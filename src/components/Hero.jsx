@@ -92,10 +92,10 @@ const Hero = () => {
         <div className="flex flex-col lg:flex-row items-center lg:items-end justify-between w-full h-full gap-12 lg:gap-8 mt-auto mb-16 lg:mb-24">
           
           {/* Left Column - Main Content */}
-          <div className="w-full lg:w-3/5 flex flex-col items-start text-left">
+          <div className="w-full lg:w-3/5 flex flex-col items-start text-left pt-12 lg:pt-0">
             
             {/* User Pill */}
-            <div className="hero-pill flex items-center space-x-3 bg-white/10 backdrop-blur-md border border-white/20 rounded-full py-1.5 pl-1.5 pr-4 mb-8 shadow-lg">
+            <div className="hero-pill flex items-center space-x-3 bg-white/10 backdrop-blur-md border border-white/20 rounded-full py-1.5 pl-1.5 pr-4 mb-6 lg:mb-8 shadow-lg">
               <div className="flex -space-x-2">
                 <div className="w-8 h-8 rounded-full bg-emerald flex items-center justify-center border-2 border-[#0D2B1A] z-30">
                   <span className="text-[10px] font-bold text-carbon">👨‍🌾</span>
@@ -114,45 +114,45 @@ const Hero = () => {
             </div>
 
             {/* Headline */}
-            <h1 className="flex flex-col mb-6 w-full">
-              <span className="hero-h1 font-sans font-bold text-[48px] lg:text-[72px] leading-[1.05] text-white tracking-tight">
+            <h1 className="flex flex-col mb-4 lg:mb-6 w-full">
+              <span className="hero-h1 font-sans font-bold text-4xl sm:text-[48px] lg:text-[72px] leading-[1.1] text-white tracking-tight">
                 {t('hero.title1')} <br className="hidden sm:block"/>
                 {t('hero.title2')}
               </span>
-              <span className="hero-h1 serif-drama italic text-[56px] lg:text-[84px] leading-[1] text-emerald mt-1">
+              <span className="hero-h1 serif-drama italic text-5xl sm:text-[56px] lg:text-[84px] leading-[1.1] lg:leading-[1] text-emerald mt-1">
                 {t('hero.title3')}
               </span>
             </h1>
 
             {/* Description */}
-            <p className="hero-body font-sans text-lg lg:text-xl text-white/90 max-w-[500px] leading-relaxed mb-8 drop-shadow-md">
+            <p className="hero-body font-sans text-base sm:text-lg lg:text-xl text-white/90 max-w-[500px] leading-relaxed mb-8 drop-shadow-md">
               {t('hero.description')}
             </p>
 
             {/* CTA */}
-            <button className="hero-cta bg-[#D4FF00] text-[#0A1F13] font-sans font-bold text-base px-8 py-4 rounded-full flex items-center justify-center space-x-3 hover:bg-[#BDE600] transition-transform hover:scale-105 active:scale-95 shadow-[0_0_30px_rgba(212,255,0,0.3)]">
+            <button className="hero-cta bg-[#D4FF00] text-[#0A1F13] font-sans font-bold text-sm sm:text-base px-6 sm:px-8 py-3.5 sm:py-4 rounded-full flex items-center justify-center space-x-3 hover:bg-[#BDE600] transition-transform hover:scale-105 active:scale-95 shadow-[0_0_30px_rgba(212,255,0,0.3)]">
               <span>{t('hero.cta')}</span>
-              <Zap size={20} className="fill-current" />
+              <Zap size={18} className="fill-current sm:w-5 sm:h-5" />
             </button>
           </div>
 
           {/* Right Column - Stats & Awards */}
-          <div className="w-full lg:w-2/5 flex flex-col items-end space-y-12">
+          <div className="w-full lg:w-2/5 flex flex-col items-start lg:items-end space-y-8 lg:space-y-12 mt-8 lg:mt-0">
             
             {/* Stat Cards */}
-            <div className="flex flex-row gap-4 w-full justify-end">
-              <div className="hero-stat-card w-1/2 max-w-[180px] bg-white/10 backdrop-blur-xl border border-white/20 rounded-[2rem] p-6 shadow-2xl flex flex-col justify-between aspect-square">
-                <span className="font-sans font-bold text-3xl lg:text-4xl text-white">{t('hero.stat1Value')}</span>
-                <span className="font-sans text-sm text-white/80 leading-tight mt-4">{t('hero.stat1Label')}</span>
+            <div className="flex flex-row gap-4 w-full justify-start lg:justify-end">
+              <div className="hero-stat-card w-1/2 max-w-[160px] lg:max-w-[180px] bg-white/10 backdrop-blur-xl border border-white/20 rounded-3xl lg:rounded-[2rem] p-5 lg:p-6 shadow-2xl flex flex-col justify-between aspect-square">
+                <span className="font-sans font-bold text-2xl sm:text-3xl lg:text-4xl text-white">{t('hero.stat1Value')}</span>
+                <span className="font-sans text-xs sm:text-sm text-white/80 leading-tight mt-2 lg:mt-4">{t('hero.stat1Label')}</span>
               </div>
-              <div className="hero-stat-card w-1/2 max-w-[180px] bg-white/10 backdrop-blur-xl border border-white/20 rounded-[2rem] p-6 shadow-2xl flex flex-col justify-between aspect-square">
-                <span className="font-sans font-bold text-3xl lg:text-4xl text-white">{t('hero.stat2Value')}</span>
-                <span className="font-sans text-sm text-white/80 leading-tight mt-4">{t('hero.stat2Label')}</span>
+              <div className="hero-stat-card w-1/2 max-w-[160px] lg:max-w-[180px] bg-white/10 backdrop-blur-xl border border-white/20 rounded-3xl lg:rounded-[2rem] p-5 lg:p-6 shadow-2xl flex flex-col justify-between aspect-square">
+                <span className="font-sans font-bold text-2xl sm:text-3xl lg:text-4xl text-white">{t('hero.stat2Value')}</span>
+                <span className="font-sans text-xs sm:text-sm text-white/80 leading-tight mt-2 lg:mt-4">{t('hero.stat2Label')}</span>
               </div>
             </div>
 
             {/* Awards */}
-            <div className="flex flex-row justify-end space-x-6 w-full pt-4 border-t border-white/20">
+            <div className="flex flex-row justify-start lg:justify-end space-x-4 sm:space-x-6 w-full pt-4 border-t border-white/20">
               <div className="hero-award flex flex-col items-center text-center max-w-[100px]">
                 <ShieldCheck size={28} className="text-emerald mb-2 opacity-80" />
                 <span className="font-sans text-[10px] font-bold text-white uppercase tracking-wider">{t('hero.award1')}</span>
