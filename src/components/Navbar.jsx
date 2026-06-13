@@ -1,18 +1,44 @@
-import React, { useState, useEffect } from 'react';
-import { Link } from 'react-router-dom';
+import React, { useState, useEffect, useCallback } from 'react';
+import { Link, useNavigate, useLocation } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
-import { LogIn, Menu, X } from 'lucide-react';
+import { LogIn, Menu, X, Sun, Moon } from 'lucide-react';
+import { useTheme } from '../context/ThemeContext';
 
 const Navbar = () => {
   const [scrolled, setScrolled] = useState(false);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const { t, i18n } = useTranslation();
+  const { theme, toggleTheme } = useTheme();
+  const navigate = useNavigate();
+  const location = useLocation();
 
   const toggleLanguage = () => {
     i18n.changeLanguage(i18n.language === 'en' ? 'bn' : 'en');
   };
 
   const closeMenu = () => setIsMobileMenuOpen(false);
+
+  // Helper: scroll to a hash target on the home page
+  const scrollToHash = useCallback((hash) => {
+    const el = document.getElementById(hash);
+    if (el) {
+      el.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }
+  }, []);
+
+  // Handle hash-based nav clicks (Platform, Sectors, Pricing)
+  const handleHashClick = useCallback((e, hash) => {
+    e.preventDefault();
+    closeMenu();
+
+    if (location.pathname === '/') {
+      // Already on home — just scroll
+      scrollToHash(hash);
+    } else {
+      // Let React Router handle the navigation + the useEffect below handles the scroll
+      navigate(`/#${hash}`);
+    }
+  }, [location.pathname, navigate, scrollToHash]);
 
   useEffect(() => {
     const sentinel = document.getElementById('hero-sentinel');
@@ -28,6 +54,14 @@ const Navbar = () => {
     observer.observe(sentinel);
     return () => observer.disconnect();
   }, []);
+
+  // Handle initial hash on page load (e.g. user lands on /#platform)
+  useEffect(() => {
+    if (location.pathname === '/' && location.hash) {
+      const hash = location.hash.replace('#', '');
+      setTimeout(() => scrollToHash(hash), 200);
+    }
+  }, [location, scrollToHash]);
 
   const navLinks = [
     { id: 'Platform', key: 'platform' }, 
@@ -61,38 +95,41 @@ const Navbar = () => {
           <div className="flex items-center space-x-8 mr-8">
             {navLinks.map((item) => {
               const isHash = ['Platform', 'Sectors', 'Pricing'].includes(item.id);
-              let path = '';
-              if (isHash) path = `/#${item.id.toLowerCase()}`;
-              else if (item.id === 'How It Works') path = `/how-it-works`;
+              const hash = item.id.toLowerCase();
 
-              return isHash ? (
-                <a
-                  key={item.id}
-                  href={path}
-                  className="font-sans font-medium text-[13px] text-white/80 hover:text-white transition-colors tracking-wide"
-                >
-                  {t(`nav.${item.key}`)}
-                </a>
-              ) : (
-                <Link
-                  key={item.id}
-                  to={path}
-                  className="font-sans font-medium text-[13px] text-white/80 hover:text-white transition-colors tracking-wide"
-                >
-                  {t(`nav.${item.key}`)}
-                </Link>
-              );
+              if (isHash) {
+                return (
+                  <a
+                    key={item.id}
+                    href={`/#${hash}`}
+                    onClick={(e) => handleHashClick(e, hash)}
+                    className="font-sans font-medium text-[13px] text-white/80 hover:text-white transition-colors tracking-wide cursor-pointer"
+                  >
+                    {t(`nav.${item.key}`)}
+                  </a>
+                );
+              } else {
+                return (
+                  <Link
+                    key={item.id}
+                    to="/how-it-works"
+                    className="font-sans font-medium text-[13px] text-white/80 hover:text-white transition-colors tracking-wide"
+                  >
+                    {t(`nav.${item.key}`)}
+                  </Link>
+                );
+              }
             })}
           </div>
 
           {/* Pill CTA Button */}
-          <button className="bg-[#0A1F13] text-emerald border border-emerald/20 font-sans font-bold text-[13px] px-6 py-2.5 rounded-full btn-magnetic hover:bg-[#0D2B1A] transition-colors shadow-inner">
+          <Link to="/how-it-works" className="bg-[#0A1F13] text-emerald border border-emerald/20 font-sans font-bold text-[13px] px-6 py-2.5 rounded-full btn-magnetic hover:bg-[#0D2B1A] transition-colors shadow-inner flex items-center justify-center">
             {t('nav.requestDemo')}
-          </button>
+          </Link>
         </div>
 
         {/* Right: Actions */}
-        <div className="flex items-center justify-end space-x-4 w-1/2 lg:w-1/4 z-50">
+        <div className="flex items-center justify-end space-x-3 sm:space-x-4 w-1/2 lg:w-1/4 z-50">
           
           {/* Language Toggle */}
           <button 
@@ -103,12 +140,24 @@ const Navbar = () => {
             <span className="text-white/20">|</span>
             <span className={i18n.language === 'bn' ? 'text-white drop-shadow-sm' : 'text-white/40'}>বাংলা</span>
           </button>
+
+          {/* Theme Toggle */}
+          <button
+            id="theme-toggle-btn"
+            onClick={toggleTheme}
+            className="theme-toggle"
+            aria-label={theme === 'dark' ? 'Switch to light mode' : 'Switch to dark mode'}
+            title={theme === 'dark' ? 'Switch to light mode' : 'Switch to dark mode'}
+          >
+            <Sun size={16} className="icon icon-sun text-amber" />
+            <Moon size={16} className="icon icon-moon text-emerald" />
+          </button>
           
           {/* Desktop Login */}
-          <div className="hidden sm:flex items-center space-x-2 cursor-pointer hover:opacity-80 transition-opacity group">
+          <Link to="/dashboard/farmer/earnings" className="hidden sm:flex items-center space-x-2 cursor-pointer hover:opacity-80 transition-opacity group">
             <span className="font-sans text-[13px] font-medium text-white/80 group-hover:text-white transition-colors">Login</span>
             <LogIn size={16} className="text-white/80 group-hover:text-white transition-colors" />
-          </div>
+          </Link>
 
           {/* Mobile Menu Toggle */}
           <button 
@@ -130,39 +179,41 @@ const Navbar = () => {
         <div className="flex flex-col items-center space-y-6 w-full px-6">
           {navLinks.map((item) => {
             const isHash = ['Platform', 'Sectors', 'Pricing'].includes(item.id);
-            let path = '';
-            if (isHash) path = `/#${item.id.toLowerCase()}`;
-            else if (item.id === 'How It Works') path = `/how-it-works`;
+            const hash = item.id.toLowerCase();
 
-            return isHash ? (
-              <a
-                key={item.id}
-                href={path}
-                onClick={closeMenu}
-                className="font-sans font-bold text-2xl text-white/90 hover:text-white transition-colors tracking-wide text-center w-full border-b border-white/10 pb-4"
-              >
-                {t(`nav.${item.key}`)}
-              </a>
-            ) : (
-              <Link
-                key={item.id}
-                to={path}
-                onClick={closeMenu}
-                className="font-sans font-bold text-2xl text-white/90 hover:text-white transition-colors tracking-wide text-center w-full border-b border-white/10 pb-4"
-              >
-                {t(`nav.${item.key}`)}
-              </Link>
-            );
+            if (isHash) {
+              return (
+                <a
+                  key={item.id}
+                  href={`/#${hash}`}
+                  onClick={(e) => handleHashClick(e, hash)}
+                  className="font-sans font-bold text-2xl text-white/90 hover:text-white transition-colors tracking-wide text-center w-full border-b border-white/10 pb-4 cursor-pointer"
+                >
+                  {t(`nav.${item.key}`)}
+                </a>
+              );
+            } else {
+              return (
+                <Link
+                  key={item.id}
+                  to="/how-it-works"
+                  onClick={closeMenu}
+                  className="font-sans font-bold text-2xl text-white/90 hover:text-white transition-colors tracking-wide text-center w-full border-b border-white/10 pb-4"
+                >
+                  {t(`nav.${item.key}`)}
+                </Link>
+              );
+            }
           })}
           
-          <button onClick={closeMenu} className="w-full max-w-sm mt-4 bg-emerald text-carbon font-sans font-bold text-lg px-8 py-4 rounded-full transition-colors shadow-lg">
+          <Link to="/how-it-works" onClick={closeMenu} className="w-full max-w-sm mt-4 bg-emerald text-carbon font-sans font-bold text-lg px-8 py-4 rounded-full transition-colors shadow-lg flex items-center justify-center">
             {t('nav.requestDemo')}
-          </button>
+          </Link>
           
-          <button onClick={closeMenu} className="w-full max-w-sm mt-2 ghost-btn border border-white/20 text-white font-sans font-bold text-lg px-8 py-4 rounded-full flex items-center justify-center space-x-2 transition-colors">
+          <Link to="/dashboard/farmer/earnings" onClick={closeMenu} className="w-full max-w-sm mt-2 ghost-btn border border-white/20 text-white font-sans font-bold text-lg px-8 py-4 rounded-full flex items-center justify-center space-x-2 transition-colors">
             <span>Login to Registry</span>
             <LogIn size={20} />
-          </button>
+          </Link>
         </div>
       </div>
 

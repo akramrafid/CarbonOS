@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
+import { Link } from 'react-router-dom';
 import gsap from 'gsap';
 import { Loader2 } from 'lucide-react';
 
@@ -376,59 +377,89 @@ const PlatformModules = () => {
         {/* 2x3 Grid */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
           
-          <div className="bg-[#0D2B1A]/50 registry-border rounded-[1.5rem] p-7 transition-all hover:bg-[#0D2B1A]/70 group">
-            <Module1 />
-            <div className="flex items-center space-x-2 mb-2">
-              <span className="font-mono text-xs text-emerald">01</span>
-              <h3 className="font-sans font-bold text-xl text-registry group-hover:text-emerald transition-colors">Project Onboarding Portal</h3>
+          <Link to="/platform/project-onboarding" className="bg-[#0D2B1A]/50 registry-border rounded-[1.5rem] p-7 transition-all hover:bg-[#0D2B1A]/70 hover:-translate-y-1 hover:shadow-[0_10px_30px_rgba(0,200,83,0.15)] group flex flex-col justify-between">
+            <div>
+              <Module1 />
+              <div className="flex items-center space-x-2 mb-2">
+                <span className="font-mono text-xs text-emerald">01</span>
+                <h3 className="font-sans font-bold text-xl text-registry group-hover:text-emerald transition-colors">Project Onboarding Portal</h3>
+              </div>
+              <p className="font-sans text-sm text-mist">Submit PIN, documents, GIS data per Bangladesh framework.</p>
             </div>
-            <p className="font-sans text-sm text-mist">Submit PIN, documents, GIS data per Bangladesh framework.</p>
-          </div>
+            <div className="mt-6 flex items-center text-emerald font-mono text-xs opacity-0 group-hover:opacity-100 transition-opacity">
+              Explore Module <span className="ml-2 group-hover:translate-x-1 transition-transform">→</span>
+            </div>
+          </Link>
 
-          <div className="bg-[#0D2B1A]/50 registry-border rounded-[1.5rem] p-7 transition-all hover:bg-[#0D2B1A]/70 group">
-            <Module2 />
-            <div className="flex items-center space-x-2 mb-2">
-              <span className="font-mono text-xs text-emerald">02</span>
-              <h3 className="font-sans font-bold text-xl text-registry group-hover:text-emerald transition-colors">MRV Dashboard</h3>
+          <Link to="/platform/mrv-dashboard" className="bg-[#0D2B1A]/50 registry-border rounded-[1.5rem] p-7 transition-all hover:bg-[#0D2B1A]/70 hover:-translate-y-1 hover:shadow-[0_10px_30px_rgba(0,200,83,0.15)] group flex flex-col justify-between">
+            <div>
+              <Module2 />
+              <div className="flex items-center space-x-2 mb-2">
+                <span className="font-mono text-xs text-emerald">02</span>
+                <h3 className="font-sans font-bold text-xl text-registry group-hover:text-emerald transition-colors">MRV Dashboard</h3>
+              </div>
+              <p className="font-sans text-sm text-mist">Satellite. IoT. Farmer reports. AI fraud detection. All unified.</p>
             </div>
-            <p className="font-sans text-sm text-mist">Satellite. IoT. Farmer reports. AI fraud detection. All unified.</p>
-          </div>
+            <div className="mt-6 flex items-center text-emerald font-mono text-xs opacity-0 group-hover:opacity-100 transition-opacity">
+              Explore Module <span className="ml-2 group-hover:translate-x-1 transition-transform">→</span>
+            </div>
+          </Link>
 
-          <div className="bg-[#0D2B1A]/50 registry-border rounded-[1.5rem] p-7 transition-all hover:bg-[#0D2B1A]/70 group">
-            <Module3 />
-            <div className="flex items-center space-x-2 mb-2">
-              <span className="font-mono text-xs text-emerald">03</span>
-              <h3 className="font-sans font-bold text-xl text-registry group-hover:text-emerald transition-colors">Carbon Registry System</h3>
+          <Link to="/platform/carbon-registry" className="bg-[#0D2B1A]/50 registry-border rounded-[1.5rem] p-7 transition-all hover:bg-[#0D2B1A]/70 hover:-translate-y-1 hover:shadow-[0_10px_30px_rgba(0,200,83,0.15)] group flex flex-col justify-between">
+            <div>
+              <Module3 />
+              <div className="flex items-center space-x-2 mb-2">
+                <span className="font-mono text-xs text-emerald">03</span>
+                <h3 className="font-sans font-bold text-xl text-registry group-hover:text-emerald transition-colors">Carbon Registry System</h3>
+              </div>
+              <p className="font-sans text-sm text-mist">Unique IDs, ownership tracking, transfer records. National registry aligned.</p>
             </div>
-            <p className="font-sans text-sm text-mist">Unique IDs, ownership tracking, transfer records. National registry aligned.</p>
-          </div>
+            <div className="mt-6 flex items-center text-emerald font-mono text-xs opacity-0 group-hover:opacity-100 transition-opacity">
+              Explore Module <span className="ml-2 group-hover:translate-x-1 transition-transform">→</span>
+            </div>
+          </Link>
 
-          <div className="bg-[#0D2B1A]/50 registry-border rounded-[1.5rem] p-7 transition-all hover:bg-[#0D2B1A]/70 group">
-            <Module4 />
-            <div className="flex items-center space-x-2 mb-2">
-              <span className="font-mono text-xs text-emerald">04</span>
-              <h3 className="font-sans font-bold text-xl text-registry group-hover:text-emerald transition-colors">Verification Workflow Engine</h3>
+          <Link to="/platform/verification-workflow" className="bg-[#0D2B1A]/50 registry-border rounded-[1.5rem] p-7 transition-all hover:bg-[#0D2B1A]/70 hover:-translate-y-1 hover:shadow-[0_10px_30px_rgba(0,200,83,0.15)] group flex flex-col justify-between">
+            <div>
+              <Module4 />
+              <div className="flex items-center space-x-2 mb-2">
+                <span className="font-mono text-xs text-emerald">04</span>
+                <h3 className="font-sans font-bold text-xl text-registry group-hover:text-emerald transition-colors">Verification Workflow Engine</h3>
+              </div>
+              <p className="font-sans text-sm text-mist">Audit tools, risk scoring, accredited verifier dashboards.</p>
             </div>
-            <p className="font-sans text-sm text-mist">Audit tools, risk scoring, accredited verifier dashboards.</p>
-          </div>
+            <div className="mt-6 flex items-center text-emerald font-mono text-xs opacity-0 group-hover:opacity-100 transition-opacity">
+              Explore Module <span className="ml-2 group-hover:translate-x-1 transition-transform">→</span>
+            </div>
+          </Link>
 
-          <div className="bg-[#0D2B1A]/50 registry-border rounded-[1.5rem] p-7 transition-all hover:bg-[#0D2B1A]/70 group">
-            <Module5 />
-            <div className="flex items-center space-x-2 mb-2">
-              <span className="font-mono text-xs text-emerald">05</span>
-              <h3 className="font-sans font-bold text-xl text-registry group-hover:text-emerald transition-colors">Carbon Marketplace</h3>
+          <Link to="/platform/marketplace" className="bg-[#0D2B1A]/50 registry-border rounded-[1.5rem] p-7 transition-all hover:bg-[#0D2B1A]/70 hover:-translate-y-1 hover:shadow-[0_10px_30px_rgba(0,200,83,0.15)] group flex flex-col justify-between">
+            <div>
+              <Module5 />
+              <div className="flex items-center space-x-2 mb-2">
+                <span className="font-mono text-xs text-emerald">05</span>
+                <h3 className="font-sans font-bold text-xl text-registry group-hover:text-emerald transition-colors">Carbon Marketplace</h3>
+              </div>
+              <p className="font-sans text-sm text-mist">Buyers, sellers, price discovery. Climate finance, simplified.</p>
             </div>
-            <p className="font-sans text-sm text-mist">Buyers, sellers, price discovery. Climate finance, simplified.</p>
-          </div>
+            <div className="mt-6 flex items-center text-emerald font-mono text-xs opacity-0 group-hover:opacity-100 transition-opacity">
+              Explore Module <span className="ml-2 group-hover:translate-x-1 transition-transform">→</span>
+            </div>
+          </Link>
 
-          <div className="bg-[#0D2B1A]/50 registry-border rounded-[1.5rem] p-7 transition-all hover:bg-[#0D2B1A]/70 group">
-            <Module6 />
-            <div className="flex items-center space-x-2 mb-2">
-              <span className="font-mono text-xs text-emerald">06</span>
-              <h3 className="font-sans font-bold text-xl text-registry group-hover:text-emerald transition-colors">AI Fraud Detection</h3>
+          <Link to="/platform/ai-detection" className="bg-[#0D2B1A]/50 registry-border rounded-[1.5rem] p-7 transition-all hover:bg-[#0D2B1A]/70 hover:-translate-y-1 hover:shadow-[0_10px_30px_rgba(0,200,83,0.15)] group flex flex-col justify-between">
+            <div>
+              <Module6 />
+              <div className="flex items-center space-x-2 mb-2">
+                <span className="font-mono text-xs text-emerald">06</span>
+                <h3 className="font-sans font-bold text-xl text-registry group-hover:text-emerald transition-colors">AI Fraud Detection</h3>
+              </div>
+              <p className="font-sans text-sm text-mist">Satellite analysis vs. reported data. Automated anomaly flagging.</p>
             </div>
-            <p className="font-sans text-sm text-mist">Satellite analysis vs. reported data. Automated anomaly flagging.</p>
-          </div>
+            <div className="mt-6 flex items-center text-emerald font-mono text-xs opacity-0 group-hover:opacity-100 transition-opacity">
+              Explore Module <span className="ml-2 group-hover:translate-x-1 transition-transform">→</span>
+            </div>
+          </Link>
 
         </div>
       </div>

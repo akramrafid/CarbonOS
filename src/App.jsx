@@ -18,8 +18,13 @@ import ProjectOnboarding from './pages/platform/ProjectOnboarding';
 import MRVDashboard from './pages/platform/MRVDashboard';
 import CarbonRegistry from './pages/platform/CarbonRegistry';
 import VerificationWorkflow from './pages/platform/VerificationWorkflow';
-import Marketplace from './pages/platform/Marketplace';
 import AIDetection from './pages/platform/AIDetection';
+
+// The new integrated features
+import Technology from './pages/Technology';
+import MarketplaceBrowse from './components/marketplace/MarketplaceBrowse';
+import FarmerCreditsWidget from './components/dashboard/FarmerCreditsWidget';
+import FarmerEarnings from './pages/platform/FarmerEarnings';
 
 // Sector Pages
 import SolarIrrigation from './pages/sectors/SolarIrrigation';
@@ -51,8 +56,15 @@ function App() {
         <Route path="/platform/mrv-dashboard" element={<MRVDashboard />} />
         <Route path="/platform/carbon-registry" element={<CarbonRegistry />} />
         <Route path="/platform/verification-workflow" element={<VerificationWorkflow />} />
-        <Route path="/platform/marketplace" element={<Marketplace />} />
+        <Route path="/platform/marketplace" element={<MarketplaceBrowse />} />
         <Route path="/platform/ai-detection" element={<AIDetection />} />
+
+        {/* Integrated Features */}
+        <Route path="/technology" element={<Technology />} />
+        <Route path="/dashboard/farmer" element={
+          <div className="pt-24 pb-16 px-4 max-w-7xl mx-auto"><FarmerCreditsWidget farmerId="farmer-123" /></div>
+        } />
+        <Route path="/dashboard/farmer/earnings" element={<FarmerEarnings />} />
 
         {/* Sector Routes */}
         <Route path="/sectors/solar-irrigation" element={<SolarIrrigation />} />
