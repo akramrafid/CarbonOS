@@ -1,0 +1,11 @@
+User-agent: *
+Allow: /
+Allow: /how-it-works
+Allow: /technology
+Allow: /sectors/
+Allow: /company/
+Disallow: /dashboard/
+Disallow: /platform/
+Disallow: /api/
+
+Sitemap: https://carbonos.com.bd/sitemap.xml
