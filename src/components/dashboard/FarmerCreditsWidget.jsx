@@ -19,7 +19,7 @@ const CreditStatusBadge = ({ status }) => {
 const CreditCard = ({ credit }) => {
   // Hook up to real-time status updates
   const liveStatus = useRealtimeStatus(credit.status, credit.id);
-  
+
   const progressSteps = ['AVAILABLE', 'RESERVED', 'SOLD', 'SETTLED'];
   const currentIndex = progressSteps.indexOf(liveStatus);
 
@@ -57,8 +57,8 @@ const CreditCard = ({ credit }) => {
         </div>
         <div className="h-1.5 w-full bg-[#080F0B] rounded-full overflow-hidden flex">
           {progressSteps.map((_, idx) => (
-            <div 
-              key={idx} 
+            <div
+              key={idx}
               className={`h-full flex-1 border-r border-[#080F0B] transition-all duration-500 ${idx <= currentIndex ? 'bg-emerald shadow-[0_0_10px_rgba(0,200,83,0.5)]' : 'bg-transparent'}`}
             />
           ))}
@@ -95,7 +95,7 @@ export const FarmerCreditsWidget = () => {
         <h2 className="font-sans font-bold text-2xl text-registry">My Credits</h2>
         <span className="font-mono text-xs bg-emerald/10 text-emerald px-3 py-1 rounded-full border border-emerald/20">Live Pipeline</span>
       </div>
-      
+
       <div className="space-y-2">
         {credits.map(credit => (
           <CreditCard key={credit.id} credit={credit} />
