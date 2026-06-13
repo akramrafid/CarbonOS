@@ -58,16 +58,16 @@ const Module1 = () => {
 };
 
 // Card 2
-const Module2 = () => {
-  const lines = [
-    "[09:42:11] CO2_SENSOR_BD047 → 12.4 tCO2e  ✓",
-    "[09:42:18] SATELLITE_KHU_03 → NDVI +0.14  ✓",
-    "[09:42:25] FARMER_REPORT_SYL → Submitted  ✓",
-    "[09:42:33] IOT_NODE_DHK_012 → Active      ✓",
-    "[09:42:41] ANOMALY_CHECK     → CLEAR      ✓",
-    "[09:42:49] MRV_PERIOD_CLOSE  → Verified   ✓"
-  ];
+const lines = [
+  "[09:42:11] CO2_SENSOR_BD047 → 12.4 tCO2e  ✓",
+  "[09:42:18] SATELLITE_KHU_03 → NDVI +0.14  ✓",
+  "[09:42:25] FARMER_REPORT_SYL → Submitted  ✓",
+  "[09:42:33] IOT_NODE_DHK_012 → Active      ✓",
+  "[09:42:41] ANOMALY_CHECK     → CLEAR      ✓",
+  "[09:42:49] MRV_PERIOD_CLOSE  → Verified   ✓"
+];
 
+const Module2 = () => {
   const [visibleLines, setVisibleLines] = useState([]);
   const [currentLineIndex, setCurrentLineIndex] = useState(0);
   const [currentCharIndex, setCurrentCharIndex] = useState(0);
