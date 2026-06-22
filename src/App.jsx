@@ -29,6 +29,10 @@ const MarketplaceBrowse = React.lazy(() => import('./components/marketplace/Mark
 const FarmerCreditsWidget = React.lazy(() => import('./components/dashboard/FarmerCreditsWidget'));
 const FarmerEarnings = React.lazy(() => import('./pages/platform/FarmerEarnings'));
 
+// Farmer's AI
+const CameraCapture = React.lazy(() => import('./pages/farmers-ai/CameraCapture'));
+const DiagnosisResult = React.lazy(() => import('./pages/farmers-ai/DiagnosisResult'));
+
 // Sector Pages
 const SolarIrrigation = React.lazy(() => import('./pages/sectors/SolarIrrigation'));
 const RiceMethane = React.lazy(() => import('./pages/sectors/RiceMethane'));
@@ -62,6 +66,10 @@ function App() {
           <Route path="/platform/verification-workflow" element={<VerificationWorkflow />} />
           <Route path="/platform/marketplace" element={<MarketplaceBrowse />} />
           <Route path="/platform/ai-detection" element={<AIDetection />} />
+
+          {/* Farmer's AI */}
+          <Route path="/farmers-ai" element={<CameraCapture />} />
+          <Route path="/farmers-ai/result" element={<DiagnosisResult />} />
 
           {/* Integrated Features */}
           <Route path="/technology" element={<Technology />} />
