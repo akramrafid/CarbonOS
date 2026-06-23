@@ -1,467 +1,607 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
-import gsap from 'gsap';
-import { Loader2 } from 'lucide-react';
 
-// Card 1
-const Module1 = () => {
-  const [cards, setCards] = useState([
-    { id: 1, type: 'SOLAR ☀️', pid: 'BD-PIN-2025-0041', title: 'Khulna Solar Irrigation — Phase II', loc: '22.8456°N, 89.5403°E' },
-    { id: 2, type: 'COOKSTOVE 🍳', pid: 'BD-PIN-2025-0089', title: 'Sylhet Clean Cookstove Distribution', loc: '24.8949°N, 91.8687°E' },
-    { id: 3, type: 'WASTE ♻️', pid: 'BD-PIN-2025-0102', title: 'Chattogram Waste-to-Energy Plant', loc: '22.3569°N, 91.7832°E' }
-  ]);
+const cos30 = 0.8660254;
+const sin30 = 0.5;
 
-  useEffect(() => {
-    const interval = setInterval(() => {
-      setCards(prev => {
-        const newCards = [...prev];
-        const last = newCards.pop();
-        newCards.unshift(last);
-        return newCards;
-      });
-    }, 3500);
-    return () => clearInterval(interval);
-  }, []);
+// Define the 3D coordinate space for the crystal cluster of cubes
+const rawCubes = [
+  // Bottom layer (z = -1)
+  { x: -1, y: -1, z: -1 },
+  { x: 0, y: -1, z: -1 },
+  { x: 1, y: -1, z: -1 },
+  { x: -1, y: 0, z: -1 },
+  { x: 0, y: 0, z: -1, glow: 'emerald' }, // Glowing emerald center-bottom
+  { x: 1, y: 0, z: -1 },
+  { x: -1, y: 1, z: -1 },
+  { x: 0, y: 1, z: -1 },
+  { x: 1, y: 1, z: -1 },
 
-  return (
-    <div className="relative h-48 mb-6 perspective-1000">
-      {cards.map((c, i) => {
-        const isTop = i === 0;
-        return (
-          <div 
-            key={c.id}
-            className="absolute top-0 left-0 w-full bg-[#080F0B] border border-emerald/20 p-4 rounded-xl transition-all duration-400"
-            style={{
-              transform: `translateY(${i * 12}px) scale(${1 - i * 0.05})`,
-              opacity: 1 - i * 0.3,
-              zIndex: 10 - i,
-              transitionTimingFunction: 'cubic-bezier(0.34, 1.56, 0.64, 1)'
-            }}
-          >
-            <div className="flex justify-between items-center mb-2">
-              <span className="font-mono text-[10px] text-carbon bg-amber px-2 py-0.5 rounded">{c.type}</span>
-              <span className="font-mono text-xs text-mist">{c.pid}</span>
-            </div>
-            <h4 className="font-sans font-bold text-registry text-sm mb-2 truncate">{c.title}</h4>
-            <div className="flex items-center space-x-2 text-xs text-mist mb-1">
-              <span>Status:</span>
-              <span className="flex items-center">
-                <span className="w-1.5 h-1.5 rounded-full bg-emerald mr-1"></span> Submitted → Under Review
-              </span>
-            </div>
-            <div className="font-mono text-[10px] text-mist">GIS: {c.loc}</div>
-          </div>
-        );
-      })}
-    </div>
-  );
-};
+  // Middle layer (z = 0)
+  { x: -1, y: -1, z: 0 },
+  { x: 0, y: -1, z: 0 },
+  { x: 1, y: -1, z: 0 },
+  { x: -1, y: 0, z: 0 },
+  { x: 0, y: 0, z: 0 }, // Center
+  { x: 1, y: 0, z: 0, glow: 'cyan' }, // Glowing cyan middle-right
+  { x: -1, y: 1, z: 0 },
+  { x: 0, y: 1, z: 0 },
+  { x: 1, y: 1, z: 0 },
 
-// Card 2
-const lines = [
-  "[09:42:11] CO2_SENSOR_BD047 → 12.4 tCO2e  ✓",
-  "[09:42:18] SATELLITE_KHU_03 → NDVI +0.14  ✓",
-  "[09:42:25] FARMER_REPORT_SYL → Submitted  ✓",
-  "[09:42:33] IOT_NODE_DHK_012 → Active      ✓",
-  "[09:42:41] ANOMALY_CHECK     → CLEAR      ✓",
-  "[09:42:49] MRV_PERIOD_CLOSE  → Verified   ✓"
+  // Top layer (z = 1)
+  { x: -1, y: -1, z: 1 },
+  { x: 0, y: -1, z: 1 },
+  { x: 1, y: -1, z: 1 },
+  { x: -1, y: 0, z: 1, glow: 'emerald' }, // Glowing emerald top-left
+  { x: 0, y: 0, z: 1 },
+  { x: 1, y: 0, z: 1 },
+  { x: -1, y: 1, z: 1 },
+  { x: 0, y: 1, z: 1 },
+  { x: 1, y: 1, z: 1 },
 ];
 
-const Module2 = () => {
-  const [visibleLines, setVisibleLines] = useState([]);
-  const [currentLineIndex, setCurrentLineIndex] = useState(0);
-  const [currentCharIndex, setCurrentCharIndex] = useState(0);
+// Filter to create a beautiful octahedron/hexagonal crystal shape
+const activeCubes = rawCubes.filter(c => {
+  const dist = Math.abs(c.x) + Math.abs(c.y) + Math.abs(c.z);
+  return dist <= 2;
+});
 
-  useEffect(() => {
-    if (currentLineIndex >= lines.length) {
-      const resetTimer = setTimeout(() => {
-        setVisibleLines([]);
-        setCurrentLineIndex(0);
-        setCurrentCharIndex(0);
-      }, 3000);
-      return () => clearTimeout(resetTimer);
-    }
+// Sort from back to front (painter's algorithm) based on depth (x + y - z)
+const sortedCubes = [...activeCubes].sort((a, b) => (a.x + a.y - a.z) - (b.x + b.y - b.z));
 
-    const currentLine = lines[currentLineIndex];
-    if (currentCharIndex < currentLine.length) {
-      const typeTimer = setTimeout(() => {
-        setCurrentCharIndex(prev => prev + 1);
-      }, 30);
-      return () => clearTimeout(typeTimer);
-    } else {
-      setVisibleLines(prev => [...prev, currentLine]);
-      const nextLineTimer = setTimeout(() => {
-        setCurrentLineIndex(prev => prev + 1);
-        setCurrentCharIndex(0);
-      }, 500);
-      return () => clearTimeout(nextLineTimer);
-    }
-  }, [currentLineIndex, currentCharIndex, lines]);
+const leftNodes = [
+  { id: 1, y: 130, title: "Project Onboarding Portal", to: "/platform/project-onboarding" },
+  { id: 2, y: 230, title: "MRV Dashboard", to: "/platform/mrv-dashboard" },
+  { id: 3, y: 330, title: "Carbon Registry System", to: "/platform/carbon-registry" },
+  { id: 4, y: 430, title: "Verification Workflow Engine", to: "/platform/verification-workflow" },
+  { id: 5, y: 530, title: "Carbon Marketplace", to: "/platform/marketplace" },
+  { id: 6, y: 630, title: "AI Fraud Detection", to: "/platform/ai-detection" },
+];
 
-  const currentTyping = currentLineIndex < lines.length ? lines[currentLineIndex].substring(0, currentCharIndex) : '';
-
-  return (
-    <div className="h-48 mb-6 bg-[#080F0B] border border-emerald/20 rounded-xl p-4 font-mono text-[11px] text-emerald flex flex-col justify-end overflow-hidden relative">
-      <div className="absolute top-3 right-3 flex items-center space-x-2">
-        <div className="pulse-dot-amber"></div>
-        <span className="text-[10px] text-amber">LIVE MRV FEED</span>
-      </div>
-      <div className="flex flex-col space-y-1 mt-4">
-        {visibleLines.slice(-5).map((l, i) => <div key={i}>{l}</div>)}
-        {currentLineIndex < lines.length && (
-          <div>
-            {currentTyping}
-            <span className="animate-pulse ml-0.5">|</span>
-          </div>
-        )}
-      </div>
-    </div>
-  );
-};
-
-// Card 3
-const Module3 = () => {
-  const [state, setState] = useState('idle'); // idle, loading, success
-
-  useEffect(() => {
-    const loop = () => {
-      setState('loading');
-      setTimeout(() => {
-        setState('success');
-        setTimeout(() => {
-          setState('idle');
-        }, 2500);
-      }, 1000);
-    };
-
-    const interval = setInterval(loop, 5000);
-    return () => clearInterval(interval);
-  }, []);
-
-  return (
-    <div className="h-48 mb-6 bg-[#080F0B] border border-emerald/20 rounded-xl p-4 relative overflow-hidden">
-      {state !== 'success' && (
-        <div className="flex flex-col h-full justify-between">
-          <div>
-            <div className="font-mono text-xs text-mist border-b border-emerald/20 pb-2 mb-3">ISSUE CARBON CREDITS</div>
-            <div className="grid grid-cols-[80px_1fr] gap-2 items-center text-xs mb-2">
-              <span className="text-mist font-sans">Project ID:</span>
-              <span className="font-mono text-emerald">BD-CRB-2025-0041</span>
-            </div>
-            <div className="grid grid-cols-[80px_1fr] gap-2 items-center text-xs mb-2">
-              <span className="text-mist font-sans">Credits:</span>
-              <span className="font-mono text-registry bg-[#0D2B1A] px-2 py-1 rounded">500 tCO₂e</span>
-            </div>
-            <div className="grid grid-cols-[80px_1fr] gap-2 items-center text-xs">
-              <span className="text-mist font-sans">Standard:</span>
-              <span className="font-sans text-registry bg-[#0D2B1A] px-2 py-1 rounded">Verra VCS ▼</span>
-            </div>
-          </div>
-          <button className="w-full bg-emerald text-carbon font-bold text-xs py-2 rounded flex items-center justify-center transition-colors">
-            {state === 'loading' ? <Loader2 size={14} className="animate-spin" /> : 'Issue Credits →'}
-          </button>
-        </div>
-      )}
-      {state === 'success' && (
-        <div className="absolute inset-0 bg-emerald/20 flex flex-col items-center justify-center p-4 text-center">
-          <div className="w-8 h-8 rounded-full bg-emerald text-carbon flex items-center justify-center font-bold mb-2">✓</div>
-          <div className="font-sans font-bold text-sm text-registry mb-1">CREDITS ISSUED</div>
-          <div className="font-mono text-[10px] text-emerald mb-1">BD-CRK-0041-A → BD-CRK-0041-E</div>
-          <div className="font-sans text-xs text-mist mb-1">500 tCO₂e | Vintage 2025</div>
-          <div className="font-mono text-[9px] text-registry">Recorded in National Registry</div>
-        </div>
-      )}
-    </div>
-  );
-};
-
-// Card 4
-const Module4 = () => {
-  const [activeStep, setActiveStep] = useState(0);
-  const steps = [
-    "Document Upload Review",
-    "GIS Boundary Verification",
-    "Satellite Cross-check",
-    "Emission Calculation Audit",
-    "Risk Score Assessment"
-  ];
-
-  useEffect(() => {
-    const interval = setInterval(() => {
-      setActiveStep(prev => {
-        if (prev >= steps.length) return 0;
-        return prev + 1;
-      });
-    }, 1200);
-    return () => clearInterval(interval);
-  }, [steps.length]);
-
-  return (
-    <div className="h-48 mb-6 bg-[#080F0B] border border-emerald/20 rounded-xl p-4 relative">
-      <div className="flex flex-col space-y-2">
-        {steps.map((step, i) => (
-          <div key={i} className="flex items-center text-[11px] font-mono">
-            <span className={`mr-2 ${i < activeStep ? 'text-emerald' : 'text-mist/50'}`}>
-              {i < activeStep ? '✓' : '□'}
-            </span>
-            <span className={i < activeStep ? 'text-registry' : 'text-mist'}>{step}</span>
-            {i === activeStep && (
-              <svg className="w-3 h-3 ml-2 text-amber animate-pulse" fill="currentColor" viewBox="0 0 24 24">
-                <path d="M7 2l12 11.2-5.8.5 3.3 7.3-2.2.9-3.2-7.4-4.4 4.1z" />
-              </svg>
-            )}
-          </div>
-        ))}
-      </div>
-      <div className="absolute bottom-4 left-4 right-4">
-        <div className="flex justify-between items-end mb-1">
-          <span className="font-sans text-[10px] text-mist">Progress</span>
-          <span className="font-mono text-[10px] text-emerald">{Math.min(100, activeStep * 20)}%</span>
-        </div>
-        <div className="w-full bg-[#0D2B1A] h-1.5 rounded-full overflow-hidden">
-          <div className="bg-emerald h-full transition-all duration-500" style={{ width: `${activeStep * 20}%` }}></div>
-        </div>
-        {activeStep >= steps.length && (
-          <div className="absolute inset-0 bg-[#080F0B]/90 flex items-center justify-center">
-            <div className="border-2 border-emerald text-emerald font-bold px-4 py-1 rounded rotate-[-5deg] animate-pulse">
-              APPROVED
-            </div>
-          </div>
-        )}
-      </div>
-    </div>
-  );
-};
-
-// Card 5
-const Module5 = () => {
-  const pathRef = useRef(null);
-
-  useEffect(() => {
-    let ctx = gsap.context(() => {
-      gsap.fromTo(pathRef.current,
-        { strokeDashoffset: 300 },
-        { 
-          strokeDashoffset: 0, 
-          duration: 2, 
-          ease: 'power2.out',
-          scrollTrigger: {
-            trigger: pathRef.current,
-            start: "top 90%",
-          }
-        }
-      );
-    });
-    return () => ctx.revert();
-  }, []);
-
-  return (
-    <div className="h-48 mb-6 bg-[#080F0B] border border-emerald/20 rounded-xl p-4 flex flex-col justify-between">
-      <div className="font-mono text-[10px] text-mist mb-2 border-b border-emerald/10 pb-1">BD Carbon Credit — Spot Price</div>
-      <div className="h-16 relative w-full mb-2">
-        <svg viewBox="0 0 100 30" className="w-full h-full overflow-visible" preserveAspectRatio="none">
-          <path
-            ref={pathRef}
-            d="M 0 25 C 10 25, 20 15, 30 18 C 40 21, 50 10, 60 12 C 70 14, 80 5, 100 2"
-            fill="none"
-            stroke="var(--color-emerald)"
-            strokeWidth="1.5"
-            strokeDasharray="300"
-            strokeLinecap="round"
-          />
-          <path
-            d="M 0 25 C 10 25, 20 15, 30 18 C 40 21, 50 10, 60 12 C 70 14, 80 5, 100 2 L 100 30 L 0 30 Z"
-            fill="url(#grad)"
-            stroke="none"
-            opacity="0.2"
-          />
-          <defs>
-            <linearGradient id="grad" x1="0" x2="0" y1="0" y2="1">
-              <stop offset="0%" stopColor="var(--color-emerald)" />
-              <stop offset="100%" stopColor="transparent" />
-            </linearGradient>
-          </defs>
-        </svg>
-      </div>
-      <div className="grid grid-cols-[60px_1fr] gap-x-2 gap-y-1 text-[11px] mb-3">
-        <span className="text-mist font-sans">Last Trade:</span>
-        <span className="font-mono text-registry">$11.20 / tCO₂e</span>
-        <span className="text-mist font-sans">Change:</span>
-        <span className="font-mono text-amber">▲ +$0.23 (+2.1%)</span>
-        <span className="text-mist font-sans">Volume:</span>
-        <span className="font-mono text-registry">340 tCO₂e today</span>
-      </div>
-      <div className="flex space-x-2">
-        <button className="flex-1 bg-emerald text-carbon font-bold text-[10px] py-1.5 rounded">Buy Credits</button>
-        <button className="flex-1 ghost-btn font-bold text-[10px] py-1.5 rounded">Sell Credits</button>
-      </div>
-    </div>
-  );
-};
-
-// Card 6
-const Module6 = () => {
-  const [scan, setScan] = useState(false);
-  const [anomaly, setAnomaly] = useState(false);
-
-  useEffect(() => {
-    const loop = () => {
-      setScan(true);
-      setAnomaly(false);
-      setTimeout(() => {
-        setScan(false);
-        setAnomaly(true);
-      }, 600);
-    };
-    const interval = setInterval(loop, 4000);
-    loop();
-    return () => clearInterval(interval);
-  }, []);
-
-  return (
-    <div className="h-48 mb-6 bg-[#080F0B] border border-emerald/20 rounded-xl p-4 relative overflow-hidden">
-      <div className="grid grid-cols-6 gap-2 mb-2 relative">
-        {Array.from({ length: 24 }).map((_, i) => {
-          const isTarget = i === 14 || i === 15;
-          let dotClass = "w-2.5 h-2.5 rounded-full bg-emerald/30";
-          if (anomaly && isTarget) dotClass = "w-2.5 h-2.5 rounded-full bg-red-500 animate-pulse shadow-[0_0_8px_#ff3b30]";
-          else if (!anomaly && isTarget) dotClass = "w-2.5 h-2.5 rounded-full bg-emerald/30";
-          else if (anomaly) dotClass = "w-2.5 h-2.5 rounded-full bg-emerald/10";
-          
-          return (
-            <div key={i} className="flex justify-center">
-              <div className={dotClass}></div>
-            </div>
-          );
-        })}
-        {/* Scanner Line */}
-        <div 
-          className={`absolute top-0 bottom-0 w-[2px] bg-amber shadow-[0_0_10px_var(--color-amber)] transition-all duration-[600ms] ease-linear z-10 ${scan ? 'left-full opacity-100' : 'left-0 opacity-0'}`}
-        ></div>
-      </div>
-      
-      <div className={`mt-4 transition-opacity duration-300 ${anomaly ? 'opacity-100' : 'opacity-0'}`}>
-        <div className="flex items-center space-x-1 text-red-500 font-mono text-[10px] mb-1">
-          <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"></path></svg>
-          <span>ANOMALY DETECTED</span>
-        </div>
-        <div className="font-mono text-[9px] text-amber">
-          BD-CRB-2025-0033 | BD-CRB-2025-0019<br/>
-          Satellite vs. reported data mismatch<br/>
-          <span className="text-red-400 mt-1 block">→ FLAGGED FOR MANUAL REVIEW</span>
-        </div>
-      </div>
-    </div>
-  );
-};
-
+const rightNodes = [
+  { id: 7, y: 230, title: "99.9% Verified Credits" },
+  { id: 8, y: 330, title: "Automated Compliance" },
+  { id: 9, y: 430, title: "Global Market Access" },
+  { id: 10, y: 530, title: "Traceable Lifecycle" },
+];
 
 const PlatformModules = () => {
+  const [hoveredNode, setHoveredNode] = useState(null);
+
+  const renderCube = (cube, index, w = 28, centerOffsetX = 700, centerOffsetY = 380) => {
+    const { x, y, z, glow } = cube;
+    const cx = centerOffsetX + (x - y) * w * cos30;
+    const cy = centerOffsetY + (x + y) * w * sin30 - z * w;
+
+    let topFill = 'url(#cubeTop)';
+    let leftFill = 'url(#cubeLeft)';
+    let rightFill = 'url(#cubeRight)';
+
+    if (glow === 'emerald') {
+      topFill = 'url(#glowEmeraldTop)';
+      leftFill = 'url(#glowEmeraldLeft)';
+      rightFill = 'url(#glowEmeraldRight)';
+    } else if (glow === 'cyan') {
+      topFill = 'url(#glowCyanTop)';
+      leftFill = 'url(#glowCyanLeft)';
+      rightFill = 'url(#glowCyanRight)';
+    }
+
+    const topPath = `M ${cx} ${cy} L ${cx - w * cos30} ${cy - w * sin30} L ${cx} ${cy - w} L ${cx + w * cos30} ${cy - w * sin30} Z`;
+    const leftPath = `M ${cx} ${cy} L ${cx - w * cos30} ${cy - w * sin30} L ${cx - w * cos30} ${cy + w * sin30} L ${cx} ${cy + w} Z`;
+    const rightPath = `M ${cx} ${cy} L ${cx + w * cos30} ${cy - w * sin30} L ${cx + w * cos30} ${cy + w * sin30} L ${cx} ${cy + w} Z`;
+
+    return (
+      <g key={index} className={glow ? 'animate-pulse' : ''} style={glow ? { animationDuration: '2s', animationDelay: `${index * 0.25}s` } : {}}>
+        <path d={leftPath} fill={leftFill} stroke="rgba(4, 10, 6, 0.4)" strokeWidth="0.5" />
+        <path d={rightPath} fill={rightFill} stroke="rgba(4, 10, 6, 0.4)" strokeWidth="0.5" />
+        <path d={topPath} fill={topFill} stroke="rgba(255, 255, 255, 0.12)" strokeWidth="0.5" />
+      </g>
+    );
+  };
+
   return (
-    <section className="w-full bg-[#040A06] py-24 px-6 lg:px-12 relative overflow-hidden">
-      <div className="max-w-7xl mx-auto relative z-10">
+    <section className="w-full bg-[#040A06] py-24 relative overflow-hidden font-sans modules-section">
+      <style>{`
+        @keyframes fadeInHeader {
+          from {
+            opacity: 0;
+            transform: translateY(-20px);
+          }
+          to {
+            opacity: 1;
+            transform: translateY(0);
+          }
+        }
+        @keyframes slideInLeft {
+          from {
+            opacity: 0;
+            transform: translateX(-30px) translateY(-50%);
+          }
+          to {
+            opacity: 1;
+            transform: translateX(0) translateY(-50%);
+          }
+        }
+        @keyframes slideInRight {
+          from {
+            opacity: 0;
+            transform: translateX(30px) translateY(-50%);
+          }
+          to {
+            opacity: 1;
+            transform: translateX(0) translateY(-50%);
+          }
+        }
+        @keyframes scaleUpHub {
+          from {
+            opacity: 0;
+            transform: scale(0.7);
+          }
+          to {
+            opacity: 1;
+            transform: scale(1);
+          }
+        }
+        @keyframes lineFlowLeft {
+          0% {
+            stroke-dashoffset: 360;
+          }
+          100% {
+            stroke-dashoffset: 0;
+          }
+        }
+        @keyframes lineFlowRight {
+          0% {
+            stroke-dashoffset: 360;
+          }
+          100% {
+            stroke-dashoffset: 0;
+          }
+        }
+        .flow-line-left {
+          stroke-dasharray: 45 150;
+          animation: lineFlowLeft 4s linear infinite;
+        }
+        .flow-line-right {
+          stroke-dasharray: 45 150;
+          animation: lineFlowRight 4s linear infinite;
+        }
+        @keyframes pulseGlow {
+          0%, 100% {
+            opacity: 0.35;
+            filter: drop-shadow(0 0 12px rgba(16, 185, 129, 0.3));
+          }
+          50% {
+            opacity: 0.7;
+            filter: drop-shadow(0 0 24px rgba(6, 182, 212, 0.6));
+          }
+        }
+        @keyframes floatCluster {
+          0%, 100% {
+            transform: translateY(0px);
+          }
+          50% {
+            transform: translateY(-8px);
+          }
+        }
+        .animate-fade-in-header {
+          animation: fadeInHeader 0.8s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+        }
+        .animate-hub-scale {
+          animation: scaleUpHub 1s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
+        }
+      `}</style>
+
+      {/* Decorative Brand Text Pillars (Top-Left / Top-Right) */}
+      <div className="absolute top-8 left-12 hidden lg:flex items-center space-x-2 text-[10px] uppercase tracking-[0.25em] text-mist/40 pointer-events-none">
+        <span>Platform Modules</span>
+        <span className="w-1 h-1 rounded-full bg-emerald"></span>
+        <span>6 Core Systems</span>
+      </div>
+      <div className="absolute top-8 right-12 hidden lg:flex items-center text-[10px] uppercase tracking-[0.25em] text-mist/40 pointer-events-none font-bold">
+        <span>CarbonOS</span>
+      </div>
+
+      <div className="max-w-7xl mx-auto px-6 lg:px-12 relative z-10">
         
-        {/* Header */}
-        <div className="mb-16">
-          <span className="font-mono text-xs text-mist tracking-widest px-3 py-1 bg-[#0D2B1A]/40 border border-[#00C853]/10 rounded-full mb-6 inline-block">
-            PLATFORM MODULES — 6 CORE SYSTEMS
-          </span>
-          <h2 className="serif-drama text-[48px] lg:text-[64px] text-white leading-tight mb-4">
-            The Full Carbon Lifecycle
-          </h2>
-          <p className="font-sans text-lg text-mist max-w-2xl">
-            One platform. From project idea to traded carbon credit.
-          </p>
-        </div>
-
-        {/* 2x3 Grid */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+        {/* Desktop Hub Container */}
+        <div className="relative w-full hidden lg:block" style={{ aspectRatio: '1200/800' }}>
           
-          <Link to="/platform/project-onboarding" className="bg-[#0D2B1A]/50 registry-border rounded-[1.5rem] p-7 transition-all hover:bg-[#0D2B1A]/70 hover:-translate-y-1 hover:shadow-[0_10px_30px_rgba(0,200,83,0.15)] group flex flex-col justify-between">
-            <div>
-              <Module1 />
-              <div className="flex items-center space-x-2 mb-2">
-                <span className="font-mono text-xs text-emerald">01</span>
-                <h3 className="font-sans font-bold text-xl text-registry group-hover:text-emerald transition-colors">Project Onboarding Portal</h3>
-              </div>
-              <p className="font-sans text-sm text-mist">Submit PIN, documents, GIS data per Bangladesh framework.</p>
-            </div>
-            <div className="mt-6 flex items-center text-emerald font-mono text-xs opacity-0 group-hover:opacity-100 transition-opacity">
-              Explore Module <span className="ml-2 group-hover:translate-x-1 transition-transform">→</span>
-            </div>
-          </Link>
+          {/* SVG Connection Lines & Hub */}
+          <svg className="absolute inset-0 w-full h-full pointer-events-none overflow-visible" viewBox="0 0 1200 800" preserveAspectRatio="xMidYMid meet">
+            <defs>
+              {/* Standard Silver Metallic Cube Gradients */}
+              <linearGradient id="cubeTop" x1="0%" y1="0%" x2="100%" y2="100%">
+                <stop offset="0%" stopColor="#ffffff" />
+                <stop offset="100%" stopColor="#cbd5e1" />
+              </linearGradient>
+              <linearGradient id="cubeLeft" x1="0%" y1="0%" x2="0%" y2="100%">
+                <stop offset="0%" stopColor="#94a3b8" />
+                <stop offset="100%" stopColor="#475569" />
+              </linearGradient>
+              <linearGradient id="cubeRight" x1="0%" y1="0%" x2="0%" y2="100%">
+                <stop offset="0%" stopColor="#64748b" />
+                <stop offset="100%" stopColor="#1e293b" />
+              </linearGradient>
 
-          <Link to="/platform/mrv-dashboard" className="bg-[#0D2B1A]/50 registry-border rounded-[1.5rem] p-7 transition-all hover:bg-[#0D2B1A]/70 hover:-translate-y-1 hover:shadow-[0_10px_30px_rgba(0,200,83,0.15)] group flex flex-col justify-between">
-            <div>
-              <Module2 />
-              <div className="flex items-center space-x-2 mb-2">
-                <span className="font-mono text-xs text-emerald">02</span>
-                <h3 className="font-sans font-bold text-xl text-registry group-hover:text-emerald transition-colors">MRV Dashboard</h3>
-              </div>
-              <p className="font-sans text-sm text-mist">Satellite. IoT. Farmer reports. AI fraud detection. All unified.</p>
-            </div>
-            <div className="mt-6 flex items-center text-emerald font-mono text-xs opacity-0 group-hover:opacity-100 transition-opacity">
-              Explore Module <span className="ml-2 group-hover:translate-x-1 transition-transform">→</span>
-            </div>
-          </Link>
+              {/* Glowing Emerald Cube Gradients */}
+              <linearGradient id="glowEmeraldTop" x1="0%" y1="0%" x2="100%" y2="100%">
+                <stop offset="0%" stopColor="#a7f3d0" />
+                <stop offset="100%" stopColor="#34d399" />
+              </linearGradient>
+              <linearGradient id="glowEmeraldLeft" x1="0%" y1="0%" x2="0%" y2="100%">
+                <stop offset="0%" stopColor="#10b981" />
+                <stop offset="100%" stopColor="#047857" />
+              </linearGradient>
+              <linearGradient id="glowEmeraldRight" x1="0%" y1="0%" x2="0%" y2="100%">
+                <stop offset="0%" stopColor="#059669" />
+                <stop offset="100%" stopColor="#064e3b" />
+              </linearGradient>
 
-          <Link to="/platform/carbon-registry" className="bg-[#0D2B1A]/50 registry-border rounded-[1.5rem] p-7 transition-all hover:bg-[#0D2B1A]/70 hover:-translate-y-1 hover:shadow-[0_10px_30px_rgba(0,200,83,0.15)] group flex flex-col justify-between">
-            <div>
-              <Module3 />
-              <div className="flex items-center space-x-2 mb-2">
-                <span className="font-mono text-xs text-emerald">03</span>
-                <h3 className="font-sans font-bold text-xl text-registry group-hover:text-emerald transition-colors">Carbon Registry System</h3>
-              </div>
-              <p className="font-sans text-sm text-mist">Unique IDs, ownership tracking, transfer records. National registry aligned.</p>
-            </div>
-            <div className="mt-6 flex items-center text-emerald font-mono text-xs opacity-0 group-hover:opacity-100 transition-opacity">
-              Explore Module <span className="ml-2 group-hover:translate-x-1 transition-transform">→</span>
-            </div>
-          </Link>
+              {/* Glowing Cyan Cube Gradients */}
+              <linearGradient id="glowCyanTop" x1="0%" y1="0%" x2="100%" y2="100%">
+                <stop offset="0%" stopColor="#a5f3fc" />
+                <stop offset="100%" stopColor="#22d3ee" />
+              </linearGradient>
+              <linearGradient id="glowCyanLeft" x1="0%" y1="0%" x2="0%" y2="100%">
+                <stop offset="0%" stopColor="#06b6d4" />
+                <stop offset="100%" stopColor="#0891b2" />
+              </linearGradient>
+              <linearGradient id="glowCyanRight" x1="0%" y1="0%" x2="0%" y2="100%">
+                <stop offset="0%" stopColor="#0891b2" />
+                <stop offset="100%" stopColor="#164e63" />
+              </linearGradient>
 
-          <Link to="/platform/verification-workflow" className="bg-[#0D2B1A]/50 registry-border rounded-[1.5rem] p-7 transition-all hover:bg-[#0D2B1A]/70 hover:-translate-y-1 hover:shadow-[0_10px_30px_rgba(0,200,83,0.15)] group flex flex-col justify-between">
-            <div>
-              <Module4 />
-              <div className="flex items-center space-x-2 mb-2">
-                <span className="font-mono text-xs text-emerald">04</span>
-                <h3 className="font-sans font-bold text-xl text-registry group-hover:text-emerald transition-colors">Verification Workflow Engine</h3>
-              </div>
-              <p className="font-sans text-sm text-mist">Audit tools, risk scoring, accredited verifier dashboards.</p>
-            </div>
-            <div className="mt-6 flex items-center text-emerald font-mono text-xs opacity-0 group-hover:opacity-100 transition-opacity">
-              Explore Module <span className="ml-2 group-hover:translate-x-1 transition-transform">→</span>
-            </div>
-          </Link>
+              {/* Hexagon Neon Gradient */}
+              <linearGradient id="hexGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+                <stop offset="0%" stopColor="#10b981" />
+                <stop offset="100%" stopColor="#06b6d4" />
+              </linearGradient>
 
-          <Link to="/platform/marketplace" className="bg-[#0D2B1A]/50 registry-border rounded-[1.5rem] p-7 transition-all hover:bg-[#0D2B1A]/70 hover:-translate-y-1 hover:shadow-[0_10px_30px_rgba(0,200,83,0.15)] group flex flex-col justify-between">
-            <div>
-              <Module5 />
-              <div className="flex items-center space-x-2 mb-2">
-                <span className="font-mono text-xs text-emerald">05</span>
-                <h3 className="font-sans font-bold text-xl text-registry group-hover:text-emerald transition-colors">Carbon Marketplace</h3>
-              </div>
-              <p className="font-sans text-sm text-mist">Buyers, sellers, price discovery. Climate finance, simplified.</p>
-            </div>
-            <div className="mt-6 flex items-center text-emerald font-mono text-xs opacity-0 group-hover:opacity-100 transition-opacity">
-              Explore Module <span className="ml-2 group-hover:translate-x-1 transition-transform">→</span>
-            </div>
-          </Link>
+              {/* Connection Line Gradients */}
+              <linearGradient id="lineGradLeft" x1="0%" y1="0%" x2="100%" y2="0%">
+                <stop offset="0%" stopColor="#10b981" stopOpacity="0.2" />
+                <stop offset="60%" stopColor="#10b981" stopOpacity="0.8" />
+                <stop offset="100%" stopColor="#06b6d4" stopOpacity="1" />
+              </linearGradient>
+              <linearGradient id="lineGradRight" x1="0%" y1="0%" x2="100%" y2="0%">
+                <stop offset="0%" stopColor="#06b6d4" stopOpacity="1" />
+                <stop offset="40%" stopColor="#06b6d4" stopOpacity="0.8" />
+                <stop offset="100%" stopColor="#10b981" stopOpacity="0.2" />
+              </linearGradient>
 
-          <Link to="/platform/ai-detection" className="bg-[#0D2B1A]/50 registry-border rounded-[1.5rem] p-7 transition-all hover:bg-[#0D2B1A]/70 hover:-translate-y-1 hover:shadow-[0_10px_30px_rgba(0,200,83,0.15)] group flex flex-col justify-between">
-            <div>
-              <Module6 />
-              <div className="flex items-center space-x-2 mb-2">
-                <span className="font-mono text-xs text-emerald">06</span>
-                <h3 className="font-sans font-bold text-xl text-registry group-hover:text-emerald transition-colors">AI Fraud Detection</h3>
-              </div>
-              <p className="font-sans text-sm text-mist">Satellite analysis vs. reported data. Automated anomaly flagging.</p>
-            </div>
-            <div className="mt-6 flex items-center text-emerald font-mono text-xs opacity-0 group-hover:opacity-100 transition-opacity">
-              Explore Module <span className="ml-2 group-hover:translate-x-1 transition-transform">→</span>
-            </div>
-          </Link>
+              {/* Glow Filter */}
+              <filter id="glowFilter" x="-20%" y="-20%" width="140%" height="140%">
+                <feGaussianBlur stdDeviation="3.5" result="blur" />
+                <feMerge>
+                  <feMergeNode in="blur" />
+                  <feMergeNode in="SourceGraphic" />
+                </feMerge>
+              </filter>
+            </defs>
 
+            {/* Static Background Path Glows */}
+            {leftNodes.map(node => (
+              <path
+                key={`bg-l-${node.id}`}
+                d={`M 320 ${node.y} C 420 ${node.y}, 513.4 380, 613.4 380`}
+                fill="none"
+                stroke="rgba(16, 185, 129, 0.08)"
+                strokeWidth="1.5"
+                className="transition-all duration-300"
+                style={{
+                  stroke: hoveredNode ? (hoveredNode.type === 'left' && hoveredNode.id === node.id ? 'rgba(16, 185, 129, 0.35)' : 'rgba(16, 185, 129, 0.02)') : 'rgba(16, 185, 129, 0.08)'
+                }}
+              />
+            ))}
+            {rightNodes.map(node => (
+              <path
+                key={`bg-r-${node.id}`}
+                d={`M 786.6 380 C 886.6 380, 860 ${node.y}, 960 ${node.y}`}
+                fill="none"
+                stroke="rgba(6, 182, 212, 0.08)"
+                strokeWidth="1.5"
+                className="transition-all duration-300"
+                style={{
+                  stroke: hoveredNode ? (hoveredNode.type === 'right' && hoveredNode.id === node.id ? 'rgba(6, 182, 212, 0.35)' : 'rgba(6, 182, 212, 0.02)') : 'rgba(6, 182, 212, 0.08)'
+                }}
+              />
+            ))}
+
+            {/* Animated Flow Lines */}
+            {leftNodes.map((node, i) => (
+              <path
+                key={`flow-l-${node.id}`}
+                d={`M 320 ${node.y} C 420 ${node.y}, 513.4 380, 613.4 380`}
+                fill="none"
+                stroke="url(#lineGradLeft)"
+                strokeWidth="2"
+                filter="url(#glowFilter)"
+                className="flow-line-left transition-all duration-300"
+                style={{
+                  animationDelay: `${i * 0.65}s`,
+                  animationDuration: `${3.5 + (i % 3) * 0.6}s`,
+                  opacity: hoveredNode ? (hoveredNode.type === 'left' && hoveredNode.id === node.id ? 1 : 0.08) : 0.65
+                }}
+              />
+            ))}
+            {rightNodes.map((node, i) => (
+              <path
+                key={`flow-r-${node.id}`}
+                d={`M 786.6 380 C 886.6 380, 860 ${node.y}, 960 ${node.y}`}
+                fill="none"
+                stroke="url(#lineGradRight)"
+                strokeWidth="2"
+                filter="url(#glowFilter)"
+                className="flow-line-right transition-all duration-300"
+                style={{
+                  animationDelay: `${i * 0.8}s`,
+                  animationDuration: `${3.5 + (i % 2) * 0.6}s`,
+                  opacity: hoveredNode ? (hoveredNode.type === 'right' && hoveredNode.id === node.id ? 1 : 0.08) : 0.65
+                }}
+              />
+            ))}
+
+            {/* Central Hexagon and Cube Cluster Group */}
+            <g className="animate-hub-scale" style={{ transformOrigin: '700px 380px', animationDelay: '0.3s', opacity: 0 }}>
+              <g className="animate-[floatCluster_5.5s_ease-in-out_infinite]" style={{ transformOrigin: '700px 380px' }}>
+                {/* Outer Hexagon with neon pulsing glow */}
+                <polygon
+                  points="700,280 786.6,330 786.6,430 700,480 613.4,430 613.4,330"
+                  fill="none"
+                  stroke="url(#hexGrad)"
+                  strokeWidth="4"
+                  filter="url(#glowFilter)"
+                  className="animate-[pulseGlow_4s_ease-in-out_infinite]"
+                />
+                {/* Inner Hexagon Container */}
+                <polygon
+                  points="700,280 786.6,330 786.6,430 700,480 613.4,430 613.4,330"
+                  fill="#080F0B"
+                  stroke="url(#hexGrad)"
+                  strokeWidth="1.5"
+                  opacity="0.9"
+                />
+                {/* Isometric Cube Cluster */}
+                {sortedCubes.map((cube, idx) => renderCube(cube, idx, 28, 700, 380))}
+              </g>
+            </g>
+          </svg>
+
+          {/* Left Column Pills */}
+          {leftNodes.map((node, idx) => (
+            <Link
+              key={node.id}
+              to={node.to}
+              className="absolute left-pill-anim flex items-center bg-[#080F0B]/85 hover:bg-[#0d1c13] border border-emerald/25 hover:border-emerald/80 rounded-full px-4 py-3 cursor-pointer transition-all duration-300 z-20 backdrop-blur-sm shadow-[0_3px_12px_rgba(4,10,6,0.6)] group"
+              style={{
+                left: '6.666%',
+                top: `${(node.y / 800) * 100}%`,
+                width: '20%',
+                transform: 'translateY(-50%)',
+                animation: 'slideInLeft 0.8s cubic-bezier(0.16, 1, 0.3, 1) forwards',
+                animationDelay: `${0.1 + idx * 0.08}s`,
+                opacity: 0
+              }}
+              onMouseEnter={() => setHoveredNode({ type: 'left', id: node.id })}
+              onMouseLeave={() => setHoveredNode(null)}
+            >
+              {/* Pulsing indicator dot */}
+              <div className="w-2 h-2 rounded-full bg-[#10b981] mr-3 relative flex items-center justify-center">
+                <div className="absolute w-2.5 h-2.5 rounded-full bg-[#10b981]/50 animate-ping group-hover:duration-700"></div>
+              </div>
+              <span className="text-registry text-xs font-mono tracking-wide">{node.title}</span>
+              {/* Edge connector anchor */}
+              <div className="absolute right-[-4px] top-1/2 -translate-y-1/2 w-2 h-2 rounded-full bg-[#10b981] border border-[#040A06] z-30 shadow-[0_0_8px_rgba(16,185,129,0.8)] group-hover:scale-125 transition-transform duration-300"></div>
+            </Link>
+          ))}
+
+          {/* Right Column Pills */}
+          {rightNodes.map((node, idx) => (
+            <div
+              key={node.id}
+              className="absolute right-pill-anim flex items-center bg-[#080F0B]/85 border border-cyan/25 hover:border-cyan/80 rounded-full px-4 py-3 transition-all duration-300 z-20 backdrop-blur-sm shadow-[0_3px_12px_rgba(4,10,6,0.6)] group"
+              style={{
+                left: '80%',
+                top: `${(node.y / 800) * 100}%`,
+                width: '16.666%',
+                transform: 'translateY(-50%)',
+                animation: 'slideInRight 0.8s cubic-bezier(0.16, 1, 0.3, 1) forwards',
+                animationDelay: `${0.1 + idx * 0.08}s`,
+                opacity: 0
+              }}
+              onMouseEnter={() => setHoveredNode({ type: 'right', id: node.id })}
+              onMouseLeave={() => setHoveredNode(null)}
+            >
+              {/* Pulsing indicator dot */}
+              <div className="w-2 h-2 rounded-full bg-[#06b6d4] mr-3 relative flex items-center justify-center">
+                <div className="absolute w-2.5 h-2.5 rounded-full bg-[#06b6d4]/50 animate-ping group-hover:duration-700"></div>
+              </div>
+              <span className="text-registry text-xs font-mono tracking-wide">{node.title}</span>
+              {/* Edge connector anchor */}
+              <div className="absolute left-[-4px] top-1/2 -translate-y-1/2 w-2 h-2 rounded-full bg-[#06b6d4] border border-[#040A06] z-30 shadow-[0_0_8px_rgba(6,182,212,0.8)] group-hover:scale-125 transition-transform duration-300"></div>
+            </div>
+          ))}
+
+          {/* Large Title Text */}
+          <div
+            className="absolute modules-header pointer-events-none select-none"
+            style={{
+              left: '38.333%',
+              top: '9.375%',
+              width: '40%',
+              animation: 'fadeInHeader 0.8s cubic-bezier(0.16, 1, 0.3, 1) forwards',
+              animationDelay: '0.1s',
+              opacity: 0
+            }}
+          >
+            <h2 className="font-sans font-light text-[38px] leading-[1.2] text-registry tracking-tight">
+              Securing the entire<br />
+              carbon lifecycle<br />
+              from source to registry
+            </h2>
+          </div>
+
+          {/* Objective Paragraph */}
+          <div
+            className="absolute modules-header"
+            style={{
+              left: '38.333%',
+              top: '70.625%',
+              width: '38.333%',
+              animation: 'fadeInHeader 0.8s cubic-bezier(0.16, 1, 0.3, 1) forwards',
+              animationDelay: '0.2s',
+              opacity: 0
+            }}
+          >
+            <h4 className="text-emerald font-mono text-[11px] uppercase tracking-[0.2em] mb-2.5 font-bold">CarbonOS Core</h4>
+            <p className="text-mist text-xs leading-relaxed font-sans opacity-95">
+              CarbonOS integration proactively monitors, verifies, and secures carbon credits at every step. By combining satellite telemetry, AI fraud detection, and automated registry workflows, we guarantee that every credit corresponds to real, permanent, and additional carbon offset, enabling instant global market access with zero risk of double counting or greenwashing.
+            </p>
+          </div>
+
+          {/* Bottom links */}
+          <div className="absolute bottom-4 left-0 text-[10px] font-mono text-mist/30 tracking-widest pointer-events-none uppercase">
+            carbonos.live
+          </div>
+          <div className="absolute bottom-4 right-0 text-[10px] font-mono text-mist/30 tracking-widest pointer-events-none uppercase text-right">
+            System Platform Modules
+          </div>
         </div>
+
+        {/* Mobile View (Hidden on Desktop) */}
+        <div className="lg:hidden flex flex-col space-y-12">
+          {/* Header */}
+          <div className="text-center space-y-4">
+            <div className="inline-flex items-center space-x-2 text-[10px] uppercase tracking-[0.25em] text-emerald font-bold">
+              <span>Platform Modules</span>
+              <span className="w-1 h-1 rounded-full bg-emerald"></span>
+              <span>6 Core Systems</span>
+            </div>
+            <h2 className="font-sans font-light text-3xl text-registry tracking-tight leading-tight">
+              Securing the entire carbon lifecycle
+            </h2>
+            <p className="text-mist text-xs leading-relaxed max-w-lg mx-auto">
+              CarbonOS integration proactively monitors, verifies, and secures carbon credits. By combining satellite telemetry, AI fraud detection, and automated registry workflows, we guarantee that every credit is real and permanent.
+            </p>
+          </div>
+
+          {/* Centered Hub SVG */}
+          <div className="flex justify-center my-6">
+            <svg className="w-48 h-56 overflow-visible pointer-events-none" viewBox="0 0 220 220">
+              <defs>
+                <linearGradient id="cubeTop" x1="0%" y1="0%" x2="100%" y2="100%">
+                  <stop offset="0%" stopColor="#ffffff" />
+                  <stop offset="100%" stopColor="#cbd5e1" />
+                </linearGradient>
+                <linearGradient id="cubeLeft" x1="0%" y1="0%" x2="0%" y2="100%">
+                  <stop offset="0%" stopColor="#94a3b8" />
+                  <stop offset="100%" stopColor="#475569" />
+                </linearGradient>
+                <linearGradient id="cubeRight" x1="0%" y1="0%" x2="0%" y2="100%">
+                  <stop offset="0%" stopColor="#64748b" />
+                  <stop offset="100%" stopColor="#1e293b" />
+                </linearGradient>
+                <linearGradient id="glowEmeraldTop" x1="0%" y1="0%" x2="100%" y2="100%">
+                  <stop offset="0%" stopColor="#a7f3d0" />
+                  <stop offset="100%" stopColor="#34d399" />
+                </linearGradient>
+                <linearGradient id="glowEmeraldLeft" x1="0%" y1="0%" x2="0%" y2="100%">
+                  <stop offset="0%" stopColor="#10b981" />
+                  <stop offset="100%" stopColor="#047857" />
+                </linearGradient>
+                <linearGradient id="glowEmeraldRight" x1="0%" y1="0%" x2="0%" y2="100%">
+                  <stop offset="0%" stopColor="#059669" />
+                  <stop offset="100%" stopColor="#064e3b" />
+                </linearGradient>
+                <linearGradient id="glowCyanTop" x1="0%" y1="0%" x2="100%" y2="100%">
+                  <stop offset="0%" stopColor="#a5f3fc" />
+                  <stop offset="100%" stopColor="#22d3ee" />
+                </linearGradient>
+                <linearGradient id="glowCyanLeft" x1="0%" y1="0%" x2="0%" y2="100%">
+                  <stop offset="0%" stopColor="#06b6d4" />
+                  <stop offset="100%" stopColor="#0891b2" />
+                </linearGradient>
+                <linearGradient id="glowCyanRight" x1="0%" y1="0%" x2="0%" y2="100%">
+                  <stop offset="0%" stopColor="#0891b2" />
+                  <stop offset="100%" stopColor="#164e63" />
+                </linearGradient>
+                <linearGradient id="hexGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+                  <stop offset="0%" stopColor="#10b981" />
+                  <stop offset="100%" stopColor="#06b6d4" />
+                </linearGradient>
+                <filter id="glowFilter" x="-20%" y="-20%" width="140%" height="140%">
+                  <feGaussianBlur stdDeviation="3.5" result="blur" />
+                  <feMerge>
+                    <feMergeNode in="blur" />
+                    <feMergeNode in="SourceGraphic" />
+                  </feMerge>
+                </filter>
+              </defs>
+              <g className="animate-[floatCluster_5s_ease-in-out_infinite]" style={{ transformOrigin: '110px 110px' }}>
+                <polygon
+                  points="110,10 196.6,60 196.6,160 110,210 23.4,160 23.4,60"
+                  fill="none"
+                  stroke="url(#hexGrad)"
+                  strokeWidth="4"
+                  filter="url(#glowFilter)"
+                  className="animate-[pulseGlow_4s_ease-in-out_infinite]"
+                />
+                <polygon
+                  points="110,10 196.6,60 196.6,160 110,210 23.4,160 23.4,60"
+                  fill="#080F0B"
+                  stroke="url(#hexGrad)"
+                  strokeWidth="1.5"
+                  opacity="0.9"
+                />
+                {sortedCubes.map((cube, idx) => renderCube(cube, idx, 24, 110, 110))}
+              </g>
+            </svg>
+          </div>
+
+          {/* Core Systems list */}
+          <div className="space-y-4">
+            <h3 className="text-emerald font-mono text-xs uppercase tracking-wider font-semibold border-b border-emerald/10 pb-2">
+              Core Platform Systems
+            </h3>
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+              {leftNodes.map((node) => (
+                <Link
+                  key={node.id}
+                  to={node.to}
+                  className="flex items-center bg-[#080F0B]/80 border border-emerald/20 hover:border-emerald/50 rounded-full px-4 py-3 transition-colors group"
+                >
+                  <div className="w-2 h-2 rounded-full bg-[#10b981] mr-3 relative flex items-center justify-center">
+                    <div className="absolute w-2 h-2 rounded-full bg-[#10b981]/50 animate-ping"></div>
+                  </div>
+                  <span className="text-registry text-xs font-mono group-hover:text-emerald transition-colors">{node.title}</span>
+                </Link>
+              ))}
+            </div>
+          </div>
+
+          {/* Key Outcomes list */}
+          <div className="space-y-4">
+            <h3 className="text-cyan font-mono text-xs uppercase tracking-wider font-semibold border-b border-cyan/10 pb-2">
+              Target Outcomes
+            </h3>
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+              {rightNodes.map((node) => (
+                <div
+                  key={node.id}
+                  className="flex items-center bg-[#080F0B]/80 border border-cyan/20 rounded-full px-4 py-3"
+                >
+                  <div className="w-2 h-2 rounded-full bg-[#06b6d4] mr-3 relative flex items-center justify-center">
+                    <div className="absolute w-2 h-2 rounded-full bg-[#06b6d4]/50 animate-ping"></div>
+                  </div>
+                  <span className="text-registry text-xs font-mono">{node.title}</span>
+                </div>
+              ))}
+            </div>
+          </div>
+        </div>
+
       </div>
     </section>
   );
