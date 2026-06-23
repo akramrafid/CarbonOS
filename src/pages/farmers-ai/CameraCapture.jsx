@@ -25,14 +25,66 @@ const crops = [
   { id: 'citrus', name: 'Citrus / লেবু', icon: '🍋' }
 ];
 
+// Helper: wait for a specified number of milliseconds
+const delay = (ms) => new Promise(resolve => setTimeout(resolve, ms));
+
+// Helper: attempt a single Gemini API call with retry for 429 errors
+const callGeminiWithRetry = async (url, body, maxRetries = 3) => {
+  for (let attempt = 0; attempt < maxRetries; attempt++) {
+    const response = await fetch(url, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(body)
+    });
+
+    if (response.ok) {
+      return response;
+    }
+
+    if (response.status === 429 && attempt < maxRetries - 1) {
+      // Extract retry delay from error response
+      let waitMs = (attempt + 1) * 5000; // default: 5s, 10s, 15s
+      try {
+        const errBody = await response.json();
+        const retryInfo = errBody?.error?.details?.find(d => d["@type"]?.includes("RetryInfo"));
+        if (retryInfo?.retryDelay) {
+          const seconds = parseInt(retryInfo.retryDelay);
+          if (!isNaN(seconds) && seconds > 0) {
+            waitMs = (seconds + 2) * 1000; // add 2s buffer
+          }
+        }
+      } catch (_) { /* ignore parse errors */ }
+
+      console.log(`[Gemini] Rate limited (429). Waiting ${waitMs / 1000}s before retry ${attempt + 2}/${maxRetries}...`);
+      await delay(waitMs);
+      continue;
+    }
+
+    // Non-retryable error
+    const errorText = await response.text();
+    throw new Error(`Status ${response.status}: ${errorText}`);
+  }
+  throw new Error("Max retries exceeded for rate limiting.");
+};
+
 const diagnoseWithGeminiDirect = async (canvas, selectedSpecies) => {
   const apiKey = import.meta.env.VITE_GEMINI_API_KEY;
   if (!apiKey) {
-    throw new Error("Gemini API key is not configured.");
+    throw new Error("Gemini API key is not configured. Please set VITE_GEMINI_API_KEY in your .env file.");
   }
 
-  // Base64 encode
-  const base64Data = canvas.toDataURL('image/jpeg', 0.85);
+  // Base64 encode — resize to max 1024px to reduce payload and quota usage
+  const maxDim = 1024;
+  let srcCanvas = canvas;
+  if (canvas.width > maxDim || canvas.height > maxDim) {
+    const scale = maxDim / Math.max(canvas.width, canvas.height);
+    const resized = document.createElement('canvas');
+    resized.width = Math.round(canvas.width * scale);
+    resized.height = Math.round(canvas.height * scale);
+    resized.getContext('2d').drawImage(canvas, 0, 0, resized.width, resized.height);
+    srcCanvas = resized;
+  }
+  const base64Data = srcCanvas.toDataURL('image/jpeg', 0.8);
   const base64Clean = base64Data.split(',')[1];
 
   // Permitted classes info
@@ -60,75 +112,100 @@ Return your response in JSON format matching this schema:
 }
 `;
 
-  const models = ["gemini-2.5-flash", "gemini-2.0-flash", "gemini-flash-latest"];
+  // Try models in order — gemini-2.0-flash-lite is cheapest quota, then 2.0-flash, then 2.5-flash
+  const models = ["gemini-2.0-flash-lite", "gemini-2.0-flash", "gemini-2.5-flash"];
   let lastErr = null;
+
+  const requestBody = {
+    contents: [{
+      parts: [
+        { text: prompt },
+        {
+          inlineData: {
+            mimeType: "image/jpeg",
+            data: base64Clean
+          }
+        }
+      ]
+    }],
+    generationConfig: {
+      responseMimeType: "application/json"
+    }
+  };
 
   for (const modelName of models) {
     const url = `https://generativelanguage.googleapis.com/v1beta/models/${modelName}:generateContent?key=${apiKey}`;
     try {
-      const response = await fetch(url, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          contents: [{
-            parts: [
-              { text: prompt },
-              {
-                inlineData: {
-                  mimeType: "image/jpeg",
-                  data: base64Clean
-                }
-              }
-            ]
-          }],
-          generationConfig: {
-            responseMimeType: "application/json"
-          }
-        })
-      });
+      const response = await callGeminiWithRetry(url, requestBody, 3);
+      const result = await response.json();
 
-      if (response.ok) {
-        const result = await response.json();
-        const textContent = result.candidates[0].content.parts[0].text;
-        const parsed = JSON.parse(textContent);
+      // Validate response structure
+      if (!result.candidates || !result.candidates[0]?.content?.parts?.[0]?.text) {
+        lastErr = `Model ${modelName} returned empty or blocked response.`;
+        console.warn(`[Gemini] ${lastErr}`, result);
+        continue;
+      }
 
-        // Normalize
-        let detSpecies = (parsed.species || selectedSpecies).toLowerCase();
-        if (!DISEASE_MAPS[detSpecies]) {
-          detSpecies = selectedSpecies;
+      const textContent = result.candidates[0].content.parts[0].text;
+      let parsed;
+      try {
+        parsed = JSON.parse(textContent);
+      } catch (parseErr) {
+        // Sometimes the model returns JSON wrapped in markdown code fences
+        const jsonMatch = textContent.match(/```(?:json)?\s*([\s\S]*?)```/);
+        if (jsonMatch) {
+          parsed = JSON.parse(jsonMatch[1].trim());
+        } else {
+          lastErr = `Model ${modelName} returned unparseable JSON: ${textContent.substring(0, 200)}`;
+          console.warn(`[Gemini] ${lastErr}`);
+          continue;
         }
+      }
 
-        const permitted = DISEASE_MAPS[detSpecies];
-        const predictedDisease = parsed.disease || "";
-        let matchedDisease = null;
+      // Normalize species
+      let detSpecies = (parsed.species || selectedSpecies).toLowerCase();
+      if (!DISEASE_MAPS[detSpecies]) {
+        detSpecies = selectedSpecies;
+      }
+
+      const permitted = DISEASE_MAPS[detSpecies];
+      const predictedDisease = parsed.disease || "";
+      let matchedDisease = null;
+      for (const item of permitted) {
+        if (item.toLowerCase() === predictedDisease.toLowerCase()) {
+          matchedDisease = item;
+          break;
+        }
+      }
+      if (!matchedDisease) {
+        // Try partial match as fallback
         for (const item of permitted) {
-          if (item.toLowerCase() === predictedDisease.toLowerCase()) {
+          if (item.toLowerCase().includes(predictedDisease.toLowerCase()) ||
+              predictedDisease.toLowerCase().includes(item.toLowerCase())) {
             matchedDisease = item;
             break;
           }
         }
-        if (!matchedDisease) {
-          matchedDisease = permitted[0];
-        }
-
-        const confidenceVal = parseFloat(parsed.confidence || 0.8);
-
-        return {
-          species: detSpecies,
-          disease: matchedDisease,
-          confidence: confidenceVal,
-          explanation: parsed.explanation || ""
-        };
-      } else {
-        const errorText = await response.text();
-        lastErr = `Status ${response.status}: ${errorText}`;
       }
+      if (!matchedDisease) {
+        matchedDisease = permitted[0];
+      }
+
+      const confidenceVal = parseFloat(parsed.confidence || 0.8);
+
+      return {
+        species: detSpecies,
+        disease: matchedDisease,
+        confidence: Math.min(Math.max(confidenceVal, 0), 1), // clamp 0-1
+        explanation: parsed.explanation || ""
+      };
     } catch (e) {
-      lastErr = e.message;
+      lastErr = `[${modelName}] ${e.message}`;
+      console.warn(`[Gemini] Model ${modelName} failed:`, e.message);
     }
   }
 
-  throw new Error(`All Gemini models failed. Last error: ${lastErr}`);
+  throw new Error(`All Gemini models failed. ${lastErr}`);
 };
 
 const CameraCapture = ({ isInline = false, onBack = null, onScanComplete = null }) => {
@@ -235,13 +312,12 @@ const CameraCapture = ({ isInline = false, onBack = null, onScanComplete = null 
   const processCanvas = useCallback(async (canvas, blob) => {
     setCropMismatch(null);
 
-    // ── Step 1: Auto-detect species ──────────────────────────────────────────
+    // ── Step 1: Auto-detect species (best-effort, non-blocking) ──────────────
     let effectiveSpecies = species;
     try {
       const detection = await detectSpecies(canvas);
       if (detection && detection.detectedSpecies) {
         if (detection.detectedSpecies !== species) {
-          // Notify user their selection was overridden
           setCropMismatch({ selected: species, detected: detection.detectedSpecies });
           effectiveSpecies = detection.detectedSpecies;
           console.log(`[CropDetector] Overriding '${species}' → '${detection.detectedSpecies}' (confidence: ${(detection.confidence * 100).toFixed(1)}%)`);
@@ -278,75 +354,103 @@ const CameraCapture = ({ isInline = false, onBack = null, onScanComplete = null 
       console.warn('Offline inference skipped:', e);
     }
 
-    // ── Step 3: Direct Cloud inference ───────────────────────────────────────
+    // ── Step 3: Cloud inference via Gemini API ───────────────────────────────
+    let cloudResult = null;
+    let cloudError = null;
     try {
       const geminiRes = await diagnoseWithGeminiDirect(canvas, effectiveSpecies);
-      stopCamera();
-      
       const imageBlobUrl = URL.createObjectURL(blob);
       const confidence = geminiRes.confidence;
       const severity = geminiRes.disease.toLowerCase().includes('healthy') 
         ? 'none' 
         : (confidence > 0.9 ? 'severe' : (confidence > 0.8 ? 'moderate' : 'mild'));
 
-      const formattedResult = {
+      cloudResult = {
         diagnosis_id: Math.random().toString(36).substring(2, 11),
         species: geminiRes.species,
         disease: geminiRes.disease,
         confidence: confidence,
         severity: severity,
         needs_agronomist_review: confidence < 0.55,
-        heatmap_url: imageBlobUrl, // Use local image blob URL as the heatmap
+        heatmap_url: imageBlobUrl,
         weather_risk: {
           index: 0.3,
           summary_bn: "আবহাওয়া স্বাভাবিক। নিয়মিত রোগ পর্যবেক্ষণ করুন।"
         },
         isOffline: false
       };
-
-      if (isInline && onScanComplete) {
-        onScanComplete(formattedResult, imageBlobUrl);
-      } else {
-        navigate('/farmers-ai/result', { state: { result: formattedResult, imageBlob: imageBlobUrl } });
-      }
     } catch (err) {
-      console.error('Cloud inference failed, falling back to offline ONNX:', err);
-      if (offlineRes) {
+      cloudError = err;
+      console.error('Cloud inference failed:', err.message);
+    }
+
+    // ── Step 4: Navigate to results (cloud > offline > error) ────────────────
+    try {
+      const finalResult = cloudResult || offlineRes;
+      if (finalResult) {
         stopCamera();
-        const imageBlobUrl = URL.createObjectURL(blob);
+        const imageBlobUrl = finalResult.heatmap_url || URL.createObjectURL(blob);
         if (isInline && onScanComplete) {
-          onScanComplete(offlineRes, imageBlobUrl);
+          onScanComplete(finalResult, imageBlobUrl);
         } else {
-          navigate('/farmers-ai/result', { state: { result: offlineRes, imageBlob: imageBlobUrl } });
+          navigate('/farmers-ai/result', { state: { result: finalResult, imageBlob: imageBlobUrl } });
         }
       } else {
-        setError('Inference failed. Please ensure the crop image is clear and well-lit.');
-        setIsProcessing(false);
+        // Both cloud and offline failed
+        const isRateLimit = cloudError?.message?.includes('429') || cloudError?.message?.includes('quota');
+        if (isRateLimit) {
+          setError('API quota exceeded. Please wait a few minutes and try again. / এপিআই কোটা শেষ। কিছুক্ষণ পর আবার চেষ্টা করুন।');
+        } else {
+          setError('Analysis failed. Please ensure the image is a clear photo of a crop leaf. / বিশ্লেষণ ব্যর্থ। পাতার পরিষ্কার ছবি দিন।');
+        }
       }
+    } finally {
+      setIsProcessing(false);
     }
   }, [species, deviceCoords, isInline, onScanComplete, navigate]);
 
   const handleFileUpload = (e) => {
-    const file = e.target.files?.[0] || e.target.files;
-    if (!file) return;
+    // Support both FileList from <input> and single File from drag-drop
+    let file = null;
+    if (e.target.files instanceof FileList) {
+      file = e.target.files[0];
+    } else if (e.target.files instanceof File) {
+      file = e.target.files;
+    }
+    if (!file || !(file instanceof File)) return;
 
     setIsProcessing(true);
     setError('');
+    setCropMismatch(null);
 
     const reader = new FileReader();
+    reader.onerror = () => {
+      setError('Failed to read the image file. Please try another image.');
+      setIsProcessing(false);
+    };
     reader.onload = (event) => {
       const img = new Image();
+      img.onerror = () => {
+        setError('Invalid image file. Please upload a JPEG or PNG image.');
+        setIsProcessing(false);
+      };
       img.onload = async () => {
-        const canvas = canvasRef.current;
-        if (!canvas) { setIsProcessing(false); return; }
-        canvas.width = img.width;
-        canvas.height = img.height;
-        const ctx = canvas.getContext('2d');
-        ctx.drawImage(img, 0, 0);
-        canvas.toBlob(async (blob) => {
-          if (!blob) { setError('Failed to process uploaded image.'); setIsProcessing(false); return; }
-          await processCanvas(canvas, blob);
-        }, 'image/jpeg', 0.8);
+        try {
+          const canvas = canvasRef.current;
+          if (!canvas) { setIsProcessing(false); return; }
+          canvas.width = img.width;
+          canvas.height = img.height;
+          const ctx = canvas.getContext('2d');
+          ctx.drawImage(img, 0, 0);
+          canvas.toBlob(async (blob) => {
+            if (!blob) { setError('Failed to process uploaded image.'); setIsProcessing(false); return; }
+            await processCanvas(canvas, blob);
+          }, 'image/jpeg', 0.8);
+        } catch (err) {
+          console.error('File upload processing error:', err);
+          setError('An error occurred while processing the image. Please try again.');
+          setIsProcessing(false);
+        }
       };
       img.src = event.target.result;
     };
@@ -367,9 +471,9 @@ const CameraCapture = ({ isInline = false, onBack = null, onScanComplete = null 
     setIsDragging(false);
     const files = e.dataTransfer?.files;
     if (files && files.length > 0) {
-      handleFileUpload({ target: { files: files[0] } });
+      handleFileUpload({ target: { files } });
     }
-  }, [species]);
+  }, [species, handleFileUpload]);
 
   const captureAndAnalyze = useCallback(async () => {
     if (!videoRef.current || !canvasRef.current) return;
