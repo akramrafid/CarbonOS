@@ -113,7 +113,7 @@ Return your response in JSON format matching this schema:
 `;
 
   // Try models in order — gemini-2.0-flash-lite is cheapest quota, then 2.0-flash, then 2.5-flash
-  const models = ["gemini-2.0-flash-lite", "gemini-2.0-flash", "gemini-2.5-flash"];
+  const models = ["gemini-2.5-flash", "gemini-2.0-flash", "gemini-2.0-flash-lite"];
   let lastErr = null;
 
   const requestBody = {
