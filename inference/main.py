@@ -55,7 +55,8 @@ def save_gradient(grad):
 def forward_hook(module, input, output):
     global cam_activations
     cam_activations = output
-    output.register_hook(save_gradient)
+    if output.requires_grad:
+        output.register_hook(save_gradient)
 
 # Register hook on the last conv layer of the backbone
 # For EfficientNet-B3, it's typically features[-1]

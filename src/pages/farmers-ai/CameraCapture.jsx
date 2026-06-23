@@ -181,7 +181,10 @@ const CameraCapture = ({ isInline = false, onBack = null, onScanComplete = null 
     formData.append('gps_lng', deviceCoords.lng);
 
     try {
-      const response = await fetch(`http://${window.location.hostname}:8000/api/farmers-ai/api/diagnose/`, {
+      const backendHost = (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1')
+        ? window.location.hostname
+        : 'localhost';
+      const response = await fetch(`http://${backendHost}:8000/api/farmers-ai/api/diagnose/`, {
         method: 'POST',
         body: formData,
       });
