@@ -7,6 +7,7 @@ from .models import Diagnosis, WeatherRiskSnapshot, AgronomistReview
 from django.db.models import Count, Q
 from channels.layers import get_channel_layer
 from asgiref.sync import async_to_sync
+from .risk_engine import calculate_disease_risk
 
 FASTAPI_URL = "http://127.0.0.1:8001/predict"
 
@@ -16,10 +17,13 @@ def diagnose(request):
     # Phase 9: Broadcast processing status
     channel_layer = get_channel_layer()
     if channel_layer:
-        async_to_sync(channel_layer.group_send)(
-            'inference_updates',
-            {'type': 'send_status', 'status': 'processing'}
-        )
+        try:
+            async_to_sync(channel_layer.group_send)(
+                'inference_updates',
+                {'type': 'send_status', 'status': 'processing'}
+            )
+        except Exception:
+            pass  # WebSocket broadcast is best-effort
 
     image = request.FILES.get('image')
     species = request.data.get('species')
@@ -44,7 +48,6 @@ def diagnose(request):
         
         # Find latest weather snapshot for this field
         from django.utils import timezone
-        from .models import WeatherRiskSnapshot
         weather_snapshot = None
         if field_id:
             weather_snapshot = WeatherRiskSnapshot.objects.filter(
@@ -65,8 +68,22 @@ def diagnose(request):
             weather_snapshot=weather_snapshot
         )
         
-        # Inject weather risk for frontend display
         # Phase 10: Structuring exact API contract payload
+        host = request.get_host()
+        
+        # Calculate dynamic weather risk using device current coordinates (gps_lat, gps_lng)
+        risk_index = 0.0
+        summary_bn = "আবহাওয়া তথ্য নেই"
+        
+        if gps_lat and gps_lng:
+            try:
+                risk_index, summary_bn, _ = calculate_disease_risk(float(gps_lat), float(gps_lng), diag.species)
+            except Exception as e:
+                print(f"Error calculating dynamic risk: {e}")
+        elif weather_snapshot:
+            risk_index = weather_snapshot.risk_index
+            summary_bn = weather_snapshot.summary_bn
+
         contract_payload = {
             'diagnosis_id': str(diag.id),
             'species': diag.species,
@@ -76,27 +93,119 @@ def diagnose(request):
             'needs_agronomist_review': diag.confidence < 80.0,
             'heatmap_url': result.get('heatmap_url', f"/media/heatmaps/{diag.id}.png"), 
             'treatment_plan': {
-                'text_bn': "জৈব পদ্ধতি: আক্রান্ত পাতা পুড়িয়ে ফেলুন এবং নিম পাতার নির্যাস ব্যবহার করুন।", # Mock organic baseline
-                'voice_url': "http://localhost:8000/media/voice/treatment_dummy.mp3" # Mock voice fallback
+                'text_bn': "জৈব পদ্ধতি: আক্রান্ত পাতা পুড়িয়ে ফেলুন এবং নিম পাতার নির্যাস ব্যবহার করুন।",
+                'voice_url': f"http://{host}/media/voice/treatment_dummy.mp3"
             },
             'weather_risk': {
-                'index': weather_snapshot.risk_index if weather_snapshot else 0.0,
-                'summary_bn': weather_snapshot.summary_bn if weather_snapshot else 'আবহাওয়া তথ্য নেই',
+                'index': risk_index,
+                'summary_bn': summary_bn,
                 'valid_until': weather_snapshot.valid_until if weather_snapshot else None
             }
         }
         
         # Phase 9: Broadcast done status
         if channel_layer:
-            async_to_sync(channel_layer.group_send)(
-                'inference_updates',
-                {'type': 'send_status', 'status': 'done'}
-            )
+            try:
+                async_to_sync(channel_layer.group_send)(
+                    'inference_updates',
+                    {'type': 'send_status', 'status': 'done'}
+                )
+            except Exception:
+                pass
             
         return Response(contract_payload, status=status.HTTP_200_OK)
         
     except requests.exceptions.RequestException as e:
         return Response({"error": f"Failed to connect to inference service: {str(e)}"}, status=status.HTTP_503_SERVICE_UNAVAILABLE)
+
+@api_view(['GET'])
+def get_journal(request):
+    """
+    Returns a list of past diagnoses for the current farmer/field.
+    Acts as a crop health journal showing diagnosis history.
+    """
+    field_id = request.query_params.get('field_id', None)
+    limit = int(request.query_params.get('limit', 20))
+    
+    queryset = Diagnosis.objects.all().order_by('-created_at')
+    if field_id:
+        queryset = queryset.filter(field_id=field_id)
+    
+    diagnoses = queryset[:limit]
+    
+    journal_entries = []
+    for d in diagnoses:
+        entry = {
+            'diagnosis_id': str(d.id),
+            'species': d.species,
+            'disease': d.disease,
+            'confidence': d.confidence,
+            'severity': d.severity,
+            'carbon_asset_risk': d.carbon_asset_risk,
+            'created_at': d.created_at.isoformat(),
+            'field_id': d.field_id,
+            'needs_agronomist_review': d.needs_agronomist_review,
+        }
+        # Include agronomist review if exists
+        try:
+            review = d.agronomist_review
+            entry['agronomist_review'] = {
+                'agronomist_id': review.agronomist_id,
+                'verified_disease': review.verified_disease,
+                'review_notes': review.review_notes,
+                'reviewed_at': review.reviewed_at.isoformat(),
+            }
+        except AgronomistReview.DoesNotExist:
+            entry['agronomist_review'] = None
+            
+        journal_entries.append(entry)
+    
+    return Response({
+        'count': len(journal_entries),
+        'entries': journal_entries
+    }, status=status.HTTP_200_OK)
+
+@api_view(['POST'])
+def agronomist_review(request, diagnosis_id):
+    """
+    Allows an agronomist to submit a review/correction for a diagnosis.
+    """
+    try:
+        diagnosis = Diagnosis.objects.get(id=diagnosis_id)
+    except Diagnosis.DoesNotExist:
+        return Response({"error": "Diagnosis not found"}, status=status.HTTP_404_NOT_FOUND)
+    
+    agronomist_id = request.data.get('agronomist_id')
+    verified_disease = request.data.get('verified_disease')
+    confidence_override = request.data.get('confidence_override')
+    review_notes = request.data.get('review_notes', '')
+    
+    if not agronomist_id or not verified_disease:
+        return Response(
+            {"error": "agronomist_id and verified_disease are required"},
+            status=status.HTTP_400_BAD_REQUEST
+        )
+    
+    review, created = AgronomistReview.objects.update_or_create(
+        diagnosis=diagnosis,
+        defaults={
+            'agronomist_id': agronomist_id,
+            'verified_disease': verified_disease,
+            'confidence_override': confidence_override,
+            'review_notes': review_notes,
+        }
+    )
+    
+    # Update the diagnosis review flag
+    diagnosis.needs_agronomist_review = False
+    diagnosis.save()
+    
+    return Response({
+        'status': 'reviewed',
+        'diagnosis_id': str(diagnosis.id),
+        'verified_disease': review.verified_disease,
+        'reviewed_at': review.reviewed_at.isoformat(),
+    }, status=status.HTTP_200_OK)
 
 @api_view(['GET'])
 def get_weather_risk(request, field_id):

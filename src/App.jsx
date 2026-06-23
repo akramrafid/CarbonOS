@@ -29,9 +29,14 @@ const MarketplaceBrowse = React.lazy(() => import('./components/marketplace/Mark
 const FarmerCreditsWidget = React.lazy(() => import('./components/dashboard/FarmerCreditsWidget'));
 const FarmerEarnings = React.lazy(() => import('./pages/platform/FarmerEarnings'));
 
-// Farmer's AI
+// Farmer's AI / HarvestGuard
+const FarmersAILanding = React.lazy(() => import('./pages/farmers-ai/FarmersAILanding'));
 const CameraCapture = React.lazy(() => import('./pages/farmers-ai/CameraCapture'));
 const DiagnosisResult = React.lazy(() => import('./pages/farmers-ai/DiagnosisResult'));
+const HarvestGuardDashboard = React.lazy(() => import('./pages/farmers-ai/HarvestGuardDashboard'));
+const BatchRegistration = React.lazy(() => import('./pages/farmers-ai/BatchRegistration'));
+const WeatherRiskWidget = React.lazy(() => import('./components/farmers-ai/WeatherRiskWidget'));
+const LocalRiskMap = React.lazy(() => import('./components/farmers-ai/LocalRiskMap'));
 
 // Sector Pages
 const SolarIrrigation = React.lazy(() => import('./pages/sectors/SolarIrrigation'));
@@ -67,9 +72,14 @@ function App() {
           <Route path="/platform/marketplace" element={<MarketplaceBrowse />} />
           <Route path="/platform/ai-detection" element={<AIDetection />} />
 
-          {/* Farmer's AI */}
-          <Route path="/farmers-ai" element={<CameraCapture />} />
+          {/* Farmer's AI & HarvestGuard */}
+          <Route path="/farmers-ai" element={<FarmersAILanding />} />
+          <Route path="/farmers-ai/camera" element={<CameraCapture />} />
           <Route path="/farmers-ai/result" element={<DiagnosisResult />} />
+          <Route path="/harvestguard/dashboard" element={<HarvestGuardDashboard />} />
+          <Route path="/harvestguard/register-batch" element={<BatchRegistration />} />
+          <Route path="/harvestguard/risk-analysis/:batchId" element={<WeatherRiskWidget />} />
+          <Route path="/harvestguard/risk-map" element={<LocalRiskMap />} />
 
           {/* Integrated Features */}
           <Route path="/technology" element={<Technology />} />

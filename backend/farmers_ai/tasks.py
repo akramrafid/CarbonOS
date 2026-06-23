@@ -52,9 +52,9 @@ def fetch_weather_and_compute_risk():
                 valid_until=timezone.now() + datetime.timedelta(days=2)
             )
 
-            # Trigger alert for high risk (only if farmer_phone is available on the record)
-            if risk_index > 0.8 and recent_diag and hasattr(recent_diag, 'farmer_phone') and recent_diag.farmer_phone:
-                send_sms_alert(recent_diag.farmer_phone, f"High {disease_risk_type} risk detected: {summary}")
+            # Log high risk alerts (SMS integration placeholder)
+            if risk_index > 0.8:
+                logger.warning(f"HIGH RISK ALERT for field {field_id}: {disease_risk_type} risk={risk_index:.2f} - {summary}")
 
         except Exception as e:
             logger.error(f"Failed to fetch risk for {field_id}: {e}")

@@ -65,6 +65,7 @@ const Navbar = () => {
 
   const navLinks = [
     { id: 'Platform', key: 'platform' }, 
+    { id: 'Farmers AI', key: 'farmersAi', path: '/farmers-ai' },
     { id: 'Sectors', key: 'sectors' }, 
     { id: 'How It Works', key: 'howItWorks' }, 
     { id: 'Pricing', key: 'pricing' }
@@ -97,7 +98,17 @@ const Navbar = () => {
               const isHash = ['Platform', 'Sectors', 'Pricing'].includes(item.id);
               const hash = item.id.toLowerCase();
 
-              if (isHash) {
+              if (item.path) {
+                return (
+                  <Link
+                    key={item.id}
+                    to={item.path}
+                    className="font-sans font-medium text-[13px] text-white/80 hover:text-white transition-colors tracking-wide"
+                  >
+                    {item.id}
+                  </Link>
+                );
+              } else if (isHash) {
                 return (
                   <a
                     key={item.id}
@@ -181,7 +192,18 @@ const Navbar = () => {
             const isHash = ['Platform', 'Sectors', 'Pricing'].includes(item.id);
             const hash = item.id.toLowerCase();
 
-            if (isHash) {
+            if (item.path) {
+              return (
+                <Link
+                  key={item.id}
+                  to={item.path}
+                  onClick={closeMenu}
+                  className="font-sans font-bold text-2xl text-white/90 hover:text-white transition-colors tracking-wide text-center w-full border-b border-white/10 pb-4"
+                >
+                  {item.id}
+                </Link>
+              );
+            } else if (isHash) {
               return (
                 <a
                   key={item.id}

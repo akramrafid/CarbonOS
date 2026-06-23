@@ -29,11 +29,28 @@ def get_agro_data(lat, lng, poly_id="mock_poly"):
         "soil_moisture": 0.4
     }
 
+def get_open_weather_data(lat, lng):
+    api_key = "895284852c5a6104617a26ba3534b46c"
+    url = f"https://api.openweathermap.org/data/2.5/weather?lat={lat}&lon={lng}&units=metric&appid={api_key}"
+    try:
+        response = requests.get(url, timeout=10)
+        response.raise_for_status()
+        data = response.json()
+        temp = data['main']['temp']
+        humidity = data['main']['humidity']
+        return temp, humidity
+    except Exception as e:
+        print(f"OpenWeather API error, falling back: {e}")
+        return None, None
+
 def calculate_disease_risk(lat, lng, species):
-    avg_temp, avg_humidity = get_open_meteo_data(lat, lng)
+    avg_temp, avg_humidity = get_open_weather_data(lat, lng)
     
     if avg_temp is None or avg_humidity is None:
-        # Fallback if API fails
+        avg_temp, avg_humidity = get_open_meteo_data(lat, lng)
+    
+    if avg_temp is None or avg_humidity is None:
+        # Fallback if both APIs fail
         avg_temp, avg_humidity = 28.0, 75.0
         
     agro_data = get_agro_data(lat, lng)

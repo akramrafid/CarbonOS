@@ -4,7 +4,7 @@
   "version": "0.0.0",
   "type": "module",
   "scripts": {
-    "dev": "vite",
+    "dev": "vite --host",
     "build": "tsc && vite build",
     "preview": "vite preview"
   },
@@ -12,20 +12,23 @@
     "@vitejs/plugin-react": "^6.0.2",
     "autoprefixer": "^10.5.0",
     "postcss": "^8.5.15",
+    "puppeteer": "^25.1.0",
     "tailwindcss": "^3.4.17",
     "typescript": "~6.0.2",
     "vite": "^8.0.12"
   },
   "dependencies": {
+    "framer-motion": "^12.40.0",
     "gsap": "^3.15.0",
     "i18next": "^26.2.0",
+    "leaflet": "^1.9.4",
     "lucide-react": "^1.16.0",
     "onnxruntime-web": "^1.27.0",
-    "puppeteer": "^25.1.0",
     "react": "^19.2.6",
     "react-countup": "^6.5.3",
     "react-dom": "^19.2.6",
     "react-i18next": "^17.0.8",
+    "react-leaflet": "^5.0.0",
     "react-router-dom": "^7.15.1"
   }
 }

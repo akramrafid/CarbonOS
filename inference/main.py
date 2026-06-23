@@ -86,13 +86,34 @@ async def predict(
     pil_img = Image.open(io.BytesIO(contents)).convert('RGB')
     input_tensor = transform(pil_img).unsqueeze(0).to(device)
     
-    # Forward pass
+    # Auto-detect the species among 8 products by running all heads!
+    best_species = species
+    max_conf = -1.0
+    best_idx = 0
+    
+    with torch.no_grad():
+        for sp in SPECIES_COUNTS.keys():
+            outputs = model(input_tensor, species_name=sp)
+            probs = F.softmax(outputs, dim=1)[0]
+            conf, idx = torch.max(probs, 0)
+            conf_val = conf.item()
+            
+            # Boost the user's selected species slightly (e.g. by 1.15) to prevent accidental mismatches
+            # for crops that look similar, but allow clear overrides (e.g. Tomato leaf on Rice selector)
+            weight = 1.15 if sp == species else 1.0
+            weighted_conf = conf_val * weight
+            if weighted_conf > max_conf:
+                max_conf = weighted_conf
+                best_species = sp
+                best_idx = idx.item()
+
+    # Now run forward pass with gradients enabled on the auto-detected species for Grad-CAM
     model.zero_grad()
-    outputs = model(input_tensor, species_name=species)
+    outputs = model(input_tensor, species_name=best_species)
     probabilities = F.softmax(outputs, dim=1)[0]
     confidence, predicted_idx = torch.max(probabilities, 0)
     
-    # Backward pass for Grad-CAM
+    # Backward pass for Grad-CAM on the auto-detected species
     outputs[0, predicted_idx].backward()
     
     # Compute CAM
@@ -119,16 +140,16 @@ async def predict(
     else:
         heatmap_url = None
         
-    predicted_class = DISEASE_MAPS[species][predicted_idx.item()]
+    predicted_class = DISEASE_MAPS[best_species][predicted_idx.item()]
     conf_val = confidence.item()
     
     severity = "mild"
     if conf_val > 0.8: severity = "moderate"
     if conf_val > 0.9: severity = "severe"
-    if "healthy" in predicted_class: severity = "none"
+    if "healthy" in predicted_class.lower(): severity = "none"
 
     return {
-        "species": species,
+        "species": best_species,
         "disease": predicted_class,
         "confidence": conf_val,
         "severity": severity,
