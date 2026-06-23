@@ -15,8 +15,8 @@ class MultiHeadFarmerAIModel(nn.Module):
         """
         super(MultiHeadFarmerAIModel, self).__init__()
         
-        # Load pretrained EfficientNet-B3
-        efficientnet = models.efficientnet_b3(pretrained=True)
+        # Load pretrained EfficientNet-B3 (using new weights API)
+        efficientnet = models.efficientnet_b3(weights=models.EfficientNet_B3_Weights.IMAGENET1K_V1)
         
         # Backbone (Feature Extractor)
         self.features = efficientnet.features

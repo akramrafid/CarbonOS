@@ -1,8 +1,18 @@
 from celery import shared_task
 from django.utils import timezone
 import datetime
+import logging
 from .models import WeatherRiskSnapshot, Diagnosis
-import random
+from .risk_engine import calculate_disease_risk
+
+logger = logging.getLogger(__name__)
+
+def send_sms_alert(farmer_phone, message):
+    """
+    MOCK SMS GATEWAY: Simulates sending an SMS fallback for farmers without internet.
+    """
+    logger.info(f"[SMS DISPATCH] To: {farmer_phone} | Msg: {message}")
+    # In production, integrate Twilio or local SMS provider here.
 
 @shared_task
 def fetch_weather_and_compute_risk():
@@ -21,31 +31,32 @@ def fetch_weather_and_compute_risk():
     
     # 2. For each field, fetch weather and compute risk
     for field_id in active_fields:
-        # MOCK API Call to Open-Meteo / Agro API
-        # Example logic: high humidity + moderate temp = blast risk for rice
-        # In a real impl, we'd use requests.get() to Open-Meteo
-        
-        mock_humidity = random.uniform(60, 95)
-        mock_temp = random.uniform(20, 35)
-        
-        risk_index = 0.0
-        summary = "আবহাওয়া স্বাভাবিক। রোগের ঝুঁকি কম।"
-        
-        if mock_humidity > 85 and 25 < mock_temp < 30:
-            risk_index = 0.85
-            summary = "আগামী ২ দিন অতিরিক্ত আর্দ্রতার কারণে ব্লাস্ট বা ছত্রাকজনিত রোগের ঝুঁকি বেশি।"
-        elif mock_humidity > 70:
-            risk_index = 0.50
-            summary = "মাঝারি আর্দ্রতা। নিয়মিত খেত পর্যবেক্ষণ করুন।"
+        try:
+            # Get the most recent diagnosis for this field to determine species
+            recent_diag = Diagnosis.objects.filter(field_id=field_id).order_by('-created_at').first()
+            species = recent_diag.species.lower() if recent_diag else 'rice'
             
-        # 3. Save snapshot
-        WeatherRiskSnapshot.objects.create(
-            field_id=field_id,
-            species='rice', # Assuming rice for MVP
-            disease_risk_type='fungal',
-            risk_index=risk_index,
-            summary_bn=summary,
-            valid_until=timezone.now() + datetime.timedelta(days=2)
-        )
+            # Default Bangladesh coordinates (in production, fetch from field polygon)
+            lat = 23.6850
+            lng = 90.3563
+            
+            risk_index, summary, disease_risk_type = calculate_disease_risk(lat, lng, species)
+                
+            # 3. Save snapshot
+            WeatherRiskSnapshot.objects.create(
+                field_id=field_id,
+                species=species,
+                disease_risk_type=disease_risk_type,
+                risk_index=risk_index,
+                summary_bn=summary,
+                valid_until=timezone.now() + datetime.timedelta(days=2)
+            )
+
+            # Trigger alert for high risk (only if farmer_phone is available on the record)
+            if risk_index > 0.8 and recent_diag and hasattr(recent_diag, 'farmer_phone') and recent_diag.farmer_phone:
+                send_sms_alert(recent_diag.farmer_phone, f"High {disease_risk_type} risk detected: {summary}")
+
+        except Exception as e:
+            logger.error(f"Failed to fetch risk for {field_id}: {e}")
         
     print(f"Computed risk for {len(active_fields)} active fields.")

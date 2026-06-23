@@ -7,7 +7,9 @@ def export_to_onnx(model, species_name, output_path):
     Exports a specific species head to ONNX and quantizes it to INT8 
     for mobile/web edge inference.
     """
-    model.eval()
+    # ONNX export must happen on CPU
+    model_cpu = model.cpu()
+    model_cpu.eval()
     
     # We create a wrapper model that only returns the specific species output
     # because ONNX tracing needs a static graph.
@@ -20,18 +22,19 @@ def export_to_onnx(model, species_name, output_path):
         def forward(self, x):
             return self.base_model(x, species_name=self.species)
             
-    wrapper = SingleSpeciesWrapper(model, species_name)
+    wrapper = SingleSpeciesWrapper(model_cpu, species_name)
+    wrapper.eval()
     
-    # Dummy input for tracing (batch_size 1, 3 channels, 224x224)
+    # Dummy input on CPU for tracing
     dummy_input = torch.randn(1, 3, 224, 224)
     
-    # Export to ONNX
+    # Export to ONNX (opset 18 is the minimum supported by PyTorch 2.x exporter)
     torch.onnx.export(
         wrapper, 
         dummy_input, 
         output_path, 
         export_params=True, 
-        opset_version=13, 
+        opset_version=18, 
         do_constant_folding=True, 
         input_names=['input'], 
         output_names=['output'],

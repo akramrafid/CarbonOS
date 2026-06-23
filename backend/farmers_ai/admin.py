@@ -12,3 +12,4 @@ class DiagnosisAdmin(admin.ModelAdmin):
 class WeatherRiskSnapshotAdmin(admin.ModelAdmin):
     list_display = ('field_id', 'species', 'disease_risk_type', 'risk_index', 'valid_until', 'created_at')
     list_filter = ('species', 'disease_risk_type')
+    

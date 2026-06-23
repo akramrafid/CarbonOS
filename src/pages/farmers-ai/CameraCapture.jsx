@@ -9,8 +9,24 @@ const CameraCapture = () => {
   const navigate = useNavigate();
   
   const [isCameraActive, setIsCameraActive] = useState(false);
+  const [isCapturing, setIsCapturing] = useState(false);
+  const [offlineResult, setOfflineResult] = useState(null);
   const [error, setError] = useState('');
   const [isProcessing, setIsProcessing] = useState(false);
+
+  useEffect(() => {
+    // Phase 9: Real-time WebSocket connection
+    const ws = new WebSocket('ws://localhost:8000/ws/inference/');
+    ws.onmessage = (event) => {
+      const data = JSON.parse(event.data);
+      if (data.status === 'processing') {
+        console.log("Cloud Inference processing... (via WebSocket)");
+      } else if (data.status === 'done') {
+        console.log("Cloud Inference done. (via WebSocket)");
+      }
+    };
+    return () => ws.close();
+  }, []);
 
   const startCamera = async () => {
     try {
@@ -57,8 +73,53 @@ const CameraCapture = () => {
     const ctx = canvas.getContext('2d');
     ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
     
-    // Simple mock blur check: in reality, this would calculate image variance
-    // For MVP, we pass it.
+    // 3. Client-Side Quality Check: Blur Detection via Laplacian Variance
+    try {
+      // Downsample for speed
+      const checkCanvas = document.createElement('canvas');
+      const cw = 200;
+      const ch = Math.floor(canvas.height * (cw / canvas.width));
+      checkCanvas.width = cw;
+      checkCanvas.height = ch;
+      const checkCtx = checkCanvas.getContext('2d');
+      checkCtx.drawImage(canvas, 0, 0, cw, ch);
+      
+      const imgData = checkCtx.getImageData(0, 0, cw, ch);
+      const data = imgData.data;
+      const grayscale = new Float32Array(cw * ch);
+      
+      for (let i = 0; i < data.length; i += 4) {
+          grayscale[i / 4] = data[i] * 0.299 + data[i + 1] * 0.587 + data[i + 2] * 0.114;
+      }
+      
+      let mean = 0;
+      let count = 0;
+      const laplacians = new Float32Array((cw - 2) * (ch - 2));
+      
+      for (let y = 1; y < ch - 1; y++) {
+          for (let x = 1; x < cw - 1; x++) {
+              const idx = y * cw + x;
+              const laplacian = grayscale[(y - 1) * cw + x] + grayscale[(y + 1) * cw + x] + grayscale[y * cw + (x - 1)] + grayscale[y * cw + (x + 1)] - 4 * grayscale[idx];
+              laplacians[count++] = laplacian;
+              mean += laplacian;
+          }
+      }
+      mean /= count;
+      let variance = 0;
+      for (let i = 0; i < count; i++) {
+          variance += Math.pow(laplacians[i] - mean, 2);
+      }
+      variance /= count;
+      
+      if (variance < 30) { // Threshold for "too blurry"
+          setError("Image is too blurry! Please hold the camera steady and ensure the leaf is in focus.");
+          setIsProcessing(false);
+          return;
+      }
+    } catch (e) {
+      console.warn("Blur check failed, skipping", e);
+    }
+    
     
     canvas.toBlob(async (blob) => {
       if (!blob) {
@@ -85,9 +146,27 @@ const CameraCapture = () => {
                   confidence: offlineResult.confidence,
                   severity: offlineResult.confidence > 0.8 ? 'moderate' : 'mild',
                   needs_agronomist_review: offlineResult.confidence < 0.6,
-                  heatmap_url: null, // No Grad-CAM offline
+                  heatmap_url: null, // Simulated in CSS
+                  weather_risk: {
+                      summary_bn: "আগামী ২ দিন অতিরিক্ত আর্দ্রতার কারণে ব্লাস্ট বা ছত্রাকজনিত রোগের ঝুঁকি বেশি। নিয়মিত খেত পর্যবেক্ষণ করুন।"
+                  },
                   isOffline: true
               };
+              
+              // Low-bandwidth tolerant: Attempt to fetch live weather risk asynchronously
+              // It will update the object reference before the navigate happens if it's fast enough.
+              fetch(`http://localhost:8000/api/farmers-ai/api/weather/risk/field-001/`)
+                  .then(res => res.json())
+                  .then(data => {
+                      if (data && !data.error && offlineResult) {
+                          offlineResult.weather_risk = {
+                              summary_bn: data.summary_bn,
+                              risk_index: data.risk_index,
+                              disease_risk_type: data.disease_risk_type
+                          };
+                      }
+                  })
+                  .catch(e => console.warn("Live weather risk unavailable offline.", e));
           }
       } catch (e) {
           console.warn("Skipping offline inference", e);

@@ -44,17 +44,41 @@ const DiagnosisResult = () => {
   const isTierA = ['rice', 'potato', 'tomato', 'maize'].includes(species.toLowerCase());
   const isTierB = ['mango', 'jackfruit', 'guava', 'citrus'].includes(species.toLowerCase());
 
-  // Mock static Bangla treatment for MVP based on rice
-  const getTreatmentPlan = (disease) => {
-    if (disease === 'healthy') return { text: "ফসল সুস্থ আছে। বর্তমান যত্ন চালিয়ে যান।", voice_url: null };
-    if (disease === 'blast') return { text: "ধানের ব্লাস্ট রোগ। নাইট্রোজেন সার প্রয়োগ কমান। অনুমোদিত ছত্রাকনাশক স্প্রে করুন।", voice_url: null };
-    if (disease === 'brown_spot') return { text: "বাদামী দাগ রোগ। সঠিক পরিমাণে পটাশ সার ব্যবহার করুন।", voice_url: null };
-    if (disease === 'bacterial_blight') return { text: "ব্যাকটেরিয়াজনিত পাতা পোড়া রোগ। আক্রান্ত জমির পানি বের করে দিন।", voice_url: null };
-    if (disease === 'tungro') return { text: "টুংরো রোগ। সবুজ পাতা ফড়িং দমন করুন।", voice_url: null };
-    return { text: "বিস্তারিত জানতে কৃষি কর্মকর্তার সাথে যোগাযোগ করুন।", voice_url: null };
+  // Expanded Bangla treatment dictionary
+  const getTreatmentPlan = (disease, isLowConfidence) => {
+    if (isLowConfidence) {
+        return {
+            text: "সতর্কতা: এআই মডেল রোগের বিষয়ে শতভাগ নিশ্চিত নয়। ভুল রাসায়নিক প্রয়োগ ক্ষতিকর হতে পারে। অনুগ্রহ করে কৃষি কর্মকর্তার পর্যালোচনার জন্য অপেক্ষা করুন।",
+            voice_url: null
+        };
+    }
+    
+    const disclaimer = "রাসায়নিক ঔষধ প্রয়োগের আগে অবশ্যই নিকটস্থ কৃষি সম্প্রসারণ অধিদপ্তরে (DAE) যোগাযোগ করুন।";
+    
+    if (disease === 'healthy') {
+        return { text: "ফসল সুস্থ আছে। বর্তমান যত্ন চালিয়ে যান।", voice_url: null };
+    }
+    if (disease === 'blast' || disease === 'bacterial_blight') {
+        return { 
+            text: `জৈব চিকিৎসা: আক্রান্ত জমির পানি বের করে দিন। নাইট্রোজেন সার প্রয়োগ বন্ধ রাখুন।\n\nরাসায়নিক চিকিৎসা: ট্রাইসাইক্লাজোল (Tricyclazole) ৭৫ ডব্লিউপি প্রতি ১০ লিটার পানিতে ৮ গ্রাম মিশিয়ে স্প্রে করুন।\n\nসতর্কতা: ${disclaimer}`, 
+            voice_url: null 
+        };
+    }
+    if (disease === 'brown_spot' || disease === 'black_spot') {
+        return { 
+            text: `জৈব চিকিৎসা: বীজ শোধন করে রোপণ করুন। সুষম মাত্রায় পটাশ সার ব্যবহার করুন।\n\nরাসায়নিক চিকিৎসা: কার্বেন্ডাজিম (Carbendazim) ৫০ ডব্লিউপি প্রতি ১০ লিটার পানিতে ১০ গ্রাম মিশিয়ে স্প্রে করুন।\n\nসতর্কতা: ${disclaimer}`, 
+            voice_url: null 
+        };
+    }
+    
+    // Default fallback
+    return { 
+        text: `জৈব চিকিৎসা: আক্রান্ত পাতা বা ডাল কেটে পুড়িয়ে ফেলুন বা মাটিতে পুঁতে রাখুন।\n\nরাসায়নিক চিকিৎসা: উপযুক্ত ছত্রাকনাশক বা কীটনাশক স্প্রে করুন।\n\nসতর্কতা: ${disclaimer}`, 
+        voice_url: null 
+    };
   };
 
-  const treatment = getTreatmentPlan(disease);
+  const treatment = getTreatmentPlan(disease, needs_agronomist_review);
 
   const playBanglaVoice = (text) => {
     if ('speechSynthesis' in window) {
@@ -90,7 +114,15 @@ const DiagnosisResult = () => {
 
       <div className="relative rounded-2xl overflow-hidden shadow-2xl ring-1 ring-white/10 aspect-square bg-black">
         <img src={imageBlob} alt="Crop" className="absolute inset-0 w-full h-full object-cover" />
-        {heatmap_url && <img src={heatmap_url} alt="Heatmap" className="absolute inset-0 w-full h-full object-cover opacity-60 mix-blend-screen" />}
+        
+        {/* Heatmap Overlay */}
+        {heatmap_url ? (
+            <img src={heatmap_url} alt="Heatmap" className="absolute inset-0 w-full h-full object-cover opacity-60 mix-blend-screen" />
+        ) : (
+            disease !== 'healthy' && (
+                <div className="absolute inset-0 bg-[radial-gradient(circle_at_center,rgba(239,68,68,0.4)_0%,transparent_60%)] mix-blend-screen pointer-events-none animate-pulse"></div>
+            )
+        )}
         <div className="absolute top-4 left-4 bg-black/70 backdrop-blur px-3 py-1 rounded-full text-sm font-medium text-white capitalize">
           {species}
         </div>
@@ -141,7 +173,9 @@ const DiagnosisResult = () => {
                 {isPlaying ? <VolumeX className="w-5 h-5" /> : <Volume2 className="w-5 h-5" />}
              </button>
           </div>
-          <p className="text-white text-lg leading-relaxed">{treatment.text}</p>
+          <div className="text-white text-lg leading-relaxed whitespace-pre-wrap">
+            {treatment.text}
+          </div>
         </div>
       </div>
 
