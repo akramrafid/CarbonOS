@@ -1,13 +1,18 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useHarvestStore } from '../../lib/useHarvestStore';
 import { ArrowLeft, Save } from 'lucide-react';
 
 const districts = [
-  "Dhaka", "Faridpur", "Gazipur", "Gopalganj", "Kishoreganj", "Madaripur", "Manikganj", "Munshiganj", "Narayanganj", "Narsingdi", "Rajbari", "Shariatpur", "Tangail",
-  "Bogra", "Joypurhat", "Naogaon", "Natore", "Nawabganj", "Pabna", "Rajshahi", "Sirajgonj",
-  "Dinajpur", "Gaibandha", "Kurigram", "Lalmonirhat", "Nilphamari", "Panchagarh", "Rangpur", "Thakurgaon",
-  "Habiganj", "Moulvibazar", "Sunamganj", "Sylhet"
+  "Bagerhat", "Bandarban", "Barguna", "Barisal", "Bhola", "Bogra", "Brahmanbaria", "Chandpur", 
+  "Chapainawabganj", "Chittagong", "Chuadanga", "Comilla", "Cox's Bazar", "Dhaka", "Dinajpur", 
+  "Faridpur", "Feni", "Gaibandha", "Gazipur", "Gopalganj", "Habiganj", "Jamalpur", "Jessore", 
+  "Jhalokati", "Jhenaidah", "Joypurhat", "Khagrachhari", "Khulna", "Kishoreganj", "Kurigram", 
+  "Kushtia", "Lalmonirhat", "Lakshmipur", "Madaripur", "Magura", "Manikganj", "Meherpur", 
+  "Moulvibazar", "Munshiganj", "Mymensingh", "Naogaon", "Narail", "Narayanganj", "Narsingdi", 
+  "Natore", "Netrokona", "Nilphamari", "Noakhali", "Pabna", "Panchagarh", "Patuakhali", 
+  "Pirojpur", "Rajbari", "Rajshahi", "Rangamati", "Rangpur", "Satkhira", "Shariatpur", "Sherpur", 
+  "Sirajganj", "Sunamganj", "Sylhet", "Tangail", "Thakurgaon"
 ].sort();
 
 const BatchRegistration = ({ isInline = false, onBack = null, onSaveBatch = null }) => {
@@ -19,6 +24,68 @@ const BatchRegistration = ({ isInline = false, onBack = null, onSaveBatch = null
   const [date, setDate] = useState('');
   const [district, setDistrict] = useState(districts[0]);
   const [storageType, setStorageType] = useState('jute_bag');
+
+  const [detectingLocation, setDetectingLocation] = useState(false);
+  const [locationError, setLocationError] = useState(null);
+
+  const detectLocation = () => {
+    if (!navigator.geolocation) {
+      setLocationError("Geolocation not supported");
+      return;
+    }
+    setDetectingLocation(true);
+    setLocationError(null);
+
+    navigator.geolocation.getCurrentPosition(
+      async (position) => {
+        const { latitude, longitude } = position.coords;
+        try {
+          const response = await fetch(
+            `https://nominatim.openstreetmap.org/reverse?lat=${latitude}&lon=${longitude}&format=json&accept-language=en`
+          );
+          if (response.ok) {
+            const data = await response.json();
+            const address = data.address || {};
+            
+            const detectedValue = 
+              address.state_district || 
+              address.county || 
+              address.district || 
+              address.city || 
+              address.suburb || 
+              "";
+
+            const matchedDistrict = districts.find(d => {
+              const normalizedD = d.toLowerCase().replace(/[\s']/g, '');
+              const normalizedVal = detectedValue.toLowerCase().replace(/[\s']/g, '');
+              return normalizedVal.includes(normalizedD) || normalizedD.includes(normalizedVal);
+            });
+
+            if (matchedDistrict) {
+              setDistrict(matchedDistrict);
+            } else {
+              setLocationError("District not matched");
+            }
+          } else {
+            setLocationError("Geocoding failed");
+          }
+        } catch (err) {
+          setLocationError("Connection error");
+        } finally {
+          setDetectingLocation(false);
+        }
+      },
+      (error) => {
+        setLocationError(error.code === 1 ? "Permission denied" : "Position unavailable");
+        setDetectingLocation(false);
+      },
+      { enableHighAccuracy: true, timeout: 8000, maximumAge: 60000 }
+    );
+  };
+
+  useEffect(() => {
+    detectLocation();
+  }, []);
 
   const handleSubmit = (e) => {
     e.preventDefault();
@@ -76,7 +143,26 @@ const BatchRegistration = ({ isInline = false, onBack = null, onSaveBatch = null
         </div>
 
         <div>
-          <label className="block text-white/80 text-sm font-bold mb-1.5">District / জেলা</label>
+          <div className="flex justify-between items-center mb-1.5">
+            <label className="block text-white/80 text-sm font-bold">District / জেলা</label>
+            <button 
+              type="button" 
+              onClick={detectLocation} 
+              disabled={detectingLocation}
+              className="text-xs text-[#CCFF00] hover:text-[#bce500] hover:underline flex items-center space-x-1 focus:outline-none disabled:opacity-50 cursor-pointer"
+            >
+              {detectingLocation ? (
+                <>
+                  <div className="w-2.5 h-2.5 border-2 border-[#CCFF00] border-t-transparent rounded-full animate-spin"></div>
+                  <span>Detecting...</span>
+                </>
+              ) : locationError ? (
+                <span className="text-white/40">Retry (Auto-detect) 📍</span>
+              ) : (
+                <span>Auto-detect 📍</span>
+              )}
+            </button>
+          </div>
           <select value={district} onChange={e => setDistrict(e.target.value)} className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-white focus:outline-none focus:border-[#CCFF00] focus:ring-1 focus:ring-[#CCFF00]/50 transition-all">
             {districts.map(d => <option key={d} value={d} className="bg-carbon text-white">{d}</option>)}
           </select>
