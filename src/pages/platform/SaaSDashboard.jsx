@@ -951,17 +951,17 @@ const SaaSDashboard = () => {
                     <button
                       onClick={() => runAIExtraction(uploadedFile || undefined)}
                       disabled={isUploading}
-                      className="bg-[#10B981] hover:bg-[#059669] disabled:bg-[#94A3B8] text-white font-sans font-bold text-sm px-6 py-3 rounded-xl transition-all shadow-md flex items-center space-x-2 w-full sm:w-auto"
+                      className="bg-[#10B981] hover:bg-[#059669] disabled:bg-[#94A3B8] force-white font-sans font-bold text-sm px-6 py-3 rounded-xl transition-all shadow-md flex items-center space-x-2 w-full sm:w-auto"
                     >
                       {isUploading ? (
                         <>
-                          <Loader2 className="w-4 h-4 animate-spin text-white" />
-                          <span>AI Extracting Data...</span>
+                          <Loader2 className="w-4 h-4 animate-spin force-white" />
+                          <span className="force-white">AI Extracting Data...</span>
                         </>
                       ) : (
                         <>
-                          <Compass className="w-4 h-4 text-white" />
-                          <span>Track Emissions</span>
+                          <Compass className="w-4 h-4 force-white" />
+                          <span className="force-white">Track Emissions</span>
                         </>
                       )}
                     </button>
@@ -1047,10 +1047,10 @@ const SaaSDashboard = () => {
 
                   <button
                     onClick={() => navigate('/platform/marketplace')}
-                    className="bg-[#4ADE80] hover:bg-[#22C55E] text-[#0F291B] font-sans font-bold text-xs py-3 px-4 rounded-xl transition-all shadow-md flex items-center justify-center space-x-1.5"
+                    className="bg-[#4ADE80] hover:bg-[#22C55E] force-white font-sans font-bold text-xs py-3 px-4 rounded-xl transition-all shadow-md flex items-center justify-center space-x-1.5"
                   >
-                    <span>Browse Marketplace</span>
-                    <ExternalLink className="w-3.5 h-3.5" />
+                    <span className="force-white">Browse Marketplace</span>
+                    <ExternalLink className="w-3.5 h-3.5 force-white" />
                   </button>
                 </div>
 

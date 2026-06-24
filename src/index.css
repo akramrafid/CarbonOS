@@ -486,3 +486,9 @@ body {
   color: #00C853 !important;
 }
 
+/* Force elements to render as white, overriding dark/light overrides */
+.force-white,
+.force-white * {
+  color: #ffffff !important;
+}
+
