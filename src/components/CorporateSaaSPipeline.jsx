@@ -196,7 +196,7 @@ const CorporateSaaSPipeline = () => {
             Workflow & System Integration
           </span>
           <h2 className="text-5xl md:text-6xl font-bold text-white tracking-tight leading-tight">
-            How CarbonOS Operates
+            Corporate SaaS Pipeline
           </h2>
           <p className="text-base md:text-lg text-mist/85 mt-4 font-light">
             Automating emissions tracking, verification, and compliance inside a single unified pipeline.
