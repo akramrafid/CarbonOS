@@ -22,6 +22,7 @@ const MRVDashboard = React.lazy(() => import('./pages/platform/MRVDashboard'));
 const CarbonRegistry = React.lazy(() => import('./pages/platform/CarbonRegistry'));
 const VerificationWorkflow = React.lazy(() => import('./pages/platform/VerificationWorkflow'));
 const AIDetection = React.lazy(() => import('./pages/platform/AIDetection'));
+const SaaSDashboard = React.lazy(() => import('./pages/platform/SaaSDashboard'));
 
 // The new integrated features
 const Technology = React.lazy(() => import('./pages/Technology'));
@@ -71,6 +72,7 @@ function App() {
           <Route path="/platform/verification-workflow" element={<VerificationWorkflow />} />
           <Route path="/platform/marketplace" element={<MarketplaceBrowse />} />
           <Route path="/platform/ai-detection" element={<AIDetection />} />
+          <Route path="/platform/saas-dashboard" element={<SaaSDashboard />} />
 
           {/* Farmer's AI & HarvestGuard */}
           <Route path="/farmers-ai" element={<FarmersAILanding />} />

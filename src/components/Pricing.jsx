@@ -1,4 +1,5 @@
 import React from 'react';
+import { Link } from 'react-router-dom';
 import { ArrowRight } from 'lucide-react';
 
 const Pricing = () => {
@@ -46,9 +47,9 @@ const Pricing = () => {
                 </li>
               ))}
             </ul>
-            <button className="ghost-btn w-full py-3 rounded-lg font-sans font-bold text-sm">
+            <Link to="/platform/saas-dashboard" className="ghost-btn w-full py-3 rounded-lg font-sans font-bold text-sm text-center block">
               Start Free Trial
-            </button>
+            </Link>
           </div>
 
           {/* Tier 2 - Featured */}
@@ -83,10 +84,10 @@ const Pricing = () => {
                 </li>
               ))}
             </ul>
-            <button className="bg-emerald text-carbon w-full py-3 rounded-lg font-sans font-bold text-sm flex justify-center items-center space-x-2 btn-magnetic">
+            <Link to="/platform/saas-dashboard" className="bg-emerald text-carbon w-full py-3 rounded-lg font-sans font-bold text-sm flex justify-center items-center space-x-2 btn-magnetic">
               <span>Start Free Trial</span>
               <ArrowRight size={16} />
-            </button>
+            </Link>
           </div>
 
           {/* Tier 3 */}
