@@ -3,6 +3,7 @@ import Hero from '../components/Hero';
 import TrustBar from '../components/TrustBar';
 import LiveMetrics from '../components/LiveMetrics';
 import PlatformModules from '../components/PlatformModules';
+import CorporateSaaSPipeline from '../components/CorporateSaaSPipeline';
 import Roadmap from '../components/Roadmap';
 import SectorFocus from '../components/SectorFocus';
 import Philosophy from '../components/Philosophy';
@@ -16,6 +17,7 @@ function Home() {
       <TrustBar />
       <LiveMetrics />
       <section id="platform"><PlatformModules /></section>
+      <section id="saas-pipeline"><CorporateSaaSPipeline /></section>
       <section id="roadmap"><Roadmap /></section>
       <section id="sectors"><SectorFocus /></section>
       <section id="philosophy"><Philosophy /></section>
