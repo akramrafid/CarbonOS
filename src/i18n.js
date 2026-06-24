@@ -6,6 +6,8 @@ const resources = {
     translation: {
       nav: {
         platform: "Platform",
+        farmersAi: "Farmers AI",
+        marketplace: "Marketplace",
         sectors: "Sectors",
         howItWorks: "How It Works",
         framework: "Framework",
@@ -69,6 +71,8 @@ const resources = {
     translation: {
       nav: {
         platform: "প্ল্যাটফর্ম",
+        farmersAi: "ফার্মার্স এআই",
+        marketplace: "মার্কেটপ্লেস",
         sectors: "খাতসমূহ",
         howItWorks: "কিভাবে কাজ করে",
         framework: "ফ্রেমওয়ার্ক",

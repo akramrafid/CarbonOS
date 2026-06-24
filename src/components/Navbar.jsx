@@ -66,6 +66,7 @@ const Navbar = () => {
   const navLinks = [
     { id: 'Platform', key: 'platform' }, 
     { id: 'Farmers AI', key: 'farmersAi', path: '/farmers-ai' },
+    { id: 'Marketplace', key: 'marketplace', path: '/platform/marketplace' },
     { id: 'Sectors', key: 'sectors' }, 
     { id: 'How It Works', key: 'howItWorks' }, 
     { id: 'Pricing', key: 'pricing' }
@@ -105,7 +106,7 @@ const Navbar = () => {
                     to={item.path}
                     className="font-sans font-medium text-[13px] text-white/80 hover:text-white transition-colors tracking-wide"
                   >
-                    {item.id}
+                    {t(`nav.${item.key}`, item.id)}
                   </Link>
                 );
               } else if (isHash) {
@@ -200,7 +201,7 @@ const Navbar = () => {
                   onClick={closeMenu}
                   className="font-sans font-bold text-2xl text-white/90 hover:text-white transition-colors tracking-wide text-center w-full border-b border-white/10 pb-4"
                 >
-                  {item.id}
+                  {t(`nav.${item.key}`, item.id)}
                 </Link>
               );
             } else if (isHash) {
