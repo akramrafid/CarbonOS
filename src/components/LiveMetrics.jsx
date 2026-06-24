@@ -22,8 +22,8 @@ const LiveMetrics = () => {
   const AIR_GOOD_MAX = 250;
   const AIR_WARN_MAX = 450;
   
-  const CO2_GOOD_MAX = 1000;
-  const CO2_WARN_MAX = 2000;
+  const CO2_GOOD_MAX = 5000;
+  const CO2_WARN_MAX = 10000;
 
   const getAirStatus = (raw) => {
     if (raw === null || isNaN(raw)) return { text: "Waiting...", style: "text-mist bg-white/5 border-white/10", bgClass: "bg-[#0D2B1A]/30 border-emerald/20" };

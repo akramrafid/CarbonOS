@@ -3,7 +3,7 @@ from rest_framework.parsers import MultiPartParser, FormParser
 from rest_framework.response import Response
 from rest_framework import status
 import requests
-from .models import Diagnosis, WeatherRiskSnapshot, AgronomistReview
+from .models import Diagnosis, WeatherRiskSnapshot, AgronomistReview, CarbonTelemetry
 from django.db.models import Count, Q
 from channels.layers import get_channel_layer
 from asgiref.sync import async_to_sync
@@ -248,3 +248,49 @@ def get_carbon_health_trends(request):
         })
         
     return Response(result, status=status.HTTP_200_OK)
+
+@api_view(['POST'])
+def save_telemetry(request):
+    """
+    Saves a new Carbon Monitor telemetry reading to the database.
+    """
+    try:
+        temp = float(request.data.get('temperature'))
+        hum = float(request.data.get('humidity'))
+        air = int(request.data.get('air_quality'))
+        co2 = int(request.data.get('co2'))
+        
+        reading = CarbonTelemetry.objects.create(
+            temperature=temp,
+            humidity=hum,
+            air_quality=air,
+            co2=co2
+        )
+        return Response({
+            "status": "success",
+            "id": str(reading.id),
+            "timestamp": reading.timestamp.isoformat()
+        }, status=status.HTTP_201_CREATED)
+    except (TypeError, ValueError) as e:
+        return Response({"error": "Invalid data format or missing parameters"}, status=status.HTTP_400_BAD_REQUEST)
+    except Exception as e:
+        return Response({"error": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+@api_view(['GET'])
+def get_telemetry_history(request):
+    """
+    Returns the history of Carbon Monitor telemetry readings (max 50, newest first).
+    """
+    readings = CarbonTelemetry.objects.all().order_by('-timestamp')[:50]
+    result = []
+    for r in readings:
+        result.append({
+            "id": str(r.id),
+            "timestamp": r.timestamp.isoformat(),
+            "temperature": r.temperature,
+            "humidity": r.humidity,
+            "air_quality": r.air_quality,
+            "co2": r.co2
+        })
+    return Response(result, status=status.HTTP_200_OK)
+

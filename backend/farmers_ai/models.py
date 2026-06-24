@@ -70,3 +70,15 @@ class AgronomistReview(models.Model):
     
     def __str__(self):
         return f"Review by {self.agronomist_id} for {self.diagnosis.id}"
+
+class CarbonTelemetry(models.Model):
+    id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
+    timestamp = models.DateTimeField(auto_now_add=True)
+    temperature = models.FloatField()
+    humidity = models.FloatField()
+    air_quality = models.IntegerField()
+    co2 = models.IntegerField()
+
+    def __str__(self):
+        return f"Telemetry at {self.timestamp} - Temp: {self.temperature}, CO2: {self.co2}"
+
