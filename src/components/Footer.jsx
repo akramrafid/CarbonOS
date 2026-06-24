@@ -25,12 +25,12 @@ const Footer = () => {
         <p className="font-sans text-lg text-white/90 max-w-2xl mb-10 drop-shadow-md">
           {t('footer.ctaSubtext')}
         </p>
-        <button className="bg-white text-carbon font-sans font-bold text-sm px-8 py-4 rounded-full flex items-center space-x-3 hover:bg-gray-100 transition-colors shadow-2xl">
+        <Link to="/platform/saas-dashboard" className="bg-white text-carbon font-sans font-bold text-sm px-8 py-4 rounded-full flex items-center space-x-3 hover:bg-gray-100 transition-colors shadow-2xl">
           <span>{t('footer.ctaButton')}</span>
           <div className="bg-carbon text-white rounded-full p-1">
             <ArrowRight size={14} />
           </div>
-        </button>
+        </Link>
       </div>
 
       {/* Glassmorphic Footer (Bottom part) */}
