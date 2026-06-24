@@ -74,6 +74,106 @@ export const MarketplaceBrowse = () => {
       status: 'AVAILABLE',
       farmer: 'Jahangir M.',
       verification: 'Verra VCS'
+    },
+    {
+      id: 'BD-2026-CR-000225',
+      type: 'Hill Tract Reforestation',
+      region: 'Chittagong',
+      tonnage: 5.6,
+      price: 84000,
+      status: 'AVAILABLE',
+      farmer: 'Parbatya Coop',
+      verification: 'Gold Standard'
+    },
+    {
+      id: 'BD-2026-CR-000230',
+      type: 'Rooftop Solar Array',
+      region: 'Dhaka',
+      tonnage: 2.8,
+      price: 42000,
+      status: 'AVAILABLE',
+      farmer: 'Metro Fab Ltd',
+      verification: 'Verra VCS'
+    },
+    {
+      id: 'BD-2026-CR-000235',
+      type: 'Community Biogas Digester',
+      region: 'Kushtia',
+      tonnage: 1.5,
+      price: 22500,
+      status: 'AVAILABLE',
+      farmer: 'Rahimun N.',
+      verification: 'Gold Standard'
+    },
+    {
+      id: 'BD-2026-CR-000240',
+      type: 'Biomass Cookstoves',
+      region: 'Dinajpur',
+      tonnage: 0.9,
+      price: 9500,
+      status: 'AVAILABLE',
+      farmer: 'Nargis A.',
+      verification: 'Verra VCS'
+    },
+    {
+      id: 'BD-2026-CR-000245',
+      type: 'Solar Irrigation Pump',
+      region: 'Rajshahi',
+      tonnage: 1.6,
+      price: 17600,
+      status: 'AVAILABLE',
+      farmer: 'Tariqul I.',
+      verification: 'Verra VCS'
+    },
+    {
+      id: 'BD-2026-CR-000250',
+      type: 'Mangrove Afforestation',
+      region: 'Cox\'s Bazar',
+      tonnage: 4.0,
+      price: 60000,
+      status: 'AVAILABLE',
+      farmer: 'Coast Alliance',
+      verification: 'Gold Standard'
+    },
+    {
+      id: 'BD-2026-CR-000255',
+      type: 'Grid-Connected Wind Project',
+      region: 'Feni',
+      tonnage: 6.5,
+      price: 97500,
+      status: 'AVAILABLE',
+      farmer: 'WindPower BD',
+      verification: 'Verra VCS'
+    },
+    {
+      id: 'BD-2026-CR-000260',
+      type: 'Solar Home Systems',
+      region: 'Barisal',
+      tonnage: 1.1,
+      price: 16500,
+      status: 'AVAILABLE',
+      farmer: 'Grameen Shakti',
+      verification: 'Gold Standard'
+    },
+    {
+      id: 'BD-2026-CR-000265',
+      type: 'Municipal Waste Compost',
+      region: 'Narayanganj',
+      tonnage: 3.5,
+      price: 52500,
+      status: 'AVAILABLE',
+      farmer: 'Green Waste BD',
+      verification: 'Verra VCS'
+    },
+    {
+      id: 'BD-2026-CR-000270',
+      type: 'Sustainable Agriculture',
+      region: 'Comilla',
+      tonnage: 1.3,
+      price: 19500,
+      status: 'AVAILABLE',
+      farmer: 'Selim Hossain',
+      verification: 'Gold Standard'
     }
   ]);
 
