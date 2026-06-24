@@ -140,7 +140,7 @@ const Hero = () => {
                 <Zap size={18} className="fill-current sm:w-5 sm:h-5" />
               </Link>
               <Link 
-                to="/platform/saas-dashboard" 
+                to="/platform/impact" 
                 className="bg-[#D4FF00] text-[#0A1F13] font-sans font-bold text-sm sm:text-base px-6 sm:px-8 py-3.5 sm:py-4 rounded-full flex items-center justify-center space-x-3 hover:bg-[#BDE600] transition-transform hover:scale-105 active:scale-95 shadow-[0_0_30px_rgba(212,255,0,0.3)] w-fit"
               >
                 <span>Impact</span>
