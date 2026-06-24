@@ -39,7 +39,7 @@ const FarmerPaidCard = ({ amount, txHash }) => {
           <p className="text-sm text-[#475569] mb-3">Khulna District, Bangladesh</p>
           
           <div className="bg-[#F8FAFC] rounded-lg p-3 border border-[#E2E8F0]">
-            <p className="text-xs text-[#475569] uppercase tracking-wider font-semibold mb-1">Payment Delivered (bKash)</p>
+            <p className="text-xs text-[#475569] uppercase tracking-wider font-semibold mb-1">Payment Delivered (Mobile Banking)</p>
             <p className="text-2xl font-bold text-[#16A34A]">৳ {amount}</p>
           </div>
           

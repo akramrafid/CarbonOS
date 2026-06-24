@@ -107,7 +107,7 @@ const PaymentStatusTracker = ({ transactionId, onComplete }) => {
               </div>
               <div className="flex justify-between">
                 <span className="font-semibold text-[#0A5C36]">Farmer Net Payout (97%)</span>
-                <span className="font-mono text-[#16A34A] animate-pulse">Routing via bKash</span>
+                <span className="font-mono text-[#16A34A] animate-pulse">Routing via Mobile Banking</span>
               </div>
             </div>
           </div>

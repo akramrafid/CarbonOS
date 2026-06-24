@@ -67,7 +67,7 @@ export const CheckoutModal = ({ credit, onClose, onSuccess }) => {
               <span>Pay & Retire Credit</span>
             </button>
             <p className="text-center font-mono text-[10px] text-mist mt-4">
-              92% of this payment goes instantly to the farmer via bKash.
+              92% of this payment goes instantly to the farmer via Mobile Banking.
             </p>
           </>
         )}

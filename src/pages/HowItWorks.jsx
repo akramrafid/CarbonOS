@@ -154,19 +154,15 @@ const HowItWorks = () => {
     },
     {
       title: "Instant Farmer Payout",
-      description: "Zero manual intervention. The moment the credit is purchased, our smart contract routes 97% of the gross sale directly to the farmer's mobile wallet via bKash or Nagad.",
+      description: "Zero manual intervention. The moment the credit is purchased, our smart contract routes 97% of the gross sale directly to the farmer's mobile wallet via the Mobile Banking System.",
       metricLabel: "Settlement Speed",
       metric: "< 5 Seconds End-to-End",
       visual: (
         <div className="w-full flex flex-col items-center">
-          <div className="flex space-x-4 mb-6">
-            <div className="bg-[#E2136E] text-white font-bold px-4 py-2 rounded-lg flex items-center space-x-2 shadow-[0_0_15px_rgba(226,19,110,0.3)] animate-pulse">
-              <div className="w-4 h-4 bg-white rounded-full"></div>
-              <span>bKash</span>
-            </div>
-            <div className="bg-[#ED1C24] text-white font-bold px-4 py-2 rounded-lg flex items-center space-x-2 shadow-[0_0_15px_rgba(237,28,36,0.3)]">
-              <div className="w-4 h-4 bg-[#F26522] rounded-full"></div>
-              <span>Nagad</span>
+          <div className="flex justify-center mb-6 w-full">
+            <div className="bg-[#1A3A28] text-white font-bold px-6 py-2 rounded-lg flex items-center space-x-2 shadow-[0_0_15px_rgba(22,163,74,0.3)] border border-emerald/30 animate-pulse">
+              <div className="w-3 h-3 bg-emerald rounded-full"></div>
+              <span>Mobile Banking System</span>
             </div>
           </div>
           <div className="text-center bg-[#0D2B1A]/50 w-full p-3 rounded-lg border border-emerald/20">
