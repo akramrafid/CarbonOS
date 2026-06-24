@@ -116,7 +116,7 @@ const LiveMetrics = () => {
             </span>
           </div>
           <h2 className="text-4xl md:text-5xl font-bold text-white tracking-tight leading-tight">
-            IoT Air Quality Monitor
+            Carbon Monitor
           </h2>
           <div className="flex justify-center items-center space-x-2 mt-4 text-xs font-mono text-mist/60">
             <span>Server: blynk.cloud</span>
