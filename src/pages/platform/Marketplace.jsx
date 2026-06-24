@@ -24,7 +24,7 @@ const Marketplace = () => {
                 <div className="font-mono text-[10px] text-mist">Vintage 2024-2025</div>
               </div>
               <div className="text-right">
-                <div className="font-mono text-lg text-emerald">$12.40 / tCO2e</div>
+                <div className="font-mono text-lg text-emerald">৳1,450 / tCO2e</div>
                 <div className="font-sans text-[10px] text-mist/70">Vol: 14,500</div>
               </div>
             </div>
@@ -35,7 +35,7 @@ const Marketplace = () => {
                 <div className="font-mono text-[10px] text-mist">Vintage 2025</div>
               </div>
               <div className="text-right">
-                <div className="font-mono text-lg text-emerald">$8.15 / tCO2e</div>
+                <div className="font-mono text-lg text-emerald">৳950 / tCO2e</div>
                 <div className="font-sans text-[10px] text-mist/70">Vol: 2,100</div>
               </div>
             </div>

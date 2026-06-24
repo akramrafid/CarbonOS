@@ -186,7 +186,7 @@ const HowItWorks = () => {
       <header className="relative pt-40 pb-20 px-6 lg:px-12 z-10 border-b border-white/5">
         <div className="max-w-4xl mx-auto text-center">
           <span className="font-mono text-xs text-emerald tracking-widest px-3 py-1 bg-[#0D2B1A]/40 border border-[#00C853]/20 rounded-full mb-6 inline-block">
-            DATA TO DOLLARS PIPELINE
+            DATA TO BDT PIPELINE
           </span>
           <h1 className="serif-drama text-5xl md:text-7xl text-white leading-tight mb-6 tracking-tight">
             The Lifecycle of a <br/>

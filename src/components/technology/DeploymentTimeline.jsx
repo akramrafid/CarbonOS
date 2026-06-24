@@ -25,7 +25,7 @@ const DeploymentTimeline = () => {
         "Corporate buyer marketplace open (beta)",
         "First verified credit sale completed"
       ],
-      milestone: "$500K pilot revenue",
+      milestone: "৳5.8 Crore pilot revenue",
       active: false
     },
     {
@@ -38,7 +38,7 @@ const DeploymentTimeline = () => {
         "International credit standard certification (VCS/Gold Standard)",
         "Bangladesh Carbon Exchange launch"
       ],
-      milestone: "$5M ARR, Series A close",
+      milestone: "৳58 Crore ARR, Series A close",
       active: false
     }
   ];
