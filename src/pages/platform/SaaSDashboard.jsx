@@ -126,15 +126,15 @@ const SaaSDashboard = () => {
   // Notifications state
   const [notifications, setNotifications] = useState([
     { id: 1, text: "Blynk IoT device Carbon Monitor connected successfully.", read: false, time: "2 mins ago" },
-    { id: 2, text: "Verification Report for Q1 2026 approved by Alexandra B.", read: true, time: "1 hour ago" },
+    { id: 2, text: "Verification Report for Q1 2026 approved by Tasnim Chowdhury.", read: true, time: "1 hour ago" },
     { id: 3, text: "Annual ESG target set to 38% reduction.", read: true, time: "1 day ago" }
   ]);
 
   // Team members list state
   const [teamMembers, setTeamMembers] = useState([
-    { name: "Alexandra B.", role: "Lead ESG Auditor", email: "alexandra@carbonzero.io", permission: "Admin", avatar: "https://images.unsplash.com/photo-1544005313-94ddf0286df2?auto=format&fit=crop&w=80&q=80", status: "Active" },
-    { name: "Edwin A.", role: "Carbon Credit Specialist", email: "edwin@carbonzero.io", permission: "Auditor", avatar: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?auto=format&fit=crop&w=80&q=80", status: "Active" },
-    { name: "Isaac O.", role: "IoT Hardware Engineer", email: "isaac@carbonzero.io", permission: "Auditor", avatar: "https://images.unsplash.com/photo-1500648767791-00dcc994a43e?auto=format&fit=crop&w=80&q=80", status: "Active" }
+    { name: "Tasnim Chowdhury", role: "Lead ESG Auditor", email: "tasnim@carbonzero.io", permission: "Admin", avatar: "https://images.unsplash.com/photo-1544005313-94ddf0286df2?auto=format&fit=crop&w=80&q=80", status: "Active" },
+    { name: "Kazi Rahman", role: "Carbon Credit Specialist", email: "kazi@carbonzero.io", permission: "Auditor", avatar: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?auto=format&fit=crop&w=80&q=80", status: "Active" },
+    { name: "Arif Hasan", role: "IoT Hardware Engineer", email: "arif@carbonzero.io", permission: "Auditor", avatar: "https://images.unsplash.com/photo-1500648767791-00dcc994a43e?auto=format&fit=crop&w=80&q=80", status: "Active" }
   ]);
 
   // Projects list state
@@ -146,11 +146,11 @@ const SaaSDashboard = () => {
 
   // Calendar Event dates state
   const [calendarEvents, setCalendarEvents] = useState({
-    4: { title: "Scope 1 Boiler Audit", auditor: "Alexandra B.", time: "10:00 AM" },
-    11: { title: "Scope 2 Grid reporting", auditor: "Edwin A.", time: "02:00 PM" },
-    18: { title: "AI Document footprint check", auditor: "Isaac O.", time: "11:30 AM" },
-    25: { title: "Offsets purchase settlement", auditor: "Alexandra B.", time: "04:00 PM" },
-    28: { title: "Board ESG presentation", auditor: "Michael T.", time: "09:00 AM" }
+    4: { title: "Scope 1 Boiler Audit", auditor: "Tasnim Chowdhury", time: "10:00 AM" },
+    11: { title: "Scope 2 Grid reporting", auditor: "Kazi Rahman", time: "02:00 PM" },
+    18: { title: "AI Document footprint check", auditor: "Arif Hasan", time: "11:30 AM" },
+    25: { title: "Offsets purchase settlement", auditor: "Tasnim Chowdhury", time: "04:00 PM" },
+    28: { title: "Board ESG presentation", auditor: "Tanveer Ahmed", time: "09:00 AM" }
   });
   const [selectedCalendarDay, setSelectedCalendarDay] = useState(4);
 
@@ -417,7 +417,7 @@ const SaaSDashboard = () => {
   const openTasksCount = tasks.filter(t => !t.completed).length;
 
   return (
-    <div className="pt-20 min-h-screen bg-[#F8F9FA] text-[#1E293B] flex relative">
+    <div className="pt-20 min-h-screen bg-[#F8F9FA] text-[#1E293B] flex relative platform-saas-dashboard">
       
       {/* FLOAT TOAST NOTIFICATION */}
       {toast.show && (
@@ -650,8 +650,8 @@ const SaaSDashboard = () => {
                   />
                 </div>
                 <div className="hidden md:block text-left">
-                  <div className="font-sans font-bold text-xs text-[#0F291B]">Totok Michael</div>
-                  <div className="text-[10px] text-[#64748B] font-mono">michael@carbonzero.io</div>
+                  <div className="font-sans font-bold text-xs text-[#0F291B]">Mohammad Tanveer</div>
+                  <div className="text-[10px] text-[#64748B] font-mono">tanveer@carbonzero.io</div>
                 </div>
               </div>
             </div>

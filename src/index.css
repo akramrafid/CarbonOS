@@ -412,3 +412,77 @@ body {
   -ms-overflow-style: none;  /* IE and Edge */
   scrollbar-width: none;  /* Firefox */
 }
+
+/* ===== PLATFORM SAAS DASHBOARD DARK THEME OVERRIDES ===== */
+[data-theme="dark"] .platform-saas-dashboard {
+  background-color: #040A06 !important;
+  color: #F0F4F1 !important;
+}
+
+/* Sidebar and Main Cards */
+[data-theme="dark"] .platform-saas-dashboard aside,
+[data-theme="dark"] .platform-saas-dashboard .bg-white {
+  background-color: #080F0B !important;
+  border-color: rgba(0, 200, 83, 0.15) !important;
+}
+
+/* Text Colors */
+[data-theme="dark"] .platform-saas-dashboard .text-\[\#0F291B\],
+[data-theme="dark"] .platform-saas-dashboard h1,
+[data-theme="dark"] .platform-saas-dashboard h2,
+[data-theme="dark"] .platform-saas-dashboard h3,
+[data-theme="dark"] .platform-saas-dashboard h4,
+[data-theme="dark"] .platform-saas-dashboard strong {
+  color: #ffffff !important;
+}
+
+[data-theme="dark"] .platform-saas-dashboard .text-\[\#1E293B\] {
+  color: #F0F4F1 !important;
+}
+
+[data-theme="dark"] .platform-saas-dashboard .text-\[\#64748B\],
+[data-theme="dark"] .platform-saas-dashboard .text-\[\#94A3B8\],
+[data-theme="dark"] .platform-saas-dashboard p,
+[data-theme="dark"] .platform-saas-dashboard span:not(.text-emerald):not(.text-\[\#EF4444\]):not(.text-rose-500) {
+  color: #B2C4B8 !important;
+}
+
+/* Borders and lines */
+[data-theme="dark"] .platform-saas-dashboard .border-\[\#E2E8F0\],
+[data-theme="dark"] .platform-saas-dashboard .border-\[\#F1F5F9\] {
+  border-color: rgba(255, 255, 255, 0.08) !important;
+}
+
+/* Active links / badges */
+[data-theme="dark"] .platform-saas-dashboard [class*="bg-\[\#F1F5F9\]"] {
+  background-color: rgba(0, 200, 83, 0.12) !important;
+}
+
+/* Inputs and Forms */
+[data-theme="dark"] .platform-saas-dashboard input,
+[data-theme="dark"] .platform-saas-dashboard select,
+[data-theme="dark"] .platform-saas-dashboard textarea,
+[data-theme="dark"] .platform-saas-dashboard [class*="bg-\[\#F8F9FA\]"] {
+  background-color: rgba(13, 43, 26, 0.35) !important;
+  color: #ffffff !important;
+  border-color: rgba(0, 200, 83, 0.2) !important;
+}
+
+[data-theme="dark"] .platform-saas-dashboard input:focus,
+[data-theme="dark"] .platform-saas-dashboard select:focus {
+  border-color: #00C853 !important;
+}
+
+/* Specific elements */
+[data-theme="dark"] .platform-saas-dashboard .text-\[\#EF4444\],
+[data-theme="dark"] .platform-saas-dashboard .text-rose-500 {
+  color: #EF4444 !important;
+}
+[data-theme="dark"] .platform-saas-dashboard .text-\[\#EF4444\]\/10 {
+  background-color: rgba(239, 68, 68, 0.1) !important;
+}
+[data-theme="dark"] .platform-saas-dashboard .text-emerald,
+[data-theme="dark"] .platform-saas-dashboard .text-\[\#4ADE80\] {
+  color: #00C853 !important;
+}
+
