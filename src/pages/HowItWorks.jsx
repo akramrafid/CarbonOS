@@ -1,4 +1,5 @@
 import React, { useEffect, useRef, useState } from 'react';
+import { Link } from 'react-router-dom';
 
 const StepCard = ({ step, index, inView }) => {
   return (
@@ -230,9 +231,9 @@ const HowItWorks = () => {
             Ready to see the smart contract in action? Head over to the Marketplace and initiate a live test transaction.
           </p>
           <div className="flex flex-col sm:flex-row justify-center items-center space-y-4 sm:space-y-0 sm:space-x-6">
-            <a href="/platform/marketplace" className="bg-emerald text-carbon font-sans font-bold text-lg px-8 py-4 rounded-xl transition-all shadow-[0_0_20px_rgba(0,200,83,0.3)] hover:shadow-[0_0_30px_rgba(0,200,83,0.5)] hover:-translate-y-1 w-full sm:w-auto">
+            <Link to="/platform/marketplace" className="bg-emerald text-carbon font-sans font-bold text-lg px-8 py-4 rounded-xl transition-all shadow-[0_0_20px_rgba(0,200,83,0.3)] hover:shadow-[0_0_30px_rgba(0,200,83,0.5)] hover:-translate-y-1 w-full sm:w-auto">
               Test Corporate Purchase →
-            </a>
+            </Link>
           </div>
         </div>
       </section>

@@ -34,6 +34,46 @@ export const MarketplaceBrowse = () => {
       status: 'AVAILABLE',
       farmer: 'Fatima B.',
       verification: 'Verra VCS'
+    },
+    {
+      id: 'BD-2026-CR-000204',
+      type: 'Solar Cold Storage',
+      region: 'Mymensingh',
+      tonnage: 2.1,
+      price: 31500,
+      status: 'AVAILABLE',
+      farmer: 'Hassan K.',
+      verification: 'Gold Standard'
+    },
+    {
+      id: 'BD-2026-CR-000210',
+      type: 'Brick Kiln Transition',
+      region: 'Gazipur',
+      tonnage: 4.5,
+      price: 67500,
+      status: 'AVAILABLE',
+      farmer: 'Aminul S.',
+      verification: 'Verra VCS'
+    },
+    {
+      id: 'BD-2026-CR-000215',
+      type: 'Waste-to-Energy (Biogas)',
+      region: 'Jessore',
+      tonnage: 1.8,
+      price: 27000,
+      status: 'AVAILABLE',
+      farmer: 'Latifa A.',
+      verification: 'Gold Standard'
+    },
+    {
+      id: 'BD-2026-CR-000221',
+      type: 'Rice Methane Reduction',
+      region: 'Rangpur',
+      tonnage: 1.2,
+      price: 18000,
+      status: 'AVAILABLE',
+      farmer: 'Jahangir M.',
+      verification: 'Verra VCS'
     }
   ]);
 
@@ -53,7 +93,7 @@ export const MarketplaceBrowse = () => {
             CORPORATE MARKETPLACE
           </span>
           <h1 className="serif-drama text-4xl lg:text-5xl text-white mb-4">Available Credits</h1>
-          <p className="font-sans text-mist text-lg">Purchase verified offsets. 97% of funds settle instantly to the farmer's mobile wallet via bKash.</p>
+          <p className="font-sans text-mist text-lg">Purchase verified offsets. 97% of funds settle instantly to the farmer's mobile wallet via mobile banking system.</p>
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">

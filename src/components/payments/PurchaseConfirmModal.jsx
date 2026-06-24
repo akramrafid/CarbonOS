@@ -4,10 +4,10 @@ import PaymentStatusTracker from './PaymentStatusTracker';
 const PurchaseConfirmModal = ({ creditId, onClose }) => {
   const [txId, setTxId] = useState(null);
   const [isProcessing, setIsProcessing] = useState(false);
-  const [paymentMethod, setPaymentMethod] = useState('card'); // 'card' | 'bkash'
-  const [bkashNumber, setBkashNumber] = useState('');
-  const [bkashOTP, setBkashOTP] = useState('');
-  const [bkashStep, setBkashStep] = useState('number'); // 'number' | 'otp'
+  const [paymentMethod, setPaymentMethod] = useState('card'); // 'card' | 'mfs'
+  const [mfsNumber, setMfsNumber] = useState('');
+  const [mfsOTP, setMfsOTP] = useState('');
+  const [mfsStep, setMfsStep] = useState('number'); // 'number' | 'otp'
 
   const handleConfirm = () => {
     setIsProcessing(true);
@@ -19,19 +19,19 @@ const PurchaseConfirmModal = ({ creditId, onClose }) => {
   };
 
   const handleCTA = () => {
-    if (paymentMethod === 'bkash') {
-      if (bkashStep === 'number') {
-        if (!bkashNumber || bkashNumber.length < 11) {
-          alert("Please enter a valid 11-digit bKash wallet number.");
+    if (paymentMethod === 'mfs') {
+      if (mfsStep === 'number') {
+        if (!mfsNumber || mfsNumber.length < 11) {
+          alert("Please enter a valid 11-digit mobile wallet number.");
           return;
         }
         setIsProcessing(true);
         setTimeout(() => {
           setIsProcessing(false);
-          setBkashStep('otp');
+          setMfsStep('otp');
         }, 1200);
       } else {
-        if (!bkashOTP || bkashOTP.length < 6) {
+        if (!mfsOTP || mfsOTP.length < 6) {
           alert("Please enter the 6-digit verification code sent to your mobile.");
           return;
         }
@@ -96,15 +96,15 @@ const PurchaseConfirmModal = ({ creditId, onClose }) => {
                   </label>
                   
                   <label 
-                    onClick={() => setPaymentMethod('bkash')}
+                    onClick={() => setPaymentMethod('mfs')}
                     className={`border-2 rounded-lg p-3 cursor-pointer flex items-center space-x-2 transition-all ${
-                      paymentMethod === 'bkash' 
-                        ? 'border-[#E2127A] bg-[#E2127A]/5' 
+                      paymentMethod === 'mfs' 
+                        ? 'border-[#16A34A] bg-[#16A34A]/5' 
                         : 'border-[#E2E8F0] bg-transparent'
                     }`}
                   >
-                    <input type="radio" name="payment" checked={paymentMethod === 'bkash'} readOnly className="text-[#E2127A] focus:ring-[#E2127A]" />
-                    <span className="text-xs font-semibold text-[#0F172A]">bKash Wallet</span>
+                    <input type="radio" name="payment" checked={paymentMethod === 'mfs'} readOnly className="text-[#16A34A] focus:ring-[#16A34A]" />
+                    <span className="text-xs font-semibold text-[#0F172A]">Mobile Wallet</span>
                   </label>
 
                   <label className="border border-[#E2E8F0] rounded-lg p-3 flex items-center space-x-2 opacity-50 cursor-not-allowed">
@@ -114,25 +114,25 @@ const PurchaseConfirmModal = ({ creditId, onClose }) => {
                 </div>
               </div>
 
-              {/* bKash Details Inputs */}
-              {paymentMethod === 'bkash' && (
-                <div className="mb-6 p-4 bg-[#E2127A]/5 border border-[#E2127A]/20 rounded-xl space-y-3.5 transition-all">
-                  <div className="flex justify-between items-center pb-2 border-b border-[#E2127A]/10">
-                    <span className="text-xs font-bold text-[#E2127A] uppercase font-mono tracking-wide">bKash MFS Gateway</span>
+              {/* Mobile Wallet Details Inputs */}
+              {paymentMethod === 'mfs' && (
+                <div className="mb-6 p-4 bg-[#16A34A]/5 border border-[#16A34A]/20 rounded-xl space-y-3.5 transition-all">
+                  <div className="flex justify-between items-center pb-2 border-b border-[#16A34A]/10">
+                    <span className="text-xs font-bold text-[#16A34A] uppercase font-mono tracking-wide">Mobile Banking Gateway</span>
                     <span className="text-[10px] font-sans font-semibold text-amber">Active Integration</span>
                   </div>
-                  {bkashStep === 'number' ? (
+                  {mfsStep === 'number' ? (
                     <div className="space-y-2">
-                      <label className="block text-xs font-bold text-[#475569] font-sans uppercase">bKash Account Number</label>
+                      <label className="block text-xs font-bold text-[#475569] font-sans uppercase">Mobile Account Number</label>
                       <input 
                         type="text" 
                         maxLength="11"
                         placeholder="e.g. 01712345678" 
-                        value={bkashNumber}
-                        onChange={(e) => setBkashNumber(e.target.value.replace(/\D/g, ''))}
-                        className="w-full p-2.5 border border-[#E2E8F0] rounded-lg text-xs font-mono text-[#0F172A] focus:outline-none focus:border-[#E2127A] bg-white"
+                        value={mfsNumber}
+                        onChange={(e) => setMfsNumber(e.target.value.replace(/\D/g, ''))}
+                        className="w-full p-2.5 border border-[#E2E8F0] rounded-lg text-xs font-mono text-[#0F172A] focus:outline-none focus:border-[#16A34A] bg-white"
                       />
-                      <p className="text-[10px] text-[#475569]">Enter the 11-digit mobile wallet number linked to your bKash merchant account.</p>
+                      <p className="text-[10px] text-[#475569]">Enter the 11-digit mobile wallet number linked to your mobile banking account.</p>
                     </div>
                   ) : (
                     <div className="space-y-2">
@@ -141,11 +141,11 @@ const PurchaseConfirmModal = ({ creditId, onClose }) => {
                         type="text" 
                         maxLength="6"
                         placeholder="e.g. 123456" 
-                        value={bkashOTP}
-                        onChange={(e) => setBkashOTP(e.target.value.replace(/\D/g, ''))}
-                        className="w-full p-2.5 border border-[#E2E8F0] rounded-lg text-xs font-mono text-[#0F172A] focus:outline-none focus:border-[#E2127A] bg-white"
+                        value={mfsOTP}
+                        onChange={(e) => setMfsOTP(e.target.value.replace(/\D/g, ''))}
+                        className="w-full p-2.5 border border-[#E2E8F0] rounded-lg text-xs font-mono text-[#0F172A] focus:outline-none focus:border-[#16A34A] bg-white"
                       />
-                      <p className="text-[10px] text-[#475569]">A 6-digit one-time PIN has been sent to {bkashNumber}.</p>
+                      <p className="text-[10px] text-[#475569]">A 6-digit one-time PIN has been sent to {mfsNumber}.</p>
                     </div>
                   )}
                 </div>
@@ -159,8 +159,8 @@ const PurchaseConfirmModal = ({ creditId, onClose }) => {
               >
                 {isProcessing ? (
                   <span className="animate-pulse">Processing...</span>
-                ) : paymentMethod === 'bkash' ? (
-                  bkashStep === 'number' ? "Next: Verify bKash" : "Confirm & Pay ৳ 15,400"
+                ) : paymentMethod === 'mfs' ? (
+                  mfsStep === 'number' ? "Next: Verify Mobile Wallet" : "Confirm & Pay ৳ 15,400"
                 ) : (
                   "Confirm Purchase — ৳ 15,400"
                 )}
@@ -168,7 +168,7 @@ const PurchaseConfirmModal = ({ creditId, onClose }) => {
 
               <p className="text-center text-xs text-[#475569] mt-4">
                 // PITCH POINT: The real-time farmer payout pipeline is our core differentiation.
-                97% goes directly to the farmer instantly via bKash.
+                97% goes directly to the farmer instantly via mobile banking system.
               </p>
             </>
           ) : (

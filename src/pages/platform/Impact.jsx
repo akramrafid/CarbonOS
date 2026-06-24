@@ -46,7 +46,7 @@ const Impact = () => {
     setTimeout(() => setToast({ show: false, message: '', type: 'info' }), 4000);
   };
 
-  // Live bKash Payouts state
+  // Live Mobile Banking Payouts state
   const [payouts, setPayouts] = useState([
     { id: 1, name: "Kamal Uddin", district: "Bogra", amount: "1,450", time: "2 mins ago", sector: "Solar Irrigation" },
     { id: 2, name: "Selina Akhtar", district: "Jessore", amount: "3,200", time: "12 mins ago", sector: "Biogas Generator" },
@@ -54,7 +54,7 @@ const Impact = () => {
     { id: 4, name: "Aminul Islam", district: "Mymensingh", amount: "1,950", time: "1 hour ago", sector: "Solar Cold Storage" }
   ]);
 
-  // Periodic simulator adding new bKash payments dynamically
+  // Periodic simulator adding new mobile banking payments dynamically
   useEffect(() => {
     const names = ["Abul Kalam", "Rasheda Begum", "Lutfur Rahman", "Sufia Khatun", "Mohammad Ali", "Jahanara Alam"];
     const districts = ["Dinajpur", "Rangpur", "Khulna", "Sylhet", "Rajshahi", "Chittagong"];
@@ -87,7 +87,7 @@ const Impact = () => {
         return updated.slice(0, 5); // Keep top 5
       });
 
-      showToast(`Disbursed ৳${randomAmount} BDT to ${randomName} (${randomDistrict}) via bKash!`, "success");
+      showToast(`Disbursed ৳${randomAmount} BDT to ${randomName} (${randomDistrict}) via Mobile Wallet!`, "success");
     }, 12000);
 
     return () => clearInterval(interval);
@@ -179,7 +179,7 @@ const Impact = () => {
               <span className="font-mono text-xs text-mist block">BDT Disbursed</span>
             </div>
             <p className="text-xs text-mist/75 mt-6 leading-relaxed font-sans">
-              Direct micro-earnings paid straight to the bKash wallets of rural farmers and solar pump operators.
+              Direct micro-earnings paid straight to the mobile wallets of rural farmers and solar pump operators.
             </p>
           </div>
 
@@ -210,7 +210,7 @@ const Impact = () => {
 
         </div>
 
-        {/* -------------------- NEW SECTION: LIVE BKASH DISBURSEMENT LEDGER -------------------- */}
+        {/* -------------------- NEW SECTION: LIVE MOBILE BANKING DISBURSEMENT LEDGER -------------------- */}
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 items-start border-t border-[#00C853]/10 pt-16">
           
           <div className="lg:col-span-1 space-y-4">
@@ -224,7 +224,7 @@ const Impact = () => {
             <div className="p-4 bg-[#0D2B1A]/40 border border-[#00C853]/10 rounded-2xl flex items-start space-x-3.5">
               <Radio className="w-5 h-5 text-[#00C853] shrink-0 animate-pulse mt-0.5" />
               <div className="text-xs font-sans">
-                <span className="font-bold text-white block">Active bKash Integration</span>
+                <span className="font-bold text-white block">Active Mobile Banking Integration</span>
                 <span className="text-mist mt-0.5 block">Direct payout latency averages under 12 seconds per validation scan.</span>
               </div>
             </div>
@@ -523,7 +523,7 @@ const Impact = () => {
               </div>
               <h4 className="font-sans font-bold text-base text-white mb-2">3. Direct Ledger Audit</h4>
               <p className="text-xs text-mist leading-relaxed font-sans">
-                Financial flows are hardcoded to mobile wallet invoices. Auditing firms trace purchase capital directly to corresponding farmers' bKash statements.
+                Financial flows are hardcoded to mobile wallet invoices. Auditing firms trace purchase capital directly to corresponding farmers' mobile banking statements.
               </p>
             </div>
           </div>
