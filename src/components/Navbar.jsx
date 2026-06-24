@@ -104,7 +104,7 @@ const Navbar = () => {
                   <Link
                     key={item.id}
                     to={item.path}
-                    className="font-sans font-medium text-[13px] text-white/80 hover:text-white transition-colors tracking-wide"
+                    className="font-sans font-medium text-[13px] text-white/80 hover:text-white transition-colors tracking-wide whitespace-nowrap"
                   >
                     {t(`nav.${item.key}`, item.id)}
                   </Link>
@@ -115,7 +115,7 @@ const Navbar = () => {
                     key={item.id}
                     href={`/#${hash}`}
                     onClick={(e) => handleHashClick(e, hash)}
-                    className="font-sans font-medium text-[13px] text-white/80 hover:text-white transition-colors tracking-wide cursor-pointer"
+                    className="font-sans font-medium text-[13px] text-white/80 hover:text-white transition-colors tracking-wide cursor-pointer whitespace-nowrap"
                   >
                     {t(`nav.${item.key}`)}
                   </a>
@@ -125,7 +125,7 @@ const Navbar = () => {
                   <Link
                     key={item.id}
                     to="/how-it-works"
-                    className="font-sans font-medium text-[13px] text-white/80 hover:text-white transition-colors tracking-wide"
+                    className="font-sans font-medium text-[13px] text-white/80 hover:text-white transition-colors tracking-wide whitespace-nowrap"
                   >
                     {t(`nav.${item.key}`)}
                   </Link>
@@ -135,7 +135,7 @@ const Navbar = () => {
           </div>
 
           {/* Pill CTA Button */}
-          <Link to="/how-it-works" className="bg-[#0A1F13] text-emerald border border-emerald/20 font-sans font-bold text-[13px] px-6 py-2.5 rounded-full btn-magnetic hover:bg-[#0D2B1A] transition-colors shadow-inner flex items-center justify-center">
+          <Link to="/how-it-works" className="bg-[#0A1F13] text-emerald border border-emerald/20 font-sans font-bold text-[13px] px-6 py-2.5 rounded-full btn-magnetic hover:bg-[#0D2B1A] transition-colors shadow-inner flex items-center justify-center whitespace-nowrap">
             {t('nav.requestDemo')}
           </Link>
         </div>
