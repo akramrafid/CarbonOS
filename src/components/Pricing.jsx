@@ -24,7 +24,7 @@ const Pricing = () => {
             <h3 className="font-sans font-bold text-2xl text-registry mb-2">Starter</h3>
             <p className="font-sans text-sm text-mist mb-6">NGOs & Early Projects</p>
             <div className="mb-2">
-              <span className="font-mono text-[36px] text-amber">৳15,000</span>
+              <span className="font-mono text-[36px] text-amber">৳50,000</span>
               <span className="font-mono text-sm text-mist"> / month</span>
             </div>
             <p className="font-sans text-sm text-mist mb-8">Up to 5 active projects</p>
@@ -61,7 +61,7 @@ const Pricing = () => {
             <h3 className="font-sans font-bold text-2xl text-registry mb-2">Professional</h3>
             <p className="font-sans text-sm text-mist mb-6">Solar & Agri Companies</p>
             <div className="mb-2">
-              <span className="font-mono text-[36px] text-emerald">৳45,000</span>
+              <span className="font-mono text-[36px] text-emerald">৳1,50,000</span>
               <span className="font-mono text-sm text-mist"> / month</span>
             </div>
             <p className="font-sans text-sm text-mist mb-8">Unlimited projects</p>

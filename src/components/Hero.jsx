@@ -2,6 +2,7 @@ import React, { useEffect, useRef } from 'react';
 import gsap from 'gsap';
 import { Zap, Award, ShieldCheck, CheckCircle2 } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
+import { Link } from 'react-router-dom';
 
 const Hero = () => {
   const containerRef = useRef(null);
@@ -130,10 +131,13 @@ const Hero = () => {
             </p>
 
             {/* CTA */}
-            <button className="hero-cta bg-[#D4FF00] text-[#0A1F13] font-sans font-bold text-sm sm:text-base px-6 sm:px-8 py-3.5 sm:py-4 rounded-full flex items-center justify-center space-x-3 hover:bg-[#BDE600] transition-transform hover:scale-105 active:scale-95 shadow-[0_0_30px_rgba(212,255,0,0.3)]">
+            <Link 
+              to="/platform/carbon-registry" 
+              className="hero-cta bg-[#D4FF00] text-[#0A1F13] font-sans font-bold text-sm sm:text-base px-6 sm:px-8 py-3.5 sm:py-4 rounded-full flex items-center justify-center space-x-3 hover:bg-[#BDE600] transition-transform hover:scale-105 active:scale-95 shadow-[0_0_30px_rgba(212,255,0,0.3)] w-fit"
+            >
               <span>{t('hero.cta')}</span>
               <Zap size={18} className="fill-current sm:w-5 sm:h-5" />
-            </button>
+            </Link>
           </div>
 
           {/* Right Column - Stats & Awards */}
