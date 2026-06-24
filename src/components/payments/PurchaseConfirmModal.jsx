@@ -57,11 +57,11 @@ const PurchaseConfirmModal = ({ creditId, onClose }) => {
                 <div className="grid grid-cols-2 gap-3">
                   <label className="border-2 border-[#16A34A] bg-[#16A34A]/5 rounded-lg p-3 cursor-pointer flex items-center space-x-2">
                     <input type="radio" name="payment" defaultChecked className="text-[#16A34A] focus:ring-[#16A34A]" />
-                    <span className="text-sm font-medium">Corporate Card</span>
+                    <span className="text-sm font-medium text-[#0F172A]">Corporate Card</span>
                   </label>
                   <label className="border border-[#E2E8F0] rounded-lg p-3 cursor-pointer flex items-center space-x-2 opacity-50">
                     <input type="radio" name="payment" disabled />
-                    <span className="text-sm font-medium">Wire Transfer</span>
+                    <span className="text-sm font-medium text-[#0F172A]">Wire Transfer</span>
                   </label>
                 </div>
               </div>
