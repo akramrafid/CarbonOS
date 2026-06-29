@@ -24,6 +24,7 @@ const VerificationWorkflow = React.lazy(() => import('./pages/platform/Verificat
 const AIDetection = React.lazy(() => import('./pages/platform/AIDetection'));
 const SaaSDashboard = React.lazy(() => import('./pages/platform/SaaSDashboard'));
 const Impact = React.lazy(() => import('./pages/platform/Impact'));
+const CarbonMonitoring = React.lazy(() => import('./pages/platform/CarbonMonitoring'));
 
 // The new integrated features
 const Technology = React.lazy(() => import('./pages/Technology'));
@@ -75,6 +76,7 @@ function App() {
           <Route path="/platform/ai-detection" element={<AIDetection />} />
           <Route path="/platform/saas-dashboard" element={<SaaSDashboard />} />
           <Route path="/platform/impact" element={<Impact />} />
+          <Route path="/carbon-monitoring" element={<CarbonMonitoring />} />
 
           {/* Farmer's AI & HarvestGuard */}
           <Route path="/farmers-ai" element={<FarmersAILanding />} />

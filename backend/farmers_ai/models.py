@@ -82,3 +82,84 @@ class CarbonTelemetry(models.Model):
     def __str__(self):
         return f"Telemetry at {self.timestamp} - Temp: {self.temperature}, CO2: {self.co2}"
 
+
+class AnalysisJob(models.Model):
+    id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
+    status = models.CharField(max_length=50, default='pending')  # pending, running, completed, failed
+    polygon_geojson = models.TextField()  # Store boundary geojson text
+    analysis_type = models.CharField(max_length=50, default='ndvi')  # ndvi, evi, forest_cover, carbon_heatmap
+    start_date = models.DateField()
+    end_date = models.DateField()
+    processing_time = models.FloatField(default=0.0)
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    def __str__(self):
+        return f"Job {self.id} ({self.status})"
+
+
+class CarbonResult(models.Model):
+    id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
+    job = models.OneToOneField(AnalysisJob, on_delete=models.CASCADE, related_name='result')
+    estimated_biomass = models.FloatField()  # Mg/ha
+    estimated_carbon = models.FloatField()   # tC/ha
+    tonnes_co2e = models.FloatField()       # tCO2e
+    avg_ndvi = models.FloatField()
+    forest_area_ha = models.FloatField()
+    confidence = models.FloatField()         # 0.0 - 1.0
+    satellite_sources = models.CharField(max_length=255, default='Sentinel-2')
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    def __str__(self):
+        return f"Carbon Result for Job {self.job.id}"
+
+
+class SatelliteLayer(models.Model):
+    id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
+    job = models.ForeignKey(AnalysisJob, on_delete=models.CASCADE, related_name='layers')
+    layer_type = models.CharField(max_length=50)  # ndvi, evi, ndwi, forest_mask, carbon_heatmap
+    layer_url = models.TextField()  # Can be local path or GEE asset URL
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    def __str__(self):
+        return f"{self.layer_type} layer for Job {self.job.id}"
+
+
+class UploadedBoundary(models.Model):
+    id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
+    name = models.CharField(max_length=255)
+    file_type = models.CharField(max_length=50)  # geojson, kml
+    boundary_data = models.TextField()  # geojson string
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    def __str__(self):
+        return self.name
+
+
+class CarbonReport(models.Model):
+    id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
+    job = models.ForeignKey(AnalysisJob, on_delete=models.CASCADE, related_name='reports')
+    project_name = models.CharField(max_length=255)
+    report_type = models.CharField(max_length=50)  # pdf, csv, geojson
+    file_path = models.TextField()  # location on disk
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    def __str__(self):
+        return f"{self.project_name} - {self.report_type}"
+
+
+class CarbonAlert(models.Model):
+    id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
+    alert_type = models.CharField(max_length=100)  # forest_loss, rapid_decline, illegal_logging, fire_risk, flood_risk
+    severity = models.CharField(max_length=50)  # info, warning, critical
+    location_lat = models.FloatField()
+    location_lng = models.FloatField()
+    message = models.TextField()
+    suggested_action = models.TextField()
+    is_resolved = models.BooleanField(default=False)
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    def __str__(self):
+        return f"{self.alert_type} ({self.severity}) - {self.created_at.date()}"
+
+

@@ -21,6 +21,7 @@ load_dotenv(dotenv_path=env_path)
 # Add backend directory to sys.path to import model
 sys.path.append(os.path.join(os.path.dirname(__file__), '../backend'))
 from ml_pipeline.model import MultiHeadFarmerAIModel
+from carbon_monitoring.router import router as carbon_router
 
 app = FastAPI(title="Farmer's AI Inference Service")
 
@@ -31,6 +32,8 @@ app.add_middleware(
     allow_methods=["*"],
     allow_headers=["*"],
 )
+
+app.include_router(carbon_router)
 
 # Load Model
 SPECIES_COUNTS = {

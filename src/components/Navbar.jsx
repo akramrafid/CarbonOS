@@ -66,6 +66,7 @@ const Navbar = () => {
   const navLinks = [
     { id: 'Platform', key: 'platform' }, 
     { id: 'Farmers AI', key: 'farmersAi', path: '/farmers-ai' },
+    { id: 'Carbon Credit', key: 'carbonCredit', path: '/carbon-monitoring' },
     { id: 'Marketplace', key: 'marketplace', path: '/platform/marketplace' },
     { id: 'Sectors', key: 'sectors' }, 
     { id: 'How It Works', key: 'howItWorks' }, 
