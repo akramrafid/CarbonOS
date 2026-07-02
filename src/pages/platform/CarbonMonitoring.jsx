@@ -44,6 +44,8 @@ L.Icon.Default.mergeOptions({
   shadowUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.7.1/images/marker-shadow.png',
 });
 
+const FASTAPI_API_URL = import.meta.env.VITE_FASTAPI_API_URL || 'http://localhost:8001';
+
 // A component to center/zoom map when boundaries are uploaded
 const RecenterMap = ({ bounds }) => {
   const map = useMap();
@@ -135,7 +137,7 @@ const CarbonMonitoring = () => {
   const fetchDashboardStats = async () => {
     setLoadingDashboard(true);
     try {
-      const res = await fetch('http://localhost:8001/api/carbon/dashboard');
+      const res = await fetch(`${FASTAPI_API_URL}/api/carbon/dashboard`);
       if (res.ok) {
         const data = await res.json();
         setDashboardData(data);
@@ -164,7 +166,7 @@ const CarbonMonitoring = () => {
   const fetchHistory = async () => {
     setLoadingHistory(true);
     try {
-      const res = await fetch('http://localhost:8001/api/carbon/history');
+      const res = await fetch(`${FASTAPI_API_URL}/api/carbon/history`);
       if (res.ok) {
         const data = await res.json();
         setAnalysisHistory(data.items || []);
@@ -185,7 +187,7 @@ const CarbonMonitoring = () => {
   const fetchAlerts = async () => {
     setLoadingAlerts(true);
     try {
-      const res = await fetch('http://localhost:8001/api/carbon/alerts');
+      const res = await fetch(`${FASTAPI_API_URL}/api/carbon/alerts`);
       if (res.ok) {
         const data = await res.json();
         setActiveAlerts(data);
@@ -247,7 +249,7 @@ const CarbonMonitoring = () => {
       formData.append("analysis_type", activeLayer);
       formData.append("project_name", projectName);
 
-      const res = await fetch('http://localhost:8001/api/carbon/analyze', {
+      const res = await fetch(`${FASTAPI_API_URL}/api/carbon/analyze`, {
         method: 'POST',
         body: formData
       });
@@ -273,7 +275,7 @@ const CarbonMonitoring = () => {
   const pollJobStatus = async (jobId) => {
     const checkStatus = async () => {
       try {
-        const res = await fetch('http://localhost:8001/api/carbon/history');
+        const res = await fetch(`${FASTAPI_API_URL}/api/carbon/history`);
         if (res.ok) {
           const data = await res.json();
           const runningJob = data.items.find(j => j.id === jobId);
@@ -329,7 +331,7 @@ const CarbonMonitoring = () => {
     formData.append("file", file);
 
     try {
-      const res = await fetch('http://localhost:8001/api/carbon/boundary/upload', {
+      const res = await fetch(`${FASTAPI_API_URL}/api/carbon/boundary/upload`, {
         method: 'POST',
         body: formData
       });
@@ -424,7 +426,7 @@ const CarbonMonitoring = () => {
   // Resolve Alert action
   const handleResolveAlert = async (id) => {
     try {
-      const res = await fetch(`http://localhost:8001/api/carbon/alerts/resolve/${id}`, {
+      const res = await fetch(`${FASTAPI_API_URL}/api/carbon/alerts/resolve/${id}`, {
         method: 'POST'
       });
       if (res.ok) {
@@ -439,7 +441,7 @@ const CarbonMonitoring = () => {
 
   // Download PDF Report
   const triggerReportDownload = (jobId, format) => {
-    window.open(`http://localhost:8001/api/carbon/report/${jobId}?format=${format}`);
+    window.open(`${FASTAPI_API_URL}/api/carbon/report/${jobId}?format=${format}`);
   };
 
   return (

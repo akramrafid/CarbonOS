@@ -12,6 +12,8 @@ import {
   Download
 } from 'lucide-react';
 
+const DJANGO_API_URL = import.meta.env.VITE_DJANGO_API_URL || 'http://localhost:8000';
+
 // Custom SVG Chart component for Telemetry History
 const TelemetryChart = ({ history, metricType }) => {
   const data = [...history].reverse(); // oldest first for left-to-right plot
@@ -168,7 +170,7 @@ const MRVDashboard = () => {
 
   // Fetch crop diagnostic trends
   const fetchTrends = () => {
-    fetch('http://localhost:8000/api/farmers-ai/api/mrv/carbon-health-trends/')
+    fetch(`${DJANGO_API_URL}/api/farmers-ai/api/mrv/carbon-health-trends/`)
       .then(res => res.json())
       .then(data => {
         if (!data.error && Array.isArray(data)) {
@@ -185,7 +187,7 @@ const MRVDashboard = () => {
   // Fetch telemetry history from Django API
   const fetchTelemetryHistory = async () => {
     try {
-      const res = await fetch('http://localhost:8000/api/farmers-ai/api/mrv/telemetry/history/');
+      const res = await fetch(`${DJANGO_API_URL}/api/farmers-ai/api/mrv/telemetry/history/`);
       if (!res.ok) throw new Error('Failed to fetch history');
       const data = await res.json();
       if (Array.isArray(data)) {
@@ -230,7 +232,7 @@ const MRVDashboard = () => {
 
     // Save to Django Server
     try {
-      const res = await fetch('http://localhost:8000/api/farmers-ai/api/mrv/telemetry/save/', {
+      const res = await fetch(`${DJANGO_API_URL}/api/farmers-ai/api/mrv/telemetry/save/`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json'
