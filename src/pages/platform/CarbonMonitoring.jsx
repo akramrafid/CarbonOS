@@ -167,6 +167,21 @@ const CarbonMonitoring = () => {
     }
   }, [storedLocations]);
 
+  // Custom Drawing state
+  const [isDrawing, setIsDrawing] = useState(false);
+  const [drawPoints, setDrawPoints] = useState([]);
+  
+  // Coordinates Search / Upload
+  const [searchQuery, setSearchQuery] = useState('');
+  const [projectName, setProjectName] = useState('Sundarbans Forest Block B');
+  const [startDate, setStartDate] = useState('2026-01-01');
+  const [endDate, setEndDate] = useState('2026-06-01');
+  const [cloudCeiling, setCloudCeiling] = useState(20);
+
+  // Hover & Inspector State
+  const [hoverCoords, setHoverCoords] = useState({ lat: 0, lng: 0 });
+  const [inspectedPixel, setInspectedPixel] = useState(null);
+
   // Auto-resolve project name based on centroid of drawn coordinates
   useEffect(() => {
     if (drawPoints.length >= 1) {
@@ -194,21 +209,6 @@ const CarbonMonitoring = () => {
       return () => clearTimeout(timer);
     }
   }, [drawPoints]);
-  
-  // Custom Drawing state
-  const [isDrawing, setIsDrawing] = useState(false);
-  const [drawPoints, setDrawPoints] = useState([]);
-  
-  // Coordinates Search / Upload
-  const [searchQuery, setSearchQuery] = useState('');
-  const [projectName, setProjectName] = useState('Sundarbans Forest Block B');
-  const [startDate, setStartDate] = useState('2026-01-01');
-  const [endDate, setEndDate] = useState('2026-06-01');
-  const [cloudCeiling, setCloudCeiling] = useState(20);
-
-  // Hover & Inspector State
-  const [hoverCoords, setHoverCoords] = useState({ lat: 0, lng: 0 });
-  const [inspectedPixel, setInspectedPixel] = useState(null);
 
   // Fetch initial dashboard and alert lists
   useEffect(() => {
