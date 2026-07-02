@@ -68,6 +68,17 @@ body {
   transition: background-color 0.4s ease, color 0.4s ease;
 }
 
+/* Custom styles for select option elements to fix dark/light contrast */
+select option {
+  background-color: #0d2b1a !important; /* solid forest background for options */
+  color: #ffffff !important;
+}
+
+[data-theme="light"] select option {
+  background-color: #ffffff !important; /* white background in light mode */
+  color: #1a2e23 !important; /* dark forest text */
+}
+
 /* ===== LIGHT THEME GLOBAL OVERRIDES ===== */
 
 /* 
