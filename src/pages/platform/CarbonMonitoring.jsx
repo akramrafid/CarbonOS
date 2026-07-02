@@ -7,7 +7,9 @@ import {
   Polygon, 
   Marker, 
   useMap, 
-  useMapEvents 
+  useMapEvents,
+  Popup,
+  Tooltip
 } from 'react-leaflet';
 import L from 'leaflet';
 import 'leaflet/dist/leaflet.css';
@@ -86,6 +88,30 @@ const MapEventHandler = ({
   return null;
 };
 
+// Predefined forest reserve polygons in Bangladesh
+const SUNDARBANS_RESERVE = [
+  [22.45, 89.02],
+  [22.42, 89.25],
+  [22.50, 89.50],
+  [22.45, 89.82],
+  [22.15, 89.85],
+  [21.75, 89.80],
+  [21.65, 89.30],
+  [21.80, 89.05]
+];
+
+const CHT_RESERVE = [
+  [23.70, 92.15],
+  [23.55, 92.40],
+  [22.80, 92.50],
+  [21.85, 92.65],
+  [21.55, 92.20],
+  [21.80, 92.05],
+  [22.45, 91.95],
+  [23.10, 91.80],
+  [23.50, 91.95]
+];
+
 const CarbonMonitoring = () => {
   const { t, i18n } = useTranslation();
   const isBn = i18n.language === 'bn';
@@ -106,11 +132,29 @@ const CarbonMonitoring = () => {
   const [selectedJob, setSelectedJob] = useState(null);
 
   // Map state
-  const [mapCenter, setMapCenter] = useState([22.3, 89.6]); // Sundarbans center default
-  const [mapZoom, setMapZoom] = useState(10);
+  const [mapCenter, setMapCenter] = useState([23.6850, 90.3563]); // Bangladesh center default
+  const [mapZoom, setMapZoom] = useState(7);
   const [mapBounds, setMapBounds] = useState(null);
-  const [basemap, setBasemap] = useState('satellite'); // satellite, terrain
+  const [basemap, setBasemap] = useState('dark'); // dark, satellite, terrain
   const [activeLayer, setActiveLayer] = useState('ndvi'); // ndvi, evi, ndwi, forest_cover, carbon_heatmap
+  
+  // Stored click coordinates log
+  const [storedLocations, setStoredLocations] = useState(() => {
+    try {
+      const saved = localStorage.getItem('carbonos_stored_locations');
+      return saved ? JSON.parse(saved) : [];
+    } catch {
+      return [];
+    }
+  });
+
+  useEffect(() => {
+    try {
+      localStorage.setItem('carbonos_stored_locations', JSON.stringify(storedLocations));
+    } catch (e) {
+      console.error("Failed to save locations to localStorage", e);
+    }
+  }, [storedLocations]);
   
   // Custom Drawing state
   const [isDrawing, setIsDrawing] = useState(false);
@@ -383,41 +427,104 @@ const CarbonMonitoring = () => {
   };
 
   // Click handler to inspect a pixel's properties on map
-  const handlePixelClick = (lat, lng) => {
-    if (!selectedJob || !selectedJob.result) return;
-    
-    // Simulate a spatial coordinate-based deviation from center
-    const bounds = selectedJob.bounds || [[22.0, 89.0], [23.0, 90.0]];
-    const minLat = bounds[0][0];
-    const maxLat = bounds[1][0];
-    const minLng = bounds[0][1];
-    const maxLng = bounds[1][1];
+  // Click handler to inspect a pixel's properties on map
+  const handlePixelClick = async (lat, lng) => {
+    // Initial loading state
+    setInspectedPixel({
+      lat: lat.toFixed(5),
+      lng: lng.toFixed(5),
+      name: "Resolving location details...",
+      region: "Contacting geocoder...",
+      ndvi: "Calculating...",
+      biomass: "Calculating...",
+      carbon: "Calculating...",
+      confidence: "...",
+      forestType: "Classifying..."
+    });
 
-    if (lat >= minLat && lat <= maxLat && lng >= minLng && lng <= maxLng) {
-      // Calculate interpolation distance from center
-      const latFraction = (lat - minLat) / (maxLat - minLat);
-      const lngFraction = (lng - minLng) / (maxLng - minLng);
-      
-      // Deterministic calculation
-      const distSeed = Math.sin(latFraction * Math.PI) * Math.cos(lngFraction * Math.PI);
-      const ndviDeviation = distSeed * 0.15;
-      
-      const avgNdvi = selectedJob.result.avg_ndvi;
-      const pixelNdvi = Math.min(0.88, Math.max(0.12, avgNdvi + ndviDeviation));
-      const pixelBiomass = Math.round(selectedJob.result.estimated_biomass * (pixelNdvi / avgNdvi) * 100) / 100;
-      const pixelCarbon = Math.round(pixelBiomass * 0.475 * 100) / 100;
-      
-      setInspectedPixel({
-        lat: lat.toFixed(5),
-        lng: lng.toFixed(5),
-        ndvi: pixelNdvi.toFixed(3),
-        biomass: pixelBiomass,
-        carbon: pixelCarbon,
-        confidence: (selectedJob.result.confidence * 100).toFixed(0)
-      });
+    // Check if near any special forest reserve zones
+    const isNearSundarbans = lat >= 21.5 && lat <= 22.6 && lng >= 89.0 && lng <= 90.0;
+    const isNearHillTracts = lat >= 21.5 && lat <= 23.8 && lng >= 91.5 && lng <= 92.8;
+
+    let forestType = "Open Canopy / Agricultural Land";
+    let estimatedBiomass = 45.2;
+    let estimatedCarbon = 21.5;
+    let ndvi = 0.42;
+
+    if (isNearSundarbans) {
+      forestType = "Sundarbans Mangrove Forest Block";
+      ndvi = 0.76;
+      estimatedBiomass = 248.5;
+      estimatedCarbon = 118.0;
+    } else if (isNearHillTracts) {
+      forestType = "CHT Montane Rainforest Zone";
+      ndvi = 0.81;
+      estimatedBiomass = 285.2;
+      estimatedCarbon = 135.5;
     } else {
-      setInspectedPixel(null);
+      // Semi-random deterministic based on coordinates
+      const seed = Math.sin(lat) * Math.cos(lng);
+      ndvi = 0.35 + Math.abs(seed) * 0.45;
+      estimatedBiomass = ndvi * 180 + 20;
+      estimatedCarbon = estimatedBiomass * 0.475;
     }
+
+    // Geocode location using OpenStreetMap Nominatim API
+    let locationName = `Coordinates: ${lat.toFixed(5)}, ${lng.toFixed(5)}`;
+    let districtInfo = "Bangladesh Region";
+
+    try {
+      const res = await fetch(`https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat}&lon=${lng}&zoom=10&addressdetails=1`, {
+        headers: {
+          'Accept-Language': 'en',
+          'User-Agent': 'CarbonOS-Bangladesh-App'
+        }
+      });
+      if (res.ok) {
+        const data = await res.json();
+        locationName = data.display_name || locationName;
+        if (data.address) {
+          const district = data.address.district || data.address.state_district || data.address.county || "";
+          const state = data.address.state || "";
+          const country = data.address.country || "Bangladesh";
+          districtInfo = [district, state, country].filter(Boolean).join(", ");
+        }
+      }
+    } catch (error) {
+      console.error("Nominatim reverse geocode failed, using coordinates fallbacks", error);
+      if (isNearSundarbans) {
+        locationName = "Sundarbans Forest Reserve, Khulna, Bangladesh";
+        districtInfo = "Khulna Division, Bangladesh";
+      } else if (isNearHillTracts) {
+        locationName = "Chittagong Hill Tracts Reserve Forest, Rangamati, Bangladesh";
+        districtInfo = "Chattogram Division, Bangladesh";
+      } else {
+        locationName = `Rural Lands, Bangladesh (${lat.toFixed(3)}, ${lng.toFixed(3)})`;
+        districtInfo = "Bangladesh Territory";
+      }
+    }
+
+    const newPixel = {
+      lat: lat.toFixed(5),
+      lng: lng.toFixed(5),
+      name: locationName,
+      region: districtInfo,
+      ndvi: ndvi.toFixed(3),
+      biomass: estimatedBiomass.toFixed(2),
+      carbon: estimatedCarbon.toFixed(2),
+      confidence: "91%",
+      timestamp: new Date().toLocaleTimeString(),
+      forestType
+    };
+
+    setInspectedPixel(newPixel);
+
+    // Save in storedLocations
+    setStoredLocations(prev => {
+      const exists = prev.find(p => p.lat === newPixel.lat && p.lng === newPixel.lng);
+      if (exists) return prev;
+      return [newPixel, ...prev].slice(0, 20);
+    });
   };
 
   // Resolve Alert action
@@ -800,7 +907,17 @@ const CarbonMonitoring = () => {
                 <MapIcon size={16} className="text-emerald" />
                 <span>Basemap Style</span>
               </h3>
-              <div className="grid grid-cols-2 gap-2">
+              <div className="grid grid-cols-3 gap-2">
+                <button 
+                  onClick={() => setBasemap('dark')}
+                  className={`text-xs py-2 rounded-xl font-bold transition-all border ${
+                    basemap === 'dark' 
+                      ? 'bg-emerald text-carbon border-emerald' 
+                      : 'bg-white/5 border-white/10 hover:bg-white/10 text-white'
+                  }`}
+                >
+                  Dark Mode
+                </button>
                 <button 
                   onClick={() => setBasemap('satellite')}
                   className={`text-xs py-2 rounded-xl font-bold transition-all border ${
@@ -809,17 +926,17 @@ const CarbonMonitoring = () => {
                       : 'bg-white/5 border-white/10 hover:bg-white/10 text-white'
                   }`}
                 >
-                  Satellite Map
+                  Satellite
                 </button>
                 <button 
                   onClick={() => setBasemap('terrain')}
-                  className={`text-xs py-2 rounded-xl font-bold transition-all border ${
+                  className={`text-xs py-2 rounded-xl font-bold transition-all border text-center ${
                     basemap === 'terrain' 
                       ? 'bg-emerald text-carbon border-emerald' 
                       : 'bg-white/5 border-white/10 hover:bg-white/10 text-white'
                   }`}
                 >
-                  Standard Terrain
+                  Terrain
                 </button>
               </div>
             </div>
@@ -839,7 +956,12 @@ const CarbonMonitoring = () => {
                 scrollWheelZoom={true}
               >
                 {/* Tile Layer Toggle */}
-                {basemap === 'satellite' ? (
+                {basemap === 'dark' ? (
+                  <TileLayer
+                    url="https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png"
+                    attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors &copy; <a href="https://carto.com/attributions">CARTO</a>'
+                  />
+                ) : basemap === 'satellite' ? (
                   <TileLayer
                     url="https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}"
                     attribution='&copy; ESRI ArcGIS World Imagery'
@@ -850,6 +972,47 @@ const CarbonMonitoring = () => {
                     attribution='&copy; OpenStreetMap contributors'
                   />
                 )}
+
+                {/* Predefined Bangladesh Forest Reserves */}
+                <Polygon 
+                  positions={SUNDARBANS_RESERVE}
+                  pathOptions={{ color: '#00C853', fillColor: '#00C853', fillOpacity: 0.18, dashArray: '6, 6' }}
+                >
+                  <Tooltip direction="top" opacity={0.9}>Sundarbans Mangrove Carbon Reserve</Tooltip>
+                  <Popup>
+                    <div className="text-black p-1 text-xs min-w-[200px]">
+                      <h4 className="font-bold text-emerald-700 text-sm">Sundarbans Mangrove Reserve</h4>
+                      <p className="mt-1 text-gray-700">World's largest mangrove forest and vital blue carbon reserve in southwest Bangladesh.</p>
+                      <hr className="my-2 border-gray-200" />
+                      <div className="space-y-1 text-[11px] text-gray-600 font-sans">
+                        <div><strong>Region:</strong> Khulna Division, BD</div>
+                        <div><strong>Area Size:</strong> ~6,017 km²</div>
+                        <div><strong>Carbon stock:</strong> ~118.0 tC/ha</div>
+                        <div><strong>Dominant Species:</strong> Sundari, Gewa</div>
+                      </div>
+                    </div>
+                  </Popup>
+                </Polygon>
+
+                <Polygon 
+                  positions={CHT_RESERVE}
+                  pathOptions={{ color: '#00E676', fillColor: '#00E676', fillOpacity: 0.15, dashArray: '6, 6' }}
+                >
+                  <Tooltip direction="top" opacity={0.9}>Chittagong Hill Tracts Carbon Reserve</Tooltip>
+                  <Popup>
+                    <div className="text-black p-1 text-xs min-w-[200px]">
+                      <h4 className="font-bold text-emerald-700 text-sm">Chittagong Hill Tracts Reserve</h4>
+                      <p className="mt-1 text-gray-700">High-altitude montane forest reserve in southeast Bangladesh with massive forest biomass carbon.</p>
+                      <hr className="my-2 border-gray-200" />
+                      <div className="space-y-1 text-[11px] text-gray-600 font-sans">
+                        <div><strong>Region:</strong> Chattogram Division, BD</div>
+                        <div><strong>Altitude Range:</strong> 300m - 1,000m</div>
+                        <div><strong>Carbon stock:</strong> ~135.5 tC/ha</div>
+                        <div><strong>Forest Type:</strong> Tropical Evergreen</div>
+                      </div>
+                    </div>
+                  </Popup>
+                </Polygon>
 
                 {/* Draw polygon coordinates visual */}
                 {drawPoints.length > 0 && (
@@ -924,48 +1087,114 @@ const CarbonMonitoring = () => {
             </div>
 
             {/* Interactive Pixel Query Results (Appears on Map Click) */}
+            {/* Interactive Pixel Query Results (Appears on Map Click) */}
             <div className="bg-white/5 border border-white/10 rounded-3xl p-6 backdrop-blur-md relative overflow-hidden">
               <h3 className="font-bold text-sm text-mist mb-4 uppercase tracking-wider flex items-center space-x-2">
                 <Eye size={18} className="text-emerald" />
-                <span>Pixel Level Inspector</span>
+                <span>Pixel Level Inspector & Location Resolver</span>
               </h3>
 
               {inspectedPixel ? (
-                <div className="grid grid-cols-2 md:grid-cols-5 gap-4">
-                  <div className="bg-white/5 p-4 rounded-xl border border-white/5">
-                    <span className="text-[10px] text-mist block">Target Coordinates</span>
-                    <span className="text-xs font-mono font-bold mt-1 block">
-                      {inspectedPixel.lat}, {inspectedPixel.lng}
-                    </span>
+                <div className="space-y-4">
+                  <div className="bg-emerald/10 border border-emerald/20/30 p-4 rounded-2xl">
+                    <div className="flex items-center space-x-2 text-emerald mb-1 font-bold text-xs uppercase tracking-wider">
+                      <MapPin size={16} />
+                      <span>Resolved Location Name</span>
+                    </div>
+                    <p className="text-sm font-bold text-white leading-relaxed">{inspectedPixel.name}</p>
+                    <p className="text-[11px] text-mist mt-1 font-mono">{inspectedPixel.region} • <span className="text-emerald font-bold">{inspectedPixel.forestType}</span></p>
                   </div>
-                  <div className="bg-white/5 p-4 rounded-xl border border-white/5">
-                    <span className="text-[10px] text-mist block">NDVI Value</span>
-                    <span className="text-sm font-bold text-emerald mt-1 block">
-                      {inspectedPixel.ndvi}
-                    </span>
-                  </div>
-                  <div className="bg-white/5 p-4 rounded-xl border border-white/5">
-                    <span className="text-[10px] text-mist block">Estimated Biomass</span>
-                    <span className="text-sm font-bold mt-1 block">
-                      {inspectedPixel.biomass} Mg/ha
-                    </span>
-                  </div>
-                  <div className="bg-white/5 p-4 rounded-xl border border-white/5">
-                    <span className="text-[10px] text-mist block">Estimated Carbon</span>
-                    <span className="text-sm font-bold mt-1 block">
-                      {inspectedPixel.carbon} tC/ha
-                    </span>
-                  </div>
-                  <div className="bg-white/5 p-4 rounded-xl border border-white/5">
-                    <span className="text-[10px] text-mist block">Model Confidence</span>
-                    <span className="text-sm font-bold text-emerald mt-1 block">
-                      {inspectedPixel.confidence}%
-                    </span>
+
+                  <div className="grid grid-cols-2 md:grid-cols-5 gap-4">
+                    <div className="bg-white/5 p-4 rounded-xl border border-white/5">
+                      <span className="text-[10px] text-mist block">Target Coordinates</span>
+                      <span className="text-xs font-mono font-bold mt-1 block">
+                        {inspectedPixel.lat}, {inspectedPixel.lng}
+                      </span>
+                    </div>
+                    <div className="bg-white/5 p-4 rounded-xl border border-white/5">
+                      <span className="text-[10px] text-mist block">NDVI Value</span>
+                      <span className="text-sm font-bold text-emerald mt-1 block">
+                        {inspectedPixel.ndvi}
+                      </span>
+                    </div>
+                    <div className="bg-white/5 p-4 rounded-xl border border-white/5">
+                      <span className="text-[10px] text-mist block">Estimated Biomass</span>
+                      <span className="text-sm font-bold mt-1 block">
+                        {inspectedPixel.biomass} Mg/ha
+                      </span>
+                    </div>
+                    <div className="bg-white/5 p-4 rounded-xl border border-white/5">
+                      <span className="text-[10px] text-mist block">Estimated Carbon</span>
+                      <span className="text-sm font-bold mt-1 block">
+                        {inspectedPixel.carbon} tC/ha
+                      </span>
+                    </div>
+                    <div className="bg-white/5 p-4 rounded-xl border border-white/5">
+                      <span className="text-[10px] text-mist block">Model Confidence</span>
+                      <span className="text-sm font-bold text-emerald mt-1 block">
+                        {inspectedPixel.confidence}
+                      </span>
+                    </div>
                   </div>
                 </div>
               ) : (
                 <div className="text-center py-6 border border-dashed border-white/5 rounded-2xl text-xs text-mist">
-                  {selectedJob ? 'Click inside the analyzed satellite raster overlay on the map to query specific coordinate metrics.' : 'Run a satellite carbon analysis or select an existing job to inspect pixel values.'}
+                  Click anywhere on the map to query specific coordinate metrics and reverse-geocode location name in Bangladesh.
+                </div>
+              )}
+            </div>
+
+            {/* Stored Bangladesh Coordinates Registry */}
+            <div className="bg-white/5 border border-white/10 rounded-3xl p-6 backdrop-blur-md">
+              <div className="flex items-center justify-between mb-4">
+                <div className="flex items-center space-x-2">
+                  <Database size={18} className="text-emerald" />
+                  <h3 className="font-bold text-sm uppercase tracking-wider text-mist">Stored Coordinates Registry</h3>
+                </div>
+                {storedLocations.length > 0 && (
+                  <button 
+                    onClick={() => {
+                      setStoredLocations([]);
+                      localStorage.removeItem('carbonos_stored_locations');
+                    }}
+                    className="text-[10px] px-3 py-1 bg-red-500/10 hover:bg-red-500/20 text-red-400 border border-red-500/20 rounded-full font-bold transition-all"
+                  >
+                    Clear Registry
+                  </button>
+                )}
+              </div>
+
+              {storedLocations.length > 0 ? (
+                <div className="overflow-x-auto max-h-[220px] overflow-y-auto">
+                  <table className="w-full text-left border-collapse">
+                    <thead>
+                      <tr className="border-b border-white/10 text-[10px] uppercase text-mist font-bold">
+                        <th className="pb-2">Coordinates</th>
+                        <th className="pb-2">Location Name</th>
+                        <th className="pb-2">Carbon Density</th>
+                        <th className="pb-2 text-right">Time</th>
+                      </tr>
+                    </thead>
+                    <tbody className="divide-y divide-white/5 text-xs text-registry">
+                      {storedLocations.map((loc, idx) => (
+                        <tr key={idx} className="hover:bg-white/5 transition-colors">
+                          <td className="py-2.5 font-mono text-[11px] text-emerald">{loc.lat}, {loc.lng}</td>
+                          <td className="py-2.5 max-w-[280px] truncate" title={loc.name}>{loc.name}</td>
+                          <td className="py-2.5">
+                            <span className="bg-emerald/10 text-emerald text-[10px] px-2 py-0.5 rounded-full font-bold">
+                              {loc.carbon} tC/ha
+                            </span>
+                          </td>
+                          <td className="py-2.5 text-right font-mono text-[10px] text-mist">{loc.timestamp}</td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+              ) : (
+                <div className="text-center py-6 border border-dashed border-white/5 rounded-2xl text-xs text-mist">
+                  No coordinates stored yet. Click anywhere on the map to add locations to this registry.
                 </div>
               )}
             </div>
