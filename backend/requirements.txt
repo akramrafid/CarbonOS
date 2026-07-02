@@ -7,3 +7,4 @@ daphne
 gunicorn
 dj-database-url
 psycopg2-binary
+django-cors-headers
