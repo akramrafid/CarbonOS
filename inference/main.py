@@ -22,6 +22,11 @@ load_dotenv(dotenv_path=env_path)
 sys.path.append(os.path.join(os.path.dirname(__file__), '../backend'))
 from ml_pipeline.model import MultiHeadFarmerAIModel
 from carbon_monitoring.router import router as carbon_router
+from carbon_monitoring.database import init_db
+import carbon_monitoring.models  # ensure models are registered on Base.metadata
+
+# Create database tables on startup (no-op if they already exist)
+init_db()
 
 app = FastAPI(title="Farmer's AI Inference Service")
 

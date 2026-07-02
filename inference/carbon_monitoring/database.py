@@ -3,9 +3,14 @@ from sqlalchemy import create_engine
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import sessionmaker
 
-# Default to the SQLite database shared with the Django app
+# Default to the SQLite database shared with the Django app (local dev)
+# On Render, the backend/ directory isn't available, so fallback to local db
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
-DEFAULT_DB_PATH = os.path.join(BASE_DIR, 'backend', 'db.sqlite3')
+SHARED_DB_PATH = os.path.join(BASE_DIR, 'backend', 'db.sqlite3')
+LOCAL_DB_PATH = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), 'db.sqlite3')
+
+# Use shared DB if available (local dev), otherwise use local path
+DEFAULT_DB_PATH = SHARED_DB_PATH if os.path.exists(os.path.dirname(SHARED_DB_PATH)) else LOCAL_DB_PATH
 SQLITE_URL = f"sqlite:///{DEFAULT_DB_PATH}"
 
 # Allow override via environment variables (e.g. for PostgreSQL in production)
@@ -28,6 +33,13 @@ else:
 SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
 
 Base = declarative_base()
+
+def init_db():
+    """
+    Create all database tables if they don't exist.
+    Must be called AFTER all models are imported so Base.metadata knows about them.
+    """
+    Base.metadata.create_all(bind=engine)
 
 def get_db():
     """

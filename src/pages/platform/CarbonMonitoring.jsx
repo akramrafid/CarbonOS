@@ -138,10 +138,9 @@ const CarbonMonitoring = () => {
     setLoadingDashboard(true);
     try {
       const res = await fetch(`${FASTAPI_API_URL}/api/carbon/dashboard`);
-      if (res.ok) {
-        const data = await res.json();
-        setDashboardData(data);
-      }
+      if (!res.ok) throw new Error(`HTTP ${res.status}`);
+      const data = await res.json();
+      setDashboardData(data);
     } catch (e) {
       console.error("Dashboard API error, rendering mockup stats", e);
       // Fallback
@@ -167,14 +166,13 @@ const CarbonMonitoring = () => {
     setLoadingHistory(true);
     try {
       const res = await fetch(`${FASTAPI_API_URL}/api/carbon/history`);
-      if (res.ok) {
-        const data = await res.json();
-        setAnalysisHistory(data.items || []);
-        if (data.items && data.items.length > 0) {
-          setSelectedJob(data.items[0]);
-          if (data.items[0].bounds) {
-            setMapBounds(data.items[0].bounds);
-          }
+      if (!res.ok) throw new Error(`HTTP ${res.status}`);
+      const data = await res.json();
+      setAnalysisHistory(data.items || []);
+      if (data.items && data.items.length > 0) {
+        setSelectedJob(data.items[0]);
+        if (data.items[0].bounds) {
+          setMapBounds(data.items[0].bounds);
         }
       }
     } catch (e) {
@@ -188,10 +186,9 @@ const CarbonMonitoring = () => {
     setLoadingAlerts(true);
     try {
       const res = await fetch(`${FASTAPI_API_URL}/api/carbon/alerts`);
-      if (res.ok) {
-        const data = await res.json();
-        setActiveAlerts(data);
-      }
+      if (!res.ok) throw new Error(`HTTP ${res.status}`);
+      const data = await res.json();
+      setActiveAlerts(data);
     } catch (e) {
       console.error("Alerts API error", e);
       setActiveAlerts([

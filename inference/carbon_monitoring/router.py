@@ -9,7 +9,7 @@ from typing import List, Optional
 from .database import get_db, SessionLocal
 from .models import AnalysisJob, CarbonResult, SatelliteLayer, UploadedBoundary, CarbonReport, CarbonAlert
 from .satellite import SatelliteEngine
-from .estimator import CarbonEstimator
+from .estimator import CarbonEstimator, XGB_AVAILABLE
 from .report_generator import ReportGenerator
 
 router = APIRouter(prefix="/api/carbon", tags=["Carbon Monitoring"])
