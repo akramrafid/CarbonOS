@@ -1069,46 +1069,7 @@ const CarbonMonitoring = () => {
 
 
 
-                {/* Predefined Bangladesh Forest Reserves */}
-                <Polygon 
-                  positions={SUNDARBANS_RESERVE}
-                  pathOptions={{ color: '#00C853', fillColor: '#00C853', fillOpacity: 0.18, dashArray: '6, 6' }}
-                >
-                  <Tooltip direction="top" opacity={0.9}>Sundarbans Mangrove Carbon Reserve</Tooltip>
-                  <Popup>
-                    <div className="text-black p-1 text-xs min-w-[200px]">
-                      <h4 className="font-bold text-emerald-700 text-sm">Sundarbans Mangrove Reserve</h4>
-                      <p className="mt-1 text-gray-700">World's largest mangrove forest and vital blue carbon reserve in southwest Bangladesh.</p>
-                      <hr className="my-2 border-gray-200" />
-                      <div className="space-y-1 text-[11px] text-gray-600 font-sans">
-                        <div><strong>Region:</strong> Khulna Division, BD</div>
-                        <div><strong>Area Size:</strong> ~6,017 km²</div>
-                        <div><strong>Carbon stock:</strong> ~118.0 tC/ha</div>
-                        <div><strong>Dominant Species:</strong> Sundari, Gewa</div>
-                      </div>
-                    </div>
-                  </Popup>
-                </Polygon>
 
-                <Polygon 
-                  positions={CHT_RESERVE}
-                  pathOptions={{ color: '#00E676', fillColor: '#00E676', fillOpacity: 0.15, dashArray: '6, 6' }}
-                >
-                  <Tooltip direction="top" opacity={0.9}>Chittagong Hill Tracts Carbon Reserve</Tooltip>
-                  <Popup>
-                    <div className="text-black p-1 text-xs min-w-[200px]">
-                      <h4 className="font-bold text-emerald-700 text-sm">Chittagong Hill Tracts Reserve</h4>
-                      <p className="mt-1 text-gray-700">High-altitude montane forest reserve in southeast Bangladesh with massive forest biomass carbon.</p>
-                      <hr className="my-2 border-gray-200" />
-                      <div className="space-y-1 text-[11px] text-gray-600 font-sans">
-                        <div><strong>Region:</strong> Chattogram Division, BD</div>
-                        <div><strong>Altitude Range:</strong> 300m - 1,000m</div>
-                        <div><strong>Carbon stock:</strong> ~135.5 tC/ha</div>
-                        <div><strong>Forest Type:</strong> Tropical Evergreen</div>
-                      </div>
-                    </div>
-                  </Popup>
-                </Polygon>
 
                 {/* Draw polygon coordinates visual */}
                 {drawPoints.length > 0 && (
