@@ -545,22 +545,52 @@ const CarbonMonitoring = () => {
     let estimatedCarbon = 21.5;
     let ndvi = 0.42;
 
-    if (isNearSundarbans) {
-      forestType = "Sundarbans Mangrove Forest Block";
-      ndvi = 0.76;
-      estimatedBiomass = 248.5;
-      estimatedCarbon = 118.0;
-    } else if (isNearHillTracts) {
-      forestType = "CHT Montane Rainforest Zone";
-      ndvi = 0.81;
-      estimatedBiomass = 285.2;
-      estimatedCarbon = 135.5;
-    } else {
-      // Semi-random deterministic based on coordinates
-      const seed = Math.sin(lat) * Math.cos(lng);
-      ndvi = 0.35 + Math.abs(seed) * 0.45;
-      estimatedBiomass = ndvi * 180 + 20;
-      estimatedCarbon = estimatedBiomass * 0.475;
+    // Check if clicking inside the currently selected analysis job bounds
+    let usedJobData = false;
+    if (selectedJob && selectedJob.result) {
+      const bounds = getJobBounds(selectedJob);
+      const minLat = bounds[0][0];
+      const maxLat = bounds[1][0];
+      const minLng = bounds[0][1];
+      const maxLng = bounds[1][1];
+
+      if (lat >= minLat && lat <= maxLat && lng >= minLng && lng <= maxLng) {
+        usedJobData = true;
+        const latFraction = (lat - minLat) / (maxLat - minLat);
+        const lngFraction = (lng - minLng) / (maxLng - minLng);
+        
+        // Deterministic variation based on location
+        const distSeed = Math.sin(latFraction * Math.PI) * Math.cos(lngFraction * Math.PI);
+        const ndviDeviation = distSeed * 0.18;
+        
+        const avgNdvi = selectedJob.result.avg_ndvi || 0.65;
+        ndvi = Math.min(0.92, Math.max(0.08, avgNdvi + ndviDeviation));
+        estimatedBiomass = selectedJob.result.estimated_biomass * (ndvi / avgNdvi);
+        estimatedCarbon = estimatedBiomass * 0.475;
+        forestType = ndvi > 0.6 ? "Dense Evergreen Forest Canopy" : "Degraded / Secondary Growth Forest";
+      }
+    }
+
+    if (!usedJobData) {
+      if (isNearSundarbans) {
+        forestType = "Sundarbans Mangrove Forest Block";
+        const variation = Math.sin(lat * 120) * Math.cos(lng * 120);
+        ndvi = 0.74 + variation * 0.10; 
+        estimatedBiomass = ndvi * 310 + (Math.sin(lat * 50) * 12);
+        estimatedCarbon = estimatedBiomass * 0.475;
+      } else if (isNearHillTracts) {
+        forestType = "CHT Montane Rainforest Zone";
+        const variation = Math.sin(lat * 100) * Math.cos(lng * 100);
+        ndvi = 0.79 + variation * 0.08;
+        estimatedBiomass = ndvi * 340 + (Math.cos(lng * 50) * 15);
+        estimatedCarbon = estimatedBiomass * 0.475;
+      } else {
+        // Semi-random deterministic based on coordinates
+        const seed = Math.sin(lat * 80) * Math.cos(lng * 80);
+        ndvi = 0.32 + Math.abs(seed) * 0.42;
+        estimatedBiomass = ndvi * 180 + 20;
+        estimatedCarbon = estimatedBiomass * 0.475;
+      }
     }
 
     // Geocode location using OpenStreetMap Nominatim API
