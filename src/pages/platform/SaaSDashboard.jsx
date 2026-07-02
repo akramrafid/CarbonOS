@@ -93,6 +93,32 @@ const SaaSDashboard = () => {
   // Search input query
   const [searchQuery, setSearchQuery] = useState('');
 
+  // Materiality Assessment State
+  const [materialityScores, setMaterialityScores] = useState({
+    climateChange: { name: "Climate Change & Emissions", impact: 5, financial: 5, description: "GHG emissions footprint and energy efficiency transition risks." },
+    waterResources: { name: "Water & Marine Resources", impact: 3, financial: 4, description: "Freshwater withdrawal, waste water discharge and scarcity risks." },
+    biodiversity: { name: "Biodiversity & Ecosystems", impact: 4, financial: 2, description: "Land use change, deforestation, and ecosystem degradation." },
+    circularEconomy: { name: "Resource Use & Circular Economy", impact: 4, financial: 3, description: "Raw materials sourcing, plastic packaging and waste recycle loops." },
+    ownWorkforce: { name: "Own Workforce (Social)", impact: 4, financial: 3, description: "Gender ratio, labor standards, training hours and safety records." },
+    affectedCommunities: { name: "Affected Communities", impact: 3, financial: 2, description: "Impact on local neighborhoods, human rights, and investments." },
+    businessConduct: { name: "Business Conduct & Governance", impact: 4, financial: 4, description: "Ethics, cybersecurity, whistleblowing, and anti-corruption." }
+  });
+
+  // Auditor Mode State
+  const [isAuditorMode, setIsAuditorMode] = useState(false);
+
+  // Dual Scope 2 Settings
+  const [marketFactor, setMarketFactor] = useState(0.12); // kg CO2e / kWh (green tariff)
+  
+  // Base Year Recalculation State
+  const [baseYear, setBaseYear] = useState(2025);
+  const [baseYearEmissions, setBaseYearEmissions] = useState(1200);
+  const [acquisitionsDivestments, setAcquisitionsDivestments] = useState(0);
+
+  // CBAM State
+  const [cbamCommodity, setCbamCommodity] = useState('Steel');
+  const [cbamWeight, setCbamWeight] = useState(500); // tons
+
   // UI state
   const [isUploading, setIsUploading] = useState(false);
   const [uploadedFile, setUploadedFile] = useState(null);
@@ -211,8 +237,11 @@ const SaaSDashboard = () => {
     // Scope 1: Direct emissions (fuels converted to tons by dividing by 1000)
     const scope1 = ((dVal * factors.diesel) + (pVal * factors.petrol) + (lVal * factors.lpg)) / 1000;
 
-    // Scope 2: Purchased Electricity (kWh converted to tons by dividing by 1000)
+    // Scope 2 Location-based (default factor)
     const scope2 = (eVal * factors.electricity) / 1000;
+    
+    // Scope 2 Market-based (uses custom marketFactor, which defaults to 0.12 kg CO2e / kWh)
+    const scope2Market = (eVal * marketFactor) / 1000;
 
     // Scope 3: Value Chain emissions (commutes in tons, travel/freight converted, raw materials in tons)
     const scope3 = (empVal * factors.employees) + 
@@ -221,12 +250,15 @@ const SaaSDashboard = () => {
                    (rawVal * factors.rawMaterials);
 
     const total = scope1 + scope2 + scope3;
+    const totalMarket = scope1 + scope2Market + scope3;
 
     setResults({
       scope1: parseFloat(scope1.toFixed(2)),
       scope2: parseFloat(scope2.toFixed(2)),
+      scope2Market: parseFloat(scope2Market.toFixed(2)),
       scope3: parseFloat(scope3.toFixed(2)),
-      total: parseFloat(total.toFixed(2))
+      total: parseFloat(total.toFixed(2)),
+      totalMarket: parseFloat(totalMarket.toFixed(2))
     });
   };
 
@@ -241,7 +273,7 @@ const SaaSDashboard = () => {
   // Trigger calculations whenever inputs or emission factors change
   useEffect(() => {
     calculateEmissions(inputs, ef);
-  }, [inputs, ef]);
+  }, [inputs, ef, marketFactor]);
 
   // Handle drag and drop file upload
   const handleFileDrop = (e) => {
@@ -458,6 +490,8 @@ const SaaSDashboard = () => {
               <nav className="space-y-1">
                 {[
                   { name: 'Dashboard', icon: Grid },
+                  { name: 'Materiality', icon: Compass },
+                  { name: 'Audit & Compliance', icon: CheckCircle2 },
                   { name: 'Tasks', icon: CheckCircle, badge: openTasksCount > 0 ? `${openTasksCount} left` : null },
                   { name: 'Calendar', icon: CalendarIcon },
                   { name: 'Analytics', icon: BarChart2 },
@@ -549,8 +583,23 @@ const SaaSDashboard = () => {
       </aside>
 
       {/* 2. Main Content Area */}
-      <main className="flex-1 p-6 lg:p-10 overflow-y-auto max-w-7xl mx-auto space-y-8 pb-20">
+      <main className="flex-1 p-6 lg:p-10 overflow-y-auto max-w-7xl mx-auto space-y-8 pb-20 relative">
         
+        {/* Auditor Read-only Active Watermark Banner */}
+        {isAuditorMode && (
+          <div className="bg-red-50 border border-red-200 rounded-2xl p-4 flex items-center justify-between text-red-800 animate-pulse mb-6">
+            <div className="flex items-center space-x-2">
+              <AlertCircle className="w-5 h-5 text-red-600" />
+              <span className="text-xs font-sans font-bold uppercase tracking-wider">
+                Auditor Assurance Lock Active — System Read-only Mode (ISAE 3410)
+              </span>
+            </div>
+            <span className="text-[10px] font-mono font-bold bg-red-100 text-red-700 px-2 py-0.5 rounded">
+              Locked
+            </span>
+          </div>
+        )}
+
         {/* Top Header */}
         <header className="flex flex-col sm:flex-row justify-between sm:items-center gap-4 border-b border-[#E2E8F0] pb-6 relative z-30">
           
@@ -732,15 +781,29 @@ const SaaSDashboard = () => {
               {/* Card 3: Scope 2 */}
               <div className="bg-white border border-[#E2E8F0] p-6 rounded-2xl shadow-sm flex flex-col justify-between aspect-[1.6]">
                 <div>
-                  <div className="font-mono text-[9px] text-[#64748B] uppercase tracking-wider font-bold mb-3">Scope 2 (Electricity)</div>
-                  <div className="font-sans font-bold text-3xl tracking-tight text-[#0F291B]">
-                    {results.scope2} <span className="text-xs font-mono font-normal text-[#64748B]">tCO2e</span>
+                  <div className="flex justify-between items-center mb-3">
+                    <span className="font-mono text-[9px] text-[#64748B] uppercase tracking-wider font-bold">Scope 2 (Electricity)</span>
+                    <span className="bg-emerald/10 text-emerald text-[8px] font-bold px-1.5 py-0.5 rounded font-sans uppercase">Dual Reporting</span>
+                  </div>
+                  <div className="grid grid-cols-2 gap-2">
+                    <div>
+                      <span className="text-[9px] text-[#94A3B8] font-semibold uppercase block">Location-based</span>
+                      <span className="font-sans font-bold text-xl lg:text-2xl text-[#0F291B]">
+                        {results.scope2} <span className="text-[10px] font-mono font-normal text-[#64748B]">t</span>
+                      </span>
+                    </div>
+                    <div>
+                      <span className="text-[9px] text-[#94A3B8] font-semibold uppercase block">Market-based</span>
+                      <span className="font-sans font-bold text-xl lg:text-2xl text-[#059669]">
+                        {results.scope2Market} <span className="text-[10px] font-mono font-normal text-[#64748B]">t</span>
+                      </span>
+                    </div>
                   </div>
                 </div>
-                <div className="flex justify-between items-center mt-4 text-[10px] text-[#64748B]">
-                  <span>Purchased Grid Power</span>
-                  <span className="font-mono font-bold text-emerald">
-                    {results.total > 0 ? ((results.scope2 / results.total) * 100).toFixed(0) : 0}%
+                <div className="flex justify-between items-center mt-3 text-[10px] text-[#64748B]">
+                  <span>Purchased Power</span>
+                  <span className="font-mono text-[9px] text-[#94A3B8]">
+                    Loc: {results.total > 0 ? ((results.scope2 / results.total) * 100).toFixed(0) : 0}% | Mkt: {results.totalMarket > 0 ? ((results.scope2Market / results.totalMarket) * 100).toFixed(0) : 0}%
                   </span>
                 </div>
               </div>
@@ -802,7 +865,8 @@ const SaaSDashboard = () => {
                             value={inputs.diesel}
                             onChange={handleInputChange}
                             placeholder="e.g. 10000"
-                            className="w-full text-xs font-mono p-2 border border-[#E2E8F0] rounded-lg focus:outline-none focus:border-[#0F291B] bg-[#F8F9FA]"
+                            disabled={isAuditorMode}
+                            className="w-full text-xs font-mono p-2 border border-[#E2E8F0] rounded-lg focus:outline-none focus:border-[#0F291B] bg-[#F8F9FA] disabled:opacity-60 disabled:cursor-not-allowed"
                           />
                         </div>
                         <div>
@@ -813,7 +877,8 @@ const SaaSDashboard = () => {
                             value={inputs.petrol}
                             onChange={handleInputChange}
                             placeholder="e.g. 5000"
-                            className="w-full text-xs font-mono p-2 border border-[#E2E8F0] rounded-lg focus:outline-none focus:border-[#0F291B] bg-[#F8F9FA]"
+                            disabled={isAuditorMode}
+                            className="w-full text-xs font-mono p-2 border border-[#E2E8F0] rounded-lg focus:outline-none focus:border-[#0F291B] bg-[#F8F9FA] disabled:opacity-60 disabled:cursor-not-allowed"
                           />
                         </div>
                         <div>
@@ -824,7 +889,8 @@ const SaaSDashboard = () => {
                             value={inputs.lpg}
                             onChange={handleInputChange}
                             placeholder="e.g. 1500"
-                            className="w-full text-xs font-mono p-2 border border-[#E2E8F0] rounded-lg focus:outline-none focus:border-[#0F291B] bg-[#F8F9FA]"
+                            disabled={isAuditorMode}
+                            className="w-full text-xs font-mono p-2 border border-[#E2E8F0] rounded-lg focus:outline-none focus:border-[#0F291B] bg-[#F8F9FA] disabled:opacity-60 disabled:cursor-not-allowed"
                           />
                         </div>
                       </div>
@@ -845,7 +911,8 @@ const SaaSDashboard = () => {
                             value={inputs.electricity}
                             onChange={handleInputChange}
                             placeholder="e.g. 100000"
-                            className="w-full text-xs font-mono p-2 border border-[#E2E8F0] rounded-lg focus:outline-none focus:border-[#0F291B] bg-[#F8F9FA]"
+                            disabled={isAuditorMode}
+                            className="w-full text-xs font-mono p-2 border border-[#E2E8F0] rounded-lg focus:outline-none focus:border-[#0F291B] bg-[#F8F9FA] disabled:opacity-60 disabled:cursor-not-allowed"
                           />
                         </div>
                       </div>
@@ -866,7 +933,8 @@ const SaaSDashboard = () => {
                             value={inputs.employees}
                             onChange={handleInputChange}
                             placeholder="e.g. 150"
-                            className="w-full text-xs font-mono p-2 border border-[#E2E8F0] rounded-lg focus:outline-none focus:border-[#0F291B] bg-[#F8F9FA]"
+                            disabled={isAuditorMode}
+                            className="w-full text-xs font-mono p-2 border border-[#E2E8F0] rounded-lg focus:outline-none focus:border-[#0F291B] bg-[#F8F9FA] disabled:opacity-60 disabled:cursor-not-allowed"
                           />
                         </div>
                         <div>
@@ -877,7 +945,8 @@ const SaaSDashboard = () => {
                             value={inputs.airTravel}
                             onChange={handleInputChange}
                             placeholder="e.g. 50000"
-                            className="w-full text-xs font-mono p-2 border border-[#E2E8F0] rounded-lg focus:outline-none focus:border-[#0F291B] bg-[#F8F9FA]"
+                            disabled={isAuditorMode}
+                            className="w-full text-xs font-mono p-2 border border-[#E2E8F0] rounded-lg focus:outline-none focus:border-[#0F291B] bg-[#F8F9FA] disabled:opacity-60 disabled:cursor-not-allowed"
                           />
                         </div>
                         <div>
@@ -888,7 +957,8 @@ const SaaSDashboard = () => {
                             value={inputs.truckTransport}
                             onChange={handleInputChange}
                             placeholder="e.g. 20000"
-                            className="w-full text-xs font-mono p-2 border border-[#E2E8F0] rounded-lg focus:outline-none focus:border-[#0F291B] bg-[#F8F9FA]"
+                            disabled={isAuditorMode}
+                            className="w-full text-xs font-mono p-2 border border-[#E2E8F0] rounded-lg focus:outline-none focus:border-[#0F291B] bg-[#F8F9FA] disabled:opacity-60 disabled:cursor-not-allowed"
                           />
                         </div>
                         <div>
@@ -899,7 +969,8 @@ const SaaSDashboard = () => {
                             value={inputs.rawMaterials}
                             onChange={handleInputChange}
                             placeholder="e.g. 400"
-                            className="w-full text-xs font-mono p-2 border border-[#E2E8F0] rounded-lg focus:outline-none focus:border-[#0F291B] bg-[#F8F9FA]"
+                            disabled={isAuditorMode}
+                            className="w-full text-xs font-mono p-2 border border-[#E2E8F0] rounded-lg focus:outline-none focus:border-[#0F291B] bg-[#F8F9FA] disabled:opacity-60 disabled:cursor-not-allowed"
                           />
                         </div>
                       </div>
@@ -1136,6 +1207,357 @@ const SaaSDashboard = () => {
 
             </div>
           </>
+        )}
+
+        {/* -------------------- TAB CONTENT: MATERIALITY -------------------- */}
+        {activeMenu === 'Materiality' && (
+          <div className="bg-white border border-[#E2E8F0] rounded-3xl p-6 lg:p-8 shadow-sm space-y-6">
+            <div>
+              <h1 className="font-sans font-bold text-3xl text-[#0F291B]">Double Materiality Assessment</h1>
+              <p className="text-sm text-[#64748B] mt-1 font-sans">
+                Identify and prioritize key ESG issues based on their Impact Materiality and Financial Materiality (CSRD/ESRS aligned).
+              </p>
+            </div>
+
+            <div className="grid grid-cols-1 xl:grid-cols-3 gap-8">
+              
+              {/* Matrix Plot (Visual Grid) */}
+              <div className="xl:col-span-1 bg-[#F8F9FA] rounded-2xl p-6 border border-[#E2E8F0] flex flex-col justify-between">
+                <div>
+                  <h3 className="font-sans font-bold text-sm text-[#0F291B] mb-4">Double Materiality Matrix</h3>
+                  <div className="relative w-full aspect-square bg-white border-l-2 border-b-2 border-[#64748B] grid grid-cols-5 grid-rows-5 rounded-tr-lg">
+                    {/* Matrix Labels */}
+                    <div className="absolute left-1/2 -bottom-6 transform -translate-x-1/2 text-[9px] font-mono uppercase text-[#64748B] font-bold">Impact Materiality →</div>
+                    <div className="absolute -left-14 top-1/2 transform -translate-y-1/2 rotate-90 text-[9px] font-mono uppercase text-[#64748B] font-bold">Financial Materiality →</div>
+                    
+                    {/* Materiality threshold line (dashed red) */}
+                    <div className="absolute inset-0 border-t border-r border-dashed border-red-400 pointer-events-none" style={{ left: '40%', top: '40%' }}>
+                      <span className="absolute right-2 top-2 text-[8px] font-mono text-red-500 font-bold uppercase tracking-wider bg-white/80 px-1 rounded">Material Threshold</span>
+                    </div>
+
+                    {/* Plotted Topics */}
+                    {Object.entries(materialityScores).map(([key, topic]) => {
+                      // Map 1-5 to percentage coordinates
+                      const xPercent = (topic.impact - 0.5) * 20; 
+                      const yPercent = (5.5 - topic.financial) * 20; // invert y for top-origin
+                      
+                      const isMaterial = topic.impact >= 3 && topic.financial >= 3;
+
+                      return (
+                        <div 
+                          key={key}
+                          className={`absolute w-4 h-4 rounded-full cursor-pointer flex items-center justify-center transform -translate-x-1/2 -translate-y-1/2 shadow-md transition-all hover:scale-125 ${
+                            isMaterial ? 'bg-[#0F291B] border-2 border-emerald-400' : 'bg-[#94A3B8] border-2 border-white'
+                          }`}
+                          style={{ left: `${xPercent}%`, top: `${yPercent}%` }}
+                          title={`${topic.name} (Impact: ${topic.impact}, Financial: ${topic.financial})`}
+                          onClick={() => showToast(`Selected: ${topic.name}. Impact: ${topic.impact}, Financial: ${topic.financial}`, "info")}
+                        >
+                          <span className="text-[7px] text-white font-bold">{topic.name.charAt(0)}</span>
+                        </div>
+                      );
+                    })}
+                  </div>
+                </div>
+                <div className="text-[10px] text-[#64748B] mt-10 leading-relaxed font-sans">
+                  * Dark green dots with emerald borders represent **Material Topics** which exceed the ESRS threshold (≥ 3.0 on both dimensions) and must be included in your ESG disclosures.
+                </div>
+              </div>
+
+              {/* Slider Controls */}
+              <div className="xl:col-span-2 space-y-6">
+                <h3 className="font-sans font-bold text-sm text-[#0F291B] border-b border-[#F1F5F9] pb-2">Rate ESG Topics</h3>
+                <div className="space-y-4 max-h-[500px] overflow-y-auto pr-2">
+                  {Object.entries(materialityScores).map(([key, topic]) => (
+                    <div key={key} className="p-4 bg-[#F8F9FA] rounded-xl border border-[#E2E8F0] space-y-3">
+                      <div className="flex justify-between items-start">
+                        <div>
+                          <h4 className="font-sans font-bold text-xs text-[#0F291B]">{topic.name}</h4>
+                          <p className="text-[10px] text-[#64748B] mt-0.5 font-sans leading-relaxed">{topic.description}</p>
+                        </div>
+                        <span className={`text-[9px] font-bold px-2 py-0.5 rounded-full ${
+                          topic.impact >= 3 && topic.financial >= 3
+                            ? 'bg-[#0F291B]/10 text-[#0F291B] border border-[#0F291B]/20'
+                            : 'bg-[#94A3B8]/10 text-[#64748B]'
+                        }`}>
+                          {topic.impact >= 3 && topic.financial >= 3 ? 'Material' : 'Non-Material'}
+                        </span>
+                      </div>
+                      
+                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 pt-2">
+                        <div className="space-y-1">
+                          <div className="flex justify-between text-[10px] text-[#64748B] font-mono">
+                            <span>Impact Materiality</span>
+                            <span className="font-bold">{topic.impact} / 5</span>
+                          </div>
+                          <input 
+                            type="range"
+                            min="1"
+                            max="5"
+                            value={topic.impact}
+                            onChange={(e) => {
+                              const val = parseInt(e.target.value);
+                              setMaterialityScores(prev => ({
+                                ...prev,
+                                [key]: { ...prev[key], impact: val }
+                              }));
+                            }}
+                            className="w-full h-1 bg-[#E2E8F0] rounded-lg appearance-none cursor-pointer accent-emerald"
+                          />
+                        </div>
+                        <div className="space-y-1">
+                          <div className="flex justify-between text-[10px] text-[#64748B] font-mono">
+                            <span>Financial Materiality</span>
+                            <span className="font-bold">{topic.financial} / 5</span>
+                          </div>
+                          <input 
+                            type="range"
+                            min="1"
+                            max="5"
+                            value={topic.financial}
+                            onChange={(e) => {
+                              const val = parseInt(e.target.value);
+                              setMaterialityScores(prev => ({
+                                ...prev,
+                                [key]: { ...prev[key], financial: val }
+                              }));
+                            }}
+                            className="w-full h-1 bg-[#E2E8F0] rounded-lg appearance-none cursor-pointer accent-emerald"
+                          />
+                        </div>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+
+            </div>
+          </div>
+        )}
+
+        {/* -------------------- TAB CONTENT: AUDIT & COMPLIANCE -------------------- */}
+        {activeMenu === 'Audit & Compliance' && (
+          <div className="space-y-8 text-left">
+            
+            {/* Page Title & Controls */}
+            <div className="bg-white border border-[#E2E8F0] rounded-3xl p-6 lg:p-8 shadow-sm flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
+              <div>
+                <h1 className="font-sans font-bold text-3xl text-[#0F291B] flex items-center">
+                  <CheckCircle2 className="w-8 h-8 text-emerald mr-2" />
+                  Audit & Compliance Center
+                </h1>
+                <p className="text-sm text-[#64748B] mt-1 font-sans">
+                  Manage third party assurance reviews, base-year restructuring, and CBAM customs export reports.
+                </p>
+              </div>
+
+              {/* Auditor Mode Toggle */}
+              <div className="flex items-center space-x-3 bg-[#F8F9FA] px-4 py-2.5 rounded-2xl border border-[#E2E8F0] self-start md:self-auto">
+                <span className="text-xs font-sans font-bold text-[#0F291B]">Auditor View Lock:</span>
+                <button 
+                  onClick={() => {
+                    setIsAuditorMode(!isAuditorMode);
+                    showToast(
+                      !isAuditorMode 
+                        ? "Auditor Mode active. System metrics locked for assurance review." 
+                        : "Auditor read-only lock disabled. Editing unlocked.",
+                      "info"
+                    );
+                  }}
+                  className={`w-12 h-6 flex items-center rounded-full p-1 transition-all focus:outline-none ${
+                    isAuditorMode ? 'bg-[#0F291B]' : 'bg-[#94A3B8]'
+                  }`}
+                >
+                  <div className={`bg-white w-4 h-4 rounded-full shadow-md transform transition-all ${
+                    isAuditorMode ? 'translate-x-6' : 'translate-x-0'
+                  }`} />
+                </button>
+              </div>
+            </div>
+
+            {/* Base Year Recalculation & CBAM Reports Grid */}
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+              
+              {/* Card A: Base Year Recalculation Policy */}
+              <div className="bg-white border border-[#E2E8F0] rounded-3xl p-6 shadow-sm space-y-4">
+                <h3 className="font-sans font-bold text-base text-[#0F291B] border-b border-[#F1F5F9] pb-2">Base Year Recalculation Policy</h3>
+                <p className="text-xs text-[#64748B] leading-relaxed font-sans">
+                  The GHG Protocol mandates adjusting baseline emissions when structural changes (mergers, acquisitions, or divestitures) alter corporate boundaries by &gt; 5%.
+                </p>
+
+                <div className="space-y-3 pt-2">
+                  <div className="grid grid-cols-2 gap-4">
+                    <div>
+                      <label className="block text-[10px] font-bold text-[#64748B] uppercase mb-1">Base Year</label>
+                      <input 
+                        type="number"
+                        value={baseYear}
+                        onChange={(e) => setBaseYear(parseInt(e.target.value) || 2025)}
+                        disabled={isAuditorMode}
+                        className="w-full text-xs font-mono p-2 border border-[#E2E8F0] rounded-lg focus:outline-none focus:border-[#0F291B] bg-[#F8F9FA] disabled:opacity-60 disabled:cursor-not-allowed"
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-[10px] font-bold text-[#64748B] uppercase mb-1">Baseline Emissions (tCO₂e)</label>
+                      <input 
+                        type="number"
+                        value={baseYearEmissions}
+                        onChange={(e) => setBaseYearEmissions(parseFloat(e.target.value) || 0)}
+                        disabled={isAuditorMode}
+                        className="w-full text-xs font-mono p-2 border border-[#E2E8F0] rounded-lg focus:outline-none focus:border-[#0F291B] bg-[#F8F9FA] disabled:opacity-60 disabled:cursor-not-allowed"
+                      />
+                    </div>
+                  </div>
+
+                  <div>
+                    <label className="block text-[10px] font-bold text-[#64748B] uppercase mb-1">Structural Adjustment (Acquisitions/Divestments tCO₂e)</label>
+                    <div className="flex gap-2">
+                      <input 
+                        type="number"
+                        placeholder="e.g. +120 or -80"
+                        onChange={(e) => setAcquisitionsDivestments(parseFloat(e.target.value) || 0)}
+                        disabled={isAuditorMode}
+                        className="flex-1 text-xs font-mono p-2 border border-[#E2E8F0] rounded-lg focus:outline-none focus:border-[#0F291B] bg-[#F8F9FA] disabled:opacity-60 disabled:cursor-not-allowed"
+                      />
+                      <button 
+                        onClick={() => {
+                          setBaseYearEmissions(prev => parseFloat((prev + acquisitionsDivestments).toFixed(2)));
+                          showToast(`Baseline recalculated successfully by ${acquisitionsDivestments > 0 ? '+' : ''}${acquisitionsDivestments} tCO₂e!`, "success");
+                        }}
+                        disabled={isAuditorMode}
+                        className="bg-[#0F291B] hover:bg-[#1A4B31] disabled:bg-[#94A3B8] text-white px-4 py-2 rounded-lg text-xs font-bold font-sans transition-all disabled:cursor-not-allowed"
+                      >
+                        Adjust
+                      </button>
+                    </div>
+                  </div>
+
+                  <div className="bg-[#F8F9FA] p-3 rounded-xl border border-[#E2E8F0] flex justify-between items-center text-xs">
+                    <span className="font-sans text-[#64748B]">Adjusted Baseline ({baseYear}):</span>
+                    <span className="font-mono font-bold text-[#0F291B]">{baseYearEmissions} tCO₂e</span>
+                  </div>
+                </div>
+              </div>
+
+              {/* Card B: CBAM Certificate Exporter */}
+              <div className="bg-white border border-[#E2E8F0] rounded-3xl p-6 shadow-sm space-y-4">
+                <h3 className="font-sans font-bold text-base text-[#0F291B] border-b border-[#F1F5F9] pb-2">CBAM Export Declaration</h3>
+                <p className="text-xs text-[#64748B] leading-relaxed font-sans">
+                  Calculate and export embedded greenhouse gas emissions certificates for industrial commodities exported to the European Union market.
+                </p>
+
+                <div className="space-y-3 pt-2">
+                  <div>
+                    <label className="block text-[10px] font-bold text-[#64748B] uppercase mb-1">Export Commodity Sector</label>
+                    <select 
+                      value={cbamCommodity}
+                      onChange={(e) => setCbamCommodity(e.target.value)}
+                      className="w-full text-xs font-sans font-bold text-[#0F291B] p-2 border border-[#E2E8F0] rounded-lg focus:outline-none focus:border-[#0F291B] bg-white cursor-pointer"
+                    >
+                      <option value="Steel">Steel & Iron Products</option>
+                      <option value="Aluminium">Aluminium Extrusions & Castings</option>
+                      <option value="Cement">Portland Cement & Clinkers</option>
+                      <option value="Fertilizers">Ammonia & Nitrogenous Fertilizers</option>
+                    </select>
+                  </div>
+
+                  <div>
+                    <label className="block text-[10px] font-bold text-[#64748B] uppercase mb-1">Export Net Weight (Metric Tons)</label>
+                    <input 
+                      type="number"
+                      value={cbamWeight}
+                      onChange={(e) => setCbamWeight(parseFloat(e.target.value) || 0)}
+                      className="w-full text-xs font-mono p-2 border border-[#E2E8F0] rounded-lg focus:outline-none focus:border-[#0F291B] bg-[#F8F9FA]"
+                    />
+                  </div>
+
+                  <div className="bg-[#F8F9FA] p-3 rounded-xl border border-[#E2E8F0] flex justify-between items-center text-xs">
+                    <span className="font-sans text-[#64748B]">Embedded Carbon (CBAM):</span>
+                    <span className="font-mono font-bold text-[#0F291B]">
+                      {parseFloat((cbamWeight * (cbamCommodity === 'Steel' ? 1.85 : cbamCommodity === 'Aluminium' ? 6.42 : cbamCommodity === 'Cement' ? 0.92 : 2.15)).toFixed(2))} tCO₂e
+                    </span>
+                  </div>
+
+                  <button 
+                    onClick={() => showToast(`CBAM Declaration Certificate for ${cbamWeight} Tons of ${cbamCommodity} exported!`, "success")}
+                    className="w-full bg-[#0F291B] hover:bg-[#1A4B31] text-white font-sans font-bold text-xs py-2.5 px-4 rounded-xl transition-all shadow-md flex items-center justify-center space-x-1.5"
+                  >
+                    <Download className="w-3.5 h-3.5" />
+                    <span>Generate CBAM Declaration</span>
+                  </button>
+                </div>
+              </div>
+
+            </div>
+
+            {/* Traceable Audit Trail Log */}
+            <div className="bg-white border border-[#E2E8F0] rounded-3xl p-6 lg:p-8 shadow-sm space-y-4">
+              <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center border-b border-[#F1F5F9] pb-4 gap-2">
+                <div>
+                  <h3 className="font-sans font-bold text-lg text-[#0F291B]">Traceable Audit Trail Log</h3>
+                  <p className="text-xs text-[#64748B] mt-0.5">Calculations verified under GHG Protocol and ISAE 3410 assurance guidelines.</p>
+                </div>
+                <span className="bg-emerald/10 text-emerald text-[10px] px-3 py-1 rounded-full font-bold border border-emerald/20">
+                  EF Library: DEFRA 2025 v1.4
+                </span>
+              </div>
+
+              <div className="overflow-x-auto">
+                <table className="w-full text-left font-sans text-xs min-w-[800px]">
+                  <thead>
+                    <tr className="text-[#64748B] font-bold border-b border-[#F1F5F9] pb-2.5">
+                      <th className="py-2.5">Emissions Source</th>
+                      <th>Activity Data</th>
+                      <th>Emission Factor (EF)</th>
+                      <th>Assurance Formula</th>
+                      <th>Scope</th>
+                      <th>Evidence Doc</th>
+                      <th className="text-right">Footprint</th>
+                    </tr>
+                  </thead>
+                  <tbody className="divide-y divide-[#F1F5F9]">
+                    {[
+                      { name: "Diesel Backup Generators", data: `${inputs.diesel} L`, factor: `${ef.diesel} kgCO2e/L`, formula: "Activity × EF / 1000", scope: "Scope 1", doc: "diesel_invoice_Q2.pdf", value: `${((parseFloat(inputs.diesel) || 0) * ef.diesel / 1000).toFixed(2)} t` },
+                      { name: "Executive Transport Vehicles", data: `${inputs.petrol} L`, factor: `${ef.petrol} kgCO2e/L`, formula: "Activity × EF / 1000", scope: "Scope 1", doc: "fuel_receipts_june.xlsx", value: `${((parseFloat(inputs.petrol) || 0) * ef.petrol / 1000).toFixed(2)} t` },
+                      { name: "Purchased Grid Power (Location-based)", data: `${inputs.electricity} kWh`, factor: `${ef.electricity} kgCO2e/kWh`, formula: "Activity × Grid EF / 1000", scope: "Scope 2 (Loc)", doc: "dhaka_power_june.pdf", value: `${results.scope2} t` },
+                      { name: "Purchased Grid Power (Market-based)", data: `${inputs.electricity} kWh`, factor: `${marketFactor} kgCO2e/kWh`, formula: "Activity × Green tariff EF / 1000", scope: "Scope 2 (Mkt)", doc: "green_ppa_contract.pdf", value: `${results.scope2Market} t` },
+                      { name: "Employee Daily Commute", data: `${inputs.employees} Staff`, factor: `${ef.employees} tCO2e/emp/yr`, formula: "Staff Count × EF", scope: "Scope 3", doc: "hr_roster_2026.csv", value: `${(parseFloat(inputs.employees) || 0) * ef.employees} t` },
+                      { name: "Supplier Logistics (Truck Transport)", data: `${inputs.truckTransport} t-km`, factor: `${ef.truckTransport} kgCO2e/t-km`, formula: "Activity × EF / 1000", scope: "Scope 3", doc: "freight_logistics_q2.pdf", value: `${((parseFloat(inputs.truckTransport) || 0) * ef.truckTransport / 1000).toFixed(2)} t` }
+                    ].map((row, idx) => (
+                      <tr key={idx} className="hover:bg-[#F8F9FA]">
+                        <td className="py-3.5 font-bold text-[#0F291B]">{row.name}</td>
+                        <td className="font-mono text-[11px]">{row.data}</td>
+                        <td className="font-mono text-[11px] text-slate-600">{row.factor}</td>
+                        <td className="font-mono text-[10px] text-slate-400">{row.formula}</td>
+                        <td>
+                          <span className={`px-2 py-0.5 rounded-full text-[9px] font-bold ${
+                            row.scope.includes("Scope 1") 
+                              ? 'bg-amber/10 text-amber' 
+                              : row.scope.includes("Scope 2")
+                                ? 'bg-emerald/10 text-emerald'
+                                : 'bg-purple-600/10 text-purple-600'
+                          }`}>
+                            {row.scope}
+                          </span>
+                        </td>
+                        <td>
+                          <button 
+                            onClick={() => showToast(`Opening audit evidence: ${row.doc}`, "info")}
+                            className="text-xs font-semibold text-[#0F291B] hover:underline flex items-center space-x-1"
+                          >
+                            <FileText className="w-3.5 h-3.5 text-slate-400" />
+                            <span className="font-mono text-[11px] text-slate-600">{row.doc}</span>
+                          </button>
+                        </td>
+                        <td className="text-right font-mono font-bold text-[#0F291B]">{row.value} CO₂e</td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            </div>
+
+          </div>
         )}
 
         {/* -------------------- TAB CONTENT: TASKS -------------------- */}
