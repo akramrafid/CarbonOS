@@ -1,0 +1,9 @@
+django
+djangorestframework
+channels
+asgiref
+requests
+daphne
+gunicorn
+dj-database-url
+psycopg2-binary

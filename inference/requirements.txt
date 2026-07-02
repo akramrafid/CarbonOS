@@ -1,3 +1,17 @@
 fastapi==0.109.2
 uvicorn==0.27.0.post1
 python-multipart==0.0.9
+--extra-index-url https://download.pytorch.org/whl/cpu
+torch
+torchvision
+numpy
+opencv-python-headless
+Pillow
+python-dotenv
+requests
+earthengine-api
+scikit-learn
+pandas
+joblib
+xgboost
+sqlalchemy
