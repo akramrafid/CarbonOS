@@ -254,9 +254,7 @@ const CarbonMonitoring = () => {
       setAnalysisHistory(data.items || []);
       if (data.items && data.items.length > 0) {
         setSelectedJob(data.items[0]);
-        if (data.items[0].bounds) {
-          setMapBounds(data.items[0].bounds);
-        }
+        setMapBounds(getJobBounds(data.items[0]));
       }
     } catch (e) {
       console.error("History API error", e);
@@ -376,9 +374,7 @@ const CarbonMonitoring = () => {
                   // Force leaflet redrawing
                 }
               }
-              if (runningJob.bounds) {
-                setMapBounds(runningJob.bounds);
-              }
+              setMapBounds(getJobBounds(runningJob));
               return true;
             } else if (runningJob.status === 'failed') {
               alert("AI Satellite analysis failed on the server.");
@@ -446,6 +442,38 @@ const CarbonMonitoring = () => {
 
   const min = (arr) => Math.min(...arr);
   const max = (arr) => Math.max(...arr);
+
+  const getJobBounds = (job) => {
+    if (!job) return null;
+    if (job.bounds) return job.bounds;
+    if (job.polygon_geojson) {
+      try {
+        const poly = typeof job.polygon_geojson === 'string' 
+          ? JSON.parse(job.polygon_geojson) 
+          : job.polygon_geojson;
+        
+        let coords = [];
+        if (poly.type === "Polygon") {
+          coords = poly.coordinates[0];
+        } else if (poly.type === "Feature") {
+          coords = poly.geometry.coordinates[0];
+        }
+
+        if (coords && coords.length > 0) {
+          // GeoJSON is [lng, lat] -> we need [lat, lng]
+          const lats = coords.map(c => c[1]);
+          const lngs = coords.map(c => c[0]);
+          return [
+            [Math.min(...lats), Math.min(...lngs)],
+            [Math.max(...lats), Math.max(...lngs)]
+          ];
+        }
+      } catch (e) {
+        console.error("Failed to parse bounds from geojson", e);
+      }
+    }
+    return [[22.2, 89.4], [22.4, 89.8]]; // fallback to Sundarbans
+  };
 
   // Address/place name and coordinates search
   const handleCoordsSearch = async () => {
@@ -1039,12 +1067,7 @@ const CarbonMonitoring = () => {
                   />
                 )}
 
-                {/* Bangladesh National Boundary Outline */}
-                <Polygon 
-                  positions={BANGLADESH_BORDER}
-                  pathOptions={{ color: '#00C853', fillColor: 'transparent', weight: 1.5, dashArray: '5, 5' }}
-                  interactive={false}
-                />
+
 
                 {/* Predefined Bangladesh Forest Reserves */}
                 <Polygon 
@@ -1108,7 +1131,7 @@ const CarbonMonitoring = () => {
                       <ImageOverlay
                         key={idx}
                         url={layer.layer_url}
-                        bounds={selectedJob.bounds || [[22.2, 89.4], [22.4, 89.8]]}
+                        bounds={getJobBounds(selectedJob)}
                         opacity={0.65}
                       />
                     ))
@@ -1292,7 +1315,7 @@ const CarbonMonitoring = () => {
                   const job = analysisHistory[parseInt(e.target.value)];
                   if (job) {
                     setSelectedJob(job);
-                    if (job.bounds) setMapBounds(job.bounds);
+                    setMapBounds(getJobBounds(job));
                   }
                 }}
                 className="w-full h-1.5 bg-white/10 rounded-lg appearance-none cursor-pointer accent-emerald"
