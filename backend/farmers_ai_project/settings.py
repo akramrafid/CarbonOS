@@ -19,13 +19,15 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/6.0/howto/deployment/checklist/
 
+import os
+
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = 'django-insecure-&!^evp!(vub%e4=yh$@go=+yt(yk6i_740922c)#l1_ivz89n!'
+SECRET_KEY = os.getenv('DJANGO_SECRET_KEY', 'django-insecure-&!^evp!(vub%e4=yh$@go=+yt(yk6i_740922c)#l1_ivz89n!')
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
+DEBUG = os.getenv('DJANGO_DEBUG', 'True').lower() in ('true', '1')
 
-ALLOWED_HOSTS = ['*']
+ALLOWED_HOSTS = os.getenv('ALLOWED_HOSTS', 'localhost,127.0.0.1,*').split(',')
 
 
 # Application definition
@@ -59,7 +61,11 @@ MIDDLEWARE = [
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
 ]
 
-CORS_ALLOW_ALL_ORIGINS = True  # For MVP, allow all
+CORS_ALLOWED_ORIGINS = os.getenv(
+    'CORS_ALLOWED_ORIGINS', 
+    'http://localhost:5173,http://127.0.0.1:5173,http://localhost:3000,https://carbon-os-beta.vercel.app'
+).split(',')
+CORS_ALLOW_CREDENTIALS = True
 
 
 ROOT_URLCONF = 'farmers_ai_project.urls'
@@ -135,5 +141,4 @@ USE_TZ = True
 
 STATIC_URL = 'static/'
 
-# CORS Configuration
-CORS_ALLOW_ALL_ORIGINS = True
+# CORS Configuration defined above

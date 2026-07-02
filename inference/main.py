@@ -30,9 +30,25 @@ init_db()
 
 app = FastAPI(title="Farmer's AI Inference Service")
 
+# Startup check for required environment variables
+@app.on_event("startup")
+async def startup_event():
+    required_env_vars = ["GEMINI_API_KEY"]
+    for var in required_env_vars:
+        if not os.getenv(var):
+            raise RuntimeError(f"Missing critical environment variable: {var}")
+    print("Startup validation completed: All critical environment variables are set.")
+
+# Tighten CORS: Allow specific origins instead of wildcard when credentials are true
+allowed_origins_str = os.getenv(
+    "ALLOWED_ORIGINS", 
+    "http://localhost:5173,http://127.0.0.1:5173,http://localhost:3000,https://carbon-os-beta.vercel.app"
+)
+allowed_origins = [orig.strip() for orig in allowed_origins_str.split(",") if orig.strip()]
+
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],
+    allow_origins=allowed_origins,
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],

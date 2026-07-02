@@ -25,188 +25,8 @@ const crops = [
   { id: 'citrus', name: 'Citrus / লেবু', icon: '🍋' }
 ];
 
-// Helper: wait for a specified number of milliseconds
-const delay = (ms) => new Promise(resolve => setTimeout(resolve, ms));
-
-// Helper: attempt a single Gemini API call with retry for 429 errors
-const callGeminiWithRetry = async (url, body, maxRetries = 3) => {
-  for (let attempt = 0; attempt < maxRetries; attempt++) {
-    const response = await fetch(url, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(body)
-    });
-
-    if (response.ok) {
-      return response;
-    }
-
-    if (response.status === 429 && attempt < maxRetries - 1) {
-      // Extract retry delay from error response
-      let waitMs = (attempt + 1) * 5000; // default: 5s, 10s, 15s
-      try {
-        const errBody = await response.json();
-        const retryInfo = errBody?.error?.details?.find(d => d["@type"]?.includes("RetryInfo"));
-        if (retryInfo?.retryDelay) {
-          const seconds = parseInt(retryInfo.retryDelay);
-          if (!isNaN(seconds) && seconds > 0) {
-            waitMs = (seconds + 2) * 1000; // add 2s buffer
-          }
-        }
-      } catch (_) { /* ignore parse errors */ }
-
-      console.log(`[Gemini] Rate limited (429). Waiting ${waitMs / 1000}s before retry ${attempt + 2}/${maxRetries}...`);
-      await delay(waitMs);
-      continue;
-    }
-
-    // Non-retryable error
-    const errorText = await response.text();
-    throw new Error(`Status ${response.status}: ${errorText}`);
-  }
-  throw new Error("Max retries exceeded for rate limiting.");
-};
-
-const diagnoseWithGeminiDirect = async (canvas, selectedSpecies) => {
-  const apiKey = import.meta.env.VITE_GEMINI_API_KEY;
-  if (!apiKey) {
-    throw new Error("Gemini API key is not configured. Please set VITE_GEMINI_API_KEY in your .env file.");
-  }
-
-  // Base64 encode — resize to max 1024px to reduce payload and quota usage
-  const maxDim = 1024;
-  let srcCanvas = canvas;
-  if (canvas.width > maxDim || canvas.height > maxDim) {
-    const scale = maxDim / Math.max(canvas.width, canvas.height);
-    const resized = document.createElement('canvas');
-    resized.width = Math.round(canvas.width * scale);
-    resized.height = Math.round(canvas.height * scale);
-    resized.getContext('2d').drawImage(canvas, 0, 0, resized.width, resized.height);
-    srcCanvas = resized;
-  }
-  const base64Data = srcCanvas.toDataURL('image/jpeg', 0.8);
-  const base64Clean = base64Data.split(',')[1];
-
-  // Permitted classes info
-  let cropsInfo = "";
-  for (const [sp, classes] of Object.entries(DISEASE_MAPS)) {
-    cropsInfo += `- Crop: '${sp}', Permitted Classes: ${classes.join(", ")}\n`;
-  }
-
-  const prompt = `
-You are an expert plant pathologist AI. Analyze this leaf/crop image and diagnose the disease.
-
-The user selected the crop: '${selectedSpecies}'.
-However, if the leaf is clearly from a different crop, auto-detect the correct crop from our supported list.
-
-Here are the supported crops and their permitted disease classes:
-${cropsInfo}
-
-You MUST choose one of the supported crops and one of its permitted disease classes.
-Return your response in JSON format matching this schema:
-{
-  "species": "<the auto-detected or selected crop species, must be one of: rice, potato, tomato, maize, mango, jackfruit, guava, citrus>",
-  "disease": "<the exact disease class string from the permitted list for that crop, case-sensitive match>",
-  "confidence": <float confidence score between 0.0 and 1.0>,
-  "explanation": "<brief diagnostic explanation>"
-}
-`;
-
-  // Try models in order — gemini-2.0-flash-lite is cheapest quota, then 2.0-flash, then 2.5-flash
-  const models = ["gemini-2.5-flash", "gemini-2.0-flash", "gemini-2.0-flash-lite"];
-  let lastErr = null;
-
-  const requestBody = {
-    contents: [{
-      parts: [
-        { text: prompt },
-        {
-          inlineData: {
-            mimeType: "image/jpeg",
-            data: base64Clean
-          }
-        }
-      ]
-    }],
-    generationConfig: {
-      responseMimeType: "application/json"
-    }
-  };
-
-  for (const modelName of models) {
-    const url = `https://generativelanguage.googleapis.com/v1beta/models/${modelName}:generateContent?key=${apiKey}`;
-    try {
-      const response = await callGeminiWithRetry(url, requestBody, 3);
-      const result = await response.json();
-
-      // Validate response structure
-      if (!result.candidates || !result.candidates[0]?.content?.parts?.[0]?.text) {
-        lastErr = `Model ${modelName} returned empty or blocked response.`;
-        console.warn(`[Gemini] ${lastErr}`, result);
-        continue;
-      }
-
-      const textContent = result.candidates[0].content.parts[0].text;
-      let parsed;
-      try {
-        parsed = JSON.parse(textContent);
-      } catch (parseErr) {
-        // Sometimes the model returns JSON wrapped in markdown code fences
-        const jsonMatch = textContent.match(/```(?:json)?\s*([\s\S]*?)```/);
-        if (jsonMatch) {
-          parsed = JSON.parse(jsonMatch[1].trim());
-        } else {
-          lastErr = `Model ${modelName} returned unparseable JSON: ${textContent.substring(0, 200)}`;
-          console.warn(`[Gemini] ${lastErr}`);
-          continue;
-        }
-      }
-
-      // Normalize species
-      let detSpecies = (parsed.species || selectedSpecies).toLowerCase();
-      if (!DISEASE_MAPS[detSpecies]) {
-        detSpecies = selectedSpecies;
-      }
-
-      const permitted = DISEASE_MAPS[detSpecies];
-      const predictedDisease = parsed.disease || "";
-      let matchedDisease = null;
-      for (const item of permitted) {
-        if (item.toLowerCase() === predictedDisease.toLowerCase()) {
-          matchedDisease = item;
-          break;
-        }
-      }
-      if (!matchedDisease) {
-        // Try partial match as fallback
-        for (const item of permitted) {
-          if (item.toLowerCase().includes(predictedDisease.toLowerCase()) ||
-              predictedDisease.toLowerCase().includes(item.toLowerCase())) {
-            matchedDisease = item;
-            break;
-          }
-        }
-      }
-      if (!matchedDisease) {
-        matchedDisease = permitted[0];
-      }
-
-      const confidenceVal = parseFloat(parsed.confidence || 0.8);
-
-      return {
-        species: detSpecies,
-        disease: matchedDisease,
-        confidence: Math.min(Math.max(confidenceVal, 0), 1), // clamp 0-1
-        explanation: parsed.explanation || ""
-      };
-    } catch (e) {
-      lastErr = `[${modelName}] ${e.message}`;
-      console.warn(`[Gemini] Model ${modelName} failed:`, e.message);
-    }
-  }
-
-  throw new Error(`All Gemini models failed. ${lastErr}`);
-};
+// Direct client-side Gemini API integration has been removed for security and key protection.
+// Requests are routed securely via the Django /api/diagnose backend.
 
 const CameraCapture = ({ isInline = false, onBack = null, onScanComplete = null }) => {
   const videoRef = useRef(null);
@@ -354,29 +174,37 @@ const CameraCapture = ({ isInline = false, onBack = null, onScanComplete = null 
       console.warn('Offline inference skipped:', e);
     }
 
-    // ── Step 3: Cloud inference via Gemini API ───────────────────────────────
+    // ── Step 3: Cloud inference via server-side Django API ───────────────────
     let cloudResult = null;
     let cloudError = null;
     try {
-      const geminiRes = await diagnoseWithGeminiDirect(canvas, effectiveSpecies);
-      const imageBlobUrl = URL.createObjectURL(blob);
-      const confidence = geminiRes.confidence;
-      const severity = geminiRes.disease.toLowerCase().includes('healthy') 
-        ? 'none' 
-        : (confidence > 0.9 ? 'severe' : (confidence > 0.8 ? 'moderate' : 'mild'));
+      const formData = new FormData();
+      formData.append('image', blob, 'leaf_scan.jpg');
+      formData.append('species', effectiveSpecies);
+      formData.append('gps_lat', deviceCoords.lat);
+      formData.append('gps_lng', deviceCoords.lng);
 
+      const djangoApiUrl = import.meta.env.VITE_DJANGO_API_URL || 'http://localhost:8000';
+      const response = await fetch(`${djangoApiUrl}/api/diagnose`, {
+        method: 'POST',
+        body: formData,
+      });
+
+      if (!response.ok) {
+        throw new Error(`Server returned status ${response.status}`);
+      }
+
+      const resData = await response.json();
       cloudResult = {
-        diagnosis_id: Math.random().toString(36).substring(2, 11),
-        species: geminiRes.species,
-        disease: geminiRes.disease,
-        confidence: confidence,
-        severity: severity,
-        needs_agronomist_review: confidence < 0.55,
-        heatmap_url: imageBlobUrl,
-        weather_risk: {
-          index: 0.3,
-          summary_bn: "আবহাওয়া স্বাভাবিক। নিয়মিত রোগ পর্যবেক্ষণ করুন।"
-        },
+        diagnosis_id: resData.diagnosis_id,
+        species: resData.species,
+        disease: resData.disease,
+        confidence: resData.confidence,
+        severity: resData.severity,
+        needs_agronomist_review: resData.needs_agronomist_review,
+        heatmap_url: resData.heatmap_url,
+        weather_risk: resData.weather_risk,
+        treatment_plan: resData.treatment_plan,
         isOffline: false
       };
     } catch (err) {

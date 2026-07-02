@@ -291,12 +291,21 @@ async def upload_boundary(
     """
     Ingests and parses boundary spatial files (GeoJSON/KML) and extracts polygon paths.
     """
+    # Enforce maximum file size check of 5MB
     contents = await file.read()
+    if len(contents) > 5 * 1024 * 1024:
+        raise HTTPException(status_code=413, detail="File size exceeds the maximum limit of 5MB.")
+
     filename = file.filename
     file_ext = filename.split(".")[-1].lower()
 
     if file_ext not in ["geojson", "json", "kml"]:
         raise HTTPException(status_code=400, detail="Only GeoJSON and KML files are supported.")
+
+    # Validate MIME type / content type
+    allowed_types = ["application/json", "application/xml", "application/vnd.google-earth.kml+xml", "text/plain", "application/octet-stream"]
+    if file.content_type and file.content_type not in allowed_types:
+        raise HTTPException(status_code=400, detail="Invalid file format or MIME type.")
 
     try:
         if file_ext in ["geojson", "json"]:
