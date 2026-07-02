@@ -222,6 +222,7 @@ def get_analysis_history(page: int = 1, limit: int = 10, db: Session = Depends(g
             "end_date": job.end_date.isoformat(),
             "processing_time": job.processing_time,
             "created_at": job.created_at.isoformat(),
+            "polygon_geojson": job.polygon_geojson,
             "result": res_data,
             "layers": layers_data
         })

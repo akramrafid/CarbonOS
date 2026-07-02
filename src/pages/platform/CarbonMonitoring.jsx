@@ -112,6 +112,17 @@ const CHT_RESERVE = [
   [23.50, 91.95]
 ];
 
+// Simplified outline of Bangladesh border
+const BANGLADESH_BORDER = [
+  [26.634, 88.388], [26.376, 88.586], [26.313, 89.043], [26.068, 89.155], [25.753, 89.843],
+  [25.178, 89.843], [25.197, 91.954], [25.042, 92.428], [24.168, 92.470], [23.951, 91.246],
+  [23.473, 91.272], [22.846, 91.503], [22.259, 92.179], [22.016, 92.368], [21.848, 92.628],
+  [21.650, 92.518], [21.200, 92.180], [20.730, 92.320], [21.050, 92.200], [21.430, 91.980],
+  [21.828, 91.890], [22.316, 91.380], [22.203, 90.353], [21.802, 89.508], [21.642, 89.148],
+  [22.222, 89.053], [22.923, 88.887], [23.633, 88.625], [24.103, 88.618], [24.633, 87.973],
+  [25.076, 88.083], [25.293, 88.883], [25.845, 88.750], [26.333, 88.130]
+];
+
 const CarbonMonitoring = () => {
   const { t, i18n } = useTranslation();
   const isBn = i18n.language === 'bn';
@@ -155,6 +166,34 @@ const CarbonMonitoring = () => {
       console.error("Failed to save locations to localStorage", e);
     }
   }, [storedLocations]);
+
+  // Auto-resolve project name based on centroid of drawn coordinates
+  useEffect(() => {
+    if (drawPoints.length >= 1) {
+      const avgLat = drawPoints.reduce((sum, p) => sum + p[0], 0) / drawPoints.length;
+      const avgLng = drawPoints.reduce((sum, p) => sum + p[1], 0) / drawPoints.length;
+      
+      const resolveProjectName = async () => {
+        try {
+          const res = await fetch(`https://nominatim.openstreetmap.org/reverse?format=json&lat=${avgLat}&lon=${avgLng}&zoom=12&addressdetails=1`);
+          if (res.ok) {
+            const data = await res.json();
+            if (data && data.address) {
+              const district = data.address.district || data.address.state_district || data.address.county || data.address.city || "";
+              const suburb = data.address.suburb || data.address.village || data.address.neighbourhood || "";
+              const place = suburb || district || "Forest Block";
+              setProjectName(`${place} Carbon Project`);
+            }
+          }
+        } catch (e) {
+          console.error("Failed to auto-update project name", e);
+        }
+      };
+      
+      const timer = setTimeout(resolveProjectName, 800);
+      return () => clearTimeout(timer);
+    }
+  }, [drawPoints]);
   
   // Custom Drawing state
   const [isDrawing, setIsDrawing] = useState(false);
@@ -408,21 +447,48 @@ const CarbonMonitoring = () => {
   const min = (arr) => Math.min(...arr);
   const max = (arr) => Math.max(...arr);
 
-  // Address lookup coordinates search
-  const handleCoordsSearch = () => {
+  // Address/place name and coordinates search
+  const handleCoordsSearch = async () => {
+    if (!searchQuery.trim()) return;
+
     const parts = searchQuery.split(',');
     if (parts.length === 2) {
-      const lat = parseFloat(parts[0].strip ? parts[0].strip() : parts[0].trim());
-      const lng = parseFloat(parts[1].strip ? parts[1].strip() : parts[1].trim());
+      const lat = parseFloat(parts[0].trim());
+      const lng = parseFloat(parts[1].trim());
       if (!isNaN(lat) && !isNaN(lng)) {
         setMapCenter([lat, lng]);
-        setMapZoom(13);
+        setMapZoom(12);
         setMapBounds([[lat - 0.02, lng - 0.02], [lat + 0.02, lng + 0.02]]);
-      } else {
-        alert("Invalid latitude/longitude coordinates.");
+        handlePixelClick(lat, lng);
+        return;
       }
-    } else {
-      alert("Please enter coordinates format: 'Latitude, Longitude' (e.g. 22.3, 89.6)");
+    }
+
+    // Otherwise, treat as place name and search via OSM Nominatim API
+    try {
+      const query = encodeURIComponent(searchQuery.trim());
+      const res = await fetch(`https://nominatim.openstreetmap.org/search?format=json&q=${query}&limit=1&addressdetails=1`);
+      if (res.ok) {
+        const data = await res.json();
+        if (data && data.length > 0) {
+          const lat = parseFloat(data[0].lat);
+          const lon = parseFloat(data[0].lon);
+          
+          setMapCenter([lat, lon]);
+          setMapZoom(12);
+          setMapBounds([[lat - 0.02, lon - 0.02], [lat + 0.02, lon + 0.02]]);
+          
+          // Trigger inspector pin
+          handlePixelClick(lat, lon);
+        } else {
+          alert(`Could not find location: "${searchQuery}"`);
+        }
+      } else {
+        alert("Geocoding search service is currently offline.");
+      }
+    } catch (e) {
+      console.error(e);
+      alert("Error resolving search query.");
     }
   };
 
@@ -973,6 +1039,13 @@ const CarbonMonitoring = () => {
                   />
                 )}
 
+                {/* Bangladesh National Boundary Outline */}
+                <Polygon 
+                  positions={BANGLADESH_BORDER}
+                  pathOptions={{ color: '#00C853', fillColor: 'transparent', weight: 1.5, dashArray: '5, 5' }}
+                  interactive={false}
+                />
+
                 {/* Predefined Bangladesh Forest Reserves */}
                 <Polygon 
                   positions={SUNDARBANS_RESERVE}
@@ -1378,7 +1451,6 @@ const CarbonMonitoring = () => {
             <FileText className="text-emerald" size={24} />
             <span>Digital MRV Report Manager</span>
           </h2>
-          
           {loadingHistory ? (
             <div className="space-y-4">
               {Array(3).fill(0).map((_, i) => (
@@ -1391,6 +1463,8 @@ const CarbonMonitoring = () => {
                 <thead>
                   <tr className="border-b border-white/10 text-mist text-[10px] uppercase tracking-wider">
                     <th className="pb-4">Analysis Job ID</th>
+                    <th className="pb-4">Location Name</th>
+                    <th className="pb-4">Coordinates</th>
                     <th className="pb-4">Date Run</th>
                     <th className="pb-4">Forest Area (ha)</th>
                     <th className="pb-4">Average NDVI</th>
@@ -1401,15 +1475,63 @@ const CarbonMonitoring = () => {
                 </thead>
                 <tbody>
                   {analysisHistory.length > 0 ? (
-                    analysisHistory.map((job) => (
-                      <tr key={job.id} className="border-b border-white/5 hover:bg-white/5 transition-colors">
-                        <td className="py-4 font-mono font-bold">{job.id.slice(0,8).toUpperCase()}</td>
-                        <td className="py-4 text-mist">{new Date(job.created_at).toLocaleDateString()}</td>
-                        <td className="py-4 font-bold">{job.result?.forest_area_ha ? job.result.forest_area_ha.toFixed(2) : '-'}</td>
-                        <td className="py-4 text-emerald font-bold">{job.result?.avg_ndvi ? job.result.avg_ndvi.toFixed(3) : '-'}</td>
-                        <td className="py-4 font-bold">{job.result?.estimated_carbon ? job.result.estimated_carbon.toFixed(2) : '-'}</td>
-                        <td className="py-4 text-white font-bold">{job.result?.tonnes_co2e ? job.result.tonnes_co2e.toLocaleString() : '-'} tCO₂e</td>
-                        <td className="py-4">
+                    analysisHistory.map((job) => {
+                      // Centroid and location name extractor helper
+                      let lat = 23.6850;
+                      let lng = 90.3563;
+                      let locationName = "Bangladesh Carbon Area";
+
+                      if (job.polygon_geojson) {
+                        try {
+                          const poly = typeof job.polygon_geojson === 'string' 
+                            ? JSON.parse(job.polygon_geojson) 
+                            : job.polygon_geojson;
+                          
+                          let coords = [];
+                          if (poly.type === "Polygon") {
+                            coords = poly.coordinates[0];
+                          } else if (poly.type === "Feature") {
+                            coords = poly.geometry.coordinates[0];
+                          }
+
+                          if (coords && coords.length > 0) {
+                            // Centroid (GeoJSON stores as [lng, lat])
+                            const sumLng = coords.reduce((sum, c) => sum + c[0], 0);
+                            const sumLat = coords.reduce((sum, c) => sum + c[1], 0);
+                            lat = sumLat / coords.length;
+                            lng = sumLng / coords.length;
+
+                            const isNearSundarbans = lat >= 21.5 && lat <= 22.6 && lng >= 89.0 && lng <= 90.0;
+                            const isNearHillTracts = lat >= 21.5 && lat <= 23.8 && lng >= 91.5 && lng <= 92.8;
+
+                            if (isNearSundarbans) {
+                              locationName = "Sundarbans Reserve Forest";
+                            } else if (isNearHillTracts) {
+                              locationName = "Chittagong Hill Tracts";
+                            } else {
+                              if (lat > 25.0) locationName = "Rangpur Division Forest";
+                              else if (lat > 24.0 && lng < 90.0) locationName = "Rajshahi Block";
+                              else if (lat > 24.0 && lng >= 90.0) locationName = "Sylhet Rainforest Block";
+                              else if (lat < 22.2) locationName = "Barishal Coastal Reserve";
+                              else locationName = "Dhaka Division Block";
+                            }
+                          }
+                        } catch (e) {
+                          console.error(e);
+                        }
+                      }
+
+                      return (
+                        <tr key={job.id} className="border-b border-white/5 hover:bg-white/5 transition-colors">
+                          <td className="py-4 font-mono font-bold">{job.id.slice(0,8).toUpperCase()}</td>
+                          <td className="py-4 text-white font-bold">{locationName}</td>
+                          <td className="py-4 font-mono text-emerald text-[11px]">{lat.toFixed(4)}, {lng.toFixed(4)}</td>
+                          <td className="py-4 text-mist">{new Date(job.created_at).toLocaleDateString()}</td>
+                          <td className="py-4 font-bold">{job.result?.forest_area_ha ? job.result.forest_area_ha.toFixed(2) : '-'}</td>
+                          <td className="py-4 text-emerald font-bold">{job.result?.avg_ndvi ? job.result.avg_ndvi.toFixed(3) : '-'}</td>
+                          <td className="py-4 font-bold">{job.result?.estimated_carbon ? job.result.estimated_carbon.toFixed(2) : '-'}</td>
+                          <td className="py-4 text-white font-bold">{job.result?.tonnes_co2e ? job.result.tonnes_co2e.toLocaleString() : '-'} tCO₂e</td>
+                          <td className="py-4">
                           <div className="flex items-center justify-end space-x-2">
                             <button 
                               onClick={() => triggerReportDownload(job.id, 'pdf')}
@@ -1438,10 +1560,11 @@ const CarbonMonitoring = () => {
                           </div>
                         </td>
                       </tr>
-                    ))
+                    );
+                  })
                   ) : (
                     <tr>
-                      <td colSpan={7} className="text-center py-12 text-mist">
+                      <td colSpan={9} className="text-center py-12 text-mist">
                         No satellite monitoring analyses found in the historical registry database.
                       </td>
                     </tr>
