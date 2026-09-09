@@ -24,9 +24,13 @@ from ml_pipeline.model import MultiHeadFarmerAIModel
 from carbon_monitoring.router import router as carbon_router
 from carbon_monitoring.database import init_db
 import carbon_monitoring.models  # ensure models are registered on Base.metadata
+from esg_rag.router import router as esg_router
+import esg_rag.models  # ensure ESG RAG models are registered on Base.metadata
+from esg_rag.database import init_db as init_esg_db
 
 # Create database tables on startup (no-op if they already exist)
 init_db()
+init_esg_db()
 
 app = FastAPI(title="Farmer's AI Inference Service")
 
@@ -55,6 +59,7 @@ app.add_middleware(
 )
 
 app.include_router(carbon_router)
+app.include_router(esg_router)
 
 # Load Model
 SPECIES_COUNTS = {

@@ -15,3 +15,7 @@ pandas
 joblib
 xgboost
 sqlalchemy
+pydantic
+pdfplumber
+python-docx
+chromadb

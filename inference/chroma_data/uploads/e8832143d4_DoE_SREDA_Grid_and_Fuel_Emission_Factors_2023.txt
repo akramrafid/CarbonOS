@@ -1,0 +1,21 @@
+
+DEPARTMENT OF ENVIRONMENT (DoE) & SREDA BANGLADESH NATIONAL GRID EMISSION FACTOR STUDY (2023-2024)
+Prepared in accordance with UNFCCC CDM 'Tool to calculate the emission factor for an electricity system' (Version 07.0).
+
+1. BANGLADESH POWER SYSTEM SUMMARY:
+Total national grid generation in FY2022-23 comprised natural gas (55%), heavy fuel oil / HFO (24%), coal (12%), imported electricity from India (8%), and utility-scale solar/hydro (<2%).
+- Operating Margin (OM) Emission Factor: 0.612 kg CO2e / kWh
+- Build Margin (BM) Emission Factor: 0.488 kg CO2e / kWh
+- Combined Margin (CM) Official Factor: 0.550 kg CO2e / kWh (0.55 tCO2e / MWh)
+Citation: DoE Grid Emission Factor Gazette Notification Ref: 22.02.0000.018.99.001.23.
+
+2. STATIONARY AND MOBILE COMBUSTION FACTORS (IPCC 2006 & PETROBANGLA):
+- High-Speed Diesel (HSD): Density 0.84 kg/L. Net Calorific Value: 43.0 TJ/Gg. Default carbon content: 20.2 tC/TJ. Oxidation factor: 1.0. Resulting Emission Factor: 2.68 kg CO2e / Liter.
+- Motor Spirit / Octane: Density 0.74 kg/L. Resulting Emission Factor: 2.31 kg CO2e / Liter.
+- Compressed Natural Gas (CNG): 2.75 kg CO2e / kg.
+- Liquefied Petroleum Gas (LPG): 2.98 kg CO2e / kg.
+
+3. SUPPLY CHAIN AND LOGISTICS (SCOPE 3 BENCHMARKS):
+- Medium Heavy Duty Trucks (Dhaka-Chattogram N1 Corridor): Average fuel economy 3.8 km/L at 65% laden capacity = 0.20 kg CO2e / ton-km.
+- Dhaka RMG Worker Commuting (Bus/Walk/Rickshaw modal split): 0.40 tCO2e / worker / annum.
+- Raw Materials: Virgin synthetic polyester fibers: 4.1 tCO2e/ton; Recycled PET yarn: 1.2 tCO2e/ton; Composite raw materials standard: 2.50 tCO2e/ton.

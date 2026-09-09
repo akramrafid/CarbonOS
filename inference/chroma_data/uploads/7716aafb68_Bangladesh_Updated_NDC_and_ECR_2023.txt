@@ -1,0 +1,24 @@
+
+BANGLADESH NATIONALLY DETERMINED CONTRIBUTIONS (UPDATED NDC 2021)
+Ministry of Environment, Forest and Climate Change (MoEFCC), Government of the People's Republic of Bangladesh.
+
+1. EXECUTIVE SUMMARY & TARGETS:
+Bangladesh committed to reduce its greenhouse gas (GHG) emissions by 27.56 Mt CO2e (6.73%) below Business-As-Usual (BAU) levels by 2030 unconditionally using domestic resources.
+With international support (finance, technology transfer, capacity building), Bangladesh commits to an additional conditional reduction of 61.9 Mt CO2e (15.12%), achieving a cumulative total reduction of 89.46 Mt CO2e (21.85%) by 2030.
+
+2. SECTORAL ALLOCATIONS:
+- Energy Sector (Power, Industry, Transport, Buildings): Accounts for 96.1% of unconditional mitigation actions.
+- Industry & Manufacturing: Mandatory adoption of high-efficiency gas generators, waste heat recovery systems, and solar rooftop installations under SREDA guidelines.
+- Agriculture, Forestry and Other Land Use (AFOLU): Scaling Alternate Wetting and Drying (AWD) rice irrigation to reduce methane emissions across 1.2 million hectares by 2030.
+
+3. ENVIRONMENT CONSERVATION RULES 2023 (ECR 2023):
+Published under S.R.O. No. 349-Act/2023 by Department of Environment (DoE).
+- Categorization: Red, Orange, Green industrial categorization now includes mandatory carbon footprint disclosure for Class-A textile, steel, cement, and chemical manufacturing facilities.
+- Environmental Clearance Certificate (ECC): Requires verified annual Scope 1 and Scope 2 emissions inventory submitted via certified MRV portals like CarbonOS.
+
+4. EU CBAM COMPLIANCE (CARBON BORDER ADJUSTMENT MECHANISM):
+EU Regulation 2023/956 on Carbon Border Adjustment Mechanism affects direct and indirect emissions for goods imported into the European Union.
+- Transitional Period (2023-2025): Quarterly reporting of embedded emissions without financial adjustments.
+- Definitive Period (2026 onwards): Importers must purchase CBAM certificates corresponding to the carbon price difference between EU ETS and domestic carbon prices.
+- Covered sectors impacting Bangladesh exports: Steel, Aluminum, and downstream electrical components.
+- Reporting requirements: Direct Scope 1 emissions and Indirect Scope 2 electricity emissions per metric ton of exported goods.

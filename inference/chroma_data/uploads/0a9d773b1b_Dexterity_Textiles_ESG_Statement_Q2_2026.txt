@@ -1,0 +1,21 @@
+
+CORPORATE AUDIT STATEMENT: DEXTERITY TEXTILES LTD (DHAKA EXPORT PROCESSING ZONE)
+Reporting Period: Q2 2026 (April 1, 2026 - June 30, 2026) | Facility Reg: DEPZ-TX-8491
+Auditor: Arif Hasan, Lead ESG Auditor (Bureau Veritas Bangladesh Partner)
+
+1. ENERGY & UTILITIES LOGBOOK (SCOPE 1 & 2):
+- Factory Backup Power: Cummins 1250 kVA diesel generator ran for 312 hours during grid load shedding. Total High Speed Diesel (HSD) drawn from depot tanks: 14,200 Liters. [Page 2, Section 3.1]
+- Fleet Transport: Executive shuttles and delivery vans consumed 4,800 Liters of Octane-95. [Page 2, Section 3.4]
+- Canteen & Boiler Auxiliary: 1,950 kg of commercial LPG consumed. [Page 3, Section 4.2]
+- DESCO Grid Power (Substation Meter ID: DESCO-HT-99210): Total active power consumed: 156,000 kWh. [Page 4, Section 5.1]
+- Rooftop Solar Generation: Onsite 100 kWp solar PV array generated 28,400 kWh, reducing net grid draw. [Page 4, Section 5.3]
+
+2. VALUE CHAIN METRICS (SCOPE 3):
+- Workforce: Total registered permanent factory personnel: 148 full-time employees. [Page 5, Section 6.1]
+- Executive Flights: 8 overseas marketing trips to Frankfurt and London totaling 82,000 passenger-kilometers. [Page 6, Section 7.2]
+- Finished Garment Freight: 12 container shipments dispatched via N1 highway to Chattogram Seaport totaling 39,000 ton-kilometers. [Page 7, Section 8.1]
+- Raw Yarn & Fabric Inward: Purchased 580 metric tons of composite cotton-polyester yarn. [Page 8, Section 9.3]
+
+AUDIT CONCLUSION:
+All physical meter readings and fuel ledgers verified against gate passes and DESCO utility receipts.
+Signed: Arif Hasan, Lead ESG Auditor. Audit Seal: CARBONOS-VERIFIED-2026-Q2-0819.
