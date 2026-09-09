@@ -26,6 +26,9 @@ const FarmerPaidCard = ({ amount, txHash }) => {
             src="https://images.unsplash.com/photo-1596700676450-93cf02157c96?q=80&w=200&auto=format&fit=crop" 
             alt="Farmer profile"
             className="w-full h-full object-cover"
+            loading="lazy"
+            width="64"
+            height="64"
           />
         </div>
 

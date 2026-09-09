@@ -26,8 +26,8 @@ const sectors = [
     desc: 'International donor funding pipeline.',
     market: '400,000 tCO₂e/yr',
     funding: 'Active',
-    color: 'from-purple-500 to-pink-500',
-    shadow: 'shadow-[0_0_30px_rgba(168,85,247,0.3)]'
+    color: 'from-amber to-orange-600',
+    shadow: 'shadow-[0_0_30px_rgba(255,179,0,0.3)]'
   },
   {
     icon: '♻️',

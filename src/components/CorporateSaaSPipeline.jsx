@@ -170,7 +170,7 @@ const CorporateSaaSPipeline = () => {
           animation: particleFlowScope3 2.4s linear infinite;
         }
         .grow-bar {
-          animation: growBarAnim 1.2s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
+          animation: growBarAnim 1.2s cubic-bezier(0.16, 1, 0.3, 1) forwards;
           transform-origin: bottom;
         }
         .pulse-dashed {
@@ -384,7 +384,7 @@ const CorporateSaaSPipeline = () => {
                     
                     {/* Visual stack central drop container */}
                     <div className="relative w-24 h-28 bg-[#080F0B]/90 border-2 border-dashed border-emerald/30 rounded-2xl flex items-center justify-center text-emerald shadow-[0_0_30px_rgba(16,185,129,0.15)] z-20">
-                      <Upload size={38} className="animate-bounce" />
+                      <Upload size={38} className="animate-pulse text-emerald drop-shadow-[0_0_8px_rgba(16,185,129,0.5)]" />
                     </div>
 
                     {/* Falling document icons mimicking files dropping */}
@@ -536,7 +536,7 @@ const CorporateSaaSPipeline = () => {
                       
                       {/* Bar 1 */}
                       <div className="flex flex-col items-center flex-1 h-[70px] relative">
-                        <div className="w-full bg-[#1A3A28]/80 hover:bg-[#1A3A28] border-t-2 border-emerald rounded-t-md grow-bar h-full transition-all duration-300 flex items-start justify-center pt-3">
+                        <div className="w-full bg-[#1A3A28]/80 hover:bg-[#1A3A28] border border-emerald/50 border-b-0 rounded-t-md shadow-[inset_0_1px_0_rgba(16,185,129,0.5)] grow-bar h-full transition-all duration-300 flex items-start justify-center pt-3">
                           <span className="text-xs font-mono text-emerald font-bold">42t</span>
                         </div>
                         {/* Dot Anchor */}
@@ -546,7 +546,7 @@ const CorporateSaaSPipeline = () => {
 
                       {/* Bar 2 */}
                       <div className="flex flex-col items-center flex-1 h-[110px] relative">
-                        <div className="w-full bg-[#1A3A28]/80 hover:bg-[#1A3A28] border-t-2 border-emerald rounded-t-md grow-bar h-full transition-all duration-300 flex items-start justify-center pt-3">
+                        <div className="w-full bg-[#1A3A28]/80 hover:bg-[#1A3A28] border border-emerald/50 border-b-0 rounded-t-md shadow-[inset_0_1px_0_rgba(16,185,129,0.5)] grow-bar h-full transition-all duration-300 flex items-start justify-center pt-3">
                           <span className="text-xs font-mono text-emerald font-bold">88t</span>
                         </div>
                         {/* Dot Anchor */}
@@ -556,7 +556,7 @@ const CorporateSaaSPipeline = () => {
 
                       {/* Bar 3 */}
                       <div className="flex flex-col items-center flex-1 h-[45px] relative">
-                        <div className="w-full bg-[#1A3A28]/80 hover:bg-[#1A3A28] border-t-2 border-emerald rounded-t-md grow-bar h-full transition-all duration-300 flex items-start justify-center pt-3">
+                        <div className="w-full bg-[#1A3A28]/80 hover:bg-[#1A3A28] border border-emerald/50 border-b-0 rounded-t-md shadow-[inset_0_1px_0_rgba(16,185,129,0.5)] grow-bar h-full transition-all duration-300 flex items-start justify-center pt-3">
                           <span className="text-xs font-mono text-emerald font-bold">23t</span>
                         </div>
                         {/* Dot Anchor */}

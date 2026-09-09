@@ -32,3 +32,7 @@ __pycache__/
 *.egg-info/
 venv/
 .env
+
+# Akram-Stack
+STOP
+.akstack.lock

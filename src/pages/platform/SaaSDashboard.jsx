@@ -38,10 +38,341 @@ import {
   Quote,
   RefreshCw,
   Send,
-  BookOpen
+  BookOpen,
+  Sun,
+  Moon,
+  MoreHorizontal,
+  Leaf,
+  Smile
 } from 'lucide-react';
+import { useTheme } from '../../context/ThemeContext';
 
 const FASTAPI_API_URL = import.meta.env.VITE_FASTAPI_API_URL || 'http://localhost:8000';
+
+// -------------------------------------------------------------
+// HIGH-CRAFT EXECUTIVE DASHBOARD COMPONENTS (EMITRA / $30K SPEC)
+// -------------------------------------------------------------
+
+// 1. Semi-Circular SVG Radial Gauge Arch
+const SemiCircularGauge = ({
+  score = 9.3,
+  max = 10,
+  label = 'Rating',
+  sublabel = 'AI score',
+  showIcon = false,
+  percentage = null,
+  isLight = false,
+  badgeText = null
+}) => {
+  const radius = 64;
+  const strokeWidth = 11;
+  const circumference = Math.PI * radius; // ~201.06
+  const normalizedValue = percentage !== null ? percentage / 100 : score / max;
+  const strokeDashoffset = circumference * (1 - Math.min(Math.max(normalizedValue, 0), 1));
+  const gradientId = `gauge-grad-${(label || 'metric').replace(/[^a-zA-Z0-9]/g, '')}`;
+
+  return (
+    <div className="relative flex flex-col items-center justify-center">
+      <svg viewBox="0 0 160 92" className="w-36 sm:w-40 h-auto overflow-visible" role="img" aria-label={`${label} gauge: ${score || percentage}`}>
+        <defs>
+          <linearGradient id={gradientId} x1="0%" y1="0%" x2="100%" y2="0%">
+            <stop offset="0%" stopColor="#00E676" />
+            <stop offset="50%" stopColor="#00C853" />
+            <stop offset="100%" stopColor="#10B981" />
+          </linearGradient>
+        </defs>
+
+        {/* Background track */}
+        <path
+          d="M 16 80 A 64 64 0 0 1 144 80"
+          fill="none"
+          stroke={isLight ? '#E8ECE8' : '#152B1D'}
+          strokeWidth={strokeWidth}
+          strokeLinecap="round"
+        />
+
+        {/* Active progress arc */}
+        <path
+          d="M 16 80 A 64 64 0 0 1 144 80"
+          fill="none"
+          stroke={`url(#${gradientId})`}
+          strokeWidth={strokeWidth}
+          strokeLinecap="round"
+          strokeDasharray={circumference}
+          strokeDashoffset={strokeDashoffset}
+          className="transition-all duration-1000 ease-out"
+        />
+      </svg>
+
+      {/* Central content */}
+      <div className="absolute top-8 sm:top-9 flex flex-col items-center justify-center text-center select-none">
+        {showIcon ? (
+          <div className="w-8 h-8 rounded-full bg-[#00C853]/15 border border-[#00C853]/30 flex items-center justify-center text-[#00C853]">
+            <Leaf className="w-4 h-4 text-[#00C853]" />
+          </div>
+        ) : (
+          <>
+            <span className={`text-[9px] font-mono uppercase tracking-wider font-bold ${isLight ? 'text-[#557361]' : 'text-[#7C9A88]'}`}>
+              {label}
+            </span>
+            <span className={`text-2xl sm:text-3xl font-sans font-bold tracking-tight leading-none my-0.5 ${isLight ? 'text-[#0F2417]' : 'text-white'}`}>
+              {score}
+            </span>
+            <span className={`text-[9px] font-sans font-medium ${isLight ? 'text-[#557361]' : 'text-[#7C9A88]'}`}>
+              {sublabel}
+            </span>
+          </>
+        )}
+      </div>
+
+      {badgeText && (
+        <div className={`mt-2 px-3 py-1 rounded-full text-[10px] font-sans font-semibold border ${
+          isLight ? 'bg-[#F4F6F4] text-[#0F2417] border-[#E8ECE8]' : 'bg-[#040906] text-[#A7F3D0] border-[#1B4D2E]'
+        }`}>
+          {badgeText}
+        </div>
+      )}
+    </div>
+  );
+};
+
+// 2. Catmull-Rom Bezier Spline Helper for Smooth Curves
+function getSplinePath(points) {
+  if (!points || points.length === 0) return '';
+  let d = `M ${points[0].x} ${points[0].y}`;
+  for (let i = 0; i < points.length - 1; i++) {
+    const p0 = points[i === 0 ? i : i - 1];
+    const p1 = points[i];
+    const p2 = points[i + 1];
+    const p3 = points[i + 2 < points.length ? i + 2 : i + 1];
+
+    const cp1x = p1.x + (p2.x - p0.x) / 6;
+    const cp1y = p1.y + (p2.y - p0.y) / 6;
+    const cp2x = p2.x - (p3.x - p1.x) / 6;
+    const cp2y = p2.y - (p3.y - p1.y) / 6;
+
+    d += ` C ${cp1x.toFixed(1)} ${cp1y.toFixed(1)}, ${cp2x.toFixed(1)} ${cp2y.toFixed(1)}, ${p2.x.toFixed(1)} ${p2.y.toFixed(1)}`;
+  }
+  return d;
+}
+
+// 3. Wide Emissions Trend Chart (Smooth Spline Area Chart)
+const EmissionsTrendChart = ({ isLight = false }) => {
+  const [hoveredPoint, setHoveredPoint] = useState(null);
+
+  // 12 months mapped for 620 x 170 viewBox
+  const actualPoints = [
+    { x: 45, y: 55, val: 327, month: 'Jan' },
+    { x: 94, y: 105, val: 145, month: 'Feb' },
+    { x: 143, y: 98, val: 170, month: 'Mar' },
+    { x: 192, y: 78, val: 243, month: 'Apr' },
+    { x: 241, y: 68, val: 279, month: 'May' },
+    { x: 290, y: 40, val: 382, month: 'Jun' },
+    { x: 339, y: 62, val: 301, month: 'Jul' },
+    { x: 388, y: 80, val: 236, month: 'Aug' },
+    { x: 437, y: 66, val: 287, month: 'Sep' },
+    { x: 486, y: 84, val: 221, month: 'Oct' },
+    { x: 535, y: 56, val: 323, month: 'Nov' },
+    { x: 585, y: 50, val: 345, month: 'Dec' },
+  ];
+
+  const targetPoints = [
+    { x: 45, y: 38 },
+    { x: 94, y: 44 },
+    { x: 143, y: 52 },
+    { x: 192, y: 60 },
+    { x: 241, y: 70 },
+    { x: 290, y: 76 },
+    { x: 339, y: 82 },
+    { x: 388, y: 88 },
+    { x: 437, y: 92 },
+    { x: 486, y: 96 },
+    { x: 535, y: 100 },
+    { x: 585, y: 104 },
+  ];
+
+  const actualCurve = getSplinePath(actualPoints);
+  const targetCurve = getSplinePath(targetPoints);
+  const areaPath = `${actualCurve} L 585 140 L 45 140 Z`;
+
+  return (
+    <div className="relative w-full h-full flex flex-col justify-between">
+      {hoveredPoint && (
+        <div 
+          className={`absolute -top-3 z-20 px-2.5 py-1 rounded-lg text-[10px] font-mono font-bold shadow-md border pointer-events-none transform -translate-x-1/2 transition-transform duration-150 ${
+            isLight 
+              ? 'bg-white text-[#0F2417] border-[#E8ECE8]' 
+              : 'bg-[#0D2B1A] text-[#4ADE80] border-[#1B4D2E]'
+          }`}
+          style={{ left: `${(hoveredPoint.x / 620) * 100}%` }}
+        >
+          {hoveredPoint.month}: {hoveredPoint.val} tCO₂e
+        </div>
+      )}
+
+      <svg viewBox="0 0 620 170" className="w-full h-auto overflow-visible select-none" preserveAspectRatio="none">
+        <defs>
+          <linearGradient id="emissionsSplineArea" x1="0%" y1="0%" x2="0%" y2="100%">
+            <stop offset="0%" stopColor="#00C853" stopOpacity={isLight ? 0.35 : 0.45} />
+            <stop offset="50%" stopColor="#00E676" stopOpacity={isLight ? 0.15 : 0.20} />
+            <stop offset="100%" stopColor="#00C853" stopOpacity={0.0} />
+          </linearGradient>
+        </defs>
+
+        {/* Y Gridlines and Ticks */}
+        {[
+          { label: '400', y: 35 },
+          { label: '300', y: 70 },
+          { label: '200', y: 105 },
+          { label: '100', y: 140 }
+        ].map((grid, idx) => (
+          <g key={idx}>
+            <text 
+              x="8" 
+              y={grid.y + 3} 
+              fill={isLight ? '#8BA192' : '#557361'} 
+              fontSize="8" 
+              fontFamily="monospace"
+            >
+              {grid.label}
+            </text>
+            <line 
+              x1="35" 
+              y1={grid.y} 
+              x2="600" 
+              y2={grid.y} 
+              stroke={isLight ? '#E5ECE5' : '#122418'} 
+              strokeDasharray="3 3" 
+              strokeWidth="1" 
+            />
+          </g>
+        ))}
+
+        {/* Target baseline curve */}
+        <path
+          d={targetCurve}
+          fill="none"
+          stroke={isLight ? '#7C9A88' : '#385443'}
+          strokeWidth="1.5"
+          strokeDasharray="4 4"
+          strokeOpacity="0.7"
+        />
+
+        {/* Actual emissions area gradient fill */}
+        <path
+          d={areaPath}
+          fill="url(#emissionsSplineArea)"
+        />
+
+        {/* Actual emissions spline curve */}
+        <path
+          d={actualCurve}
+          fill="none"
+          stroke="#00C853"
+          strokeWidth="2.5"
+          strokeLinecap="round"
+          strokeLinejoin="round"
+        />
+
+        {/* Month labels and hover interactive dots */}
+        {actualPoints.map((pt, i) => (
+          <g key={i}>
+            <text
+              x={pt.x}
+              y="160"
+              textAnchor="middle"
+              fill={isLight ? '#557361' : '#7C9A88'}
+              fontSize="8.5"
+              fontFamily="sans-serif"
+              fontWeight={hoveredPoint?.month === pt.month ? 'bold' : 'normal'}
+            >
+              {pt.month}
+            </text>
+            <circle
+              cx={pt.x}
+              cy={pt.y}
+              r={hoveredPoint?.month === pt.month ? 5 : 3}
+              fill={hoveredPoint?.month === pt.month ? '#00E676' : '#00C853'}
+              stroke={isLight ? '#FFFFFF' : '#040906'}
+              strokeWidth="1.5"
+              className="transition-all duration-150 cursor-pointer"
+              onMouseEnter={() => setHoveredPoint(pt)}
+              onMouseLeave={() => setHoveredPoint(null)}
+            />
+          </g>
+        ))}
+      </svg>
+    </div>
+  );
+};
+
+// 4. Segmented LED Capsule Progress Bar (24 rounded vertical capsules)
+const SegmentedProgressBar = ({ totalBars = 24, activeBars = 19, isLight = false }) => {
+  return (
+    <div className="flex items-center space-x-1 sm:space-x-1.5 w-full py-1">
+      {Array.from({ length: totalBars }).map((_, index) => {
+        const isActive = index < activeBars;
+        return (
+          <div
+            key={index}
+            className={`flex-1 h-6 sm:h-7 rounded-full transition-all duration-300 ${
+              isActive
+                ? 'bg-[#00C853] shadow-[0_0_6px_rgba(0,200,83,0.3)]'
+                : isLight
+                  ? 'bg-[#E5ECE5]'
+                  : 'bg-[#152B1D]'
+            }`}
+            title={`Segment ${index + 1} of ${totalBars} (${isActive ? 'Verified' : 'Pending'})`}
+          />
+        );
+      })}
+    </div>
+  );
+};
+
+// 5. Micro Bar Chart (Telemetry Volume)
+const MicroBarChart = ({ isLight = false }) => {
+  const bars = [
+    { label: 'Apr', height: '45%', active: false },
+    { label: 'May', height: '58%', active: false },
+    { label: 'Jun', height: '50%', active: false },
+    { label: 'Jul', height: '88%', active: true },
+  ];
+
+  return (
+    <div className="flex items-end justify-end space-x-2.5 h-16 sm:h-18">
+      {bars.map((bar, i) => (
+        <div key={i} className="flex flex-col items-center space-y-1.5 h-full justify-end">
+          <div
+            className={`w-3.5 sm:w-4 rounded-t-md transition-all duration-500 ${
+              bar.active
+                ? 'bg-[#00C853] shadow-[0_0_8px_rgba(0,200,83,0.35)]'
+                : isLight
+                  ? 'bg-[#E2ECE2]'
+                  : 'bg-[#173020]'
+            }`}
+            style={{ height: bar.height }}
+          />
+          <span className={`text-[8.5px] font-mono ${isLight ? 'text-[#7C9A88]' : 'text-[#557361]'}`}>
+            {bar.label}
+          </span>
+        </div>
+      ))}
+    </div>
+  );
+};
+
+// 6. Carousel Slider Indicator
+const CarouselIndicator = ({ isLight = false }) => {
+  return (
+    <div className="flex items-center space-x-1.5 pt-1">
+      <div className="w-8 h-1 rounded-full bg-[#00C853]" />
+      <div className={`w-2.5 h-1 rounded-full ${isLight ? 'bg-[#E2ECE2]' : 'bg-[#173020]'}`} />
+      <div className={`w-2.5 h-1 rounded-full ${isLight ? 'bg-[#E2ECE2]' : 'bg-[#173020]'}`} />
+      <div className={`w-2.5 h-1 rounded-full ${isLight ? 'bg-[#E2ECE2]' : 'bg-[#173020]'}`} />
+    </div>
+  );
+};
 
 // Bangladesh Districts List
 const BANGLADESH_DISTRICTS = [
@@ -60,6 +391,8 @@ const BANGLADESH_DISTRICTS = [
 
 const SaaSDashboard = () => {
   const navigate = useNavigate();
+  const { theme, toggleTheme } = useTheme();
+  const isLight = theme === 'light';
 
   // Active Menu / Tabs state
   const [activeMenu, setActiveMenu] = useState('Dashboard');
@@ -630,45 +963,62 @@ const SaaSDashboard = () => {
   const openTasksCount = tasks.filter(t => !t.completed).length;
 
   return (
-    <div className="pt-20 min-h-screen bg-[#040906] text-[#E0EFE7] flex relative platform-saas-dashboard">
+    <div className={`pt-20 min-h-screen flex relative platform-saas-dashboard transition-colors duration-300 ${
+      isLight ? 'bg-[#F4F6F4] text-[#0F2417]' : 'bg-[#040906] text-[#E0EFE7]'
+    }`}>
       
       {/* FLOAT TOAST NOTIFICATION */}
       {toast.show && (
-        <div className={`fixed bottom-6 right-6 z-50 flex items-center space-x-3 px-4.5 py-3.5 rounded-2xl shadow-xl border text-white transition-all transform duration-300 animate-bounce ${
+        <div className={`fixed bottom-6 right-6 z-50 flex items-center space-x-3 px-4.5 py-3.5 rounded-2xl shadow-xl border transition-all transform duration-300 animate-fade-in ${
           toast.type === 'success' 
-            ? 'bg-[#0F291B] border-[#4ADE80]/30' 
+            ? (isLight ? 'bg-[#EAF7EE] text-[#0B4D26] border-[#00C853]/40' : 'bg-[#0F291B] text-[#4ADE80] border-[#4ADE80]/30') 
             : toast.type === 'error'
-              ? 'bg-red-800 border-red-500/30'
-              : 'bg-[#0B170F] border-[#183021]'
+              ? (isLight ? 'bg-red-50 text-red-700 border-red-200' : 'bg-red-950/80 text-red-300 border-red-500/30')
+              : (isLight ? 'bg-white text-[#0F2417] border-[#DCE4DE]' : 'bg-[#0B170F] text-[#E0EFE7] border-[#183021]')
         }`}>
           {toast.type === 'success' ? (
-            <CheckCircle className="w-5 h-5 text-[#4ADE80]" />
+            <CheckCircle className={`w-5 h-5 ${isLight ? 'text-[#00C853]' : 'text-[#4ADE80]'}`} />
           ) : toast.type === 'error' ? (
-            <AlertCircle className="w-5 h-5 text-red-400" />
+            <AlertCircle className="w-5 h-5 text-red-500" />
           ) : (
-            <Info className="w-5 h-5 text-sky-400" />
+            <Info className="w-5 h-5 text-sky-500" />
           )}
           <span className="font-sans font-semibold text-xs tracking-wide">{toast.message}</span>
         </div>
       )}
 
-      {/* 1. Left Sidebar Navigation Panel */}
-      <aside className="w-[240px] bg-[#060D08] border-r border-[#122418] p-6 hidden lg:flex flex-col justify-between shrink-0">
-        <div className="space-y-8">
+      {/* 1. Left Sidebar Navigation Panel — Clean Soft Pill Floating Aesthetic */}
+      <aside className={`w-[250px] border-r p-5 hidden lg:flex flex-col justify-between shrink-0 transition-colors duration-300 ${
+        isLight ? 'bg-[#FFFFFF] border-[#E8ECE8]' : 'bg-[#060D08] border-[#122418]'
+      }`}>
+        <div className="space-y-7">
           
           {/* Logo */}
-          <Link to="/" className="flex items-center space-x-2.5 px-2 hover:opacity-80 transition-opacity">
-            <div className="w-8 h-8 rounded-lg bg-[#0D2B1A] border border-[#1B4D2E] flex items-center justify-center shadow-md">
-              <Compass className="w-5 h-5 text-[#4ADE80]" />
+          <Link to="/" className="flex items-center space-x-3 px-2 hover:opacity-85 transition-opacity">
+            <div className="w-9 h-9 rounded-xl bg-gradient-to-tr from-[#00C853] to-[#00E676] flex items-center justify-center shadow-md shadow-[#00C853]/20">
+              <Compass className="w-5 h-5 text-white" />
             </div>
-            <span className="font-sans font-bold text-lg text-white tracking-tight">CarbonZero</span>
+            <div>
+              <span className={`font-sans font-extrabold text-base tracking-tight block leading-tight ${
+                isLight ? 'text-[#0F2417]' : 'text-white'
+              }`}>
+                CarbonZero
+              </span>
+              <span className={`text-[9px] font-mono block ${isLight ? 'text-[#557361]' : 'text-[#7C9A88]'}`}>
+                ESG Registry OS
+              </span>
+            </div>
           </Link>
 
           {/* Menu Sections */}
           <div className="space-y-6">
             <div>
-              <span className="font-mono text-[9px] text-[#557361] uppercase tracking-wider block px-2 mb-2 font-bold">Menu</span>
-              <nav className="space-y-1">
+              <span className={`font-mono text-[9px] uppercase tracking-wider block px-3 mb-2.5 font-bold ${
+                isLight ? 'text-[#8FA899]' : 'text-[#557361]'
+              }`}>
+                Menu
+              </span>
+              <nav className="space-y-1.5">
                 {[
                   { name: 'Dashboard', icon: Grid },
                   { name: 'Materiality', icon: Compass },
@@ -684,18 +1034,28 @@ const SaaSDashboard = () => {
                     <button
                       key={item.name}
                       onClick={() => setActiveMenu(item.name)}
-                      className={`w-full flex items-center justify-between px-3 py-2 rounded-lg text-sm font-sans font-semibold transition-all ${
+                      className={`w-full flex items-center justify-between px-3.5 py-2.5 rounded-2xl text-xs font-sans transition-all duration-200 cursor-pointer ${
                         isActive 
-                          ? 'bg-[#0D2B1A] text-[#4ADE80] border border-[#1B4D2E]' 
-                          : 'text-[#7C9A88] hover:bg-[#0A160F] hover:text-white'
+                          ? (isLight 
+                              ? 'bg-[#F2F7F3] text-[#0F2417] font-bold border border-[#DFE8E1] shadow-[0_2px_8px_rgba(0,0,0,0.04)]' 
+                              : 'bg-[#0D2B1A] text-white font-bold border border-[#1B4D2E] shadow-[0_4px_16px_rgba(0,200,83,0.12)]')
+                          : (isLight 
+                              ? 'text-[#557361] hover:bg-[#F4F7F4] hover:text-[#0F2417] font-medium' 
+                              : 'text-[#7C9A88] hover:bg-[#0A160F] hover:text-white font-medium')
                       }`}
                     >
-                      <div className="flex items-center space-x-2.5">
-                        <Icon className={`w-4 h-4 ${isActive ? 'text-[#4ADE80]' : 'text-[#557361]'}`} />
-                        <span>{item.name}</span>
+                      <div className="flex items-center space-x-3">
+                        <div className={`w-7 h-7 rounded-xl flex items-center justify-center transition-all ${
+                          isActive 
+                            ? 'bg-[#00C853] text-white shadow-sm' 
+                            : (isLight ? 'text-[#557361] bg-transparent' : 'text-[#7C9A88] bg-transparent')
+                        }`}>
+                          <Icon className="w-3.5 h-3.5" />
+                        </div>
+                        <span className="text-xs">{item.name}</span>
                       </div>
                       {item.badge && (
-                        <span className="bg-[#EF4444] text-white text-[9px] font-bold px-1.5 py-0.5 rounded-full">
+                        <span className="bg-[#EF4444] text-white text-[9px] font-bold px-2 py-0.5 rounded-full shadow-sm">
                           {item.badge}
                         </span>
                       )}
@@ -706,8 +1066,12 @@ const SaaSDashboard = () => {
             </div>
 
             <div>
-              <span className="font-mono text-[9px] text-[#557361] uppercase tracking-wider block px-2 mb-2 font-bold">General</span>
-              <nav className="space-y-1">
+              <span className={`font-mono text-[9px] uppercase tracking-wider block px-3 mb-2.5 font-bold ${
+                isLight ? 'text-[#8FA899]' : 'text-[#557361]'
+              }`}>
+                General
+              </span>
+              <nav className="space-y-1.5">
                 {[
                   { name: 'Settings', icon: Settings },
                   { name: 'Help', icon: HelpCircle },
@@ -725,14 +1089,24 @@ const SaaSDashboard = () => {
                           setActiveMenu(item.name);
                         }
                       }}
-                      className={`w-full flex items-center space-x-2.5 px-3 py-2 rounded-lg text-sm font-sans font-semibold transition-all ${
+                      className={`w-full flex items-center space-x-3 px-3.5 py-2.5 rounded-2xl text-xs font-sans transition-all duration-200 cursor-pointer ${
                         isActive 
-                          ? 'bg-[#0D2B1A] text-[#4ADE80] border border-[#1B4D2E]' 
-                          : 'text-[#7C9A88] hover:bg-[#0A160F] hover:text-white'
+                          ? (isLight 
+                              ? 'bg-[#F2F7F3] text-[#0F2417] font-bold border border-[#DFE8E1] shadow-[0_2px_8px_rgba(0,0,0,0.04)]' 
+                              : 'bg-[#0D2B1A] text-white font-bold border border-[#1B4D2E] shadow-[0_4px_16px_rgba(0,200,83,0.12)]')
+                          : (isLight 
+                              ? 'text-[#557361] hover:bg-[#F4F7F4] hover:text-[#0F2417] font-medium' 
+                              : 'text-[#7C9A88] hover:bg-[#0A160F] hover:text-white font-medium')
                       }`}
                     >
-                      <Icon className={`w-4 h-4 ${isActive ? 'text-[#4ADE80]' : 'text-[#557361]'}`} />
-                      <span>{item.name}</span>
+                      <div className={`w-7 h-7 rounded-xl flex items-center justify-center transition-all ${
+                        isActive 
+                          ? 'bg-[#00C853] text-white shadow-sm' 
+                          : (isLight ? 'text-[#557361] bg-transparent' : 'text-[#7C9A88] bg-transparent')
+                      }`}>
+                        <Icon className="w-3.5 h-3.5" />
+                      </div>
+                      <span className="text-xs">{item.name}</span>
                     </button>
                   );
                 })}
@@ -742,14 +1116,23 @@ const SaaSDashboard = () => {
         </div>
 
         {/* Mobile Promo Card */}
-        <div className="bg-gradient-to-br from-[#0D2B1A] to-[#143D25] border border-[#1B4D2E] text-white p-4 rounded-2xl relative overflow-hidden shadow-lg">
-          <div className="absolute -right-4 -bottom-4 w-20 h-20 bg-white/5 rounded-full"></div>
-          <h4 className="font-sans font-bold text-xs mb-1">Track ESG on the go</h4>
-          <p className="text-[10px] text-white/70 mb-3 leading-relaxed">Download our mobile companion app to sync emissions feeds.</p>
+        <div className={`p-4 rounded-3xl relative overflow-hidden transition-all ${
+          isLight 
+            ? 'bg-gradient-to-br from-[#EAF5ED] to-[#DCEDE1] border border-[#CCE2D3] text-[#0F2417] shadow-sm' 
+            : 'bg-gradient-to-br from-[#0D2B1A] to-[#143D25] border border-[#1B4D2E] text-white shadow-lg'
+        }`}>
+          <div className="absolute -right-4 -bottom-4 w-20 h-20 bg-white/10 rounded-full blur-sm"></div>
+          <div className="flex items-center space-x-1.5 mb-1.5">
+            <span className="w-2 h-2 rounded-full bg-[#00C853]"></span>
+            <h4 className="font-sans font-bold text-xs tracking-tight">Track ESG on the go</h4>
+          </div>
+          <p className={`text-[10px] mb-3 leading-relaxed font-sans ${isLight ? 'text-[#557361]' : 'text-white/70'}`}>
+            Download our mobile companion app to sync live emissions telemetry.
+          </p>
           <button 
             disabled={downloadingApp}
             onClick={handleDownloadApp}
-            className="bg-[#00C853] hover:bg-[#00E676] text-[#040906] font-sans font-bold text-[10px] px-3 py-1.5 rounded-lg transition-colors w-full flex items-center justify-center space-x-1 shadow-sm"
+            className="bg-[#00C853] hover:bg-[#00E676] text-[#040906] font-sans font-bold text-[10px] px-3.5 py-2 rounded-xl transition-all w-full flex items-center justify-center space-x-1 shadow-sm cursor-pointer"
           >
             {downloadingApp ? (
               <>
@@ -768,52 +1151,60 @@ const SaaSDashboard = () => {
         
         {/* Auditor Read-only Active Watermark Banner */}
         {isAuditorMode && (
-          <div className="bg-red-50 border border-red-200 rounded-2xl p-4 flex items-center justify-between text-red-800 animate-pulse mb-6">
+          <div className="bg-red-500/10 border border-red-500/30 rounded-2xl p-4 flex items-center justify-between text-red-500 animate-pulse mb-6">
             <div className="flex items-center space-x-2">
-              <AlertCircle className="w-5 h-5 text-red-600" />
+              <AlertCircle className="w-5 h-5 text-red-500" />
               <span className="text-xs font-sans font-bold uppercase tracking-wider">
                 Auditor Assurance Lock Active — System Read-only Mode (ISAE 3410)
               </span>
             </div>
-            <span className="text-[10px] font-mono font-bold bg-red-100 text-red-700 px-2 py-0.5 rounded">
+            <span className="text-[10px] font-mono font-bold bg-red-500/20 text-red-500 px-2 py-0.5 rounded">
               Locked
             </span>
           </div>
         )}
 
-        {/* Top Header */}
-        <header className="flex flex-col sm:flex-row justify-between sm:items-center gap-4 border-b border-[#122418] pb-6 relative z-30">
+        {/* Top Header — Elegant Search Pill, Action Buttons, Theme Switch & Profile */}
+        <header className={`flex flex-col sm:flex-row justify-between sm:items-center gap-4 border-b pb-6 relative z-30 transition-colors ${
+          isLight ? 'border-[#E8ECE8]' : 'border-[#122418]'
+        }`}>
           
-          {/* Search bar */}
-          <div className="relative w-full max-w-xs">
-            <Search className="w-4 h-4 text-[#557361] absolute left-3 top-1/2 transform -translate-y-1/2" />
+          {/* Rounded-full Search pill */}
+          <div className="relative w-full max-w-sm">
+            <Search className={`w-4 h-4 absolute left-3.5 top-1/2 transform -translate-y-1/2 ${
+              isLight ? 'text-[#7D9A8A]' : 'text-[#7C9A88]'
+            }`} />
             <input 
               type="text" 
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
               placeholder="Search reports, team, projects... (Ctrl + F)" 
-              className="w-full pl-9 pr-4 py-2 border border-[#173020] rounded-xl text-xs font-sans placeholder-[#557361] focus:outline-none focus:border-[#00C853] bg-[#08130C] text-[#E0EFE7]"
+              className={`w-full pl-10 pr-9 py-2.5 rounded-full text-xs font-sans transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-[#00C853]/40 ${
+                isLight 
+                  ? 'bg-white border border-[#DCE4DE] text-[#0F2417] placeholder-[#8FA899] shadow-sm' 
+                  : 'bg-[#08130C] border border-[#152B1D] text-white placeholder-[#557361]'
+              }`}
             />
             {searchQuery && (
               <button 
                 onClick={() => setSearchQuery('')}
-                className="absolute right-3 top-1/2 transform -translate-y-1/2 text-xs text-[#7C9A88] hover:text-white"
+                className="absolute right-3 top-1/2 transform -translate-y-1/2 text-xs text-[#7C9A88] hover:text-[#00C853]"
               >
                 Clear
               </button>
             )}
           </div>
 
-          {/* User profile & Actions */}
-          <div className="flex items-center justify-between sm:justify-end gap-4">
+          {/* User Profile & Actions */}
+          <div className="flex items-center justify-between sm:justify-end gap-3 flex-wrap">
             
-            {/* Top action buttons */}
+            {/* Top Action Pills */}
             <div className="flex items-center space-x-2">
               <button 
                 onClick={() => setIsAddProjectOpen(true)}
-                className="bg-[#00C853] hover:bg-[#00E676] text-[#040906] font-sans font-bold text-xs px-4 py-2 rounded-xl transition-all shadow-md shadow-[#00C853]/20 flex items-center space-x-1.5"
+                className="bg-[#00C853] hover:bg-[#00E676] text-[#040906] font-sans font-bold text-xs px-4 py-2 rounded-full transition-all shadow-md shadow-[#00C853]/20 flex items-center space-x-1.5 cursor-pointer"
               >
-                <Plus className="w-3.5 h-3.5" />
+                <Plus className="w-3.5 h-3.5 text-[#040906]" />
                 <span>Add Project</span>
               </button>
               <button 
@@ -821,33 +1212,63 @@ const SaaSDashboard = () => {
                   const inputEl = document.getElementById('drag-file-input');
                   if (inputEl) inputEl.click();
                 }}
-                className="bg-[#08130C] border border-[#152B1D] hover:bg-[#0D1F14] text-[#E0EFE7] font-sans font-bold text-xs px-4 py-2 rounded-xl transition-all shadow-sm"
+                className={`font-sans font-bold text-xs px-4 py-2 rounded-full transition-all cursor-pointer ${
+                  isLight 
+                    ? 'bg-white border border-[#DCE4DE] hover:bg-[#F4F7F4] text-[#0F2417] shadow-sm' 
+                    : 'bg-[#08130C] border border-[#152B1D] hover:bg-[#0F2417] text-[#E0EFE7]'
+                }`}
               >
                 Import Data
               </button>
             </div>
 
-            {/* Profile & Notifications Bell */}
-            <div className="flex items-center space-x-3 pl-4 border-l border-[#122418] relative">
+            {/* Profile, Theme Toggle & Notifications Bell */}
+            <div className={`flex items-center space-x-3 pl-3 border-l relative ${
+              isLight ? 'border-[#E8ECE8]' : 'border-[#122418]'
+            }`}>
+              
+              {/* Theme Toggle Button */}
+              <button
+                id="dashboard-theme-toggle"
+                onClick={toggleTheme}
+                className="theme-toggle cursor-pointer"
+                aria-label={theme === 'dark' ? 'Switch to light mode' : 'Switch to dark mode'}
+                title={theme === 'dark' ? 'Switch to light mode' : 'Switch to dark mode'}
+              >
+                <Sun size={16} className="icon icon-sun text-amber" />
+                <Moon size={16} className="icon icon-moon text-[#00C853]" />
+              </button>
+
+              {/* Notification Bell */}
               <button 
                 onClick={() => setIsNotificationsOpen(!isNotificationsOpen)}
-                className="relative p-1.5 rounded-full hover:bg-[#08130C] text-[#7C9A88] hover:text-[#00C853] transition-colors"
+                className={`relative p-2 rounded-full transition-colors cursor-pointer ${
+                  isLight 
+                    ? 'bg-white border border-[#E8ECE8] text-[#557361] hover:text-[#00C853] shadow-sm' 
+                    : 'bg-[#08130C] border border-[#152B1D] text-[#7C9A88] hover:text-[#00C853]'
+                }`}
               >
                 {unreadNotificationsCount > 0 && (
                   <span className="absolute top-1.5 right-1.5 w-2 h-2 rounded-full bg-[#EF4444] animate-pulse"></span>
                 )}
-                <Bell className="w-4.5 h-4.5" />
+                <Bell className="w-4 h-4" />
               </button>
 
               {/* Notifications Dropdown Panel */}
               {isNotificationsOpen && (
-                <div className="absolute right-0 top-12 w-80 bg-[#08130C] border border-[#152B1D] rounded-2xl shadow-2xl p-4 space-y-3 z-50 text-left">
-                  <div className="flex justify-between items-center pb-2 border-b border-[#122418]">
-                    <span className="font-sans font-bold text-sm text-white">Notifications</span>
+                <div className={`absolute right-0 top-12 w-80 rounded-2xl shadow-2xl p-4 space-y-3 z-50 text-left border ${
+                  isLight 
+                    ? 'bg-white border-[#E2E8E3] text-[#0F2417]' 
+                    : 'bg-[#08130C] border-[#152B1D] text-white'
+                }`}>
+                  <div className={`flex justify-between items-center pb-2 border-b ${
+                    isLight ? 'border-[#E8ECE8]' : 'border-[#122418]'
+                  }`}>
+                    <span className="font-sans font-bold text-sm">Notifications</span>
                     {unreadNotificationsCount > 0 && (
                       <button 
                         onClick={markAllNotificationsRead}
-                        className="text-[10px] font-sans font-semibold text-[#4ADE80] hover:underline"
+                        className="text-[10px] font-sans font-semibold text-[#00C853] hover:underline"
                       >
                         Mark all as read
                       </button>
@@ -858,11 +1279,15 @@ const SaaSDashboard = () => {
                       <div className="text-xs text-[#7C9A88] py-4 text-center">No alerts or notifications.</div>
                     ) : (
                       notifications.map(n => (
-                        <div key={n.id} className={`p-2 rounded-lg text-xs flex items-start gap-2.5 ${n.read ? 'bg-transparent' : 'bg-[#0D2B1A] border-l-2 border-[#00C853]'}`}>
+                        <div key={n.id} className={`p-2.5 rounded-xl text-xs flex items-start gap-2.5 ${
+                          n.read 
+                            ? 'bg-transparent' 
+                            : (isLight ? 'bg-[#F2F7F3] border border-[#00C853]/20' : 'bg-[#0D2B1A]/40 border border-[#00C853]/30')
+                        }`}>
                           <div className={`w-1.5 h-1.5 mt-1.5 rounded-full ${n.read ? 'bg-transparent' : 'bg-[#00C853]'}`}></div>
                           <div className="flex-1">
-                            <p className="text-[#E0EFE7] font-sans leading-tight">{n.text}</p>
-                            <span className="text-[9px] text-[#557361] font-mono block mt-1">{n.time}</span>
+                            <p className="font-sans leading-tight">{n.text}</p>
+                            <span className={`text-[9px] font-mono block mt-1 ${isLight ? 'text-[#8FA899]' : 'text-[#7C9A88]'}`}>{n.time}</span>
                           </div>
                         </div>
                       ))
@@ -871,17 +1296,23 @@ const SaaSDashboard = () => {
                 </div>
               )}
               
-              <div className="flex items-center space-x-2.5">
-                <div className="w-8 h-8 rounded-full bg-[#08130C] overflow-hidden border border-[#1B4D2E]">
+              {/* User Profile Pill (Mohammad Tanveer - Admin) */}
+              <div className={`flex items-center space-x-2.5 px-3 py-1.5 rounded-full border shadow-sm ${
+                isLight ? 'bg-white border-[#E8ECE8]' : 'bg-[#08130C] border-[#152B1D]'
+              }`}>
+                <div className="w-7 h-7 rounded-full overflow-hidden border border-[#00C853]/40">
                   <img 
                     src="https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=100&q=80" 
                     alt="User profile" 
                     className="w-full h-full object-cover"
+                    loading="lazy"
+                    width="28"
+                    height="28"
                   />
                 </div>
-                <div className="hidden md:block text-left">
-                  <div className="font-sans font-bold text-xs text-white">Mohammad Tanveer</div>
-                  <div className="text-[10px] text-[#7C9A88] font-mono">tanveer@carbonzero.io</div>
+                <div className="hidden md:block text-left leading-tight">
+                  <div className={`font-sans font-bold text-xs ${isLight ? 'text-[#0F2417]' : 'text-white'}`}>Mohammad Tanveer</div>
+                  <div className="text-[9px] text-[#00C853] font-mono font-medium">Admin • ESG Lead</div>
                 </div>
               </div>
             </div>
@@ -892,118 +1323,525 @@ const SaaSDashboard = () => {
         {/* -------------------- TAB CONTENT: DASHBOARD -------------------- */}
         {activeMenu === 'Dashboard' && (
           <>
-            {/* Dashboard Title & Introduction */}
+            {/* Dashboard Title & Bangladesh Geolocation Selector */}
             <div className="flex flex-col md:flex-row justify-between md:items-center gap-4">
               <div>
-                <h1 className="font-sans font-bold text-3xl text-white">Dashboard</h1>
-                <p className="text-sm text-[#7C9A88] mt-1 font-sans">Plan, prioritize, and verify your corporate emissions with ease.</p>
+                <div className="flex items-center space-x-2 mb-1">
+                  <h1 className={`font-sans font-black text-2xl lg:text-3xl tracking-tight ${
+                    isLight ? 'text-[#0F2417]' : 'text-white'
+                  }`}>
+                    ESG Progress
+                  </h1>
+                  <span className={`px-2.5 py-0.5 rounded-full text-[10px] font-mono font-bold uppercase ${
+                    isLight ? 'bg-[#E8F7EC] text-[#0B4D26] border border-[#00C853]/30' : 'bg-[#0D2B1A] text-[#4ADE80] border border-[#1B4D2E]'
+                  }`}>
+                    Live Active
+                  </span>
+                </div>
+                <p className={`text-xs font-sans ${isLight ? 'text-[#557361]' : 'text-[#7C9A88]'}`}>
+                  Plan, prioritize, and verify your corporate emissions with ease.
+                </p>
               </div>
 
-              {/* Bangladesh Geolocation Selector */}
-              <div className="flex items-center space-x-2 bg-[#08130C] px-3 py-1.5 rounded-xl border border-[#152B1D] self-start md:self-auto">
-                <MapPin className="w-4 h-4 text-[#00C853]" />
-                <span className="text-xs font-sans text-[#7C9A88]">District:</span>
+              {/* Bangladesh Geolocation Selector Pill */}
+              <div className={`flex items-center space-x-2 px-3 py-1.5 rounded-full border self-start md:self-auto shadow-sm ${
+                isLight ? 'bg-white border-[#E8ECE8]' : 'bg-[#08130C] border-[#152B1D]'
+              }`}>
+                <MapPin className="w-3.5 h-3.5 text-[#00C853]" />
+                <span className={`text-[11px] font-sans ${isLight ? 'text-[#557361]' : 'text-[#7C9A88]'}`}>District:</span>
                 <select 
                   value={selectedDistrict}
                   onChange={(e) => {
                     setSelectedDistrict(e.target.value);
                     showToast(`District branch updated to ${e.target.value}.`, "info");
                   }}
-                  className="text-xs font-sans font-bold text-white border-none bg-transparent focus:ring-0 cursor-pointer"
+                  className={`text-xs font-sans font-bold border-none bg-transparent focus:ring-0 cursor-pointer ${
+                    isLight ? 'text-[#0F2417]' : 'text-white'
+                  }`}
                 >
                   {BANGLADESH_DISTRICTS.map(dist => (
-                    <option key={dist} value={dist} className="bg-[#08130C] text-white">{dist}</option>
+                    <option key={dist} value={dist} className={isLight ? 'bg-white text-[#0F2417]' : 'bg-[#08130C] text-white'}>
+                      {dist}
+                    </option>
                   ))}
                 </select>
                 <button 
                   onClick={detectLocation}
-                  className="font-mono text-[9px] bg-[#00C853]/15 text-[#4ADE80] hover:bg-[#00C853]/25 px-2 py-0.5 rounded transition-all border border-[#1B4D2E]"
+                  className={`font-mono text-[9px] px-2.5 py-1 rounded-full font-bold transition-all cursor-pointer ${
+                    isLight 
+                      ? 'bg-[#E8F7EC] text-[#0B4D26] hover:bg-[#D6F0DC] border border-[#00C853]/30' 
+                      : 'bg-[#00C853]/15 text-[#4ADE80] hover:bg-[#00C853]/25 border border-[#1B4D2E]'
+                  }`}
                 >
                   Auto Select
                 </button>
               </div>
             </div>
 
-            {/* KPI Summary Cards Grid */}
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
-              {/* Card 1: Total Emissions */}
-              <div className="bg-gradient-to-br from-[#0D2B1A] via-[#0A2215] to-[#07180F] border border-[#1B4D2E] text-white p-6 rounded-2xl shadow-lg relative overflow-hidden flex flex-col justify-between aspect-[1.6]">
-                <div>
-                  <div className="font-mono text-[9px] text-[#A7F3D0] uppercase tracking-wider font-bold mb-3">Total Carbon footprint</div>
-                  <div className="font-sans font-bold text-3xl lg:text-4xl tracking-tight text-white">
-                    {results.total} <span className="text-xs font-mono font-normal text-[#A7F3D0]">tCO2e</span>
+            {/* ============================================================= */}
+            {/* ROW 1: EXECUTIVE SHOWCASE — IMPACT OVERVIEW & EMISSIONS TREND */}
+            {/* ============================================================= */}
+            <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
+              
+              {/* Card 1: Impact Overview (Pills + Radial Gauge) */}
+              <div className={`lg:col-span-5 rounded-3xl p-6 lg:p-7 border flex flex-col justify-between transition-all duration-300 ${
+                isLight 
+                  ? 'bg-white border-[#E8ECE8] shadow-[0_10px_30px_-4px_rgba(0,0,0,0.04),0_2px_8px_rgba(0,0,0,0.02)]' 
+                  : 'bg-[#08130C] border-[#152B1D] shadow-[0_16px_40px_-10px_rgba(0,0,0,0.6)]'
+              }`}>
+                {/* Header */}
+                <div className="flex items-center justify-between pb-4">
+                  <div className="flex items-center space-x-2.5">
+                    <div className="w-7 h-7 rounded-xl bg-[#00C853]/15 flex items-center justify-center">
+                      <Leaf className="w-4 h-4 text-[#00C853]" />
+                    </div>
+                    <h3 className={`font-sans font-bold text-base tracking-tight ${isLight ? 'text-[#0F2417]' : 'text-white'}`}>
+                      Impact Overview
+                    </h3>
                   </div>
+                  <button className={`p-1.5 rounded-full hover:opacity-80 transition-opacity ${isLight ? 'text-[#7D9A8A]' : 'text-[#7C9A88]'}`}>
+                    <MoreHorizontal className="w-4 h-4" />
+                  </button>
                 </div>
-                <div className="flex justify-between items-center mt-4">
-                  <span className="text-[10px] text-[#4ADE80] font-mono bg-white/10 px-2.5 py-1 rounded-full flex items-center border border-white/10">
-                    <TrendingDown className="w-3 h-3 mr-1" />
-                    {reductionTarget}% reduced
-                  </span>
-                  <span className="text-[9px] text-[#A7F3D0] font-sans">vs last year</span>
+
+                {/* Content: Left Stacked Pills + Right SemiCircular Gauge */}
+                <div className="grid grid-cols-1 sm:grid-cols-12 gap-5 items-center py-2">
+                  
+                  {/* Left Column: 3 Tactile Metric Pills */}
+                  <div className="sm:col-span-7 space-y-2.5">
+                    
+                    {/* Metric 1 */}
+                    <div className={`p-3 rounded-2xl border transition-all ${
+                      isLight ? 'bg-[#F7FAF7] border-[#E8ECE8]' : 'bg-[#040906] border-[#152B1D]'
+                    }`}>
+                      <div className="flex items-center justify-between">
+                        <span className={`text-[10px] font-sans font-medium ${isLight ? 'text-[#557361]' : 'text-[#7C9A88]'}`}>
+                          Emissions Reduced
+                        </span>
+                        <span className={`text-[9px] font-mono font-bold px-1.5 py-0.5 rounded-full ${
+                          isLight ? 'bg-[#E8F7EC] text-[#0B4D26]' : 'bg-[#00C853]/15 text-[#4ADE80]'
+                        }`}>
+                          +14%
+                        </span>
+                      </div>
+                      <div className="mt-1 flex items-baseline space-x-1.5">
+                        <span className={`font-sans font-extrabold text-lg tracking-tight ${isLight ? 'text-[#0F2417]' : 'text-white'}`}>
+                          2,450
+                        </span>
+                        <span className={`text-[11px] font-mono ${isLight ? 'text-[#7D9A8A]' : 'text-[#7C9A88]'}`}>
+                          tCO2e
+                        </span>
+                      </div>
+                    </div>
+
+                    {/* Metric 2 */}
+                    <div className={`p-3 rounded-2xl border transition-all ${
+                      isLight ? 'bg-[#F7FAF7] border-[#E8ECE8]' : 'bg-[#040906] border-[#152B1D]'
+                    }`}>
+                      <div className="flex items-center justify-between">
+                        <span className={`text-[10px] font-sans font-medium ${isLight ? 'text-[#557361]' : 'text-[#7C9A88]'}`}>
+                          Projects Tracked
+                        </span>
+                        <span className="w-2 h-2 rounded-full bg-[#00C853]"></span>
+                      </div>
+                      <div className="mt-1 flex items-baseline space-x-1.5">
+                        <span className={`font-sans font-extrabold text-lg tracking-tight ${isLight ? 'text-[#0F2417]' : 'text-white'}`}>
+                          12 Active
+                        </span>
+                        <span className={`text-[11px] font-sans ${isLight ? 'text-[#7D9A8A]' : 'text-[#7C9A88]'}`}>
+                          initiatives
+                        </span>
+                      </div>
+                    </div>
+
+                    {/* Metric 3 */}
+                    <div className={`p-3 rounded-2xl border transition-all ${
+                      isLight ? 'bg-[#F7FAF7] border-[#E8ECE8]' : 'bg-[#040906] border-[#152B1D]'
+                    }`}>
+                      <div className="flex items-center justify-between">
+                        <span className={`text-[10px] font-sans font-medium ${isLight ? 'text-[#557361]' : 'text-[#7C9A88]'}`}>
+                          Teams Involved
+                        </span>
+                        <Users className={`w-3.5 h-3.5 ${isLight ? 'text-[#7D9A8A]' : 'text-[#557361]'}`} />
+                      </div>
+                      <div className="mt-1 flex items-baseline space-x-1.5">
+                        <span className={`font-sans font-extrabold text-lg tracking-tight ${isLight ? 'text-[#0F2417]' : 'text-white'}`}>
+                          8 Units
+                        </span>
+                        <span className={`text-[11px] font-sans ${isLight ? 'text-[#7D9A8A]' : 'text-[#7C9A88]'}`}>
+                          cross-functional
+                        </span>
+                      </div>
+                    </div>
+
+                  </div>
+
+                  {/* Right Column: Radial Arch Gauge with Rating 9.3 */}
+                  <div className="sm:col-span-5 flex flex-col items-center justify-center pt-2 sm:pt-0">
+                    <SemiCircularGauge 
+                      value={93} 
+                      max={100} 
+                      label="Rating" 
+                      sublabel="9.3 AI score" 
+                      accentColor="#00C853" 
+                      isLight={isLight} 
+                    />
+                    <div className={`mt-3 px-3 py-1 rounded-full text-[10px] font-sans font-bold flex items-center space-x-1 border shadow-xs ${
+                      isLight 
+                        ? 'bg-[#EAF7EE] text-[#0B4D26] border-[#00C853]/30' 
+                        : 'bg-[#0D2B1A] text-[#4ADE80] border-[#1B4D2E]'
+                    }`}>
+                      <Sparkles className="w-3 h-3 text-[#00C853]" />
+                      <span>Excellence Tier</span>
+                    </div>
+                  </div>
+
+                </div>
+
+                {/* Footer Insight */}
+                <div className={`pt-3 border-t text-[11px] font-sans flex items-center justify-between ${
+                  isLight ? 'border-[#E8ECE8] text-[#557361]' : 'border-[#122418] text-[#7C9A88]'
+                }`}>
+                  <span>Audited against ISO 14064-1</span>
+                  <span className="font-mono text-[#00C853] font-bold">Top 5% in Sector</span>
                 </div>
               </div>
 
-              {/* Card 2: Scope 1 */}
-              <div className="bg-[#08130C] border border-[#152B1D] p-6 rounded-2xl shadow-sm flex flex-col justify-between aspect-[1.6] text-white">
-                <div>
-                  <div className="font-mono text-[9px] text-[#7C9A88] uppercase tracking-wider font-bold mb-3">Scope 1 (Direct)</div>
-                  <div className="font-sans font-bold text-3xl tracking-tight text-white">
-                    {results.scope1} <span className="text-xs font-mono font-normal text-[#7C9A88]">tCO2e</span>
+              {/* Card 2: Emissions Trend (Wide Catmull-Rom Area Chart) */}
+              <div className={`lg:col-span-7 rounded-3xl p-6 lg:p-7 border flex flex-col justify-between transition-all duration-300 ${
+                isLight 
+                  ? 'bg-white border-[#E8ECE8] shadow-[0_10px_30px_-4px_rgba(0,0,0,0.04),0_2px_8px_rgba(0,0,0,0.02)]' 
+                  : 'bg-[#08130C] border-[#152B1D] shadow-[0_16px_40px_-10px_rgba(0,0,0,0.6)]'
+              }`}>
+                {/* Header with Title & Metric Badges */}
+                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 pb-2">
+                  <div>
+                    <h3 className={`font-sans font-bold text-base tracking-tight ${isLight ? 'text-[#0F2417]' : 'text-white'}`}>
+                      Emissions Trend
+                    </h3>
+                    <p className={`text-[11px] font-sans ${isLight ? 'text-[#557361]' : 'text-[#7C9A88]'}`}>
+                      12-Month Corporate Carbon Trajectory (Jan – Dec 2026)
+                    </p>
+                  </div>
+                  <div className="flex items-center space-x-2">
+                    <span className={`px-2.5 py-1 rounded-full text-[10px] font-mono font-medium border ${
+                      isLight ? 'bg-[#F7FAF7] border-[#E8ECE8] text-[#557361]' : 'bg-[#040906] border-[#152B1D] text-[#7C9A88]'
+                    }`}>
+                      Scope 1-3 Baseline
+                    </span>
+                    <span className={`px-2.5 py-1 rounded-full text-[10px] font-mono font-bold flex items-center space-x-1 ${
+                      isLight ? 'bg-[#E8F7EC] text-[#0B4D26] border border-[#00C853]/30' : 'bg-[#00C853]/15 text-[#4ADE80] border border-[#1B4D2E]'
+                    }`}>
+                      <TrendingDown className="w-3 h-3 text-[#00C853]" />
+                      <span>(+12%) improvement since January</span>
+                    </span>
                   </div>
                 </div>
-                <div className="flex justify-between items-center mt-4 text-[10px] text-[#7C9A88]">
-                  <span>Boilers, Generators, Vehicles</span>
+
+                {/* Spline Area Chart */}
+                <div className="py-2">
+                  <EmissionsTrendChart isLight={isLight} />
+                </div>
+
+                {/* Chart Legend & Telemetry Status */}
+                <div className={`pt-3 border-t text-[11px] font-sans flex flex-wrap items-center justify-between gap-2 ${
+                  isLight ? 'border-[#E8ECE8] text-[#557361]' : 'border-[#122418] text-[#7C9A88]'
+                }`}>
+                  <div className="flex items-center space-x-4">
+                    <div className="flex items-center space-x-1.5">
+                      <span className="w-2.5 h-2.5 rounded-full bg-[#00C853]"></span>
+                      <span>Target Path</span>
+                    </div>
+                    <div className="flex items-center space-x-1.5">
+                      <span className={`w-2.5 h-2.5 rounded-full ${isLight ? 'bg-[#A3B8AC]' : 'bg-[#1D4A2F]'}`}></span>
+                      <span>Prior Year Actual</span>
+                    </div>
+                  </div>
+                  <span className="font-mono text-[10px]">Updated 12m ago via IoT API</span>
+                </div>
+              </div>
+
+            </div>
+
+            {/* ============================================================= */}
+            {/* ROW 2: DEEP TELEMETRY — CARBON OVERVIEW, NEW ESG DATA, ANALYZER */}
+            {/* ============================================================= */}
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+              
+              {/* Card 1: Carbon Overview */}
+              <div className={`rounded-3xl p-6 border flex flex-col justify-between transition-all duration-300 ${
+                isLight 
+                  ? 'bg-white border-[#E8ECE8] shadow-[0_10px_30px_-4px_rgba(0,0,0,0.04),0_2px_8px_rgba(0,0,0,0.02)]' 
+                  : 'bg-[#08130C] border-[#152B1D] shadow-[0_16px_40px_-10px_rgba(0,0,0,0.6)]'
+              }`}>
+                {/* Header */}
+                <div className="flex items-center justify-between pb-3">
+                  <h3 className={`font-sans font-bold text-sm tracking-tight ${isLight ? 'text-[#0F2417]' : 'text-white'}`}>
+                    Carbon Overview
+                  </h3>
+                  <button className={`p-1 rounded-full hover:opacity-80 transition-opacity ${isLight ? 'text-[#7D9A8A]' : 'text-[#7C9A88]'}`}>
+                    <MoreHorizontal className="w-4 h-4" />
+                  </button>
+                </div>
+
+                {/* Gauge with 78% Real-Time Insights */}
+                <div className="flex flex-col items-center justify-center py-2">
+                  <SemiCircularGauge 
+                    value={78} 
+                    max={100} 
+                    label="78%" 
+                    sublabel="real-time insights" 
+                    accentColor="#00C853" 
+                    isLight={isLight} 
+                  />
+                  
+                  {/* Footprint Readout Underneath Gauge */}
+                  <div className="mt-3 text-center">
+                    <div className={`font-sans font-extrabold text-2xl tracking-tight ${isLight ? 'text-[#0F2417]' : 'text-white'}`}>
+                      {results.total} <span className="text-xs font-mono font-normal text-[#00C853]">tCO2e</span>
+                    </div>
+                    <div className="flex items-center justify-center space-x-6 text-[10px] font-mono text-[#7C9A88] mt-1">
+                      <span>0%</span>
+                      <span className="text-[#00C853] font-bold">Optimal Target</span>
+                      <span>100%</span>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Eco Trajectory Pill */}
+                <div className={`mt-3 p-2.5 rounded-2xl border text-center text-xs font-sans font-semibold flex items-center justify-center space-x-2 ${
+                  isLight ? 'bg-[#F7FAF7] border-[#E8ECE8] text-[#0F2417]' : 'bg-[#040906] border-[#152B1D] text-white'
+                }`}>
+                  <span className="w-2 h-2 rounded-full bg-[#00C853] animate-pulse"></span>
+                  <span>Optimal Reduction Trajectory</span>
+                </div>
+              </div>
+
+              {/* Card 2: New ESG Data */}
+              <div className={`rounded-3xl p-6 border flex flex-col justify-between transition-all duration-300 ${
+                isLight 
+                  ? 'bg-white border-[#E8ECE8] shadow-[0_10px_30px_-4px_rgba(0,0,0,0.04),0_2px_8px_rgba(0,0,0,0.02)]' 
+                  : 'bg-[#08130C] border-[#152B1D] shadow-[0_16px_40px_-10px_rgba(0,0,0,0.6)]'
+              }`}>
+                {/* Header */}
+                <div className="flex items-center justify-between pb-2">
+                  <h3 className={`font-sans font-bold text-sm tracking-tight ${isLight ? 'text-[#0F2417]' : 'text-white'}`}>
+                    New ESG Data
+                  </h3>
+                  <button className={`p-1 rounded-full hover:opacity-80 transition-opacity ${isLight ? 'text-[#7D9A8A]' : 'text-[#7C9A88]'}`}>
+                    <MoreHorizontal className="w-4 h-4" />
+                  </button>
+                </div>
+
+                {/* Counter + Growth Pill */}
+                <div>
+                  <div className="flex items-baseline space-x-2.5">
+                    <span className={`font-sans font-black text-3xl lg:text-4xl tracking-tight ${isLight ? 'text-[#0F2417]' : 'text-white'}`}>
+                      4,826
+                    </span>
+                    <span className={`text-[10px] font-mono font-bold px-2 py-0.5 rounded-full ${
+                      isLight ? 'bg-[#E8F7EC] text-[#0B4D26]' : 'bg-[#00C853]/15 text-[#4ADE80]'
+                    }`}>
+                      +1,852 this month
+                    </span>
+                  </div>
+                  <p className={`text-[11px] font-sans mt-1 ${isLight ? 'text-[#557361]' : 'text-[#7C9A88]'}`}>
+                    Telemetry data points synced from smart meters & utility logs
+                  </p>
+                </div>
+
+                {/* Micro Monthly Bar Chart (Apr - Jul) */}
+                <div className="py-2">
+                  <MicroBarChart isLight={isLight} />
+                </div>
+
+                {/* Segmented Carousel Indicator */}
+                <div className="pt-2 flex justify-center">
+                  <CarouselIndicator count={4} activeIndex={0} isLight={isLight} />
+                </div>
+              </div>
+
+              {/* Card 3: ESG Analyzer */}
+              <div className={`rounded-3xl p-6 border flex flex-col justify-between transition-all duration-300 ${
+                isLight 
+                  ? 'bg-white border-[#E8ECE8] shadow-[0_10px_30px_-4px_rgba(0,0,0,0.04),0_2px_8px_rgba(0,0,0,0.02)]' 
+                  : 'bg-[#08130C] border-[#152B1D] shadow-[0_16px_40px_-10px_rgba(0,0,0,0.6)]'
+              }`}>
+                {/* Header with Run AI Pill */}
+                <div className="flex items-center justify-between pb-2">
+                  <h3 className={`font-sans font-bold text-sm tracking-tight ${isLight ? 'text-[#0F2417]' : 'text-white'}`}>
+                    ESG Analyzer
+                  </h3>
+                  <button 
+                    onClick={() => executeRagQuery("Summarize our ESG score readiness against CSRD and Bangladesh ECR standards.")}
+                    className="bg-[#00C853] hover:bg-[#00E676] text-[#040906] font-sans font-bold text-[10px] px-3 py-1 rounded-full transition-all shadow-sm flex items-center space-x-1 cursor-pointer"
+                  >
+                    <Sparkles className="w-3 h-3 text-[#040906]" />
+                    <span>Run AI</span>
+                  </button>
+                </div>
+
+                {/* Statement */}
+                <div>
+                  <div className="flex items-center space-x-2">
+                    <span className="w-2.5 h-2.5 rounded-full bg-[#00C853]"></span>
+                    <p className={`text-xs font-sans font-semibold ${isLight ? 'text-[#0F2417]' : 'text-white'}`}>
+                      Your ESG score is <span className="text-[#00C853] font-bold">80%</span>
+                    </p>
+                  </div>
+                  <p className={`text-[11px] font-sans mt-1 leading-relaxed ${isLight ? 'text-[#557361]' : 'text-[#7C9A88]'}`}>
+                    This score is considered to be <strong className={isLight ? 'text-[#0B4D26]' : 'text-[#4ADE80]'}>Strong</strong> across Scope 1-3 direct & value-chain emissions.
+                  </p>
+                </div>
+
+                {/* 24-Capsule LED Segmented Progress Bar */}
+                <div className="py-2 space-y-1.5">
+                  <div className="flex justify-between text-[10px] font-mono text-[#7C9A88]">
+                    <span>Score: 80 / 100</span>
+                    <span className="text-[#00C853] font-bold">19 / 24 Capsules Active</span>
+                  </div>
+                  <SegmentedProgressBar activeCount={19} total={24} isLight={isLight} />
+                </div>
+
+                {/* Subtext Footer */}
+                <div className={`pt-3 border-t text-[10px] font-mono flex items-center justify-between ${
+                  isLight ? 'border-[#E8ECE8] text-[#557361]' : 'border-[#122418] text-[#7C9A88]'
+                }`}>
+                  <span>ISO 14064 Assurance</span>
+                  <span className="text-[#00C853] font-semibold">DoE 2026 Compliant</span>
+                </div>
+              </div>
+
+            </div>
+
+            {/* ============================================================= */}
+            {/* ROW 3: DETAILED SCOPE BREAKDOWN CARDS                         */}
+            {/* ============================================================= */}
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
+              
+              {/* Card 1: Total Emissions */}
+              <div className={`p-6 rounded-3xl border shadow-md relative overflow-hidden flex flex-col justify-between aspect-[1.5] transition-all ${
+                isLight 
+                  ? 'bg-gradient-to-br from-[#EAF5ED] via-[#DFEFE3] to-[#D4E9DA] border-[#CCE2D3] text-[#0F2417]' 
+                  : 'bg-gradient-to-br from-[#0D2B1A] via-[#0A2215] to-[#07180F] border-[#1B4D2E] text-white'
+              }`}>
+                <div>
+                  <div className={`font-mono text-[9px] uppercase tracking-wider font-bold mb-2 ${
+                    isLight ? 'text-[#0B4D26]' : 'text-[#A7F3D0]'
+                  }`}>
+                    Total Carbon Footprint
+                  </div>
+                  <div className={`font-sans font-black text-3xl lg:text-4xl tracking-tight ${
+                    isLight ? 'text-[#0F2417]' : 'text-white'
+                  }`}>
+                    {results.total} <span className={`text-xs font-mono font-normal ${isLight ? 'text-[#0B4D26]' : 'text-[#A7F3D0]'}`}>tCO2e</span>
+                  </div>
+                </div>
+                <div className="flex justify-between items-center mt-4">
+                  <span className={`text-[10px] font-mono px-3 py-1 rounded-full flex items-center border ${
+                    isLight 
+                      ? 'bg-white/80 text-[#0B4D26] border-[#00C853]/20 shadow-xs' 
+                      : 'bg-white/10 text-[#4ADE80] border-white/10'
+                  }`}>
+                    <TrendingDown className="w-3 h-3 mr-1 text-[#00C853]" />
+                    {reductionTarget}% reduced
+                  </span>
+                  <span className={`text-[9px] font-sans ${isLight ? 'text-[#557361]' : 'text-[#A7F3D0]'}`}>
+                    vs baseline
+                  </span>
+                </div>
+              </div>
+
+              {/* Card 2: Scope 1 (Direct) */}
+              <div className={`p-6 rounded-3xl border flex flex-col justify-between aspect-[1.5] transition-all ${
+                isLight 
+                  ? 'bg-white border-[#E8ECE8] text-[#0F2417] shadow-sm' 
+                  : 'bg-[#08130C] border-[#152B1D] text-white'
+              }`}>
+                <div>
+                  <div className={`font-mono text-[9px] uppercase tracking-wider font-bold mb-2 ${
+                    isLight ? 'text-[#557361]' : 'text-[#7C9A88]'
+                  }`}>
+                    Scope 1 (Direct)
+                  </div>
+                  <div className={`font-sans font-bold text-3xl tracking-tight ${isLight ? 'text-[#0F2417]' : 'text-white'}`}>
+                    {results.scope1} <span className={`text-xs font-mono font-normal ${isLight ? 'text-[#7D9A8A]' : 'text-[#7C9A88]'}`}>tCO2e</span>
+                  </div>
+                </div>
+                <div className={`flex justify-between items-center mt-4 text-[10px] ${isLight ? 'text-[#557361]' : 'text-[#7C9A88]'}`}>
+                  <span>Boilers, Fleet, Fuel</span>
                   <span className="font-mono font-bold text-amber">
                     {results.total > 0 ? ((results.scope1 / results.total) * 100).toFixed(0) : 0}%
                   </span>
                 </div>
               </div>
 
-              {/* Card 3: Scope 2 */}
-              <div className="bg-[#08130C] border border-[#152B1D] p-6 rounded-2xl shadow-sm flex flex-col justify-between aspect-[1.6] text-white">
+              {/* Card 3: Scope 2 (Electricity) */}
+              <div className={`p-6 rounded-3xl border flex flex-col justify-between aspect-[1.5] transition-all ${
+                isLight 
+                  ? 'bg-white border-[#E8ECE8] text-[#0F2417] shadow-sm' 
+                  : 'bg-[#08130C] border-[#152B1D] text-white'
+              }`}>
                 <div>
-                  <div className="flex justify-between items-center mb-3">
-                    <span className="font-mono text-[9px] text-[#7C9A88] uppercase tracking-wider font-bold">Scope 2 (Electricity)</span>
-                    <span className="bg-[#0D2B1A] text-[#4ADE80] border border-[#1B4D2E] text-[8px] font-bold px-1.5 py-0.5 rounded font-sans uppercase">Dual Reporting</span>
+                  <div className="flex justify-between items-center mb-2">
+                    <span className={`font-mono text-[9px] uppercase tracking-wider font-bold ${
+                      isLight ? 'text-[#557361]' : 'text-[#7C9A88]'
+                    }`}>
+                      Scope 2 (Electricity)
+                    </span>
+                    <span className={`text-[8px] font-bold px-1.5 py-0.5 rounded font-sans uppercase ${
+                      isLight ? 'bg-[#E8F7EC] text-[#0B4D26] border border-[#00C853]/20' : 'bg-[#0D2B1A] text-[#4ADE80] border border-[#1B4D2E]'
+                    }`}>
+                      Dual Reporting
+                    </span>
                   </div>
                   <div className="grid grid-cols-2 gap-2">
                     <div>
-                      <span className="text-[9px] text-[#557361] font-semibold uppercase block">Location-based</span>
-                      <span className="font-sans font-bold text-xl lg:text-2xl text-white">
+                      <span className={`text-[9px] font-semibold uppercase block ${isLight ? 'text-[#7D9A8A]' : 'text-[#557361]'}`}>Location</span>
+                      <span className={`font-sans font-bold text-xl ${isLight ? 'text-[#0F2417]' : 'text-white'}`}>
                         {results.scope2} <span className="text-[10px] font-mono font-normal text-[#7C9A88]">t</span>
                       </span>
                     </div>
                     <div>
-                      <span className="text-[9px] text-[#557361] font-semibold uppercase block">Market-based</span>
-                      <span className="font-sans font-bold text-xl lg:text-2xl text-[#4ADE80]">
+                      <span className={`text-[9px] font-semibold uppercase block ${isLight ? 'text-[#7D9A8A]' : 'text-[#557361]'}`}>Market</span>
+                      <span className="font-sans font-bold text-xl text-[#00C853]">
                         {results.scope2Market} <span className="text-[10px] font-mono font-normal text-[#7C9A88]">t</span>
                       </span>
                     </div>
                   </div>
                 </div>
-                <div className="flex justify-between items-center mt-3 text-[10px] text-[#7C9A88]">
+                <div className={`flex justify-between items-center mt-3 text-[10px] ${isLight ? 'text-[#557361]' : 'text-[#7C9A88]'}`}>
                   <span>Purchased Power</span>
-                  <span className="font-mono text-[9px] text-[#557361]">
+                  <span className="font-mono text-[9px] text-[#00C853] font-bold">
                     Loc: {results.total > 0 ? ((results.scope2 / results.total) * 100).toFixed(0) : 0}% | Mkt: {results.totalMarket > 0 ? ((results.scope2Market / results.totalMarket) * 100).toFixed(0) : 0}%
                   </span>
                 </div>
               </div>
 
-              {/* Card 4: Scope 3 */}
-              <div className="bg-[#08130C] border border-[#152B1D] p-6 rounded-2xl shadow-sm flex flex-col justify-between aspect-[1.6] text-white">
+              {/* Card 4: Scope 3 (Value Chain) */}
+              <div className={`p-6 rounded-3xl border flex flex-col justify-between aspect-[1.5] transition-all ${
+                isLight 
+                  ? 'bg-white border-[#E8ECE8] text-[#0F2417] shadow-sm' 
+                  : 'bg-[#08130C] border-[#152B1D] text-white'
+              }`}>
                 <div>
-                  <div className="font-mono text-[9px] text-[#7C9A88] uppercase tracking-wider font-bold mb-3">Scope 3 (Value Chain)</div>
-                  <div className="font-sans font-bold text-3xl tracking-tight text-white">
-                    {results.scope3} <span className="text-xs font-mono font-normal text-[#7C9A88]">tCO2e</span>
+                  <div className={`font-mono text-[9px] uppercase tracking-wider font-bold mb-2 ${
+                    isLight ? 'text-[#557361]' : 'text-[#7C9A88]'
+                  }`}>
+                    Scope 3 (Value Chain)
+                  </div>
+                  <div className={`font-sans font-bold text-3xl tracking-tight ${isLight ? 'text-[#0F2417]' : 'text-white'}`}>
+                    {results.scope3} <span className={`text-xs font-mono font-normal ${isLight ? 'text-[#7D9A8A]' : 'text-[#7C9A88]'}`}>tCO2e</span>
                   </div>
                 </div>
-                <div className="flex justify-between items-center mt-4 text-[10px] text-[#7C9A88]">
+                <div className={`flex justify-between items-center mt-4 text-[10px] ${isLight ? 'text-[#557361]' : 'text-[#7C9A88]'}`}>
                   <span>Supply Chain & Commutes</span>
                   <span className="font-mono font-bold text-[#A855F7]">
                     {results.total > 0 ? ((results.scope3 / results.total) * 100).toFixed(0) : 0}%
                   </span>
                 </div>
               </div>
+
             </div>
 
             {/* Main Two Column Section Grid */}
@@ -1013,16 +1851,22 @@ const SaaSDashboard = () => {
               <div className="lg:col-span-2 space-y-8">
                 
                 {/* Scope Emissions Calculator Module */}
-                <div className="bg-[#08130C] border border-[#152B1D] rounded-3xl p-6 lg:p-8 shadow-sm space-y-6 text-white">
+                <div className={`p-6 lg:p-8 rounded-3xl border shadow-sm space-y-6 transition-all ${
+                  isLight 
+                    ? 'bg-white border-[#E8ECE8] text-[#0F2417]' 
+                    : 'bg-[#08130C] border-[#152B1D] text-white'
+                }`}>
                   
-                  <div className="flex justify-between items-center border-b border-[#122418] pb-4">
+                  <div className={`flex justify-between items-center border-b pb-4 ${
+                    isLight ? 'border-[#E8ECE8]' : 'border-[#122418]'
+                  }`}>
                     <div>
-                      <h3 className="font-sans font-bold text-lg text-white">Protocol Emissions Calculator</h3>
-                      <p className="text-xs text-[#7C9A88] mt-0.5 font-sans">Input raw values or upload utility invoices to extract footprint.</p>
+                      <h3 className={`font-sans font-bold text-lg ${isLight ? 'text-[#0F2417]' : 'text-white'}`}>Protocol Emissions Calculator</h3>
+                      <p className={`text-xs mt-0.5 font-sans ${isLight ? 'text-[#557361]' : 'text-[#7C9A88]'}`}>Input raw values or upload utility invoices to extract footprint.</p>
                     </div>
                     <button 
                       onClick={clearCalculator}
-                      className="font-mono text-[10px] text-[#EF4444] bg-[#EF4444]/10 hover:bg-[#EF4444]/20 border border-[#EF4444]/20 px-3 py-1 rounded transition-colors"
+                      className="font-mono text-[10px] text-[#EF4444] bg-[#EF4444]/10 hover:bg-[#EF4444]/20 border border-[#EF4444]/20 px-3 py-1 rounded transition-colors cursor-pointer"
                     >
                       Clear Data
                     </button>
@@ -1033,13 +1877,17 @@ const SaaSDashboard = () => {
                     
                     {/* Scope 1 Column */}
                     <div className="space-y-4">
-                      <div className="font-mono text-[10px] text-[#A7F3D0] uppercase tracking-wider font-bold pb-2 border-b border-[#122418]">
+                      <div className={`font-mono text-[10px] uppercase tracking-wider font-bold pb-2 border-b ${
+                        isLight ? 'text-[#00873E] border-[#E8ECE8]' : 'text-[#A7F3D0] border-[#122418]'
+                      }`}>
                         Scope 1 (Direct)
                       </div>
                       
                       <div className="space-y-3">
                         <div>
-                          <label className="block text-[10px] font-bold text-[#7C9A88] font-sans uppercase mb-1">Diesel (Liters)</label>
+                          <label className={`block text-[10px] font-bold font-sans uppercase mb-1 ${
+                            isLight ? 'text-[#557361]' : 'text-[#7C9A88]'
+                          }`}>Diesel (Liters)</label>
                           <input 
                             type="number"
                             name="diesel"
@@ -1047,11 +1895,17 @@ const SaaSDashboard = () => {
                             onChange={handleInputChange}
                             placeholder="e.g. 10000"
                             disabled={isAuditorMode}
-                            className="w-full text-xs font-mono p-2 border border-[#173020] rounded-lg focus:outline-none focus:border-[#00C853] bg-[#040906] text-[#4ADE80] placeholder-[#385443] disabled:opacity-60 disabled:cursor-not-allowed"
+                            className={`w-full text-xs font-mono p-2 border rounded-lg focus:outline-none focus:border-[#00C853] transition-all disabled:opacity-60 disabled:cursor-not-allowed ${
+                              isLight 
+                                ? 'bg-[#F7FAF7] border-[#DCE4DE] text-[#0F2417] placeholder-[#8FA899]' 
+                                : 'bg-[#040906] border-[#173020] text-[#4ADE80] placeholder-[#385443]'
+                            }`}
                           />
                         </div>
                         <div>
-                          <label className="block text-[10px] font-bold text-[#7C9A88] font-sans uppercase mb-1">Petrol (Liters)</label>
+                          <label className={`block text-[10px] font-bold font-sans uppercase mb-1 ${
+                            isLight ? 'text-[#557361]' : 'text-[#7C9A88]'
+                          }`}>Petrol (Liters)</label>
                           <input 
                             type="number"
                             name="petrol"
@@ -1059,11 +1913,17 @@ const SaaSDashboard = () => {
                             onChange={handleInputChange}
                             placeholder="e.g. 5000"
                             disabled={isAuditorMode}
-                            className="w-full text-xs font-mono p-2 border border-[#173020] rounded-lg focus:outline-none focus:border-[#00C853] bg-[#040906] text-[#4ADE80] placeholder-[#385443] disabled:opacity-60 disabled:cursor-not-allowed"
+                            className={`w-full text-xs font-mono p-2 border rounded-lg focus:outline-none focus:border-[#00C853] transition-all disabled:opacity-60 disabled:cursor-not-allowed ${
+                              isLight 
+                                ? 'bg-[#F7FAF7] border-[#DCE4DE] text-[#0F2417] placeholder-[#8FA899]' 
+                                : 'bg-[#040906] border-[#173020] text-[#4ADE80] placeholder-[#385443]'
+                            }`}
                           />
                         </div>
                         <div>
-                          <label className="block text-[10px] font-bold text-[#7C9A88] font-sans uppercase mb-1">LPG (Kg)</label>
+                          <label className={`block text-[10px] font-bold font-sans uppercase mb-1 ${
+                            isLight ? 'text-[#557361]' : 'text-[#7C9A88]'
+                          }`}>LPG (Kg)</label>
                           <input 
                             type="number"
                             name="lpg"
@@ -1071,7 +1931,11 @@ const SaaSDashboard = () => {
                             onChange={handleInputChange}
                             placeholder="e.g. 1500"
                             disabled={isAuditorMode}
-                            className="w-full text-xs font-mono p-2 border border-[#173020] rounded-lg focus:outline-none focus:border-[#00C853] bg-[#040906] text-[#4ADE80] placeholder-[#385443] disabled:opacity-60 disabled:cursor-not-allowed"
+                            className={`w-full text-xs font-mono p-2 border rounded-lg focus:outline-none focus:border-[#00C853] transition-all disabled:opacity-60 disabled:cursor-not-allowed ${
+                              isLight 
+                                ? 'bg-[#F7FAF7] border-[#DCE4DE] text-[#0F2417] placeholder-[#8FA899]' 
+                                : 'bg-[#040906] border-[#173020] text-[#4ADE80] placeholder-[#385443]'
+                            }`}
                           />
                         </div>
                       </div>
@@ -1079,13 +1943,17 @@ const SaaSDashboard = () => {
 
                     {/* Scope 2 Column */}
                     <div className="space-y-4">
-                      <div className="font-mono text-[10px] text-[#A7F3D0] uppercase tracking-wider font-bold pb-2 border-b border-[#122418]">
+                      <div className={`font-mono text-[10px] uppercase tracking-wider font-bold pb-2 border-b ${
+                        isLight ? 'text-[#00873E] border-[#E8ECE8]' : 'text-[#A7F3D0] border-[#122418]'
+                      }`}>
                         Scope 2 (Indirect)
                       </div>
                       
                       <div className="space-y-3">
                         <div>
-                          <label className="block text-[10px] font-bold text-[#7C9A88] font-sans uppercase mb-1">Grid Power (kWh)</label>
+                          <label className={`block text-[10px] font-bold font-sans uppercase mb-1 ${
+                            isLight ? 'text-[#557361]' : 'text-[#7C9A88]'
+                          }`}>Grid Power (kWh)</label>
                           <input 
                             type="number"
                             name="electricity"
@@ -1093,7 +1961,11 @@ const SaaSDashboard = () => {
                             onChange={handleInputChange}
                             placeholder="e.g. 100000"
                             disabled={isAuditorMode}
-                            className="w-full text-xs font-mono p-2 border border-[#173020] rounded-lg focus:outline-none focus:border-[#00C853] bg-[#040906] text-[#4ADE80] placeholder-[#385443] disabled:opacity-60 disabled:cursor-not-allowed"
+                            className={`w-full text-xs font-mono p-2 border rounded-lg focus:outline-none focus:border-[#00C853] transition-all disabled:opacity-60 disabled:cursor-not-allowed ${
+                              isLight 
+                                ? 'bg-[#F7FAF7] border-[#DCE4DE] text-[#0F2417] placeholder-[#8FA899]' 
+                                : 'bg-[#040906] border-[#173020] text-[#4ADE80] placeholder-[#385443]'
+                            }`}
                           />
                         </div>
                       </div>
@@ -1101,13 +1973,17 @@ const SaaSDashboard = () => {
 
                     {/* Scope 3 Column */}
                     <div className="space-y-4">
-                      <div className="font-mono text-[10px] text-[#A7F3D0] uppercase tracking-wider font-bold pb-2 border-b border-[#122418]">
+                      <div className={`font-mono text-[10px] uppercase tracking-wider font-bold pb-2 border-b ${
+                        isLight ? 'text-[#00873E] border-[#E8ECE8]' : 'text-[#A7F3D0] border-[#122418]'
+                      }`}>
                         Scope 3 (Value Chain)
                       </div>
                       
                       <div className="space-y-3">
                         <div>
-                          <label className="block text-[10px] font-bold text-[#7C9A88] font-sans uppercase mb-1">Employees (Commute)</label>
+                          <label className={`block text-[10px] font-bold font-sans uppercase mb-1 ${
+                            isLight ? 'text-[#557361]' : 'text-[#7C9A88]'
+                          }`}>Employees (Commute)</label>
                           <input 
                             type="number"
                             name="employees"
@@ -1115,11 +1991,17 @@ const SaaSDashboard = () => {
                             onChange={handleInputChange}
                             placeholder="e.g. 150"
                             disabled={isAuditorMode}
-                            className="w-full text-xs font-mono p-2 border border-[#173020] rounded-lg focus:outline-none focus:border-[#00C853] bg-[#040906] text-[#4ADE80] placeholder-[#385443] disabled:opacity-60 disabled:cursor-not-allowed"
+                            className={`w-full text-xs font-mono p-2 border rounded-lg focus:outline-none focus:border-[#00C853] transition-all disabled:opacity-60 disabled:cursor-not-allowed ${
+                              isLight 
+                                ? 'bg-[#F7FAF7] border-[#DCE4DE] text-[#0F2417] placeholder-[#8FA899]' 
+                                : 'bg-[#040906] border-[#173020] text-[#4ADE80] placeholder-[#385443]'
+                            }`}
                           />
                         </div>
                         <div>
-                          <label className="block text-[10px] font-bold text-[#7C9A88] font-sans uppercase mb-1">Air Travel (Km)</label>
+                          <label className={`block text-[10px] font-bold font-sans uppercase mb-1 ${
+                            isLight ? 'text-[#557361]' : 'text-[#7C9A88]'
+                          }`}>Air Travel (Km)</label>
                           <input 
                             type="number"
                             name="airTravel"
@@ -1127,11 +2009,17 @@ const SaaSDashboard = () => {
                             onChange={handleInputChange}
                             placeholder="e.g. 50000"
                             disabled={isAuditorMode}
-                            className="w-full text-xs font-mono p-2 border border-[#173020] rounded-lg focus:outline-none focus:border-[#00C853] bg-[#040906] text-[#4ADE80] placeholder-[#385443] disabled:opacity-60 disabled:cursor-not-allowed"
+                            className={`w-full text-xs font-mono p-2 border rounded-lg focus:outline-none focus:border-[#00C853] transition-all disabled:opacity-60 disabled:cursor-not-allowed ${
+                              isLight 
+                                ? 'bg-[#F7FAF7] border-[#DCE4DE] text-[#0F2417] placeholder-[#8FA899]' 
+                                : 'bg-[#040906] border-[#173020] text-[#4ADE80] placeholder-[#385443]'
+                            }`}
                           />
                         </div>
                         <div>
-                          <label className="block text-[10px] font-bold text-[#7C9A88] font-sans uppercase mb-1">Truck Freight (T-Km)</label>
+                          <label className={`block text-[10px] font-bold font-sans uppercase mb-1 ${
+                            isLight ? 'text-[#557361]' : 'text-[#7C9A88]'
+                          }`}>Truck Freight (T-Km)</label>
                           <input 
                             type="number"
                             name="truckTransport"
@@ -1139,11 +2027,17 @@ const SaaSDashboard = () => {
                             onChange={handleInputChange}
                             placeholder="e.g. 20000"
                             disabled={isAuditorMode}
-                            className="w-full text-xs font-mono p-2 border border-[#173020] rounded-lg focus:outline-none focus:border-[#00C853] bg-[#040906] text-[#4ADE80] placeholder-[#385443] disabled:opacity-60 disabled:cursor-not-allowed"
+                            className={`w-full text-xs font-mono p-2 border rounded-lg focus:outline-none focus:border-[#00C853] transition-all disabled:opacity-60 disabled:cursor-not-allowed ${
+                              isLight 
+                                ? 'bg-[#F7FAF7] border-[#DCE4DE] text-[#0F2417] placeholder-[#8FA899]' 
+                                : 'bg-[#040906] border-[#173020] text-[#4ADE80] placeholder-[#385443]'
+                            }`}
                           />
                         </div>
                         <div>
-                          <label className="block text-[10px] font-bold text-[#7C9A88] font-sans uppercase mb-1">Raw Materials (Tons)</label>
+                          <label className={`block text-[10px] font-bold font-sans uppercase mb-1 ${
+                            isLight ? 'text-[#557361]' : 'text-[#7C9A88]'
+                          }`}>Raw Materials (Tons)</label>
                           <input 
                             type="number"
                             name="rawMaterials"
@@ -1151,7 +2045,11 @@ const SaaSDashboard = () => {
                             onChange={handleInputChange}
                             placeholder="e.g. 400"
                             disabled={isAuditorMode}
-                            className="w-full text-xs font-mono p-2 border border-[#173020] rounded-lg focus:outline-none focus:border-[#00C853] bg-[#040906] text-[#4ADE80] placeholder-[#385443] disabled:opacity-60 disabled:cursor-not-allowed"
+                            className={`w-full text-xs font-mono p-2 border rounded-lg focus:outline-none focus:border-[#00C853] transition-all disabled:opacity-60 disabled:cursor-not-allowed ${
+                              isLight 
+                                ? 'bg-[#F7FAF7] border-[#DCE4DE] text-[#0F2417] placeholder-[#8FA899]' 
+                                : 'bg-[#040906] border-[#173020] text-[#4ADE80] placeholder-[#385443]'
+                            }`}
                           />
                         </div>
                       </div>
@@ -1162,49 +2060,65 @@ const SaaSDashboard = () => {
                 </div>
 
                 {/* AI Document Dropzone & Full ESG RAG System */}
-                <div className="bg-[#08130C] border border-[#152B1D] rounded-3xl p-6 lg:p-8 shadow-sm space-y-6 text-white">
+                <div className={`p-6 lg:p-8 rounded-3xl border shadow-sm space-y-6 transition-all ${
+                  isLight 
+                    ? 'bg-white border-[#E8ECE8] text-[#0F2417]' 
+                    : 'bg-[#08130C] border-[#152B1D] text-white'
+                }`}>
                   
                   {/* Header & Badges */}
-                  <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-2 border-b border-[#122418] pb-4">
+                  <div className={`flex flex-col sm:flex-row justify-between items-start sm:items-center gap-2 border-b pb-4 ${
+                    isLight ? 'border-[#E8ECE8]' : 'border-[#122418]'
+                  }`}>
                     <div>
                       <div className="flex items-center space-x-2">
                         <FileText className="w-5 h-5 text-[#00C853]" />
-                        <h3 className="font-sans font-bold text-lg text-white">
+                        <h3 className={`font-sans font-bold text-lg ${isLight ? 'text-[#0F2417]' : 'text-white'}`}>
                           AI Document Footprint Extractor
                         </h3>
                       </div>
-                      <p className="text-xs text-[#7C9A88] mt-0.5 font-sans">
+                      <p className={`text-xs mt-0.5 font-sans ${isLight ? 'text-[#557361]' : 'text-[#7C9A88]'}`}>
                         Upload corporate bills, utility statements, or fuel spreadsheets. CarbonOS RAG scans documents, matches national DoE emission factors, and generates citation-backed parameters.
                       </p>
                     </div>
                     
                     <div className="flex items-center space-x-2 shrink-0">
-                      <span className="inline-flex items-center px-2.5 py-1 rounded-full text-[10px] font-mono font-bold bg-[#0D2B1A] text-[#4ADE80] border border-[#1B4D2E]">
+                      <span className={`inline-flex items-center px-2.5 py-1 rounded-full text-[10px] font-mono font-bold ${
+                        isLight ? 'bg-[#E8F8EE] text-[#00873E] border border-[#C2E9CF]' : 'bg-[#0D2B1A] text-[#4ADE80] border border-[#1B4D2E]'
+                      }`}>
                         <Sparkles className="w-3 h-3 mr-1 text-[#00C853]" />
                         Multi-Corpus RAG Active
                       </span>
-                      <span className="inline-flex items-center px-2.5 py-1 rounded-full text-[10px] font-mono font-bold bg-[#08130C] text-[#7C9A88] border border-[#152B1D]">
+                      <span className={`inline-flex items-center px-2.5 py-1 rounded-full text-[10px] font-mono font-bold ${
+                        isLight ? 'bg-[#F4F6F4] text-[#557361] border border-[#E8ECE8]' : 'bg-[#08130C] text-[#7C9A88] border border-[#152B1D]'
+                      }`}>
                         DoE 2023 Factors
                       </span>
                     </div>
                   </div>
 
                   {/* Sample Quick Loader Banner */}
-                  <div className="bg-[#0A1D12] border border-[#1B4D2E] rounded-2xl p-4 flex flex-col sm:flex-row justify-between items-center gap-3">
+                  <div className={`rounded-2xl p-4 flex flex-col sm:flex-row justify-between items-center gap-3 border ${
+                    isLight 
+                      ? 'bg-[#F2FBF5] border-[#BCE7CB]' 
+                      : 'bg-[#0A1D12] border-[#1B4D2E]'
+                  }`}>
                     <div className="flex items-center space-x-3">
-                      <div className="w-8 h-8 rounded-lg bg-[#0D2B1A] border border-[#1B4D2E] text-[#4ADE80] flex items-center justify-center shrink-0">
-                        <Database className="w-4 h-4 text-[#4ADE80]" />
+                      <div className={`w-8 h-8 rounded-lg border flex items-center justify-center shrink-0 ${
+                        isLight ? 'bg-[#E8F8EE] border-[#BCE7CB] text-[#00873E]' : 'bg-[#0D2B1A] border-[#1B4D2E] text-[#4ADE80]'
+                      }`}>
+                        <Database className={`w-4 h-4 ${isLight ? 'text-[#00873E]' : 'text-[#4ADE80]'}`} />
                       </div>
                       <div className="text-left">
-                        <div className="text-xs font-bold text-white">Quick Test with Audited Baseline</div>
-                        <div className="text-[11px] text-[#7C9A88]">Load Dexterity Textiles Ltd Q2 Audit Statement (DEPZ TX-8491)</div>
+                        <div className={`text-xs font-bold ${isLight ? 'text-[#0F2417]' : 'text-white'}`}>Quick Test with Audited Baseline</div>
+                        <div className={`text-[11px] ${isLight ? 'text-[#557361]' : 'text-[#7C9A88]'}`}>Load Dexterity Textiles Ltd Q2 Audit Statement (DEPZ TX-8491)</div>
                       </div>
                     </div>
                     <button
                       type="button"
                       onClick={() => executeAIExtraction("Dexterity_Textiles_ESG_Statement_Q2_2026.txt")}
                       disabled={isUploading}
-                      className="text-xs font-bold font-sans px-3.5 py-1.5 rounded-xl bg-[#00C853] hover:bg-[#00E676] text-[#040906] transition-all shadow-sm flex items-center space-x-1.5 shrink-0"
+                      className="text-xs font-bold font-sans px-3.5 py-1.5 rounded-xl bg-[#00C853] hover:bg-[#00E676] text-[#040906] transition-all shadow-sm flex items-center space-x-1.5 shrink-0 cursor-pointer"
                     >
                       <Sparkles className="w-3.5 h-3.5 text-[#040906]" />
                       <span>Load Verified Sample Document</span>
@@ -1215,7 +2129,11 @@ const SaaSDashboard = () => {
                   <div 
                     onDragOver={(e) => e.preventDefault()}
                     onDrop={handleFileDrop}
-                    className="border-2 border-dashed border-[#1B3B26] rounded-2xl p-8 text-center bg-[#040906]/80 hover:bg-[#061009] transition-colors cursor-pointer relative"
+                    className={`border-2 border-dashed rounded-2xl p-8 text-center transition-colors cursor-pointer relative ${
+                      isLight 
+                        ? 'border-[#C2E9CF] bg-[#F7FAF7] hover:bg-[#E8F8EE]' 
+                        : 'border-[#1B3B26] bg-[#040906]/80 hover:bg-[#061009]'
+                    }`}
                   >
                     <input 
                       type="file" 
@@ -1226,10 +2144,10 @@ const SaaSDashboard = () => {
                     />
                     <div onClick={() => document.getElementById('drag-file-input').click()} className="space-y-3">
                       <Upload className="w-10 h-10 text-[#00C853] mx-auto animate-none" />
-                      <div className="text-xs font-bold text-white">
+                      <div className={`text-xs font-bold ${isLight ? 'text-[#0F2417]' : 'text-white'}`}>
                         {uploadedFile ? `Uploaded Document: ${uploadedFile}` : "Drag & Drop Financial spreadsheets, utility bills, or fuel invoices here"}
                       </div>
-                      <div className="text-[10px] text-[#7C9A88]">Supports PDF, XLSX, CSV, TXT (Max 25MB) • Encrypted Per-Tenant Ingestion</div>
+                      <div className={`text-[10px] ${isLight ? 'text-[#557361]' : 'text-[#7C9A88]'}`}>Supports PDF, XLSX, CSV, TXT (Max 25MB) • Encrypted Per-Tenant Ingestion</div>
                     </div>
                   </div>
 
@@ -1258,7 +2176,11 @@ const SaaSDashboard = () => {
                         <button
                           type="button"
                           onClick={() => setShowExtractionEvidence(!showExtractionEvidence)}
-                          className="text-xs font-bold font-sans text-white border border-[#173020] hover:bg-[#0D1F14] px-4 py-3 rounded-xl transition-all flex items-center space-x-1.5"
+                          className={`text-xs font-bold font-sans border px-4 py-3 rounded-xl transition-all flex items-center space-x-1.5 cursor-pointer ${
+                            isLight 
+                              ? 'text-[#0F2417] border-[#DCE4DE] hover:bg-[#F7FAF7]' 
+                              : 'text-white border-[#173020] hover:bg-[#0D1F14]'
+                          }`}
                         >
                           <FileText className="w-3.5 h-3.5 text-[#00C853]" />
                           <span>{showExtractionEvidence ? "Hide Citation Traces" : "View Audit Citations"}</span>
@@ -1269,11 +2191,17 @@ const SaaSDashboard = () => {
 
                     {/* Audit Verification Seal */}
                     {isVerified && (
-                      <div className="flex items-center space-x-2.5 bg-[#0D2B1A] border border-[#1B4D2E] px-4 py-2.5 rounded-xl text-[#4ADE80] animate-none">
+                      <div className={`flex items-center space-x-2.5 px-4 py-2.5 rounded-xl border ${
+                        isLight 
+                          ? 'bg-[#E8F8EE] border-[#C2E9CF] text-[#00873E]' 
+                          : 'bg-[#0D2B1A] border-[#1B4D2E] text-[#4ADE80]'
+                      }`}>
                         <CheckCircle2 className="w-5 h-5 text-[#00C853]" />
                         <div className="text-left leading-none">
-                          <div className="font-mono text-[9px] uppercase tracking-wider font-bold text-[#A7F3D0]">Audit Assurance</div>
-                          <div className="font-sans font-bold text-xs text-white">CARBONOS AUDIT VERIFIED</div>
+                          <div className={`font-mono text-[9px] uppercase tracking-wider font-bold ${
+                            isLight ? 'text-[#00873E]' : 'text-[#A7F3D0]'
+                          }`}>Audit Assurance</div>
+                          <div className={`font-sans font-bold text-xs ${isLight ? 'text-[#0F2417]' : 'text-white'}`}>CARBONOS AUDIT VERIFIED</div>
                         </div>
                       </div>
                     )}
@@ -1281,15 +2209,21 @@ const SaaSDashboard = () => {
 
                   {/* Extraction Evidence & Verbatim Citations Table */}
                   {showExtractionEvidence && extractionResult && (
-                    <div className="bg-[#040906] border border-[#152B1D] rounded-2xl p-5 space-y-3">
-                      <div className="flex justify-between items-center pb-2 border-b border-[#122418]">
+                    <div className={`rounded-2xl p-5 space-y-3 border ${
+                      isLight 
+                        ? 'bg-[#F7FAF7] border-[#E8ECE8]' 
+                        : 'bg-[#040906] border-[#152B1D]'
+                    }`}>
+                      <div className={`flex justify-between items-center pb-2 border-b ${
+                        isLight ? 'border-[#E8ECE8]' : 'border-[#122418]'
+                      }`}>
                         <div className="flex items-center space-x-2">
                           <ShieldCheck className="w-4 h-4 text-[#00C853]" />
-                          <span className="font-sans font-bold text-xs text-white">
+                          <span className={`font-sans font-bold text-xs ${isLight ? 'text-[#0F2417]' : 'text-white'}`}>
                             Audited Extraction Traceability — {extractionResult.filename}
                           </span>
                         </div>
-                        <span className="font-mono text-[10px] text-[#7C9A88]">
+                        <span className={`font-mono text-[10px] ${isLight ? 'text-[#557361]' : 'text-[#7C9A88]'}`}>
                           Confidence: {Math.round((extractionResult.overall_confidence || 0.98) * 100)}% • ISO 14064 Ready
                         </span>
                       </div>
@@ -1297,7 +2231,9 @@ const SaaSDashboard = () => {
                       <div className="overflow-x-auto">
                         <table className="w-full text-left font-sans text-xs">
                           <thead>
-                            <tr className="text-[#557361] font-bold border-b border-[#122418] text-[10px] uppercase">
+                            <tr className={`font-bold border-b text-[10px] uppercase ${
+                              isLight ? 'text-[#557361] border-[#E8ECE8]' : 'text-[#557361] border-[#122418]'
+                            }`}>
                               <th className="py-2">Metric</th>
                               <th>Scope</th>
                               <th>Extracted Value</th>
@@ -1306,24 +2242,28 @@ const SaaSDashboard = () => {
                               <th>Confidence</th>
                             </tr>
                           </thead>
-                          <tbody className="divide-y divide-[#122418]">
+                          <tbody className={`divide-y ${isLight ? 'divide-[#E8ECE8]' : 'divide-[#122418]'}`}>
                             {extractionResult.details && extractionResult.details.map((item, idx) => (
-                              <tr key={idx} className="hover:bg-[#08130C]">
-                                <td className="py-2.5 font-bold text-white capitalize">{item.param_name}</td>
+                              <tr key={idx} className={`transition-colors ${isLight ? 'hover:bg-white' : 'hover:bg-[#08130C]'}`}>
+                                <td className={`py-2.5 font-bold capitalize ${isLight ? 'text-[#0F2417]' : 'text-white'}`}>{item.param_name}</td>
                                 <td>
-                                  <span className="px-2 py-0.5 rounded-full text-[9px] font-bold bg-[#0D2B1A] text-[#4ADE80] border border-[#1B4D2E]">
+                                  <span className={`px-2 py-0.5 rounded-full text-[9px] font-bold border ${
+                                    isLight ? 'bg-[#E8F8EE] text-[#00873E] border-[#C2E9CF]' : 'bg-[#0D2B1A] text-[#4ADE80] border-[#1B4D2E]'
+                                  }`}>
                                     {item.scope}
                                   </span>
                                 </td>
-                                <td className="font-mono font-bold text-[#4ADE80]">
+                                <td className={`font-mono font-bold ${isLight ? 'text-[#00873E]' : 'text-[#4ADE80]'}`}>
                                   {Number(item.value).toLocaleString()} {item.unit}
                                 </td>
-                                <td className="font-mono text-[11px] text-[#7C9A88]">Page {item.source_page || 1}</td>
-                                <td className="text-[11px] text-[#8FA899] italic max-w-[320px] truncate" title={item.raw_snippet}>
+                                <td className={`font-mono text-[11px] ${isLight ? 'text-[#557361]' : 'text-[#7C9A88]'}`}>Page {item.source_page || 1}</td>
+                                <td className={`text-[11px] italic max-w-[320px] truncate ${isLight ? 'text-[#557361]' : 'text-[#8FA899]'}`} title={item.raw_snippet}>
                                   "{item.raw_snippet}"
                                 </td>
                                 <td>
-                                  <span className="px-2 py-0.5 rounded-full text-[9px] font-bold bg-[#0D2B1A] text-[#4ADE80] border border-[#1B4D2E]">
+                                  <span className={`px-2 py-0.5 rounded-full text-[9px] font-bold border ${
+                                    isLight ? 'bg-[#E8F8EE] text-[#00873E] border-[#C2E9CF]' : 'bg-[#0D2B1A] text-[#4ADE80] border-[#1B4D2E]'
+                                  }`}>
                                     {Math.round((item.confidence || 0.95) * 100)}%
                                   </span>
                                 </td>
@@ -1338,19 +2278,23 @@ const SaaSDashboard = () => {
                   {/* ------------------------------------------------------------- */}
                   {/* CarbonOS ESG Regulatory & Copilot (RAG Assistant Section)     */}
                   {/* ------------------------------------------------------------- */}
-                  <div className="border-t border-[#122418] pt-6 space-y-4">
+                  <div className={`border-t pt-6 space-y-4 ${isLight ? 'border-[#E8ECE8]' : 'border-[#122418]'}`}>
                     <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-2">
                       <div className="flex items-center space-x-2">
-                        <div className="w-6 h-6 rounded-md bg-[#0D2B1A] border border-[#1B4D2E] flex items-center justify-center">
+                        <div className={`w-6 h-6 rounded-md border flex items-center justify-center ${
+                          isLight ? 'bg-[#E8F8EE] border-[#C2E9CF]' : 'bg-[#0D2B1A] border-[#1B4D2E]'
+                        }`}>
                           <Sparkles className="w-3.5 h-3.5 text-[#00C853]" />
                         </div>
-                        <h4 className="font-sans font-bold text-sm text-white">
+                        <h4 className={`font-sans font-bold text-sm ${isLight ? 'text-[#0F2417]' : 'text-white'}`}>
                           CarbonOS ESG Regulatory & Auditor Copilot
                         </h4>
                       </div>
                       
                       {/* Corpus Filter Tabs */}
-                      <div className="flex items-center space-x-1 bg-[#040906] p-1 rounded-xl border border-[#152B1D]">
+                      <div className={`flex items-center space-x-1 p-1 rounded-xl border ${
+                        isLight ? 'bg-[#F4F6F4] border-[#E8ECE8]' : 'bg-[#040906] border-[#152B1D]'
+                      }`}>
                         {[
                           { id: 'all', label: 'All Corpora' },
                           { id: 'regulatory', label: 'Regulations (NDC/ECR)' },
@@ -1361,10 +2305,14 @@ const SaaSDashboard = () => {
                             key={c.id}
                             type="button"
                             onClick={() => setRagCorpus(c.id)}
-                            className={`px-2.5 py-1 rounded-lg text-[10px] font-sans font-bold transition-all ${
+                            className={`px-2.5 py-1 rounded-lg text-[10px] font-sans font-bold transition-all cursor-pointer ${
                               ragCorpus === c.id
-                                ? 'bg-[#0D2B1A] text-[#4ADE80] border border-[#1B4D2E] shadow-sm'
-                                : 'text-[#7C9A88] hover:text-white'
+                                ? isLight 
+                                  ? 'bg-white text-[#00873E] border border-[#C2E9CF] shadow-xs' 
+                                  : 'bg-[#0D2B1A] text-[#4ADE80] border border-[#1B4D2E] shadow-sm'
+                                : isLight 
+                                  ? 'text-[#557361] hover:text-[#0F2417]' 
+                                  : 'text-[#7C9A88] hover:text-white'
                             }`}
                           >
                             {c.label}
@@ -1385,9 +2333,13 @@ const SaaSDashboard = () => {
                           key={i}
                           type="button"
                           onClick={() => executeRagQuery(promptText)}
-                          className="text-[11px] font-sans bg-[#07150C] hover:bg-[#0D2214] text-[#A3C2B0] border border-[#152B1D] px-3 py-1.5 rounded-full transition-all flex items-center space-x-1 cursor-pointer"
+                          className={`text-[11px] font-sans px-3 py-1.5 rounded-full transition-all flex items-center space-x-1 cursor-pointer border ${
+                            isLight 
+                              ? 'bg-[#F4F6F4] hover:bg-[#E8F8EE] text-[#0F2417] border-[#DCE4DE]' 
+                              : 'bg-[#07150C] hover:bg-[#0D2214] text-[#A3C2B0] border-[#152B1D]'
+                          }`}
                         >
-                          <Search className="w-3 h-3 text-[#557361]" />
+                          <Search className={`w-3 h-3 ${isLight ? 'text-[#557361]' : 'text-[#557361]'}`} />
                           <span>{promptText}</span>
                         </button>
                       ))}
@@ -1402,9 +2354,13 @@ const SaaSDashboard = () => {
                           onChange={(e) => setRagQuery(e.target.value)}
                           onKeyDown={(e) => { if (e.key === 'Enter') { e.preventDefault(); executeRagQuery(); } }}
                           placeholder="Ask anything about Bangladesh ESG laws, DoE emission factors, or audit evidence..."
-                          className="w-full text-xs font-sans p-3 pl-9 border border-[#173020] rounded-xl focus:outline-none focus:border-[#00C853] bg-[#040906] text-white placeholder-[#557361]"
+                          className={`w-full text-xs font-sans p-3 pl-9 border rounded-xl focus:outline-none focus:border-[#00C853] transition-all ${
+                            isLight 
+                              ? 'bg-[#F7FAF7] border-[#DCE4DE] text-[#0F2417] placeholder-[#8FA899]' 
+                              : 'bg-[#040906] border-[#173020] text-white placeholder-[#557361]'
+                          }`}
                         />
-                        <Search className="w-4 h-4 text-[#557361] absolute left-3 top-3.5" />
+                        <Search className={`w-4 h-4 absolute left-3 top-3.5 ${isLight ? 'text-[#8FA899]' : 'text-[#557361]'}`} />
                       </div>
                       <button
                         type="button"
@@ -1425,17 +2381,27 @@ const SaaSDashboard = () => {
 
                     {/* RAG Grounded Answer Output */}
                     {ragResponse && (
-                      <div className="bg-[#050C07] border border-[#1B4D2E] rounded-2xl p-5 space-y-4 animate-none">
-                        <div className="flex justify-between items-center pb-2 border-b border-[#122418]">
+                      <div className={`rounded-2xl p-5 space-y-4 border ${
+                        isLight 
+                          ? 'bg-[#F2FBF5] border-[#BCE7CB]' 
+                          : 'bg-[#050C07] border-[#1B4D2E]'
+                      }`}>
+                        <div className={`flex justify-between items-center pb-2 border-b ${
+                          isLight ? 'border-[#C2E9CF]' : 'border-[#122418]'
+                        }`}>
                           <div className="flex items-center space-x-2">
-                            <span className="font-mono text-[9px] font-bold px-2 py-0.5 rounded bg-[#0D2B1A] text-[#4ADE80] border border-[#1B4D2E] uppercase">
+                            <span className={`font-mono text-[9px] font-bold px-2 py-0.5 rounded uppercase border ${
+                              isLight ? 'bg-white text-[#00873E] border-[#BCE7CB]' : 'bg-[#0D2B1A] text-[#4ADE80] border-[#1B4D2E]'
+                            }`}>
                               {ragResponse.model_used || "CarbonOS RAG Engine"}
                             </span>
-                            <span className="font-sans font-bold text-xs text-white">
+                            <span className={`font-sans font-bold text-xs ${isLight ? 'text-[#0F2417]' : 'text-white'}`}>
                               Audit Traceable Response
                             </span>
                           </div>
-                          <div className="flex items-center space-x-2 font-mono text-[10px] text-[#7C9A88]">
+                          <div className={`flex items-center space-x-2 font-mono text-[10px] ${
+                            isLight ? 'text-[#557361]' : 'text-[#7C9A88]'
+                          }`}>
                             <span>Confidence: {Math.round((ragResponse.confidence || 0.95) * 100)}%</span>
                             <span>•</span>
                             <span>{ragResponse.latency_ms || 320}ms</span>
@@ -1443,14 +2409,18 @@ const SaaSDashboard = () => {
                         </div>
 
                         {/* Answer Text */}
-                        <div className="text-xs text-[#D8E8DF] leading-relaxed font-sans whitespace-pre-line">
+                        <div className={`text-xs leading-relaxed font-sans whitespace-pre-line ${
+                          isLight ? 'text-[#0F2417]' : 'text-[#D8E8DF]'
+                        }`}>
                           {ragResponse.answer}
                         </div>
 
                         {/* Citations List */}
                         {ragResponse.citations && ragResponse.citations.length > 0 && (
-                          <div className="space-y-2 pt-2 border-t border-[#122418]">
-                            <div className="text-[10px] font-mono uppercase font-bold text-[#7C9A88] flex items-center">
+                          <div className={`space-y-2 pt-2 border-t ${isLight ? 'border-[#C2E9CF]' : 'border-[#122418]'}`}>
+                            <div className={`text-[10px] font-mono uppercase font-bold flex items-center ${
+                              isLight ? 'text-[#557361]' : 'text-[#7C9A88]'
+                            }`}>
                               <Quote className="w-3 h-3 mr-1 text-[#00C853]" />
                               Verifiable Document Citations ({ragResponse.citations.length}):
                             </div>
@@ -1458,17 +2428,27 @@ const SaaSDashboard = () => {
                               {ragResponse.citations.map((c, idx) => (
                                 <div 
                                   key={idx}
-                                  className="bg-[#08130C] border border-[#152B1D] p-3 rounded-xl space-y-1 hover:border-[#1B4D2E] transition-colors"
+                                  className={`p-3 rounded-xl space-y-1 border transition-colors ${
+                                    isLight 
+                                      ? 'bg-white border-[#DCE4DE] hover:border-[#00C853]' 
+                                      : 'bg-[#08130C] border-[#152B1D] hover:border-[#1B4D2E]'
+                                  }`}
                                 >
                                   <div className="flex justify-between items-center text-[10px]">
-                                    <span className="font-mono font-bold text-white truncate max-w-[200px]" title={c.source}>
+                                    <span className={`font-mono font-bold truncate max-w-[200px] ${
+                                      isLight ? 'text-[#0F2417]' : 'text-white'
+                                    }`} title={c.source}>
                                       📄 {c.source}
                                     </span>
-                                    <span className="font-mono text-[#4ADE80] font-semibold">
+                                    <span className={`font-mono font-semibold ${
+                                      isLight ? 'text-[#00873E]' : 'text-[#4ADE80]'
+                                    }`}>
                                       Page {c.page || 1} • {Math.round((c.relevance_score || 0.9) * 100)}% Match
                                     </span>
                                   </div>
-                                  <p className="text-[11px] text-[#7C9A88] line-clamp-2 italic">
+                                  <p className={`text-[11px] line-clamp-2 italic ${
+                                    isLight ? 'text-[#557361]' : 'text-[#7C9A88]'
+                                  }`}>
                                     "{c.snippet}"
                                   </p>
                                 </div>
@@ -1484,15 +2464,21 @@ const SaaSDashboard = () => {
                 </div>
 
                 {/* Company Projects List in Dashboard */}
-                <div className="bg-[#08130C] border border-[#152B1D] rounded-3xl p-6 lg:p-8 shadow-sm text-white">
-                  <div className="flex justify-between items-center pb-4 border-b border-[#122418] mb-4">
+                <div className={`p-6 lg:p-8 rounded-3xl border shadow-sm transition-all ${
+                  isLight 
+                    ? 'bg-white border-[#E8ECE8] text-[#0F2417]' 
+                    : 'bg-[#08130C] border-[#152B1D] text-white'
+                }`}>
+                  <div className={`flex justify-between items-center pb-4 border-b mb-4 ${
+                    isLight ? 'border-[#E8ECE8]' : 'border-[#122418]'
+                  }`}>
                     <div>
-                      <h3 className="font-sans font-bold text-lg text-white">Active Corporate Projects</h3>
-                      <p className="text-xs text-[#7C9A88] mt-0.5">District specific offsetting initiatives under CarbonZero monitoring.</p>
+                      <h3 className={`font-sans font-bold text-lg ${isLight ? 'text-[#0F2417]' : 'text-white'}`}>Active Corporate Projects</h3>
+                      <p className={`text-xs mt-0.5 ${isLight ? 'text-[#557361]' : 'text-[#7C9A88]'}`}>District specific offsetting initiatives under CarbonZero monitoring.</p>
                     </div>
                     <button 
                       onClick={() => setIsAddProjectOpen(true)}
-                      className="text-xs font-sans font-bold text-[#4ADE80] hover:underline flex items-center space-x-1"
+                      className="text-xs font-sans font-bold text-[#00C853] hover:underline flex items-center space-x-1 cursor-pointer"
                     >
                       <Plus className="w-3.5 h-3.5" />
                       <span>New Project</span>
@@ -1502,26 +2488,28 @@ const SaaSDashboard = () => {
                   <div className="overflow-x-auto">
                     <table className="w-full text-left font-sans text-xs">
                       <thead>
-                        <tr className="text-[#557361] font-bold border-b border-[#122418] pb-2 text-[10px] uppercase">
+                        <tr className={`font-bold border-b pb-2 text-[10px] uppercase ${
+                          isLight ? 'text-[#557361] border-[#E8ECE8]' : 'text-[#557361] border-[#122418]'
+                        }`}>
                           <th className="py-2.5">Project Name</th>
                           <th>Sector</th>
                           <th>Target (tCO2e/yr)</th>
                           <th>Audit Status</th>
                         </tr>
                       </thead>
-                      <tbody className="divide-y divide-[#122418]">
+                      <tbody className={`divide-y ${isLight ? 'divide-[#E8ECE8]' : 'divide-[#122418]'}`}>
                         {projects.map(p => (
-                          <tr key={p.id} className="hover:bg-[#040906]">
-                            <td className="py-3 font-bold text-white">{p.name}</td>
-                            <td className="text-[#7C9A88]">{p.sector}</td>
-                            <td className="font-mono font-semibold text-[#4ADE80]">{p.target} tCO2e</td>
+                          <tr key={p.id} className={`transition-colors ${isLight ? 'hover:bg-[#F7FAF7]' : 'hover:bg-[#040906]'}`}>
+                            <td className={`py-3 font-bold ${isLight ? 'text-[#0F2417]' : 'text-white'}`}>{p.name}</td>
+                            <td className={isLight ? 'text-[#557361]' : 'text-[#7C9A88]'}>{p.sector}</td>
+                            <td className={`font-mono font-semibold ${isLight ? 'text-[#00873E]' : 'text-[#4ADE80]'}`}>{p.target} tCO2e</td>
                             <td>
                               <span className={`px-2 py-0.5 rounded-full text-[9px] font-bold ${
                                 p.status === 'Verified' 
-                                  ? 'bg-[#0D2B1A] text-[#4ADE80] border border-[#1B4D2E]' 
+                                  ? isLight ? 'bg-[#E8F8EE] text-[#00873E] border border-[#C2E9CF]' : 'bg-[#0D2B1A] text-[#4ADE80] border border-[#1B4D2E]'
                                   : p.status === 'In Progress'
-                                    ? 'bg-amber/10 text-amber border border-amber/20'
-                                    : 'bg-[#040906] text-[#7C9A88]'
+                                    ? isLight ? 'bg-amber-50 text-amber-700 border border-amber-200' : 'bg-amber-500/10 text-amber-400 border border-amber-500/20'
+                                    : isLight ? 'bg-gray-100 text-gray-600' : 'bg-[#040906] text-[#7C9A88]'
                               }`}>
                                 {p.status}
                               </span>
@@ -1539,11 +2527,17 @@ const SaaSDashboard = () => {
               <div className="space-y-8">
                 
                 {/* Offset Options Panel */}
-                <div className="bg-gradient-to-br from-[#0D2B1A] via-[#0A2215] to-[#07180F] border border-[#1B4D2E] text-white rounded-3xl p-6 shadow-md flex flex-col justify-between h-[230px]">
+                <div className={`p-6 rounded-3xl shadow-md flex flex-col justify-between h-[230px] border transition-all ${
+                  isLight
+                    ? 'bg-gradient-to-br from-[#E8F8EE] via-[#D8F3E3] to-[#C7EED8] border-[#A3E2B8] text-[#0F2417]'
+                    : 'bg-gradient-to-br from-[#0D2B1A] via-[#0A2215] to-[#07180F] border-[#1B4D2E] text-white'
+                }`}>
                   <div className="space-y-2">
-                    <div className="font-mono text-[9px] text-[#A7F3D0] uppercase tracking-wider font-bold">EMISSIONS COMPENSATIONS</div>
-                    <h3 className="font-sans font-bold text-lg leading-tight text-white">Offset Your Footprint</h3>
-                    <p className="text-xs text-white/70 leading-relaxed font-sans">
+                    <div className={`font-mono text-[9px] uppercase tracking-wider font-bold ${
+                      isLight ? 'text-[#00873E]' : 'text-[#A7F3D0]'
+                    }`}>EMISSIONS COMPENSATIONS</div>
+                    <h3 className={`font-sans font-bold text-lg leading-tight ${isLight ? 'text-[#0F2417]' : 'text-white'}`}>Offset Your Footprint</h3>
+                    <p className={`text-xs leading-relaxed font-sans ${isLight ? 'text-[#3E5C49]' : 'text-white/70'}`}>
                       Purchase certified Bangladeshi carbon credits directly on our registry to mitigate your calculated corporate emissions debt.
                     </p>
                   </div>
@@ -1558,10 +2552,18 @@ const SaaSDashboard = () => {
                 </div>
 
                 {/* Reminders / To-dos */}
-                <div className="bg-[#08130C] border border-[#152B1D] rounded-3xl p-6 shadow-sm text-white">
-                  <div className="flex justify-between items-center mb-4 pb-2 border-b border-[#122418]">
-                    <h3 className="font-sans font-bold text-sm text-white">Verification Tasks</h3>
-                    <span className="bg-[#0D2B1A] text-[#4ADE80] border border-[#1B4D2E] text-[9px] font-bold px-2 py-0.5 rounded-full font-mono">
+                <div className={`p-6 rounded-3xl border shadow-sm transition-all ${
+                  isLight 
+                    ? 'bg-white border-[#E8ECE8] text-[#0F2417]' 
+                    : 'bg-[#08130C] border-[#152B1D] text-white'
+                }`}>
+                  <div className={`flex justify-between items-center mb-4 pb-2 border-b ${
+                    isLight ? 'border-[#E8ECE8]' : 'border-[#122418]'
+                  }`}>
+                    <h3 className={`font-sans font-bold text-sm ${isLight ? 'text-[#0F2417]' : 'text-white'}`}>Verification Tasks</h3>
+                    <span className={`text-[9px] font-bold px-2 py-0.5 rounded-full font-mono ${
+                      isLight ? 'bg-[#E8F8EE] text-[#00873E] border border-[#C2E9CF]' : 'bg-[#0D2B1A] text-[#4ADE80] border border-[#1B4D2E]'
+                    }`}>
                       {openTasksCount} left
                     </span>
                   </div>
@@ -1574,13 +2576,20 @@ const SaaSDashboard = () => {
                             type="checkbox" 
                             checked={task.completed} 
                             onChange={() => toggleTask(task.id)}
-                            className="mt-0.5 border-[#173020] bg-[#040906] rounded text-[#00C853] focus:ring-[#00C853] cursor-pointer" 
+                            className={`mt-0.5 rounded text-[#00C853] focus:ring-[#00C853] cursor-pointer ${
+                              isLight ? 'border-[#DCE4DE] bg-white' : 'border-[#173020] bg-[#040906]'
+                            }`} 
                           />
-                          <span className={task.completed ? "text-[#557361] line-through" : "text-[#D8E8DF]"}>
+                          <span className={task.completed 
+                            ? isLight ? "text-[#8FA899] line-through" : "text-[#557361] line-through" 
+                            : isLight ? "text-[#0F2417]" : "text-[#D8E8DF]"
+                          }>
                             {task.text}
                           </span>
                         </div>
-                        <button onClick={() => deleteTask(task.id)} className="text-[#557361] hover:text-[#EF4444] transition-colors">
+                        <button onClick={() => deleteTask(task.id)} className={`transition-colors hover:text-[#EF4444] cursor-pointer ${
+                          isLight ? 'text-[#8FA899]' : 'text-[#557361]'
+                        }`}>
                           <Trash2 className="w-3.5 h-3.5" />
                         </button>
                       </li>
@@ -1588,19 +2597,29 @@ const SaaSDashboard = () => {
                   </ul>
                   <button 
                     onClick={() => setActiveMenu('Tasks')}
-                    className="w-full text-center text-xs font-sans font-bold text-[#4ADE80] hover:underline mt-4 pt-3 border-t border-[#122418] cursor-pointer"
+                    className={`w-full text-center text-xs font-sans font-bold hover:underline mt-4 pt-3 border-t cursor-pointer ${
+                      isLight ? 'text-[#00873E] border-[#E8ECE8]' : 'text-[#4ADE80] border-[#122418]'
+                    }`}
                   >
                     View All Tasks
                   </button>
                 </div>
 
                 {/* Team Members */}
-                <div className="bg-[#08130C] border border-[#152B1D] rounded-3xl p-6 shadow-sm text-white">
-                  <div className="flex justify-between items-center mb-4 pb-2 border-b border-[#122418]">
-                    <h3 className="font-sans font-bold text-sm text-white">ESG Audit Team</h3>
+                <div className={`p-6 rounded-3xl border shadow-sm transition-all ${
+                  isLight 
+                    ? 'bg-white border-[#E8ECE8] text-[#0F2417]' 
+                    : 'bg-[#08130C] border-[#152B1D] text-white'
+                }`}>
+                  <div className={`flex justify-between items-center mb-4 pb-2 border-b ${
+                    isLight ? 'border-[#E8ECE8]' : 'border-[#122418]'
+                  }`}>
+                    <h3 className={`font-sans font-bold text-sm ${isLight ? 'text-[#0F2417]' : 'text-white'}`}>ESG Audit Team</h3>
                     <button 
                       onClick={() => setIsAddMemberOpen(true)}
-                      className="text-[10px] font-sans font-semibold text-[#4ADE80] hover:underline cursor-pointer"
+                      className={`text-[10px] font-sans font-semibold hover:underline cursor-pointer ${
+                        isLight ? 'text-[#00873E]' : 'text-[#4ADE80]'
+                      }`}
                     >
                       Add Member
                     </button>
@@ -1610,23 +2629,27 @@ const SaaSDashboard = () => {
                     {teamMembers.map((member, i) => (
                       <div key={i} className="flex items-center justify-between">
                         <div className="flex items-center space-x-3.5">
-                          <div className="w-7 h-7 rounded-full bg-[#040906] overflow-hidden border border-[#1B4D2E] cursor-pointer" onClick={() => toggleMemberStatus(member.name)}>
-                            <img src={member.avatar} alt={member.name} className="w-full h-full object-cover" />
+                          <div className={`w-7 h-7 rounded-full overflow-hidden border cursor-pointer ${
+                            isLight ? 'bg-[#F7FAF7] border-[#DCE4DE]' : 'bg-[#040906] border-[#1B4D2E]'
+                          }`} onClick={() => toggleMemberStatus(member.name)}>
+                            <img src={member.avatar} alt={member.name} className="w-full h-full object-cover" width="28" height="28" loading="lazy" />
                           </div>
                           <div className="text-left leading-none">
-                            <div className="font-sans font-bold text-xs text-white">{member.name}</div>
-                            <div className="text-[9px] text-[#7C9A88] font-mono mt-0.5">{member.role}</div>
+                            <div className={`font-sans font-bold text-xs ${isLight ? 'text-[#0F2417]' : 'text-white'}`}>{member.name}</div>
+                            <div className={`text-[9px] font-mono mt-0.5 ${isLight ? 'text-[#557361]' : 'text-[#7C9A88]'}`}>{member.role}</div>
                           </div>
                         </div>
                         <div className="flex items-center space-x-2">
                           <span className={`text-[8px] border px-2 py-0.5 rounded uppercase font-bold ${
                             member.status === 'Active' 
-                              ? 'bg-[#0D2B1A] text-[#4ADE80] border-[#1B4D2E]' 
-                              : 'bg-[#040906] text-[#557361] border-[#122418]'
+                              ? isLight ? 'bg-[#E8F8EE] text-[#00873E] border-[#C2E9CF]' : 'bg-[#0D2B1A] text-[#4ADE80] border-[#1B4D2E]'
+                              : isLight ? 'bg-gray-100 text-gray-500 border-gray-200' : 'bg-[#040906] text-[#557361] border-[#122418]'
                           }`}>
                             {member.status}
                           </span>
-                          <button onClick={() => removeMember(member.name)} className="text-[#557361] hover:text-[#EF4444] transition-colors cursor-pointer">
+                          <button onClick={() => removeMember(member.name)} className={`hover:text-[#EF4444] transition-colors cursor-pointer ${
+                            isLight ? 'text-[#8FA899]' : 'text-[#557361]'
+                          }`}>
                             <X className="w-3 h-3" />
                           </button>
                         </div>
@@ -1657,7 +2680,7 @@ const SaaSDashboard = () => {
               <div className="xl:col-span-1 bg-[#040906] rounded-2xl p-6 border border-[#152B1D] flex flex-col justify-between">
                 <div>
                   <h3 className="font-sans font-bold text-sm text-white mb-4">Double Materiality Matrix</h3>
-                  <div className="relative w-full aspect-square bg-[#08130C] border-l-2 border-b-2 border-[#1B4D2E] grid grid-cols-5 grid-rows-5 rounded-tr-lg">
+                  <div className="relative w-full aspect-square bg-carbon border-l border-b border-forest grid grid-cols-5 grid-rows-5">
                     {/* Matrix Labels */}
                     <div className="absolute left-1/2 -bottom-6 transform -translate-x-1/2 text-[9px] font-mono uppercase text-[#7C9A88] font-bold">Impact Materiality →</div>
                     <div className="absolute -left-14 top-1/2 transform -translate-y-1/2 rotate-90 text-[9px] font-mono uppercase text-[#7C9A88] font-bold">Financial Materiality →</div>
@@ -2268,7 +3291,7 @@ const SaaSDashboard = () => {
 
                   <div className="flex items-center space-x-4">
                     <div className="w-12 h-12 rounded-full overflow-hidden border-2 border-emerald/20">
-                      <img src={member.avatar} alt={member.name} className="w-full h-full object-cover" />
+                      <img src={member.avatar} alt={member.name} className="w-full h-full object-cover" width="48" height="48" loading="lazy" />
                     </div>
                     <div>
                       <h4 className="font-sans font-bold text-sm text-[#0F291B]">{member.name}</h4>

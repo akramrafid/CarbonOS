@@ -74,80 +74,82 @@ const Navbar = () => {
   ];
 
   return (
-    <nav
-      className={`fixed top-0 left-0 w-full z-50 transition-all duration-300 h-20 flex items-center px-6 lg:px-12 ${
-        scrolled || isMobileMenuOpen
-          ? 'bg-[#040A06]/85 backdrop-blur-[20px] border-b border-[#00C853]/10'
-          : 'bg-transparent'
-      }`}
-    >
-      <div className="flex items-center w-full justify-between max-w-[1400px] mx-auto relative h-full">
-        
-        {/* Left: Logo */}
-        <div className="flex items-center space-x-3 w-1/2 lg:w-1/4 z-50">
-          <Link to="/" onClick={closeMenu} className="flex items-center space-x-2 hover:opacity-80 transition-opacity">
-            <span className="font-sans font-bold text-registry text-2xl tracking-tight drop-shadow-sm">CarbonOS</span>
-            <span className="text-xl drop-shadow-sm">🇧🇩</span>
+    <nav className="fixed top-6 left-0 w-full z-50 flex justify-center px-4 sm:px-6 pointer-events-none">
+      <div 
+        className={`w-full max-w-[1400px] rounded-full border transition-all duration-500 ease-out flex items-center justify-between px-6 sm:px-8 py-3 sm:py-3.5 pointer-events-auto ${
+          scrolled 
+            ? 'bg-[#040A06]/85 dark:bg-[#040A06]/85 backdrop-blur-xl border-emerald/20 shadow-[0_8px_32px_rgba(0,0,0,0.37)]' 
+            : 'bg-[#040A06]/60 dark:bg-[#040A06]/60 backdrop-blur-md border-white/10'
+        }`}
+      >
+        {/* Left Side: Brand Logo */}
+        <div className="flex items-center space-x-3 w-1/2 lg:w-1/4">
+          <Link to="/" className="flex items-center space-x-2 group">
+            <span className="serif-drama text-2xl font-bold tracking-wider text-white group-hover:text-emerald transition-colors">
+              Carbon<span className="text-emerald">OS</span>
+            </span>
+            <span className="font-mono text-[9px] bg-emerald/10 border border-emerald/20 text-emerald px-1.5 py-0.5 rounded tracking-widest uppercase">
+              BD
+            </span>
           </Link>
         </div>
 
-        {/* Center: Glassmorphic Navigation Pill (Desktop Only) */}
-        <div className="hidden lg:flex items-center bg-white/5 backdrop-blur-xl border border-white/10 shadow-[0_4px_30px_rgba(0,0,0,0.1)] rounded-full pl-8 pr-2 py-2 absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 z-50">
-          
-          {/* Navigation Links */}
-          <div className="flex items-center space-x-8 mr-8">
-            {navLinks.map((item) => {
-              const isHash = ['Platform', 'Sectors', 'Pricing'].includes(item.id);
-              const hash = item.id.toLowerCase();
+        {/* Center: Desktop Navigation Links */}
+        <div className="hidden lg:flex items-center space-x-1 bg-white/[0.03] border border-white/5 rounded-full p-1.5 backdrop-blur-sm">
+          {navLinks.map((item) => {
+            const isHash = ['Platform', 'Sectors', 'Pricing'].includes(item.id);
+            const hash = item.id.toLowerCase();
 
-              if (item.path) {
-                return (
-                  <Link
-                    key={item.id}
-                    to={item.path}
-                    className="font-sans font-medium text-[13px] text-white/80 hover:text-white transition-colors tracking-wide whitespace-nowrap"
-                  >
-                    {t(`nav.${item.key}`, item.id)}
-                  </Link>
-                );
-              } else if (isHash) {
-                return (
-                  <a
-                    key={item.id}
-                    href={`/#${hash}`}
-                    onClick={(e) => handleHashClick(e, hash)}
-                    className="font-sans font-medium text-[13px] text-white/80 hover:text-white transition-colors tracking-wide cursor-pointer whitespace-nowrap"
-                  >
-                    {t(`nav.${item.key}`)}
-                  </a>
-                );
-              } else {
-                return (
-                  <Link
-                    key={item.id}
-                    to="/how-it-works"
-                    className="font-sans font-medium text-[13px] text-white/80 hover:text-white transition-colors tracking-wide whitespace-nowrap"
-                  >
-                    {t(`nav.${item.key}`)}
-                  </Link>
-                );
-              }
-            })}
-          </div>
+            if (item.path) {
+              return (
+                <Link
+                  key={item.id}
+                  to={item.path}
+                  className="font-sans text-[13px] font-medium text-white/80 hover:text-white px-4 py-2 rounded-full transition-all duration-300 hover:bg-white/5"
+                >
+                  {t(`nav.${item.key}`, item.id)}
+                </Link>
+              );
+            } else if (isHash) {
+              return (
+                <a
+                  key={item.id}
+                  href={`/#${hash}`}
+                  onClick={(e) => handleHashClick(e, hash)}
+                  className="font-sans text-[13px] font-medium text-white/80 hover:text-white px-4 py-2 rounded-full transition-all duration-300 hover:bg-white/5 cursor-pointer"
+                >
+                  {t(`nav.${item.key}`)}
+                </a>
+              );
+            } else {
+              return (
+                <button
+                  key={item.id}
+                  className="font-sans text-[13px] font-medium text-white/80 hover:text-white px-4 py-2 rounded-full transition-all duration-300 hover:bg-white/5 cursor-pointer"
+                >
+                  {t(`nav.${item.key}`)}
+                </button>
+              );
+            }
+          })}
 
-          {/* Pill CTA Button */}
-          <Link to="/how-it-works" className="bg-[#0A1F13] text-emerald border border-emerald/20 font-sans font-bold text-[13px] px-6 py-2.5 rounded-full btn-magnetic hover:bg-[#0D2B1A] transition-colors shadow-inner flex items-center justify-center whitespace-nowrap">
-            {t('nav.requestDemo')}
+          {/* Request Demo Pill Button */}
+          <Link
+            to="/platform/saas"
+            className="font-mono text-[11px] font-bold text-white bg-[#0A1F13] hover:bg-[#00C853] hover:text-[#0A1F13] border border-[#00C853]/40 px-4 py-2 rounded-full transition-all duration-300 shadow-[0_0_12px_rgba(0,200,83,0.15)] ml-2"
+          >
+            [Request Demo]
           </Link>
         </div>
 
-        {/* Right: Actions */}
-        <div className="flex items-center justify-end space-x-3 sm:space-x-4 w-1/2 lg:w-1/4 z-50">
+        {/* Right Side: Language Switcher, Theme Toggle, Login, Mobile Menu Toggle */}
+        <div className="flex items-center justify-end space-x-2 sm:space-x-3 w-1/2 lg:w-1/4 z-50">
           
           {/* Language Toggle */}
           <button 
             onClick={toggleLanguage}
-            className="ghost-btn font-sans font-bold text-xs px-2 py-1.5 rounded flex items-center space-x-1 sm:space-x-2"
+            aria-label={`Current language is ${i18n.language === 'en' ? 'English' : 'Bengali'}. Click to switch language`}
+            className="ghost-btn font-sans font-bold text-xs px-2.5 py-1.5 min-h-[44px] min-w-[44px] rounded-lg flex items-center justify-center space-x-1 sm:space-x-2 focus-visible:ring-2 focus-visible:ring-emerald/60 focus:outline-none"
           >
             <span className={i18n.language === 'en' ? 'text-white drop-shadow-sm' : 'text-white/40'}>EN</span>
             <span className="text-white/20">|</span>
@@ -158,7 +160,7 @@ const Navbar = () => {
           <button
             id="theme-toggle-btn"
             onClick={toggleTheme}
-            className="theme-toggle"
+            className="theme-toggle min-w-[44px] min-h-[44px] focus-visible:ring-2 focus-visible:ring-emerald/60 focus:outline-none"
             aria-label={theme === 'dark' ? 'Switch to light mode' : 'Switch to dark mode'}
             title={theme === 'dark' ? 'Switch to light mode' : 'Switch to dark mode'}
           >
@@ -167,15 +169,18 @@ const Navbar = () => {
           </button>
           
           {/* Desktop Login */}
-          <Link to="/dashboard/farmer/earnings" className="hidden sm:flex items-center space-x-2 cursor-pointer hover:opacity-80 transition-opacity group">
+          <Link to="/dashboard/farmer/earnings" className="hidden sm:flex items-center space-x-2 cursor-pointer hover:opacity-80 transition-opacity group min-h-[44px] px-2">
             <span className="font-sans text-[13px] font-medium text-white/80 group-hover:text-white transition-colors">Login</span>
             <LogIn size={16} className="text-white/80 group-hover:text-white transition-colors" />
           </Link>
 
           {/* Mobile Menu Toggle */}
           <button 
-            className="lg:hidden p-2 text-white/80 hover:text-white transition-colors"
+            className="lg:hidden min-w-[44px] min-h-[44px] p-2 flex items-center justify-center text-white/80 hover:text-white transition-colors focus-visible:ring-2 focus-visible:ring-emerald/60 focus:outline-none rounded-lg"
             onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
+            aria-label={isMobileMenuOpen ? "Close navigation menu" : "Open navigation menu"}
+            aria-expanded={isMobileMenuOpen}
+            aria-controls="mobile-menu-drawer"
           >
             {isMobileMenuOpen ? <X size={24} /> : <Menu size={24} />}
           </button>
@@ -185,9 +190,11 @@ const Navbar = () => {
 
       {/* Mobile Menu Drawer */}
       <div 
+        id="mobile-menu-drawer"
         className={`fixed inset-0 top-0 pt-24 bg-[#040A06]/95 backdrop-blur-3xl transition-transform duration-300 z-40 flex flex-col items-center space-y-8 lg:hidden ${
           isMobileMenuOpen ? 'translate-x-0' : 'translate-x-full'
         }`}
+        aria-hidden={!isMobileMenuOpen}
       >
         <div className="flex flex-col items-center space-y-6 w-full px-6">
           {navLinks.map((item) => {

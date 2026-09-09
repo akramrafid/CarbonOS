@@ -106,7 +106,7 @@ const Impact = () => {
 
       {/* FLOAT TOAST NOTIFICATION */}
       {toast.show && (
-        <div className={`fixed bottom-6 right-6 z-50 flex items-center space-x-3 px-4.5 py-3.5 rounded-2xl shadow-xl border text-white transition-all transform duration-300 animate-bounce ${
+        <div className={`fixed bottom-6 right-6 z-50 flex items-center space-x-3 px-4.5 py-3.5 rounded-2xl shadow-xl border text-white transition-all transform duration-300 animate-fade-in ${
           toast.type === 'success' 
             ? 'bg-[#0D2B1A] border-[#00C853]/30' 
             : 'bg-[#1E293B] border-[#E2E8F0]/20'

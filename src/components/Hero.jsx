@@ -9,7 +9,20 @@ const Hero = () => {
   const { t } = useTranslation();
 
   useEffect(() => {
+    const prefersReducedMotion = typeof window !== 'undefined' && 
+      window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
     let ctx = gsap.context(() => {
+      if (prefersReducedMotion) {
+        gsap.set(['.hero-bg', '.hero-watermark', '.hero-pill', '.hero-h1', '.hero-body', '.hero-cta', '.hero-stat-card', '.hero-award'], {
+          opacity: 1,
+          scale: 1,
+          x: 0,
+          y: 0
+        });
+        return;
+      }
+
       const tl = gsap.timeline();
 
       // Background fade

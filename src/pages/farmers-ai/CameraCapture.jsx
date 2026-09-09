@@ -516,10 +516,11 @@ const CameraCapture = ({ isInline = false, onBack = null, onScanComplete = null 
       <div className="relative aspect-video w-full bg-black/40 border border-white/10 rounded-[32px] overflow-hidden shadow-2xl flex items-center justify-center min-h-[340px]">
         
         {/* Corner framing targets */}
-        <div className="absolute top-6 left-6 w-5 h-5 border-t-2 border-l-2 border-[#CCFF00]/40 rounded-tl-lg pointer-events-none z-10" />
-        <div className="absolute top-6 right-6 w-5 h-5 border-t-2 border-r-2 border-[#CCFF00]/40 rounded-tr-lg pointer-events-none z-10" />
-        <div className="absolute bottom-6 left-6 w-5 h-5 border-b-2 border-l-2 border-[#CCFF00]/40 rounded-bl-lg pointer-events-none z-10" />
-        <div className="absolute bottom-6 right-6 w-5 h-5 border-b-2 border-r-2 border-[#CCFF00]/40 rounded-br-lg pointer-events-none z-10" />
+        {/* impeccable-disable side-tab, border-accent-on-rounded -- camera viewfinder reticle brackets */}
+        <div className="absolute top-6 left-6 w-5 h-5 border-t-2 border-l-2 border-[#CCFF00]/40 pointer-events-none z-10" />
+        <div className="absolute top-6 right-6 w-5 h-5 border-t-2 border-r-2 border-[#CCFF00]/40 pointer-events-none z-10" />
+        <div className="absolute bottom-6 left-6 w-5 h-5 border-b-2 border-l-2 border-[#CCFF00]/40 pointer-events-none z-10" />
+        <div className="absolute bottom-6 right-6 w-5 h-5 border-b-2 border-r-2 border-[#CCFF00]/40 pointer-events-none z-10" />
         
         {/* Subtle grid pattern */}
         <div className="absolute inset-0 opacity-10 bg-[linear-gradient(rgba(255,255,255,0.05)_1px,transparent_1px),linear-gradient(90deg,rgba(255,255,255,0.05)_1px,transparent_1px)] bg-[size:20px_20px] pointer-events-none" />
