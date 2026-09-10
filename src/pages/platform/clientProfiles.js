@@ -46,31 +46,31 @@ export const CLIENT_PROFILES = [
     logo: "/govaly.png",
     logoTheme: "dark",
     website: "https://govaly.com.bd/",
-    sector: "Corporate Travel Tech & Aviation",
-    category: "travel",
+    sector: "Fashion Marketplace",
+    category: "fashion",
     headquarters: "Gulshan-2, Dhaka",
     founded: "2020",
-    reportingStandard: "ICAO CORSIA & IATA Carbon Offset Framework",
-    assignedAuditor: "Farhana Ahmed, MBA • Aviation Scope 3 Lead",
+    reportingStandard: "Sustainable Apparel Coalition (Higg Index) & ISO 14064",
+    assignedAuditor: "Farhana Ahmed, MBA • Sustainable Fashion & Scope 3 Lead",
     facilities: [
-      { name: "Corporate HQ & Operations Suite", location: "Gulshan-2, Dhaka", type: "Commercial Office" },
-      { name: "Regional Data Operations Hub", location: "Banani, Dhaka", type: "Server Facility" }
+      { name: "Corporate HQ & Digital Studio", location: "Gulshan-2, Dhaka", type: "Commercial Office" },
+      { name: "Fulfilment & Garment Logistics Hub", location: "Tejgaon, Dhaka", type: "Distribution Center" }
     ],
     baselineInputs: {
-      diesel: "2400",         // Executive shuttle & building generator share
-      petrol: "3200",         // Corporate fleet vehicles
-      lpg: "350",
-      electricity: "68000",   // Data servers, workstations, air conditioning
-      employees: "85",        // Product managers, engineers, customer support
-      airTravel: "340000",    // Primary business metric: Scope 3 Cat 6 passenger aviation flights
-      truckTransport: "4500", // IT hardware shipments
-      rawMaterials: "25"      // Paperless digital operations
+      diesel: "1800",         // Backup generator & fulfillment logistics
+      petrol: "2400",         // Dispatch parcel couriers
+      lpg: "250",
+      electricity: "48000",   // Digital studio, warehouse operations, server compute
+      employees: "85",        // Merchandisers, stylists, engineers, customer support
+      airTravel: "25000",     // Sourcing & designer buyer trips
+      truckTransport: "65000", // Apparel supply chain & logistics freight
+      rawMaterials: "820"     // Eco-textiles, organic cotton apparel, recycled poly bags
     },
-    sustainabilityHighlight: "AI Route Optimization & Direct SAF Aviation Carbon Offset Settlement",
+    sustainabilityHighlight: "Circular Fashion Resale & Low-Impact Eco-Apparel Logistics",
     activeInsets: 1200,
     creditVintage: "2026",
-    sampleInvoiceName: "Govaly_Corporate_Aviation_Travel_Manifest_Q2.pdf",
-    sampleInvoiceType: "IATA Passenger Aviation Seat-Km & Airport Surcharge Manifest"
+    sampleInvoiceName: "Govaly_Fashion_Logistics_EcoPackaging_Invoice.pdf",
+    sampleInvoiceType: "Apparel Supply Chain Freight & Eco-Packaging Materials Statement"
   },
   {
     id: "motorent",
@@ -247,7 +247,7 @@ export const CLIENT_SECTORS = [
   { id: "mobility", label: "Clean Mobility & Fleet", count: 4 },
   { id: "circular", label: "Circular Economy & Packaging", count: 1 },
   { id: "education", label: "Higher Education & Campus", count: 1 },
-  { id: "travel", label: "Corporate Travel & Aviation", count: 1 }
+  { id: "fashion", label: "Fashion Marketplace", count: 1 }
 ];
 
 export default CLIENT_PROFILES;

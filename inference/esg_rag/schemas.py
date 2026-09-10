@@ -42,6 +42,29 @@ class ExtractedParameter(BaseModel):
     raw_snippet: str
     confidence: float
 
+class CategoryMetric(BaseModel):
+    id: str
+    name: str
+    icon: Optional[str] = "zap"
+    spend_bdt: float
+    carbon_kg: float
+    carbon_tonnes: float
+    percentage: float
+    scope: str
+    unit: str
+    quantity: float
+    emission_factor: float
+    factor_citation: str
+    status: Optional[str] = "verified"
+
+class TopImpactCategory(BaseModel):
+    rank: int
+    id: str
+    name: str
+    carbon_kg: float
+    carbon_tonnes: float
+    percentage: float
+
 class ExtractionResponse(BaseModel):
     filename: str
     tenant_id: str
@@ -51,6 +74,13 @@ class ExtractionResponse(BaseModel):
     audit_seal: bool
     verified_at: str
     summary: str
+    total_footprint_kg: Optional[float] = None
+    total_footprint_tonnes: Optional[float] = None
+    total_spend_bdt: Optional[float] = None
+    trend_vs_last_month: Optional[float] = -8.0
+    categories: Optional[List[CategoryMetric]] = None
+    top_impact_categories: Optional[List[TopImpactCategory]] = None
+    quick_tips: Optional[List[str]] = None
 
 class EmissionFactorItem(BaseModel):
     id: str

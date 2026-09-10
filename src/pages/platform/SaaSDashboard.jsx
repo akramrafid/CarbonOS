@@ -48,7 +48,19 @@ import {
   Globe,
   Cpu,
   Layers,
-  GitBranch
+  GitBranch,
+  Utensils,
+  Car,
+  Shirt,
+  ShoppingBag,
+  Home,
+  Film,
+  HeartPulse,
+  Package,
+  Sliders,
+  Edit3,
+  Lightbulb,
+  PieChart
 } from 'lucide-react';
 import { useTheme } from '../../context/ThemeContext';
 import { SaaSLocales } from './SaaSLocalization';
@@ -402,6 +414,269 @@ const BANGLADESH_DISTRICTS = [
   "Thakurgaon"
 ];
 
+// -------------------------------------------------------------
+// 9 STANDARD INVOICE FOOTPRINT CATEGORIES & CALCULATOR
+// -------------------------------------------------------------
+const NINE_CATEGORIES_CONFIG = [
+  { id: 'food_groceries', name: 'Food & Groceries', icon: Utensils, color: '#F59E0B', defaultScope: 'Scope 3', defaultUnit: 'Staff Meals', defaultFactor: 2.40 },
+  { id: 'transport', name: 'Transport', icon: Car, color: '#00E5FF', defaultScope: 'Scope 1 & 3', defaultUnit: 'Liters / T-Km', defaultFactor: 2.31 },
+  { id: 'electricity_energy', name: 'Electricity & Energy', icon: Zap, color: '#00C853', defaultScope: 'Scope 2 & 1', defaultUnit: 'kWh & Gen-Liters', defaultFactor: 0.55 },
+  { id: 'clothing_footwear', name: 'Clothing & Footwear', icon: Shirt, color: '#EC4899', defaultScope: 'Scope 3', defaultUnit: 'PPE Garments', defaultFactor: 8.50 },
+  { id: 'shopping_products', name: 'Shopping & Products', icon: ShoppingBag, color: '#A855F7', defaultScope: 'Scope 3', defaultUnit: 'Metric Tons Inputs', defaultFactor: 2500.0 },
+  { id: 'housing_rent', name: 'Housing & Rent', icon: Home, color: '#3B82F6', defaultScope: 'Scope 1 & 2', defaultUnit: 'Facility m²', defaultFactor: 0.35 },
+  { id: 'entertainment', name: 'Entertainment', icon: Film, color: '#F97316', defaultScope: 'Scope 3', defaultUnit: 'Hospitality Events', defaultFactor: 0.11 },
+  { id: 'health_care', name: 'Health & Personal Care', icon: HeartPulse, color: '#10B981', defaultScope: 'Scope 3', defaultUnit: 'Medical Supplies', defaultFactor: 3.80 },
+  { id: 'others', name: 'Others', icon: Package, color: '#94A3B8', defaultScope: 'Scope 3', defaultUnit: 'Ancillary Services', defaultFactor: 0.22 },
+];
+
+const computeCategoryMatrix = (rawParams = {}, customAddedItems = [], adjustments = {}) => {
+  const diesel = parseFloat(rawParams.diesel) || 0;
+  const petrol = parseFloat(rawParams.petrol) || 0;
+  const lpg = parseFloat(rawParams.lpg) || 0;
+  const electricity = parseFloat(rawParams.electricity) || 0;
+  const employees = parseFloat(rawParams.employees) || 0;
+  const airTravel = parseFloat(rawParams.airTravel) || 0;
+  const truckTransport = parseFloat(rawParams.truckTransport) || 0;
+  const rawMaterials = parseFloat(rawParams.rawMaterials) || 0;
+
+  // 1. Food & Groceries
+  const canteenKg = (employees > 0 ? employees * 22 * 2.4 : 850);
+  const lpgKitchenKg = (lpg > 0 ? lpg * 0.60 * 2.98 : 340);
+  let foodKg = canteenKg + lpgKitchenKg;
+  let foodSpend = (employees > 0 ? employees * 22 * 180 + (lpg * 0.60 * 120) : 68000);
+
+  // 2. Transport
+  const petrolKg = petrol * 2.31;
+  const dieselFleetKg = (diesel * 0.30) * 2.68;
+  const truckKg = truckTransport * 0.20;
+  const flightKg = airTravel * 0.12;
+  let transKg = petrolKg + dieselFleetKg + truckKg + flightKg;
+  let transSpend = (petrol * 125) + (diesel * 0.30 * 105) + (truckTransport * 18) + (airTravel * 14);
+  if (transSpend <= 0) transSpend = 185000;
+
+  // 3. Electricity & Energy
+  const gridKg = electricity * 0.550;
+  const dieselGenKg = (diesel * 0.70) * 2.68;
+  let elecKg = gridKg + dieselGenKg;
+  let elecSpend = (electricity * 10.50) + (diesel * 0.70 * 105);
+  if (elecSpend <= 0) elecSpend = 450000;
+
+  // 4. Clothing & Footwear
+  let clothKg = (employees > 0 ? employees * 4 * 8.5 : 180);
+  let clothSpend = (employees > 0 ? employees * 4 * 1200 : 42000);
+
+  // 5. Shopping & Products
+  let shopKg = (rawMaterials > 0 ? rawMaterials * 2500 : 14500);
+  let shopSpend = (rawMaterials > 0 ? rawMaterials * 140000 : 820000);
+
+  // 6. Housing & Rent
+  const lpgFacKg = (lpg > 0 ? lpg * 0.40 * 2.98 : 220);
+  const facGridKg = (electricity > 0 ? electricity * 0.08 * 0.55 : 450);
+  let houseKg = lpgFacKg + facGridKg + 850;
+  let houseSpend = (lpg * 0.40 * 120) + 185000;
+
+  // 7. Entertainment
+  let entKg = (airTravel * 0.03) + 240;
+  let entSpend = (airTravel * 3.5) + 55000;
+
+  // 8. Health & Personal Care
+  let healthKg = (employees > 0 ? employees * 3.8 : 190);
+  let healthSpend = (employees > 0 ? employees * 650 : 32000);
+
+  // 9. Others
+  let othersKg = (employees > 0 ? employees * 2.5 : 680);
+  let othersSpend = (employees > 0 ? employees * 280 : 125000);
+
+  const baseValues = {
+    food_groceries: { spend: foodSpend, kg: foodKg, qty: employees * 22 || 350 },
+    transport: { spend: transSpend, kg: transKg, qty: petrol + (diesel * 0.3) + truckTransport },
+    electricity_energy: { spend: elecSpend, kg: elecKg, qty: electricity + (diesel * 0.7) },
+    clothing_footwear: { spend: clothSpend, kg: clothKg, qty: employees * 4 || 24 },
+    shopping_products: { spend: shopSpend, kg: shopKg, qty: rawMaterials || 12 },
+    housing_rent: { spend: houseSpend, kg: houseKg, qty: 1 },
+    entertainment: { spend: entSpend, kg: entKg, qty: 1 },
+    health_care: { spend: healthSpend, kg: healthKg, qty: employees || 15 },
+    others: { spend: othersSpend, kg: othersKg, qty: 1 }
+  };
+
+  // Apply user custom category adjustments if any
+  Object.keys(adjustments).forEach(catId => {
+    if (baseValues[catId]) {
+      if (adjustments[catId].spend !== undefined) baseValues[catId].spend = adjustments[catId].spend;
+      if (adjustments[catId].kg !== undefined) baseValues[catId].kg = adjustments[catId].kg;
+      if (adjustments[catId].qty !== undefined) baseValues[catId].qty = adjustments[catId].qty;
+    }
+  });
+
+  // Add custom items
+  customAddedItems.forEach(item => {
+    if (baseValues[item.categoryId]) {
+      baseValues[item.categoryId].spend += (parseFloat(item.spendBdt) || 0);
+      baseValues[item.categoryId].kg += (parseFloat(item.carbonKg) || 0);
+      baseValues[item.categoryId].qty += (parseFloat(item.quantity) || 0);
+    }
+  });
+
+  const totalKg = Object.values(baseValues).reduce((acc, v) => acc + v.kg, 0);
+  const totalSpend = Object.values(baseValues).reduce((acc, v) => acc + v.spend, 0);
+
+  const categories = NINE_CATEGORIES_CONFIG.map(cfg => {
+    const val = baseValues[cfg.id];
+    const pct = totalKg > 0 ? (val.kg / totalKg) * 100 : 0;
+    return {
+      id: cfg.id,
+      name: cfg.name,
+      icon: cfg.icon,
+      color: cfg.color,
+      scope: cfg.defaultScope,
+      unit: cfg.defaultUnit,
+      spendBdt: Math.round(val.spend),
+      carbonKg: Math.round(val.kg),
+      carbonTonnes: parseFloat((val.kg / 1000).toFixed(3)),
+      percentage: parseFloat(pct.toFixed(1)),
+      quantity: Math.round(val.qty)
+    };
+  });
+
+  const sorted = [...categories].sort((a, b) => b.carbonKg - a.carbonKg);
+  const topImpactCategories = sorted.slice(0, 3).map((cat, idx) => ({
+    rank: idx + 1,
+    id: cat.id,
+    name: cat.name,
+    color: cat.color,
+    carbonKg: cat.carbonKg,
+    carbonTonnes: cat.carbonTonnes,
+    percentage: cat.percentage
+  }));
+
+  const top1 = sorted[0] || categories[0];
+  const tipsCatalog = {
+    electricity_energy: `Electricity & Energy is your primary emissions driver (${top1.percentage}% of total). Installing a 150 kWp rooftop solar system under SREDA net-metering can abate ~85 tonnes CO₂e annually and eliminate peak grid surcharges.`,
+    transport: `Transport & Logistics accounts for ${top1.percentage}% of your carbon footprint. Consolidate N1 highway dispatch schedules and transition internal site shuttles to EV/CNG to cut fleet emissions by up to 24%.`,
+    shopping_products: `Purchased Raw Materials contribute ${top1.percentage}% of total emissions. Procuring OEKO-TEX or GRS-certified circular recycled fibers can lower upstream Scope 3 intensity by ~28%.`,
+    food_groceries: `Canteen & Provisions make up ${top1.percentage}% of footprint. Switching to direct local agro-cooperatives and implementing organic kitchen composting reduces Scope 3 food loss footprints by 18%.`,
+    housing_rent: `Facility HVAC & Heating contributes ${top1.percentage}% of emissions. Performing thermal insulation on boiler steam pipes and tuning chiller setpoints by 1.5°C will save ~12% facility energy.`,
+    clothing_footwear: `Uniforms & protective gear generate ${top1.percentage}% of emissions. Transitioning to organic certified cotton workwear extends replacement cycles and cuts Scope 3 textile impact by 15%.`,
+    entertainment: `Hospitality & corporate travel accounts for ${top1.percentage}%. Substituting 25% of overseas sales flights with virtual showroom sessions saves ~20 tCO₂e.`,
+    health_care: `Occupational health and safety supplies represent ${top1.percentage}%. Consolidating medical deliveries and selecting autoclave-reusable PPE reduces consumable waste.`,
+    others: `Ancillary services and solid waste make up ${top1.percentage}%. Installing on-site waste segregation and subscribing to green cloud data regions mitigates operational overhead.`
+  };
+  const quickTip = tipsCatalog[top1.id] || `Conduct an ISO 50001 energy audit on your largest consumption facilities to unlock immediate 10-15% operational emission reductions.`;
+
+  return {
+    categories,
+    totalFootprintKg: Math.round(totalKg),
+    totalFootprintTonnes: parseFloat((totalKg / 1000).toFixed(2)),
+    totalSpendBdt: Math.round(totalSpend),
+    trendVsLastMonth: -8.4,
+    topImpactCategories,
+    quickTip
+  };
+};
+
+const CarbonDistributionDonut = ({ categories = [], totalKg = 0, totalTonnes = 0, unitMode = 'tonnes', hoveredId = null, onHover = () => {}, isLight = false }) => {
+  const radius = 68;
+  const strokeWidth = 16;
+  const circumference = 2 * Math.PI * radius; // ~427.25
+
+  const activeSlices = categories.filter(c => c.percentage > 0);
+  let accumulatedPct = 0;
+
+  return (
+    <div className="flex flex-col items-center justify-center w-full">
+      <div className="relative w-48 h-48 sm:w-56 sm:h-56 flex items-center justify-center">
+        <svg viewBox="0 0 180 180" className="w-full h-full transform -rotate-90">
+          {/* Background track */}
+          <circle
+            cx="90"
+            cy="90"
+            r={radius}
+            fill="transparent"
+            stroke={isLight ? "#E2E8F0" : "#0D2214"}
+            strokeWidth={strokeWidth}
+          />
+          {activeSlices.map((slice) => {
+            const strokeDash = (slice.percentage / 100) * circumference;
+            const strokeOffset = -((accumulatedPct / 100) * circumference);
+            accumulatedPct += slice.percentage;
+            const isHovered = hoveredId === slice.id;
+
+            return (
+              <circle
+                key={slice.id}
+                cx="90"
+                cy="90"
+                r={radius}
+                fill="transparent"
+                stroke={slice.color}
+                strokeWidth={isHovered ? strokeWidth + 4 : strokeWidth}
+                strokeDasharray={`${strokeDash} ${circumference}`}
+                strokeDashoffset={strokeOffset}
+                strokeLinecap="round"
+                className="transition-all duration-300 cursor-pointer"
+                onMouseEnter={() => onHover(slice.id)}
+                onMouseLeave={() => onHover(null)}
+                style={{
+                  filter: isHovered ? `drop-shadow(0 0 8px ${slice.color}99)` : 'none'
+                }}
+              />
+            );
+          })}
+        </svg>
+
+        {/* Center Display */}
+        <div className="absolute inset-0 flex flex-col items-center justify-center text-center pointer-events-none px-2">
+          <span className={`text-[9px] font-mono uppercase tracking-wider font-bold ${
+            isLight ? 'text-[#41634E]' : 'text-[#9EBFAB]'
+          }`}>
+            Total Footprint
+          </span>
+          <span className={`font-mono font-black text-lg sm:text-xl leading-tight ${
+            isLight ? 'text-[#00873E]' : 'text-[#00E676]'
+          }`}>
+            {unitMode === 'tonnes' ? `${totalTonnes.toLocaleString()} t` : `${totalKg.toLocaleString()} kg`}
+          </span>
+          <span className={`text-[9px] font-semibold ${isLight ? 'text-[#64748B]' : 'text-emerald-300/60'}`}>
+            CO₂e Emissions
+          </span>
+        </div>
+      </div>
+
+      {/* Interactive Legend Grid */}
+      <div className="grid grid-cols-2 sm:grid-cols-3 gap-2 mt-4 w-full">
+        {activeSlices.map(slice => {
+          const isHovered = hoveredId === slice.id;
+          return (
+            <div
+              key={slice.id}
+              onMouseEnter={() => onHover(slice.id)}
+              onMouseLeave={() => onHover(null)}
+              className={`flex items-center space-x-2 p-1.5 rounded-xl cursor-pointer transition-all border ${
+                isHovered 
+                  ? (isLight ? 'bg-emerald-50/80 border-emerald-300 scale-[1.02]' : 'bg-[#0E2616] border-[#00C853]/40 scale-[1.02]') 
+                  : (isLight ? 'bg-[#F8FAFC] border-transparent hover:border-slate-200' : 'bg-[#061009]/60 border-transparent hover:border-[#152B1D]')
+              }`}
+            >
+              <div 
+                className="w-2.5 h-2.5 rounded-full shrink-0 shadow-sm"
+                style={{ backgroundColor: slice.color }}
+              />
+              <div className="truncate text-left leading-tight min-w-0">
+                <div className={`text-[11px] font-bold truncate ${isLight ? 'text-[#0F2417]' : 'text-white'}`}>
+                  {slice.name}
+                </div>
+                <div className={`text-[10px] font-mono ${isLight ? 'text-[#41634E]' : 'text-[#9EBFAB]'}`}>
+                  {slice.percentage}% • {unitMode === 'tonnes' ? `${slice.carbonTonnes} t` : `${slice.carbonKg.toLocaleString()} kg`}
+                </div>
+              </div>
+            </div>
+          );
+        })}
+      </div>
+    </div>
+  );
+};
+
 const SaaSDashboard = () => {
   const navigate = useNavigate();
   const { theme, toggleTheme } = useTheme();
@@ -537,6 +812,80 @@ const SaaSDashboard = () => {
   const [isRagLoading, setIsRagLoading] = useState(false);
   const [selectedCitation, setSelectedCitation] = useState(null);
   const [isSyncingFactors, setIsSyncingFactors] = useState(false);
+
+  // Multi-Category Invoice Footprint & Metrics State
+  const [extractionStep, setExtractionStep] = useState(1); // 1: Upload/Ingest, 2: Refine & Analyze, 3: Audit Assurance
+  const [unitMode, setUnitMode] = useState('tonnes'); // 'kg' | 'tonnes'
+  const [customItems, setCustomItems] = useState([]);
+  const [isAddCustomModalOpen, setIsAddCustomModalOpen] = useState(false);
+  const [newCustomItem, setNewCustomItem] = useState({
+    name: '',
+    categoryId: 'transport',
+    scope: 'Scope 1',
+    spendBdt: '',
+    quantity: '',
+    unit: 'Liters',
+    factor: '2.31'
+  });
+  const [editingCategory, setEditingCategory] = useState(null);
+  const [categoryAdjustments, setCategoryAdjustments] = useState({});
+  const [donutHoveredId, setDonutHoveredId] = useState(null);
+
+  // Handlers for Custom Items & Category Refinement
+  const handleAddCustomItem = (e) => {
+    e.preventDefault();
+    if (!newCustomItem.name.trim()) {
+      showToast("Please enter an item description.", "error");
+      return;
+    }
+    const spend = parseFloat(newCustomItem.spendBdt) || 0;
+    const qty = parseFloat(newCustomItem.quantity) || 0;
+    const factor = parseFloat(newCustomItem.factor) || 1.0;
+    const carbonKg = qty > 0 ? Math.round(qty * factor) : Math.round(spend * 0.065);
+
+    const item = {
+      id: Date.now(),
+      name: newCustomItem.name,
+      categoryId: newCustomItem.categoryId,
+      scope: newCustomItem.scope,
+      spendBdt: spend,
+      quantity: qty || 1,
+      unit: newCustomItem.unit || 'Units',
+      factor: factor,
+      carbonKg: carbonKg
+    };
+
+    setCustomItems(prev => [...prev, item]);
+    setIsAddCustomModalOpen(false);
+    setNewCustomItem({
+      name: '',
+      categoryId: 'transport',
+      scope: 'Scope 1',
+      spendBdt: '',
+      quantity: '',
+      unit: 'Liters',
+      factor: '2.31'
+    });
+    showToast(`Added "${item.name}" (+${carbonKg.toLocaleString()} kg CO₂e) to footprint matrix!`, "success");
+  };
+
+  const handleDeleteCustomItem = (id) => {
+    setCustomItems(prev => prev.filter(i => i.id !== id));
+    showToast("Removed custom item from matrix.", "info");
+  };
+
+  const handleSaveCategoryAdjustment = (catId, newSpend, newKg, newQty) => {
+    setCategoryAdjustments(prev => ({
+      ...prev,
+      [catId]: {
+        spend: parseFloat(newSpend) || 0,
+        kg: parseFloat(newKg) || 0,
+        qty: parseFloat(newQty) || 0
+      }
+    }));
+    setEditingCategory(null);
+    showToast("Category parameters refined and recalculated!", "success");
+  };
 
   // Interactive Checklist Tasks state
   const [tasks, setTasks] = useState([
@@ -734,6 +1083,7 @@ const SaaSDashboard = () => {
         setExtractionResult(data);
         setShowExtractionEvidence(true);
         setIsVerified(true);
+        setExtractionStep(2);
       } else {
         throw new Error("Local fallback required");
       }
@@ -782,6 +1132,7 @@ const SaaSDashboard = () => {
       setExtractionResult(fallbackData);
       setShowExtractionEvidence(true);
       setIsVerified(true);
+      setExtractionStep(2);
     } finally {
       setIsUploading(false);
       setTasks(prev => prev.map(t => t.id === 2 ? { ...t, completed: true } : t));
@@ -1007,6 +1358,10 @@ const SaaSDashboard = () => {
 
   // Active tasks count
   const openTasksCount = tasks.filter(t => !t.completed).length;
+
+  // Active 9-Category Footprint Matrix (auto-cascades custom items & category adjustments)
+  const activeParams = extractionResult ? (extractionResult.parameters || inputs) : inputs;
+  const activeMatrix = computeCategoryMatrix(activeParams, customItems, categoryAdjustments);
 
   return (
     <div className={`pt-20 min-h-screen flex relative platform-saas-dashboard transition-colors duration-300 ${
@@ -1266,15 +1621,15 @@ const SaaSDashboard = () => {
             <button 
               disabled={downloadingApp}
               onClick={handleDownloadApp}
-              className="w-full bg-[#00C853] hover:bg-[#00E676] text-white font-sans font-bold text-[11px] py-1.5 px-3 rounded-xl transition-all flex items-center justify-center space-x-1.5 shadow-sm cursor-pointer disabled:opacity-50"
+              className="w-full bg-[#00C853] hover:bg-[#00E676] text-white font-sans font-bold text-[11px] py-2 px-3 rounded-xl transition-all flex items-center justify-center space-x-1.5 shadow-md shadow-[#00C853]/20 cursor-pointer disabled:opacity-50"
             >
               {downloadingApp ? (
                 <>
-                  <Loader2 className="w-3 h-3 animate-spin text-white" />
-                  <span>Connecting...</span>
+                  <Loader2 className="w-3.5 h-3.5 animate-spin text-white" />
+                  <span className="text-white font-bold">Connecting...</span>
                 </>
               ) : (
-                <span>Download Mobile App</span>
+                <span className="text-white font-bold tracking-tight">Download Mobile App</span>
               )}
             </button>
           </div>
@@ -1361,10 +1716,10 @@ const SaaSDashboard = () => {
             <div className="flex items-center space-x-2">
               <button 
                 onClick={() => setIsAddProjectOpen(true)}
-                className="bg-[#00C853] hover:bg-[#00E676] text-[#040906] font-sans font-bold text-xs px-4 py-2 rounded-full transition-all shadow-md shadow-[#00C853]/20 flex items-center space-x-1.5 cursor-pointer"
+                className="bg-[#00C853] hover:bg-[#00E676] text-white font-sans font-bold text-xs px-4 py-2 rounded-full transition-all shadow-md shadow-[#00C853]/25 flex items-center space-x-1.5 cursor-pointer"
               >
-                <Plus className="w-3.5 h-3.5 text-[#040906]" />
-                <span>Add Project</span>
+                <Plus className="w-3.5 h-3.5 text-white" />
+                <span className="text-white font-bold">Add Project</span>
               </button>
               <button 
                 onClick={() => {
@@ -2252,7 +2607,7 @@ const SaaSDashboard = () => {
 
                 </div>
 
-                {/* AI Document Dropzone & Full ESG RAG System */}
+                {/* AI Document Footprint Extractor — 3-Step Executive Flow */}
                 <div className={`p-6 lg:p-8 rounded-3xl border shadow-sm space-y-6 transition-all ${
                   isLight 
                     ? 'bg-white border-[#E8ECE8] text-[#0F2417]' 
@@ -2271,7 +2626,7 @@ const SaaSDashboard = () => {
                         </h3>
                       </div>
                       <p className={`text-xs mt-0.5 font-sans ${isLight ? 'text-[#41634E]' : 'text-[#9EBFAB]'}`}>
-                        Upload corporate bills, utility statements, or fuel spreadsheets. Carbon Zero BD RAG scans documents, matches national DoE emission factors, and generates citation-backed parameters.
+                        Upload corporate bills, utility statements, or fuel spreadsheets. Carbon Zero BD RAG scans documents, matches national DoE emission factors, and calculates multi-category carbon metrics.
                       </p>
                     </div>
                     
@@ -2290,180 +2645,936 @@ const SaaSDashboard = () => {
                     </div>
                   </div>
 
-                  {/* Sample Quick Loader Banner */}
-                  <div className={`rounded-2xl p-4 flex flex-col sm:flex-row justify-between items-center gap-3 border ${
-                    isLight 
-                      ? 'bg-[#F2FBF5] border-[#BCE7CB]' 
-                      : 'bg-[#0A1D12] border-[#1B4D2E]'
+                  {/* 3-Step Interactive Process Navigation Bar */}
+                  <div className={`p-1.5 rounded-2xl border grid grid-cols-3 gap-1 ${
+                    isLight ? 'bg-[#F4F6F4] border-[#E8ECE8]' : 'bg-[#040906] border-[#152B1D]'
                   }`}>
-                    <div className="flex items-center space-x-3">
-                      <div className={`w-8 h-8 rounded-lg border flex items-center justify-center shrink-0 ${
-                        isLight ? 'bg-[#E8F8EE] border-[#BCE7CB] text-[#00873E]' : 'bg-[#0D2B1A] border-[#1B4D2E] text-[#4ADE80]'
-                      }`}>
-                        <Database className={`w-4 h-4 ${isLight ? 'text-[#00873E]' : 'text-[#4ADE80]'}`} />
-                      </div>
-                      <div className="text-left">
-                        <div className={`text-xs font-bold ${isLight ? 'text-[#0F2417]' : 'text-white'}`}>Quick Test with Audited Baseline</div>
-                        <div className={`text-[11px] ${isLight ? 'text-[#41634E]' : 'text-[#9EBFAB]'}`}>Load Dexterity Textiles Ltd Q2 Audit Statement (DEPZ TX-8491)</div>
-                      </div>
-                    </div>
-                    <button
-                      type="button"
-                      onClick={() => executeAIExtraction("Dexterity_Textiles_ESG_Statement_Q2_2026.txt")}
-                      disabled={isUploading}
-                      className="text-xs font-extrabold font-sans px-3.5 py-1.5 rounded-xl bg-[#00C853] hover:bg-[#00E676] text-white transition-all shadow-sm flex items-center space-x-1.5 shrink-0 cursor-pointer"
-                    >
-                      <Sparkles className="w-3.5 h-3.5 text-white" />
-                      <span>Load Verified Sample Document</span>
-                    </button>
+                    {[
+                      { step: 1, label: "1. Ingest & Upload", sub: "Raw Bills & Invoices" },
+                      { step: 2, label: "2. Refine & Categorize", sub: "9 Categories & Impact" },
+                      { step: 3, label: "3. Audit Assurance", sub: "ISO 14064 Citations" }
+                    ].map(s => {
+                      const isActive = extractionStep === s.step;
+                      return (
+                        <button
+                          key={s.step}
+                          type="button"
+                          onClick={() => setExtractionStep(s.step)}
+                          className={`py-2.5 px-3 rounded-xl text-center transition-all cursor-pointer ${
+                            isActive
+                              ? (isLight 
+                                  ? 'bg-white text-[#00873E] shadow-sm font-bold border border-emerald-200' 
+                                  : 'bg-[#0D2616] text-[#00E676] font-bold border border-[#00C853]/40 shadow-sm')
+                              : (isLight 
+                                  ? 'text-[#557361] hover:text-[#0F2417] hover:bg-white/50' 
+                                  : 'text-[#7C9A88] hover:text-white hover:bg-[#08150D]')
+                          }`}
+                        >
+                          <div className="text-xs font-bold font-sans">{s.label}</div>
+                          <div className={`text-[10px] font-mono hidden sm:block ${
+                            isActive ? (isLight ? 'text-[#00873E]' : 'text-emerald-300') : (isLight ? 'text-[#7D9A8A]' : 'text-[#557361]')
+                          }`}>
+                            {s.sub}
+                          </div>
+                        </button>
+                      );
+                    })}
                   </div>
 
-                  {/* Drag and Drop Zone */}
-                  <div 
-                    onDragOver={(e) => e.preventDefault()}
-                    onDrop={handleFileDrop}
-                    className={`border-2 border-dashed rounded-2xl p-8 text-center transition-colors cursor-pointer relative ${
+                  {/* STEP 1: Upload & Document Intake View */}
+                  <div className={`space-y-5 ${extractionStep === 1 ? 'block' : 'hidden'}`}>
+                    {/* Sample Quick Loader Banner */}
+                    <div className={`rounded-2xl p-4 flex flex-col sm:flex-row justify-between items-center gap-3 border ${
                       isLight 
-                        ? 'border-[#C2E9CF] bg-[#F7FAF7] hover:bg-[#E8F8EE]' 
-                        : 'border-[#1B3B26] bg-[#040906]/80 hover:bg-[#061009]'
-                    }`}
-                  >
-                    <input 
-                      type="file" 
-                      id="drag-file-input"
-                      onChange={handleFileDrop}
-                      className="hidden" 
-                      accept=".csv,.xlsx,.xls,.pdf,.txt"
-                    />
-                    <div onClick={() => document.getElementById('drag-file-input').click()} className="space-y-3">
-                      <Upload className="w-10 h-10 text-[#00C853] mx-auto animate-none" />
-                      <div className={`text-xs font-bold ${isLight ? 'text-[#0F2417]' : 'text-white'}`}>
-                        {uploadedFile ? `Uploaded Document: ${uploadedFile}` : "Drag & Drop Financial spreadsheets, utility bills, or fuel invoices here"}
+                        ? 'bg-[#F2FBF5] border-[#BCE7CB]' 
+                        : 'bg-[#0A1D12] border-[#1B4D2E]'
+                    }`}>
+                      <div className="flex items-center space-x-3">
+                        <div className={`w-8 h-8 rounded-lg border flex items-center justify-center shrink-0 ${
+                          isLight ? 'bg-[#E8F8EE] border-[#BCE7CB] text-[#00873E]' : 'bg-[#0D2B1A] border-[#1B4D2E] text-[#4ADE80]'
+                        }`}>
+                          <Database className={`w-4 h-4 ${isLight ? 'text-[#00873E]' : 'text-[#4ADE80]'}`} />
+                        </div>
+                        <div className="text-left">
+                          <div className={`text-xs font-bold ${isLight ? 'text-[#0F2417]' : 'text-white'}`}>Quick Test with Audited Baseline</div>
+                          <div className={`text-[11px] ${isLight ? 'text-[#41634E]' : 'text-[#9EBFAB]'}`}>Load Dexterity Textiles Ltd Q2 Audit Statement (DEPZ TX-8491)</div>
+                        </div>
                       </div>
-                      <div className={`text-[10px] ${isLight ? 'text-[#41634E]' : 'text-[#9EBFAB]'}`}>Supports PDF, XLSX, CSV, TXT (Max 25MB) • Encrypted Per-Tenant Ingestion</div>
-                    </div>
-                  </div>
-
-                  {/* Controls & Verification Sign */}
-                  <div className="flex flex-col sm:flex-row justify-between items-center gap-4">
-                    <div className="flex items-center space-x-3 w-full sm:w-auto">
                       <button
-                        onClick={() => executeAIExtraction(uploadedFile || "ESG_Statement_Q2_2026.xlsx")}
+                        type="button"
+                        onClick={() => executeAIExtraction("Dexterity_Textiles_ESG_Statement_Q2_2026.txt")}
                         disabled={isUploading}
-                        className="bg-[#00C853] hover:bg-[#00E676] disabled:bg-[#0E2014] disabled:text-emerald-300/40 disabled:border disabled:border-[#1A3824] disabled:shadow-none disabled:cursor-not-allowed text-white font-sans font-extrabold text-sm px-6 py-3 rounded-xl transition-all shadow-md shadow-[#00C853]/20 flex items-center justify-center space-x-2 w-full sm:w-auto cursor-pointer"
+                        className="text-xs font-extrabold font-sans px-3.5 py-1.5 rounded-xl bg-[#00C853] hover:bg-[#00E676] text-white transition-all shadow-sm flex items-center space-x-1.5 shrink-0 cursor-pointer"
                       >
-                        {isUploading ? (
-                          <>
-                            <Loader2 className="w-4 h-4 animate-spin text-inherit" />
-                            <span>RAG Extracting & Verifying...</span>
-                          </>
-                        ) : (
-                          <>
-                            <Sparkles className="w-4 h-4 text-inherit" />
-                            <span>Run RAG Extraction</span>
-                          </>
-                        )}
+                        <Sparkles className="w-3.5 h-3.5 text-white" />
+                        <span>Load Verified Sample Document</span>
                       </button>
+                    </div>
 
-                      {extractionResult && (
+                    {/* Drag and Drop Zone */}
+                    <div 
+                      onDragOver={(e) => e.preventDefault()}
+                      onDrop={handleFileDrop}
+                      className={`border-2 border-dashed rounded-2xl p-8 text-center transition-colors cursor-pointer relative ${
+                        isLight 
+                          ? 'border-[#C2E9CF] bg-[#F7FAF7] hover:bg-[#E8F8EE]' 
+                          : 'border-[#1B3B26] bg-[#040906]/80 hover:bg-[#061009]'
+                      }`}
+                    >
+                      <input 
+                        type="file" 
+                        id="drag-file-input"
+                        onChange={handleFileDrop}
+                        className="hidden" 
+                        accept=".csv,.xlsx,.xls,.pdf,.txt"
+                      />
+                      <div onClick={() => document.getElementById('drag-file-input').click()} className="space-y-3">
+                        <Upload className="w-10 h-10 text-[#00C853] mx-auto animate-none" />
+                        <div className={`text-xs font-bold ${isLight ? 'text-[#0F2417]' : 'text-white'}`}>
+                          {uploadedFile ? `Uploaded Document: ${uploadedFile}` : "Drag & Drop Financial spreadsheets, utility bills, or fuel invoices here"}
+                        </div>
+                        <div className={`text-[10px] ${isLight ? 'text-[#41634E]' : 'text-[#9EBFAB]'}`}>Supports PDF, XLSX, CSV, TXT (Max 25MB) • Encrypted Per-Tenant Ingestion</div>
+                      </div>
+                    </div>
+
+                    {/* Controls & Action Buttons */}
+                    <div className="flex flex-col sm:flex-row justify-between items-center gap-4">
+                      <div className="flex items-center space-x-3 w-full sm:w-auto">
+                        <button
+                          onClick={() => executeAIExtraction(uploadedFile || "ESG_Statement_Q2_2026.xlsx")}
+                          disabled={isUploading}
+                          className="bg-[#00C853] hover:bg-[#00E676] disabled:bg-[#0E2014] disabled:text-emerald-300/40 disabled:border disabled:border-[#1A3824] disabled:shadow-none disabled:cursor-not-allowed text-white font-sans font-extrabold text-sm px-6 py-3 rounded-xl transition-all shadow-md shadow-[#00C853]/20 flex items-center justify-center space-x-2 w-full sm:w-auto cursor-pointer"
+                        >
+                          {isUploading ? (
+                            <>
+                              <Loader2 className="w-4 h-4 animate-spin text-inherit" />
+                              <span>RAG Extracting & Verifying...</span>
+                            </>
+                          ) : (
+                            <>
+                              <Sparkles className="w-4 h-4 text-inherit" />
+                              <span>Run RAG Extraction</span>
+                            </>
+                          )}
+                        </button>
+
                         <button
                           type="button"
-                          onClick={() => setShowExtractionEvidence(!showExtractionEvidence)}
+                          onClick={() => setExtractionStep(2)}
                           className={`text-xs font-bold font-sans border px-4 py-3 rounded-xl transition-all flex items-center space-x-1.5 cursor-pointer ${
                             isLight 
                               ? 'text-[#0F2417] border-[#DCE4DE] hover:bg-[#F7FAF7]' 
                               : 'text-white border-[#173020] hover:bg-[#0D1F14]'
                           }`}
                         >
-                          <FileText className="w-3.5 h-3.5 text-[#00C853]" />
-                          <span>{showExtractionEvidence ? "Hide Citation Traces" : "View Audit Citations"}</span>
-                          {showExtractionEvidence ? <ChevronUp className="w-3.5 h-3.5" /> : <ChevronDown className="w-3.5 h-3.5" />}
+                          <span>View Metrics & Categories</span>
+                          <ArrowRight className="w-3.5 h-3.5 text-[#00C853]" />
                         </button>
+                      </div>
+
+                      {isVerified && (
+                        <div className={`flex items-center space-x-2.5 px-4 py-2.5 rounded-xl border ${
+                          isLight 
+                            ? 'bg-[#E8F8EE] border-[#C2E9CF] text-[#00873E]' 
+                            : 'bg-[#0D2B1A] border-[#1B4D2E] text-[#4ADE80]'
+                        }`}>
+                          <CheckCircle2 className="w-5 h-5 text-[#00C853]" />
+                          <div className="text-left leading-none">
+                            <div className={`font-mono text-[9px] uppercase tracking-wider font-bold ${
+                              isLight ? 'text-[#00873E]' : 'text-[#A7F3D0]'
+                            }`}>Audit Assurance</div>
+                            <div className={`font-sans font-bold text-xs ${isLight ? 'text-[#0F2417]' : 'text-white'}`}>CARBON ZERO BD AUDIT VERIFIED</div>
+                          </div>
+                        </div>
                       )}
                     </div>
+                  </div>
 
-                    {/* Audit Verification Seal */}
-                    {isVerified && (
-                      <div className={`flex items-center space-x-2.5 px-4 py-2.5 rounded-xl border ${
-                        isLight 
-                          ? 'bg-[#E8F8EE] border-[#C2E9CF] text-[#00873E]' 
-                          : 'bg-[#0D2B1A] border-[#1B4D2E] text-[#4ADE80]'
-                      }`}>
-                        <CheckCircle2 className="w-5 h-5 text-[#00C853]" />
-                        <div className="text-left leading-none">
-                          <div className={`font-mono text-[9px] uppercase tracking-wider font-bold ${
-                            isLight ? 'text-[#00873E]' : 'text-[#A7F3D0]'
-                          }`}>Audit Assurance</div>
-                          <div className={`font-sans font-bold text-xs ${isLight ? 'text-[#0F2417]' : 'text-white'}`}>CARBON ZERO BD AUDIT VERIFIED</div>
+                  {/* EXECUTIVE HEADLINE METRICS CARD (Always accessible for complete footprint overview) */}
+                  <div className={`p-6 rounded-2xl border transition-all ${
+                    isLight 
+                      ? 'bg-[#F8FAF8] border-[#DCE4DE]' 
+                      : 'bg-[#040906] border-[#142A1B]'
+                  }`}>
+                    <div className="flex flex-col lg:flex-row justify-between items-start lg:items-center gap-6">
+                      
+                      {/* Left: Total Footprint Readout */}
+                      <div className="space-y-1">
+                        <div className="flex items-center space-x-2">
+                          <span className={`font-mono text-[10px] uppercase tracking-wider font-bold ${
+                            isLight ? 'text-[#41634E]' : 'text-[#9EBFAB]'
+                          }`}>
+                            Total Invoiced Carbon Footprint
+                          </span>
+                          <span className="inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-bold bg-emerald-500/10 text-[#00C853] border border-emerald-500/20">
+                            <TrendingDown className="w-3 h-3 mr-1 text-[#00C853]" />
+                            {Math.abs(activeMatrix.trendVsLastMonth)}% vs last month
+                          </span>
                         </div>
+                        <div className="flex items-baseline space-x-3">
+                          <div className={`font-sans font-extrabold text-3xl sm:text-4xl tracking-tight ${
+                            isLight ? 'text-[#0F2417]' : 'text-white'
+                          }`}>
+                            {unitMode === 'tonnes' 
+                              ? `${activeMatrix.totalFootprintTonnes.toLocaleString()}` 
+                              : `${activeMatrix.totalFootprintKg.toLocaleString()}`
+                            }
+                          </div>
+                          <div className={`font-mono text-base font-bold ${
+                            isLight ? 'text-[#00873E]' : 'text-[#00E676]'
+                          }`}>
+                            {unitMode === 'tonnes' ? 'tCO₂e' : 'kg CO₂e'}
+                          </div>
+                        </div>
+                        <div className={`text-xs ${isLight ? 'text-[#64748B]' : 'text-[#7C9A88]'}`}>
+                          Calculated from {activeMatrix.categories.filter(c => c.carbonKg > 0).length} active corporate emission categories • ISO 14064 Compliant
+                        </div>
+                      </div>
+
+                      {/* Right: Quick Stats & Unit Mode Toggle */}
+                      <div className="flex flex-wrap items-center gap-4">
+                        {/* Spend Box */}
+                        <div className={`px-4 py-2.5 rounded-xl border text-left ${
+                          isLight ? 'bg-white border-[#E8ECE8]' : 'bg-[#08130C] border-[#173020]'
+                        }`}>
+                          <div className={`text-[10px] uppercase font-mono font-bold ${isLight ? 'text-[#41634E]' : 'text-[#7C9A88]'}`}>
+                            Invoiced Spend
+                          </div>
+                          <div className={`text-sm font-bold font-mono ${isLight ? 'text-[#0F2417]' : 'text-white'}`}>
+                            ৳ {activeMatrix.totalSpendBdt.toLocaleString()} <span className="text-[10px] font-normal text-slate-400">BDT</span>
+                          </div>
+                        </div>
+
+                        {/* Intensity Box */}
+                        <div className={`px-4 py-2.5 rounded-xl border text-left ${
+                          isLight ? 'bg-white border-[#E8ECE8]' : 'bg-[#08130C] border-[#173020]'
+                        }`}>
+                          <div className={`text-[10px] uppercase font-mono font-bold ${isLight ? 'text-[#41634E]' : 'text-[#7C9A88]'}`}>
+                            Carbon Intensity
+                          </div>
+                          <div className={`text-sm font-bold font-mono ${isLight ? 'text-[#00873E]' : 'text-[#4ADE80]'}`}>
+                            {activeMatrix.totalSpendBdt > 0 
+                              ? ((activeMatrix.totalFootprintKg / activeMatrix.totalSpendBdt) * 1000).toFixed(2) 
+                              : "0.00"
+                            } <span className="text-[10px] font-normal text-slate-400">kg/৳1k</span>
+                          </div>
+                        </div>
+
+                        {/* Unit Toggle Buttons */}
+                        <div className={`flex items-center p-1 rounded-xl border ${
+                          isLight ? 'bg-white border-[#DCE4DE]' : 'bg-[#08130C] border-[#173020]'
+                        }`}>
+                          <button
+                            type="button"
+                            onClick={() => setUnitMode('kg')}
+                            className={`px-3 py-1.5 rounded-lg text-xs font-mono font-bold transition-all cursor-pointer ${
+                              unitMode === 'kg'
+                                ? 'bg-[#00C853] text-white shadow-sm'
+                                : (isLight ? 'text-[#557361] hover:text-[#0F2417]' : 'text-[#7C9A88] hover:text-white')
+                            }`}
+                          >
+                            kg CO₂e
+                          </button>
+                          <button
+                            type="button"
+                            onClick={() => setUnitMode('tonnes')}
+                            className={`px-3 py-1.5 rounded-lg text-xs font-mono font-bold transition-all cursor-pointer ${
+                              unitMode === 'tonnes'
+                                ? 'bg-[#00C853] text-white shadow-sm'
+                                : (isLight ? 'text-[#557361] hover:text-[#0F2417]' : 'text-[#7C9A88] hover:text-white')
+                            }`}
+                          >
+                            Tonnes (t)
+                          </button>
+                        </div>
+
+                        {/* Add Custom Item Trigger Button */}
+                        <button
+                          type="button"
+                          onClick={() => setIsAddCustomModalOpen(true)}
+                          className="bg-[#00C853] hover:bg-[#00E676] text-white text-xs font-extrabold font-sans px-4 py-2.5 rounded-xl transition-all shadow-sm flex items-center space-x-1.5 cursor-pointer"
+                        >
+                          <Plus className="w-3.5 h-3.5 text-white" />
+                          <span>+ Add Custom Item</span>
+                        </button>
+                      </div>
+
+                    </div>
+                  </div>
+
+                  {/* STEP 2: Refine & Analyze Category Matrix & Top Impacts */}
+                  <div className={`space-y-6 ${extractionStep === 2 ? 'block' : 'hidden'}`}>
+                    
+                    {/* Visual Category Distribution (Donut) & Top Impact Categories (2 Columns) */}
+                    <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
+                      
+                      {/* Left Column: Interactive Donut Chart */}
+                      <div className={`lg:col-span-6 p-5 rounded-2xl border flex flex-col items-center justify-between ${
+                        isLight ? 'bg-white border-[#E8ECE8]' : 'bg-[#040906] border-[#152B1D]'
+                      }`}>
+                        <div className="w-full flex justify-between items-center border-b pb-3 mb-2">
+                          <div className="flex items-center space-x-2">
+                            <PieChart className="w-4 h-4 text-[#00C853]" />
+                            <h4 className={`text-xs font-bold uppercase font-mono tracking-wider ${
+                              isLight ? 'text-[#0F2417]' : 'text-white'
+                            }`}>
+                              Emission Distribution by Category
+                            </h4>
+                          </div>
+                          <span className={`text-[10px] font-mono ${isLight ? 'text-[#557361]' : 'text-[#7C9A88]'}`}>
+                            Hover slices for breakdown
+                          </span>
+                        </div>
+
+                        <CarbonDistributionDonut 
+                          categories={activeMatrix.categories}
+                          totalKg={activeMatrix.totalFootprintKg}
+                          totalTonnes={activeMatrix.totalFootprintTonnes}
+                          unitMode={unitMode}
+                          hoveredId={donutHoveredId}
+                          onHover={setDonutHoveredId}
+                          isLight={isLight}
+                        />
+                      </div>
+
+                      {/* Right Column: Top Impact Categories & Decarbonization AI Tip */}
+                      <div className="lg:col-span-6 space-y-4">
+                        
+                        {/* Top 3 Impact Categories Cards */}
+                        <div className={`p-5 rounded-2xl border space-y-3 ${
+                          isLight ? 'bg-white border-[#E8ECE8]' : 'bg-[#040906] border-[#152B1D]'
+                        }`}>
+                          <div className="flex justify-between items-center pb-2 border-b">
+                            <div className="flex items-center space-x-2">
+                              <Activity className="w-4 h-4 text-[#00C853]" />
+                              <h4 className={`text-xs font-bold uppercase font-mono tracking-wider ${
+                                isLight ? 'text-[#0F2417]' : 'text-white'
+                              }`}>
+                                Top Impact Drivers
+                              </h4>
+                            </div>
+                            <span className="text-[10px] font-mono text-[#00C853] font-bold">
+                              Prioritized by Footprint Magnitude
+                            </span>
+                          </div>
+
+                          <div className="space-y-2.5">
+                            {activeMatrix.topImpactCategories.map(top => (
+                              <div 
+                                key={top.id}
+                                className={`p-3 rounded-xl border transition-all ${
+                                  isLight 
+                                    ? 'bg-[#F8FAF8] border-[#E8ECE8] hover:border-emerald-300' 
+                                    : 'bg-[#08130C] border-[#173020] hover:border-[#00C853]/40'
+                                }`}
+                              >
+                                <div className="flex justify-between items-center mb-1.5">
+                                  <div className="flex items-center space-x-2">
+                                    <span 
+                                      className="w-5 h-5 rounded-full flex items-center justify-center text-[10px] font-black text-white shadow-sm"
+                                      style={{ backgroundColor: top.color }}
+                                    >
+                                      {top.rank}
+                                    </span>
+                                    <span className={`text-xs font-bold ${isLight ? 'text-[#0F2417]' : 'text-white'}`}>
+                                      {top.name}
+                                    </span>
+                                  </div>
+                                  <div className="text-right font-mono">
+                                    <span className={`text-xs font-black ${isLight ? 'text-[#00873E]' : 'text-[#4ADE80]'}`}>
+                                      {unitMode === 'tonnes' ? `${top.carbonTonnes} t` : `${top.carbonKg.toLocaleString()} kg`}
+                                    </span>
+                                    <span className={`ml-2 text-[10px] font-bold ${isLight ? 'text-slate-500' : 'text-slate-400'}`}>
+                                      ({top.percentage}%)
+                                    </span>
+                                  </div>
+                                </div>
+                                
+                                {/* Impact Progress Meter */}
+                                <div className="w-full h-2 rounded-full bg-slate-200/40 overflow-hidden">
+                                  <div 
+                                    className="h-full rounded-full transition-all duration-700"
+                                    style={{ 
+                                      width: `${top.percentage}%`,
+                                      backgroundColor: top.color 
+                                    }}
+                                  />
+                                </div>
+                              </div>
+                            ))}
+                          </div>
+                        </div>
+
+                        {/* Dynamic AI Decarbonization Recommendation Card */}
+                        <div className={`p-4 rounded-2xl border flex items-start space-x-3 ${
+                          isLight 
+                            ? 'bg-[#F0FAF3] border-[#BCE7CB]' 
+                            : 'bg-[#06180E] border-[#184828]'
+                        }`}>
+                          <div className={`p-2 rounded-xl shrink-0 ${
+                            isLight ? 'bg-emerald-100 text-[#00873E]' : 'bg-[#0D2B1A] text-[#4ADE80]'
+                          }`}>
+                            <Lightbulb className="w-4 h-4 text-[#00C853]" />
+                          </div>
+                          <div className="space-y-1">
+                            <div className={`text-xs font-bold font-sans ${isLight ? 'text-[#0F2417]' : 'text-white'}`}>
+                              AI Decarbonization Action Plan
+                            </div>
+                            <p className={`text-[11px] leading-relaxed ${isLight ? 'text-[#2E543C]' : 'text-[#A7F3D0]'}`}>
+                              {activeMatrix.quickTip}
+                            </p>
+                          </div>
+                        </div>
+
+                      </div>
+
+                    </div>
+
+                    {/* 9 Standard Categories Grid */}
+                    <div className="space-y-3">
+                      <div className="flex justify-between items-center">
+                        <div>
+                          <h4 className={`text-sm font-bold font-sans ${isLight ? 'text-[#0F2417]' : 'text-white'}`}>
+                            All 9 Activity & Invoiced Expense Categories
+                          </h4>
+                          <p className={`text-[11px] ${isLight ? 'text-[#41634E]' : 'text-[#7C9A88]'}`}>
+                            Categorized under GHG Protocol Corporate Standard & Bangladesh DoE Emission Factors
+                          </p>
+                        </div>
+                        <button
+                          type="button"
+                          onClick={() => setIsAddCustomModalOpen(true)}
+                          className={`text-xs font-bold px-3 py-1.5 rounded-lg border transition-all cursor-pointer flex items-center space-x-1 ${
+                            isLight ? 'bg-white border-slate-200 text-emerald-700 hover:bg-emerald-50' : 'bg-[#061009] border-[#1B3B26] text-emerald-400 hover:bg-[#0D2214]'
+                          }`}
+                        >
+                          <Plus className="w-3.5 h-3.5" />
+                          <span>Add Custom Line Item</span>
+                        </button>
+                      </div>
+
+                      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                        {activeMatrix.categories.map((cat) => {
+                          const IconComp = cat.icon || Package;
+                          return (
+                            <div
+                              key={cat.id}
+                              className={`p-4 rounded-2xl border transition-all relative flex flex-col justify-between ${
+                                isLight 
+                                  ? 'bg-white border-[#E8ECE8] hover:border-[#00C853]/50 hover:shadow-sm' 
+                                  : 'bg-[#040906] border-[#152B1D] hover:border-[#00C853]/40'
+                              }`}
+                            >
+                              <div className="space-y-3">
+                                {/* Top Row: Icon + Name + Scope Badge */}
+                                <div className="flex justify-between items-start">
+                                  <div className="flex items-center space-x-2.5">
+                                    <div 
+                                      className="w-8 h-8 rounded-xl flex items-center justify-center text-white shadow-sm"
+                                      style={{ backgroundColor: cat.color }}
+                                    >
+                                      <IconComp className="w-4 h-4 text-white" />
+                                    </div>
+                                    <div className="leading-tight">
+                                      <div className={`text-xs font-bold ${isLight ? 'text-[#0F2417]' : 'text-white'}`}>
+                                        {cat.name}
+                                      </div>
+                                      <span className={`text-[9px] font-mono px-1.5 py-0.5 rounded border inline-block mt-0.5 ${
+                                        isLight ? 'bg-slate-100 text-slate-600 border-slate-200' : 'bg-[#0B1A11] text-emerald-300/80 border-[#1B3B26]'
+                                      }`}>
+                                        {cat.scope}
+                                      </span>
+                                    </div>
+                                  </div>
+
+                                  {/* Refine / Adjust Button */}
+                                  <button
+                                    type="button"
+                                    onClick={() => setEditingCategory(cat)}
+                                    title="Refine category values"
+                                    className={`p-1.5 rounded-lg text-slate-400 hover:text-[#00C853] transition-colors cursor-pointer border ${
+                                      isLight ? 'border-slate-100 hover:bg-slate-50' : 'border-transparent hover:bg-[#0D2214]'
+                                    }`}
+                                  >
+                                    <Sliders className="w-3.5 h-3.5" />
+                                  </button>
+                                </div>
+
+                                {/* Spend & Emissions Figures */}
+                                <div className="grid grid-cols-2 gap-2 pt-1 border-t border-slate-100/10">
+                                  <div>
+                                    <span className={`text-[10px] font-mono uppercase ${isLight ? 'text-[#64748B]' : 'text-[#7C9A88]'}`}>
+                                      Spend (BDT)
+                                    </span>
+                                    <div className={`text-xs font-bold font-mono ${isLight ? 'text-[#0F2417]' : 'text-white'}`}>
+                                      ৳ {cat.spendBdt.toLocaleString()}
+                                    </div>
+                                  </div>
+                                  <div className="text-right">
+                                    <span className={`text-[10px] font-mono uppercase ${isLight ? 'text-[#64748B]' : 'text-[#7C9A88]'}`}>
+                                      Emissions
+                                    </span>
+                                    <div className={`text-xs font-bold font-mono ${isLight ? 'text-[#00873E]' : 'text-[#4ADE80]'}`}>
+                                      {unitMode === 'tonnes' ? `${cat.carbonTonnes} t` : `${cat.carbonKg.toLocaleString()} kg`}
+                                    </div>
+                                  </div>
+                                </div>
+
+                                {/* Percentage Bar */}
+                                <div className="space-y-1">
+                                  <div className="flex justify-between text-[10px] font-mono">
+                                    <span className={isLight ? 'text-slate-500' : 'text-slate-400'}>Share</span>
+                                    <span className="font-bold text-[#00C853]">{cat.percentage}%</span>
+                                  </div>
+                                  <div className="w-full h-1.5 rounded-full bg-slate-200/30 overflow-hidden">
+                                    <div 
+                                      className="h-full rounded-full transition-all duration-500"
+                                      style={{ 
+                                        width: `${cat.percentage}%`,
+                                        backgroundColor: cat.color 
+                                      }}
+                                    />
+                                  </div>
+                                </div>
+                              </div>
+
+                              {/* Activity Volume Footer */}
+                              <div className={`mt-3 pt-2 border-t flex justify-between items-center text-[10px] font-mono ${
+                                isLight ? 'border-slate-100 text-slate-500' : 'border-slate-800/40 text-slate-400'
+                              }`}>
+                                <span>Activity Qty</span>
+                                <span className="font-bold">{cat.quantity.toLocaleString()} {cat.unit}</span>
+                              </div>
+                            </div>
+                          );
+                        })}
+                      </div>
+                    </div>
+
+                    {/* Custom Added Line Items Ledger (if any) */}
+                    {customItems.length > 0 && (
+                      <div className={`p-4 rounded-2xl border space-y-3 ${
+                        isLight ? 'bg-[#F9FBFA] border-[#DCE4DE]' : 'bg-[#040906] border-[#152B1D]'
+                      }`}>
+                        <div className="flex justify-between items-center">
+                          <div className="flex items-center space-x-2">
+                            <Package className="w-4 h-4 text-[#00C853]" />
+                            <h4 className={`text-xs font-bold uppercase font-mono tracking-wider ${
+                              isLight ? 'text-[#0F2417]' : 'text-white'
+                            }`}>
+                              Custom Invoiced Additions ({customItems.length})
+                            </h4>
+                          </div>
+                          <span className={`text-[10px] font-mono ${isLight ? 'text-slate-500' : 'text-slate-400'}`}>
+                            Live calculated into total footprint
+                          </span>
+                        </div>
+
+                        <div className="overflow-x-auto">
+                          <table className="w-full text-left font-sans text-xs">
+                            <thead>
+                              <tr className={`border-b text-[10px] uppercase font-mono ${
+                                isLight ? 'text-slate-500 border-slate-200' : 'text-slate-400 border-slate-800'
+                              }`}>
+                                <th className="py-2">Description</th>
+                                <th>Category</th>
+                                <th>Scope</th>
+                                <th>Spend (BDT)</th>
+                                <th>Quantity</th>
+                                <th>Emissions</th>
+                                <th className="text-right">Action</th>
+                              </tr>
+                            </thead>
+                            <tbody className={`divide-y ${isLight ? 'divide-slate-100' : 'divide-slate-800/40'}`}>
+                              {customItems.map((item) => (
+                                <tr key={item.id} className={isLight ? 'hover:bg-white' : 'hover:bg-[#08130C]'}>
+                                  <td className={`py-2 font-bold ${isLight ? 'text-[#0F2417]' : 'text-white'}`}>
+                                    {item.name}
+                                  </td>
+                                  <td className="capitalize text-slate-400">
+                                    {item.categoryId.replace('_', ' ')}
+                                  </td>
+                                  <td>
+                                    <span className="px-2 py-0.5 rounded text-[9px] font-mono font-bold bg-emerald-500/10 text-[#00C853] border border-emerald-500/20">
+                                      {item.scope}
+                                    </span>
+                                  </td>
+                                  <td className="font-mono">
+                                    ৳ {item.spendBdt.toLocaleString()}
+                                  </td>
+                                  <td className="font-mono text-slate-400">
+                                    {item.quantity} {item.unit}
+                                  </td>
+                                  <td className="font-mono font-bold text-[#00C853]">
+                                    +{unitMode === 'tonnes' ? (item.carbonKg / 1000).toFixed(3) : item.carbonKg.toLocaleString()} {unitMode === 'tonnes' ? 't' : 'kg'}
+                                  </td>
+                                  <td className="text-right">
+                                    <button
+                                      type="button"
+                                      onClick={() => handleDeleteCustomItem(item.id)}
+                                      className="p-1 text-red-500 hover:text-red-400 transition-colors cursor-pointer"
+                                      title="Delete item"
+                                    >
+                                      <Trash2 className="w-3.5 h-3.5" />
+                                    </button>
+                                  </td>
+                                </tr>
+                              ))}
+                            </tbody>
+                          </table>
+                        </div>
+                      </div>
+                    )}
+
+                  </div>
+
+                  {/* STEP 3: Audit Assurance & Citation Traces View */}
+                  <div className={`space-y-4 ${extractionStep === 3 ? 'block' : 'hidden'}`}>
+                    {extractionResult ? (
+                      <div className={`rounded-2xl p-5 space-y-3 border ${
+                        isLight 
+                          ? 'bg-[#F7FAF7] border-[#E8ECE8]' 
+                          : 'bg-[#040906] border-[#152B1D]'
+                      }`}>
+                        <div className={`flex justify-between items-center pb-2 border-b ${
+                          isLight ? 'border-[#E8ECE8]' : 'border-[#122418]'
+                        }`}>
+                          <div className="flex items-center space-x-2">
+                            <ShieldCheck className="w-4 h-4 text-[#00C853]" />
+                            <span className={`font-sans font-bold text-xs ${isLight ? 'text-[#0F2417]' : 'text-white'}`}>
+                              Audited Extraction Traceability — {extractionResult.filename}
+                            </span>
+                          </div>
+                          <span className={`font-mono text-[10px] ${isLight ? 'text-[#41634E]' : 'text-[#9EBFAB]'}`}>
+                            Confidence: {Math.round((extractionResult.overall_confidence || 0.98) * 100)}% • ISO 14064 Ready
+                          </span>
+                        </div>
+
+                        <div className="overflow-x-auto">
+                          <table className="w-full text-left font-sans text-xs">
+                            <thead>
+                              <tr className={`font-bold border-b text-[10px] uppercase ${
+                                isLight ? 'text-[#41634E] border-[#E8ECE8]' : 'text-[#9EBFAB] border-[#122418]'
+                              }`}>
+                                <th className="py-2">Metric</th>
+                                <th>Scope</th>
+                                <th>Extracted Value</th>
+                                <th>Source Page</th>
+                                <th>Verbatim Audit Quote</th>
+                                <th>Confidence</th>
+                              </tr>
+                            </thead>
+                            <tbody className={`divide-y ${isLight ? 'divide-[#E8ECE8]' : 'divide-[#122418]'}`}>
+                              {extractionResult.details && extractionResult.details.map((item, idx) => (
+                                <tr key={idx} className={`transition-colors ${isLight ? 'hover:bg-white' : 'hover:bg-[#08130C]'}`}>
+                                  <td className={`py-2.5 font-bold capitalize ${isLight ? 'text-[#0F2417]' : 'text-white'}`}>{item.param_name}</td>
+                                  <td>
+                                    <span className={`px-2 py-0.5 rounded-full text-[9px] font-bold border ${
+                                      isLight ? 'bg-[#E8F8EE] text-[#00873E] border-[#C2E9CF]' : 'bg-[#0D2B1A] text-[#4ADE80] border-[#1B4D2E]'
+                                    }`}>
+                                      {item.scope}
+                                    </span>
+                                  </td>
+                                  <td className={`font-mono font-bold ${isLight ? 'text-[#00873E]' : 'text-[#4ADE80]'}`}>
+                                    {Number(item.value).toLocaleString()} {item.unit}
+                                  </td>
+                                  <td className={`font-mono text-[11px] ${isLight ? 'text-[#41634E]' : 'text-[#9EBFAB]'}`}>Page {item.source_page || 1}</td>
+                                  <td className={`text-[11px] italic max-w-[320px] truncate ${isLight ? 'text-[#41634E]' : 'text-[#B4D2C1]'}`} title={item.raw_snippet}>
+                                    "{item.raw_snippet}"
+                                  </td>
+                                  <td>
+                                    <span className={`px-2 py-0.5 rounded-full text-[9px] font-bold border ${
+                                      isLight ? 'bg-[#E8F8EE] text-[#00873E] border-[#C2E9CF]' : 'bg-[#0D2B1A] text-[#4ADE80] border-[#1B4D2E]'
+                                    }`}>
+                                      {Math.round((item.confidence || 0.95) * 100)}%
+                                    </span>
+                                  </td>
+                                </tr>
+                              ))}
+                            </tbody>
+                          </table>
+                        </div>
+                      </div>
+                    ) : (
+                      <div className={`p-8 rounded-2xl border text-center space-y-2 ${
+                        isLight ? 'bg-[#F9FBFA] border-[#DCE4DE]' : 'bg-[#040906] border-[#152B1D]'
+                      }`}>
+                        <ShieldCheck className="w-8 h-8 text-[#00C853] mx-auto" />
+                        <div className={`text-sm font-bold ${isLight ? 'text-[#0F2417]' : 'text-white'}`}>
+                          No Extracted Audit Traces Yet
+                        </div>
+                        <p className={`text-xs ${isLight ? 'text-slate-500' : 'text-slate-400'}`}>
+                          Ingest a document or click "Load Verified Sample Document" to generate verifiable ISO 14064 citation traces.
+                        </p>
+                        <button
+                          type="button"
+                          onClick={() => executeAIExtraction("Dexterity_Textiles_ESG_Statement_Q2_2026.txt")}
+                          className="mt-2 text-xs font-bold px-4 py-2 rounded-xl bg-[#00C853] text-white hover:bg-[#00E676] transition-all cursor-pointer inline-flex items-center space-x-1.5"
+                        >
+                          <Sparkles className="w-3.5 h-3.5" />
+                          <span>Load Sample Document Now</span>
+                        </button>
                       </div>
                     )}
                   </div>
 
-                  {/* Extraction Evidence & Verbatim Citations Table */}
-                  {showExtractionEvidence && extractionResult && (
-                    <div className={`rounded-2xl p-5 space-y-3 border ${
-                      isLight 
-                        ? 'bg-[#F7FAF7] border-[#E8ECE8]' 
-                        : 'bg-[#040906] border-[#152B1D]'
-                    }`}>
-                      <div className={`flex justify-between items-center pb-2 border-b ${
-                        isLight ? 'border-[#E8ECE8]' : 'border-[#122418]'
+                  {/* MODAL: ADD CUSTOM INVOICE ITEM */}
+                  {isAddCustomModalOpen && (
+                    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/70 backdrop-blur-sm animate-fade-in">
+                      <div className={`w-full max-w-lg rounded-3xl p-6 border shadow-2xl space-y-5 ${
+                        isLight ? 'bg-white border-slate-200 text-[#0F2417]' : 'bg-[#08130C] border-[#1B3B26] text-white'
                       }`}>
-                        <div className="flex items-center space-x-2">
-                          <ShieldCheck className="w-4 h-4 text-[#00C853]" />
-                          <span className={`font-sans font-bold text-xs ${isLight ? 'text-[#0F2417]' : 'text-white'}`}>
-                            Audited Extraction Traceability — {extractionResult.filename}
-                          </span>
+                        <div className="flex justify-between items-center border-b pb-3">
+                          <div className="flex items-center space-x-2">
+                            <Plus className="w-5 h-5 text-[#00C853]" />
+                            <h3 className="font-bold text-base font-sans">Add Custom Expense / Invoice Item</h3>
+                          </div>
+                          <button
+                            type="button"
+                            onClick={() => setIsAddCustomModalOpen(false)}
+                            className="p-1 rounded-lg text-slate-400 hover:text-white cursor-pointer"
+                          >
+                            <X className="w-5 h-5" />
+                          </button>
                         </div>
-                        <span className={`font-mono text-[10px] ${isLight ? 'text-[#41634E]' : 'text-[#9EBFAB]'}`}>
-                          Confidence: {Math.round((extractionResult.overall_confidence || 0.98) * 100)}% • ISO 14064 Ready
-                        </span>
-                      </div>
 
-                      <div className="overflow-x-auto">
-                        <table className="w-full text-left font-sans text-xs">
-                          <thead>
-                            <tr className={`font-bold border-b text-[10px] uppercase ${
-                              isLight ? 'text-[#41634E] border-[#E8ECE8]' : 'text-[#9EBFAB] border-[#122418]'
-                            }`}>
-                              <th className="py-2">Metric</th>
-                              <th>Scope</th>
-                              <th>Extracted Value</th>
-                              <th>Source Page</th>
-                              <th>Verbatim Audit Quote</th>
-                              <th>Confidence</th>
-                            </tr>
-                          </thead>
-                          <tbody className={`divide-y ${isLight ? 'divide-[#E8ECE8]' : 'divide-[#122418]'}`}>
-                            {extractionResult.details && extractionResult.details.map((item, idx) => (
-                              <tr key={idx} className={`transition-colors ${isLight ? 'hover:bg-white' : 'hover:bg-[#08130C]'}`}>
-                                <td className={`py-2.5 font-bold capitalize ${isLight ? 'text-[#0F2417]' : 'text-white'}`}>{item.param_name}</td>
-                                <td>
-                                  <span className={`px-2 py-0.5 rounded-full text-[9px] font-bold border ${
-                                    isLight ? 'bg-[#E8F8EE] text-[#00873E] border-[#C2E9CF]' : 'bg-[#0D2B1A] text-[#4ADE80] border-[#1B4D2E]'
-                                  }`}>
-                                    {item.scope}
-                                  </span>
-                                </td>
-                                <td className={`font-mono font-bold ${isLight ? 'text-[#00873E]' : 'text-[#4ADE80]'}`}>
-                                  {Number(item.value).toLocaleString()} {item.unit}
-                                </td>
-                                <td className={`font-mono text-[11px] ${isLight ? 'text-[#41634E]' : 'text-[#9EBFAB]'}`}>Page {item.source_page || 1}</td>
-                                <td className={`text-[11px] italic max-w-[320px] truncate ${isLight ? 'text-[#41634E]' : 'text-[#B4D2C1]'}`} title={item.raw_snippet}>
-                                  "{item.raw_snippet}"
-                                </td>
-                                <td>
-                                  <span className={`px-2 py-0.5 rounded-full text-[9px] font-bold border ${
-                                    isLight ? 'bg-[#E8F8EE] text-[#00873E] border-[#C2E9CF]' : 'bg-[#0D2B1A] text-[#4ADE80] border-[#1B4D2E]'
-                                  }`}>
-                                    {Math.round((item.confidence || 0.95) * 100)}%
-                                  </span>
-                                </td>
-                              </tr>
-                            ))}
-                          </tbody>
-                        </table>
+                        <form onSubmit={handleAddCustomItem} className="space-y-4">
+                          <div>
+                            <label className="block text-xs font-bold uppercase font-mono mb-1 text-slate-400">
+                              Item / Expense Description
+                            </label>
+                            <input
+                              type="text"
+                              required
+                              placeholder="e.g. Auxiliary Diesel for Factory Generator B"
+                              value={newCustomItem.name}
+                              onChange={(e) => setNewCustomItem({ ...newCustomItem, name: e.target.value })}
+                              className={`w-full text-xs p-2.5 rounded-xl border focus:outline-none focus:border-[#00C853] ${
+                                isLight ? 'bg-slate-50 border-slate-200 text-[#0F2417]' : 'bg-[#040906] border-[#152B1D] text-white'
+                              }`}
+                            />
+                          </div>
+
+                          <div className="grid grid-cols-2 gap-3">
+                            <div>
+                              <label className="block text-xs font-bold uppercase font-mono mb-1 text-slate-400">
+                                Category
+                              </label>
+                              <select
+                                value={newCustomItem.categoryId}
+                                onChange={(e) => setNewCustomItem({ ...newCustomItem, categoryId: e.target.value })}
+                                className={`w-full text-xs p-2.5 rounded-xl border focus:outline-none focus:border-[#00C853] ${
+                                  isLight ? 'bg-slate-50 border-slate-200 text-[#0F2417]' : 'bg-[#040906] border-[#152B1D] text-white'
+                                }`}
+                              >
+                                {NINE_CATEGORIES_CONFIG.map(c => (
+                                  <option key={c.id} value={c.id}>{c.name}</option>
+                                ))}
+                              </select>
+                            </div>
+
+                            <div>
+                              <label className="block text-xs font-bold uppercase font-mono mb-1 text-slate-400">
+                                Scope Protocol
+                              </label>
+                              <select
+                                value={newCustomItem.scope}
+                                onChange={(e) => setNewCustomItem({ ...newCustomItem, scope: e.target.value })}
+                                className={`w-full text-xs p-2.5 rounded-xl border focus:outline-none focus:border-[#00C853] ${
+                                  isLight ? 'bg-slate-50 border-slate-200 text-[#0F2417]' : 'bg-[#040906] border-[#152B1D] text-white'
+                                }`}
+                              >
+                                <option value="Scope 1">Scope 1 (Direct)</option>
+                                <option value="Scope 2">Scope 2 (Electricity)</option>
+                                <option value="Scope 3">Scope 3 (Value Chain)</option>
+                              </select>
+                            </div>
+                          </div>
+
+                          <div className="grid grid-cols-2 gap-3">
+                            <div>
+                              <label className="block text-xs font-bold uppercase font-mono mb-1 text-slate-400">
+                                Invoiced Spend (BDT)
+                              </label>
+                              <input
+                                type="number"
+                                placeholder="e.g. 75000"
+                                value={newCustomItem.spendBdt}
+                                onChange={(e) => setNewCustomItem({ ...newCustomItem, spendBdt: e.target.value })}
+                                className={`w-full text-xs p-2.5 rounded-xl border focus:outline-none focus:border-[#00C853] ${
+                                  isLight ? 'bg-slate-50 border-slate-200 text-[#0F2417]' : 'bg-[#040906] border-[#152B1D] text-white'
+                                }`}
+                              />
+                            </div>
+
+                            <div>
+                              <label className="block text-xs font-bold uppercase font-mono mb-1 text-slate-400">
+                                Activity Quantity
+                              </label>
+                              <div className="flex space-x-1">
+                                <input
+                                  type="number"
+                                  placeholder="e.g. 500"
+                                  value={newCustomItem.quantity}
+                                  onChange={(e) => setNewCustomItem({ ...newCustomItem, quantity: e.target.value })}
+                                  className={`w-2/3 text-xs p-2.5 rounded-xl border focus:outline-none focus:border-[#00C853] ${
+                                    isLight ? 'bg-slate-50 border-slate-200 text-[#0F2417]' : 'bg-[#040906] border-[#152B1D] text-white'
+                                  }`}
+                                />
+                                <input
+                                  type="text"
+                                  placeholder="Units"
+                                  value={newCustomItem.unit}
+                                  onChange={(e) => setNewCustomItem({ ...newCustomItem, unit: e.target.value })}
+                                  className={`w-1/3 text-xs p-2.5 rounded-xl border focus:outline-none focus:border-[#00C853] ${
+                                    isLight ? 'bg-slate-50 border-slate-200 text-[#0F2417]' : 'bg-[#040906] border-[#152B1D] text-white'
+                                  }`}
+                                />
+                              </div>
+                            </div>
+                          </div>
+
+                          <div>
+                            <label className="block text-xs font-bold uppercase font-mono mb-1 text-slate-400">
+                              Emission Factor (kg CO₂e per unit)
+                            </label>
+                            <input
+                              type="number"
+                              step="0.01"
+                              placeholder="e.g. 2.68"
+                              value={newCustomItem.factor}
+                              onChange={(e) => setNewCustomItem({ ...newCustomItem, factor: e.target.value })}
+                              className={`w-full text-xs p-2.5 rounded-xl border focus:outline-none focus:border-[#00C853] ${
+                                isLight ? 'bg-slate-50 border-slate-200 text-[#0F2417]' : 'bg-[#040906] border-[#152B1D] text-white'
+                              }`}
+                            />
+                          </div>
+
+                          {/* Preview Calculated CO2 */}
+                          <div className={`p-3 rounded-xl border flex justify-between items-center ${
+                            isLight ? 'bg-emerald-50 border-emerald-200' : 'bg-[#0D2616] border-[#00C853]/30'
+                          }`}>
+                            <span className="text-xs font-bold font-sans">Calculated Added Impact:</span>
+                            <span className="text-xs font-mono font-black text-[#00C853]">
+                              +{(
+                                (parseFloat(newCustomItem.quantity) || 0) > 0
+                                  ? Math.round((parseFloat(newCustomItem.quantity) || 0) * (parseFloat(newCustomItem.factor) || 1))
+                                  : Math.round((parseFloat(newCustomItem.spendBdt) || 0) * 0.065)
+                              ).toLocaleString()} kg CO₂e
+                            </span>
+                          </div>
+
+                          <div className="flex space-x-3 pt-2">
+                            <button
+                              type="submit"
+                              className="flex-1 bg-[#00C853] hover:bg-[#00E676] text-white font-bold py-2.5 rounded-xl text-xs transition-all shadow-md cursor-pointer"
+                            >
+                              Add to Footprint Matrix
+                            </button>
+                            <button
+                              type="button"
+                              onClick={() => setIsAddCustomModalOpen(false)}
+                              className={`px-4 py-2.5 rounded-xl text-xs font-bold border transition-all cursor-pointer ${
+                                isLight ? 'bg-slate-100 text-slate-600 border-slate-200' : 'bg-slate-800/40 text-slate-300 border-slate-700'
+                              }`}
+                            >
+                              Cancel
+                            </button>
+                          </div>
+                        </form>
+                      </div>
+                    </div>
+                  )}
+
+                  {/* MODAL: REFINE CATEGORY ADJUSTMENT */}
+                  {editingCategory && (
+                    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/70 backdrop-blur-sm animate-fade-in">
+                      <div className={`w-full max-w-md rounded-3xl p-6 border shadow-2xl space-y-5 ${
+                        isLight ? 'bg-white border-slate-200 text-[#0F2417]' : 'bg-[#08130C] border-[#1B3B26] text-white'
+                      }`}>
+                        <div className="flex justify-between items-center border-b pb-3">
+                          <div className="flex items-center space-x-2">
+                            <Sliders className="w-5 h-5 text-[#00C853]" />
+                            <h3 className="font-bold text-base font-sans">
+                              Refine {editingCategory.name}
+                            </h3>
+                          </div>
+                          <button
+                            type="button"
+                            onClick={() => setEditingCategory(null)}
+                            className="p-1 rounded-lg text-slate-400 hover:text-white cursor-pointer"
+                          >
+                            <X className="w-5 h-5" />
+                          </button>
+                        </div>
+
+                        <div className="space-y-4">
+                          <div>
+                            <label className="block text-xs font-bold uppercase font-mono mb-1 text-slate-400">
+                              Adjust Invoiced Spend (BDT)
+                            </label>
+                            <input
+                              type="number"
+                              defaultValue={editingCategory.spendBdt}
+                              id="adjust-spend"
+                              className={`w-full text-xs p-2.5 rounded-xl border focus:outline-none focus:border-[#00C853] ${
+                                isLight ? 'bg-slate-50 border-slate-200 text-[#0F2417]' : 'bg-[#040906] border-[#152B1D] text-white'
+                              }`}
+                            />
+                          </div>
+
+                          <div>
+                            <label className="block text-xs font-bold uppercase font-mono mb-1 text-slate-400">
+                              Adjust Emissions (kg CO₂e)
+                            </label>
+                            <input
+                              type="number"
+                              defaultValue={editingCategory.carbonKg}
+                              id="adjust-kg"
+                              className={`w-full text-xs p-2.5 rounded-xl border focus:outline-none focus:border-[#00C853] ${
+                                isLight ? 'bg-slate-50 border-slate-200 text-[#0F2417]' : 'bg-[#040906] border-[#152B1D] text-white'
+                              }`}
+                            />
+                          </div>
+
+                          <div>
+                            <label className="block text-xs font-bold uppercase font-mono mb-1 text-slate-400">
+                              Adjust Activity Quantity ({editingCategory.unit})
+                            </label>
+                            <input
+                              type="number"
+                              defaultValue={editingCategory.quantity}
+                              id="adjust-qty"
+                              className={`w-full text-xs p-2.5 rounded-xl border focus:outline-none focus:border-[#00C853] ${
+                                isLight ? 'bg-slate-50 border-slate-200 text-[#0F2417]' : 'bg-[#040906] border-[#152B1D] text-white'
+                              }`}
+                            />
+                          </div>
+
+                          <div className="flex space-x-3 pt-2">
+                            <button
+                              type="button"
+                              onClick={() => {
+                                const s = document.getElementById('adjust-spend').value;
+                                const k = document.getElementById('adjust-kg').value;
+                                const q = document.getElementById('adjust-qty').value;
+                                handleSaveCategoryAdjustment(editingCategory.id, s, k, q);
+                              }}
+                              className="flex-1 bg-[#00C853] hover:bg-[#00E676] text-white font-bold py-2.5 rounded-xl text-xs transition-all shadow-md cursor-pointer"
+                            >
+                              Save Recalculation
+                            </button>
+                            <button
+                              type="button"
+                              onClick={() => setEditingCategory(null)}
+                              className={`px-4 py-2.5 rounded-xl text-xs font-bold border transition-all cursor-pointer ${
+                                isLight ? 'bg-slate-100 text-slate-600 border-slate-200' : 'bg-slate-800/40 text-slate-300 border-slate-700'
+                              }`}
+                            >
+                              Cancel
+                            </button>
+                          </div>
+                        </div>
                       </div>
                     </div>
                   )}
@@ -2559,14 +3670,14 @@ const SaaSDashboard = () => {
                         type="button"
                         onClick={() => executeRagQuery()}
                         disabled={isRagLoading || !ragQuery.trim()}
-                        className="bg-[#00C853] hover:bg-[#00E676] disabled:bg-[#0E2014] disabled:text-emerald-300/40 disabled:border disabled:border-[#1A3824] disabled:shadow-none disabled:cursor-not-allowed text-white px-5 py-3 rounded-xl font-sans font-extrabold text-xs transition-all shadow-md shadow-[#00C853]/20 flex items-center space-x-1.5 shrink-0 cursor-pointer"
+                        className="bg-[#00C853] hover:bg-[#00E676] disabled:bg-[#0E2014] disabled:text-white/50 disabled:border disabled:border-[#1A3824] disabled:shadow-none disabled:cursor-not-allowed text-white px-5 py-3 rounded-xl font-sans font-extrabold text-xs transition-all shadow-md shadow-[#00C853]/20 flex items-center space-x-1.5 shrink-0 cursor-pointer"
                       >
                         {isRagLoading ? (
-                          <Loader2 className="w-4 h-4 animate-spin text-inherit" />
+                          <Loader2 className="w-4 h-4 animate-spin text-white" />
                         ) : (
                           <>
-                            <Send className="w-3.5 h-3.5 text-inherit" />
-                            <span>Ask Copilot</span>
+                            <Send className="w-3.5 h-3.5 text-white" />
+                            <span className="text-white font-bold">Ask Copilot</span>
                           </>
                         )}
                       </button>
@@ -2737,10 +3848,10 @@ const SaaSDashboard = () => {
 
                   <button
                     onClick={() => navigate('/platform/marketplace')}
-                    className="bg-[#00C853] hover:bg-[#00E676] text-[#040906] font-sans font-bold text-xs py-3 px-4 rounded-xl transition-all shadow-md flex items-center justify-center space-x-1.5 cursor-pointer"
+                    className="bg-[#00C853] hover:bg-[#00E676] text-white font-sans font-bold text-xs py-3 px-4 rounded-xl transition-all shadow-md shadow-[#00C853]/25 flex items-center justify-center space-x-1.5 cursor-pointer"
                   >
-                    <span>Browse Marketplace</span>
-                    <ExternalLink className="w-3.5 h-3.5 text-[#040906]" />
+                    <span className="text-white font-bold">Browse Marketplace</span>
+                    <ExternalLink className="w-3.5 h-3.5 text-white" />
                   </button>
                 </div>
 

@@ -13,7 +13,7 @@ import {
   Layers,
   Recycle,
   GraduationCap,
-  Plane
+  ShoppingBag
 } from 'lucide-react';
 import { CLIENT_PROFILES, CLIENT_SECTORS } from '../pages/platform/clientProfiles';
 
@@ -26,7 +26,7 @@ const ClientShowcase = () => {
       case 'mobility': return Zap;
       case 'circular': return Recycle;
       case 'education': return GraduationCap;
-      case 'travel': return Plane;
+      case 'fashion': return ShoppingBag;
       default: return Sparkles;
     }
   };
