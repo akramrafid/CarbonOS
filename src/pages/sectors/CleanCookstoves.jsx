@@ -17,7 +17,7 @@ const CleanCookstoves = () => {
             Methodology & MRV
           </h2>
           <div className="space-y-6 font-sans text-mist text-base leading-relaxed">
-            <p>Clean cookstoves mitigate emissions by burning wood or biomass more efficiently. CarbonOS uses mobile app registries and digital surveys to track distribution and usage rates.</p>
+            <p>Clean cookstoves mitigate emissions by burning wood or biomass more efficiently. Carbon Zero BD uses mobile app registries and digital surveys to track distribution and usage rates.</p>
             
             <div className="mt-6 grid grid-cols-1 md:grid-cols-2 gap-4">
               <div className="p-5 bg-[#040A06] border border-emerald/10 rounded-xl">

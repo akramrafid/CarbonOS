@@ -17,7 +17,7 @@ const BrickKilns = () => {
             Methodology & MRV
           </h2>
           <div className="space-y-6 font-sans text-mist text-base leading-relaxed">
-            <p>Brick kilns are a major pollution source. Upgrading technologies drastically reduces coal consumption. CarbonOS tracks fuel inputs and brick production output for accurate crediting.</p>
+            <p>Brick kilns are a major pollution source. Upgrading technologies drastically reduces coal consumption. Carbon Zero BD tracks fuel inputs and brick production output for accurate crediting.</p>
             
             <div className="mt-6 grid grid-cols-1 md:grid-cols-2 gap-4">
               <div className="p-5 bg-[#040A06] border border-emerald/10 rounded-xl">

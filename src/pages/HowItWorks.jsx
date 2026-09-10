@@ -118,7 +118,7 @@ const HowItWorks = () => {
     },
     {
       title: "Registry & Tokenization",
-      description: "Once verified, a distinct, traceable Carbon Credit (tCO₂e) is minted on the CarbonOS registry. It receives a unique identifier preventing double-counting.",
+      description: "Once verified, a distinct, traceable Carbon Credit (tCO₂e) is minted on the Carbon Zero BD registry. It receives a unique identifier preventing double-counting.",
       metricLabel: "Standard Compliant",
       metric: "Verra VCS / Gold Standard",
       visual: (
@@ -193,7 +193,7 @@ const HowItWorks = () => {
             <span className="text-emerald italic">Verified Credit</span>
           </h1>
           <p className="text-lg md:text-xl text-mist font-sans font-light max-w-2xl mx-auto">
-            CarbonOS is the first end-to-end registry in South Asia with zero payment friction. See how we move value from the farm directly to the farmer.
+            Carbon Zero BD is the first end-to-end registry in South Asia with zero payment friction. See how we move value from the farm directly to the farmer.
           </p>
         </div>
       </header>

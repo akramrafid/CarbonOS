@@ -200,7 +200,7 @@ const PlatformModules = () => {
         <span>6 Core Systems</span>
       </div>
       <div className="absolute top-8 right-12 hidden lg:flex items-center text-[10px] uppercase tracking-[0.25em] text-mist/40 pointer-events-none font-bold">
-        <span>CarbonOS</span>
+        <span>Carbon Zero BD</span>
       </div>
 
       <div className="max-w-7xl mx-auto px-6 lg:px-12 relative z-10">
@@ -455,15 +455,15 @@ const PlatformModules = () => {
               opacity: 0
             }}
           >
-            <h4 className="text-emerald font-mono text-[11px] uppercase tracking-[0.2em] mb-2.5 font-bold">CarbonOS Core</h4>
+            <h4 className="text-emerald font-mono text-[11px] uppercase tracking-[0.2em] mb-2.5 font-bold">Carbon Zero BD Core</h4>
             <p className="text-mist text-xs leading-relaxed font-sans opacity-95">
-              CarbonOS integration proactively monitors, verifies, and secures carbon credits at every step. By combining satellite telemetry, AI fraud detection, and automated registry workflows, we guarantee that every credit corresponds to real, permanent, and additional carbon offset, enabling instant global market access with zero risk of double counting or greenwashing.
+              Carbon Zero BD integration proactively monitors, verifies, and secures carbon credits at every step. By combining satellite telemetry, AI fraud detection, and automated registry workflows, we guarantee that every credit corresponds to real, permanent, and additional carbon offset, enabling instant global market access with zero risk of double counting or greenwashing.
             </p>
           </div>
 
           {/* Bottom links */}
           <div className="absolute bottom-4 left-0 text-[10px] font-mono text-mist/30 tracking-widest pointer-events-none uppercase">
-            carbonos.live
+            carbonzerobd.com
           </div>
           <div className="absolute bottom-4 right-0 text-[10px] font-mono text-mist/30 tracking-widest pointer-events-none uppercase text-right">
             System Platform Modules
@@ -483,7 +483,7 @@ const PlatformModules = () => {
               Securing the entire carbon lifecycle
             </h2>
             <p className="text-mist text-xs leading-relaxed max-w-lg mx-auto">
-              CarbonOS integration proactively monitors, verifies, and secures carbon credits. By combining satellite telemetry, AI fraud detection, and automated registry workflows, we guarantee that every credit is real and permanent.
+              Carbon Zero BD integration proactively monitors, verifies, and secures carbon credits. By combining satellite telemetry, AI fraud detection, and automated registry workflows, we guarantee that every credit is real and permanent.
             </p>
           </div>
 

@@ -482,7 +482,7 @@ const SaaSDashboard = () => {
     setTimeout(() => setToast({ show: false, message: '', type: 'success' }), 4000);
   };
 
-  // CarbonOS ESG Multi-Corpus RAG State
+  // Carbon Zero BD ESG Multi-Corpus RAG State
   const [extractionResult, setExtractionResult] = useState(null);
   const [showExtractionEvidence, setShowExtractionEvidence] = useState(false);
   const [ragQuery, setRagQuery] = useState('');
@@ -634,7 +634,7 @@ const SaaSDashboard = () => {
     if (file) {
       setUploadedFile(file.name);
       setIsVerified(false);
-      showToast(`Selected file: ${file.name}. Initializing CarbonOS RAG pipeline...`, "info");
+      showToast(`Selected file: ${file.name}. Initializing Carbon Zero BD RAG pipeline...`, "info");
       await executeAIExtraction(file);
     }
   };
@@ -643,7 +643,7 @@ const SaaSDashboard = () => {
   const executeAIExtraction = async (fileOrName = "ESG_Statement_Q2_2026.xlsx") => {
     setIsUploading(true);
     const fileName = typeof fileOrName === 'string' ? fileOrName : fileOrName.name;
-    showToast(`CarbonOS RAG Extractor analyzing ${fileName}...`, "info");
+    showToast(`Carbon Zero BD RAG Extractor analyzing ${fileName}...`, "info");
 
     try {
       let data = null;
@@ -740,10 +740,10 @@ const SaaSDashboard = () => {
       setIsUploading(false);
       setTasks(prev => prev.map(t => t.id === 2 ? { ...t, completed: true } : t));
       setNotifications(prev => [
-        { id: Date.now(), text: `CarbonOS RAG Extractor verified report: ${fileName}`, read: false, time: "Just now" },
+        { id: Date.now(), text: `Carbon Zero BD RAG Extractor verified report: ${fileName}`, read: false, time: "Just now" },
         ...prev
       ]);
-      showToast("CarbonOS RAG extraction and verification completed!", "success");
+      showToast("Carbon Zero BD RAG extraction and verification completed!", "success");
     }
   };
 
@@ -786,10 +786,10 @@ const SaaSDashboard = () => {
         ansText = `Under Bangladesh's Updated Nationally Determined Contributions (NDC 2021):\n\n• **Unconditional Target:** Reduce emissions by 27.56 Mt CO₂e (6.73% below BAU) by 2030 using domestic budget.\n• **Conditional Target:** Additional 61.9 Mt CO₂e (15.12% reduction) with international climate finance, reaching 21.85% total reduction.\n• **Industrial Focus:** Mandatory SREDA energy audits and waste heat recovery for export facilities.`;
         cites = [{ source: "Bangladesh_Updated_NDC_and_ECR_2023.txt", page: 1, section: "Corpus: regulatory", snippet: "Bangladesh committed to reduce its GHG emissions by 27.56 Mt CO2e below BAU levels by 2030 unconditionally.", relevance_score: 0.96 }];
       } else if (q.toLowerCase().includes("cbam") || q.toLowerCase().includes("eu") || q.toLowerCase().includes("export")) {
-        ansText = `Under EU CBAM (Regulation 2023/956):\n\n• **Transitional Phase (2023-2025):** Mandatory quarterly reporting of direct Scope 1 and embedded indirect Scope 2 emissions without financial tariffs.\n• **Definitive Phase (2026+):** Exporters must submit verified emissions certificates matching EU ETS carbon pricing.\n• **Impact on Bangladesh:** Key exposure in steel, aluminum, and chemical sub-sectors. Verified MRV documentation via CarbonOS is accepted.`;
+        ansText = `Under EU CBAM (Regulation 2023/956):\n\n• **Transitional Phase (2023-2025):** Mandatory quarterly reporting of direct Scope 1 and embedded indirect Scope 2 emissions without financial tariffs.\n• **Definitive Phase (2026+):** Exporters must submit verified emissions certificates matching EU ETS carbon pricing.\n• **Impact on Bangladesh:** Key exposure in steel, aluminum, and chemical sub-sectors. Verified MRV documentation via Carbon Zero BD is accepted.`;
         cites = [{ source: "Bangladesh_Updated_NDC_and_ECR_2023.txt", page: 2, section: "Corpus: regulatory", snippet: "EU CBAM requires Scope 1 and Scope 2 disclosure per metric ton of exported goods.", relevance_score: 0.94 }];
       } else {
-        ansText = `Based on verified records in the CarbonOS repository, your query "${q}" is grounded in the National Environmental Guidelines and corporate emission ledgers.\n\nAll Scope 1, 2, and 3 accounting adheres to the GHG Protocol Corporate Standard with Bangladesh-specific emission factors.`;
+        ansText = `Based on verified records in the Carbon Zero BD repository, your query "${q}" is grounded in the National Environmental Guidelines and corporate emission ledgers.\n\nAll Scope 1, 2, and 3 accounting adheres to the GHG Protocol Corporate Standard with Bangladesh-specific emission factors.`;
         cites = [{ source: "DoE_SREDA_Grid_and_Fuel_Emission_Factors_2023.txt", page: 1, section: "Corpus: emission_factors", snippet: "All calculations verified against DoE / SREDA national emission inventories.", relevance_score: 0.88 }];
       }
 
@@ -2078,7 +2078,7 @@ const SaaSDashboard = () => {
                         </h3>
                       </div>
                       <p className={`text-xs mt-0.5 font-sans ${isLight ? 'text-[#557361]' : 'text-[#7C9A88]'}`}>
-                        Upload corporate bills, utility statements, or fuel spreadsheets. CarbonOS RAG scans documents, matches national DoE emission factors, and generates citation-backed parameters.
+                        Upload corporate bills, utility statements, or fuel spreadsheets. Carbon Zero BD RAG scans documents, matches national DoE emission factors, and generates citation-backed parameters.
                       </p>
                     </div>
                     
@@ -2201,7 +2201,7 @@ const SaaSDashboard = () => {
                           <div className={`font-mono text-[9px] uppercase tracking-wider font-bold ${
                             isLight ? 'text-[#00873E]' : 'text-[#A7F3D0]'
                           }`}>Audit Assurance</div>
-                          <div className={`font-sans font-bold text-xs ${isLight ? 'text-[#0F2417]' : 'text-white'}`}>CARBONOS AUDIT VERIFIED</div>
+                          <div className={`font-sans font-bold text-xs ${isLight ? 'text-[#0F2417]' : 'text-white'}`}>CARBON ZERO BD AUDIT VERIFIED</div>
                         </div>
                       </div>
                     )}
@@ -2276,7 +2276,7 @@ const SaaSDashboard = () => {
                   )}
 
                   {/* ------------------------------------------------------------- */}
-                  {/* CarbonOS ESG Regulatory & Copilot (RAG Assistant Section)     */}
+                  {/* Carbon Zero BD ESG Regulatory & Copilot (RAG Assistant Section)     */}
                   {/* ------------------------------------------------------------- */}
                   <div className={`border-t pt-6 space-y-4 ${isLight ? 'border-[#E8ECE8]' : 'border-[#122418]'}`}>
                     <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-2">
@@ -2287,7 +2287,7 @@ const SaaSDashboard = () => {
                           <Sparkles className="w-3.5 h-3.5 text-[#00C853]" />
                         </div>
                         <h4 className={`font-sans font-bold text-sm ${isLight ? 'text-[#0F2417]' : 'text-white'}`}>
-                          CarbonOS ESG Regulatory & Auditor Copilot
+                          Carbon Zero BD ESG Regulatory & Auditor Copilot
                         </h4>
                       </div>
                       
@@ -2393,7 +2393,7 @@ const SaaSDashboard = () => {
                             <span className={`font-mono text-[9px] font-bold px-2 py-0.5 rounded uppercase border ${
                               isLight ? 'bg-white text-[#00873E] border-[#BCE7CB]' : 'bg-[#0D2B1A] text-[#4ADE80] border-[#1B4D2E]'
                             }`}>
-                              {ragResponse.model_used || "CarbonOS RAG Engine"}
+                              {ragResponse.model_used || "Carbon Zero BD RAG Engine"}
                             </span>
                             <span className={`font-sans font-bold text-xs ${isLight ? 'text-[#0F2417]' : 'text-white'}`}>
                               Audit Traceable Response
@@ -3491,7 +3491,7 @@ const SaaSDashboard = () => {
                 onClick={() => showToast("A support request has been sent. An ESG auditor will reach out soon.", "success")}
                 className="bg-[#10B981] hover:bg-[#059669] text-white font-bold text-xs py-2 px-4 rounded-xl transition-colors shadow-sm"
               >
-                Consult CarbonOS Specialists
+                Consult Carbon Zero BD Specialists
               </button>
             </div>
 

@@ -128,7 +128,7 @@ const Impact = () => {
             <span className="text-[#00C853]">Impact Outcomes</span>
           </h1>
           <p className="font-sans text-sm sm:text-base text-mist max-w-xl mx-auto leading-relaxed">
-            CarbonOS monitors, registers, and monetizes verified carbon emissions reductions while directing funding into local rural communities in Bangladesh.
+            Carbon Zero BD monitors, registers, and monetizes verified carbon emissions reductions while directing funding into local rural communities in Bangladesh.
           </p>
         </div>
 
@@ -219,7 +219,7 @@ const Impact = () => {
             </span>
             <h2 className="font-sans font-bold text-3xl text-white">Live Community Payout Ledger</h2>
             <p className="text-xs text-mist leading-relaxed font-sans">
-              CarbonOS utilizes an automated mobile financial service pipeline in Bangladesh, connecting carbon revenue directly to localized mobile wallets. Every generated credit routes 97% of funds directly to rural participants instantly.
+              Carbon Zero BD utilizes an automated mobile financial service pipeline in Bangladesh, connecting carbon revenue directly to localized mobile wallets. Every generated credit routes 97% of funds directly to rural participants instantly.
             </p>
             <div className="p-4 bg-[#0D2B1A]/40 border border-[#00C853]/10 rounded-2xl flex items-start space-x-3.5">
               <Radio className="w-5 h-5 text-[#00C853] shrink-0 animate-pulse mt-0.5" />
@@ -490,7 +490,7 @@ const Impact = () => {
             <span className="font-mono text-xs text-[#00C853] tracking-wider uppercase font-bold">
               VERIFICATION STANDARDS
             </span>
-            <h2 className="font-sans font-bold text-3xl text-white">How CarbonOS Validates Impact</h2>
+            <h2 className="font-sans font-bold text-3xl text-white">How Carbon Zero BD Validates Impact</h2>
             <p className="text-sm text-mist max-w-xl mx-auto font-sans leading-relaxed">
               Our triple-tier monitoring framework secures audit integrity from hardware node to registry issuance.
             </p>
@@ -535,7 +535,7 @@ const Impact = () => {
           <div className="space-y-3 max-w-2xl text-left">
             <h3 className="font-sans font-bold text-2xl sm:text-3xl text-white">Join the Sustainable Revolution</h3>
             <p className="text-xs sm:text-sm text-mist leading-relaxed font-sans">
-              Whether you are an enterprise looking to purchase certified offsets, a project developer planning clean infrastructure, or an auditor validating metrics—CarbonOS provides the tools.
+              Whether you are an enterprise looking to purchase certified offsets, a project developer planning clean infrastructure, or an auditor validating metrics—Carbon Zero BD provides the tools.
             </p>
           </div>
           <div className="flex flex-wrap gap-4 shrink-0">

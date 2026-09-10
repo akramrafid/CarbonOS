@@ -73,7 +73,7 @@ const Philosophy = () => {
         />
 
         <SplitText 
-          text="CarbonOS is built for" 
+          text="Carbon Zero BD is built for" 
           className="font-sans text-[24px] text-white mb-2"
         />
 
@@ -98,7 +98,7 @@ const Philosophy = () => {
         />
 
         <SplitText 
-          text="Software + automation + local knowledge. That is your advantage. That is CarbonOS." 
+          text="Software + automation + local knowledge. That is your advantage. That is Carbon Zero BD." 
           className="font-sans text-[16px] lg:text-[18px] text-mist max-w-[600px] leading-relaxed"
         />
 

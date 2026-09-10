@@ -48,7 +48,7 @@ const FarmerPaidCard = ({ amount, txHash }) => {
           
           <div className="mt-3 flex items-center justify-between text-xs text-[#475569]">
             <span className="font-mono bg-slate-100 px-2 py-1 rounded">TX: {txHash.substring(0, 10)}...</span>
-            <span className="text-[#16A34A] font-medium">Verified by CarbonOS</span>
+            <span className="text-[#16A34A] font-medium">Verified by Carbon Zero BD</span>
           </div>
         </div>
       </div>

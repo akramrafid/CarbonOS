@@ -17,7 +17,7 @@ const APIDocs = () => {
             Developer Hub
           </h2>
           <div className="space-y-6 font-sans text-mist text-base leading-relaxed">
-            <p>Our endpoints are secured via OAuth2.0. Contact the CarbonOS admin team to provision your client keys.</p>
+            <p>Our endpoints are secured via OAuth2.0. Contact the Carbon Zero BD admin team to provision your client keys.</p>
             
             <div className="mt-8 bg-[#040A06] border border-emerald/20 p-6 rounded-xl font-mono text-sm text-mist overflow-x-auto">
               <div className="text-emerald mb-2"># Post new telemetry data from an IoT node</div>

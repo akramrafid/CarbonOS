@@ -74,28 +74,28 @@ const Navbar = () => {
   ];
 
   return (
-    <nav className="fixed top-6 left-0 w-full z-50 flex justify-center px-4 sm:px-6 pointer-events-none">
+    <nav className="fixed top-6 left-0 w-full z-50 flex justify-center px-4 sm:px-8 pointer-events-none">
       <div 
-        className={`w-full max-w-[1400px] rounded-full border transition-all duration-500 ease-out flex items-center justify-between px-6 sm:px-8 py-3 sm:py-3.5 pointer-events-auto ${
+        className={`w-full max-w-[1780px] rounded-full border transition-all duration-500 ease-out flex items-center justify-between px-6 sm:px-8 py-2.5 sm:py-3 pointer-events-auto gap-4 ${
           scrolled 
             ? 'bg-[#040A06]/85 dark:bg-[#040A06]/85 backdrop-blur-xl border-emerald/20 shadow-[0_8px_32px_rgba(0,0,0,0.37)]' 
             : 'bg-[#040A06]/60 dark:bg-[#040A06]/60 backdrop-blur-md border-white/10'
         }`}
       >
         {/* Left Side: Brand Logo */}
-        <div className="flex items-center space-x-3 w-1/2 lg:w-1/4">
+        <div className="flex items-center space-x-3 shrink-0">
           <Link to="/" className="flex items-center space-x-2 group">
-            <span className="serif-drama text-2xl font-bold tracking-wider text-white group-hover:text-emerald transition-colors">
-              Carbon<span className="text-emerald">OS</span>
+            <span className="serif-drama text-2xl font-bold tracking-wider text-white group-hover:text-emerald transition-colors whitespace-nowrap">
+              Carbon<span className="text-emerald">Zero</span>
             </span>
-            <span className="font-mono text-[9px] bg-emerald/10 border border-emerald/20 text-emerald px-1.5 py-0.5 rounded tracking-widest uppercase">
+            <span className="font-mono text-[9px] bg-emerald/10 border border-emerald/20 text-emerald px-1.5 py-0.5 rounded tracking-widest uppercase whitespace-nowrap">
               BD
             </span>
           </Link>
         </div>
 
         {/* Center: Desktop Navigation Links */}
-        <div className="hidden lg:flex items-center space-x-1 bg-white/[0.03] border border-white/5 rounded-full p-1.5 backdrop-blur-sm">
+        <div className="hidden lg:flex items-center space-x-1 bg-white/[0.03] border border-white/5 rounded-full p-1.5 backdrop-blur-sm shrink-0">
           {navLinks.map((item) => {
             const isHash = ['Platform', 'Sectors', 'Pricing'].includes(item.id);
             const hash = item.id.toLowerCase();
@@ -105,7 +105,7 @@ const Navbar = () => {
                 <Link
                   key={item.id}
                   to={item.path}
-                  className="font-sans text-[13px] font-medium text-white/80 hover:text-white px-4 py-2 rounded-full transition-all duration-300 hover:bg-white/5"
+                  className="font-sans text-[13px] font-medium text-white/80 hover:text-white px-3.5 py-1.5 rounded-full transition-all duration-300 hover:bg-white/5 whitespace-nowrap"
                 >
                   {t(`nav.${item.key}`, item.id)}
                 </Link>
@@ -116,7 +116,7 @@ const Navbar = () => {
                   key={item.id}
                   href={`/#${hash}`}
                   onClick={(e) => handleHashClick(e, hash)}
-                  className="font-sans text-[13px] font-medium text-white/80 hover:text-white px-4 py-2 rounded-full transition-all duration-300 hover:bg-white/5 cursor-pointer"
+                  className="font-sans text-[13px] font-medium text-white/80 hover:text-white px-3.5 py-1.5 rounded-full transition-all duration-300 hover:bg-white/5 cursor-pointer whitespace-nowrap"
                 >
                   {t(`nav.${item.key}`)}
                 </a>
@@ -125,7 +125,7 @@ const Navbar = () => {
               return (
                 <button
                   key={item.id}
-                  className="font-sans text-[13px] font-medium text-white/80 hover:text-white px-4 py-2 rounded-full transition-all duration-300 hover:bg-white/5 cursor-pointer"
+                  className="font-sans text-[13px] font-medium text-white/80 hover:text-white px-3.5 py-1.5 rounded-full transition-all duration-300 hover:bg-white/5 cursor-pointer whitespace-nowrap"
                 >
                   {t(`nav.${item.key}`)}
                 </button>
@@ -136,14 +136,14 @@ const Navbar = () => {
           {/* Request Demo Pill Button */}
           <Link
             to="/platform/saas"
-            className="font-mono text-[11px] font-bold text-white bg-[#0A1F13] hover:bg-[#00C853] hover:text-[#0A1F13] border border-[#00C853]/40 px-4 py-2 rounded-full transition-all duration-300 shadow-[0_0_12px_rgba(0,200,83,0.15)] ml-2"
+            className="font-mono text-[11px] font-bold text-white bg-[#0A1F13] hover:bg-[#00C853] hover:text-[#0A1F13] border border-[#00C853]/40 px-3.5 py-1.5 rounded-full transition-all duration-300 shadow-[0_0_12px_rgba(0,200,83,0.15)] ml-2 whitespace-nowrap shrink-0"
           >
             [Request Demo]
           </Link>
         </div>
 
         {/* Right Side: Language Switcher, Theme Toggle, Login, Mobile Menu Toggle */}
-        <div className="flex items-center justify-end space-x-2 sm:space-x-3 w-1/2 lg:w-1/4 z-50">
+        <div className="flex items-center justify-end space-x-2 sm:space-x-3 shrink-0 z-50">
           
           {/* Language Toggle */}
           <button 

@@ -12,7 +12,7 @@ const TechStackDiagram = () => {
     {
       level: "Layer 4",
       name: "Platform",
-      tech: "Node.js REST API, WebSockets, CarbonOS Credit Registry, Smart Contract Engine",
+      tech: "Node.js REST API, WebSockets, Carbon Zero BD Credit Registry, Smart Contract Engine",
       color: "bg-[#0A5C36]",
       textColor: "text-white"
     },

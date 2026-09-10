@@ -98,9 +98,9 @@ const Footer = () => {
         </div>
 
         {/* Giant Bottom Text */}
-        <div className="w-full overflow-hidden flex justify-center -mb-2 opacity-90 select-none pointer-events-none">
-          <span className="font-sans font-bold text-[24vw] leading-[0.75] text-white tracking-tighter">
-            CarbonOS
+        <div className="w-full overflow-hidden flex justify-center -mb-2 opacity-85 select-none pointer-events-none">
+          <span className="font-sans font-bold text-[13vw] leading-[0.8] text-white tracking-tighter uppercase whitespace-nowrap">
+            Carbon Zero BD
           </span>
         </div>
       </footer>

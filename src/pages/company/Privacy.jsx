@@ -14,7 +14,7 @@ const Privacy = () => {
         <div className="bg-[#080F0B] registry-border p-8 md:p-12 rounded-[2rem] shadow-[0_0_30px_rgba(0,200,83,0.05)]">
           <div className="space-y-6 font-sans text-mist text-base leading-relaxed">
             <p><strong>Last Updated: January 1, 2026</strong></p>
-            <p>CarbonOS Bangladesh is committed to safeguarding your privacy. We collect data solely to verify carbon emissions reductions under the National Framework.</p>
+            <p>Carbon Zero BD is committed to safeguarding your privacy. We collect data solely to verify carbon emissions reductions under the National Framework.</p>
             <h3 className="text-registry font-bold text-lg mt-6">1. Data We Collect</h3>
             <p>We collect project coordinates (GIS data), IoT telemetry (inverter logs, flow meters), and corporate identification documents necessary for project onboarding.</p>
             <h3 className="text-registry font-bold text-lg mt-6">2. How We Use Data</h3>

@@ -19,7 +19,7 @@ const resources = {
       },
       howItWorks: {
         tag: "EDUCATION",
-        title: "How CarbonOS Works",
+        title: "How Carbon Zero BD Works",
         subtitle: "A simple, step-by-step guide from your farm to the national registry.",
         steps: [
           {
@@ -61,9 +61,9 @@ const resources = {
       },
       footer: {
         ctaTitle: "Ready to Scale Bangladesh's Green Infrastructure?",
-        ctaSubtext: "Explore how CarbonOS helps organizations plan, manage, and verify green projects across the country.",
+        ctaSubtext: "Explore how Carbon Zero BD helps organizations plan, manage, and verify green projects across the country.",
         ctaButton: "Explore Platform",
-        copyright: "Copyright 2026 CarbonOS BD",
+        copyright: "Copyright 2026 Carbon Zero BD",
         rights: "All Rights Reserved"
       }
     }
@@ -85,7 +85,7 @@ const resources = {
       },
       howItWorks: {
         tag: "শিক্ষামূলক",
-        title: "কার্বনওএস কিভাবে কাজ করে",
+        title: "কার্বন জিরো বিডি কিভাবে কাজ করে",
         subtitle: "আপনার খামার থেকে জাতীয় রেজিস্ট্রি পর্যন্ত একটি সহজ নির্দেশিকা।",
         steps: [
           {
@@ -127,9 +127,9 @@ const resources = {
       },
       footer: {
         ctaTitle: "বাংলাদেশের সবুজ অবকাঠামো সম্প্রসারণ করতে প্রস্তুত?",
-        ctaSubtext: "কার্বনওএস কীভাবে সংস্থাগুলোকে সারা দেশে সবুজ প্রকল্পগুলির পরিকল্পনা, পরিচালনা এবং যাচাই করতে সহায়তা করে তা জানুন।",
+        ctaSubtext: "কার্বন জিরো বিডি কীভাবে সংস্থাগুলোকে সারা দেশে সবুজ প্রকল্পগুলির পরিকল্পনা, পরিচালনা এবং যাচাই করতে সহায়তা করে তা জানুন।",
         ctaButton: "প্ল্যাটফর্ম এক্সপ্লোর করুন",
-        copyright: "কপিরাইট ২০২৬ কার্বনওএস বিডি",
+        copyright: "কপিরাইট ২০২৬ কার্বন জিরো বিডি",
         rights: "সর্বস্বত্ব সংরক্ষিত"
       }
     }

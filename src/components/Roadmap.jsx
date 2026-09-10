@@ -89,7 +89,7 @@ const Roadmap = () => {
             PROCESS OVERVIEW
           </span>
           <h2 className="serif-drama text-[48px] lg:text-[64px] text-white leading-tight mb-4">
-            How CarbonOS Works
+            How Carbon Zero BD Works
           </h2>
           <p className="font-sans text-lg text-mist max-w-2xl mx-auto">
             A transparent, end-to-end operational framework for the national carbon ecosystem.

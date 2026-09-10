@@ -17,7 +17,7 @@ const MangroveCarbon = () => {
             Methodology & MRV
           </h2>
           <div className="space-y-6 font-sans text-mist text-base leading-relaxed">
-            <p>Blue carbon sinks are highly effective. CarbonOS utilizes remote sensing (NDVI, SAR) to monitor biomass growth and protect against illegal logging.</p>
+            <p>Blue carbon sinks are highly effective. Carbon Zero BD utilizes remote sensing (NDVI, SAR) to monitor biomass growth and protect against illegal logging.</p>
             
             <div className="mt-6 grid grid-cols-1 md:grid-cols-2 gap-4">
               <div className="p-5 bg-[#040A06] border border-emerald/10 rounded-xl">

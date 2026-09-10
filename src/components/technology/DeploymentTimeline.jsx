@@ -10,7 +10,7 @@ const DeploymentTimeline = () => {
         "50 IoT sensor nodes across 5 agroforestry projects",
         "LoRaWAN network covering 200 hectares",
         "Google Earth Engine satellite integration live",
-        "First 10 carbon credits issued on CarbonOS registry"
+        "First 10 carbon credits issued on Carbon Zero BD registry"
       ],
       milestone: "MoEFCC letter of support secured",
       active: true

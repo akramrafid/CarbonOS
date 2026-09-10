@@ -29,7 +29,7 @@ const Technology = () => {
             The Infrastructure Behind Every Verified Carbon Credit
           </h1>
           <p className="text-lg text-[#475569] max-w-3xl mx-auto mb-12">
-            CarbonOS operates a full-stack MRV infrastructure — combining ground-level IoT sensors with satellite remote sensing and AI-powered analytics. Processing 50,000+ readings/hour.
+            Carbon Zero BD operates a full-stack MRV infrastructure — combining ground-level IoT sensors with satellite remote sensing and AI-powered analytics. Processing 50,000+ readings/hour.
           </p>
           
           {/* Schematic Diagram placeholder */}
@@ -99,7 +99,7 @@ const Technology = () => {
       {/* SECTION 6: CTA */}
       <section className="py-24 px-4 sm:px-6 lg:px-8 bg-[#0A5C36] text-center">
         <div className="max-w-4xl mx-auto">
-          <h2 className="text-4xl font-bold text-white mb-8">Ready to integrate your project into CarbonOS?</h2>
+          <h2 className="text-4xl font-bold text-white mb-8">Ready to integrate your project into Carbon Zero BD?</h2>
           <div className="flex flex-col sm:flex-row justify-center items-center space-y-4 sm:space-y-0 sm:space-x-6">
             <button className="bg-[#16A34A] hover:bg-[#16A34A]/90 text-white font-bold py-4 px-8 rounded-xl transition-colors w-full sm:w-auto text-lg">
               Register a Carbon Project →
