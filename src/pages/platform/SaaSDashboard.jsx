@@ -43,9 +43,22 @@ import {
   Moon,
   MoreHorizontal,
   Leaf,
-  Smile
+  Smile,
+  Zap,
+  Globe,
+  Cpu,
+  Layers,
+  GitBranch
 } from 'lucide-react';
 import { useTheme } from '../../context/ThemeContext';
+import { SaaSLocales } from './SaaSLocalization';
+import { DuckDBEngineView } from './components/DuckDBEngineView';
+import { SatelliteMRVStudio } from './components/SatelliteMRVStudio';
+import { FactorRegistryStudio } from './components/FactorRegistryStudio';
+import { AtlasBenchmarkStudio } from './components/AtlasBenchmarkStudio';
+import { ConglomerateTreeStudio } from './components/ConglomerateTreeStudio';
+import { CLIENT_PROFILES } from './clientProfiles';
+import { UniversalUtilityExtractor } from './components/UniversalUtilityExtractor';
 
 const FASTAPI_API_URL = import.meta.env.VITE_FASTAPI_API_URL || 'http://localhost:8000';
 
@@ -397,6 +410,11 @@ const SaaSDashboard = () => {
   // Active Menu / Tabs state
   const [activeMenu, setActiveMenu] = useState('Dashboard');
 
+  // Bilingual Localization & Reporting Currency state
+  const [lang, setLang] = useState('en');
+  const locale = SaaSLocales[lang] || SaaSLocales.en;
+  const [currency, setCurrency] = useState('BDT');
+
   // Selected District state
   const [selectedDistrict, setSelectedDistrict] = useState("Dhaka");
 
@@ -480,6 +498,34 @@ const SaaSDashboard = () => {
   const showToast = (message, type = 'success') => {
     setToast({ show: true, message, type });
     setTimeout(() => setToast({ show: false, message: '', type: 'success' }), 4000);
+  };
+
+  // Multi-Tenant Corporate Client Profiles (Revoo EV, Govaly, MotoRent, East Delta University, SchoolBus BD, EzyGo BD, PolyJute Asia)
+  const [activeClientId, setActiveClientId] = useState('east-delta-university');
+  const [isClientModalOpen, setIsClientModalOpen] = useState(false);
+  const activeClient = CLIENT_PROFILES.find(c => c.id === activeClientId) || CLIENT_PROFILES[0];
+
+  const handleSelectClient = (clientId) => {
+    setActiveClientId(clientId);
+    setIsClientModalOpen(false);
+    const client = CLIENT_PROFILES.find(c => c.id === clientId);
+    if (client) {
+      if (client.baselineInputs) {
+        setInputs(prev => ({
+          ...prev,
+          ...client.baselineInputs
+        }));
+      }
+      if (client.district) {
+        setSelectedDistrict(client.district);
+      }
+      showToast(
+        lang === 'bn' 
+          ? `ক্লায়েন্ট প্রোফাইল সক্রিয়: ${client.name}` 
+          : `Active corporate workspace: ${client.name}`,
+        "info"
+      );
+    }
   };
 
   // Carbon Zero BD ESG Multi-Corpus RAG State
@@ -1065,6 +1111,59 @@ const SaaSDashboard = () => {
               </nav>
             </div>
 
+            {/* Enterprise Core & Satellite MRV Engines */}
+            <div>
+              <span className={`font-mono text-[9px] uppercase tracking-wider block px-3 mb-2.5 font-bold ${
+                isLight ? 'text-[#8FA899]' : 'text-[#557361]'
+              }`}>
+                {lang === 'bn' ? 'কোর ইঞ্জিন ও এমআরভি' : 'Engines & MRV'}
+              </span>
+              <nav className="space-y-1.5">
+                {[
+                  { name: 'DuckDB Engine', label: lang === 'bn' ? 'ডাকডিবি ইঞ্জিন' : 'DuckDB Engine', icon: Zap, badge: 'Sub-25ms' },
+                  { name: 'Utility Invoices', label: lang === 'bn' ? 'ইউটিলিটি ইনভয়েস' : 'Utility Invoices', icon: FileText, badge: 'Universal' },
+                  { name: 'Satellite MRV', label: lang === 'bn' ? 'স্যাটেলাইট এমআরভি' : 'Satellite MRV', icon: Globe, badge: 'GEDI' },
+                  { name: 'Factor Registry', label: lang === 'bn' ? 'ফ্যাক্টর রেজিস্ট্রি' : 'Factor Registry', icon: Database, badge: 'DoE' },
+                  { name: 'ATLAS Benchmark', label: lang === 'bn' ? 'অ্যাটলাস বেঞ্চমার্ক' : 'ATLAS Benchmark', icon: CheckCircle2, badge: '10 Bills' },
+                  { name: 'Entity Tree', label: lang === 'bn' ? 'কর্পোরেট হায়ারার্কি' : 'Entity Tree', icon: Building, badge: 'Sweep' },
+                ].map((item) => {
+                  const Icon = item.icon;
+                  const isActive = activeMenu === item.name;
+                  return (
+                    <button
+                      key={item.name}
+                      onClick={() => setActiveMenu(item.name)}
+                      className={`w-full flex items-center justify-between px-3.5 py-2.5 rounded-2xl text-xs font-sans transition-all duration-200 cursor-pointer ${
+                        isActive 
+                          ? (isLight 
+                              ? 'bg-[#F2F7F3] text-[#0F2417] font-bold border border-[#DFE8E1] shadow-[0_2px_8px_rgba(0,0,0,0.04)]' 
+                              : 'bg-[#0D2B1A] text-white font-bold border border-[#1B4D2E] shadow-[0_4px_16px_rgba(0,200,83,0.12)]')
+                          : (isLight 
+                              ? 'text-[#557361] hover:bg-[#F4F7F4] hover:text-[#0F2417] font-medium' 
+                              : 'text-[#7C9A88] hover:bg-[#0A160F] hover:text-white font-medium')
+                      }`}
+                    >
+                      <div className="flex items-center space-x-3">
+                        <div className={`w-7 h-7 rounded-xl flex items-center justify-center transition-all ${
+                          isActive 
+                            ? 'bg-[#00C853] text-white shadow-sm' 
+                            : (isLight ? 'text-[#557361] bg-transparent' : 'text-[#7C9A88] bg-transparent')
+                        }`}>
+                          <Icon className="w-3.5 h-3.5" />
+                        </div>
+                        <span className="text-xs">{item.label}</span>
+                      </div>
+                      {item.badge && (
+                        <span className="bg-[#00C853]/15 text-[#00C853] text-[9px] font-mono font-bold px-2 py-0.5 rounded-full border border-[#00C853]/30">
+                          {item.badge}
+                        </span>
+                      )}
+                    </button>
+                  );
+                })}
+              </nav>
+            </div>
+
             <div>
               <span className={`font-mono text-[9px] uppercase tracking-wider block px-3 mb-2.5 font-bold ${
                 isLight ? 'text-[#8FA899]' : 'text-[#557361]'
@@ -1198,6 +1297,28 @@ const SaaSDashboard = () => {
           {/* User Profile & Actions */}
           <div className="flex items-center justify-between sm:justify-end gap-3 flex-wrap">
             
+            {/* Corporate Client Profile Switcher Button */}
+            <button
+              onClick={() => setIsClientModalOpen(true)}
+              className={`flex items-center space-x-2 px-3 py-1.5 rounded-full border transition-all cursor-pointer shadow-sm ${
+                isLight 
+                  ? 'bg-white border-[#DCE4DE] hover:border-[#00C853] text-[#0F2417]' 
+                  : 'bg-[#08130C] border-[#152B1D] hover:border-[#00C853] text-white'
+              }`}
+              title="Switch Corporate Client Workspace Profile"
+            >
+              <div className="w-5 h-5 rounded-full bg-white p-0.5 flex items-center justify-center border border-slate-200 overflow-hidden shrink-0">
+                <img src={activeClient.logo} alt={activeClient.name} className="w-full h-full object-contain" />
+              </div>
+              <div className="text-left leading-none flex items-center gap-1.5">
+                <span className="font-sans font-bold text-xs">{activeClient.name}</span>
+                <span className="text-[9px] px-1.5 py-0.5 rounded bg-[#00C853]/15 text-[#00C853] font-mono font-bold hidden sm:inline-block">
+                  {activeClient.sector}
+                </span>
+              </div>
+              <ChevronDown className="w-3.5 h-3.5 text-[#7C9A88]" />
+            </button>
+
             {/* Top Action Pills */}
             <div className="flex items-center space-x-2">
               <button 
@@ -1223,10 +1344,45 @@ const SaaSDashboard = () => {
             </div>
 
             {/* Profile, Theme Toggle & Notifications Bell */}
-            <div className={`flex items-center space-x-3 pl-3 border-l relative ${
+            <div className={`flex items-center space-x-2.5 pl-3 border-l relative ${
               isLight ? 'border-[#E8ECE8]' : 'border-[#122418]'
             }`}>
               
+              {/* Language Switcher Button (English / বাংলা) */}
+              <button
+                onClick={() => {
+                  const nextLang = lang === 'en' ? 'bn' : 'en';
+                  setLang(nextLang);
+                  showToast(nextLang === 'bn' ? "ভাষা পরিবর্তন: বাংলা (Bilingual ESG Active)" : "Language switched: English", "info");
+                }}
+                className={`flex items-center space-x-1.5 px-3 py-1.5 rounded-full text-xs font-bold transition-all cursor-pointer border ${
+                  isLight 
+                    ? 'bg-white border-[#E8ECE8] text-[#0F2417] hover:bg-[#F2F7F3]' 
+                    : 'bg-[#08130C] border-[#152B1D] text-white hover:bg-[#0D2B1A]'
+                }`}
+                title="Toggle English / বাংলা"
+              >
+                <Globe className="w-3.5 h-3.5 text-[#00C853]" />
+                <span className="font-mono text-[11px]">{lang === 'en' ? 'বাংলা' : 'English'}</span>
+              </button>
+
+              {/* Reporting Currency Toggle (BDT / USD) */}
+              <button
+                onClick={() => {
+                  const nextCur = currency === 'BDT' ? 'USD' : 'BDT';
+                  setCurrency(nextCur);
+                  showToast(`Reporting currency: ${nextCur}`, "info");
+                }}
+                className={`flex items-center space-x-1 px-2.5 py-1.5 rounded-full text-xs font-mono font-bold transition-all cursor-pointer border ${
+                  isLight 
+                    ? 'bg-white border-[#E8ECE8] text-[#0F2417] hover:bg-[#F2F7F3]' 
+                    : 'bg-[#08130C] border-[#152B1D] text-[#00C853] hover:bg-[#0D2B1A]'
+                }`}
+                title="Toggle Currency BDT / USD"
+              >
+                <span>{currency === 'BDT' ? '৳ BDT' : '$ USD'}</span>
+              </button>
+
               {/* Theme Toggle Button */}
               <button
                 id="dashboard-theme-toggle"
@@ -1296,23 +1452,22 @@ const SaaSDashboard = () => {
                 </div>
               )}
               
-              {/* User Profile Pill (Mohammad Tanveer - Admin) */}
+              {/* User Profile Pill (Assigned ESG Auditor / Admin) */}
               <div className={`flex items-center space-x-2.5 px-3 py-1.5 rounded-full border shadow-sm ${
                 isLight ? 'bg-white border-[#E8ECE8]' : 'bg-[#08130C] border-[#152B1D]'
               }`}>
-                <div className="w-7 h-7 rounded-full overflow-hidden border border-[#00C853]/40">
-                  <img 
-                    src="https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=100&q=80" 
-                    alt="User profile" 
-                    className="w-full h-full object-cover"
-                    loading="lazy"
-                    width="28"
-                    height="28"
-                  />
+                <div className="w-7 h-7 rounded-full overflow-hidden border border-[#00C853]/40 bg-[#00C853]/15 flex items-center justify-center font-mono font-bold text-[10px] text-[#00C853]">
+                  {activeClient.assignedAuditor?.name 
+                    ? activeClient.assignedAuditor.name.split(' ').filter(p=>!['Dr.', 'Engr.', 'FCA'].includes(p)).map(n=>n[0]).join('').slice(0, 2)
+                    : 'MT'}
                 </div>
                 <div className="hidden md:block text-left leading-tight">
-                  <div className={`font-sans font-bold text-xs ${isLight ? 'text-[#0F2417]' : 'text-white'}`}>Mohammad Tanveer</div>
-                  <div className="text-[9px] text-[#00C853] font-mono font-medium">Admin • ESG Lead</div>
+                  <div className={`font-sans font-bold text-xs ${isLight ? 'text-[#0F2417]' : 'text-white'}`}>
+                    {activeClient.assignedAuditor?.name || 'Mohammad Tanveer'}
+                  </div>
+                  <div className="text-[9px] text-[#00C853] font-mono font-medium truncate max-w-[130px]">
+                    {activeClient.assignedAuditor?.title || 'Admin • ESG Lead'}
+                  </div>
                 </div>
               </div>
             </div>
@@ -3498,7 +3653,152 @@ const SaaSDashboard = () => {
           </div>
         )}
 
+        {/* -------------------- ENTERPRISE CORE STUDIOS -------------------- */}
+        {activeMenu === 'DuckDB Engine' && (
+          <DuckDBEngineView isLight={isLight} locale={locale} />
+        )}
+
+        {activeMenu === 'Utility Invoices' && (
+          <UniversalUtilityExtractor 
+            isLight={isLight} 
+            locale={locale} 
+            activeClientId={activeClientId}
+            onApplyToLedger={(extractedData) => {
+              showToast(
+                lang === 'bn'
+                  ? `ইউটিলিটি লেজার আপডেট সম্পন্ন: ${extractedData.segments?.length || 0} টি সেগমেন্ট অন্তর্ভুক্ত`
+                  : `Universal utility ledger updated: ${extractedData.segments?.length || 0} segments committed with SHA-256 seal.`, 
+                "success"
+              );
+            }}
+          />
+        )}
+
+        {activeMenu === 'Satellite MRV' && (
+          <SatelliteMRVStudio isLight={isLight} locale={locale} />
+        )}
+
+        {activeMenu === 'Factor Registry' && (
+          <FactorRegistryStudio isLight={isLight} locale={locale} />
+        )}
+
+        {activeMenu === 'ATLAS Benchmark' && (
+          <AtlasBenchmarkStudio isLight={isLight} locale={locale} />
+        )}
+
+        {activeMenu === 'Entity Tree' && (
+          <ConglomerateTreeStudio isLight={isLight} locale={locale} />
+        )}
+
       </main>
+
+      {/* -------------------- CORPORATE CLIENT WORKSPACE SWITCHER MODAL -------------------- */}
+      {isClientModalOpen && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 backdrop-blur-md bg-black/60 overflow-y-auto">
+          <div className={`max-w-3xl w-full rounded-3xl p-6 sm:p-8 shadow-2xl space-y-6 relative border transition-all my-8 ${
+            isLight ? 'bg-white border-[#E2E8E3] text-[#0F2417]' : 'bg-[#08130C] border-[#152B1D] text-white'
+          }`}>
+            <button 
+              onClick={() => setIsClientModalOpen(false)}
+              className="absolute top-5 right-5 text-gray-400 hover:text-white p-1 rounded-full hover:bg-white/10 transition-colors"
+            >
+              <X className="w-5 h-5" />
+            </button>
+
+            <div>
+              <div className="flex items-center space-x-2 text-[10px] font-mono uppercase tracking-widest text-[#00C853] font-bold">
+                <Building className="w-4 h-4" />
+                <span>Multi-Tenant Corporate ESG Registry</span>
+              </div>
+              <h3 className="font-sans font-bold text-xl sm:text-2xl mt-1">
+                Select Client Workspace Profile
+              </h3>
+              <p className="text-xs text-gray-400 mt-1 max-w-xl leading-relaxed">
+                Seamlessly switch between our enterprise clients to inspect dedicated operational baselines, registered facilities, assigned ESG audit officers, and multi-segment utility invoices.
+              </p>
+            </div>
+
+            {/* Client Cards Grid */}
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-3.5 max-h-[60vh] overflow-y-auto pr-1">
+              {CLIENT_PROFILES.map((client) => {
+                const isSelected = client.id === activeClientId;
+                return (
+                  <div
+                    key={client.id}
+                    onClick={() => handleSelectClient(client.id)}
+                    className={`p-4 rounded-2xl border transition-all cursor-pointer text-left flex flex-col justify-between group ${
+                      isSelected
+                        ? 'border-[#00C853] bg-[#00C853]/10 shadow-[0_0_20px_rgba(0,200,83,0.15)]'
+                        : (isLight 
+                            ? 'bg-[#F9FBFA] border-[#E8ECE8] hover:border-[#00C853]/50 hover:bg-white' 
+                            : 'bg-[#0B1A11] border-[#152B1D] hover:border-[#00C853]/40 hover:bg-[#0D2216]')
+                    }`}
+                  >
+                    <div>
+                      <div className="flex items-start justify-between gap-2 mb-3">
+                        <div className="w-12 h-12 rounded-xl bg-white p-1.5 flex items-center justify-center border border-slate-200 overflow-hidden shadow-sm shrink-0">
+                          <img 
+                            src={client.logo} 
+                            alt={client.name} 
+                            className="w-full h-full object-contain" 
+                          />
+                        </div>
+                        <div className="flex flex-col items-end gap-1">
+                          <span className="text-[10px] font-mono px-2 py-0.5 rounded-full bg-[#00C853]/20 text-[#00C853] font-bold">
+                            {client.sector}
+                          </span>
+                          {isSelected && (
+                            <span className="text-[9px] font-mono font-bold text-[#00C853] flex items-center gap-1">
+                              <CheckCircle2 className="w-3 h-3" /> Active Workspace
+                            </span>
+                          )}
+                        </div>
+                      </div>
+
+                      <h4 className="font-sans font-bold text-sm leading-snug group-hover:text-[#00C853] transition-colors">
+                        {client.name}
+                      </h4>
+                      <div className="text-[11px] text-gray-400 font-mono mt-0.5">
+                        {client.legalName}
+                      </div>
+
+                      <p className="text-xs text-gray-400 mt-2 line-clamp-2 leading-relaxed">
+                        {client.description}
+                      </p>
+                    </div>
+
+                    <div className="mt-4 pt-3 border-t border-white/5 flex items-center justify-between text-[10px] font-mono">
+                      <div className="text-gray-400">
+                        Auditor: <span className="text-gray-300 font-bold">{client.assignedAuditor?.name?.split(' ')[0]} {client.assignedAuditor?.name?.split(' ')[1]}</span>
+                      </div>
+                      <a
+                        href={client.website}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        onClick={(e) => e.stopPropagation()}
+                        className="text-[#00C853] hover:underline flex items-center space-x-1"
+                      >
+                        <span>Visit Site</span>
+                        <ExternalLink className="w-2.5 h-2.5" />
+                      </a>
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+
+            <div className="pt-2 flex justify-between items-center border-t border-white/10 text-xs text-gray-400 font-mono">
+              <span>{CLIENT_PROFILES.length} enterprise clients active in Bangladesh</span>
+              <button
+                onClick={() => setIsClientModalOpen(false)}
+                className="px-4 py-2 rounded-xl bg-white/10 hover:bg-white/20 text-white font-sans font-bold text-xs transition-colors"
+              >
+                Close
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* -------------------- ADD PROJECT MODAL DIALOG -------------------- */}
       {isAddProjectOpen && (

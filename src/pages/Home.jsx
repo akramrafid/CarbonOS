@@ -1,6 +1,7 @@
 import React from 'react';
 import Hero from '../components/Hero';
 import TrustBar from '../components/TrustBar';
+import ClientShowcase from '../components/ClientShowcase';
 import LiveMetrics from '../components/LiveMetrics';
 import PlatformModules from '../components/PlatformModules';
 import CorporateSaaSPipeline from '../components/CorporateSaaSPipeline';
@@ -15,6 +16,7 @@ function Home() {
     <>
       <section id="hero"><Hero /></section>
       <TrustBar />
+      <section id="clients"><ClientShowcase /></section>
       <LiveMetrics />
       <section id="platform"><PlatformModules /></section>
       <section id="saas-pipeline"><CorporateSaaSPipeline /></section>
