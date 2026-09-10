@@ -17,46 +17,49 @@ export function cleanNumber(str) {
 
 // Universal FlateDecode decompressor using browser native DecompressionStream with Node fallback
 async function decompressStreamBytes(bytes) {
+  // 1. Node.js runtime fallback
+  if (typeof process !== 'undefined' && process?.versions?.node) {
+    try {
+      const zlib = await import('zlib');
+      if (zlib && (zlib.inflateSync || zlib.default?.inflateSync)) {
+        const inflateSync = zlib.inflateSync || zlib.default.inflateSync;
+        const inflateRawSync = zlib.inflateRawSync || zlib.default.inflateRawSync;
+        try {
+          return new Uint8Array(inflateSync(Buffer.from(bytes)));
+        } catch {
+          try {
+            return new Uint8Array(inflateRawSync(Buffer.from(bytes)));
+          } catch {
+            // fall through
+          }
+        }
+      }
+    } catch {
+      // fall through
+    }
+  }
+
+  // 2. Browser native DecompressionStream
   if (typeof DecompressionStream !== 'undefined') {
     try {
       const ds = new DecompressionStream('deflate');
-      const writer = ds.writable.getWriter();
-      writer.write(bytes);
-      writer.close();
-      const response = new Response(ds.readable);
+      const blob = new Blob([bytes]);
+      const stream = blob.stream().pipeThrough(ds);
+      const response = new Response(stream);
       const arrayBuffer = await response.arrayBuffer();
       return new Uint8Array(arrayBuffer);
     } catch {
       try {
         const dsRaw = new DecompressionStream('deflate-raw');
-        const writer = dsRaw.writable.getWriter();
-        writer.write(bytes);
-        writer.close();
-        const response = new Response(dsRaw.readable);
+        const blob = new Blob([bytes]);
+        const stream = blob.stream().pipeThrough(dsRaw);
+        const response = new Response(stream);
         const arrayBuffer = await response.arrayBuffer();
         return new Uint8Array(arrayBuffer);
       } catch {
-        // Fall through
+        return bytes;
       }
     }
-  }
-
-  // Node.js runtime fallback
-  try {
-    const zlib = await import('zlib');
-    if (zlib && zlib.inflateSync) {
-      try {
-        return new Uint8Array(zlib.inflateSync(Buffer.from(bytes)));
-      } catch {
-        try {
-          return new Uint8Array(zlib.inflateRawSync(Buffer.from(bytes)));
-        } catch {
-          return bytes;
-        }
-      }
-    }
-  } catch {
-    // ignore
   }
 
   return bytes;
