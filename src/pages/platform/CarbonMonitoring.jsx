@@ -173,14 +173,16 @@ const getBangladeshEcoZone = (lat, lng) => {
   }
 };
 
-// A component to center/zoom map when boundaries are uploaded
-const RecenterMap = ({ bounds }) => {
+// A component to center/zoom map when boundaries are uploaded or presets selected
+const RecenterMap = ({ bounds, center, zoom }) => {
   const map = useMap();
   useEffect(() => {
-    if (bounds) {
-      map.fitBounds(bounds, { padding: [50, 50] });
+    if (bounds && Array.isArray(bounds) && bounds.length === 2 && bounds[0] && bounds[1]) {
+      map.fitBounds(bounds, { padding: [50, 50], maxZoom: 13 });
+    } else if (center && Array.isArray(center) && center.length === 2 && !isNaN(center[0]) && !isNaN(center[1])) {
+      map.setView(center, zoom || map.getZoom());
     }
-  }, [bounds, map]);
+  }, [bounds, center, zoom, map]);
   return null;
 };
 
@@ -1759,6 +1761,7 @@ const CarbonMonitoring = () => {
                         setIsDrawing(false);
                         setMapCenter([22.15, 89.45]);
                         setMapZoom(9);
+                        setMapBounds([[21.65, 89.02], [22.50, 89.85]]);
                       }}
                       className={`text-[11px] py-1.5 px-2 rounded-lg font-semibold border transition-all text-left truncate cursor-pointer ${
                         drawPoints === SUNDARBANS_RESERVE || (drawPoints.length === SUNDARBANS_RESERVE.length && drawPoints[0][0] === SUNDARBANS_RESERVE[0][0])
@@ -1774,6 +1777,7 @@ const CarbonMonitoring = () => {
                         setIsDrawing(false);
                         setMapCenter([22.75, 92.25]);
                         setMapZoom(9);
+                        setMapBounds([[21.85, 92.15], [23.70, 92.65]]);
                       }}
                       className={`text-[11px] py-1.5 px-2 rounded-lg font-semibold border transition-all text-left truncate cursor-pointer ${
                         drawPoints === CHT_RESERVE || (drawPoints.length === CHT_RESERVE.length && drawPoints[0][0] === CHT_RESERVE[0][0])
@@ -2026,8 +2030,8 @@ const CarbonMonitoring = () => {
                 ) : (
                   <TileLayer
                     key="terrain"
-                    url="https://{s}.tile.openstreetmap.org/{z}/{y}/{x}.png"
-                    attribution='&copy; OpenStreetMap contributors'
+                    url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
+                    attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
                     maxZoom={19}
                   />
                 )}
@@ -2044,7 +2048,7 @@ const CarbonMonitoring = () => {
                         weight: 2.5
                       }} 
                     />
-                    {drawPoints.map((point, idx) => (
+                    {isDrawing && drawPoints.map((point, idx) => (
                       <Marker key={idx} position={point} />
                     ))}
                   </>
@@ -2088,7 +2092,7 @@ const CarbonMonitoring = () => {
                 )}
 
                 {/* Recenter Map when boundaries loaded */}
-                <RecenterMap bounds={mapBounds} />
+                <RecenterMap bounds={mapBounds} center={mapCenter} zoom={mapZoom} />
 
                 {/* Map event helper */}
                 <MapEventHandler 
