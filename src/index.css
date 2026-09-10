@@ -718,9 +718,43 @@ select option {
 
 [data-theme="dark"] .platform-saas-dashboard .text-\[\#64748B\],
 [data-theme="dark"] .platform-saas-dashboard .text-\[\#94A3B8\],
-[data-theme="dark"] .platform-saas-dashboard p,
-[data-theme="dark"] .platform-saas-dashboard span:not(.text-emerald):not(.text-\[\#EF4444\]):not(.text-rose-500) {
+[data-theme="dark"] .platform-saas-dashboard p:not(button *),
+[data-theme="dark"] .platform-saas-dashboard span:not(.text-emerald):not(.text-\[\#EF4444\]):not(.text-rose-500):not(.text-white):not([class*="text-white"]):not(button *):not([class*="text-[#00C853]"]):not([class*="text-[#00E676]"]) {
   color: #B2C4B8 !important;
+}
+
+/* High-Contrast Action Buttons matching Reference Image 2: #00C853 background with pure #FFFFFF text */
+.platform-saas-dashboard button[class*="bg-[#00C853]"],
+.platform-saas-dashboard button[class*="bg-[#00c853]"],
+.platform-saas-dashboard a[class*="bg-[#00C853]"],
+.platform-saas-dashboard .btn-action-primary {
+  background-color: #00C853 !important;
+  color: #ffffff !important;
+  font-weight: 700 !important;
+}
+
+.platform-saas-dashboard button[class*="bg-[#00C853]"] *,
+.platform-saas-dashboard button[class*="bg-[#00c853]"] *,
+.platform-saas-dashboard a[class*="bg-[#00C853]"] *,
+.platform-saas-dashboard .btn-action-primary * {
+  color: #ffffff !important;
+  stroke: #ffffff !important;
+}
+
+.platform-saas-dashboard button[class*="bg-[#00C853]"]:hover,
+.platform-saas-dashboard button[class*="bg-[#00c853]"]:hover,
+.platform-saas-dashboard a[class*="bg-[#00C853]"]:hover,
+.platform-saas-dashboard .btn-action-primary:hover {
+  background-color: #00E676 !important;
+  color: #ffffff !important;
+}
+
+.platform-saas-dashboard button[class*="bg-[#00C853]"]:hover *,
+.platform-saas-dashboard button[class*="bg-[#00c853]"]:hover *,
+.platform-saas-dashboard a[class*="bg-[#00C853]"]:hover *,
+.platform-saas-dashboard .btn-action-primary:hover * {
+  color: #ffffff !important;
+  stroke: #ffffff !important;
 }
 
 /* Borders and lines */

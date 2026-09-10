@@ -1621,15 +1621,15 @@ const SaaSDashboard = () => {
             <button 
               disabled={downloadingApp}
               onClick={handleDownloadApp}
-              className="w-full bg-[#00C853] hover:bg-[#00E676] text-white font-sans font-bold text-[11px] py-2 px-3 rounded-xl transition-all flex items-center justify-center space-x-1.5 shadow-md shadow-[#00C853]/20 cursor-pointer disabled:opacity-50"
+              className="w-full bg-[#00C853] hover:bg-[#00E676] text-white font-mono font-bold text-xs py-2.5 px-3 rounded-xl transition-all flex items-center justify-center space-x-1.5 shadow-sm cursor-pointer disabled:opacity-50"
             >
               {downloadingApp ? (
                 <>
                   <Loader2 className="w-3.5 h-3.5 animate-spin text-white" />
-                  <span className="text-white font-bold">Connecting...</span>
+                  <span className="text-white font-mono font-bold">Connecting...</span>
                 </>
               ) : (
-                <span className="text-white font-bold tracking-tight">Download Mobile App</span>
+                <span className="text-white font-mono font-bold tracking-tight">Download Mobile App</span>
               )}
             </button>
           </div>
@@ -1716,23 +1716,20 @@ const SaaSDashboard = () => {
             <div className="flex items-center space-x-2">
               <button 
                 onClick={() => setIsAddProjectOpen(true)}
-                className="bg-[#00C853] hover:bg-[#00E676] text-white font-sans font-bold text-xs px-4 py-2 rounded-full transition-all shadow-md shadow-[#00C853]/25 flex items-center space-x-1.5 cursor-pointer"
+                className="bg-[#00C853] hover:bg-[#00E676] text-white font-mono font-bold text-xs px-4 py-2 rounded-xl transition-all shadow-sm flex items-center space-x-1.5 cursor-pointer"
               >
-                <Plus className="w-3.5 h-3.5 text-white" />
-                <span className="text-white font-bold">Add Project</span>
+                <Plus className="w-3.5 h-3.5 text-white stroke-[2.5]" />
+                <span className="text-white font-mono font-bold">Add Project</span>
               </button>
               <button 
                 onClick={() => {
                   const inputEl = document.getElementById('drag-file-input');
                   if (inputEl) inputEl.click();
                 }}
-                className={`font-sans font-bold text-xs px-4 py-2 rounded-full transition-all cursor-pointer ${
-                  isLight 
-                    ? 'bg-white border border-[#DCE4DE] hover:bg-[#F4F7F4] text-[#0F2417] shadow-sm' 
-                    : 'bg-[#08130C] border border-[#152B1D] hover:bg-[#0F2417] text-[#E0EFE7]'
-                }`}
+                className="bg-[#00C853] hover:bg-[#00E676] text-white font-mono font-bold text-xs px-4 py-2 rounded-xl transition-all shadow-sm flex items-center space-x-1.5 cursor-pointer"
               >
-                Import Data
+                <Upload className="w-3.5 h-3.5 text-white stroke-[2.5]" />
+                <span className="text-white font-mono font-bold">Import Data</span>
               </button>
             </div>
 
@@ -1915,11 +1912,7 @@ const SaaSDashboard = () => {
                 </select>
                 <button 
                   onClick={detectLocation}
-                  className={`font-mono text-[9px] px-2.5 py-1 rounded-full font-bold transition-all cursor-pointer ${
-                    isLight 
-                      ? 'bg-[#E8F7EC] text-[#0B4D26] hover:bg-[#D6F0DC] border border-[#00C853]/30' 
-                      : 'bg-[#00C853]/15 text-[#4ADE80] hover:bg-[#00C853]/25 border border-[#1B4D2E]'
-                  }`}
+                  className="bg-[#00C853] hover:bg-[#00E676] text-white font-mono font-bold text-[10px] px-3 py-1.5 rounded-lg transition-all shadow-sm cursor-pointer"
                 >
                   Auto Select
                 </button>
@@ -2222,10 +2215,10 @@ const SaaSDashboard = () => {
                   </h3>
                   <button 
                     onClick={() => executeRagQuery("Summarize our ESG score readiness against CSRD and Bangladesh ECR standards.")}
-                    className="bg-[#00C853] hover:bg-[#00E676] text-[#040906] font-sans font-bold text-[10px] px-3 py-1 rounded-full transition-all shadow-sm flex items-center space-x-1 cursor-pointer"
+                    className="bg-[#00C853] hover:bg-[#00E676] text-white font-mono font-bold text-[10px] px-3 py-1.5 rounded-lg transition-all shadow-sm flex items-center space-x-1 cursor-pointer"
                   >
-                    <Sparkles className="w-3 h-3 text-[#040906]" />
-                    <span>Run AI</span>
+                    <Sparkles className="w-3 h-3 text-white" />
+                    <span className="text-white font-mono font-bold">Run AI</span>
                   </button>
                 </div>
 
@@ -2662,17 +2655,15 @@ const SaaSDashboard = () => {
                           onClick={() => setExtractionStep(s.step)}
                           className={`py-2.5 px-3 rounded-xl text-center transition-all cursor-pointer ${
                             isActive
-                              ? (isLight 
-                                  ? 'bg-white text-[#00873E] shadow-sm font-bold border border-emerald-200' 
-                                  : 'bg-[#0D2616] text-[#00E676] font-bold border border-[#00C853]/40 shadow-sm')
+                              ? 'bg-[#00C853] text-white shadow-sm font-bold border border-[#00C853]'
                               : (isLight 
                                   ? 'text-[#557361] hover:text-[#0F2417] hover:bg-white/50' 
                                   : 'text-[#7C9A88] hover:text-white hover:bg-[#08150D]')
                           }`}
                         >
-                          <div className="text-xs font-bold font-sans">{s.label}</div>
+                          <div className={`text-xs font-bold font-mono ${isActive ? 'text-white' : ''}`}>{s.label}</div>
                           <div className={`text-[10px] font-mono hidden sm:block ${
-                            isActive ? (isLight ? 'text-[#00873E]' : 'text-emerald-300') : (isLight ? 'text-[#7D9A8A]' : 'text-[#557361]')
+                            isActive ? 'text-white/90 font-medium' : (isLight ? 'text-[#7D9A8A]' : 'text-[#557361]')
                           }`}>
                             {s.sub}
                           </div>
@@ -2704,10 +2695,10 @@ const SaaSDashboard = () => {
                         type="button"
                         onClick={() => executeAIExtraction("Dexterity_Textiles_ESG_Statement_Q2_2026.txt")}
                         disabled={isUploading}
-                        className="text-xs font-extrabold font-sans px-3.5 py-1.5 rounded-xl bg-[#00C853] hover:bg-[#00E676] text-white transition-all shadow-sm flex items-center space-x-1.5 shrink-0 cursor-pointer"
+                        className="text-xs font-bold font-mono px-3.5 py-1.5 rounded-xl bg-[#00C853] hover:bg-[#00E676] text-white transition-all shadow-sm flex items-center space-x-1.5 shrink-0 cursor-pointer"
                       >
                         <Sparkles className="w-3.5 h-3.5 text-white" />
-                        <span>Load Verified Sample Document</span>
+                        <span className="text-white font-mono font-bold">Load Verified Sample Document</span>
                       </button>
                     </div>
 
@@ -2743,17 +2734,17 @@ const SaaSDashboard = () => {
                         <button
                           onClick={() => executeAIExtraction(uploadedFile || "ESG_Statement_Q2_2026.xlsx")}
                           disabled={isUploading}
-                          className="bg-[#00C853] hover:bg-[#00E676] disabled:bg-[#0E2014] disabled:text-emerald-300/40 disabled:border disabled:border-[#1A3824] disabled:shadow-none disabled:cursor-not-allowed text-white font-sans font-extrabold text-sm px-6 py-3 rounded-xl transition-all shadow-md shadow-[#00C853]/20 flex items-center justify-center space-x-2 w-full sm:w-auto cursor-pointer"
+                          className="bg-[#00C853] hover:bg-[#00E676] disabled:bg-[#0E2014] disabled:text-white/40 disabled:border disabled:border-[#1A3824] disabled:shadow-none disabled:cursor-not-allowed text-white font-mono font-bold text-xs px-6 py-3 rounded-xl transition-all shadow-sm flex items-center justify-center space-x-2 w-full sm:w-auto cursor-pointer"
                         >
                           {isUploading ? (
                             <>
-                              <Loader2 className="w-4 h-4 animate-spin text-inherit" />
-                              <span>RAG Extracting & Verifying...</span>
+                              <Loader2 className="w-4 h-4 animate-spin text-white" />
+                              <span className="text-white font-mono font-bold">RAG Extracting & Verifying...</span>
                             </>
                           ) : (
                             <>
-                              <Sparkles className="w-4 h-4 text-inherit" />
-                              <span>Run RAG Extraction</span>
+                              <Sparkles className="w-4 h-4 text-white" />
+                              <span className="text-white font-mono font-bold">Run RAG Extraction</span>
                             </>
                           )}
                         </button>
@@ -2761,14 +2752,10 @@ const SaaSDashboard = () => {
                         <button
                           type="button"
                           onClick={() => setExtractionStep(2)}
-                          className={`text-xs font-bold font-sans border px-4 py-3 rounded-xl transition-all flex items-center space-x-1.5 cursor-pointer ${
-                            isLight 
-                              ? 'text-[#0F2417] border-[#DCE4DE] hover:bg-[#F7FAF7]' 
-                              : 'text-white border-[#173020] hover:bg-[#0D1F14]'
-                          }`}
+                          className="bg-[#00C853] hover:bg-[#00E676] text-white font-mono font-bold text-xs px-4 py-3 rounded-xl transition-all shadow-sm flex items-center space-x-1.5 cursor-pointer"
                         >
-                          <span>View Metrics & Categories</span>
-                          <ArrowRight className="w-3.5 h-3.5 text-[#00C853]" />
+                          <span className="text-white font-mono font-bold">View Metrics & Categories</span>
+                          <ArrowRight className="w-3.5 h-3.5 text-white" />
                         </button>
                       </div>
 
@@ -2892,10 +2879,10 @@ const SaaSDashboard = () => {
                         <button
                           type="button"
                           onClick={() => setIsAddCustomModalOpen(true)}
-                          className="bg-[#00C853] hover:bg-[#00E676] text-white text-xs font-extrabold font-sans px-4 py-2.5 rounded-xl transition-all shadow-sm flex items-center space-x-1.5 cursor-pointer"
+                          className="bg-[#00C853] hover:bg-[#00E676] text-white text-xs font-bold font-mono px-4 py-2.5 rounded-xl transition-all shadow-sm flex items-center space-x-1.5 cursor-pointer"
                         >
-                          <Plus className="w-3.5 h-3.5 text-white" />
-                          <span>+ Add Custom Item</span>
+                          <Plus className="w-3.5 h-3.5 text-white stroke-[2.5]" />
+                          <span className="text-white font-mono font-bold">Add Custom Item</span>
                         </button>
                       </div>
 
@@ -3044,12 +3031,10 @@ const SaaSDashboard = () => {
                         <button
                           type="button"
                           onClick={() => setIsAddCustomModalOpen(true)}
-                          className={`text-xs font-bold px-3 py-1.5 rounded-lg border transition-all cursor-pointer flex items-center space-x-1 ${
-                            isLight ? 'bg-white border-slate-200 text-emerald-700 hover:bg-emerald-50' : 'bg-[#061009] border-[#1B3B26] text-emerald-400 hover:bg-[#0D2214]'
-                          }`}
+                          className="bg-[#00C853] hover:bg-[#00E676] text-white text-xs font-mono font-bold px-3.5 py-1.5 rounded-lg transition-all shadow-sm flex items-center space-x-1.5 cursor-pointer"
                         >
-                          <Plus className="w-3.5 h-3.5" />
-                          <span>Add Custom Line Item</span>
+                          <Plus className="w-3.5 h-3.5 text-white stroke-[2.5]" />
+                          <span className="text-white font-mono font-bold">Add Custom Line Item</span>
                         </button>
                       </div>
 
@@ -3251,39 +3236,48 @@ const SaaSDashboard = () => {
                         </div>
 
                         <div className="overflow-x-auto">
-                          <table className="w-full text-left font-sans text-xs">
+                          <table className="w-full text-left font-sans text-xs border-collapse">
                             <thead>
-                              <tr className={`font-bold border-b text-[10px] uppercase ${
+                              <tr className={`font-bold border-b text-[10px] uppercase tracking-wider ${
                                 isLight ? 'text-[#41634E] border-[#E8ECE8]' : 'text-[#9EBFAB] border-[#122418]'
                               }`}>
-                                <th className="py-2">Metric</th>
-                                <th>Scope</th>
-                                <th>Extracted Value</th>
-                                <th>Source Page</th>
-                                <th>Verbatim Audit Quote</th>
-                                <th>Confidence</th>
+                                <th className="py-3 px-3 w-40 min-w-[130px]">Metric</th>
+                                <th className="py-3 px-3 w-36 min-w-[120px]">Scope</th>
+                                <th className="py-3 px-3 w-44 min-w-[140px]">Extracted Value</th>
+                                <th className="py-3 px-3 w-28 min-w-[95px]">Source Page</th>
+                                <th className="py-3 px-3 min-w-[260px]">Verbatim Audit Quote</th>
+                                <th className="py-3 px-3 w-28 min-w-[90px] text-right">Confidence</th>
                               </tr>
                             </thead>
                             <tbody className={`divide-y ${isLight ? 'divide-[#E8ECE8]' : 'divide-[#122418]'}`}>
                               {extractionResult.details && extractionResult.details.map((item, idx) => (
                                 <tr key={idx} className={`transition-colors ${isLight ? 'hover:bg-white' : 'hover:bg-[#08130C]'}`}>
-                                  <td className={`py-2.5 font-bold capitalize ${isLight ? 'text-[#0F2417]' : 'text-white'}`}>{item.param_name}</td>
-                                  <td>
-                                    <span className={`px-2 py-0.5 rounded-full text-[9px] font-bold border ${
-                                      isLight ? 'bg-[#E8F8EE] text-[#00873E] border-[#C2E9CF]' : 'bg-[#0D2B1A] text-[#4ADE80] border-[#1B4D2E]'
+                                  <td className={`py-3 px-3 font-bold capitalize whitespace-nowrap ${isLight ? 'text-[#0F2417]' : 'text-white'}`}>
+                                    {item.param_name}
+                                  </td>
+                                  <td className="py-3 px-3 whitespace-nowrap">
+                                    <span className={`inline-flex items-center px-3 py-1 rounded-full text-[10px] font-mono font-bold border whitespace-nowrap shadow-xs ${
+                                      item.scope?.toLowerCase().includes('scope 1')
+                                        ? isLight ? 'bg-emerald-50 text-emerald-800 border-emerald-300' : 'bg-[#0D2B1A] text-[#4ADE80] border-[#1B4D2E]'
+                                        : item.scope?.toLowerCase().includes('scope 2')
+                                        ? isLight ? 'bg-teal-50 text-teal-800 border-teal-300' : 'bg-[#0B2522] text-[#2DD4BF] border-[#134E4A]'
+                                        : isLight ? 'bg-slate-100 text-slate-700 border-slate-300' : 'bg-[#101E17] text-[#86EFAC] border-[#1E3A2B]'
                                     }`}>
+                                      <span className="w-1.5 h-1.5 rounded-full bg-current mr-1.5 shrink-0 opacity-80" />
                                       {item.scope}
                                     </span>
                                   </td>
-                                  <td className={`font-mono font-bold ${isLight ? 'text-[#00873E]' : 'text-[#4ADE80]'}`}>
+                                  <td className={`py-3 px-3 font-mono font-bold whitespace-nowrap ${isLight ? 'text-[#00873E]' : 'text-[#4ADE80]'}`}>
                                     {Number(item.value).toLocaleString()} {item.unit}
                                   </td>
-                                  <td className={`font-mono text-[11px] ${isLight ? 'text-[#41634E]' : 'text-[#9EBFAB]'}`}>Page {item.source_page || 1}</td>
-                                  <td className={`text-[11px] italic max-w-[320px] truncate ${isLight ? 'text-[#41634E]' : 'text-[#B4D2C1]'}`} title={item.raw_snippet}>
+                                  <td className={`py-3 px-3 font-mono text-[11px] whitespace-nowrap ${isLight ? 'text-[#41634E]' : 'text-[#9EBFAB]'}`}>
+                                    Page {item.source_page || 1}
+                                  </td>
+                                  <td className={`py-3 px-3 text-[11px] italic max-w-[360px] truncate ${isLight ? 'text-[#41634E]' : 'text-[#B4D2C1]'}`} title={item.raw_snippet}>
                                     "{item.raw_snippet}"
                                   </td>
-                                  <td>
-                                    <span className={`px-2 py-0.5 rounded-full text-[9px] font-bold border ${
+                                  <td className="py-3 px-3 text-right whitespace-nowrap">
+                                    <span className={`inline-block px-2.5 py-0.5 rounded-full text-[9px] font-bold border ${
                                       isLight ? 'bg-[#E8F8EE] text-[#00873E] border-[#C2E9CF]' : 'bg-[#0D2B1A] text-[#4ADE80] border-[#1B4D2E]'
                                     }`}>
                                       {Math.round((item.confidence || 0.95) * 100)}%
@@ -3309,10 +3303,10 @@ const SaaSDashboard = () => {
                         <button
                           type="button"
                           onClick={() => executeAIExtraction("Dexterity_Textiles_ESG_Statement_Q2_2026.txt")}
-                          className="mt-2 text-xs font-bold px-4 py-2 rounded-xl bg-[#00C853] text-white hover:bg-[#00E676] transition-all cursor-pointer inline-flex items-center space-x-1.5"
+                          className="mt-2 text-xs font-mono font-bold px-4 py-2 rounded-xl bg-[#00C853] text-white hover:bg-[#00E676] transition-all shadow-sm cursor-pointer inline-flex items-center space-x-1.5"
                         >
-                          <Sparkles className="w-3.5 h-3.5" />
-                          <span>Load Sample Document Now</span>
+                          <Sparkles className="w-3.5 h-3.5 text-white" />
+                          <span className="text-white font-mono font-bold">Load Sample Document Now</span>
                         </button>
                       </div>
                     )}
@@ -3467,7 +3461,7 @@ const SaaSDashboard = () => {
                           <div className="flex space-x-3 pt-2">
                             <button
                               type="submit"
-                              className="flex-1 bg-[#00C853] hover:bg-[#00E676] text-white font-bold py-2.5 rounded-xl text-xs transition-all shadow-md cursor-pointer"
+                              className="flex-1 bg-[#00C853] hover:bg-[#00E676] text-white font-mono font-bold py-2.5 rounded-xl text-xs transition-all shadow-sm cursor-pointer"
                             >
                               Add to Footprint Matrix
                             </button>
@@ -3560,7 +3554,7 @@ const SaaSDashboard = () => {
                                 const q = document.getElementById('adjust-qty').value;
                                 handleSaveCategoryAdjustment(editingCategory.id, s, k, q);
                               }}
-                              className="flex-1 bg-[#00C853] hover:bg-[#00E676] text-white font-bold py-2.5 rounded-xl text-xs transition-all shadow-md cursor-pointer"
+                              className="flex-1 bg-[#00C853] hover:bg-[#00E676] text-white font-mono font-bold py-2.5 rounded-xl text-xs transition-all shadow-sm cursor-pointer"
                             >
                               Save Recalculation
                             </button>
@@ -3670,14 +3664,14 @@ const SaaSDashboard = () => {
                         type="button"
                         onClick={() => executeRagQuery()}
                         disabled={isRagLoading || !ragQuery.trim()}
-                        className="bg-[#00C853] hover:bg-[#00E676] disabled:bg-[#0E2014] disabled:text-white/50 disabled:border disabled:border-[#1A3824] disabled:shadow-none disabled:cursor-not-allowed text-white px-5 py-3 rounded-xl font-sans font-extrabold text-xs transition-all shadow-md shadow-[#00C853]/20 flex items-center space-x-1.5 shrink-0 cursor-pointer"
+                        className="bg-[#00C853] hover:bg-[#00E676] disabled:bg-[#0E2014] disabled:text-white/40 disabled:border disabled:border-[#1A3824] disabled:shadow-none disabled:cursor-not-allowed text-white px-5 py-3 rounded-xl font-mono font-bold text-xs transition-all shadow-sm flex items-center space-x-1.5 shrink-0 cursor-pointer"
                       >
                         {isRagLoading ? (
                           <Loader2 className="w-4 h-4 animate-spin text-white" />
                         ) : (
                           <>
                             <Send className="w-3.5 h-3.5 text-white" />
-                            <span className="text-white font-bold">Ask Copilot</span>
+                            <span className="text-white font-mono font-bold">Ask Copilot</span>
                           </>
                         )}
                       </button>
@@ -3782,10 +3776,10 @@ const SaaSDashboard = () => {
                     </div>
                     <button 
                       onClick={() => setIsAddProjectOpen(true)}
-                      className="text-xs font-sans font-bold text-[#00C853] hover:underline flex items-center space-x-1 cursor-pointer"
+                      className="bg-[#00C853] hover:bg-[#00E676] text-white font-mono font-bold text-[11px] px-3 py-1.5 rounded-lg transition-all shadow-sm flex items-center space-x-1 cursor-pointer"
                     >
-                      <Plus className="w-3.5 h-3.5" />
-                      <span>New Project</span>
+                      <Plus className="w-3 h-3 text-white stroke-[2.5]" />
+                      <span className="text-white font-mono font-bold">New Project</span>
                     </button>
                   </div>
                   
@@ -3848,9 +3842,9 @@ const SaaSDashboard = () => {
 
                   <button
                     onClick={() => navigate('/platform/marketplace')}
-                    className="bg-[#00C853] hover:bg-[#00E676] text-white font-sans font-bold text-xs py-3 px-4 rounded-xl transition-all shadow-md shadow-[#00C853]/25 flex items-center justify-center space-x-1.5 cursor-pointer"
+                    className="bg-[#00C853] hover:bg-[#00E676] text-white font-mono font-bold text-xs py-3 px-4 rounded-xl transition-all shadow-sm flex items-center justify-center space-x-1.5 cursor-pointer"
                   >
-                    <span className="text-white font-bold">Browse Marketplace</span>
+                    <span className="text-white font-mono font-bold">Browse Marketplace</span>
                     <ExternalLink className="w-3.5 h-3.5 text-white" />
                   </button>
                 </div>
@@ -3901,11 +3895,10 @@ const SaaSDashboard = () => {
                   </ul>
                   <button 
                     onClick={() => setActiveMenu('Tasks')}
-                    className={`w-full text-center text-xs font-sans font-bold hover:underline mt-4 pt-3 border-t cursor-pointer ${
-                      isLight ? 'text-[#00873E] border-[#E8ECE8]' : 'text-[#4ADE80] border-[#122418]'
-                    }`}
+                    className="w-full bg-[#00C853] hover:bg-[#00E676] text-white font-mono font-bold text-xs py-2 px-3 rounded-xl transition-all shadow-sm flex items-center justify-center space-x-1.5 cursor-pointer mt-3"
                   >
-                    View All Tasks
+                    <span className="text-white font-mono font-bold">View All Tasks</span>
+                    <ArrowRight className="w-3.5 h-3.5 text-white" />
                   </button>
                 </div>
 
@@ -3921,11 +3914,10 @@ const SaaSDashboard = () => {
                     <h3 className={`font-sans font-bold text-sm ${isLight ? 'text-[#0F2417]' : 'text-white'}`}>ESG Audit Team</h3>
                     <button 
                       onClick={() => setIsAddMemberOpen(true)}
-                      className={`text-[10px] font-sans font-semibold hover:underline cursor-pointer ${
-                        isLight ? 'text-[#00873E]' : 'text-[#4ADE80]'
-                      }`}
+                      className="bg-[#00C853] hover:bg-[#00E676] text-white font-mono font-bold text-[10px] px-2.5 py-1 rounded-lg transition-all shadow-sm cursor-pointer flex items-center space-x-1"
                     >
-                      Add Member
+                      <Plus className="w-3 h-3 text-white stroke-[2.5]" />
+                      <span className="text-white font-mono font-bold">Add Member</span>
                     </button>
                   </div>
 
@@ -4184,7 +4176,7 @@ const SaaSDashboard = () => {
                           showToast(`Baseline recalculated successfully by ${acquisitionsDivestments > 0 ? '+' : ''}${acquisitionsDivestments} tCO₂e!`, "success");
                         }}
                         disabled={isAuditorMode}
-                        className="bg-[#0F291B] hover:bg-[#1A4B31] disabled:bg-[#94A3B8] text-white px-4 py-2 rounded-lg text-xs font-bold font-sans transition-all disabled:cursor-not-allowed"
+                        className="bg-[#00C853] hover:bg-[#00E676] disabled:bg-[#94A3B8] text-white px-4 py-2 rounded-lg text-xs font-mono font-bold transition-all shadow-sm disabled:cursor-not-allowed cursor-pointer"
                       >
                         Adjust
                       </button>
@@ -4239,10 +4231,10 @@ const SaaSDashboard = () => {
 
                   <button 
                     onClick={() => showToast(`CBAM Declaration Certificate for ${cbamWeight} Tons of ${cbamCommodity} exported!`, "success")}
-                    className="w-full bg-[#0F291B] hover:bg-[#1A4B31] text-white font-sans font-bold text-xs py-2.5 px-4 rounded-xl transition-all shadow-md flex items-center justify-center space-x-1.5"
+                    className="w-full bg-[#00C853] hover:bg-[#00E676] text-white font-mono font-bold text-xs py-2.5 px-4 rounded-xl transition-all shadow-sm flex items-center justify-center space-x-1.5 cursor-pointer"
                   >
-                    <Download className="w-3.5 h-3.5" />
-                    <span>Generate CBAM Declaration</span>
+                    <Download className="w-3.5 h-3.5 text-white" />
+                    <span className="text-white font-mono font-bold">Generate CBAM Declaration</span>
                   </button>
                 </div>
               </div>
@@ -4338,7 +4330,7 @@ const SaaSDashboard = () => {
               />
               <button 
                 type="submit" 
-                className="bg-[#0F291B] text-white hover:bg-[#1C4E34] px-5 py-3 rounded-xl text-xs font-sans font-bold transition-all shadow-md"
+                className="bg-[#00C853] hover:bg-[#00E676] text-white px-5 py-3 rounded-xl text-xs font-mono font-bold transition-all shadow-sm cursor-pointer"
               >
                 Add Task
               </button>
@@ -4451,7 +4443,7 @@ const SaaSDashboard = () => {
                     </div>
                     <button 
                       onClick={() => showToast(`Report for "${calendarEvents[selectedCalendarDay].title}" requested.`, "success")}
-                      className="w-full bg-[#0F291B] text-white font-bold text-xs py-2 px-3 rounded-lg hover:bg-[#1A4B31] transition-colors shadow-sm block text-center"
+                      className="w-full bg-[#00C853] hover:bg-[#00E676] text-white font-mono font-bold text-xs py-2 px-3 rounded-lg transition-all shadow-sm block text-center cursor-pointer"
                     >
                       Request Audit Dossier
                     </button>
@@ -4576,10 +4568,10 @@ const SaaSDashboard = () => {
               </div>
               <button 
                 onClick={() => setIsAddMemberOpen(true)}
-                className="bg-[#0F291B] hover:bg-[#1A4B31] text-white font-sans font-bold text-xs px-4 py-2 rounded-xl transition-all shadow-md flex items-center space-x-1.5"
+                className="bg-[#00C853] hover:bg-[#00E676] text-white font-mono font-bold text-xs px-4 py-2 rounded-xl transition-all shadow-sm flex items-center space-x-1.5 cursor-pointer"
               >
-                <Plus className="w-3.5 h-3.5" />
-                <span>Add Member</span>
+                <Plus className="w-3.5 h-3.5 text-white stroke-[2.5]" />
+                <span className="text-white font-mono font-bold">Add Member</span>
               </button>
             </div>
 
@@ -4665,10 +4657,10 @@ const SaaSDashboard = () => {
                     type="button"
                     onClick={syncOfficialFactors}
                     disabled={isSyncingFactors}
-                    className="text-xs font-sans font-bold px-3 py-1.5 rounded-lg bg-emerald/10 text-emerald hover:bg-emerald/20 border border-emerald/30 flex items-center space-x-1.5 transition-all"
+                    className="text-xs font-mono font-bold px-3.5 py-2 rounded-xl bg-[#00C853] text-white hover:bg-[#00E676] flex items-center space-x-1.5 transition-all shadow-sm cursor-pointer"
                   >
-                    <RefreshCw className={`w-3.5 h-3.5 ${isSyncingFactors ? 'animate-spin' : ''}`} />
-                    <span>Sync with Official DoE / IPCC RAG Registry</span>
+                    <RefreshCw className={`w-3.5 h-3.5 text-white ${isSyncingFactors ? 'animate-spin' : ''}`} />
+                    <span className="text-white font-mono font-bold">Sync with Official DoE / IPCC RAG Registry</span>
                   </button>
                 </div>
                 <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
@@ -4793,7 +4785,7 @@ const SaaSDashboard = () => {
               <p className="text-xs text-[#64748B] font-sans">Our certified ESG specialists are available to review your corporate data streams.</p>
               <button 
                 onClick={() => showToast("A support request has been sent. An ESG auditor will reach out soon.", "success")}
-                className="bg-[#10B981] hover:bg-[#059669] text-white font-bold text-xs py-2 px-4 rounded-xl transition-colors shadow-sm"
+                className="bg-[#00C853] hover:bg-[#00E676] text-white font-mono font-bold text-xs py-2 px-4 rounded-xl transition-all shadow-sm cursor-pointer"
               >
                 Consult Carbon Zero BD Specialists
               </button>
@@ -5022,7 +5014,7 @@ const SaaSDashboard = () => {
               <div className="flex gap-2.5 pt-2">
                 <button 
                   type="submit" 
-                  className="flex-1 bg-[#0F291B] text-white font-bold py-2.5 rounded-xl hover:bg-[#1A4B31] transition-all shadow-md"
+                  className="flex-1 bg-[#00C853] hover:bg-[#00E676] text-white font-mono font-bold py-2.5 rounded-xl transition-all shadow-sm cursor-pointer"
                 >
                   Add Project
                 </button>
@@ -5111,7 +5103,7 @@ const SaaSDashboard = () => {
               <div className="flex gap-2.5 pt-2">
                 <button 
                   type="submit" 
-                  className="flex-1 bg-[#0F291B] text-white font-bold py-2.5 rounded-xl hover:bg-[#1A4B31] transition-all shadow-md"
+                  className="flex-1 bg-[#00C853] hover:bg-[#00E676] text-white font-mono font-bold py-2.5 rounded-xl transition-all shadow-sm cursor-pointer"
                 >
                   Invite Member
                 </button>
