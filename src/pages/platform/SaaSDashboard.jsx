@@ -1033,215 +1033,251 @@ const SaaSDashboard = () => {
         </div>
       )}
 
-      {/* 1. Left Sidebar Navigation Panel — Clean Soft Pill Floating Aesthetic */}
-      <aside className={`w-[250px] border-r p-5 hidden lg:flex flex-col justify-between shrink-0 transition-colors duration-300 ${
-        isLight ? 'bg-[#FFFFFF] border-[#E8ECE8]' : 'bg-[#060D08] border-[#122418]'
+      {/* 1. Left Sidebar Navigation Panel — Executive Enterprise Architecture */}
+      <aside className={`w-[272px] min-w-[272px] border-r h-screen sticky top-0 hidden lg:flex flex-col justify-between shrink-0 transition-colors duration-200 z-30 select-none ${
+        isLight ? 'bg-[#FAFCFA] border-[#E3EAE5]' : 'bg-[#060D08] border-[#132318]'
       }`}>
-        <div className="space-y-7">
-          
-          {/* Logo */}
-          <Link to="/" className="flex items-center space-x-3 px-2 hover:opacity-85 transition-opacity">
-            <div className="w-9 h-9 rounded-xl bg-gradient-to-tr from-[#00C853] to-[#00E676] flex items-center justify-center shadow-md shadow-[#00C853]/20">
-              <Compass className="w-5 h-5 text-white" />
+        {/* Header / Brand */}
+        <div className={`px-5 py-4 border-b shrink-0 ${isLight ? 'border-[#E3EAE5]' : 'border-[#132318]'}`}>
+          <Link to="/" className="flex items-center space-x-3 group">
+            <div className="w-8 h-8 rounded-xl bg-gradient-to-tr from-[#00C853] to-[#00E676] flex items-center justify-center shadow-[0_0_16px_rgba(0,200,83,0.25)] text-[#050C07] shrink-0 transition-transform duration-200 group-hover:scale-105">
+              <Leaf className="w-4 h-4 text-[#050C07] stroke-[2.5]" />
             </div>
-            <div>
-              <span className={`font-sans font-extrabold text-base tracking-tight block leading-tight ${
-                isLight ? 'text-[#0F2417]' : 'text-white'
+            <div className="flex-1 min-w-0">
+              <div className="flex items-center space-x-1.5">
+                <span className={`font-sans font-bold text-sm tracking-tight truncate ${
+                  isLight ? 'text-[#0F2417]' : 'text-white'
+                }`}>
+                  CarbonZero
+                </span>
+                <span className="text-[9px] font-mono font-bold px-1.5 py-0.5 rounded bg-[#00C853]/15 text-[#00E676] border border-[#00C853]/30 shrink-0 leading-none">
+                  BD
+                </span>
+              </div>
+              <span className={`text-[10px] font-sans font-semibold tracking-wider uppercase block truncate mt-0.5 ${
+                isLight ? 'text-[#557361]' : 'text-[#6E8F7A]'
               }`}>
-                CarbonZero
-              </span>
-              <span className={`text-[9px] font-mono block ${isLight ? 'text-[#557361]' : 'text-[#7C9A88]'}`}>
-                ESG Registry OS
+                Sovereign Registry OS
               </span>
             </div>
           </Link>
+        </div>
 
-          {/* Menu Sections */}
-          <div className="space-y-6">
-            <div>
-              <span className={`font-mono text-[9px] uppercase tracking-wider block px-3 mb-2.5 font-bold ${
-                isLight ? 'text-[#8FA899]' : 'text-[#557361]'
-              }`}>
-                Menu
-              </span>
-              <nav className="space-y-1.5">
-                {[
-                  { name: 'Dashboard', icon: Grid },
-                  { name: 'Materiality', icon: Compass },
-                  { name: 'Audit & Compliance', icon: CheckCircle2 },
-                  { name: 'Tasks', icon: CheckCircle, badge: openTasksCount > 0 ? `${openTasksCount} left` : null },
-                  { name: 'Calendar', icon: CalendarIcon },
-                  { name: 'Analytics', icon: BarChart2 },
-                  { name: 'Team', icon: Users }
-                ].map((item) => {
-                  const Icon = item.icon;
-                  const isActive = activeMenu === item.name;
-                  return (
-                    <button
-                      key={item.name}
-                      onClick={() => setActiveMenu(item.name)}
-                      className={`w-full flex items-center justify-between px-3.5 py-2.5 rounded-2xl text-xs font-sans transition-all duration-200 cursor-pointer ${
+        {/* Scrollable Menu Sections */}
+        <div className="flex-1 overflow-y-auto px-3.5 py-4 space-y-6 custom-scrollbar">
+          {/* Main Menu */}
+          <div>
+            <span className={`font-sans text-[10px] uppercase tracking-wider block px-2.5 mb-1.5 font-bold ${
+              isLight ? 'text-[#7C9A88]' : 'text-[#557361]'
+            }`}>
+              {lang === 'bn' ? 'প্রধান মেনু' : 'Menu'}
+            </span>
+            <nav className="space-y-1">
+              {[
+                { name: 'Dashboard', label: lang === 'bn' ? 'ড্যাশবোর্ড' : 'Dashboard', icon: Grid },
+                { name: 'Materiality', label: lang === 'bn' ? 'ম্যাটেরিয়ালিটি' : 'Materiality', icon: Compass },
+                { name: 'Audit & Compliance', label: lang === 'bn' ? 'অডিট ও কমপ্লায়েন্স' : 'Audit & Compliance', icon: CheckCircle2 },
+                { name: 'Tasks', label: lang === 'bn' ? 'টাস্ক তালিকা' : 'Tasks', icon: CheckCircle, badge: openTasksCount > 0 ? `${openTasksCount} left` : null },
+                { name: 'Calendar', label: lang === 'bn' ? 'ক্যালেন্ডার' : 'Calendar', icon: CalendarIcon },
+                { name: 'Analytics', label: lang === 'bn' ? 'অ্যানালিটিক্স' : 'Analytics', icon: BarChart2 },
+                { name: 'Team', label: lang === 'bn' ? 'টিম ম্যানেজমেন্ট' : 'Team', icon: Users }
+              ].map((item) => {
+                const Icon = item.icon;
+                const isActive = activeMenu === item.name;
+                return (
+                  <button
+                    key={item.name}
+                    onClick={() => setActiveMenu(item.name)}
+                    className={`w-full flex items-center justify-between px-2.5 py-2 rounded-xl text-xs font-sans transition-all duration-150 cursor-pointer relative group ${
+                      isActive 
+                        ? (isLight 
+                            ? 'bg-[#EEF7F1] text-[#0A2E19] font-bold border border-[#CCE2D3] shadow-sm' 
+                            : 'bg-[#0B2114] text-white font-bold border border-[#174D2B] shadow-[0_2px_10px_rgba(0,200,83,0.08)]')
+                        : (isLight 
+                            ? 'text-slate-600 hover:bg-slate-100/70 hover:text-slate-950 font-medium border border-transparent' 
+                            : 'text-[#8FA899] hover:bg-white/[0.04] hover:text-white font-medium border border-transparent')
+                    }`}
+                  >
+                    {isActive && (
+                      <span className={`absolute left-0 top-1.5 bottom-1.5 w-1 rounded-r-full ${
+                        isLight ? 'bg-[#00C853]' : 'bg-[#00E676] shadow-[0_0_8px_rgba(0,230,118,0.5)]'
+                      }`} />
+                    )}
+                    <div className="flex items-center space-x-2.5 min-w-0 pr-1">
+                      <div className={`w-6 h-6 rounded-lg flex items-center justify-center shrink-0 transition-colors ${
                         isActive 
-                          ? (isLight 
-                              ? 'bg-[#F2F7F3] text-[#0F2417] font-bold border border-[#DFE8E1] shadow-[0_2px_8px_rgba(0,0,0,0.04)]' 
-                              : 'bg-[#0D2B1A] text-white font-bold border border-[#1B4D2E] shadow-[0_4px_16px_rgba(0,200,83,0.12)]')
-                          : (isLight 
-                              ? 'text-[#557361] hover:bg-[#F4F7F4] hover:text-[#0F2417] font-medium' 
-                              : 'text-[#7C9A88] hover:bg-[#0A160F] hover:text-white font-medium')
-                      }`}
-                    >
-                      <div className="flex items-center space-x-3">
-                        <div className={`w-7 h-7 rounded-xl flex items-center justify-center transition-all ${
-                          isActive 
-                            ? 'bg-[#00C853] text-white shadow-sm' 
-                            : (isLight ? 'text-[#557361] bg-transparent' : 'text-[#7C9A88] bg-transparent')
-                        }`}>
-                          <Icon className="w-3.5 h-3.5" />
-                        </div>
-                        <span className="text-xs">{item.name}</span>
-                      </div>
-                      {item.badge && (
-                        <span className="bg-[#EF4444] text-white text-[9px] font-bold px-2 py-0.5 rounded-full shadow-sm">
-                          {item.badge}
-                        </span>
-                      )}
-                    </button>
-                  );
-                })}
-              </nav>
-            </div>
-
-            {/* Enterprise Core & Satellite MRV Engines */}
-            <div>
-              <span className={`font-mono text-[9px] uppercase tracking-wider block px-3 mb-2.5 font-bold ${
-                isLight ? 'text-[#8FA899]' : 'text-[#557361]'
-              }`}>
-                {lang === 'bn' ? 'কোর ইঞ্জিন ও এমআরভি' : 'Engines & MRV'}
-              </span>
-              <nav className="space-y-1.5">
-                {[
-                  { name: 'DuckDB Engine', label: lang === 'bn' ? 'ডাকডিবি ইঞ্জিন' : 'DuckDB Engine', icon: Zap, badge: 'Sub-25ms' },
-                  { name: 'Utility Invoices', label: lang === 'bn' ? 'ইউটিলিটি ইনভয়েস' : 'Utility Invoices', icon: FileText, badge: 'Universal' },
-                  { name: 'Satellite MRV', label: lang === 'bn' ? 'স্যাটেলাইট এমআরভি' : 'Satellite MRV', icon: Globe, badge: 'GEDI' },
-                  { name: 'Factor Registry', label: lang === 'bn' ? 'ফ্যাক্টর রেজিস্ট্রি' : 'Factor Registry', icon: Database, badge: 'DoE' },
-                  { name: 'ATLAS Benchmark', label: lang === 'bn' ? 'অ্যাটলাস বেঞ্চমার্ক' : 'ATLAS Benchmark', icon: CheckCircle2, badge: '10 Bills' },
-                  { name: 'Entity Tree', label: lang === 'bn' ? 'কর্পোরেট হায়ারার্কি' : 'Entity Tree', icon: Building, badge: 'Sweep' },
-                ].map((item) => {
-                  const Icon = item.icon;
-                  const isActive = activeMenu === item.name;
-                  return (
-                    <button
-                      key={item.name}
-                      onClick={() => setActiveMenu(item.name)}
-                      className={`w-full flex items-center justify-between px-3.5 py-2.5 rounded-2xl text-xs font-sans transition-all duration-200 cursor-pointer ${
-                        isActive 
-                          ? (isLight 
-                              ? 'bg-[#F2F7F3] text-[#0F2417] font-bold border border-[#DFE8E1] shadow-[0_2px_8px_rgba(0,0,0,0.04)]' 
-                              : 'bg-[#0D2B1A] text-white font-bold border border-[#1B4D2E] shadow-[0_4px_16px_rgba(0,200,83,0.12)]')
-                          : (isLight 
-                              ? 'text-[#557361] hover:bg-[#F4F7F4] hover:text-[#0F2417] font-medium' 
-                              : 'text-[#7C9A88] hover:bg-[#0A160F] hover:text-white font-medium')
-                      }`}
-                    >
-                      <div className="flex items-center space-x-3">
-                        <div className={`w-7 h-7 rounded-xl flex items-center justify-center transition-all ${
-                          isActive 
-                            ? 'bg-[#00C853] text-white shadow-sm' 
-                            : (isLight ? 'text-[#557361] bg-transparent' : 'text-[#7C9A88] bg-transparent')
-                        }`}>
-                          <Icon className="w-3.5 h-3.5" />
-                        </div>
-                        <span className="text-xs">{item.label}</span>
-                      </div>
-                      {item.badge && (
-                        <span className="bg-[#00C853]/15 text-[#00C853] text-[9px] font-mono font-bold px-2 py-0.5 rounded-full border border-[#00C853]/30">
-                          {item.badge}
-                        </span>
-                      )}
-                    </button>
-                  );
-                })}
-              </nav>
-            </div>
-
-            <div>
-              <span className={`font-mono text-[9px] uppercase tracking-wider block px-3 mb-2.5 font-bold ${
-                isLight ? 'text-[#8FA899]' : 'text-[#557361]'
-              }`}>
-                General
-              </span>
-              <nav className="space-y-1.5">
-                {[
-                  { name: 'Settings', icon: Settings },
-                  { name: 'Help', icon: HelpCircle },
-                  { name: 'Logout', icon: LogOut }
-                ].map((item) => {
-                  const Icon = item.icon;
-                  const isActive = activeMenu === item.name;
-                  return (
-                    <button
-                      key={item.name}
-                      onClick={() => {
-                        if (item.name === 'Logout') {
-                          navigate('/');
-                        } else {
-                          setActiveMenu(item.name);
-                        }
-                      }}
-                      className={`w-full flex items-center space-x-3 px-3.5 py-2.5 rounded-2xl text-xs font-sans transition-all duration-200 cursor-pointer ${
-                        isActive 
-                          ? (isLight 
-                              ? 'bg-[#F2F7F3] text-[#0F2417] font-bold border border-[#DFE8E1] shadow-[0_2px_8px_rgba(0,0,0,0.04)]' 
-                              : 'bg-[#0D2B1A] text-white font-bold border border-[#1B4D2E] shadow-[0_4px_16px_rgba(0,200,83,0.12)]')
-                          : (isLight 
-                              ? 'text-[#557361] hover:bg-[#F4F7F4] hover:text-[#0F2417] font-medium' 
-                              : 'text-[#7C9A88] hover:bg-[#0A160F] hover:text-white font-medium')
-                      }`}
-                    >
-                      <div className={`w-7 h-7 rounded-xl flex items-center justify-center transition-all ${
-                        isActive 
-                          ? 'bg-[#00C853] text-white shadow-sm' 
-                          : (isLight ? 'text-[#557361] bg-transparent' : 'text-[#7C9A88] bg-transparent')
+                          ? (isLight ? 'bg-[#00C853]/15 text-[#00A844]' : 'bg-[#00C853]/20 text-[#00E676]') 
+                          : (isLight ? 'text-[#64748B] group-hover:text-slate-900' : 'text-[#6E8F7A] group-hover:text-emerald-300')
                       }`}>
                         <Icon className="w-3.5 h-3.5" />
                       </div>
-                      <span className="text-xs">{item.name}</span>
-                    </button>
-                  );
-                })}
-              </nav>
-            </div>
+                      <span className="text-xs tracking-tight truncate">{item.label || item.name}</span>
+                    </div>
+                    {item.badge && (
+                      <span className="bg-amber-500/15 text-amber-400 border border-amber-500/30 text-[10px] font-mono font-semibold px-2 py-0.5 rounded-md shrink-0 whitespace-nowrap leading-none">
+                        {item.badge}
+                      </span>
+                    )}
+                  </button>
+                );
+              })}
+            </nav>
+          </div>
+
+          {/* Enterprise Core & Satellite MRV Engines */}
+          <div>
+            <span className={`font-sans text-[10px] uppercase tracking-wider block px-2.5 mb-1.5 font-bold ${
+              isLight ? 'text-[#7C9A88]' : 'text-[#557361]'
+            }`}>
+              {lang === 'bn' ? 'কোর ইঞ্জিন ও এমআরভি' : 'Engines & MRV'}
+            </span>
+            <nav className="space-y-1">
+              {[
+                { name: 'DuckDB Engine', label: lang === 'bn' ? 'ডাকডিবি ইঞ্জিন' : 'DuckDB Engine', icon: Zap, badge: 'Sub-25ms' },
+                { name: 'Utility Invoices', label: lang === 'bn' ? 'ইউটিলিটি ইনভয়েস' : 'Utility Invoices', icon: FileText, badge: 'Universal' },
+                { name: 'Satellite MRV', label: lang === 'bn' ? 'স্যাটেলাইট এমআরভি' : 'Satellite MRV', icon: Globe, badge: 'GEDI' },
+                { name: 'Factor Registry', label: lang === 'bn' ? 'ফ্যাক্টর রেজিস্ট্রি' : 'Factor Registry', icon: Database, badge: 'DoE' },
+                { name: 'ATLAS Benchmark', label: lang === 'bn' ? 'অ্যাটলাস বেঞ্চমার্ক' : 'ATLAS Benchmark', icon: CheckCircle2, badge: '10 Bills' },
+                { name: 'Entity Tree', label: lang === 'bn' ? 'কর্পোরেট হায়ারার্কি' : 'Entity Tree', icon: Building, badge: 'Sweep' },
+              ].map((item) => {
+                const Icon = item.icon;
+                const isActive = activeMenu === item.name;
+                return (
+                  <button
+                    key={item.name}
+                    onClick={() => setActiveMenu(item.name)}
+                    className={`w-full flex items-center justify-between px-2.5 py-2 rounded-xl text-xs font-sans transition-all duration-150 cursor-pointer relative group ${
+                      isActive 
+                        ? (isLight 
+                            ? 'bg-[#EEF7F1] text-[#0A2E19] font-bold border border-[#CCE2D3] shadow-sm' 
+                            : 'bg-[#0B2114] text-white font-bold border border-[#174D2B] shadow-[0_2px_10px_rgba(0,200,83,0.08)]')
+                        : (isLight 
+                            ? 'text-slate-600 hover:bg-slate-100/70 hover:text-slate-950 font-medium border border-transparent' 
+                            : 'text-[#8FA899] hover:bg-white/[0.04] hover:text-white font-medium border border-transparent')
+                    }`}
+                  >
+                    {isActive && (
+                      <span className={`absolute left-0 top-1.5 bottom-1.5 w-1 rounded-r-full ${
+                        isLight ? 'bg-[#00C853]' : 'bg-[#00E676] shadow-[0_0_8px_rgba(0,230,118,0.5)]'
+                      }`} />
+                    )}
+                    <div className="flex items-center space-x-2.5 min-w-0 pr-1">
+                      <div className={`w-6 h-6 rounded-lg flex items-center justify-center shrink-0 transition-colors ${
+                        isActive 
+                          ? (isLight ? 'bg-[#00C853]/15 text-[#00A844]' : 'bg-[#00C853]/20 text-[#00E676]') 
+                          : (isLight ? 'text-[#64748B] group-hover:text-slate-900' : 'text-[#6E8F7A] group-hover:text-emerald-300')
+                      }`}>
+                        <Icon className="w-3.5 h-3.5" />
+                      </div>
+                      <span className="text-xs tracking-tight truncate">{item.label}</span>
+                    </div>
+                    {item.badge && (
+                      <span className="bg-[#00C853]/10 text-[#00E676] text-[10px] font-mono font-medium px-2 py-0.5 rounded-md border border-[#00C853]/25 shrink-0 whitespace-nowrap leading-none">
+                        {item.badge}
+                      </span>
+                    )}
+                  </button>
+                );
+              })}
+            </nav>
+          </div>
+
+          {/* General Section */}
+          <div>
+            <span className={`font-sans text-[10px] uppercase tracking-wider block px-2.5 mb-1.5 font-bold ${
+              isLight ? 'text-[#7C9A88]' : 'text-[#557361]'
+            }`}>
+              {lang === 'bn' ? 'সাধারণ' : 'General'}
+            </span>
+            <nav className="space-y-1">
+              {[
+                { name: 'Settings', label: lang === 'bn' ? 'সেটিংস' : 'Settings', icon: Settings },
+                { name: 'Help', label: lang === 'bn' ? 'সহায়তা' : 'Help', icon: HelpCircle },
+                { name: 'Logout', label: lang === 'bn' ? 'লগআউট' : 'Logout', icon: LogOut }
+              ].map((item) => {
+                const Icon = item.icon;
+                const isActive = activeMenu === item.name;
+                return (
+                  <button
+                    key={item.name}
+                    onClick={() => {
+                      if (item.name === 'Logout') {
+                        navigate('/');
+                      } else {
+                        setActiveMenu(item.name);
+                      }
+                    }}
+                    className={`w-full flex items-center justify-between px-2.5 py-2 rounded-xl text-xs font-sans transition-all duration-150 cursor-pointer relative group ${
+                      isActive 
+                        ? (isLight 
+                            ? 'bg-[#EEF7F1] text-[#0A2E19] font-bold border border-[#CCE2D3] shadow-sm' 
+                            : 'bg-[#0B2114] text-white font-bold border border-[#174D2B] shadow-[0_2px_10px_rgba(0,200,83,0.08)]')
+                        : (isLight 
+                            ? 'text-slate-600 hover:bg-slate-100/70 hover:text-slate-950 font-medium border border-transparent' 
+                            : 'text-[#8FA899] hover:bg-white/[0.04] hover:text-white font-medium border border-transparent')
+                    }`}
+                  >
+                    {isActive && (
+                      <span className={`absolute left-0 top-1.5 bottom-1.5 w-1 rounded-r-full ${
+                        isLight ? 'bg-[#00C853]' : 'bg-[#00E676] shadow-[0_0_8px_rgba(0,230,118,0.5)]'
+                      }`} />
+                    )}
+                    <div className="flex items-center space-x-2.5 min-w-0 pr-1">
+                      <div className={`w-6 h-6 rounded-lg flex items-center justify-center shrink-0 transition-colors ${
+                        isActive 
+                          ? (isLight ? 'bg-[#00C853]/15 text-[#00A844]' : 'bg-[#00C853]/20 text-[#00E676]') 
+                          : (isLight ? 'text-[#64748B] group-hover:text-slate-900' : 'text-[#6E8F7A] group-hover:text-emerald-300')
+                      }`}>
+                        <Icon className="w-3.5 h-3.5" />
+                      </div>
+                      <span className="text-xs tracking-tight truncate">{item.label || item.name}</span>
+                    </div>
+                  </button>
+                );
+              })}
+            </nav>
           </div>
         </div>
 
-        {/* Mobile Promo Card */}
-        <div className={`p-4 rounded-3xl relative overflow-hidden transition-all ${
-          isLight 
-            ? 'bg-gradient-to-br from-[#EAF5ED] to-[#DCEDE1] border border-[#CCE2D3] text-[#0F2417] shadow-sm' 
-            : 'bg-gradient-to-br from-[#0D2B1A] to-[#143D25] border border-[#1B4D2E] text-white shadow-lg'
-        }`}>
-          <div className="absolute -right-4 -bottom-4 w-20 h-20 bg-white/10 rounded-full blur-sm"></div>
-          <div className="flex items-center space-x-1.5 mb-1.5">
-            <span className="w-2 h-2 rounded-full bg-[#00C853]"></span>
-            <h4 className="font-sans font-bold text-xs tracking-tight">Track ESG on the go</h4>
+        {/* Telemetry Status & Mobile App Card */}
+        <div className={`p-3 border-t shrink-0 ${isLight ? 'border-[#E3EAE5]' : 'border-[#132318]'}`}>
+          <div className={`p-3 rounded-2xl border transition-all ${
+            isLight 
+              ? 'bg-[#F2F8F4] border-[#CCE2D3] text-[#0F2417]' 
+              : 'bg-[#07150D] border-[#132A1C] text-white'
+          }`}>
+            <div className="flex items-center justify-between mb-1.5">
+              <div className="flex items-center space-x-2">
+                <span className="relative flex h-2 w-2">
+                  <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-[#00C853] opacity-75"></span>
+                  <span className="relative inline-flex rounded-full h-2 w-2 bg-[#00C853]"></span>
+                </span>
+                <span className="font-sans font-bold text-[11px] tracking-tight">
+                  Live MRV Telemetry
+                </span>
+              </div>
+              <span className="text-[9px] font-mono font-bold text-emerald-400 bg-[#00C853]/15 border border-[#00C853]/30 px-1.5 py-0.5 rounded leading-none">
+                SYNC
+              </span>
+            </div>
+            <p className={`text-[10px] mb-2.5 leading-tight font-sans ${isLight ? 'text-[#557361]' : 'text-[#7C9A88]'}`}>
+              Mobile satellite sync & live emissions stream telemetry.
+            </p>
+            <button 
+              disabled={downloadingApp}
+              onClick={handleDownloadApp}
+              className="w-full bg-[#00C853] hover:bg-[#00E676] text-[#050C07] font-sans font-bold text-[11px] py-1.5 px-3 rounded-xl transition-all flex items-center justify-center space-x-1.5 shadow-sm cursor-pointer disabled:opacity-50"
+            >
+              {downloadingApp ? (
+                <>
+                  <Loader2 className="w-3 h-3 animate-spin text-[#050C07]" />
+                  <span>Connecting...</span>
+                </>
+              ) : (
+                <span>Download Mobile App</span>
+              )}
+            </button>
           </div>
-          <p className={`text-[10px] mb-3 leading-relaxed font-sans ${isLight ? 'text-[#557361]' : 'text-white/70'}`}>
-            Download our mobile companion app to sync live emissions telemetry.
-          </p>
-          <button 
-            disabled={downloadingApp}
-            onClick={handleDownloadApp}
-            className="bg-[#00C853] hover:bg-[#00E676] text-[#040906] font-sans font-bold text-[10px] px-3.5 py-2 rounded-xl transition-all w-full flex items-center justify-center space-x-1 shadow-sm cursor-pointer"
-          >
-            {downloadingApp ? (
-              <>
-                <Loader2 className="w-3 h-3 animate-spin text-[#040906]" />
-                <span>Downloading...</span>
-              </>
-            ) : (
-              <span>Download App</span>
-            )}
-          </button>
         </div>
       </aside>
 
@@ -1307,8 +1343,10 @@ const SaaSDashboard = () => {
               }`}
               title="Switch Corporate Client Workspace Profile"
             >
-              <div className="w-5 h-5 rounded-full bg-white p-0.5 flex items-center justify-center border border-slate-200 overflow-hidden shrink-0">
-                <img src={activeClient.logo} alt={activeClient.name} className="w-full h-full object-contain" />
+              <div className={`w-7 h-5 px-1 rounded flex items-center justify-center overflow-hidden shrink-0 ${
+                activeClient.logoTheme === 'dark' ? 'bg-[#06140B] border border-[#163D22]' : 'bg-white border border-slate-200'
+              }`}>
+                <img src={activeClient.logo} alt={activeClient.name} className="max-h-full max-w-full object-contain" />
               </div>
               <div className="text-left leading-none flex items-center gap-1.5">
                 <span className="font-sans font-bold text-xs">{activeClient.name}</span>
@@ -2232,7 +2270,7 @@ const SaaSDashboard = () => {
                           AI Document Footprint Extractor
                         </h3>
                       </div>
-                      <p className={`text-xs mt-0.5 font-sans ${isLight ? 'text-[#557361]' : 'text-[#7C9A88]'}`}>
+                      <p className={`text-xs mt-0.5 font-sans ${isLight ? 'text-[#41634E]' : 'text-[#9EBFAB]'}`}>
                         Upload corporate bills, utility statements, or fuel spreadsheets. Carbon Zero BD RAG scans documents, matches national DoE emission factors, and generates citation-backed parameters.
                       </p>
                     </div>
@@ -2245,7 +2283,7 @@ const SaaSDashboard = () => {
                         Multi-Corpus RAG Active
                       </span>
                       <span className={`inline-flex items-center px-2.5 py-1 rounded-full text-[10px] font-mono font-bold ${
-                        isLight ? 'bg-[#F4F6F4] text-[#557361] border border-[#E8ECE8]' : 'bg-[#08130C] text-[#7C9A88] border border-[#152B1D]'
+                        isLight ? 'bg-[#F0F5F1] text-[#345942] border border-[#D5E3D8]' : 'bg-[#0D2214] text-[#A7F3D0] border border-[#1E4D2B]'
                       }`}>
                         DoE 2023 Factors
                       </span>
@@ -2266,16 +2304,16 @@ const SaaSDashboard = () => {
                       </div>
                       <div className="text-left">
                         <div className={`text-xs font-bold ${isLight ? 'text-[#0F2417]' : 'text-white'}`}>Quick Test with Audited Baseline</div>
-                        <div className={`text-[11px] ${isLight ? 'text-[#557361]' : 'text-[#7C9A88]'}`}>Load Dexterity Textiles Ltd Q2 Audit Statement (DEPZ TX-8491)</div>
+                        <div className={`text-[11px] ${isLight ? 'text-[#41634E]' : 'text-[#9EBFAB]'}`}>Load Dexterity Textiles Ltd Q2 Audit Statement (DEPZ TX-8491)</div>
                       </div>
                     </div>
                     <button
                       type="button"
                       onClick={() => executeAIExtraction("Dexterity_Textiles_ESG_Statement_Q2_2026.txt")}
                       disabled={isUploading}
-                      className="text-xs font-bold font-sans px-3.5 py-1.5 rounded-xl bg-[#00C853] hover:bg-[#00E676] text-[#040906] transition-all shadow-sm flex items-center space-x-1.5 shrink-0 cursor-pointer"
+                      className="text-xs font-extrabold font-sans px-3.5 py-1.5 rounded-xl bg-[#00C853] hover:bg-[#00E676] text-[#050C07] transition-all shadow-sm flex items-center space-x-1.5 shrink-0 cursor-pointer"
                     >
-                      <Sparkles className="w-3.5 h-3.5 text-[#040906]" />
+                      <Sparkles className="w-3.5 h-3.5 text-[#050C07]" />
                       <span>Load Verified Sample Document</span>
                     </button>
                   </div>
@@ -2302,7 +2340,7 @@ const SaaSDashboard = () => {
                       <div className={`text-xs font-bold ${isLight ? 'text-[#0F2417]' : 'text-white'}`}>
                         {uploadedFile ? `Uploaded Document: ${uploadedFile}` : "Drag & Drop Financial spreadsheets, utility bills, or fuel invoices here"}
                       </div>
-                      <div className={`text-[10px] ${isLight ? 'text-[#557361]' : 'text-[#7C9A88]'}`}>Supports PDF, XLSX, CSV, TXT (Max 25MB) • Encrypted Per-Tenant Ingestion</div>
+                      <div className={`text-[10px] ${isLight ? 'text-[#41634E]' : 'text-[#9EBFAB]'}`}>Supports PDF, XLSX, CSV, TXT (Max 25MB) • Encrypted Per-Tenant Ingestion</div>
                     </div>
                   </div>
 
@@ -2312,16 +2350,16 @@ const SaaSDashboard = () => {
                       <button
                         onClick={() => executeAIExtraction(uploadedFile || "ESG_Statement_Q2_2026.xlsx")}
                         disabled={isUploading}
-                        className="bg-[#00C853] hover:bg-[#00E676] disabled:bg-[#152B1D] disabled:text-[#557361] text-[#040906] font-sans font-bold text-sm px-6 py-3 rounded-xl transition-all shadow-md shadow-[#00C853]/20 flex items-center justify-center space-x-2 w-full sm:w-auto cursor-pointer"
+                        className="bg-[#00C853] hover:bg-[#00E676] disabled:bg-[#0E2014] disabled:text-emerald-300/40 disabled:border disabled:border-[#1A3824] disabled:shadow-none disabled:cursor-not-allowed text-[#050C07] font-sans font-extrabold text-sm px-6 py-3 rounded-xl transition-all shadow-md shadow-[#00C853]/20 flex items-center justify-center space-x-2 w-full sm:w-auto cursor-pointer"
                       >
                         {isUploading ? (
                           <>
-                            <Loader2 className="w-4 h-4 animate-spin text-[#040906]" />
+                            <Loader2 className="w-4 h-4 animate-spin text-inherit" />
                             <span>RAG Extracting & Verifying...</span>
                           </>
                         ) : (
                           <>
-                            <Sparkles className="w-4 h-4 text-[#040906]" />
+                            <Sparkles className="w-4 h-4 text-inherit" />
                             <span>Run RAG Extraction</span>
                           </>
                         )}
@@ -2378,7 +2416,7 @@ const SaaSDashboard = () => {
                             Audited Extraction Traceability — {extractionResult.filename}
                           </span>
                         </div>
-                        <span className={`font-mono text-[10px] ${isLight ? 'text-[#557361]' : 'text-[#7C9A88]'}`}>
+                        <span className={`font-mono text-[10px] ${isLight ? 'text-[#41634E]' : 'text-[#9EBFAB]'}`}>
                           Confidence: {Math.round((extractionResult.overall_confidence || 0.98) * 100)}% • ISO 14064 Ready
                         </span>
                       </div>
@@ -2387,7 +2425,7 @@ const SaaSDashboard = () => {
                         <table className="w-full text-left font-sans text-xs">
                           <thead>
                             <tr className={`font-bold border-b text-[10px] uppercase ${
-                              isLight ? 'text-[#557361] border-[#E8ECE8]' : 'text-[#557361] border-[#122418]'
+                              isLight ? 'text-[#41634E] border-[#E8ECE8]' : 'text-[#9EBFAB] border-[#122418]'
                             }`}>
                               <th className="py-2">Metric</th>
                               <th>Scope</th>
@@ -2411,8 +2449,8 @@ const SaaSDashboard = () => {
                                 <td className={`font-mono font-bold ${isLight ? 'text-[#00873E]' : 'text-[#4ADE80]'}`}>
                                   {Number(item.value).toLocaleString()} {item.unit}
                                 </td>
-                                <td className={`font-mono text-[11px] ${isLight ? 'text-[#557361]' : 'text-[#7C9A88]'}`}>Page {item.source_page || 1}</td>
-                                <td className={`text-[11px] italic max-w-[320px] truncate ${isLight ? 'text-[#557361]' : 'text-[#8FA899]'}`} title={item.raw_snippet}>
+                                <td className={`font-mono text-[11px] ${isLight ? 'text-[#41634E]' : 'text-[#9EBFAB]'}`}>Page {item.source_page || 1}</td>
+                                <td className={`text-[11px] italic max-w-[320px] truncate ${isLight ? 'text-[#41634E]' : 'text-[#B4D2C1]'}`} title={item.raw_snippet}>
                                   "{item.raw_snippet}"
                                 </td>
                                 <td>
@@ -2448,7 +2486,7 @@ const SaaSDashboard = () => {
                       
                       {/* Corpus Filter Tabs */}
                       <div className={`flex items-center space-x-1 p-1 rounded-xl border ${
-                        isLight ? 'bg-[#F4F6F4] border-[#E8ECE8]' : 'bg-[#040906] border-[#152B1D]'
+                        isLight ? 'bg-[#F4F6F4] border-[#E8ECE8]' : 'bg-[#040906] border-[#1A3824]'
                       }`}>
                         {[
                           { id: 'all', label: 'All Corpora' },
@@ -2466,8 +2504,8 @@ const SaaSDashboard = () => {
                                   ? 'bg-white text-[#00873E] border border-[#C2E9CF] shadow-xs' 
                                   : 'bg-[#0D2B1A] text-[#4ADE80] border border-[#1B4D2E] shadow-sm'
                                 : isLight 
-                                  ? 'text-[#557361] hover:text-[#0F2417]' 
-                                  : 'text-[#7C9A88] hover:text-white'
+                                  ? 'text-[#41634E] hover:text-[#0F2417] hover:bg-black/[0.03]' 
+                                  : 'text-[#A3C4B0] hover:text-white hover:bg-white/[0.05]'
                             }`}
                           >
                             {c.label}
@@ -2488,13 +2526,13 @@ const SaaSDashboard = () => {
                           key={i}
                           type="button"
                           onClick={() => executeRagQuery(promptText)}
-                          className={`text-[11px] font-sans px-3 py-1.5 rounded-full transition-all flex items-center space-x-1 cursor-pointer border ${
+                          className={`text-[11px] font-sans px-3 py-1.5 rounded-full transition-all flex items-center space-x-1.5 cursor-pointer border ${
                             isLight 
-                              ? 'bg-[#F4F6F4] hover:bg-[#E8F8EE] text-[#0F2417] border-[#DCE4DE]' 
-                              : 'bg-[#07150C] hover:bg-[#0D2214] text-[#A3C2B0] border-[#152B1D]'
+                              ? 'bg-[#F0F5F1] hover:bg-[#E2F0E6] text-[#0F2417] border-[#CDE0D2]' 
+                              : 'bg-[#0A1A10] hover:bg-[#0E2818] text-[#C2E0CC] hover:text-white border-[#183B24] hover:border-emerald-500/40'
                           }`}
                         >
-                          <Search className={`w-3 h-3 ${isLight ? 'text-[#557361]' : 'text-[#557361]'}`} />
+                          <Search className={`w-3 h-3 shrink-0 ${isLight ? 'text-[#00873E]' : 'text-emerald-400'}`} />
                           <span>{promptText}</span>
                         </button>
                       ))}
@@ -2511,23 +2549,23 @@ const SaaSDashboard = () => {
                           placeholder="Ask anything about Bangladesh ESG laws, DoE emission factors, or audit evidence..."
                           className={`w-full text-xs font-sans p-3 pl-9 border rounded-xl focus:outline-none focus:border-[#00C853] transition-all ${
                             isLight 
-                              ? 'bg-[#F7FAF7] border-[#DCE4DE] text-[#0F2417] placeholder-[#8FA899]' 
-                              : 'bg-[#040906] border-[#173020] text-white placeholder-[#557361]'
+                              ? 'bg-[#F7FAF7] border-[#DCE4DE] text-[#0F2417] placeholder-[#557361]' 
+                              : 'bg-[#040906] border-[#1B3B26] text-white placeholder-[#7E9F8B] focus:bg-[#07130B]'
                           }`}
                         />
-                        <Search className={`w-4 h-4 absolute left-3 top-3.5 ${isLight ? 'text-[#8FA899]' : 'text-[#557361]'}`} />
+                        <Search className={`w-4 h-4 absolute left-3 top-3.5 ${isLight ? 'text-[#557361]' : 'text-emerald-400/80'}`} />
                       </div>
                       <button
                         type="button"
                         onClick={() => executeRagQuery()}
                         disabled={isRagLoading || !ragQuery.trim()}
-                        className="bg-[#00C853] hover:bg-[#00E676] disabled:bg-[#152B1D] disabled:text-[#557361] text-[#040906] px-5 py-3 rounded-xl font-sans font-bold text-xs transition-all shadow-md shadow-[#00C853]/20 flex items-center space-x-1.5 shrink-0 cursor-pointer"
+                        className="bg-[#00C853] hover:bg-[#00E676] disabled:bg-[#0E2014] disabled:text-emerald-300/40 disabled:border disabled:border-[#1A3824] disabled:shadow-none disabled:cursor-not-allowed text-[#050C07] px-5 py-3 rounded-xl font-sans font-extrabold text-xs transition-all shadow-md shadow-[#00C853]/20 flex items-center space-x-1.5 shrink-0 cursor-pointer"
                       >
                         {isRagLoading ? (
-                          <Loader2 className="w-4 h-4 animate-spin text-[#040906]" />
+                          <Loader2 className="w-4 h-4 animate-spin text-inherit" />
                         ) : (
                           <>
-                            <Send className="w-3.5 h-3.5 text-[#040906]" />
+                            <Send className="w-3.5 h-3.5 text-inherit" />
                             <span>Ask Copilot</span>
                           </>
                         )}
@@ -2555,7 +2593,7 @@ const SaaSDashboard = () => {
                             </span>
                           </div>
                           <div className={`flex items-center space-x-2 font-mono text-[10px] ${
-                            isLight ? 'text-[#557361]' : 'text-[#7C9A88]'
+                            isLight ? 'text-[#41634E]' : 'text-[#9EBFAB]'
                           }`}>
                             <span>Confidence: {Math.round((ragResponse.confidence || 0.95) * 100)}%</span>
                             <span>•</span>
@@ -2574,7 +2612,7 @@ const SaaSDashboard = () => {
                         {ragResponse.citations && ragResponse.citations.length > 0 && (
                           <div className={`space-y-2 pt-2 border-t ${isLight ? 'border-[#C2E9CF]' : 'border-[#122418]'}`}>
                             <div className={`text-[10px] font-mono uppercase font-bold flex items-center ${
-                              isLight ? 'text-[#557361]' : 'text-[#7C9A88]'
+                              isLight ? 'text-[#41634E]' : 'text-[#9EBFAB]'
                             }`}>
                               <Quote className="w-3 h-3 mr-1 text-[#00C853]" />
                               Verifiable Document Citations ({ragResponse.citations.length}):
@@ -2602,7 +2640,7 @@ const SaaSDashboard = () => {
                                     </span>
                                   </div>
                                   <p className={`text-[11px] line-clamp-2 italic ${
-                                    isLight ? 'text-[#557361]' : 'text-[#7C9A88]'
+                                    isLight ? 'text-[#41634E]' : 'text-[#A3C4B0]'
                                   }`}>
                                     "{c.snippet}"
                                   </p>
@@ -2629,7 +2667,7 @@ const SaaSDashboard = () => {
                   }`}>
                     <div>
                       <h3 className={`font-sans font-bold text-lg ${isLight ? 'text-[#0F2417]' : 'text-white'}`}>Active Corporate Projects</h3>
-                      <p className={`text-xs mt-0.5 ${isLight ? 'text-[#557361]' : 'text-[#7C9A88]'}`}>District specific offsetting initiatives under CarbonZero monitoring.</p>
+                      <p className={`text-xs mt-0.5 ${isLight ? 'text-[#41634E]' : 'text-[#9EBFAB]'}`}>District specific offsetting initiatives under CarbonZero monitoring.</p>
                     </div>
                     <button 
                       onClick={() => setIsAddProjectOpen(true)}
@@ -3655,7 +3693,14 @@ const SaaSDashboard = () => {
 
         {/* -------------------- ENTERPRISE CORE STUDIOS -------------------- */}
         {activeMenu === 'DuckDB Engine' && (
-          <DuckDBEngineView isLight={isLight} locale={locale} />
+          <DuckDBEngineView 
+            isLight={isLight} 
+            locale={locale} 
+            currency={currency}
+            activityInputs={inputs}
+            activityResults={results}
+            onRecalculate={() => calculateEmissions(inputs, ef)}
+          />
         )}
 
         {activeMenu === 'Utility Invoices' && (
@@ -3736,11 +3781,15 @@ const SaaSDashboard = () => {
                   >
                     <div>
                       <div className="flex items-start justify-between gap-2 mb-3">
-                        <div className="w-12 h-12 rounded-xl bg-white p-1.5 flex items-center justify-center border border-slate-200 overflow-hidden shadow-sm shrink-0">
+                        <div className={`h-12 px-3 py-1 rounded-xl flex items-center justify-center overflow-hidden shadow-sm shrink-0 min-w-[80px] max-w-[100px] ${
+                          client.logoTheme === 'dark'
+                            ? 'bg-[#06140B] border border-[#163D22] ring-1 ring-emerald-500/20'
+                            : 'bg-white border border-slate-200'
+                        }`}>
                           <img 
                             src={client.logo} 
                             alt={client.name} 
-                            className="w-full h-full object-contain" 
+                            className="max-h-full max-w-full object-contain" 
                           />
                         </div>
                         <div className="flex flex-col items-end gap-1">

@@ -207,7 +207,11 @@ export const UniversalUtilityExtractor = ({
         <div className={`flex items-center space-x-3 px-4 py-2.5 rounded-2xl border ${
           isLight ? 'bg-[#F4F7F4] border-[#DCE4DE]' : 'bg-[#040A06] border-[#152B1D]'
         }`}>
-          <div className="w-9 h-9 rounded-xl bg-white p-1 flex items-center justify-center border border-white/20 shrink-0">
+          <div className={`h-9 px-2.5 rounded-xl flex items-center justify-center shrink-0 min-w-[65px] max-w-[85px] ${
+            activeClient.logoTheme === 'dark'
+              ? 'bg-[#06140B] border border-[#163D22] ring-1 ring-emerald-500/20'
+              : 'bg-white border border-slate-200'
+          }`}>
             <img src={activeClient.logo} alt={activeClient.name} className="max-h-full max-w-full object-contain" />
           </div>
           <div>

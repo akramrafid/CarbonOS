@@ -14,39 +14,48 @@ const Pricing = () => {
         
         {/* Header */}
         <div className="mb-14 text-center max-w-3xl mx-auto">
-          <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-emerald-950/50 border border-emerald-500/30 text-emerald-400 font-mono text-xs font-semibold uppercase tracking-wider mb-5 shadow-[0_0_15px_rgba(16,185,129,0.12)]">
+          <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-emerald-950/60 border border-[#00C853]/40 text-[#00E676] font-mono text-xs font-semibold uppercase tracking-wider mb-5 shadow-[0_0_15px_rgba(0,230,118,0.15)]">
             <span>Sovereign Infrastructure SaaS & Node Licensure</span>
           </div>
 
           <h2 className="text-3xl sm:text-4xl lg:text-5xl font-sans font-bold tracking-tight text-white leading-tight">
-            Predictable Scaling for <span className="text-transparent bg-clip-text bg-gradient-to-r from-emerald-400 via-teal-300 to-cyan-400">Carbon Developers</span>.
+            Predictable Scaling for{' '}
+            <span className="bg-gradient-to-r from-[#00E676] via-[#10B981] to-[#00C853] bg-clip-text text-transparent font-extrabold">
+              Carbon Developers
+            </span>
           </h2>
           <p className="font-sans text-base sm:text-lg text-white/70 mt-4 leading-relaxed">
             Deploy automated MRV, satellite data pipelines, and sovereign ledger registry nodes with zero hidden transaction tariffs.
           </p>
 
           {/* Billing Interval Toggle Switch */}
-          <div className="mt-8 inline-flex items-center p-1.5 rounded-2xl bg-white/[0.04] border border-white/10 backdrop-blur-xl shadow-inner">
+          <div className="mt-8 inline-flex items-center p-1.5 rounded-2xl bg-[#08150D] border border-[#183822] shadow-lg backdrop-blur-xl">
             <button
+              type="button"
               onClick={() => setIsAnnual(false)}
-              className={`px-5 py-2 rounded-xl text-xs font-sans font-semibold transition-all duration-200 ${
+              className={`px-5 py-2.5 rounded-xl text-xs font-sans font-semibold transition-all duration-200 cursor-pointer ${
                 !isAnnual 
-                  ? 'bg-white text-black shadow-md' 
-                  : 'text-white/60 hover:text-white'
+                  ? 'bg-white text-black shadow-md font-bold' 
+                  : 'text-gray-300 hover:text-white'
               }`}
             >
               Monthly Billing
             </button>
             <button
+              type="button"
               onClick={() => setIsAnnual(true)}
-              className={`px-5 py-2 rounded-xl text-xs font-sans font-semibold flex items-center gap-2 transition-all duration-200 ${
+              className={`px-5 py-2.5 rounded-xl text-xs font-sans font-semibold flex items-center gap-2 transition-all duration-200 cursor-pointer ${
                 isAnnual 
-                  ? 'bg-emerald-500 text-black shadow-[0_0_15px_rgba(16,185,129,0.4)]' 
-                  : 'text-white/60 hover:text-white'
+                  ? 'bg-[#00C853] text-[#050C07] font-bold shadow-[0_0_20px_rgba(0,200,83,0.35)]' 
+                  : 'text-gray-300 hover:text-white'
               }`}
             >
               <span>Annual Settlement</span>
-              <span className={`text-[10px] font-mono font-bold uppercase px-1.5 py-0.5 rounded ${isAnnual ? 'bg-black/20 text-black' : 'bg-emerald-500/20 text-emerald-300'}`}>
+              <span className={`text-[10px] font-mono font-extrabold uppercase px-2 py-0.5 rounded-full ${
+                isAnnual 
+                  ? 'bg-[#050C07]/20 text-[#050C07]' 
+                  : 'bg-[#00C853]/20 text-[#00E676] border border-[#00C853]/30'
+              }`}>
                 Save 20%
               </span>
             </button>
@@ -71,7 +80,7 @@ const Pricing = () => {
 
               <div className="mb-6 p-4 rounded-xl bg-black/40 border border-white/5">
                 <div className="flex items-baseline gap-1.5">
-                  <span className="font-mono text-3xl sm:text-4xl font-extrabold text-amber-400">
+                  <span className="font-mono text-3xl sm:text-4xl font-extrabold text-[#FFB300]">
                     ৳{isAnnual ? '40,000' : '50,000'}
                   </span>
                   <span className="font-mono text-xs text-white/50">/ month</span>
@@ -84,19 +93,19 @@ const Pricing = () => {
               <div className="text-xs font-mono uppercase tracking-wider text-white/40 mb-3 font-semibold">Included Capabilities:</div>
               <ul className="space-y-3 mb-8 text-xs font-sans text-white/80">
                 <li className="flex items-start gap-2.5">
-                  <CheckCircle2 size={15} className="text-emerald-400 shrink-0 mt-0.5" />
+                  <CheckCircle2 size={15} className="text-[#00E676] shrink-0 mt-0.5" />
                   <span>Up to <strong>5 Active Project Sites</strong> on registry</span>
                 </li>
                 <li className="flex items-start gap-2.5">
-                  <CheckCircle2 size={15} className="text-emerald-400 shrink-0 mt-0.5" />
+                  <CheckCircle2 size={15} className="text-[#00E676] shrink-0 mt-0.5" />
                   <span>Basic IoT telemetry sync (Blynk / HTTP API)</span>
                 </li>
                 <li className="flex items-start gap-2.5">
-                  <CheckCircle2 size={15} className="text-emerald-400 shrink-0 mt-0.5" />
+                  <CheckCircle2 size={15} className="text-[#00E676] shrink-0 mt-0.5" />
                   <span>Automated PDF verification dossiers</span>
                 </li>
                 <li className="flex items-start gap-2.5">
-                  <CheckCircle2 size={15} className="text-emerald-400 shrink-0 mt-0.5" />
+                  <CheckCircle2 size={15} className="text-[#00E676] shrink-0 mt-0.5" />
                   <span>Direct bKash / Nagad rural payout settlement</span>
                 </li>
                 <li className="flex items-start gap-2.5 text-white/30">
@@ -112,25 +121,25 @@ const Pricing = () => {
 
             <Link 
               to="/platform/saas-dashboard" 
-              className="w-full py-3.5 rounded-xl font-sans font-semibold text-xs text-center bg-white/[0.06] hover:bg-white/[0.12] text-white border border-white/10 hover:border-white/20 transition-all duration-200 block"
+              className="w-full py-3.5 rounded-xl font-sans font-semibold text-xs text-center bg-white/[0.08] hover:bg-white/[0.16] text-white border border-white/15 hover:border-white/30 transition-all duration-200 block cursor-pointer"
             >
               Deploy Starter Node
             </Link>
           </div>
 
           {/* Tier 2: Institutional (Most Popular) */}
-          <div className="bg-gradient-to-b from-[#0D2818] to-[#08150D] border-2 border-emerald-500/50 shadow-[0_0_50px_rgba(16,185,129,0.15)] rounded-[2.2rem] p-8 flex flex-col justify-between relative z-10 group">
+          <div className="bg-gradient-to-b from-[#0D2818] to-[#08150D] border-2 border-[#00C853]/60 shadow-[0_0_50px_rgba(0,200,83,0.18)] rounded-[2.2rem] p-8 flex flex-col justify-between relative z-10 group">
             <div className="absolute -top-3.5 left-1/2 -translate-x-1/2">
-              <span className="font-mono text-[10px] text-black bg-emerald-400 px-3.5 py-1 rounded-full font-bold uppercase tracking-wider shadow-lg flex items-center gap-1.5">
-                <Zap size={12} className="fill-black" />
+              <span className="font-mono text-[10px] text-[#050C07] bg-[#00E676] px-3.5 py-1 rounded-full font-extrabold uppercase tracking-wider shadow-[0_0_20px_rgba(0,230,118,0.4)] flex items-center gap-1.5 border border-[#00E676]">
+                <Zap size={12} className="fill-[#050C07] text-[#050C07]" />
                 <span>Primary Sovereign Tier</span>
               </span>
             </div>
 
             <div>
               <div className="flex items-center justify-between mb-4 mt-2">
-                <span className="font-mono text-xs uppercase tracking-widest text-emerald-400 font-bold">Institutional Scale</span>
-                <span className="text-[10px] font-mono px-2 py-0.5 rounded bg-emerald-500/20 border border-emerald-500/30 text-emerald-300">
+                <span className="font-mono text-xs uppercase tracking-widest text-[#00E676] font-bold">Institutional Scale</span>
+                <span className="text-[10px] font-mono px-2.5 py-0.5 rounded-md bg-[#00C853]/20 border border-[#00C853]/40 text-[#00E676] font-bold">
                   RECOMMENDED
                 </span>
               </div>
@@ -140,42 +149,42 @@ const Pricing = () => {
                 For commercial solar IPPs, industrial textile mills, agribusiness conglomerates, and registry certifiers.
               </p>
 
-              <div className="mb-6 p-4 rounded-xl bg-black/60 border border-emerald-500/20">
+              <div className="mb-6 p-4 rounded-xl bg-black/60 border border-[#00C853]/30">
                 <div className="flex items-baseline gap-1.5">
-                  <span className="font-mono text-3xl sm:text-4xl font-extrabold text-emerald-400">
+                  <span className="font-mono text-3xl sm:text-4xl font-extrabold text-[#00E676]">
                     ৳{isAnnual ? '1,20,000' : '1,50,000'}
                   </span>
                   <span className="font-mono text-xs text-white/50">/ month</span>
                 </div>
-                <div className="text-[11px] font-mono text-emerald-400/80 mt-1">
+                <div className="text-[11px] font-mono text-[#00E676]/90 mt-1 font-medium">
                   {isAnnual ? 'Billed annually ৳14,40,000 / yr (Save ৳3,60,000)' : 'Billed monthly on corporate invoice'}
                 </div>
               </div>
 
-              <div className="text-xs font-mono uppercase tracking-wider text-emerald-400/80 mb-3 font-semibold">Everything in Starter, Plus:</div>
+              <div className="text-xs font-mono uppercase tracking-wider text-[#00E676] mb-3 font-bold">Everything in Starter, Plus:</div>
               <ul className="space-y-3 mb-8 text-xs font-sans text-white/90">
                 <li className="flex items-start gap-2.5">
-                  <CheckCircle2 size={15} className="text-emerald-400 shrink-0 mt-0.5" />
+                  <CheckCircle2 size={15} className="text-[#00E676] shrink-0 mt-0.5" />
                   <span><strong>Unlimited Project Onboarding</strong> & MRV workflows</span>
                 </li>
                 <li className="flex items-start gap-2.5">
-                  <CheckCircle2 size={15} className="text-emerald-400 shrink-0 mt-0.5" />
+                  <CheckCircle2 size={15} className="text-[#00E676] shrink-0 mt-0.5" />
                   <span>Google Earth Engine Sentinel-2 NDVI & SAR radar pipeline</span>
                 </li>
                 <li className="flex items-start gap-2.5">
-                  <CheckCircle2 size={15} className="text-emerald-400 shrink-0 mt-0.5" />
+                  <CheckCircle2 size={15} className="text-[#00E676] shrink-0 mt-0.5" />
                   <span>AI satellite fraud & double-crediting verification engine</span>
                 </li>
                 <li className="flex items-start gap-2.5">
-                  <CheckCircle2 size={15} className="text-emerald-400 shrink-0 mt-0.5" />
+                  <CheckCircle2 size={15} className="text-[#00E676] shrink-0 mt-0.5" />
                   <span>Direct wholesale liquidity market access & block trading</span>
                 </li>
                 <li className="flex items-start gap-2.5">
-                  <CheckCircle2 size={15} className="text-emerald-400 shrink-0 mt-0.5" />
+                  <CheckCircle2 size={15} className="text-[#00E676] shrink-0 mt-0.5" />
                   <span>REST API + Webhooks access (50,000 calls / month)</span>
                 </li>
                 <li className="flex items-start gap-2.5">
-                  <CheckCircle2 size={15} className="text-emerald-400 shrink-0 mt-0.5" />
+                  <CheckCircle2 size={15} className="text-[#00E676] shrink-0 mt-0.5" />
                   <span>Dedicated compliance officer & 4-hour SLA response</span>
                 </li>
               </ul>
@@ -183,7 +192,7 @@ const Pricing = () => {
 
             <Link 
               to="/platform/saas-dashboard" 
-              className="w-full py-4 rounded-xl font-sans font-bold text-xs text-center bg-emerald-500 hover:bg-emerald-400 text-black transition-all duration-200 shadow-[0_0_25px_rgba(16,185,129,0.3)] flex items-center justify-center gap-2"
+              className="w-full py-4 rounded-xl font-sans font-bold text-xs text-center bg-[#00C853] hover:bg-[#00E676] text-[#050C07] transition-all duration-200 shadow-[0_0_25px_rgba(0,200,83,0.35)] flex items-center justify-center gap-2 cursor-pointer"
             >
               <span>Provision Institutional Node</span>
               <ArrowRight size={14} />

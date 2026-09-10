@@ -28,12 +28,31 @@ const EEIO_SECTOR_DEFAULTS = {
 
 export const DuckDBEngineView = ({ 
   isLight, 
-  locale, 
+  locale = {}, 
   currency = 'BDT', 
   activityInputs, 
   activityResults,
   onRecalculate 
 }) => {
+  const defaultInputs = {
+    diesel: '10000',
+    petrol: '4000',
+    lpg: '1200',
+    electricity: '85000',
+    employees: '120',
+    airTravel: '45000',
+    truckTransport: '18000',
+    rawMaterials: '320'
+  };
+  const safeInputs = { ...defaultInputs, ...(activityInputs || {}) };
+
+  const defaultResults = {
+    scope1: ((parseFloat(safeInputs.diesel || 0) * 2.68 + parseFloat(safeInputs.petrol || 0) * 2.31 + parseFloat(safeInputs.lpg || 0) * 2.98) / 1000).toFixed(2),
+    scope2: (parseFloat(safeInputs.electricity || 0) * 0.55 / 1000).toFixed(2),
+    scope3: ((parseFloat(safeInputs.employees || 0) * 0.40) + (parseFloat(safeInputs.truckTransport || 0) * 0.20 / 1000) + (parseFloat(safeInputs.rawMaterials || 0) * 2.50)).toFixed(2)
+  };
+  const safeResults = { ...defaultResults, ...(activityResults || {}) };
+
   const [calculationMode, setCalculationMode] = useState('activity'); // 'activity' | 'spend_eeio'
   const [spendInputs, setSpendInputs] = useState(EEIO_SECTOR_DEFAULTS);
   const [selectedCurrency, setSelectedCurrency] = useState(currency);
@@ -92,6 +111,13 @@ export const DuckDBEngineView = ({
 
   const handleSimulateDuckDBCalculate = () => {
     setIsCalculating(true);
+    if (typeof onRecalculate === 'function') {
+      try {
+        onRecalculate();
+      } catch (err) {
+        console.warn('onRecalculate error:', err);
+      }
+    }
     const start = performance.now();
     setTimeout(() => {
       const end = performance.now();
@@ -115,14 +141,14 @@ export const DuckDBEngineView = ({
                 <Database className="w-4 h-4" />
               </div>
               <h2 className={`text-xl font-bold font-sans ${isLight ? 'text-gray-900' : 'text-white'}`}>
-                {locale.duckdbTitle}
+                {locale?.duckdbTitle || 'DuckDB In-Process OLAP Engine'}
               </h2>
               <span className="px-2.5 py-0.5 rounded-full text-[10px] font-mono font-bold bg-emerald-500/15 text-emerald-600 dark:text-emerald-400 border border-emerald-500/30">
                 OLAP v2026.2
               </span>
             </div>
             <p className={`text-xs ${isLight ? 'text-gray-600' : 'text-[#8FA899]'}`}>
-              {locale.duckdbSubtitle}
+              {locale?.duckdbSubtitle || 'Sub-25ms calculation pipeline supporting Activity-based & Spend-based (EEIO) accounting'}
             </p>
           </div>
 
@@ -145,7 +171,7 @@ export const DuckDBEngineView = ({
               className="px-4 py-1.5 rounded-2xl bg-emerald-600 hover:bg-emerald-500 text-white font-sans font-semibold text-xs transition-all shadow-sm flex items-center space-x-1.5 cursor-pointer disabled:opacity-50"
             >
               <RefreshCw className={`w-3.5 h-3.5 ${isCalculating ? 'animate-spin' : ''}`} />
-              <span>{locale.calculateNow}</span>
+              <span>{locale?.calculateNow || 'Recalculate OLAP Footprint'}</span>
             </button>
           </div>
         </div>
@@ -162,7 +188,7 @@ export const DuckDBEngineView = ({
                 : (isLight ? 'bg-gray-100 text-gray-600 hover:text-gray-900' : 'bg-[#0A160F] text-gray-400 hover:text-white')
             }`}
           >
-            {locale.activityMode}
+            {locale?.activityMode || 'Physical Activity Accounting'}
           </button>
           <button
             onClick={() => setCalculationMode('spend_eeio')}
@@ -173,7 +199,7 @@ export const DuckDBEngineView = ({
             }`}
           >
             <DollarSign className="w-3.5 h-3.5" />
-            <span>{locale.spendMode}</span>
+            <span>{locale?.spendMode || 'Spend-Based EEIO (CEDA Model)'}</span>
           </button>
         </div>
 
@@ -182,7 +208,7 @@ export const DuckDBEngineView = ({
             <span className={isLight ? 'text-gray-500' : 'text-gray-400'}>Currency:</span>
             <button
               onClick={() => setSelectedCurrency(selectedCurrency === 'BDT' ? 'USD' : 'BDT')}
-              className="px-3 py-1 rounded-xl bg-emerald-500/15 text-emerald-600 dark:text-emerald-400 border border-emerald-500/30 font-bold"
+              className="px-3 py-1 rounded-xl bg-emerald-500/15 text-emerald-600 dark:text-emerald-400 border border-emerald-500/30 font-bold cursor-pointer"
             >
               {selectedCurrency === 'BDT' ? 'BDT (৳) [1 USD = 120 BDT]' : 'USD ($)'}
             </button>
@@ -197,23 +223,23 @@ export const DuckDBEngineView = ({
           <div className={`p-5 rounded-3xl border ${isLight ? 'bg-white border-gray-200' : 'bg-[#0A160F] border-[#1B4D2E]'}`}>
             <div className="flex items-center justify-between mb-4">
               <span className="text-xs font-mono font-bold text-amber-500 uppercase tracking-wider">Scope 1 Direct</span>
-              <span className="text-lg font-bold font-mono text-emerald-500">{activityResults?.scope1 || 0} tCO₂e</span>
+              <span className="text-lg font-bold font-mono text-emerald-500">{safeResults?.scope1 || 0} tCO₂e</span>
             </div>
             <p className={`text-xs mb-4 ${isLight ? 'text-gray-500' : 'text-gray-400'}`}>
               Stationary diesel generators, corporate fleet vehicles, and canteen LPG.
             </p>
             <div className="space-y-2.5 text-xs font-mono">
               <div className="flex justify-between py-1 border-b border-gray-100 dark:border-gray-800">
-                <span className={isLight ? 'text-gray-600' : 'text-gray-400'}>Diesel ({activityInputs.diesel} L × 2.68)</span>
-                <span className="font-bold">{((parseFloat(activityInputs.diesel) || 0) * 2.68 / 1000).toFixed(2)} t</span>
+                <span className={isLight ? 'text-gray-600' : 'text-gray-400'}>Diesel ({safeInputs.diesel} L × 2.68)</span>
+                <span className="font-bold">{((parseFloat(safeInputs.diesel) || 0) * 2.68 / 1000).toFixed(2)} t</span>
               </div>
               <div className="flex justify-between py-1 border-b border-gray-100 dark:border-gray-800">
-                <span className={isLight ? 'text-gray-600' : 'text-gray-400'}>Petrol ({activityInputs.petrol} L × 2.31)</span>
-                <span className="font-bold">{((parseFloat(activityInputs.petrol) || 0) * 2.31 / 1000).toFixed(2)} t</span>
+                <span className={isLight ? 'text-gray-600' : 'text-gray-400'}>Petrol ({safeInputs.petrol} L × 2.31)</span>
+                <span className="font-bold">{((parseFloat(safeInputs.petrol) || 0) * 2.31 / 1000).toFixed(2)} t</span>
               </div>
               <div className="flex justify-between py-1">
-                <span className={isLight ? 'text-gray-600' : 'text-gray-400'}>LPG ({activityInputs.lpg} kg × 2.98)</span>
-                <span className="font-bold">{((parseFloat(activityInputs.lpg) || 0) * 2.98 / 1000).toFixed(2)} t</span>
+                <span className={isLight ? 'text-gray-600' : 'text-gray-400'}>LPG ({safeInputs.lpg} kg × 2.98)</span>
+                <span className="font-bold">{((parseFloat(safeInputs.lpg) || 0) * 2.98 / 1000).toFixed(2)} t</span>
               </div>
             </div>
           </div>
@@ -222,7 +248,7 @@ export const DuckDBEngineView = ({
           <div className={`p-5 rounded-3xl border ${isLight ? 'bg-white border-gray-200' : 'bg-[#0A160F] border-[#1B4D2E]'}`}>
             <div className="flex items-center justify-between mb-4">
               <span className="text-xs font-mono font-bold text-cyan-500 uppercase tracking-wider">Scope 2 Grid</span>
-              <span className="text-lg font-bold font-mono text-cyan-500">{activityResults?.scope2 || 0} tCO₂e</span>
+              <span className="text-lg font-bold font-mono text-cyan-500">{safeResults?.scope2 || 0} tCO₂e</span>
             </div>
             <p className={`text-xs mb-4 ${isLight ? 'text-gray-500' : 'text-gray-400'}`}>
               Grid electricity via Bangladesh National Combined Margin (0.550 kg CO₂e/kWh).
@@ -230,7 +256,7 @@ export const DuckDBEngineView = ({
             <div className="space-y-2.5 text-xs font-mono">
               <div className="flex justify-between py-1 border-b border-gray-100 dark:border-gray-800">
                 <span className={isLight ? 'text-gray-600' : 'text-gray-400'}>Electricity Consumption</span>
-                <span className="font-bold">{activityInputs.electricity} kWh</span>
+                <span className="font-bold">{safeInputs.electricity} kWh</span>
               </div>
               <div className="flex justify-between py-1 border-b border-gray-100 dark:border-gray-800">
                 <span className={isLight ? 'text-gray-600' : 'text-gray-400'}>Location Factor (DoE Gazette)</span>
@@ -247,23 +273,23 @@ export const DuckDBEngineView = ({
           <div className={`p-5 rounded-3xl border ${isLight ? 'bg-white border-gray-200' : 'bg-[#0A160F] border-[#1B4D2E]'}`}>
             <div className="flex items-center justify-between mb-4">
               <span className="text-xs font-mono font-bold text-emerald-500 uppercase tracking-wider">Scope 3 Value Chain</span>
-              <span className="text-lg font-bold font-mono text-emerald-500">{activityResults?.scope3 || 0} tCO₂e</span>
+              <span className="text-lg font-bold font-mono text-emerald-500">{safeResults?.scope3 || 0} tCO₂e</span>
             </div>
             <p className={`text-xs mb-4 ${isLight ? 'text-gray-500' : 'text-gray-400'}`}>
               Worker commuting, N1 highway freight, international travel, and yarn imports.
             </p>
             <div className="space-y-2.5 text-xs font-mono">
               <div className="flex justify-between py-1 border-b border-gray-100 dark:border-gray-800">
-                <span className={isLight ? 'text-gray-600' : 'text-gray-400'}>Commute ({activityInputs.employees} staff)</span>
-                <span className="font-bold">{((parseFloat(activityInputs.employees) || 0) * 0.40).toFixed(2)} t</span>
+                <span className={isLight ? 'text-gray-600' : 'text-gray-400'}>Commute ({safeInputs.employees} staff)</span>
+                <span className="font-bold">{((parseFloat(safeInputs.employees) || 0) * 0.40).toFixed(2)} t</span>
               </div>
               <div className="flex justify-between py-1 border-b border-gray-100 dark:border-gray-800">
-                <span className={isLight ? 'text-gray-600' : 'text-gray-400'}>Freight ({activityInputs.truckTransport} t-km)</span>
-                <span className="font-bold">{((parseFloat(activityInputs.truckTransport) || 0) * 0.20 / 1000).toFixed(2)} t</span>
+                <span className={isLight ? 'text-gray-600' : 'text-gray-400'}>Freight ({safeInputs.truckTransport} t-km)</span>
+                <span className="font-bold">{((parseFloat(safeInputs.truckTransport) || 0) * 0.20 / 1000).toFixed(2)} t</span>
               </div>
               <div className="flex justify-between py-1">
-                <span className={isLight ? 'text-gray-600' : 'text-gray-400'}>Raw Material ({activityInputs.rawMaterials} T)</span>
-                <span className="font-bold">{((parseFloat(activityInputs.rawMaterials) || 0) * 2.50).toFixed(2)} t</span>
+                <span className={isLight ? 'text-gray-600' : 'text-gray-400'}>Raw Material ({safeInputs.rawMaterials} T)</span>
+                <span className="font-bold">{((parseFloat(safeInputs.rawMaterials) || 0) * 2.50).toFixed(2)} t</span>
               </div>
             </div>
           </div>

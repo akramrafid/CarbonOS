@@ -1,3 +1,5 @@
+import colors from 'tailwindcss/colors.js';
+
 /** @type {import('tailwindcss').Config} */
 export default {
   content: [
@@ -9,8 +11,14 @@ export default {
       colors: {
         forest: 'var(--color-forest)',
         carbon: 'var(--color-carbon)',
-        emerald: 'var(--color-emerald)',
-        amber: 'var(--color-amber)',
+        emerald: {
+          ...colors.emerald,
+          DEFAULT: 'var(--color-emerald)',
+        },
+        amber: {
+          ...colors.amber,
+          DEFAULT: 'var(--color-amber)',
+        },
         registry: 'var(--color-registry)',
         mist: 'var(--color-mist)',
       },
