@@ -1266,11 +1266,11 @@ const SaaSDashboard = () => {
             <button 
               disabled={downloadingApp}
               onClick={handleDownloadApp}
-              className="w-full bg-[#00C853] hover:bg-[#00E676] text-[#050C07] font-sans font-bold text-[11px] py-1.5 px-3 rounded-xl transition-all flex items-center justify-center space-x-1.5 shadow-sm cursor-pointer disabled:opacity-50"
+              className="w-full bg-[#00C853] hover:bg-[#00E676] text-white font-sans font-bold text-[11px] py-1.5 px-3 rounded-xl transition-all flex items-center justify-center space-x-1.5 shadow-sm cursor-pointer disabled:opacity-50"
             >
               {downloadingApp ? (
                 <>
-                  <Loader2 className="w-3 h-3 animate-spin text-[#050C07]" />
+                  <Loader2 className="w-3 h-3 animate-spin text-white" />
                   <span>Connecting...</span>
                 </>
               ) : (
@@ -2311,9 +2311,9 @@ const SaaSDashboard = () => {
                       type="button"
                       onClick={() => executeAIExtraction("Dexterity_Textiles_ESG_Statement_Q2_2026.txt")}
                       disabled={isUploading}
-                      className="text-xs font-extrabold font-sans px-3.5 py-1.5 rounded-xl bg-[#00C853] hover:bg-[#00E676] text-[#050C07] transition-all shadow-sm flex items-center space-x-1.5 shrink-0 cursor-pointer"
+                      className="text-xs font-extrabold font-sans px-3.5 py-1.5 rounded-xl bg-[#00C853] hover:bg-[#00E676] text-white transition-all shadow-sm flex items-center space-x-1.5 shrink-0 cursor-pointer"
                     >
-                      <Sparkles className="w-3.5 h-3.5 text-[#050C07]" />
+                      <Sparkles className="w-3.5 h-3.5 text-white" />
                       <span>Load Verified Sample Document</span>
                     </button>
                   </div>
@@ -2350,7 +2350,7 @@ const SaaSDashboard = () => {
                       <button
                         onClick={() => executeAIExtraction(uploadedFile || "ESG_Statement_Q2_2026.xlsx")}
                         disabled={isUploading}
-                        className="bg-[#00C853] hover:bg-[#00E676] disabled:bg-[#0E2014] disabled:text-emerald-300/40 disabled:border disabled:border-[#1A3824] disabled:shadow-none disabled:cursor-not-allowed text-[#050C07] font-sans font-extrabold text-sm px-6 py-3 rounded-xl transition-all shadow-md shadow-[#00C853]/20 flex items-center justify-center space-x-2 w-full sm:w-auto cursor-pointer"
+                        className="bg-[#00C853] hover:bg-[#00E676] disabled:bg-[#0E2014] disabled:text-emerald-300/40 disabled:border disabled:border-[#1A3824] disabled:shadow-none disabled:cursor-not-allowed text-white font-sans font-extrabold text-sm px-6 py-3 rounded-xl transition-all shadow-md shadow-[#00C853]/20 flex items-center justify-center space-x-2 w-full sm:w-auto cursor-pointer"
                       >
                         {isUploading ? (
                           <>
@@ -2559,7 +2559,7 @@ const SaaSDashboard = () => {
                         type="button"
                         onClick={() => executeRagQuery()}
                         disabled={isRagLoading || !ragQuery.trim()}
-                        className="bg-[#00C853] hover:bg-[#00E676] disabled:bg-[#0E2014] disabled:text-emerald-300/40 disabled:border disabled:border-[#1A3824] disabled:shadow-none disabled:cursor-not-allowed text-[#050C07] px-5 py-3 rounded-xl font-sans font-extrabold text-xs transition-all shadow-md shadow-[#00C853]/20 flex items-center space-x-1.5 shrink-0 cursor-pointer"
+                        className="bg-[#00C853] hover:bg-[#00E676] disabled:bg-[#0E2014] disabled:text-emerald-300/40 disabled:border disabled:border-[#1A3824] disabled:shadow-none disabled:cursor-not-allowed text-white px-5 py-3 rounded-xl font-sans font-extrabold text-xs transition-all shadow-md shadow-[#00C853]/20 flex items-center space-x-1.5 shrink-0 cursor-pointer"
                       >
                         {isRagLoading ? (
                           <Loader2 className="w-4 h-4 animate-spin text-inherit" />
