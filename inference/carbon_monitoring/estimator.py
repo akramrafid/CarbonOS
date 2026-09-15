@@ -18,6 +18,84 @@ try:
 except ImportError:
     XGB_AVAILABLE = False
 
+STRATUM_ALLOMETRY = {
+    "SUNDARBANS_MANGROVE": {
+        "root_shoot_ratio": 0.49,     # Mahmood et al. 2019 / IPCC 2013 Wetlands Supplement
+        "carbon_fraction": 0.47,      # IPCC Wetlands default
+        "bulk_density_g_cm3": 0.82,   # Mangrove anaerobic delta mud (Sarker et al. 2016)
+        "base_soc_pct": 2.4,          # Deep delta silt core (100cm)
+        "soc_ndvi_factor": 0.6,
+        "description": "Sundarbans Estuarine Mangrove Complex (Tier-3 Blue Carbon)"
+    },
+    "TROPICAL_MOIST_FOREST": {
+        "root_shoot_ratio": 0.235,    # Mokany et al. 2006 / IPCC 2006 AFOLU
+        "carbon_fraction": 0.47,
+        "bulk_density_g_cm3": 1.15,   # Mineral clay/loam soils
+        "base_soc_pct": 0.9,
+        "soc_ndvi_factor": 0.4,
+        "description": "Chittagong Hill Tracts & Sylhet Tropical Semi-Evergreen Forest"
+    },
+    "COASTAL_AGROFORESTRY": {
+        "root_shoot_ratio": 0.28,     # IPCC 2006 Agroforestry default
+        "carbon_fraction": 0.46,
+        "bulk_density_g_cm3": 1.25,   # Alluvial agricultural soils
+        "base_soc_pct": 0.55,
+        "soc_ndvi_factor": 0.3,
+        "description": "Coastal Mixed Agroforestry and Social Forestry Belt"
+    }
+}
+
+def determine_stratum(lat: float, lng: float) -> str:
+    """
+    Classifies geographic coordinates into ecological forest strata for Bangladesh.
+    - SUNDARBANS_MANGROVE: Southwest coastal delta (21.4 <= lat <= 22.65 N, 88.9 <= lng <= 90.1 E)
+    - TROPICAL_MOIST_FOREST: Southeast Hill Tracts & Northeast Sylhet (lat > 21.0, lng >= 91.5 or lat >= 24.0, lng >= 91.4)
+    - COASTAL_AGROFORESTRY: Default agricultural / social forestry coastal plain
+    """
+    if 21.4 <= lat <= 22.65 and 88.9 <= lng <= 90.1:
+        return "SUNDARBANS_MANGROVE"
+    elif (21.0 <= lat <= 23.9 and lng >= 91.5) or (lat >= 24.0 and lng >= 91.4):
+        return "TROPICAL_MOIST_FOREST"
+    else:
+        return "COASTAL_AGROFORESTRY"
+
+def calculate_multi_pool(biomass_agb: float, carbon_agb: float, ndvi: float, stratum: str = "SUNDARBANS_MANGROVE", soc_depth_cm: float = 100.0) -> dict:
+    """
+    Computes IPCC Tier-3 / Verra VM0047 multi-pool carbon stocks:
+    1. Aboveground Biomass (AGB) Carbon: carbon_agb
+    2. Belowground Biomass (BGB) Carbon: carbon_agb * root_shoot_ratio
+    3. Soil Organic Carbon (SOC): bulk_density * soc_depth_cm * soc_pct (down to 100cm core)
+    Returns dictionary with carbon and biomass breakdown across all pools.
+    """
+    params = STRATUM_ALLOMETRY.get(stratum, STRATUM_ALLOMETRY["SUNDARBANS_MANGROVE"])
+    r_ratio = params["root_shoot_ratio"]
+    
+    # Belowground Biomass
+    biomass_bgb = biomass_agb * r_ratio
+    carbon_bgb = carbon_agb * r_ratio
+    
+    # Soil Organic Carbon (SOC)
+    soc_pct = params["base_soc_pct"] + (max(0.0, ndvi) * params["soc_ndvi_factor"])
+    carbon_soc = params["bulk_density_g_cm3"] * soc_depth_cm * soc_pct
+    
+    # Total Stocks
+    total_biomass = biomass_agb + biomass_bgb
+    total_carbon = carbon_agb + carbon_bgb + carbon_soc
+    
+    return {
+        "stratum": stratum,
+        "biomass_agb_mg_ha": round(biomass_agb, 2),
+        "biomass_bgb_mg_ha": round(biomass_bgb, 2),
+        "biomass_total_mg_ha": round(total_biomass, 2),
+        "carbon_agb_tc_ha": round(carbon_agb, 2),
+        "carbon_bgb_tc_ha": round(carbon_bgb, 2),
+        "carbon_soc_tc_ha": round(carbon_soc, 2),
+        "carbon_total_tc_ha": round(total_carbon, 2),
+        "root_shoot_ratio": r_ratio,
+        "soc_depth_cm": soc_depth_cm,
+        "soil_bulk_density": params["bulk_density_g_cm3"]
+    }
+
 class CarbonEstimator:
     def __init__(self):
         base_dir = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
@@ -223,14 +301,22 @@ class CarbonEstimator:
             "interval_method": "rf_tree_quantile"
         }
 
-    def estimate_carbon_stock(self, indices_data):
+    def estimate_carbon_stock(self, indices_data, lat=None, lng=None):
         """
-        Runs model inference for aggregate statistics.
+        Runs model inference for aggregate statistics with IPCC Tier-3 Multi-Pool Allometry.
+        Computes Aboveground Biomass (AGB), Belowground Biomass (BGB), and Soil Organic Carbon (SOC).
         """
         model = self.rf_model
         # Use active model
         is_xgb = self.model_type == "xgboost" and self.xgb_model is not None
         
+        # Determine coordinates and ecological stratum
+        if lat is None:
+            lat = indices_data.get("lat", indices_data.get("location_lat", 22.25))
+        if lng is None:
+            lng = indices_data.get("lng", indices_data.get("location_lng", 89.55))
+        stratum = determine_stratum(lat, lng)
+
         # Prepare feature vector (using mean indices)
         ndvi = indices_data.get("average_ndvi", 0.6)
         evi = indices_data.get("average_evi", 0.5)
@@ -262,25 +348,45 @@ class CarbonEstimator:
         X_df = pd.DataFrame([features], columns=self.feature_names)
 
         if is_xgb:
-            biomass = float(self.xgb_model["biomass"].predict(X_df)[0])
-            carbon = float(self.xgb_model["carbon"].predict(X_df)[0])
+            biomass_agb = float(self.xgb_model["biomass"].predict(X_df)[0])
+            carbon_agb = float(self.xgb_model["carbon"].predict(X_df)[0])
         else:
             pred = self.rf_model.predict(X_df)[0]
-            biomass = float(pred[0])
-            carbon = float(pred[1])
+            biomass_agb = float(pred[0])
+            carbon_agb = float(pred[1])
 
-        # Interval always comes from the RF ensemble regardless of active model -
-        # XGBoost doesn't give us ensemble spread for free. Label this clearly
-        # rather than implying the active model produced its own interval.
+        # Multi-pool calculation (IPCC Tier-3 / Verra VM0047)
+        multi_pool = calculate_multi_pool(biomass_agb, carbon_agb, ndvi, stratum=stratum)
+
+        # Interval from the RF ensemble for AGB, propagated across pools
         interval = self._rf_prediction_interval(X_df)
+        total_interval = None
+        if interval:
+            r = multi_pool["root_shoot_ratio"]
+            soc = multi_pool["carbon_soc_tc_ha"]
+            total_interval = {
+                "biomass_lower_90": round(interval["biomass_lower_90"] * (1.0 + r), 2),
+                "biomass_upper_90": round(interval["biomass_upper_90"] * (1.0 + r), 2),
+                "carbon_lower_90": round(interval["carbon_lower_90"] * (1.0 + r) + (soc * 0.88), 2),
+                "carbon_upper_90": round(interval["carbon_upper_90"] * (1.0 + r) + (soc * 1.12), 2),
+                "interval_method": interval.get("interval_method", "rf_tree_quantile")
+            }
 
         return {
-            "estimated_biomass_per_ha": round(biomass, 2),
-            "estimated_carbon_per_ha": round(carbon, 2),
+            "estimated_biomass_per_ha": multi_pool["biomass_total_mg_ha"],
+            "estimated_carbon_per_ha": multi_pool["carbon_total_tc_ha"],
+            "carbon_agb_tc_ha": multi_pool["carbon_agb_tc_ha"],
+            "carbon_bgb_tc_ha": multi_pool["carbon_bgb_tc_ha"],
+            "carbon_soc_tc_ha": multi_pool["carbon_soc_tc_ha"],
+            "biomass_agb_mg_ha": multi_pool["biomass_agb_mg_ha"],
+            "biomass_bgb_mg_ha": multi_pool["biomass_bgb_mg_ha"],
+            "forest_stratum": stratum,
+            "root_shoot_ratio": multi_pool["root_shoot_ratio"],
             "co2_multiplier": 3.667,
             "model_used": self.model_type,
             "feature_importance": self._get_feature_importances(),
-            "interval": interval,
+            "interval": total_interval,
+            "agb_interval": interval,
             "model_version": self.model_meta.get("version"),
             "model_trained_on": self.model_meta.get("trained_on"),
             "feature_vector": dict(zip(self.feature_names, [round(float(v), 5) for v in features]))

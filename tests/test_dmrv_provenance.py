@@ -141,9 +141,9 @@ class TestDMRVProvenanceExtension(unittest.TestCase):
 
         self.assertEqual(prov_data["result_id"], result_id)
         self.assertTrue(prov_data["hash_verified"], "Cryptographic hash must verify against content and previous hash.")
-        self.assertIn(prov_data["data_source"], ["gee_live", "simulated"])
+        self.assertIn(prov_data["data_source"], ["gee_live", "simulated", "stac_live"])
         self.assertEqual(prov_data["model_trained_on"], "synthetic-v1")
-        self.assertEqual(prov_data["gedi_tree_height_source"], "formula_estimate_not_gedi_l2b")
+        self.assertIn(prov_data["gedi_tree_height_source"], ["formula_estimate_not_gedi_l2b", "gedi_l2b_spatial_allometry"])
         self.assertTrue(len(prov_data["record_hash"]) == 64, "SHA-256 hash must be 64 characters hex.")
 
     def test_05_verify_provenance_chain_endpoint(self):

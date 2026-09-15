@@ -24,6 +24,7 @@ class AnalysisJob(Base):
     result = relationship("CarbonResult", uselist=False, back_populates="job", cascade="all, delete-orphan")
     layers = relationship("SatelliteLayer", back_populates="job", cascade="all, delete-orphan")
     reports = relationship("CarbonReport", back_populates="job", cascade="all, delete-orphan")
+    baseline = relationship("BaselineAssessment", uselist=False, back_populates="job", cascade="all, delete-orphan")
 
 
 class CarbonResult(Base):
@@ -48,6 +49,17 @@ class CarbonResult(Base):
     carbon_lower_90 = Column(Float, nullable=True)
     carbon_upper_90 = Column(Float, nullable=True)
     interval_method = Column(String(50), nullable=True)  # e.g. 'rf_tree_quantile'
+
+    # --- Multi-pool carbon stock vector (Sprint 2: IPCC Tier-3 / Verra VM0047) ---
+    forest_stratum = Column(String(50), default="SUNDARBANS_MANGROVE", nullable=True)
+    carbon_agb_tc_ha = Column(Float, nullable=True)  # Aboveground Biomass Carbon (tC/ha)
+    carbon_bgb_tc_ha = Column(Float, nullable=True)  # Belowground Biomass Carbon (tC/ha)
+    carbon_soc_tc_ha = Column(Float, nullable=True)  # Soil Organic Carbon (tC/ha)
+
+    # --- Verra VM0047 Conformal Uncertainty & Precision Deductions (Sprint 4) ---
+    relative_margin_of_error = Column(Float, nullable=True)
+    verra_precision_discount_pct = Column(Float, default=0.0, nullable=True)
+    conservative_creditable_tco2e = Column(Float, nullable=True)
 
     job = relationship("AnalysisJob", back_populates="result")
     provenance = relationship("EstimateProvenance", uselist=False, back_populates="result", cascade="all, delete-orphan")
@@ -161,3 +173,38 @@ class CarbonAlert(Base):
     suggested_action = Column(Text, nullable=False)
     is_resolved = Column(Boolean, default=False)
     created_at = Column(DateTime, default=datetime.datetime.utcnow)
+
+
+class BaselineAssessment(Base):
+    """
+    Sprint 3: Dynamic Synthetic Control Baseline & Leakage Monitoring (Verra VM0047).
+    Records pre-intervention donor pool weights, counterfactual carbon trajectory,
+    leakage belt buffer deductions, and non-permanence buffer pool withholding.
+    """
+    __tablename__ = 'carbon_mrv_baselineassessment'
+
+    id = Column(String(36), primary_key=True, default=generate_uuid)
+    job_id = Column(String(36), ForeignKey('farmers_ai_analysisjob.id', ondelete='CASCADE'), unique=True, nullable=False)
+    
+    baseline_method = Column(String(50), default="synthetic_control_abadie")
+    donor_pool_count = Column(Integer, default=10)
+    pre_treatment_rmse = Column(Float, nullable=False)
+    weights_json = Column(Text, nullable=False)  # JSON dictionary of donor_id -> weight
+    
+    historical_trajectory_json = Column(Text, nullable=False)  # JSON of pre/post project vs synthetic baseline
+    counterfactual_carbon_tc_ha = Column(Float, nullable=False)
+    gross_additionality_tco2e = Column(Float, nullable=False)
+    
+    # 10 km Leakage Belt Monitoring
+    leakage_belt_area_ha = Column(Float, nullable=False)
+    leakage_deduction_tco2e = Column(Float, default=0.0)
+    leakage_risk_rating = Column(String(20), default="LOW")
+    
+    # Non-Permanence Risk Buffer Pool (Verra AFOLU)
+    buffer_deduction_pct = Column(Float, default=0.18) # e.g. 18% for coastal delta
+    buffer_withheld_tco2e = Column(Float, nullable=False)
+    net_creditable_tco2e = Column(Float, nullable=False)
+    
+    created_at = Column(DateTime, default=datetime.datetime.utcnow)
+
+    job = relationship("AnalysisJob", back_populates="baseline")

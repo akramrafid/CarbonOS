@@ -8,12 +8,15 @@ from typing import List, Optional
 
 from .database import get_db, SessionLocal
 from .models import (AnalysisJob, CarbonResult, SatelliteLayer, UploadedBoundary, CarbonReport,
-                      CarbonAlert, GroundTruthPlot, EstimateProvenance)
+                      CarbonAlert, GroundTruthPlot, EstimateProvenance, BaselineAssessment)
 from .satellite import SatelliteEngine
 from .estimator import CarbonEstimator, XGB_AVAILABLE
 from .report_generator import ReportGenerator
 from . import provenance as provenance_utils
 from .calibration import run_recalibration
+from .baseline import run_dynamic_baseline_assessment, LeakageMonitoringEngine, RiskBufferCalculator
+from .uncertainty import (compute_conformal_verra_assessment, ConformalUncertaintyEngine,
+                          VerraPrecisionDeductionEngine)
 
 router = APIRouter(prefix="/api/carbon", tags=["Carbon Monitoring"])
 
@@ -59,8 +62,8 @@ def run_async_analysis(job_id: str):
             job.analysis_type
         )
 
-        # Run AI estimation
-        estimator_result = carbon_estimator.estimate_carbon_stock(sat_result)
+        # Run AI estimation with multi-pool allometry
+        estimator_result = carbon_estimator.estimate_carbon_stock(sat_result, lat=coords[0][0], lng=coords[0][1])
 
         # Compute totals
         forest_area_ha = sat_result["forest_area_ha"]
@@ -77,6 +80,16 @@ def run_async_analysis(job_id: str):
 
         # Save result
         interval = estimator_result.get("interval") or {}
+        
+        # Conformal uncertainty & Verra precision discount evaluation on gross stock
+        initial_uncert = compute_conformal_verra_assessment(
+            net_creditable_tco2e=round(total_co2e, 2),
+            carbon_lower_90=interval.get("carbon_lower_90") or (carbon_per_ha * 0.85),
+            carbon_upper_90=interval.get("carbon_upper_90") or (carbon_per_ha * 1.15),
+            estimated_carbon_tc_ha=carbon_per_ha,
+            db=db
+        )
+
         result = CarbonResult(
             job_id=job.id,
             estimated_biomass=biomass_per_ha,
@@ -90,7 +103,14 @@ def run_async_analysis(job_id: str):
             biomass_upper_90=interval.get("biomass_upper_90"),
             carbon_lower_90=interval.get("carbon_lower_90"),
             carbon_upper_90=interval.get("carbon_upper_90"),
-            interval_method=interval.get("interval_method")
+            interval_method=interval.get("interval_method"),
+            forest_stratum=estimator_result.get("forest_stratum", "SUNDARBANS_MANGROVE"),
+            carbon_agb_tc_ha=estimator_result.get("carbon_agb_tc_ha"),
+            carbon_bgb_tc_ha=estimator_result.get("carbon_bgb_tc_ha"),
+            carbon_soc_tc_ha=estimator_result.get("carbon_soc_tc_ha"),
+            relative_margin_of_error=initial_uncert["relative_margin_of_error"],
+            verra_precision_discount_pct=initial_uncert["verra_precision_discount_pct"],
+            conservative_creditable_tco2e=initial_uncert["conservative_creditable_tco2e"]
         )
         db.add(result)
         db.flush()  # populate result.id before building the provenance record below
@@ -124,6 +144,47 @@ def run_async_analysis(job_id: str):
             layer_url=tile_url
         )
         db.add(layer)
+
+        # Verra VM0047 Dynamic Synthetic Control Baseline & 10km Leakage Belt
+        try:
+            baseline_data = run_dynamic_baseline_assessment(
+                job_id=job.id,
+                polygon_geojson=job.polygon_geojson,
+                forest_area_ha=forest_area_ha,
+                project_carbon_tc_ha=carbon_per_ha,
+                stratum=estimator_result.get("forest_stratum", "SUNDARBANS_MANGROVE")
+            )
+            baseline_rec = BaselineAssessment(
+                job_id=job.id,
+                baseline_method=baseline_data["baseline_method"],
+                donor_pool_count=len(baseline_data["donor_weights"]),
+                pre_treatment_rmse=baseline_data["pre_treatment_rmse"],
+                weights_json=json.dumps(baseline_data["donor_weights"]),
+                historical_trajectory_json=json.dumps(baseline_data["trajectory"]),
+                counterfactual_carbon_tc_ha=baseline_data["counterfactual_carbon_tc_ha"],
+                gross_additionality_tco2e=baseline_data["gross_additionality_tco2e"],
+                leakage_belt_area_ha=baseline_data["leakage_belt_area_ha"],
+                leakage_deduction_tco2e=baseline_data["leakage_deduction_tco2e"],
+                leakage_risk_rating=baseline_data["leakage_risk_rating"],
+                buffer_deduction_pct=baseline_data["buffer_deduction_pct"],
+                buffer_withheld_tco2e=baseline_data["buffer_withheld_tco2e"],
+                net_creditable_tco2e=baseline_data["net_creditable_tco2e"]
+            )
+            db.add(baseline_rec)
+
+            # Re-evaluate conformal uncertainty and Verra discount on net additionality credits
+            net_uncert = compute_conformal_verra_assessment(
+                net_creditable_tco2e=baseline_data["net_creditable_tco2e"],
+                carbon_lower_90=interval.get("carbon_lower_90") or (carbon_per_ha * 0.85),
+                carbon_upper_90=interval.get("carbon_upper_90") or (carbon_per_ha * 1.15),
+                estimated_carbon_tc_ha=carbon_per_ha,
+                db=db
+            )
+            result.relative_margin_of_error = net_uncert["relative_margin_of_error"]
+            result.verra_precision_discount_pct = net_uncert["verra_precision_discount_pct"]
+            result.conservative_creditable_tco2e = net_uncert["conservative_creditable_tco2e"]
+        except Exception as e_base:
+            print(f"[Baseline Warning] Could not construct baseline for job {job.id}: {e_base}")
 
         # Create system Alerts if forest health is poor (NDVI < 0.35) and area is significant
         if sat_result["average_ndvi"] < 0.40 and forest_area_ha > 5.0:
@@ -243,7 +304,14 @@ def get_analysis_history(page: int = 1, limit: int = 10, db: Session = Depends(g
                 "biomass_upper_90": job.result.biomass_upper_90,
                 "carbon_lower_90": job.result.carbon_lower_90,
                 "carbon_upper_90": job.result.carbon_upper_90,
-                "interval_method": job.result.interval_method
+                "interval_method": job.result.interval_method,
+                "forest_stratum": job.result.forest_stratum,
+                "carbon_agb_tc_ha": job.result.carbon_agb_tc_ha,
+                "carbon_bgb_tc_ha": job.result.carbon_bgb_tc_ha,
+                "carbon_soc_tc_ha": job.result.carbon_soc_tc_ha,
+                "relative_margin_of_error": job.result.relative_margin_of_error,
+                "verra_precision_discount_pct": job.result.verra_precision_discount_pct,
+                "conservative_creditable_tco2e": job.result.conservative_creditable_tco2e
             }
         
         layers_data = []
@@ -252,6 +320,22 @@ def get_analysis_history(page: int = 1, limit: int = 10, db: Session = Depends(g
                 "layer_type": l.layer_type,
                 "layer_url": l.layer_url
             })
+
+        base_data = None
+        if job.baseline:
+            base_data = {
+                "baseline_method": job.baseline.baseline_method,
+                "donor_pool_count": job.baseline.donor_pool_count,
+                "pre_treatment_rmse": job.baseline.pre_treatment_rmse,
+                "counterfactual_carbon_tc_ha": job.baseline.counterfactual_carbon_tc_ha,
+                "gross_additionality_tco2e": job.baseline.gross_additionality_tco2e,
+                "leakage_belt_area_ha": job.baseline.leakage_belt_area_ha,
+                "leakage_deduction_tco2e": job.baseline.leakage_deduction_tco2e,
+                "leakage_risk_rating": job.baseline.leakage_risk_rating,
+                "buffer_deduction_pct": job.baseline.buffer_deduction_pct,
+                "buffer_withheld_tco2e": job.baseline.buffer_withheld_tco2e,
+                "net_creditable_tco2e": job.baseline.net_creditable_tco2e
+            }
 
         results.append({
             "id": job.id,
@@ -263,6 +347,7 @@ def get_analysis_history(page: int = 1, limit: int = 10, db: Session = Depends(g
             "created_at": job.created_at.isoformat(),
             "polygon_geojson": job.polygon_geojson,
             "result": res_data,
+            "baseline": base_data,
             "layers": layers_data
         })
 
@@ -276,7 +361,7 @@ def get_analysis_history(page: int = 1, limit: int = 10, db: Session = Depends(g
 @router.get("/results/{result_id}")
 def get_result(result_id: str, db: Session = Depends(get_db)):
     """
-    Retrieves a single carbon result by result_id or job_id, including 90% prediction intervals.
+    Retrieves a single carbon result by result_id or job_id, including 90% prediction intervals, multi-pool vector, and Verra conformal precision.
     """
     res = db.query(CarbonResult).filter(CarbonResult.id == result_id).first()
     if not res:
@@ -299,8 +384,120 @@ def get_result(result_id: str, db: Session = Depends(get_db)):
         "carbon_lower_90": res.carbon_lower_90,
         "carbon_upper_90": res.carbon_upper_90,
         "interval_method": res.interval_method,
+        "forest_stratum": res.forest_stratum,
+        "carbon_agb_tc_ha": res.carbon_agb_tc_ha,
+        "carbon_bgb_tc_ha": res.carbon_bgb_tc_ha,
+        "carbon_soc_tc_ha": res.carbon_soc_tc_ha,
+        "relative_margin_of_error": res.relative_margin_of_error,
+        "verra_precision_discount_pct": res.verra_precision_discount_pct,
+        "conservative_creditable_tco2e": res.conservative_creditable_tco2e,
         "created_at": res.created_at.isoformat() if res.created_at else None
     }
+
+@router.get("/baseline/{job_id}")
+def get_baseline_assessment(job_id: str, db: Session = Depends(get_db)):
+    """
+    Retrieves the Verra VM0047 dynamic synthetic control baseline assessment,
+    including donor weights, counterfactual trajectory, leakage deduction, and buffer pool withholding.
+    """
+    baseline = db.query(BaselineAssessment).filter(BaselineAssessment.job_id == job_id).first()
+    if not baseline:
+        job = db.query(AnalysisJob).filter(AnalysisJob.id == job_id).first()
+        if not job or not job.result:
+            raise HTTPException(status_code=404, detail="Baseline assessment not found for this job.")
+        # Compute on-the-fly if missing on older job
+        baseline_data = run_dynamic_baseline_assessment(
+            job_id=job.id,
+            polygon_geojson=job.polygon_geojson,
+            forest_area_ha=job.result.forest_area_ha,
+            project_carbon_tc_ha=job.result.estimated_carbon,
+            stratum=job.result.forest_stratum or "SUNDARBANS_MANGROVE"
+        )
+        return baseline_data
+
+    return {
+        "id": baseline.id,
+        "job_id": baseline.job_id,
+        "baseline_method": baseline.baseline_method,
+        "donor_pool_count": baseline.donor_pool_count,
+        "pre_treatment_rmse": baseline.pre_treatment_rmse,
+        "donor_weights": json.loads(baseline.weights_json),
+        "trajectory": json.loads(baseline.historical_trajectory_json),
+        "counterfactual_carbon_tc_ha": baseline.counterfactual_carbon_tc_ha,
+        "gross_additionality_tco2e": baseline.gross_additionality_tco2e,
+        "leakage_belt_area_ha": baseline.leakage_belt_area_ha,
+        "leakage_deduction_tco2e": baseline.leakage_deduction_tco2e,
+        "leakage_risk_rating": baseline.leakage_risk_rating,
+        "buffer_deduction_pct": baseline.buffer_deduction_pct,
+        "buffer_withheld_tco2e": baseline.buffer_withheld_tco2e,
+        "net_creditable_tco2e": baseline.net_creditable_tco2e,
+        "created_at": baseline.created_at.isoformat() if baseline.created_at else None
+    }
+
+@router.post("/baseline/assess")
+def assess_baseline_direct(
+    polygon_geojson: str = Form(...),
+    forest_area_ha: float = Form(...),
+    project_carbon_tc_ha: float = Form(...),
+    stratum: str = Form("SUNDARBANS_MANGROVE"),
+    leakage_belt_loss_rate: float = Form(0.015),
+    regional_control_loss_rate: float = Form(0.018)
+):
+    """
+    Direct simulation endpoint for Verra VM0047 dynamic baseline, leakage belt, and risk buffer.
+    """
+    return run_dynamic_baseline_assessment(
+        job_id="SIMULATED_BASELINE",
+        polygon_geojson=polygon_geojson,
+        forest_area_ha=forest_area_ha,
+        project_carbon_tc_ha=project_carbon_tc_ha,
+        stratum=stratum,
+        leakage_belt_loss_rate=leakage_belt_loss_rate,
+        regional_control_loss_rate=regional_control_loss_rate
+    )
+
+@router.get("/uncertainty/{result_id}")
+def get_uncertainty_assessment(result_id: str, db: Session = Depends(get_db)):
+    """
+    Retrieves finite-sample distribution-free conformal uncertainty intervals (90% CI)
+    and Verra VM0047 precision deduction evaluation for a carbon analysis result.
+    """
+    res = db.query(CarbonResult).filter(CarbonResult.id == result_id).first()
+    if not res:
+        res = db.query(CarbonResult).filter(CarbonResult.job_id == result_id).first()
+    if not res:
+        raise HTTPException(status_code=404, detail="Carbon result not found.")
+
+    assessment = compute_conformal_verra_assessment(
+        net_creditable_tco2e=res.tonnes_co2e,
+        carbon_lower_90=res.carbon_lower_90 or (res.estimated_carbon * 0.85),
+        carbon_upper_90=res.carbon_upper_90 or (res.estimated_carbon * 1.15),
+        estimated_carbon_tc_ha=res.estimated_carbon,
+        db=db
+    )
+    assessment["result_id"] = res.id
+    assessment["job_id"] = res.job_id
+    assessment["verra_compliance_standard"] = "Verra VM0047 Section 8.4 & VCS Standard v4.5"
+    return assessment
+
+@router.post("/uncertainty/assess")
+def assess_uncertainty_direct(
+    net_creditable_tco2e: float = Form(...),
+    carbon_lower_90: float = Form(...),
+    carbon_upper_90: float = Form(...),
+    estimated_carbon_tc_ha: float = Form(...),
+    allowable_error: float = Form(0.15)
+):
+    """
+    Direct simulation endpoint for Conformal Prediction bounds and Verra VM0047 precision deduction.
+    """
+    return compute_conformal_verra_assessment(
+        net_creditable_tco2e=net_creditable_tco2e,
+        carbon_lower_90=carbon_lower_90,
+        carbon_upper_90=carbon_upper_90,
+        estimated_carbon_tc_ha=estimated_carbon_tc_ha,
+        allowable_error=allowable_error
+    )
 
 @router.get("/report/{job_id}")
 def get_report(job_id: str, format: str = "pdf", db: Session = Depends(get_db)):
@@ -329,7 +526,23 @@ def get_report(job_id: str, format: str = "pdf", db: Session = Depends(get_db)):
         "satellite_sources": job.result.satellite_sources
     }
 
-    if format == "csv":
+    if format in ["dossier", "vvb-pdf", "audit-pdf"]:
+        provenance = db.query(EstimateProvenance).filter(EstimateProvenance.result_id == job.result.id).first()
+        dossier = ReportGenerator.build_vvb_audit_dossier(job, job.result, job.baseline, provenance, db=db)
+        return Response(
+            content=ReportGenerator.generate_vvb_dossier_pdf(dossier),
+            media_type="application/pdf",
+            headers={"Content-Disposition": f"attachment; filename=VVB_Audit_Dossier_{job_id[:8]}.pdf"}
+        )
+    elif format in ["dossier-md", "markdown", "md"]:
+        provenance = db.query(EstimateProvenance).filter(EstimateProvenance.result_id == job.result.id).first()
+        dossier = ReportGenerator.build_vvb_audit_dossier(job, job.result, job.baseline, provenance, db=db)
+        return Response(
+            content=ReportGenerator.generate_vvb_dossier_markdown(dossier),
+            media_type="text/markdown",
+            headers={"Content-Disposition": f"attachment; filename=VVB_Audit_Dossier_{job_id[:8]}.md"}
+        )
+    elif format == "csv":
         csv_content = ReportGenerator.generate_csv(job_data, result_data)
         return Response(
             content=csv_content,
@@ -343,13 +556,43 @@ def get_report(job_id: str, format: str = "pdf", db: Session = Depends(get_db)):
             media_type="application/json",
             headers={"Content-Disposition": f"attachment; filename=boundary_carbon_{job_id}.geojson"}
         )
-    else: # PDF
+    else: # PDF standard summary
         pdf_bytes = ReportGenerator.generate_pdf_placeholder(job_data, result_data)
         return Response(
             content=pdf_bytes,
             media_type="application/pdf",
             headers={"Content-Disposition": f"attachment; filename=carbon_report_{job_id}.pdf"}
         )
+
+@router.get("/report/audit-dossier/{job_id}")
+def get_audit_dossier(job_id: str, format: str = "json", db: Session = Depends(get_db)):
+    """
+    Generates an automated, institutional-grade Verra VM0047 Monitoring Dossier & VVB Audit Package.
+    Outputs: JSON (default), Markdown ('markdown' or 'md'), or PDF ('pdf').
+    """
+    job = db.query(AnalysisJob).filter(AnalysisJob.id == job_id).first()
+    if not job or not job.result:
+        raise HTTPException(status_code=404, detail="Analysis result or job not found.")
+
+    provenance = db.query(EstimateProvenance).filter(EstimateProvenance.result_id == job.result.id).first()
+    dossier = ReportGenerator.build_vvb_audit_dossier(job, job.result, job.baseline, provenance, db=db)
+
+    if format in ["markdown", "md"]:
+        md_text = ReportGenerator.generate_vvb_dossier_markdown(dossier)
+        return Response(
+            content=md_text,
+            media_type="text/markdown",
+            headers={"Content-Disposition": f"attachment; filename=VVB_Audit_Dossier_{job_id[:8]}.md"}
+        )
+    elif format == "pdf":
+        pdf_bytes = ReportGenerator.generate_vvb_dossier_pdf(dossier)
+        return Response(
+            content=pdf_bytes,
+            media_type="application/pdf",
+            headers={"Content-Disposition": f"attachment; filename=VVB_Audit_Dossier_{job_id[:8]}.pdf"}
+        )
+    else:
+        return dossier
 
 @router.post("/boundary/upload")
 async def upload_boundary(
