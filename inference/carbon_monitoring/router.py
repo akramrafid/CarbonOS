@@ -7,10 +7,13 @@ from sqlalchemy.orm import Session
 from typing import List, Optional
 
 from .database import get_db, SessionLocal
-from .models import AnalysisJob, CarbonResult, SatelliteLayer, UploadedBoundary, CarbonReport, CarbonAlert
+from .models import (AnalysisJob, CarbonResult, SatelliteLayer, UploadedBoundary, CarbonReport,
+                      CarbonAlert, GroundTruthPlot, EstimateProvenance)
 from .satellite import SatelliteEngine
 from .estimator import CarbonEstimator, XGB_AVAILABLE
 from .report_generator import ReportGenerator
+from . import provenance as provenance_utils
+from .calibration import run_recalibration
 
 router = APIRouter(prefix="/api/carbon", tags=["Carbon Monitoring"])
 
@@ -34,12 +37,17 @@ def run_async_analysis(job_id: str):
         # Parse polygon coordinates
         polygon_geojson = json.loads(job.polygon_geojson)
         coords = []
-        if polygon_geojson.get("type") == "Polygon":
-            # GEE / Simulator expects list of [lat, lng]
-            # GeoJSON stores coordinates as [lng, lat]
-            coords = [[c[1], c[0]] for c in polygon_geojson["coordinates"][0]]
-        elif polygon_geojson.get("type") == "Feature":
-            coords = [[c[1], c[0]] for c in polygon_geojson["geometry"]["coordinates"][0]]
+        if isinstance(polygon_geojson, list):
+            coords = polygon_geojson
+        elif isinstance(polygon_geojson, dict):
+            if polygon_geojson.get("type") == "Polygon":
+                # GEE / Simulator expects list of [lat, lng]
+                # GeoJSON stores coordinates as [lng, lat]
+                coords = [[c[1], c[0]] for c in polygon_geojson["coordinates"][0]]
+            elif polygon_geojson.get("type") == "Feature":
+                coords = [[c[1], c[0]] for c in polygon_geojson["geometry"]["coordinates"][0]]
+            else:
+                raise ValueError("Unsupported geometry type. Must be Polygon.")
         else:
             raise ValueError("Unsupported geometry type. Must be Polygon.")
 
@@ -68,6 +76,7 @@ def run_async_analysis(job_id: str):
         confidence = min(0.98, max(0.50, confidence))
 
         # Save result
+        interval = estimator_result.get("interval") or {}
         result = CarbonResult(
             job_id=job.id,
             estimated_biomass=biomass_per_ha,
@@ -76,9 +85,33 @@ def run_async_analysis(job_id: str):
             avg_ndvi=sat_result["average_ndvi"],
             forest_area_ha=forest_area_ha,
             confidence=round(confidence, 2),
-            satellite_sources=sat_result["satellite_sources"]
+            satellite_sources=sat_result["satellite_sources"],
+            biomass_lower_90=interval.get("biomass_lower_90"),
+            biomass_upper_90=interval.get("biomass_upper_90"),
+            carbon_lower_90=interval.get("carbon_lower_90"),
+            carbon_upper_90=interval.get("carbon_upper_90"),
+            interval_method=interval.get("interval_method")
         )
         db.add(result)
+        db.flush()  # populate result.id before building the provenance record below
+
+        # Part (c): immutable provenance record, written in the SAME transaction
+        # as the result it describes. If this fails, the whole estimate is
+        # rolled back rather than existing without a provenance trail.
+        prov = provenance_utils.build_provenance_record(
+            db,
+            result_id=result.id,
+            data_source=sat_result.get("data_source", "unknown"),
+            satellite_scene_ids=sat_result.get("analysis_metadata", {}).get("s2_scene_ids", []),
+            gedi_tree_height_source=sat_result.get("analysis_metadata", {}).get(
+                "gedi_tree_height_source", "formula_estimate_not_gedi_l2b"),
+            model_type=estimator_result.get("model_used", "random_forest"),
+            model_version=estimator_result.get("model_version", "0.0.0-unset"),
+            model_trained_on=estimator_result.get("model_trained_on", "synthetic-v1"),
+            feature_vector=estimator_result.get("feature_vector", {}),
+            lat=coords[0][0], lng=coords[0][1]
+        )
+        db.add(prov)
 
         # Save layer
         tile_url = sat_result.get("tile_url", "")
@@ -198,13 +231,19 @@ def get_analysis_history(page: int = 1, limit: int = 10, db: Session = Depends(g
         res_data = None
         if job.result:
             res_data = {
+                "id": job.result.id,
                 "estimated_biomass": job.result.estimated_biomass,
                 "estimated_carbon": job.result.estimated_carbon,
                 "tonnes_co2e": job.result.tonnes_co2e,
                 "avg_ndvi": job.result.avg_ndvi,
                 "forest_area_ha": job.result.forest_area_ha,
                 "confidence": job.result.confidence,
-                "satellite_sources": job.result.satellite_sources
+                "satellite_sources": job.result.satellite_sources,
+                "biomass_lower_90": job.result.biomass_lower_90,
+                "biomass_upper_90": job.result.biomass_upper_90,
+                "carbon_lower_90": job.result.carbon_lower_90,
+                "carbon_upper_90": job.result.carbon_upper_90,
+                "interval_method": job.result.interval_method
             }
         
         layers_data = []
@@ -232,6 +271,35 @@ def get_analysis_history(page: int = 1, limit: int = 10, db: Session = Depends(g
         "page": page,
         "limit": limit,
         "items": results
+    }
+
+@router.get("/results/{result_id}")
+def get_result(result_id: str, db: Session = Depends(get_db)):
+    """
+    Retrieves a single carbon result by result_id or job_id, including 90% prediction intervals.
+    """
+    res = db.query(CarbonResult).filter(CarbonResult.id == result_id).first()
+    if not res:
+        res = db.query(CarbonResult).filter(CarbonResult.job_id == result_id).first()
+    if not res:
+        raise HTTPException(status_code=404, detail="Carbon result not found.")
+
+    return {
+        "id": res.id,
+        "job_id": res.job_id,
+        "estimated_biomass": res.estimated_biomass,
+        "estimated_carbon": res.estimated_carbon,
+        "tonnes_co2e": res.tonnes_co2e,
+        "avg_ndvi": res.avg_ndvi,
+        "forest_area_ha": res.forest_area_ha,
+        "confidence": res.confidence,
+        "satellite_sources": res.satellite_sources,
+        "biomass_lower_90": res.biomass_lower_90,
+        "biomass_upper_90": res.biomass_upper_90,
+        "carbon_lower_90": res.carbon_lower_90,
+        "carbon_upper_90": res.carbon_upper_90,
+        "interval_method": res.interval_method,
+        "created_at": res.created_at.isoformat() if res.created_at else None
     }
 
 @router.get("/report/{job_id}")
@@ -467,5 +535,119 @@ def get_settings():
     return {
         "active_model": carbon_estimator.model_type,
         "xgboost_available": XGB_AVAILABLE,
-        "feature_names": carbon_estimator.feature_names
+        "feature_names": carbon_estimator.feature_names,
+        "model_version": carbon_estimator.model_meta.get("version"),
+        "model_trained_on": carbon_estimator.model_meta.get("trained_on")
     }
+
+# --- Part (b): ground-truth plots ---
+
+@router.post("/ground-truth")
+def submit_ground_truth_plot(
+    plot_name: str = Form(...),
+    location_lat: float = Form(...),
+    location_lng: float = Form(...),
+    measured_biomass_mg_ha: float = Form(...),
+    measured_carbon_tc_ha: float = Form(...),
+    measurement_date: str = Form(...),
+    measurement_method: str = Form(...),
+    collected_by: str = Form(...),
+    plot_radius_m: float = Form(15.0),
+    notes: Optional[str] = Form(None),
+    db: Session = Depends(get_db)
+):
+    """
+    Logs a real field measurement. This is the only thing that can ever make
+    the model's accuracy claims real - there is no code substitute for someone
+    physically measuring trees. TODO: gate this behind field-team authentication
+    once auth exists; right now anyone who can reach this endpoint can write to
+    the calibration dataset, which is a data-integrity risk worth closing before
+    this goes anywhere near a VVB conversation.
+    """
+    try:
+        m_date = datetime.datetime.strptime(measurement_date, "%Y-%m-%d").date()
+    except ValueError:
+        raise HTTPException(status_code=400, detail="Invalid measurement_date format. Use YYYY-MM-DD.")
+
+    plot = GroundTruthPlot(
+        plot_name=plot_name,
+        location_lat=location_lat,
+        location_lng=location_lng,
+        plot_radius_m=plot_radius_m,
+        measured_biomass_mg_ha=measured_biomass_mg_ha,
+        measured_carbon_tc_ha=measured_carbon_tc_ha,
+        measurement_date=m_date,
+        measurement_method=measurement_method,
+        collected_by=collected_by,
+        notes=notes
+    )
+    db.add(plot)
+    db.commit()
+    db.refresh(plot)
+    return {"id": plot.id, "status": "recorded", "used_in_training": False}
+
+
+@router.get("/ground-truth")
+def list_ground_truth_plots(db: Session = Depends(get_db)):
+    plots = db.query(GroundTruthPlot).order_by(GroundTruthPlot.measurement_date.desc()).all()
+    return [{
+        "id": p.id, "plot_name": p.plot_name, "location": [p.location_lat, p.location_lng],
+        "measured_carbon_tc_ha": p.measured_carbon_tc_ha, "measurement_date": p.measurement_date.isoformat(),
+        "measurement_method": p.measurement_method, "used_in_training": p.used_in_training
+    } for p in plots]
+
+
+@router.post("/recalibrate")
+def trigger_recalibration():
+    """
+    Manually triggers the recalibration job (normally run on a schedule via
+    Celery beat - see calibration.py). TODO: gate behind admin auth before
+    exposing this outside internal use; it's a cheap operation to abuse
+    (mostly Earth Engine quota) even though it can't corrupt the live model
+    thanks to the staging/validate/promote design.
+    """
+    result = run_recalibration()
+    return result
+
+# --- Part (c): provenance ---
+
+@router.get("/provenance/verify-chain")
+def verify_provenance_chain(db: Session = Depends(get_db)):
+    """
+    Walks the entire provenance chain and confirms nothing has been altered
+    after the fact. Run this before any audit conversation.
+    """
+    return provenance_utils.verify_chain(db)
+
+
+@router.get("/provenance/{result_id}")
+def get_provenance(result_id: str, db: Session = Depends(get_db)):
+    """
+    Returns the full provenance record for one estimate - the artifact you'd
+    actually hand a VVB auditor. Recomputes the hash on the fly so tampering
+    is visible in the response, not just in an offline check.
+    """
+    record = db.query(EstimateProvenance).filter(EstimateProvenance.result_id == result_id).first()
+    if not record:
+        raise HTTPException(status_code=404, detail="No provenance record found for this result.")
+
+    payload = {
+        "result_id": record.result_id, "data_source": record.data_source,
+        "satellite_scene_ids": json.loads(record.satellite_scene_ids or "[]"),
+        "gedi_tree_height_source": record.gedi_tree_height_source,
+        "model_type": record.model_type, "model_version": record.model_version,
+        "model_trained_on": record.model_trained_on,
+        "feature_vector": json.loads(record.feature_vector_json),
+        "geolocation_lat": record.geolocation_lat, "geolocation_lng": record.geolocation_lng,
+    }
+    recomputed = provenance_utils.compute_record_hash(payload, record.previous_hash)
+
+    return {
+        **payload,
+        "record_hash": record.record_hash,
+        "previous_hash": record.previous_hash,
+        "hash_verified": recomputed == record.record_hash,
+        "created_at": record.created_at.isoformat()
+    }
+
+

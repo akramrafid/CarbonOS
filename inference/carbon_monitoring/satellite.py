@@ -183,6 +183,14 @@ class SatelliteEngine:
         # In full production, this reads GEDI L2B assets
         grid_data = self._generate_simulated_grid(bounds, mean_stats.get('NDVI', 0.6), seed=42)
 
+        # PROVENANCE: capture the exact constituent scene IDs that went into the median
+        # composite. A composite has no single "pass ID" - record the full set instead
+        # of pretending there's one scene behind this estimate.
+        try:
+            scene_ids = s2_collection.aggregate_array('system:index').getInfo()
+        except Exception:
+            scene_ids = []
+
         return {
             "average_ndvi": mean_stats.get('NDVI', 0.6),
             "average_evi": mean_stats.get('EVI', 0.5),
@@ -198,10 +206,13 @@ class SatelliteEngine:
             "tile_url": tile_url,
             "bounds": bounds,
             "grid_pixels": grid_data["pixels"],
+            "data_source": "gee_live",
             "analysis_metadata": {
                 "cloud_cover_max": 20,
                 "compositing_method": "median",
-                "bands_processed": ["B2", "B3", "B4", "B8", "B11", "B12", "VV", "VH", "QA60"]
+                "bands_processed": ["B2", "B3", "B4", "B8", "B11", "B12", "VV", "VH", "QA60"],
+                "s2_scene_ids": scene_ids,
+                "gedi_tree_height_source": "formula_estimate_not_gedi_l2b"
             }
         }
 
@@ -272,10 +283,13 @@ class SatelliteEngine:
             "tile_url": "", # Will be generated in estimator.py from pixel estimations
             "bounds": bounds,
             "grid_pixels": grid_data["pixels"],
+            "data_source": "simulated",
             "analysis_metadata": {
                 "cloud_cover_max": 20,
                 "compositing_method": "median",
                 "bands_processed": ["B2", "B3", "B4", "B8", "B11", "B12", "VV", "VH", "QA60"],
+                "s2_scene_ids": [],
+                "gedi_tree_height_source": "formula_estimate_not_gedi_l2b",
                 "simulation": True
             }
         }

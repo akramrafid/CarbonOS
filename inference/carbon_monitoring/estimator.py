@@ -1,5 +1,7 @@
 import os
+import json
 import time
+import datetime
 import numpy as np
 import pandas as pd
 import joblib
@@ -8,6 +10,7 @@ import io
 import base64
 from sklearn.ensemble import RandomForestRegressor
 from sklearn.model_selection import train_test_split
+from sklearn.metrics import mean_absolute_error, r2_score
 
 try:
     import xgboost as xgb
@@ -21,6 +24,11 @@ class CarbonEstimator:
         self.model_dir = os.path.join(base_dir, "models")
         self.rf_path = os.path.join(self.model_dir, "carbon_rf_model.joblib")
         self.xgb_path = os.path.join(self.model_dir, "carbon_xgb_model.joblib")
+        self.meta_path = os.path.join(self.model_dir, "carbon_model_meta.json")
+        # Honest default: until a recalibration run promotes a real-data model,
+        # every estimate must say plainly that it came from a synthetic-trained model.
+        self.model_meta = {"version": "0.0.0-unset", "trained_on": "synthetic-v1",
+                            "trained_at": None, "validation": None}
         
         # Extended 16-feature vector
         self.feature_names = [
@@ -42,6 +50,12 @@ class CarbonEstimator:
         If missing, automatically generates synthetic datasets representing GEDI
         and Sentinel-2 forestry features, fits the estimators, and serializes them.
         """
+        if os.path.exists(self.meta_path):
+            try:
+                with open(self.meta_path, "r") as f:
+                    self.model_meta = json.load(f)
+            except Exception as e:
+                print(f"[AI Module] Could not read model metadata, using default: {e}")
         # Load RF
         if os.path.exists(self.rf_path):
             try:
@@ -156,6 +170,22 @@ class CarbonEstimator:
             joblib.dump(self.xgb_model, self.xgb_path)
             print("[AI Module] Trained dual-head XGBoost regressors.")
 
+        # Record honestly that this model has NOT been calibrated against any
+        # real field measurement yet. calibration.py overwrites this once a
+        # recalibration run against GroundTruthPlot data actually passes validation.
+        self.model_meta = {
+            "version": "0.1.0-synthetic",
+            "trained_on": "synthetic-v1",
+            "trained_at": datetime.datetime.utcnow().isoformat(),
+            "validation": None
+        }
+        self._save_model_meta()
+
+    def _save_model_meta(self):
+        os.makedirs(self.model_dir, exist_ok=True)
+        with open(self.meta_path, "w") as f:
+            json.dump(self.model_meta, f, indent=2)
+
     def set_model_type(self, model_name):
         if model_name in ["random_forest", "xgboost"]:
             if model_name == "xgboost" and not XGB_AVAILABLE:
@@ -164,6 +194,34 @@ class CarbonEstimator:
             self.model_type = model_name
             return True
         return False
+
+    def _rf_prediction_interval(self, X_df, lower_pct=5, upper_pct=95):
+        """
+        Part (a): a 90% prediction interval built from the spread of individual
+        tree predictions in the Random Forest ensemble. This is a real, if
+        somewhat narrow, uncertainty estimate - not a placeholder number.
+        It undersells true uncertainty for small forests (few trees agree on
+        out-of-distribution inputs), so treat this as a floor on the real
+        interval, not a ceiling. A quantile-regression XGBoost pair (see the
+        build prompt's note on this) is the natural next upgrade once you have
+        enough ground-truth data to train one properly.
+        """
+        if self.rf_model is None:
+            return None
+        # Each tree predicts [biomass, carbon] since the RF was fit on 2 targets.
+        # .values: individual trees don't carry feature-name metadata like the
+        # top-level RF does, so passing the raw array avoids a harmless-but-noisy warning.
+        X_values = X_df.values
+        per_tree = np.array([tree.predict(X_values)[0] for tree in self.rf_model.estimators_])
+        biomass_samples = per_tree[:, 0]
+        carbon_samples = per_tree[:, 1]
+        return {
+            "biomass_lower_90": float(np.percentile(biomass_samples, lower_pct)),
+            "biomass_upper_90": float(np.percentile(biomass_samples, upper_pct)),
+            "carbon_lower_90": float(np.percentile(carbon_samples, lower_pct)),
+            "carbon_upper_90": float(np.percentile(carbon_samples, upper_pct)),
+            "interval_method": "rf_tree_quantile"
+        }
 
     def estimate_carbon_stock(self, indices_data):
         """
@@ -211,12 +269,21 @@ class CarbonEstimator:
             biomass = float(pred[0])
             carbon = float(pred[1])
 
+        # Interval always comes from the RF ensemble regardless of active model -
+        # XGBoost doesn't give us ensemble spread for free. Label this clearly
+        # rather than implying the active model produced its own interval.
+        interval = self._rf_prediction_interval(X_df)
+
         return {
             "estimated_biomass_per_ha": round(biomass, 2),
             "estimated_carbon_per_ha": round(carbon, 2),
             "co2_multiplier": 3.667,
             "model_used": self.model_type,
-            "feature_importance": self._get_feature_importances()
+            "feature_importance": self._get_feature_importances(),
+            "interval": interval,
+            "model_version": self.model_meta.get("version"),
+            "model_trained_on": self.model_meta.get("trained_on"),
+            "feature_vector": dict(zip(self.feature_names, [round(float(v), 5) for v in features]))
         }
 
     def predict_grid_heatmap(self, grid_pixels, layer_type="carbon_heatmap"):
@@ -334,3 +401,74 @@ class CarbonEstimator:
         if importances:
             return dict(zip(self.feature_names, [round(x, 4) for x in importances]))
         return {}
+
+    def retrain_with_ground_truth(self, X_real, y_real, min_samples=30,
+                                   max_mae_carbon=25.0, min_r2=0.3):
+        """
+        Part (b): staging/validate/promote retraining loop, called by
+        calibration.py's scheduled recalibration job.
+
+        X_real: DataFrame with columns matching self.feature_names, built from
+                actual satellite feature extraction at each GroundTruthPlot's
+                location and measurement_date.
+        y_real: DataFrame with columns ['biomass', 'carbon'] from measured_biomass_mg_ha
+                and measured_carbon_tc_ha.
+
+        This NEVER overwrites the live model directly. It trains a candidate,
+        validates it against a held-out slice of real plots, and only promotes
+        it if it clears the thresholds - otherwise the live model is untouched
+        and the failure is returned for the caller to log/alert on.
+        """
+        n = len(X_real)
+        if n < min_samples:
+            return {
+                "promoted": False,
+                "reason": f"only {n} ground-truth plots available, need >= {min_samples}. "
+                          f"Model remains {self.model_meta.get('trained_on')} - this is expected "
+                          f"and should be surfaced to users, not hidden.",
+            }
+
+        X_train, X_holdout, y_train, y_holdout = train_test_split(
+            X_real, y_real, test_size=0.25, random_state=42
+        )
+
+        candidate_rf = RandomForestRegressor(n_estimators=200, max_depth=14, random_state=42, n_jobs=-1)
+        candidate_rf.fit(X_train, y_train)
+
+        holdout_pred = candidate_rf.predict(X_holdout)
+        mae_carbon = mean_absolute_error(y_holdout["carbon"], holdout_pred[:, 1])
+        r2_carbon = r2_score(y_holdout["carbon"], holdout_pred[:, 1])
+
+        validation = {
+            "n_samples": n,
+            "n_holdout": len(X_holdout),
+            "mae_carbon_tc_ha": round(float(mae_carbon), 3),
+            "r2_carbon": round(float(r2_carbon), 3),
+            "evaluated_at": datetime.datetime.utcnow().isoformat()
+        }
+
+        if mae_carbon > max_mae_carbon or r2_carbon < min_r2:
+            return {"promoted": False, "reason": "candidate model failed validation thresholds",
+                    "validation": validation}
+
+        # Passed validation - refit on the FULL real dataset (train+holdout) and promote.
+        final_rf = RandomForestRegressor(n_estimators=200, max_depth=14, random_state=42, n_jobs=-1)
+        final_rf.fit(X_real, y_real)
+        self.rf_model = final_rf
+        joblib.dump(self.rf_model, self.rf_path)
+
+        prev_version = self.model_meta.get("version", "0.0.0")
+        try:
+            major = int(prev_version.split("-")[0].split(".")[1]) + 1
+        except Exception:
+            major = 1
+        self.model_meta = {
+            "version": f"0.{major}.0-real-calibrated",
+            "trained_on": f"real-plots-blend-v{major}",
+            "trained_at": datetime.datetime.utcnow().isoformat(),
+            "validation": validation
+        }
+        self._save_model_meta()
+
+        return {"promoted": True, "validation": validation, "new_version": self.model_meta["version"]}
+
