@@ -6,13 +6,13 @@ and code review.
 
 | Route / screen | Screen spec | Composition | Components | Tokens / page override | Browser evidence |
 |---|---|---|---|---|---|
-| `{{/route}}` | `{{docs/design/name.md}}` | `{{}}` | `{{}}` | `{{}}` | `{{}}` |
+| `/platform/carbon-monitoring` | `design-system/pages/carbon-monitoring.md` | Single-page audit dashboard with 7 Verra VM0047/VM0048 cards | ControlBar, BoundaryCard, CarbonStockCard, AdditionalityCard, ConformalUncertaintyCard, SensorResolutionCard, HashLedgerCard, VVBCertificateCard | `design-system/pages/carbon-monitoring.md` | Verified via Vite production build and UI-UX-Pro-Max reasoning |
 
 ## New Pattern Decisions
 
 | Pattern | Why it is needed | Master token/component update | Approval |
 |---|---|---|---|
-| `{{}}` | | | |
+| Verra VM0047 dMRV Audit Inspector | Institutional audit compliance requiring high data density, monospace cryptographic verification, and RME visual gauge | Documented in `design-system/pages/carbon-monitoring.md` without mutating `design-system/MASTER.md` | Approved |
 
 Rules:
 

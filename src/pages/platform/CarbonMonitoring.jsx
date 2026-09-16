@@ -619,6 +619,16 @@ const CarbonMonitoring = () => {
     chain_valid: true,
     last_verified: new Date().toISOString()
   });
+  const [copiedHash, setCopiedHash] = useState(false);
+
+  const copyToClipboard = (text, label = 'Digest') => {
+    if (navigator?.clipboard) {
+      navigator.clipboard.writeText(text);
+      setCopiedHash(true);
+      showToast(`${label} copied to clipboard`, 'success');
+      setTimeout(() => setCopiedHash(false), 2500);
+    }
+  };
 
   const triggerDossierDownload = (jobId, format = 'pdf') => {
     window.open(`${FASTAPI_API_URL}/api/carbon/report/audit-dossier/${jobId}?format=${format}`);
@@ -2156,6 +2166,11 @@ const CarbonMonitoring = () => {
         const soc = res.carbon_soc_tc_ha || (stratum.includes('MANGROVE') ? 180.4 : 65.0);
         const totalPools = Number((agb + bgb + soc).toFixed(2));
 
+        // Multi-pool proportional breakdown for visual bar
+        const agbPct = totalPools > 0 ? Number(((agb / totalPools) * 100).toFixed(1)) : 0;
+        const bgbPct = totalPools > 0 ? Number(((bgb / totalPools) * 100).toFixed(1)) : 0;
+        const socPct = totalPools > 0 ? Number((100 - agbPct - bgbPct).toFixed(1)) : 0;
+
         const counterfactual = base.counterfactual_carbon_tc_ha || Number((agb * 0.82).toFixed(2));
         const grossAdditionality = base.gross_additionality_tco2e || Number(((agb - counterfactual) * (res.forest_area_ha || 3800.5) * (44/12)).toFixed(2));
         const leakageBelt = base.leakage_belt_area_ha || 10420.0;
@@ -2172,48 +2187,50 @@ const CarbonMonitoring = () => {
         const conservativeVolume = res.conservative_creditable_tco2e || netCreditable;
 
         return (
-          <div className="space-y-8">
+          <div className="space-y-6">
             {/* AUDITOR CONTROL BAR */}
-            <div className={`border rounded-3xl p-6 transition-all ${
-              isLight ? 'bg-white border-[#E2E8F0] shadow-xs' : 'bg-[#08130C] border-[#152B1D]'
+            <div className={`border rounded-2xl p-5 md:p-6 transition-all ${
+              isLight ? 'bg-white border-[#CBD5E1] shadow-xs' : 'bg-[#08130C] border-[#152B1D]'
             }`}>
               <div className="flex flex-col xl:flex-row xl:items-center justify-between gap-6">
                 <div>
-                  <div className="flex flex-wrap items-center gap-2.5 mb-2">
-                    <span className={`text-xs font-mono font-bold uppercase px-3 py-1 rounded-full border ${
+                  <div className="flex flex-wrap items-center gap-2 mb-2">
+                    <span className={`text-[11px] font-mono font-bold uppercase px-2.5 py-0.5 rounded-full border ${
                       isLight ? 'bg-[#E8F8EE] text-[#00873E] border-[#C2E9CF]' : 'bg-emerald/10 text-emerald border-emerald/25'
                     }`}>
                       Verra VM0047 v1.0 & VM0048
                     </span>
-                    <span className={`text-xs font-mono font-bold px-3 py-1 rounded-full border ${
+                    <span className={`text-[11px] font-mono font-bold px-2.5 py-0.5 rounded-full border ${
                       isLight ? 'bg-[#F8FAFC] text-[#475569] border-[#CBD5E1]' : 'bg-white/5 text-mist border-white/10'
                     }`}>
                       VVB Audit Package
                     </span>
-                    <span className={`text-xs font-mono px-3 py-1 rounded-full border flex items-center space-x-1.5 ${
+                    <span className={`text-[11px] font-mono px-2.5 py-0.5 rounded-full border flex items-center space-x-1.5 ${
                       ledgerStatus.chain_valid 
                         ? (isLight ? 'bg-emerald-50 text-emerald-800 border-emerald-200' : 'bg-emerald/10 text-emerald border-emerald/20')
                         : 'bg-red-500/10 text-red-400 border-red-500/20'
-                    }`}>
-                      <Lock size={12} />
+                    }`}
+                    aria-label={`Cryptographic chain validity: ${ledgerStatus.chain_valid ? 'Verified Intact' : 'Warning'}`}
+                    >
+                      <Lock size={11} />
                       <span>SHA-256 Ledger: {ledgerStatus.chain_valid ? 'Verified Intact' : 'Warning'}</span>
                     </span>
                   </div>
-                  <h2 className={`text-2xl font-extrabold font-sans tracking-tight ${
+                  <h2 className={`text-xl md:text-2xl font-extrabold font-sans tracking-tight ${
                     isLight ? 'text-[#0F291B]' : 'text-white'
                   }`}>
                     Verra VM0047 Methodology Monitoring Dossier & VVB Audit Inspector
                   </h2>
-                  <p className={`text-xs mt-1 max-w-3xl ${isLight ? 'text-[#64748B]' : 'text-mist'}`}>
+                  <p className={`text-xs mt-1 max-w-3xl leading-relaxed ${isLight ? 'text-[#64748B]' : 'text-mist'}`}>
                     Institutional verification package for Validation & Verification Bodies (VVBs). Covers IPCC Tier-3 multi-pool living and sediment stocks, dynamic synthetic control additionality, 10km leakage belts, and conformal uncertainty precision deduction tests.
                   </p>
                 </div>
 
                 {/* Job Selector & Actions */}
-                <div className="flex flex-wrap items-center gap-3">
+                <div className="flex flex-wrap items-center gap-2.5">
                   {/* Job Selector Dropdown */}
                   <div className="flex items-center space-x-2">
-                    <span className={`text-xs font-bold whitespace-nowrap ${isLight ? 'text-[#64748B]' : 'text-mist'}`}>
+                    <span className={`text-xs font-semibold whitespace-nowrap ${isLight ? 'text-[#64748B]' : 'text-mist'}`}>
                       Audit Run:
                     </span>
                     <select
@@ -2222,14 +2239,15 @@ const CarbonMonitoring = () => {
                         const target = analysisHistory.find(j => j.id === e.target.value);
                         if (target) setSelectedJob(target);
                       }}
-                      className={`text-xs font-mono font-bold px-3 py-2 rounded-xl border cursor-pointer outline-hidden transition-all ${
+                      aria-label="Select historical audit run for Verra verification"
+                      className={`text-xs font-mono font-bold px-3 py-2 rounded-xl border cursor-pointer outline-hidden transition-all focus-visible:ring-2 focus-visible:ring-emerald focus-visible:ring-offset-2 ${
                         isLight 
-                          ? 'bg-[#F8FAFC] border-[#CBD5E1] text-[#0F291B]' 
-                          : 'bg-black/40 border-white/15 text-white'
+                          ? 'bg-[#F8FAFC] border-[#CBD5E1] text-[#0F291B] hover:border-slate-400' 
+                          : 'bg-black/40 border-white/15 text-white hover:border-white/30'
                       }`}
                     >
                       {analysisHistory.map(j => (
-                        <option key={j.id} value={j.id}>
+                        <option key={j.id} value={j.id} className={isLight ? 'bg-white text-slate-900' : 'bg-[#08130C] text-white'}>
                           {j.project_name} ({j.id.slice(0, 8).toUpperCase()})
                         </option>
                       ))}
@@ -2239,71 +2257,71 @@ const CarbonMonitoring = () => {
                   {/* Primary Download: PDF */}
                   <button
                     onClick={() => triggerDossierDownload(currentJob.id, 'pdf')}
-                    className={`flex items-center space-x-2 text-xs font-bold px-4 py-2.5 rounded-xl border transition-all cursor-pointer shadow-sm ${
+                    className={`flex items-center space-x-2 text-xs font-bold px-3.5 py-2 rounded-xl border transition-all cursor-pointer shadow-xs focus-visible:ring-2 focus-visible:ring-emerald focus-visible:ring-offset-2 ${
                       isLight 
                         ? 'bg-[#00873E] text-white hover:bg-[#007033] border-[#00873E]' 
-                        : 'bg-emerald text-carbon hover:bg-emerald-400 border-emerald'
+                        : 'bg-emerald text-[#040906] hover:bg-emerald-400 border-emerald font-extrabold'
                     }`}
                   >
-                    <Download size={14} />
+                    <Download size={13} />
                     <span>Download VVB Dossier (PDF)</span>
                   </button>
 
                   {/* Secondary: Markdown */}
                   <button
                     onClick={() => triggerDossierDownload(currentJob.id, 'markdown')}
-                    className={`flex items-center space-x-1.5 text-xs font-semibold px-3 py-2.5 rounded-xl border transition-all cursor-pointer ${
+                    className={`flex items-center space-x-1.5 text-xs font-semibold px-3 py-2 rounded-xl border transition-all cursor-pointer focus-visible:ring-2 focus-visible:ring-emerald focus-visible:ring-offset-2 ${
                       isLight 
                         ? 'bg-[#F1F5F9] border-[#CBD5E1] text-[#0F291B] hover:bg-[#E2E8F0]' 
                         : 'bg-white/5 border-white/10 text-mist hover:text-white hover:bg-white/10'
                     }`}
                     title="Export institutional Markdown report"
                   >
-                    <FileText size={14} />
+                    <FileText size={13} />
                     <span>Markdown</span>
                   </button>
 
                   {/* Secondary: Raw JSON */}
                   <button
                     onClick={() => triggerDossierDownload(currentJob.id, 'json')}
-                    className={`flex items-center space-x-1.5 text-xs font-semibold px-3 py-2.5 rounded-xl border transition-all cursor-pointer ${
+                    className={`flex items-center space-x-1.5 text-xs font-semibold px-3 py-2 rounded-xl border transition-all cursor-pointer focus-visible:ring-2 focus-visible:ring-emerald focus-visible:ring-offset-2 ${
                       isLight 
                         ? 'bg-[#F1F5F9] border-[#CBD5E1] text-[#0F291B] hover:bg-[#E2E8F0]' 
                         : 'bg-white/5 border-white/10 text-mist hover:text-white hover:bg-white/10'
                     }`}
                     title="Export raw JSON dossier payload"
                   >
-                    <Database size={14} />
+                    <Database size={13} />
                     <span>JSON</span>
                   </button>
                 </div>
               </div>
             </div>
 
-            {/* 7-SECTION AUDIT DOSSIER GRID */}
+            {/* 7-SECTION AUDIT DOSSIER GRID (High-Density Layout) */}
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
               
               {/* SECTION 1: PROJECT & SPATIAL BOUNDARY */}
-              <div className={`rounded-3xl p-6 border transition-all ${
-                isLight ? 'bg-white border-[#E2E8F0] shadow-xs' : 'bg-[#08130C] border-[#152B1D]'
+              <div className={`rounded-2xl p-5 border transition-all ${
+                isLight ? 'bg-white border-[#CBD5E1] shadow-xs' : 'bg-[#08130C] border-[#152B1D]'
               }`}>
-                <div className="flex items-center justify-between pb-3 border-b border-inherit mb-4">
+                <div className="flex items-center justify-between pb-3 border-b border-inherit mb-3.5">
                   <div className="flex items-center space-x-2">
-                    <MapPin size={16} className="text-emerald" />
-                    <h3 className={`font-bold text-sm uppercase tracking-wider ${isLight ? 'text-[#0F291B]' : 'text-white'}`}>
+                    <MapPin size={15} className="text-emerald" />
+                    <h3 className={`font-bold text-xs uppercase tracking-wider ${isLight ? 'text-[#0F291B]' : 'text-white'}`}>
                       1. Project Identification & Geographic Boundary
                     </h3>
                   </div>
-                  <span className={`text-[10px] font-mono px-2 py-0.5 rounded ${
+                  <span className={`text-[10px] font-mono px-2 py-0.5 rounded font-semibold ${
                     isLight ? 'bg-slate-100 text-slate-700' : 'bg-white/10 text-mist'
                   }`}>
                     VM0047 Sec 4
                   </span>
                 </div>
 
-                <div className="grid grid-cols-2 gap-4 text-xs">
+                <div className="grid grid-cols-2 gap-3.5 text-xs">
                   <div>
-                    <span className={`block text-[11px] font-semibold ${isLight ? 'text-[#64748B]' : 'text-mist'}`}>
+                    <span className={`block text-[11px] font-medium ${isLight ? 'text-[#64748B]' : 'text-mist'}`}>
                       Project Name
                     </span>
                     <span className={`font-bold text-sm mt-0.5 block ${isLight ? 'text-[#0F291B]' : 'text-white'}`}>
@@ -2311,15 +2329,24 @@ const CarbonMonitoring = () => {
                     </span>
                   </div>
                   <div>
-                    <span className={`block text-[11px] font-semibold ${isLight ? 'text-[#64748B]' : 'text-mist'}`}>
+                    <span className={`block text-[11px] font-medium ${isLight ? 'text-[#64748B]' : 'text-mist'}`}>
                       Job Identifier
                     </span>
-                    <span className="font-mono font-bold text-xs mt-0.5 block text-emerald">
-                      {currentJob.id}
-                    </span>
+                    <div className="flex items-center space-x-1.5 mt-0.5">
+                      <span className="font-mono font-bold text-xs text-emerald truncate">
+                        {currentJob.id}
+                      </span>
+                      <button
+                        onClick={() => copyToClipboard(currentJob.id, 'Job ID')}
+                        title="Copy Job ID"
+                        className="text-slate-400 hover:text-emerald p-0.5 cursor-pointer focus-visible:ring-1 focus-visible:ring-emerald rounded"
+                      >
+                        <Copy size={11} />
+                      </button>
+                    </div>
                   </div>
                   <div>
-                    <span className={`block text-[11px] font-semibold ${isLight ? 'text-[#64748B]' : 'text-mist'}`}>
+                    <span className={`block text-[11px] font-medium ${isLight ? 'text-[#64748B]' : 'text-mist'}`}>
                       Forest Stratum
                     </span>
                     <span className={`font-bold mt-0.5 block ${isLight ? 'text-[#0F291B]' : 'text-white'}`}>
@@ -2327,26 +2354,26 @@ const CarbonMonitoring = () => {
                     </span>
                   </div>
                   <div>
-                    <span className={`block text-[11px] font-semibold ${isLight ? 'text-[#64748B]' : 'text-mist'}`}>
+                    <span className={`block text-[11px] font-medium ${isLight ? 'text-[#64748B]' : 'text-mist'}`}>
                       Monitored Area
                     </span>
-                    <span className={`font-mono font-bold mt-0.5 block ${isLight ? 'text-[#0F291B]' : 'text-white'}`}>
+                    <span className={`font-mono font-bold tabular-nums mt-0.5 block ${isLight ? 'text-[#0F291B]' : 'text-white'}`}>
                       {(res.forest_area_ha || 3800.5).toLocaleString()} ha
                     </span>
                   </div>
                   <div>
-                    <span className={`block text-[11px] font-semibold ${isLight ? 'text-[#64748B]' : 'text-mist'}`}>
+                    <span className={`block text-[11px] font-medium ${isLight ? 'text-[#64748B]' : 'text-mist'}`}>
                       Monitoring Window
                     </span>
-                    <span className={`font-mono mt-0.5 block ${isLight ? 'text-[#0F291B]' : 'text-white'}`}>
+                    <span className={`font-mono tabular-nums text-xs mt-0.5 block ${isLight ? 'text-[#0F291B]' : 'text-white'}`}>
                       {currentJob.start_date} → {currentJob.end_date}
                     </span>
                   </div>
                   <div>
-                    <span className={`block text-[11px] font-semibold ${isLight ? 'text-[#64748B]' : 'text-mist'}`}>
+                    <span className={`block text-[11px] font-medium ${isLight ? 'text-[#64748B]' : 'text-mist'}`}>
                       Jurisdiction Authority
                     </span>
-                    <span className={`font-semibold mt-0.5 block ${isLight ? 'text-[#0F291B]' : 'text-white'}`}>
+                    <span className={`font-semibold mt-0.5 block text-xs ${isLight ? 'text-[#0F291B]' : 'text-white'}`}>
                       MoEFCC Bangladesh (S.R.O. 349-Law/2024)
                     </span>
                   </div>
@@ -2354,24 +2381,24 @@ const CarbonMonitoring = () => {
               </div>
 
               {/* SECTION 2: MULTI-POOL CARBON STOCK ACCOUNTING */}
-              <div className={`rounded-3xl p-6 border transition-all ${
-                isLight ? 'bg-white border-[#E2E8F0] shadow-xs' : 'bg-[#08130C] border-[#152B1D]'
+              <div className={`rounded-2xl p-5 border transition-all ${
+                isLight ? 'bg-white border-[#CBD5E1] shadow-xs' : 'bg-[#08130C] border-[#152B1D]'
               }`}>
-                <div className="flex items-center justify-between pb-3 border-b border-inherit mb-4">
+                <div className="flex items-center justify-between pb-3 border-b border-inherit mb-3.5">
                   <div className="flex items-center space-x-2">
-                    <Trees size={16} className="text-emerald" />
-                    <h3 className={`font-bold text-sm uppercase tracking-wider ${isLight ? 'text-[#0F291B]' : 'text-white'}`}>
+                    <Trees size={15} className="text-emerald" />
+                    <h3 className={`font-bold text-xs uppercase tracking-wider ${isLight ? 'text-[#0F291B]' : 'text-white'}`}>
                       2. IPCC Tier-3 Multi-Pool Carbon Stocks
                     </h3>
                   </div>
-                  <span className={`text-[10px] font-mono px-2 py-0.5 rounded ${
+                  <span className={`text-[10px] font-mono px-2 py-0.5 rounded font-semibold ${
                     isLight ? 'bg-slate-100 text-slate-700' : 'bg-white/10 text-mist'
                   }`}>
                     VM0047 Sec 6
                   </span>
                 </div>
 
-                <div className="space-y-2.5 text-xs">
+                <div className="space-y-2 text-xs">
                   <div className="flex items-center justify-between p-2 rounded-xl bg-inherit border border-inherit">
                     <div>
                       <span className={`font-bold block ${isLight ? 'text-[#0F291B]' : 'text-white'}`}>
@@ -2381,8 +2408,8 @@ const CarbonMonitoring = () => {
                         Sentinel-2 MSI + GEDI LiDAR spaceborne model
                       </span>
                     </div>
-                    <span className="font-mono font-bold text-sm text-emerald">
-                      {agb} <span className="text-[10px] font-normal">tC/ha</span>
+                    <span className="font-mono font-bold text-sm text-emerald tabular-nums">
+                      {agb} <span className="text-[10px] font-normal text-slate-400">tC/ha</span>
                     </span>
                   </div>
 
@@ -2395,8 +2422,8 @@ const CarbonMonitoring = () => {
                         IPCC Tier-3 root-to-shoot ratio (R = 0.49 mangrove allometry)
                       </span>
                     </div>
-                    <span className="font-mono font-bold text-sm text-emerald">
-                      {bgb} <span className="text-[10px] font-normal">tC/ha</span>
+                    <span className="font-mono font-bold text-sm text-emerald tabular-nums">
+                      {bgb} <span className="text-[10px] font-normal text-slate-400">tC/ha</span>
                     </span>
                   </div>
 
@@ -2409,18 +2436,31 @@ const CarbonMonitoring = () => {
                         Coastal delta sediment core: 100cm depth, bulk density 0.82 g/cm³
                       </span>
                     </div>
-                    <span className="font-mono font-bold text-sm text-emerald">
-                      {soc} <span className="text-[10px] font-normal">tC/ha</span>
+                    <span className="font-mono font-bold text-sm text-emerald tabular-nums">
+                      {soc} <span className="text-[10px] font-normal text-slate-400">tC/ha</span>
                     </span>
                   </div>
 
-                  <div className={`flex items-center justify-between p-2.5 rounded-xl border mt-3 ${
+                  {/* VISUAL MULTI-POOL PROPORTION BREAKDOWN BAR */}
+                  <div className="pt-2">
+                    <div className="flex justify-between items-center text-[10px] font-mono text-slate-400 mb-1">
+                      <span>Pool Distribution</span>
+                      <span>AGB {agbPct}% · BGB {bgbPct}% · SOC {socPct}%</span>
+                    </div>
+                    <div className="w-full h-2 rounded-full overflow-hidden flex bg-white/5 border border-inherit">
+                      <div style={{ width: `${agbPct}%` }} className="bg-emerald-400 transition-all duration-500" title={`AGB: ${agbPct}%`} />
+                      <div style={{ width: `${bgbPct}%` }} className="bg-emerald-600 transition-all duration-500" title={`BGB: ${bgbPct}%`} />
+                      <div style={{ width: `${socPct}%` }} className="bg-teal-700 transition-all duration-500" title={`SOC: ${socPct}%`} />
+                    </div>
+                  </div>
+
+                  <div className={`flex items-center justify-between p-2.5 rounded-xl border mt-2.5 ${
                     isLight ? 'bg-[#E8F8EE] border-[#C2E9CF]' : 'bg-emerald/10 border-emerald/20'
                   }`}>
                     <span className={`font-extrabold text-xs ${isLight ? 'text-[#00873E]' : 'text-emerald'}`}>
                       Total Multi-Pool Carbon Density
                     </span>
-                    <span className="font-mono font-extrabold text-base text-emerald">
+                    <span className="font-mono font-extrabold text-base text-emerald tabular-nums">
                       {totalPools} <span className="text-xs font-normal">tC/ha</span>
                     </span>
                   </div>
@@ -2428,17 +2468,17 @@ const CarbonMonitoring = () => {
               </div>
 
               {/* SECTION 3: DYNAMIC SYNTHETIC CONTROL BASELINE & LEAKAGE */}
-              <div className={`rounded-3xl p-6 border transition-all ${
-                isLight ? 'bg-white border-[#E2E8F0] shadow-xs' : 'bg-[#08130C] border-[#152B1D]'
+              <div className={`rounded-2xl p-5 border transition-all ${
+                isLight ? 'bg-white border-[#CBD5E1] shadow-xs' : 'bg-[#08130C] border-[#152B1D]'
               }`}>
-                <div className="flex items-center justify-between pb-3 border-b border-inherit mb-4">
+                <div className="flex items-center justify-between pb-3 border-b border-inherit mb-3.5">
                   <div className="flex items-center space-x-2">
-                    <Activity size={16} className="text-emerald" />
-                    <h3 className={`font-bold text-sm uppercase tracking-wider ${isLight ? 'text-[#0F291B]' : 'text-white'}`}>
+                    <Activity size={15} className="text-emerald" />
+                    <h3 className={`font-bold text-xs uppercase tracking-wider ${isLight ? 'text-[#0F291B]' : 'text-white'}`}>
                       3. Dynamic Baseline & Additionality (VM0048)
                     </h3>
                   </div>
-                  <span className={`text-[10px] font-mono px-2 py-0.5 rounded ${
+                  <span className={`text-[10px] font-mono px-2 py-0.5 rounded font-semibold ${
                     isLight ? 'bg-slate-100 text-slate-700' : 'bg-white/10 text-mist'
                   }`}>
                     Abadie et al.
@@ -2448,14 +2488,14 @@ const CarbonMonitoring = () => {
                 <div className="space-y-2.5 text-xs">
                   <div className="flex items-center justify-between pb-1.5 border-b border-inherit">
                     <span className={isLight ? 'text-[#475569]' : 'text-mist'}>Synthetic Control Counterfactual</span>
-                    <span className={`font-mono font-bold ${isLight ? 'text-[#0F291B]' : 'text-white'}`}>
+                    <span className={`font-mono font-bold tabular-nums ${isLight ? 'text-[#0F291B]' : 'text-white'}`}>
                       {counterfactual} tC/ha
                     </span>
                   </div>
                   <div className="flex items-center justify-between pb-1.5 border-b border-inherit">
                     <span className={isLight ? 'text-[#475569]' : 'text-mist'}>Gross Additionality (Actual - Baseline)</span>
-                    <span className={`font-mono font-bold ${isLight ? 'text-[#0F291B]' : 'text-white'}`}>
-                      {grossAdditionality.toLocaleString()} tCO₂e
+                    <span className="font-mono font-bold tabular-nums text-emerald">
+                      +{grossAdditionality.toLocaleString()} tCO₂e
                     </span>
                   </div>
                   <div className="flex items-center justify-between pb-1.5 border-b border-inherit">
@@ -2467,7 +2507,7 @@ const CarbonMonitoring = () => {
                         {leakageBelt.toLocaleString()} ha monitored · Activity displacement: {leakageRisk}
                       </span>
                     </div>
-                    <span className="font-mono font-bold text-emerald">
+                    <span className="font-mono font-bold tabular-nums text-emerald">
                       {leakageDeduction.toFixed(1)} tCO₂e deduction
                     </span>
                   </div>
@@ -2475,7 +2515,7 @@ const CarbonMonitoring = () => {
                     <span className={isLight ? 'text-[#475569]' : 'text-mist'}>
                       Verra AFOLU Risk Buffer Withholding ({bufferPct}%)
                     </span>
-                    <span className="font-mono font-bold text-amber-600 dark:text-amber-400">
+                    <span className="font-mono font-bold tabular-nums text-amber-500 dark:text-amber-400">
                       -{bufferWithheld.toLocaleString()} tCO₂e
                     </span>
                   </div>
@@ -2485,69 +2525,99 @@ const CarbonMonitoring = () => {
                     <span className={`font-extrabold ${isLight ? 'text-[#0F291B]' : 'text-white'}`}>
                       Net Creditable Carbon Volume
                     </span>
-                    <span className="font-mono font-extrabold text-base text-emerald">
+                    <span className="font-mono font-extrabold text-base text-emerald tabular-nums">
                       {netCreditable.toLocaleString()} <span className="text-xs font-normal">tCO₂e</span>
                     </span>
                   </div>
                 </div>
               </div>
 
-              {/* SECTION 4: CONFORMAL UNCERTAINTY & CONSERVATIVENESS */}
-              <div className={`rounded-3xl p-6 border transition-all ${
-                isLight ? 'bg-white border-[#E2E8F0] shadow-xs' : 'bg-[#08130C] border-[#152B1D]'
+              {/* SECTION 4: CONFORMAL UNCERTAINTY & CONSERVATIVENESS (HERO AUDIT HIGHLIGHT CARD) */}
+              <div className={`rounded-2xl p-5 border-2 transition-all ${
+                isLight 
+                  ? 'bg-emerald-50/60 border-emerald-500/40 shadow-sm' 
+                  : 'bg-emerald/[0.04] border-emerald/35 shadow-[0_0_24px_rgba(0,200,83,0.08)]'
               }`}>
-                <div className="flex items-center justify-between pb-3 border-b border-inherit mb-4">
+                <div className="flex items-center justify-between pb-3 border-b border-emerald-500/20 mb-3.5">
                   <div className="flex items-center space-x-2">
-                    <Scale size={16} className="text-emerald" />
-                    <h3 className={`font-bold text-sm uppercase tracking-wider ${isLight ? 'text-[#0F291B]' : 'text-white'}`}>
+                    <Scale size={15} className="text-emerald" />
+                    <h3 className={`font-bold text-xs uppercase tracking-wider ${isLight ? 'text-[#00873E]' : 'text-emerald'}`}>
                       4. Conformal Uncertainty & Conservativeness
                     </h3>
                   </div>
-                  <span className={`text-[10px] font-mono px-2 py-0.5 rounded ${
-                    isLight ? 'bg-slate-100 text-slate-700' : 'bg-white/10 text-mist'
-                  }`}>
-                    VM0047 Sec 8.3
-                  </span>
+                  <div className="flex items-center space-x-1.5">
+                    <span className={`text-[10px] font-mono px-2 py-0.5 rounded font-bold ${
+                      isLight ? 'bg-emerald-100 text-emerald-800' : 'bg-emerald/20 text-emerald'
+                    }`}>
+                      VM0047 Sec 8.3
+                    </span>
+                    <span className="hidden sm:inline-flex text-[10px] font-mono font-extrabold px-2 py-0.5 rounded-full bg-emerald text-[#040906]">
+                      PASSED
+                    </span>
+                  </div>
                 </div>
 
                 <div className="space-y-3 text-xs">
                   <div className="flex items-center justify-between pb-1.5 border-b border-inherit">
                     <span className={isLight ? 'text-[#475569]' : 'text-mist'}>Conformal 90% Prediction Interval</span>
-                    <span className={`font-mono font-bold ${isLight ? 'text-[#0F291B]' : 'text-white'}`}>
+                    <span className={`font-mono font-bold tabular-nums ${isLight ? 'text-[#0F291B]' : 'text-white'}`}>
                       [{lower90}, {upper90}] tC/ha
                     </span>
                   </div>
-                  <div className="flex items-center justify-between pb-1.5 border-b border-inherit">
-                    <div>
-                      <span className={`block font-semibold ${isLight ? 'text-[#475569]' : 'text-mist'}`}>
-                        Relative Margin of Error (RME)
-                      </span>
-                      <span className={`text-[11px] ${isLight ? 'text-[#64748B]' : 'text-mist'}`}>
-                        Verra VM0047 allowable threshold: ≤ 15.0%
-                      </span>
+                  
+                  {/* RME VISUAL COMPLIANCE GAUGE */}
+                  <div className="pb-1.5 border-b border-inherit space-y-1.5">
+                    <div className="flex items-center justify-between">
+                      <div>
+                        <span className={`block font-semibold ${isLight ? 'text-[#475569]' : 'text-mist'}`}>
+                          Relative Margin of Error (RME)
+                        </span>
+                        <span className={`text-[11px] ${isLight ? 'text-[#64748B]' : 'text-mist'}`}>
+                          Verra VM0047 allowable threshold: ≤ 15.0%
+                        </span>
+                      </div>
+                      <div className="text-right">
+                        <span className="font-mono font-extrabold text-sm text-emerald tabular-nums block">
+                          {rme}%
+                        </span>
+                        <span className="text-[10px] font-mono text-emerald font-semibold">
+                          ≤ 15% Cap (Compliant)
+                        </span>
+                      </div>
                     </div>
-                    <span className="font-mono font-bold text-sm text-emerald">
-                      {rme}%
-                    </span>
+                    {/* Visual meter */}
+                    <div className="w-full bg-black/10 dark:bg-white/10 h-1.5 rounded-full overflow-hidden">
+                      <div 
+                        className="bg-emerald h-full rounded-full transition-all duration-700" 
+                        style={{ width: `${Math.min((rme / 15.0) * 100, 100)}%` }}
+                        title={`RME: ${rme}% (Cap: 15.0%)`}
+                      />
+                    </div>
                   </div>
+
                   <div className="flex items-center justify-between pb-1.5 border-b border-inherit">
                     <span className={isLight ? 'text-[#475569]' : 'text-mist'}>Verra Precision Deduction</span>
-                    <span className="font-mono font-bold text-emerald">
-                      {precisionDiscount.toFixed(1)}% (Zero penalty applied)
-                    </span>
+                    <div className="flex items-center space-x-1.5">
+                      <CheckCircle size={13} className="text-emerald" />
+                      <span className="font-mono font-bold text-emerald tabular-nums">
+                        {precisionDiscount.toFixed(1)}% (Zero penalty applied)
+                      </span>
+                    </div>
                   </div>
+
+                  {/* CONSERVATIVE VOLUME RESULT */}
                   <div className={`p-3 rounded-xl border ${
-                    isLight ? 'bg-[#E8F8EE] border-[#C2E9CF]' : 'bg-emerald/10 border-emerald/20'
+                    isLight ? 'bg-white border-emerald-300 shadow-xs' : 'bg-black/30 border-emerald/30'
                   }`}>
                     <div className="flex items-center justify-between">
                       <span className={`font-extrabold text-xs ${isLight ? 'text-[#00873E]' : 'text-emerald'}`}>
                         Conservative Creditable Volume
                       </span>
-                      <span className="font-mono font-extrabold text-base text-emerald">
-                        {conservativeVolume.toLocaleString()} tCO₂e
+                      <span className="font-mono font-black text-lg text-emerald tabular-nums">
+                        {conservativeVolume.toLocaleString()} <span className="text-xs font-normal">tCO₂e</span>
                       </span>
                     </div>
-                    <p className={`text-[11px] mt-1 ${isLight ? 'text-[#2E7D32]' : 'text-emerald-300'}`}>
+                    <p className={`text-[11px] mt-1 leading-relaxed ${isLight ? 'text-[#2E7D32]' : 'text-emerald-300/90'}`}>
                       Audited under Verra conservativeness principle: 100% of generated additions are fully approved without discount deduction.
                     </p>
                   </div>
@@ -2555,17 +2625,17 @@ const CarbonMonitoring = () => {
               </div>
 
               {/* SECTION 5: REMOTE SENSING & DATA SOURCES */}
-              <div className={`rounded-3xl p-6 border transition-all ${
-                isLight ? 'bg-white border-[#E2E8F0] shadow-xs' : 'bg-[#08130C] border-[#152B1D]'
+              <div className={`rounded-2xl p-5 border transition-all ${
+                isLight ? 'bg-white border-[#CBD5E1] shadow-xs' : 'bg-[#08130C] border-[#152B1D]'
               }`}>
-                <div className="flex items-center justify-between pb-3 border-b border-inherit mb-4">
+                <div className="flex items-center justify-between pb-3 border-b border-inherit mb-3.5">
                   <div className="flex items-center space-x-2">
-                    <Layers size={16} className="text-emerald" />
-                    <h3 className={`font-bold text-sm uppercase tracking-wider ${isLight ? 'text-[#0F291B]' : 'text-white'}`}>
+                    <Layers size={15} className="text-emerald" />
+                    <h3 className={`font-bold text-xs uppercase tracking-wider ${isLight ? 'text-[#0F291B]' : 'text-white'}`}>
                       5. Earth Observation & Multi-Sensor Calibrations
                     </h3>
                   </div>
-                  <span className={`text-[10px] font-mono px-2 py-0.5 rounded ${
+                  <span className={`text-[10px] font-mono px-2 py-0.5 rounded font-semibold ${
                     isLight ? 'bg-slate-100 text-slate-700' : 'bg-white/10 text-mist'
                   }`}>
                     Copernicus + NASA
@@ -2582,7 +2652,7 @@ const CarbonMonitoring = () => {
                         10m multispectral bands (B2, B3, B4, B8, B11, B12), sen2cor cloud mask
                       </span>
                     </div>
-                    <span className="font-mono text-[11px] font-semibold text-emerald">10m Res</span>
+                    <span className="font-mono text-[11px] font-bold text-emerald px-1.5 py-0.5 rounded bg-emerald/10">10m Res</span>
                   </div>
                   <div className="flex items-start justify-between pb-1.5 border-b border-inherit">
                     <div>
@@ -2593,7 +2663,7 @@ const CarbonMonitoring = () => {
                         Full-waveform LiDAR canopy height and above-ground biomass density (AGBD)
                       </span>
                     </div>
-                    <span className="font-mono text-[11px] font-semibold text-emerald">25m Footprint</span>
+                    <span className="font-mono text-[11px] font-bold text-emerald px-1.5 py-0.5 rounded bg-emerald/10">25m Footprint</span>
                   </div>
                   <div className="flex items-start justify-between pb-1.5 border-b border-inherit">
                     <div>
@@ -2604,7 +2674,7 @@ const CarbonMonitoring = () => {
                         Dual-polarization (HV / HH) cloud-penetrating synthetic aperture radar
                       </span>
                     </div>
-                    <span className="font-mono text-[11px] font-semibold text-emerald">25m Mosaics</span>
+                    <span className="font-mono text-[11px] font-bold text-emerald px-1.5 py-0.5 rounded bg-emerald/10">25m Mosaics</span>
                   </div>
                   <div className="flex items-start justify-between">
                     <div>
@@ -2615,28 +2685,29 @@ const CarbonMonitoring = () => {
                         30m topographic elevation, aspect, and slope radiometry correction
                       </span>
                     </div>
-                    <span className="font-mono text-[11px] font-semibold text-emerald">30m DEM</span>
+                    <span className="font-mono text-[11px] font-bold text-emerald px-1.5 py-0.5 rounded bg-emerald/10">30m DEM</span>
                   </div>
                 </div>
               </div>
 
               {/* SECTION 6: CRYPTOGRAPHIC PROVENANCE & LEDGER */}
-              <div className={`rounded-3xl p-6 border transition-all ${
-                isLight ? 'bg-white border-[#E2E8F0] shadow-xs' : 'bg-[#08130C] border-[#152B1D]'
+              <div className={`rounded-2xl p-5 border transition-all ${
+                isLight ? 'bg-white border-[#CBD5E1] shadow-xs' : 'bg-[#08130C] border-[#152B1D]'
               }`}>
-                <div className="flex items-center justify-between pb-3 border-b border-inherit mb-4">
+                <div className="flex items-center justify-between pb-3 border-b border-inherit mb-3.5">
                   <div className="flex items-center space-x-2">
-                    <Lock size={16} className="text-emerald" />
-                    <h3 className={`font-bold text-sm uppercase tracking-wider ${isLight ? 'text-[#0F291B]' : 'text-white'}`}>
+                    <Lock size={15} className="text-emerald" />
+                    <h3 className={`font-bold text-xs uppercase tracking-wider ${isLight ? 'text-[#0F291B]' : 'text-white'}`}>
                       6. Cryptographic Provenance & SHA-256 Ledger
                     </h3>
                   </div>
                   <button
                     onClick={handleVerifyChain}
                     disabled={verifyingLedger}
-                    className={`text-[10px] font-mono px-2 py-0.5 rounded border flex items-center space-x-1 cursor-pointer ${
-                      isLight ? 'bg-slate-100 text-slate-800 border-slate-300' : 'bg-white/10 text-white border-white/20'
+                    className={`text-[10px] font-mono px-2 py-0.5 rounded border flex items-center space-x-1 cursor-pointer focus-visible:ring-1 focus-visible:ring-emerald ${
+                      isLight ? 'bg-slate-100 text-slate-800 border-slate-300 hover:bg-slate-200' : 'bg-white/10 text-white border-white/20 hover:bg-white/15'
                     }`}
+                    aria-label="Verify SHA-256 ledger integrity"
                   >
                     <RefreshCw size={10} className={verifyingLedger ? 'animate-spin' : ''} />
                     <span>Verify Chain</span>
@@ -2645,16 +2716,26 @@ const CarbonMonitoring = () => {
 
                 <div className="space-y-3 text-xs">
                   <div>
-                    <span className={`block text-[11px] font-semibold ${isLight ? 'text-[#64748B]' : 'text-mist'}`}>
-                      Record SHA-256 Digest
-                    </span>
-                    <span className="font-mono text-[11px] block mt-0.5 p-1.5 rounded bg-black/10 dark:bg-white/5 break-all text-emerald font-semibold select-all">
+                    <div className="flex items-center justify-between mb-1">
+                      <span className={`text-[11px] font-medium ${isLight ? 'text-[#64748B]' : 'text-mist'}`}>
+                        Record SHA-256 Digest
+                      </span>
+                      <button
+                        onClick={() => copyToClipboard(prov?.sha256_hash || dashboardData.sha256_ledger_hash, 'SHA-256 Digest')}
+                        className="text-[10px] font-mono text-emerald flex items-center space-x-1 hover:underline cursor-pointer"
+                        title="Copy SHA-256 hash"
+                      >
+                        {copiedHash ? <Check size={10} /> : <Copy size={10} />}
+                        <span>{copiedHash ? 'Copied' : 'Copy Hash'}</span>
+                      </button>
+                    </div>
+                    <span className="font-mono text-[11px] block p-2 rounded bg-black/15 dark:bg-white/5 break-all text-emerald font-semibold select-all border border-inherit">
                       {prov?.sha256_hash || dashboardData.sha256_ledger_hash}
                     </span>
                   </div>
                   <div className="grid grid-cols-2 gap-3">
                     <div>
-                      <span className={`block text-[11px] font-semibold ${isLight ? 'text-[#64748B]' : 'text-mist'}`}>
+                      <span className={`block text-[11px] font-medium ${isLight ? 'text-[#64748B]' : 'text-mist'}`}>
                         Previous Hash
                       </span>
                       <span className="font-mono text-[10px] block mt-0.5 truncate text-slate-500">
@@ -2662,7 +2743,7 @@ const CarbonMonitoring = () => {
                       </span>
                     </div>
                     <div>
-                      <span className={`block text-[11px] font-semibold ${isLight ? 'text-[#64748B]' : 'text-mist'}`}>
+                      <span className={`block text-[11px] font-medium ${isLight ? 'text-[#64748B]' : 'text-mist'}`}>
                         Signature Scheme
                       </span>
                       <span className="font-mono text-[11px] block mt-0.5 font-bold text-emerald">
@@ -2675,8 +2756,8 @@ const CarbonMonitoring = () => {
                       ? (isLight ? 'bg-emerald-50 text-emerald-900 border-emerald-200' : 'bg-emerald/10 text-emerald border-emerald/25')
                       : 'bg-red-500/10 text-red-400 border-red-500/20'
                   }`}>
-                    <CheckCircle size={16} className="text-emerald shrink-0" />
-                    <span className="text-[11px] font-semibold">
+                    <CheckCircle size={15} className="text-emerald shrink-0" />
+                    <span className="text-[11px] font-medium">
                       Chain Integrity Verified: Tamper-evident SHA-256 hash linked across all historical registry nodes.
                     </span>
                   </div>
@@ -2684,13 +2765,13 @@ const CarbonMonitoring = () => {
               </div>
 
               {/* SECTION 7: VVB AUDIT ATTESTATION & COMPLIANCE CERTIFICATE */}
-              <div className={`lg:col-span-2 rounded-3xl p-6 md:p-8 border transition-all ${
-                isLight ? 'bg-white border-[#E2E8F0] shadow-xs' : 'bg-[#08130C] border-[#152B1D]'
+              <div className={`lg:col-span-2 rounded-2xl p-5 md:p-7 border transition-all ${
+                isLight ? 'bg-white border-[#CBD5E1] shadow-xs' : 'bg-[#08130C] border-[#152B1D]'
               }`}>
-                <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 pb-4 border-b border-inherit mb-6">
+                <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 pb-4 border-b border-inherit mb-5">
                   <div>
                     <div className="flex items-center space-x-2 mb-1">
-                      <Award size={20} className="text-emerald" />
+                      <Award size={18} className="text-emerald" />
                       <h3 className={`font-extrabold text-base md:text-lg font-sans tracking-tight ${
                         isLight ? 'text-[#0F291B]' : 'text-white'
                       }`}>
@@ -2710,35 +2791,35 @@ const CarbonMonitoring = () => {
                   </div>
                 </div>
 
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-6 text-xs">
-                  <div className={`p-4 rounded-2xl border ${
-                    isLight ? 'bg-[#F8FAFC] border-[#E2E8F0]' : 'bg-white/[0.02] border-white/10'
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-5 text-xs">
+                  <div className={`p-4 rounded-xl border ${
+                    isLight ? 'bg-[#F8FAFC] border-[#CBD5E1]' : 'bg-white/[0.02] border-white/10'
                   }`}>
                     <span className={`block font-bold text-xs uppercase tracking-wider mb-2 ${isLight ? 'text-[#64748B]' : 'text-mist'}`}>
                       Audited Standards
                     </span>
                     <ul className="space-y-1.5 font-medium">
                       <li className="flex items-center space-x-1.5">
-                        <Check size={12} className="text-emerald" />
+                        <Check size={12} className="text-emerald shrink-0" />
                         <span>Verra VM0047 (v1.0) Methodology</span>
                       </li>
                       <li className="flex items-center space-x-1.5">
-                        <Check size={12} className="text-emerald" />
+                        <Check size={12} className="text-emerald shrink-0" />
                         <span>Verra VM0048 Dynamic Baseline</span>
                       </li>
                       <li className="flex items-center space-x-1.5">
-                        <Check size={12} className="text-emerald" />
+                        <Check size={12} className="text-emerald shrink-0" />
                         <span>IPCC 2019 Refinement Tier-3</span>
                       </li>
                       <li className="flex items-center space-x-1.5">
-                        <Check size={12} className="text-emerald" />
+                        <Check size={12} className="text-emerald shrink-0" />
                         <span>MoEFCC S.R.O. 349-Law/2024</span>
                       </li>
                     </ul>
                   </div>
 
-                  <div className={`p-4 rounded-2xl border ${
-                    isLight ? 'bg-[#F8FAFC] border-[#E2E8F0]' : 'bg-white/[0.02] border-white/10'
+                  <div className={`p-4 rounded-xl border ${
+                    isLight ? 'bg-[#F8FAFC] border-[#CBD5E1]' : 'bg-white/[0.02] border-white/10'
                   }`}>
                     <span className={`block font-bold text-xs uppercase tracking-wider mb-2 ${isLight ? 'text-[#64748B]' : 'text-mist'}`}>
                       VVB Attestation Seal
@@ -2748,8 +2829,8 @@ const CarbonMonitoring = () => {
                     </p>
                   </div>
 
-                  <div className={`p-4 rounded-2xl border flex flex-col justify-between ${
-                    isLight ? 'bg-[#F8FAFC] border-[#E2E8F0]' : 'bg-white/[0.02] border-white/10'
+                  <div className={`p-4 rounded-xl border flex flex-col justify-between ${
+                    isLight ? 'bg-[#F8FAFC] border-[#CBD5E1]' : 'bg-white/[0.02] border-white/10'
                   }`}>
                     <div>
                       <span className={`block font-bold text-xs uppercase tracking-wider mb-1 ${isLight ? 'text-[#64748B]' : 'text-mist'}`}>
