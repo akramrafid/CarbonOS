@@ -61,8 +61,20 @@ class CarbonResult(Base):
     verra_precision_discount_pct = Column(Float, default=0.0, nullable=True)
     conservative_creditable_tco2e = Column(Float, nullable=True)
 
+    # Optional convenient fields for parcels and JSON bundles
+    parcel_id = Column(String(255), nullable=True)
+    biomass_agb_mg_ha = Column(Float, nullable=True)
+    biomass_bgb_mg_ha = Column(Float, nullable=True)
+    indices_json = Column(Text, nullable=True)
+    interval_json = Column(Text, nullable=True)
+
     job = relationship("AnalysisJob", back_populates="result")
     provenance = relationship("EstimateProvenance", uselist=False, back_populates="result", cascade="all, delete-orphan")
+    verification_tasks = relationship("VerificationTask", back_populates="result", cascade="all, delete-orphan")
+
+    @property
+    def analysis_date(self):
+        return self.created_at
 
 
 class GroundTruthPlot(Base):
@@ -123,6 +135,7 @@ class EstimateProvenance(Base):
     created_at = Column(DateTime, default=datetime.datetime.utcnow)
 
     result = relationship("CarbonResult", back_populates="provenance")
+    signatures = relationship("ValidatorSignature", back_populates="provenance_record", cascade="all, delete-orphan")
 
 
 
@@ -206,5 +219,85 @@ class BaselineAssessment(Base):
     net_creditable_tco2e = Column(Float, nullable=False)
     
     created_at = Column(DateTime, default=datetime.datetime.utcnow)
-
+ 
     job = relationship("AnalysisJob", back_populates="baseline")
+
+
+class VerificationTask(Base):
+    """
+    dMRV v2: Uncertainty-Tiered Monitoring (Treeconomy pattern).
+    Triggered when satellite prediction interval relative width exceeds threshold (e.g. > 0.35).
+    Dispatches a targeted second verification tier (drone survey or field visit).
+    """
+    __tablename__ = 'carbon_mrv_verificationtask'
+
+    id = Column(String(36), primary_key=True, default=generate_uuid)
+    result_id = Column(String(36), ForeignKey('farmers_ai_carbonresult.id', ondelete='CASCADE'), nullable=False)
+    status = Column(String(50), default='pending')  # 'pending', 'assigned', 'completed', 'cancelled'
+    assigned_to = Column(String(255), nullable=True)
+    verification_method = Column(String(50), default='drone_survey')  # 'drone_survey' or 'field_visit'
+    due_date = Column(Date, nullable=True)
+    notes = Column(Text, nullable=True)
+    created_at = Column(DateTime, default=datetime.datetime.utcnow)
+    updated_at = Column(DateTime, default=datetime.datetime.utcnow, onupdate=datetime.datetime.utcnow)
+
+    result = relationship("CarbonResult", back_populates="verification_tasks")
+    drone_result = relationship("DroneSurveyResult", uselist=False, back_populates="task", cascade="all, delete-orphan")
+
+    @property
+    def surveys(self):
+        return [self.drone_result] if self.drone_result else []
+
+    @property
+    def carbon_result(self):
+        return self.result
+
+
+class DroneSurveyResult(Base):
+    """
+    dMRV v2: High-resolution drone survey verification payload.
+    Feeds back into recalibration alongside GroundTruthPlot data.
+    Must carry data_source and collected_by to prevent unaudited backdoors.
+    """
+    __tablename__ = 'carbon_mrv_dronesurveyresult'
+
+    id = Column(String(36), primary_key=True, default=generate_uuid)
+    verification_task_id = Column(String(36), ForeignKey('carbon_mrv_verificationtask.id', ondelete='CASCADE'), unique=True, nullable=False)
+    measured_biomass_mg_ha = Column(Float, nullable=False)
+    measured_carbon_tc_ha = Column(Float, nullable=False)
+    survey_date = Column(Date, nullable=False)
+    drone_platform = Column(String(255), default='DJI Matrice 300 RTK + Multispectral LiDAR')
+    raw_imagery_path = Column(Text, nullable=True)
+    collected_by = Column(String(255), nullable=False)  # Organization / Operator
+    data_source = Column(String(50), default='drone_survey', nullable=False)
+    notes = Column(Text, nullable=True)
+    used_in_training = Column(Boolean, default=False)
+    created_at = Column(DateTime, default=datetime.datetime.utcnow)
+
+    task = relationship("VerificationTask", back_populates="drone_result")
+
+    @property
+    def verification_task(self):
+        return self.task
+
+
+class ValidatorSignature(Base):
+    """
+    dMRV v2: Multi-Validator Cryptographic Trust Layer (Open Forest Protocol pattern).
+    Independent human validators co-sign the EstimateProvenance record_hash using Ed25519.
+    Distinguishes 'hash-chain intact' from 'independently verified'.
+    """
+    __tablename__ = 'carbon_mrv_validatorsignature'
+
+    id = Column(String(36), primary_key=True, default=generate_uuid)
+    provenance_record_id = Column(String(36), ForeignKey('carbon_mrv_estimateprovenance.id', ondelete='CASCADE'), nullable=False)
+    validator_id = Column(String(100), nullable=False)
+    validator_name = Column(String(255), nullable=False)
+    validator_organization = Column(String(255), nullable=False)
+    validator_public_key = Column(String(128), nullable=False)  # Hex-encoded Ed25519 public key
+    signature = Column(String(256), nullable=False)  # Hex-encoded Ed25519 signature of record_hash
+    comments = Column(Text, nullable=True)
+    signed_at = Column(DateTime, default=datetime.datetime.utcnow)
+
+    provenance_record = relationship("EstimateProvenance", back_populates="signatures")
+

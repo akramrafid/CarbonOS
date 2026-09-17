@@ -18,6 +18,8 @@ try:
 except ImportError:
     XGB_AVAILABLE = False
 
+from .fusion_model import CarbonFusionEstimator
+
 STRATUM_ALLOMETRY = {
     "SUNDARBANS_MANGROVE": {
         "root_shoot_ratio": 0.49,     # Mahmood et al. 2019 / IPCC 2013 Wetlands Supplement
@@ -117,9 +119,10 @@ class CarbonEstimator:
             "tree_height" # GEDI LiDAR footprint tree height
         ]
         
-        self.model_type = "random_forest" # Options: random_forest, xgboost
+        self.model_type = "random_forest" # Options: random_forest, xgboost, fusion
         self.rf_model = None
         self.xgb_model = None
+        self.fusion_estimator = CarbonFusionEstimator(self.model_dir)
         self._load_or_train_models()
 
     def _load_or_train_models(self):
@@ -265,10 +268,15 @@ class CarbonEstimator:
             json.dump(self.model_meta, f, indent=2)
 
     def set_model_type(self, model_name):
-        if model_name in ["random_forest", "xgboost"]:
+        if model_name in ["random_forest", "xgboost", "fusion"]:
             if model_name == "xgboost" and not XGB_AVAILABLE:
                 print("[AI Module] XGBoost is not available, remaining on Random Forest.")
                 return False
+            if model_name == "fusion":
+                if not hasattr(self, "fusion_estimator") or self.fusion_estimator is None:
+                    self.fusion_estimator = CarbonFusionEstimator(self.model_dir)
+                if not self.fusion_estimator.is_loaded:
+                    print(f"[AI Module] Fusion model status: {self.fusion_estimator.meta.get('status')}. Will operate with baseline fallback until gate is cleared.")
             self.model_type = model_name
             return True
         return False
@@ -309,6 +317,7 @@ class CarbonEstimator:
         model = self.rf_model
         # Use active model
         is_xgb = self.model_type == "xgboost" and self.xgb_model is not None
+        is_fusion = self.model_type == "fusion" and self.fusion_estimator is not None and self.fusion_estimator.is_loaded
         
         # Determine coordinates and ecological stratum
         if lat is None:
@@ -347,7 +356,12 @@ class CarbonEstimator:
 
         X_df = pd.DataFrame([features], columns=self.feature_names)
 
-        if is_xgb:
+        fusion_res = None
+        if is_fusion:
+            fusion_res = self.fusion_estimator.predict(X_df)
+            biomass_agb = float(fusion_res["biomass"][0])
+            carbon_agb = float(fusion_res["carbon"][0])
+        elif is_xgb:
             biomass_agb = float(self.xgb_model["biomass"].predict(X_df)[0])
             carbon_agb = float(self.xgb_model["carbon"].predict(X_df)[0])
         else:
@@ -358,8 +372,18 @@ class CarbonEstimator:
         # Multi-pool calculation (IPCC Tier-3 / Verra VM0047)
         multi_pool = calculate_multi_pool(biomass_agb, carbon_agb, ndvi, stratum=stratum)
 
-        # Interval from the RF ensemble for AGB, propagated across pools
-        interval = self._rf_prediction_interval(X_df)
+        # Interval from the fusion quantile head or RF ensemble for AGB, propagated across pools
+        if is_fusion and fusion_res is not None:
+            interval = {
+                "biomass_lower_90": float(fusion_res["biomass_lower_90"][0]),
+                "biomass_upper_90": float(fusion_res["biomass_upper_90"][0]),
+                "carbon_lower_90": float(fusion_res["carbon_lower_90"][0]),
+                "carbon_upper_90": float(fusion_res["carbon_upper_90"][0]),
+                "interval_method": "fusion_pinball_quantile"
+            }
+        else:
+            interval = self._rf_prediction_interval(X_df)
+
         total_interval = None
         if interval:
             r = multi_pool["root_shoot_ratio"]
@@ -372,6 +396,21 @@ class CarbonEstimator:
                 "interval_method": interval.get("interval_method", "rf_tree_quantile")
             }
 
+        # Model provenance metadata
+        if self.model_type == "fusion":
+            if is_fusion:
+                active_model_name = "fusion"
+                active_version = self.fusion_estimator.model_meta.get("version", "fusion-v1")
+                active_trained_on = self.fusion_estimator.model_meta.get("trained_on", "real-ground-truth")
+            else:
+                active_model_name = "fusion_fallback_rf"
+                active_version = self.model_meta.get("version")
+                active_trained_on = self.model_meta.get("trained_on")
+        else:
+            active_model_name = self.model_type
+            active_version = self.model_meta.get("version")
+            active_trained_on = self.model_meta.get("trained_on")
+
         return {
             "estimated_biomass_per_ha": multi_pool["biomass_total_mg_ha"],
             "estimated_carbon_per_ha": multi_pool["carbon_total_tc_ha"],
@@ -383,12 +422,12 @@ class CarbonEstimator:
             "forest_stratum": stratum,
             "root_shoot_ratio": multi_pool["root_shoot_ratio"],
             "co2_multiplier": 3.667,
-            "model_used": self.model_type,
+            "model_used": active_model_name,
             "feature_importance": self._get_feature_importances(),
             "interval": total_interval,
             "agb_interval": interval,
-            "model_version": self.model_meta.get("version"),
-            "model_trained_on": self.model_meta.get("trained_on"),
+            "model_version": active_version,
+            "model_trained_on": active_trained_on,
             "feature_vector": dict(zip(self.feature_names, [round(float(v), 5) for v in features]))
         }
 
@@ -401,6 +440,7 @@ class CarbonEstimator:
         image = Image.new("RGBA", (width, height), (0, 0, 0, 0))
         
         is_xgb = self.model_type == "xgboost" and self.xgb_model is not None
+        is_fusion = self.model_type == "fusion" and self.fusion_estimator is not None and self.fusion_estimator.is_loaded
 
         # Build feature list for batch inference (speeds up predicting 4096 pixels)
         features_batch = []
@@ -428,7 +468,11 @@ class CarbonEstimator:
 
         # Batch predict
         X_df = pd.DataFrame(features_batch, columns=self.feature_names)
-        if is_xgb:
+        if is_fusion:
+            fusion_preds = self.fusion_estimator.predict(X_df)
+            biomass_preds = fusion_preds["biomass"]
+            carbon_preds = fusion_preds["carbon"]
+        elif is_xgb:
             biomass_preds = self.xgb_model["biomass"].predict(X_df)
             carbon_preds = self.xgb_model["carbon"].predict(X_df)
         else:
@@ -501,6 +545,12 @@ class CarbonEstimator:
             imp_biomass = self.xgb_model["biomass"].feature_importances_
             imp_carbon = self.xgb_model["carbon"].feature_importances_
             importances = ((imp_biomass + imp_carbon) / 2.0).tolist()
+        elif self.model_type == "fusion" and self.fusion_estimator is not None and self.fusion_estimator.is_loaded:
+            # Multi-modal encoder relative weights: optical 13/28, SAR 3/28, LiDAR 1/28
+            opt_weight = (13.0 / 28.0) / 13.0
+            sar_weight = (3.0 / 28.0) / 3.0
+            lidar_weight = (1.0 / 28.0)
+            importances = [opt_weight]*13 + [sar_weight]*3 + [lidar_weight]
         elif self.rf_model is not None:
             importances = self.rf_model.feature_importances_.tolist()
             
@@ -577,4 +627,12 @@ class CarbonEstimator:
         self._save_model_meta()
 
         return {"promoted": True, "validation": validation, "new_version": self.model_meta["version"]}
+
+    def retrain_fusion_with_ground_truth(self, X_real, y_real):
+        """
+        Retrains the multi-modal fusion model on real ground-truth samples,
+        enforcing the >= 150 sample gate and refusing synthetic training data.
+        """
+        res = self.fusion_estimator.fit_on_real_data(X_real, y_real)
+        return res
 

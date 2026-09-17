@@ -6,9 +6,12 @@ from fastapi.responses import Response, StreamingResponse
 from sqlalchemy.orm import Session
 from typing import List, Optional
 
+from pydantic import BaseModel, Field
+
 from .database import get_db, SessionLocal
 from .models import (AnalysisJob, CarbonResult, SatelliteLayer, UploadedBoundary, CarbonReport,
-                      CarbonAlert, GroundTruthPlot, EstimateProvenance, BaselineAssessment)
+                      CarbonAlert, GroundTruthPlot, EstimateProvenance, BaselineAssessment,
+                      VerificationTask, DroneSurveyResult, ValidatorSignature)
 from .satellite import SatelliteEngine
 from .estimator import CarbonEstimator, XGB_AVAILABLE
 from .report_generator import ReportGenerator
@@ -17,6 +20,28 @@ from .calibration import run_recalibration
 from .baseline import run_dynamic_baseline_assessment, LeakageMonitoringEngine, RiskBufferCalculator
 from .uncertainty import (compute_conformal_verra_assessment, ConformalUncertaintyEngine,
                           VerraPrecisionDeductionEngine)
+from .tiering import flag_for_verification, complete_verification_task, list_verification_tasks
+from .registry_export import export_vm0047_stocking_index
+
+class CompleteTaskRequest(BaseModel):
+    measured_biomass_mg_ha: float
+    measured_carbon_tc_ha: float
+    survey_date: Optional[str] = None
+    drone_platform: Optional[str] = "DJI Matrice 300 RTK + Zenmuse L1 LiDAR"
+    raw_imagery_path: Optional[str] = None
+    collected_by: Optional[str] = "Certified UAV Surveyor"
+    data_source: Optional[str] = "drone_lidar"
+
+class SignProvenanceRequest(BaseModel):
+    validator_id: str
+    validator_name: str
+    validator_organization: str
+    public_key_hex: str
+    signature_hex: str
+    comments: Optional[str] = None
+
+class UpdateSettingsRequest(BaseModel):
+    model_type: str
 
 router = APIRouter(prefix="/api/carbon", tags=["Carbon Monitoring"])
 
@@ -132,6 +157,14 @@ def run_async_analysis(job_id: str):
             lat=coords[0][0], lng=coords[0][1]
         )
         db.add(prov)
+
+        # Treeconomy tiered uncertainty monitoring dispatch
+        try:
+            flag_res = flag_for_verification(result, threshold_relative_width=0.35, db=db)
+            if flag_res.get("flagged"):
+                print(f"[Tiering Alert] High uncertainty W={flag_res['relative_width']} triggered verification task {flag_res.get('task_id')}")
+        except Exception as e_tier:
+            print(f"[Tiering Warning] Failed to evaluate verification task: {e_tier}")
 
         # Save layer
         tile_url = sat_result.get("tile_url", "")
@@ -757,31 +790,56 @@ def resolve_alert(alert_id: str, db: Session = Depends(get_db)):
     return {"status": "success", "message": "Alert marked as resolved."}
 
 @router.post("/settings")
-def update_settings(model_type: str = Form(...)):
+def update_settings(model_type: Optional[str] = Form(None), payload: Optional[UpdateSettingsRequest] = None):
     """
-    Toggles the active carbon estimation machine learning model between Random Forest and XGBoost.
+    Toggles the active carbon estimation machine learning model (random_forest, xgboost, fusion).
     """
-    success = carbon_estimator.set_model_type(model_type)
+    chosen_type = (payload.model_type if payload else None) or model_type
+    if not chosen_type:
+        raise HTTPException(status_code=400, detail="model_type is required.")
+    success = carbon_estimator.set_model_type(chosen_type)
     if not success:
-        raise HTTPException(status_code=400, detail=f"Model type '{model_type}' is invalid or not available.")
+        raise HTTPException(status_code=400, detail=f"Model type '{chosen_type}' is invalid or not available.")
     return {
         "status": "success",
         "active_model": carbon_estimator.model_type,
-        "xgboost_available": XGB_AVAILABLE
+        "xgboost_available": XGB_AVAILABLE,
+        "fusion_model_available": True,
+        "fusion_model_loaded": carbon_estimator.fusion_estimator.is_loaded
     }
 
 @router.get("/settings")
 def get_settings():
     """
-    Retrieves active model settings.
+    Retrieves active model settings including multi-modal fusion model gate status.
     """
     return {
         "active_model": carbon_estimator.model_type,
         "xgboost_available": XGB_AVAILABLE,
+        "fusion_model_available": True,
+        "fusion_model_loaded": carbon_estimator.fusion_estimator.is_loaded,
+        "fusion_model_status": carbon_estimator.fusion_estimator.model_meta.get("status", "gated_insufficient_real_data"),
+        "fusion_gate_threshold": 150,
         "feature_names": carbon_estimator.feature_names,
         "model_version": carbon_estimator.model_meta.get("version"),
         "model_trained_on": carbon_estimator.model_meta.get("trained_on")
     }
+
+
+@router.post("/settings")
+def update_settings(payload: UpdateSettingsRequest):
+    """
+    Updates the active estimator model type (e.g. 'random_forest', 'xgboost', 'fusion').
+    """
+    try:
+        carbon_estimator.set_model_type(payload.model_type)
+        return {
+            "status": "success",
+            "active_model": carbon_estimator.model_type,
+            "fusion_model_status": carbon_estimator.fusion_estimator.model_meta.get("status", "gated_insufficient_real_data")
+        }
+    except ValueError as ve:
+        raise HTTPException(status_code=400, detail=str(ve))
 
 # --- Part (b): ground-truth plots ---
 
@@ -866,13 +924,15 @@ def verify_provenance_chain(db: Session = Depends(get_db)):
 @router.get("/provenance/{result_id}")
 def get_provenance(result_id: str, db: Session = Depends(get_db)):
     """
-    Returns the full provenance record for one estimate - the artifact you'd
-    actually hand a VVB auditor. Recomputes the hash on the fly so tampering
-    is visible in the response, not just in an offline check.
+    Returns the full provenance record for one estimate with dual trust status:
+    1. Hash-chain integrity
+    2. Independent Ed25519 validator co-signatures
     """
     record = db.query(EstimateProvenance).filter(EstimateProvenance.result_id == result_id).first()
     if not record:
         raise HTTPException(status_code=404, detail="No provenance record found for this result.")
+
+    trust_status = provenance_utils.get_provenance_trust_status(record, db)
 
     payload = {
         "result_id": record.result_id, "data_source": record.data_source,
@@ -883,14 +943,102 @@ def get_provenance(result_id: str, db: Session = Depends(get_db)):
         "feature_vector": json.loads(record.feature_vector_json),
         "geolocation_lat": record.geolocation_lat, "geolocation_lng": record.geolocation_lng,
     }
-    recomputed = provenance_utils.compute_record_hash(payload, record.previous_hash)
 
     return {
         **payload,
-        "record_hash": record.record_hash,
-        "previous_hash": record.previous_hash,
-        "hash_verified": recomputed == record.record_hash,
+        **trust_status,
+        "hash_verified": trust_status["hash_chain_intact"],
         "created_at": record.created_at.isoformat()
     }
+
+
+@router.post("/provenance/generate-keys")
+def generate_validator_keys():
+    """
+    Generates a new Ed25519 keypair for an accredited validator or VVB auditor.
+    """
+    return provenance_utils.generate_validator_keypair()
+
+
+@router.post("/provenance/{result_id}/sign")
+def sign_provenance(result_id: str, payload: SignProvenanceRequest, db: Session = Depends(get_db)):
+    """
+    Attaches an external validator's Ed25519 co-signature to the provenance record.
+    Cryptographically verifies the signature over record_hash.
+    """
+    try:
+        sig_record = provenance_utils.add_validator_signature(
+            db=db,
+            result_id=result_id,
+            validator_id=payload.validator_id,
+            validator_name=payload.validator_name,
+            validator_organization=payload.validator_organization,
+            public_key_hex=payload.public_key_hex,
+            signature_hex=payload.signature_hex,
+            comments=payload.comments
+        )
+        return {
+            "status": "success",
+            "message": "Validator signature verified and attached to provenance record.",
+            "signature_id": sig_record.id,
+            "validator_id": sig_record.validator_id,
+            "signed_at": sig_record.signed_at.isoformat()
+        }
+    except ValueError as ve:
+        raise HTTPException(status_code=400, detail=str(ve))
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Failed to add signature: {e}")
+
+
+# --- Tiered Monitoring & Drone Verification Tasks (Treeconomy Pattern) ---
+
+@router.get("/verification-tasks")
+def get_verification_tasks(status: Optional[str] = None, db: Session = Depends(get_db)):
+    """
+    Lists verification tasks flagged due to high model prediction uncertainty.
+    """
+    return list_verification_tasks(status=status, db=db)
+
+
+@router.post("/verification-tasks/{task_id}/complete")
+def complete_task(task_id: int, payload: CompleteTaskRequest, db: Session = Depends(get_db)):
+    """
+    Marks a verification task as completed and ingests drone survey measurements.
+    """
+    try:
+        res = complete_verification_task(task_id, payload.dict(), db)
+        return res
+    except ValueError as ve:
+        raise HTTPException(status_code=404, detail=str(ve))
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Failed to complete task: {e}")
+
+
+# --- Verra VM0047 Dynamic Stocking Index Registry Export ---
+
+@router.get("/registry-export/vm0047/{project_id}")
+def get_vm0047_export(
+    project_id: str,
+    result_id: Optional[str] = None,
+    buffer_pool_pct: float = 18.0,
+    db: Session = Depends(get_db)
+):
+    """
+    Exports a Verra VM0047-compliant Dynamic Stocking Index submission bundle.
+    Contains multi-pool carbon stocks, sensor telemetry, conformal uncertainty deductions,
+    risk buffer pool withholding, and cryptographic multi-validator provenance.
+    """
+    try:
+        bundle = export_vm0047_stocking_index(
+            project_id=project_id,
+            db=db,
+            result_id=result_id,
+            buffer_pool_pct=buffer_pool_pct
+        )
+        return bundle
+    except ValueError as ve:
+        raise HTTPException(status_code=404, detail=str(ve))
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Failed to generate VM0047 export: {e}")
 
 

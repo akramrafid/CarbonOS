@@ -55,6 +55,11 @@ def init_db():
                 ("relative_margin_of_error", "FLOAT"),
                 ("verra_precision_discount_pct", "FLOAT"),
                 ("conservative_creditable_tco2e", "FLOAT"),
+                ("parcel_id", "VARCHAR(255)"),
+                ("biomass_agb_mg_ha", "FLOAT"),
+                ("biomass_bgb_mg_ha", "FLOAT"),
+                ("indices_json", "TEXT"),
+                ("interval_json", "TEXT"),
             ]
             with engine.begin() as conn:
                 for col_name, col_type in cols_to_add:
