@@ -48,6 +48,7 @@ INSTALLED_APPS = [
 
     # Local
     'farmers_ai',
+    'national_registry_bridge',
 ]
 
 MIDDLEWARE = [

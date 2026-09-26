@@ -68,8 +68,8 @@ const Navbar = () => {
     { id: 'Farmers AI', key: 'farmersAi', path: '/farmers-ai' },
     { id: 'Carbon Credit', key: 'carbonCredit', path: '/carbon-monitoring' },
     { id: 'Marketplace', key: 'marketplace', path: '/platform/marketplace' },
+    { id: 'Carbon Registry', key: 'carbonRegistry', path: '/platform/carbon-registry' },
     { id: 'Sectors', key: 'sectors' }, 
-    { id: 'How It Works', key: 'howItWorks', path: '/how-it-works' }, 
     { id: 'Pricing', key: 'pricing' }
   ];
 
@@ -237,7 +237,7 @@ const Navbar = () => {
             }
           })}
           
-          <Link to="/how-it-works" onClick={closeMenu} className="w-full max-w-sm mt-4 bg-emerald text-carbon font-sans font-bold text-lg px-8 py-4 rounded-full transition-colors shadow-lg flex items-center justify-center">
+          <Link to="/platform/saas" onClick={closeMenu} className="w-full max-w-sm mt-4 bg-emerald text-carbon font-sans font-bold text-lg px-8 py-4 rounded-full transition-colors shadow-lg flex items-center justify-center">
             {t('nav.requestDemo')}
           </Link>
           

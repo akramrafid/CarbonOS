@@ -71,6 +71,7 @@ function App() {
           <Route path="/platform/project-onboarding" element={<ProjectOnboarding />} />
           <Route path="/platform/mrv-dashboard" element={<MRVDashboard />} />
           <Route path="/platform/carbon-registry" element={<CarbonRegistry />} />
+          <Route path="/carbon-registry" element={<CarbonRegistry />} />
           <Route path="/platform/verification-workflow" element={<VerificationWorkflow />} />
           <Route path="/platform/marketplace" element={<MarketplaceBrowse />} />
           <Route path="/platform/ai-detection" element={<AIDetection />} />
