@@ -1,0 +1,89 @@
+version: '3.8'
+
+services:
+  db:
+    image: postgres:16-alpine
+    container_name: carbonos-postgres
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: carbonos_db
+      POSTGRES_USER: carbonos_admin
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-change_in_production_secure_pwd}
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U carbonos_admin -d carbonos_db"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - carbonos-mesh
+
+  redis:
+    image: redis:7-alpine
+    container_name: carbonos-redis
+    restart: unless-stopped
+    command: redis-server --appendonly yes
+    volumes:
+      - redis_data:/data
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - carbonos-mesh
+
+  inference:
+    build:
+      context: .
+      dockerfile: inference/Dockerfile
+    container_name: carbonos-inference
+    restart: unless-stopped
+    environment:
+      - PORT=8000
+      - CHROMA_PERSIST_DIR=/app/data/chroma
+      - GEMINI_API_KEY=${GEMINI_API_KEY:-}
+      - REDIS_URL=redis://redis:6379/0
+    volumes:
+      - chroma_data:/app/data/chroma
+      - ./inference/models:/app/inference/models:ro
+    ports:
+      - "8000:8000"
+    depends_on:
+      redis:
+        condition: service_healthy
+    networks:
+      - carbonos-mesh
+
+  backend:
+    build:
+      context: .
+      dockerfile: backend/Dockerfile
+    container_name: carbonos-backend
+    restart: unless-stopped
+    environment:
+      - DJANGO_DEBUG=False
+      - DJANGO_SECRET_KEY=${DJANGO_SECRET_KEY:-insecure_dev_key_must_override_in_prod_64char_long_string_12345}
+      - ALLOWED_HOSTS=localhost,127.0.0.1,backend,carbonos.bd
+      - DATABASE_URL=postgres://carbonos_admin:${POSTGRES_PASSWORD:-change_in_production_secure_pwd}@db:5432/carbonos_db
+      - REDIS_URL=redis://redis:6379/1
+      - INFERENCE_SERVICE_URL=http://inference:8000
+    ports:
+      - "8001:8000"
+    depends_on:
+      db:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    networks:
+      - carbonos-mesh
+
+volumes:
+  postgres_data:
+  redis_data:
+  chroma_data:
+
+networks:
+  carbonos-mesh:
+    driver: bridge

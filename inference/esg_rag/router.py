@@ -132,7 +132,7 @@ async def extract_footprint(
         if sample and sample.chunks:
             doc_text = "\n".join([f"[Page {c.page_number}] {c.content}" for c in sample.chunks])
         else:
-            doc_text = "Factory backup power: 14,200 Liters High Speed Diesel. DESCO grid power: 156,000 kWh. Staff: 148 employees. Freight: 39,000 ton-km. Raw yarn: 580 tons. Fleet octane: 4,800 Liters. LPG: 1,950 kg. Flights: 82,000 km."
+            doc_text = ""
 
     # Run AI extraction
     extracted = extract_footprint_from_text(doc_text)
