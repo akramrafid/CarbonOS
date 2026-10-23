@@ -25,6 +25,11 @@ test("assistant failure shows unavailable state without citations", async ({ pag
   await expect(page.getByText(/ESG assistant is unavailable/)).toBeVisible();
 });
 
+test("legacy dashboard is labelled as a demo and makes no assurance claims", async ({ page }) => {
+  await expect(page.getByRole("note").filter({ hasText: "DEMO DASHBOARD" })).toBeVisible();
+  await expect(page.getByText(/Audited against ISO|ISO 14064 Compliant|DoE 2026 Compliant|Top 5% in Sector/)).toHaveCount(0);
+});
+
 test("no uncaught page errors", async ({ page }) => {
   const errors: string[] = [];
   page.on("pageerror", (e) => errors.push(String(e)));

@@ -1300,7 +1300,12 @@ const SaaSDashboard = () => {
     <div className={`min-h-screen flex relative platform-saas-dashboard transition-colors duration-300 ${
       isLight ? 'bg-[#F4F6F4] text-[#0F2417]' : 'bg-[#040906] text-[#E0EFE7]'
     }`}>
-      
+      {/* This legacy dashboard shows illustrative figures; real accounting lives in /platform/esg (register A24). */}
+      <p role="note" className="fixed inset-x-0 bottom-0 z-40 bg-amber-400 px-4 py-2 text-center font-mono text-[11px] font-bold text-black">
+        DEMO DASHBOARD — figures are illustrative, not your organization&apos;s data and not assured.{' '}
+        <a href="/platform/esg" className="underline">Open the ESG accounting workspace</a>
+      </p>
+
       {/* FLOAT TOAST NOTIFICATION */}
       {toast.show && (
         <div className={`fixed bottom-6 right-6 z-50 flex items-center space-x-3 px-4.5 py-3.5 rounded-2xl shadow-xl border transition-all transform duration-300 animate-fade-in ${
@@ -1976,8 +1981,8 @@ const SaaSDashboard = () => {
                 <div className={`pt-3 border-t text-[11px] font-sans flex items-center justify-between ${
                   isLight ? 'border-[#E8ECE8] text-[#557361]' : 'border-[#122418] text-[#7C9A88]'
                 }`}>
-                  <span>Audited against ISO 14064-1</span>
-                  <span className="font-mono text-[#00C853] font-bold">Top 5% in Sector</span>
+                  <span>Illustrative demo figures</span>
+                  <span className="font-mono text-amber-500 font-bold">DEMO</span>
                 </div>
               </div>
 
@@ -2181,8 +2186,8 @@ const SaaSDashboard = () => {
                 <div className={`pt-3 border-t text-[10px] font-mono flex items-center justify-between ${
                   isLight ? 'border-[#E8ECE8] text-[#557361]' : 'border-[#122418] text-[#7C9A88]'
                 }`}>
-                  <span>ISO 14064 Assurance</span>
-                  <span className="text-[#00C853] font-semibold">DoE 2026 Compliant</span>
+                  <span>Demo data</span>
+                  <span className="text-amber-500 font-semibold">Not assured</span>
                 </div>
               </div>
 
@@ -2578,7 +2583,7 @@ const SaaSDashboard = () => {
                     {[
                       { step: 1, label: "1. Ingest & Upload", sub: "Raw Bills & Invoices" },
                       { step: 2, label: "2. Refine & Categorize", sub: "9 Categories & Impact" },
-                      { step: 3, label: "3. Audit Assurance", sub: "ISO 14064 Citations" }
+                      { step: 3, label: "3. Evidence", sub: "Source snippets" }
                     ].map(s => {
                       const isActive = extractionStep === s.step;
                       return (
@@ -2620,7 +2625,7 @@ const SaaSDashboard = () => {
                           <Database className={`w-4 h-4 ${isLight ? 'text-[#00873E]' : 'text-[#4ADE80]'}`} />
                         </div>
                         <div className="text-left">
-                          <div className={`text-xs font-bold ${isLight ? 'text-[#0F2417]' : 'text-white'}`}>Quick Test with Audited Baseline</div>
+                          <div className={`text-xs font-bold ${isLight ? 'text-[#0F2417]' : 'text-white'}`}>Quick Test with Demo Sample</div>
                           <div className={`text-[11px] ${isLight ? 'text-[#41634E]' : 'text-[#9EBFAB]'}`}>Load Dexterity Textiles Ltd Q2 Audit Statement (DEPZ TX-8491)</div>
                         </div>
                       </div>
@@ -2747,7 +2752,7 @@ const SaaSDashboard = () => {
                           </div>
                         </div>
                         <div className={`text-xs ${isLight ? 'text-[#64748B]' : 'text-[#7C9A88]'}`}>
-                          Calculated from {activeMatrix.categories.filter(c => c.carbonKg > 0).length} active corporate emission categories • ISO 14064 Compliant
+                          Calculated from {activeMatrix.categories.filter(c => c.carbonKg > 0).length} active corporate emission categories • estimate, not assured
                         </div>
                       </div>
 
@@ -4186,7 +4191,7 @@ const SaaSDashboard = () => {
               <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center border-b border-[#F1F5F9] pb-4 gap-2">
                 <div>
                   <h3 className="font-sans font-bold text-lg text-[#0F291B]">Traceable Audit Trail Log</h3>
-                  <p className="text-xs text-[#64748B] mt-0.5">Calculations verified under GHG Protocol and ISAE 3410 assurance guidelines.</p>
+                  <p className="text-xs text-[#64748B] mt-0.5">Demo view. No external assurance has been performed on these figures.</p>
                 </div>
                 <span className="bg-emerald/10 text-emerald text-[10px] px-3 py-1 rounded-full font-bold border border-emerald/20">
                   EF Library: DEFRA 2025 v1.4
