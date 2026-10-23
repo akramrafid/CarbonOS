@@ -554,3 +554,8 @@ def esg_detect_utility_segments(
     return detect_all_utility_segments(raw_text, client_id=client_id)
 
 
+
+
+# Ledger routes (facilities, periods, factors, activities, calculations, snapshots) share the /api/esg prefix.
+from .ledger_router import router as _ledger_router  # noqa: E402
+router.include_router(_ledger_router)

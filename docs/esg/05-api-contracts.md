@@ -64,3 +64,30 @@ corpus returns the existing document with `duplicate: true`.
 * `confidence` is extraction-model confidence only and is `null` for rule-based matches.
 * LLM extraction (Gemini) runs only when `ESG_LLM_EXTRACTION_ENABLED=true`; otherwise documents never leave the server.
 * Nothing in the API sets `verified`, `audit_seal` or similar; `verified_by_audit` is reserved for a recorded human review (not built yet).
+
+## Ledger routes (P1-1)
+
+All under `/api/esg`, same auth/tenant rules. Decimals are JSON **strings**. Lists return `{total, items}`
+with `limit` (1–200, default 50) and `offset`. Domain rule violations: 403 (role / separation of duties),
+404 (not in caller's organization), 409 (state conflict, overlap, locked period, stale calculation), 422 (validation).
+
+| Method & path | Permission | Notes |
+|---|---|---|
+| POST/GET `/legal-entities` | admin / read | `{name, country (ISO-2), registration_number?}` |
+| POST/GET `/facilities` | admin / read | `{legal_entity_id, name, country, grid_region, address?, operational_control, financial_control, equity_share_pct}` |
+| POST/GET `/periods` | admin / read | `{name, start_date, end_date, boundary_method}` |
+| POST `/factors[?platform_wide=true]` | admin (platform: operator) | creates DRAFT version; unit must be the activity's canonical unit; Scope 1 → `direct`, Scope 2 → `location`/`market` |
+| POST `/factors/{id}/approve` | admin (platform: operator), not the author | DRAFT → APPROVED, then immutable |
+| GET `/factors?status&activity_type` | read | organization + platform factors |
+| POST `/activities` | write | `{facility_id, period_id, activity_type, quantity, unit, activity_start, activity_end, meter_ref?, source_type, source_document_id?, source_ref?, evidence_snippet?, factor_id?, market_factor_id?, notes?, supersedes_id?, idempotency_key?}` → record + `created` |
+| PATCH `/activities/{id}` | write | DRAFT/REJECTED only; audit keeps before/after |
+| POST `/activities/{id}/submit` | write | DRAFT/REJECTED → SUBMITTED |
+| POST `/activities/{id}/approve` · `/reject` | review, not the creator | reject requires `comment` |
+| GET `/activities?period_id&facility_id&status` | read | |
+| POST `/periods/{id}/calculate` | write | stores run + lines; returns totals, exceptions, `blocking` |
+| GET `/calculations/{id}` | read | run + line-level trace (formula, factor version) |
+| POST `/periods/{id}/lock` | admin, not the run's preparer | `{calculation_run_id}` → snapshot (content omitted) |
+| POST `/periods/{id}/restate` | admin | `{reason}`; LOCKED → OPEN, revision + 1 |
+| GET `/periods/{id}/snapshots` | read | revisions with sha256 |
+| GET `/snapshots/{id}/export?format=json\|csv` | read | byte-identical on every call; `X-Content-SHA256` header |
+| GET `/audit-events?entity_id` | review | newest first |

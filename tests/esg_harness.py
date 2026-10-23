@@ -15,23 +15,47 @@ os.environ["DATABASE_URL"] = f"sqlite:///{os.path.join(TMP, 'unused.sqlite3')}"
 os.environ["ESG_AUTH_JWT_SECRET"] = "test-secret-" + "x" * 40
 os.environ["ESG_PLATFORM_OPERATOR_SUBS"] = "operator-1"
 os.environ.pop("ESG_AUTH_JWKS_URL", None)
-os.environ.pop("GEMINI_API_KEY", None)
+os.environ["GEMINI_API_KEY"] = ""  # load_dotenv never overrides set vars: tests never call Gemini
+os.environ["ESG_LLM_EXTRACTION_ENABLED"] = ""
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), "..", "inference"))
 
 import jwt  # noqa: E402
 from fastapi import FastAPI  # noqa: E402
 from fastapi.testclient import TestClient  # noqa: E402
-from sqlalchemy import create_engine  # noqa: E402
+from sqlalchemy import create_engine, event, text  # noqa: E402
 from sqlalchemy.orm import sessionmaker  # noqa: E402
 from sqlalchemy.pool import StaticPool  # noqa: E402
 
 from carbon_monitoring.database import Base  # noqa: E402
 from esg_rag import models  # noqa: E402,F401
-from esg_rag.database import get_db  # noqa: E402
+from esg_rag.database import EsgBase, get_db, upgrade  # noqa: E402
+from esg_rag import ledger_models  # noqa: E402,F401
 from esg_rag.models import ESGMembership  # noqa: E402
 from esg_rag.router import router  # noqa: E402
 
 SECRET = os.environ["ESG_AUTH_JWT_SECRET"]
+# Set to a disposable PostgreSQL database to run the API suites against Postgres + Alembic migrations.
+TEST_DB = os.environ.get("ESG_TEST_DATABASE_URL")
+LEGACY_TABLES = ("esg_rag_chunk", "esg_rag_document", "esg_rag_querylog", "esg_emission_factors")
+_pg_engine = None
+
+
+def make_engine():
+    global _pg_engine
+    if TEST_DB:
+        if _pg_engine is None:
+            _pg_engine = create_engine(TEST_DB)
+            Base.metadata.create_all(_pg_engine, tables=[Base.metadata.tables[t] for t in LEGACY_TABLES])
+            upgrade(TEST_DB)
+        names = ", ".join(list(EsgBase.metadata.tables) + list(LEGACY_TABLES))
+        with _pg_engine.begin() as conn:
+            conn.execute(text(f"TRUNCATE {names} RESTART IDENTITY CASCADE"))
+        return _pg_engine
+    engine = create_engine("sqlite://", connect_args={"check_same_thread": False}, poolclass=StaticPool)
+    event.listen(engine, "connect", lambda conn, _: conn.execute("PRAGMA foreign_keys=ON"))
+    Base.metadata.create_all(engine)
+    EsgBase.metadata.create_all(engine)
+    return engine
 
 
 def token(sub, secret=SECRET, exp_in=300, **extra):
@@ -50,9 +74,7 @@ def auth(sub, org=None):
 
 class ESGApiTestCase(unittest.TestCase):
     def setUp(self):
-        engine = create_engine("sqlite://", connect_args={"check_same_thread": False}, poolclass=StaticPool)
-        Base.metadata.create_all(engine)
-        self.Session = sessionmaker(bind=engine)
+        self.Session = sessionmaker(bind=make_engine())
 
         def override_db():
             db = self.Session()

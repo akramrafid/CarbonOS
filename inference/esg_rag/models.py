@@ -1,6 +1,7 @@
 from sqlalchemy import Column, String, Float, Boolean, DateTime, Integer, Text, ForeignKey, JSON, UniqueConstraint, CheckConstraint
 from sqlalchemy.orm import relationship
 from carbon_monitoring.database import Base
+from .database import EsgBase
 import datetime
 import uuid
 
@@ -13,7 +14,7 @@ ESG_ROLES = (
 )
 
 
-class ESGOrganization(Base):
+class ESGOrganization(EsgBase):
     """A tenant. Its id is the tenant_id stored on every tenant-owned ESG row."""
     __tablename__ = 'esg_organization'
 
@@ -26,7 +27,7 @@ class ESGOrganization(Base):
     archived_at = Column(DateTime, nullable=True)
 
 
-class ESGMembership(Base):
+class ESGMembership(EsgBase):
     __tablename__ = 'esg_membership'
     __table_args__ = (
         UniqueConstraint('organization_id', 'user_sub', name='uq_esg_membership_org_user'),

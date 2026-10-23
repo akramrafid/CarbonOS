@@ -78,3 +78,45 @@ engine and the studio components. These need the P1 ledger + calculation engine 
 
 **Next slice.** P0-3 CI (add `test` script + Python ESG job so the workflow can pass), then P1 domain model
 (Alembic, facility, reporting period, activity ledger with Decimal) and factor registry. P0-4 login stays BLOCKED on the IdP decision.
+
+---
+
+## Batch 3 — P1-1 accounting core: ledger, factors, calculation, locks, snapshots
+
+**Objective.** Replace "numbers in React state" with a persisted, tenant-bound, auditable ledger and a
+deterministic Scope 1/2 engine, so a period can be calculated, approved, locked and reproduced.
+
+**Files.**
+- `inference/esg_rag/accounting.py` (new) — pure Decimal calculation library (units, factor selection, boundary, dual Scope 2, memo items, exceptions).
+- `inference/esg_rag/ledger_models.py` (new) — 10 tables on `EsgBase` with composite tenant FKs and dual-control check constraints; `esg_organization`/`esg_membership` moved to `EsgBase`.
+- `inference/esg_rag/ledger.py` (new) — domain service: structure, factor governance, activity workflow, calculation runs, lock/restate, snapshot export; audit event per state change.
+- `inference/esg_rag/ledger_router.py` (new) — 22 routes; mounted by `router.py`.
+- `inference/esg_rag/database.py` — `EsgBase`, Alembic helpers; `init_db` applies migrations.
+- `inference/esg_migrations/` (new) — Alembic env limited to ESG tables, migration `0001`.
+- `inference/requirements.txt` (+alembic, psycopg2-binary), `inference/requirements-esg.txt` (new, slim ESG deps).
+- `tests/test_esg_accounting.py` (12), `tests/test_esg_ledger.py` (16), `tests/esg_harness.py` (SQLite with FK enforcement, or PostgreSQL via `ESG_TEST_DATABASE_URL`; Gemini disabled).
+- Docs: `ACCOUNTING_METHODOLOGY.md`, `FACTOR_REGISTRY.md`, `DATA_MODEL.md`, API contracts.
+
+**Data migration.** `0001` creates the ESG tables. On an existing database that already has
+`esg_organization`/`esg_membership` from batch 1's `create_all`, stamp or drop those two empty tables before
+upgrading (they only ever existed on this branch).
+
+**Tests run.**
+```
+.venv-esg/bin/python -m unittest discover -s tests -p "test_esg*.py"
+  SQLite:      Ran 56 tests … OK (skipped=1: PostgreSQL-only concurrency test)
+  PostgreSQL:  ESG_TEST_DATABASE_URL=postgresql+psycopg2://esg@127.0.0.1:55432/esg_test → Ran 56 tests … OK
+Alembic: upgrade head + `alembic check` (no drift) + downgrade base + upgrade on PostgreSQL 16 and SQLite → OK
+```
+PostgreSQL was a disposable local cluster (`initdb` in the session scratchpad, port 55432).
+
+**Covered brief fixtures.** kWh×factor→t; overlapping invoices rejected; unit normalisation/rejection; factor
+version change leaves locked report byte-identical; market/location separate; missing market input not
+invented; approval + period locks; missing factor is a blocking exception; memo items never net; boundary
+rollups (operational/financial/equity); post-approval change via supersede; concurrent approvals single
+winner (PostgreSQL); retries idempotent; cross-tenant access 404 and DB-level composite FK rejection.
+
+**Status.** CODE_COMPLETE + tests VERIFIED locally. METHODOLOGY_VALIDATED: no (needs a GHG practitioner).
+No UI yet for these routes; no factors shipped (by policy — see FACTOR_REGISTRY.md).
+
+**Next.** CI workflow; members/invitations; ledger UI screens; replace fabricated dashboard KPIs (A24) with ledger data.

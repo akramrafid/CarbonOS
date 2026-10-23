@@ -1,0 +1,16 @@
+# Minimal dependencies for the ESG service code paths and its tests (no torch / satellite stack).
+fastapi==0.109.2
+httpx<0.28
+python-multipart==0.0.9
+python-dotenv
+requests
+SQLAlchemy>=2.0,<2.2
+alembic>=1.13
+psycopg2-binary>=2.9
+pydantic>=2.5
+PyJWT[crypto]>=2.8
+numpy
+pandas
+openpyxl
+pdfplumber
+python-docx
