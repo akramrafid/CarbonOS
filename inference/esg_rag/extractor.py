@@ -138,23 +138,16 @@ def regex_heuristic_extraction(document_text: str) -> Dict[str, Any]:
             except ValueError:
                 pass
 
-    # If document has reasonable content but no patterns matched, provide a standard verified baseline
+    # Phase 9.1 & Scenario F: When no patterns matched, do NOT inject fake baseline metrics
     if sum(params.values()) == 0:
-        params = {
-            "diesel": 14200.0,
-            "petrol": 4800.0,
-            "lpg": 1950.0,
-            "electricity": 156000.0,
-            "employees": 148.0,
-            "airTravel": 82000.0,
-            "truckTransport": 39000.0,
-            "rawMaterials": 580.0
+        return {
+            "parameters": {k: 0.0 for k in params.keys()},
+            "details": [],
+            "summary": "No verified utility consumption parameters detected in document.",
+            "overall_confidence": 0.0,
+            "status": "NO_METRICS_DETECTED",
+            "data_origin": "document_parse_empty"
         }
-        details = [
-            {"param_name": "diesel", "value": 14200.0, "unit": "Liters", "scope": "Scope 1", "source_page": 1, "raw_snippet": "Generator logbook: 14,200 L HSD consumed", "confidence": 0.94},
-            {"param_name": "electricity", "value": 156000.0, "unit": "kWh", "scope": "Scope 2", "source_page": 2, "raw_snippet": "DESCO HT meter billed units: 156,000 kWh", "confidence": 0.99},
-            {"param_name": "truckTransport", "value": 39000.0, "unit": "T-Km", "scope": "Scope 3", "source_page": 4, "raw_snippet": "Chattogram depot dispatch: 39,000 ton-km", "confidence": 0.91}
-        ]
 
     return {
         "parameters": params,
@@ -425,46 +418,38 @@ def detect_all_utility_segments(document_text: str, client_id: str = None) -> Di
                 "raw_snippet": snippet or f"Extracted line-item: {qty:,.1f} {rule['unit']} of {rule['name']}"
             })
 
-    # If document is sparse or synthetic, supply verified multi-segment bill representation
-    if len(detected_segments) < 3:
-        for rule in UTILITY_SEGMENT_RULES[:8]:
-            qty = rule["default_val"]
-            emissions_kg = qty * rule["factor"]
-            emissions_t = emissions_kg / 1000.0
-            cost = qty * rule["unit_rate_bdt"]
-            total_cost_bdt += cost
-
-            if "Scope 1" in rule["scope"]:
-                scope_totals["Scope 1"] += emissions_t
-            elif "Scope 2" in rule["scope"]:
-                scope_totals["Scope 2"] += emissions_t
-            elif "Scope 3" in rule["scope"]:
-                scope_totals["Scope 3"] += emissions_t
-
-            detected_segments.append({
-                "segment_id": rule["id"],
-                "segment_name": rule["name"],
-                "utility_type": rule["type"],
-                "meter_or_account": f"MTR-{rule['id'].upper()}-9902",
-                "quantity": qty,
-                "unit": rule["unit"],
-                "scope": rule["scope"],
-                "emission_factor": rule["factor"],
-                "factor_citation": rule["factor_citation"],
-                "emissions_kg": round(emissions_kg, 2),
-                "emissions_tco2e": round(emissions_t, 3),
-                "cost_bdt": round(cost, 2),
-                "cost_usd": round(cost / 120.0, 2),
-                "confidence": 0.96,
-                "source_page": 1,
-                "raw_snippet": f"Audit Verified Bill Item: {qty:,.1f} {rule['unit']} {rule['name']} billed under BERC schedule."
-            })
+    # Phase 9.1 & Scenario F: Truthful detection with zero fabrication
+    if not detected_segments:
+        return {
+            "invoice_meta": {
+                "invoice_number": None,
+                "issuing_authority": "Unrecognized / Insufficient Data",
+                "billing_period": None,
+                "tariff_category": None,
+                "currency": "BDT",
+                "total_billed_amount_bdt": 0.0,
+                "total_billed_amount_usd": 0.0
+            },
+            "segments": [],
+            "total_segments_detected": 0,
+            "total_emissions_tco2e": 0.0,
+            "scope_breakdown": {
+                "scope1_tco2e": 0.0,
+                "scope2_tco2e": 0.0,
+                "scope3_tco2e": 0.0
+            },
+            "status": "NO_SEGMENTS_DETECTED",
+            "audit_seal": "UNSEALED-NO-DATA",
+            "confidence_score": 0.0,
+            "data_origin": "document_parse_empty"
+        }
 
     import hashlib
     hash_payload = json.dumps([s["segment_id"] + str(s["quantity"]) for s in detected_segments])
     audit_hash = hashlib.sha256(hash_payload.encode()).hexdigest()[:16].upper()
 
     total_emissions = sum(scope_totals.values())
+    avg_confidence = round(sum(s["confidence"] for s in detected_segments) / len(detected_segments), 2)
 
     return {
         "invoice_meta": {
@@ -485,7 +470,7 @@ def detect_all_utility_segments(document_text: str, client_id: str = None) -> Di
             "scope3_tco2e": round(scope_totals["Scope 3"], 2)
         },
         "audit_seal": f"SHA256-SEAL-{audit_hash}",
-        "confidence_score": 0.98,
+        "confidence_score": avg_confidence,
         "verified_at": "2026-09-10 16:30 UTC"
     }
 

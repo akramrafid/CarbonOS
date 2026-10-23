@@ -138,6 +138,37 @@ class TestESGCalculationEngine(unittest.TestCase):
         self.assertEqual(calc_historical_restored["scope1"]["diesel_tco2e"], calc_v2026["scope1"]["diesel_tco2e"])
         self.assertEqual(calc_historical_restored["audit_seal"], calc_v2026["audit_seal"])
 
+    def test_scenario_f_invalid_document_no_fabricated_metrics(self):
+        """
+        Master Prompt Phase 9.1 & Regression Scenario F:
+        A user uploads an invalid or malformed source document.
+        Expected: Safe validation response, no invented consumption values, zero emissions,
+        and no fabricated utility segments.
+        """
+        from esg_rag.extractor import regex_heuristic_extraction, detect_all_utility_segments
+        
+        # 1. Test malformed / non-utility text with regex_heuristic_extraction
+        malformed_doc = "Board Meeting Minutes: Executive committee approved Q3 office catering supplier."
+        res_heuristic = regex_heuristic_extraction(malformed_doc)
+        
+        self.assertEqual(res_heuristic.get("status"), "NO_METRICS_DETECTED")
+        self.assertEqual(res_heuristic.get("overall_confidence"), 0.0)
+        self.assertEqual(sum(res_heuristic["parameters"].values()), 0.0)
+        self.assertEqual(len(res_heuristic["details"]), 0)
+        
+        # Must NOT invent default 14,200 L diesel or 156,000 kWh electricity
+        self.assertEqual(res_heuristic["parameters"]["diesel"], 0.0)
+        self.assertEqual(res_heuristic["parameters"]["electricity"], 0.0)
+        
+        # 2. Test malformed text with detect_all_utility_segments
+        res_segments = detect_all_utility_segments(malformed_doc)
+        self.assertEqual(res_segments.get("status"), "NO_SEGMENTS_DETECTED")
+        self.assertEqual(res_segments.get("total_segments_detected"), 0)
+        self.assertEqual(res_segments.get("total_emissions_tco2e"), 0.0)
+        self.assertEqual(res_segments.get("confidence_score"), 0.0)
+        self.assertEqual(len(res_segments.get("segments", [])), 0)
+        self.assertEqual(res_segments.get("audit_seal"), "UNSEALED-NO-DATA")
+
 if __name__ == '__main__':
     unittest.main()
 

@@ -150,10 +150,10 @@ async def extract_footprint(
         raw_materials = float(parameters.get("rawMaterials", parameters.get("raw_materials", 0.0)) or 0.0)
 
         # 1. Food & Groceries / Canteen Provisions
-        canteen_kg = (employees * 22 * 2.4) if employees > 0 else 850.0
-        lpg_kitchen_kg = (lpg * 0.60 * 2.98) if lpg > 0 else 340.0
+        canteen_kg = (employees * 22 * 2.4) if employees > 0 else 0.0
+        lpg_kitchen_kg = (lpg * 0.60 * 2.98) if lpg > 0 else 0.0
         food_kg = canteen_kg + lpg_kitchen_kg
-        food_spend = (employees * 22 * 180.0 + (lpg * 0.60 * 120.0)) if employees > 0 else 68000.0
+        food_spend = (employees * 22 * 180.0 + (lpg * 0.60 * 120.0)) if (employees > 0 or lpg > 0) else 0.0
 
         # 2. Transport & Fleet / Logistics
         petrol_kg = petrol * 2.31
@@ -162,42 +162,38 @@ async def extract_footprint(
         flight_kg = air_travel * 0.12
         trans_kg = petrol_kg + diesel_fleet_kg + truck_kg + flight_kg
         trans_spend = (petrol * 125.0) + (diesel * 0.30 * 105.0) + (truck_transport * 18.0) + (air_travel * 14.0)
-        if trans_spend <= 0:
-            trans_spend = 185000.0
 
         # 3. Electricity & Energy
         grid_kg = electricity * 0.550
         diesel_gen_kg = (diesel * 0.70) * 2.68
         elec_kg = grid_kg + diesel_gen_kg
         elec_spend = (electricity * 10.50) + (diesel * 0.70 * 105.0)
-        if elec_spend <= 0:
-            elec_spend = 450000.0
 
         # 4. Clothing & Footwear / Uniforms
-        cloth_kg = (employees * 4.0 * 8.5) if employees > 0 else 180.0
-        cloth_spend = (employees * 4.0 * 1200.0) if employees > 0 else 42000.0
+        cloth_kg = (employees * 4.0 * 8.5) if employees > 0 else 0.0
+        cloth_spend = (employees * 4.0 * 1200.0) if employees > 0 else 0.0
 
         # 5. Shopping & Products / Raw Materials
-        shop_kg = (raw_materials * 2500.0) if raw_materials > 0 else 14500.0
-        shop_spend = (raw_materials * 140000.0) if raw_materials > 0 else 820000.0
+        shop_kg = (raw_materials * 2500.0) if raw_materials > 0 else 0.0
+        shop_spend = (raw_materials * 140000.0) if raw_materials > 0 else 0.0
 
         # 6. Housing & Rent / Facilities
-        lpg_facility_kg = (lpg * 0.40 * 2.98) if lpg > 0 else 220.0
-        facility_grid_kg = (electricity * 0.08 * 0.550) if electricity > 0 else 450.0
-        house_kg = lpg_facility_kg + facility_grid_kg + 850.0
-        house_spend = (lpg * 0.40 * 120.0) + 185000.0
+        lpg_facility_kg = (lpg * 0.40 * 2.98) if lpg > 0 else 0.0
+        facility_grid_kg = (electricity * 0.08 * 0.550) if electricity > 0 else 0.0
+        house_kg = lpg_facility_kg + facility_grid_kg
+        house_spend = (lpg * 0.40 * 120.0) if lpg > 0 else 0.0
 
         # 7. Entertainment & Client Hospitality
-        ent_kg = (air_travel * 0.03) + 240.0
-        ent_spend = (air_travel * 3.5) + 55000.0
+        ent_kg = (air_travel * 0.03) if air_travel > 0 else 0.0
+        ent_spend = (air_travel * 3.5) if air_travel > 0 else 0.0
 
         # 8. Health & Personal Care / Safety PPE
-        health_kg = (employees * 3.8) if employees > 0 else 190.0
-        health_spend = (employees * 650.0) if employees > 0 else 32000.0
+        health_kg = (employees * 3.8) if employees > 0 else 0.0
+        health_spend = (employees * 650.0) if employees > 0 else 0.0
 
         # 9. Others & Ancillary Services
-        others_kg = (employees * 2.5) + 680.0
-        others_spend = (employees * 280.0) + 125000.0
+        others_kg = (employees * 2.5) if employees > 0 else 0.0
+        others_spend = (employees * 280.0) if employees > 0 else 0.0
 
         cat_defs = [
             {
@@ -208,10 +204,10 @@ async def extract_footprint(
                 "carbon_kg": round(food_kg, 2),
                 "scope": "Scope 3 (Cat 1)",
                 "unit": "Staff Meals / Provisions",
-                "quantity": float(round(employees * 22 if employees > 0 else 350, 1)),
+                "quantity": float(round(employees * 22, 1)) if employees > 0 else 0.0,
                 "emission_factor": 2.40,
                 "factor_citation": "CEDA EEIO Agro-Provisions & DoE LPG Gazette 2023",
-                "status": "verified"
+                "status": "verified" if food_kg > 0 else "zero_activity"
             },
             {
                 "id": "transport",
@@ -224,7 +220,7 @@ async def extract_footprint(
                 "quantity": float(round(petrol + (diesel * 0.3) + truck_transport, 1)),
                 "emission_factor": 2.31,
                 "factor_citation": "Bangladesh BPC 2023 & Smart Freight Centre GLEC Heavy Haulage Model",
-                "status": "verified"
+                "status": "verified" if trans_kg > 0 else "zero_activity"
             },
             {
                 "id": "electricity_energy",
@@ -237,7 +233,7 @@ async def extract_footprint(
                 "quantity": float(round(electricity + (diesel * 0.7), 1)),
                 "emission_factor": 0.550,
                 "factor_citation": "DoE Official Grid Baseline Gazette Ref: 22.02.0000.018.99.001.23",
-                "status": "verified"
+                "status": "verified" if elec_kg > 0 else "zero_activity"
             },
             {
                 "id": "clothing_footwear",
@@ -247,10 +243,10 @@ async def extract_footprint(
                 "carbon_kg": round(cloth_kg, 2),
                 "scope": "Scope 3 (Cat 1)",
                 "unit": "PPE Garments",
-                "quantity": float(round(employees * 4 if employees > 0 else 24, 1)),
+                "quantity": float(round(employees * 4, 1)) if employees > 0 else 0.0,
                 "emission_factor": 8.50,
                 "factor_citation": "Apparel LCA Database & CEDA EEIO Uniforms Factor",
-                "status": "verified"
+                "status": "verified" if cloth_kg > 0 else "zero_activity"
             },
             {
                 "id": "shopping_products",
@@ -260,10 +256,10 @@ async def extract_footprint(
                 "carbon_kg": round(shop_kg, 2),
                 "scope": "Scope 3 (Cat 1)",
                 "unit": "Metric Tons Inputs",
-                "quantity": float(round(raw_materials if raw_materials > 0 else 12, 1)),
+                "quantity": float(round(raw_materials, 1)) if raw_materials > 0 else 0.0,
                 "emission_factor": 2500.0,
                 "factor_citation": "DoE Composite Textile & Raw Material Factor (2.50 tCO2e/ton)",
-                "status": "verified"
+                "status": "verified" if shop_kg > 0 else "zero_activity"
             },
             {
                 "id": "housing_rent",
@@ -273,10 +269,10 @@ async def extract_footprint(
                 "carbon_kg": round(house_kg, 2),
                 "scope": "Scope 1 & 2",
                 "unit": "Facility m² / Month",
-                "quantity": 1.0,
+                "quantity": 1.0 if (lpg > 0 or electricity > 0) else 0.0,
                 "emission_factor": 0.35,
                 "factor_citation": "DEFRA Facilities Carbon Model & BERC Commercial Space Baseline",
-                "status": "verified"
+                "status": "verified" if house_kg > 0 else "zero_activity"
             },
             {
                 "id": "entertainment",
@@ -286,10 +282,10 @@ async def extract_footprint(
                 "carbon_kg": round(ent_kg, 2),
                 "scope": "Scope 3 (Cat 6)",
                 "unit": "Hospitality Events",
-                "quantity": 1.0,
+                "quantity": float(round(air_travel, 1)) if air_travel > 0 else 0.0,
                 "emission_factor": 0.11,
                 "factor_citation": "GHG Protocol Scope 3 Cat 6 Business Travel & Hospitality Index",
-                "status": "verified"
+                "status": "verified" if ent_kg > 0 else "zero_activity"
             },
             {
                 "id": "health_care",
@@ -299,10 +295,10 @@ async def extract_footprint(
                 "carbon_kg": round(health_kg, 2),
                 "scope": "Scope 3 (Cat 1)",
                 "unit": "Medical / Safety Kits",
-                "quantity": float(round(employees if employees > 0 else 15, 1)),
+                "quantity": float(round(employees, 1)) if employees > 0 else 0.0,
                 "emission_factor": 3.80,
                 "factor_citation": "Healthcare Without Harm & EEIO Medical Consumables Factor",
-                "status": "verified"
+                "status": "verified" if health_kg > 0 else "zero_activity"
             },
             {
                 "id": "others",
@@ -312,10 +308,10 @@ async def extract_footprint(
                 "carbon_kg": round(others_kg, 2),
                 "scope": "Scope 3 (Cat 5)",
                 "unit": "Ancillary Services",
-                "quantity": 1.0,
+                "quantity": float(round(employees, 1)) if employees > 0 else 0.0,
                 "emission_factor": 0.22,
                 "factor_citation": "DoE Municipal Solid Waste Methane Standard & Cloud Data Index",
-                "status": "verified"
+                "status": "verified" if others_kg > 0 else "zero_activity"
             }
         ]
 
