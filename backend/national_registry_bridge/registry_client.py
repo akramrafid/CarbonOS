@@ -260,19 +260,22 @@ class NationalRegistryClient:
             if force_sandbox_success:
                 response_status = 201
                 response_body = {
-                    "status": "ACCEPTED",
-                    "registrySubmissionId": f"SUB-BD-{str(registry_project.id)[:8].upper()}-{timezone.now().strftime('%Y%m%d%H%M')}",
-                    "assignedExternalId": registry_project.external_project_id or f"BD-DOE-{str(registry_project.id)[:6].upper()}",
-                    "message": "MRV monitoring report validated and ingested into National Registry ledger.",
+                    "status": "SANDBOX_ACCEPTED",
+                    "data_origin": "simulation",
+                    "simulationNotice": "SANDBOX SIMULATION ONLY: Validated against local sandbox rules. Not connected to live Bangladesh National Carbon Registry.",
+                    "registrySubmissionId": f"SANDBOX-SUB-BD-{str(registry_project.id)[:8].upper()}-{timezone.now().strftime('%Y%m%d%H%M')}",
+                    "assignedExternalId": registry_project.external_project_id or f"SANDBOX-BD-DOE-{str(registry_project.id)[:6].upper()}",
+                    "message": "MRV monitoring report validated in SANDBOX mode.",
                     "provenanceHashVerified": True,
                     "acknowledgedTco2e": round(total_tco2e * 0.95, 2),
-                    "dnaStatus": "PENDING_TECHNICAL_COMMITTEE_REVIEW"
+                    "dnaStatus": "SANDBOX_SIMULATED_REVIEW"
                 }
                 submission_status = "accepted"
             else:
                 response_status = 400
                 response_body = {
-                    "status": "REJECTED",
+                    "status": "SANDBOX_REJECTED",
+                    "data_origin": "simulation",
                     "error": "Validation failed on conservative buffer withholding calculation."
                 }
                 submission_status = "rejected"

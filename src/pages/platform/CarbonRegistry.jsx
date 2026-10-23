@@ -36,7 +36,7 @@ import {
   CheckCircle
 } from 'lucide-react';
 
-const DJANGO_API_URL = import.meta.env.VITE_DJANGO_API_URL || 'http://localhost:8000';
+const DJANGO_API_URL = import.meta.env.VITE_DJANGO_API_URL || 'http://localhost:8001';
 
 // Default mock mirror of live SQLite database records (ensures 100% operational resilience)
 const DEFAULT_PROJECTS = [

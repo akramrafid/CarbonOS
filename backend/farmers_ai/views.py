@@ -2,6 +2,7 @@ from rest_framework.decorators import api_view, parser_classes
 from rest_framework.parsers import MultiPartParser, FormParser
 from rest_framework.response import Response
 from rest_framework import status
+import os
 import requests
 from .models import Diagnosis, WeatherRiskSnapshot, AgronomistReview, CarbonTelemetry
 from django.db.models import Count, Q
@@ -9,7 +10,7 @@ from channels.layers import get_channel_layer
 from asgiref.sync import async_to_sync
 from .risk_engine import calculate_disease_risk
 
-FASTAPI_URL = "http://127.0.0.1:8001/predict"
+FASTAPI_URL = os.getenv("FASTAPI_URL", "http://127.0.0.1:8000/predict")
 
 @api_view(['POST'])
 @parser_classes([MultiPartParser, FormParser])

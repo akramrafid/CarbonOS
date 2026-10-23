@@ -20,14 +20,27 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 # See https://docs.djangoproject.com/en/6.0/howto/deployment/checklist/
 
 import os
+from django.core.exceptions import ImproperlyConfigured
 
-# SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = os.getenv('DJANGO_SECRET_KEY', 'django-insecure-&!^evp!(vub%e4=yh$@go=+yt(yk6i_740922c)#l1_ivz89n!')
+INSECURE_DEV_KEY = 'django-insecure-&!^evp!(vub%e4=yh$@go=+yt(yk6i_740922c)#l1_ivz89n!'
+SECRET_KEY = os.getenv('DJANGO_SECRET_KEY', INSECURE_DEV_KEY)
 
-# SECURITY WARNING: don't run with debug turned on in production!
+# DEBUG defaults to True in local development; set DJANGO_DEBUG=False in production
 DEBUG = os.getenv('DJANGO_DEBUG', 'True').lower() in ('true', '1')
 
-ALLOWED_HOSTS = os.getenv('ALLOWED_HOSTS', 'localhost,127.0.0.1,*').split(',')
+# In production (DEBUG=False), enforce secret key and host constraints
+if not DEBUG:
+    if SECRET_KEY == INSECURE_DEV_KEY:
+        raise ImproperlyConfigured(
+            "CRITICAL SECURITY CONFIGURATION ERROR: DJANGO_SECRET_KEY must be set in production when DEBUG=False."
+        )
+
+# Strip unsafe wildcards; explicitly parse allowed hosts
+raw_allowed_hosts = os.getenv('ALLOWED_HOSTS', '')
+if raw_allowed_hosts:
+    ALLOWED_HOSTS = [h.strip() for h in raw_allowed_hosts.split(',') if h.strip() and h.strip() != '*']
+else:
+    ALLOWED_HOSTS = ['localhost', '127.0.0.1', '[::1]', 'testserver']
 
 
 # Application definition
@@ -142,4 +155,35 @@ USE_TZ = True
 
 STATIC_URL = 'static/'
 
-# CORS Configuration defined above
+# REST Framework Configuration
+REST_FRAMEWORK = {
+    'DEFAULT_PERMISSION_CLASSES': [
+        'rest_framework.permissions.AllowAny' if DEBUG else 'rest_framework.permissions.IsAuthenticated',
+    ],
+    'DEFAULT_AUTHENTICATION_CLASSES': [
+        'rest_framework.authentication.SessionAuthentication',
+        'rest_framework.authentication.BasicAuthentication',
+    ],
+    'DEFAULT_THROTTLE_CLASSES': [
+        'rest_framework.throttling.AnonRateThrottle',
+        'rest_framework.throttling.UserRateThrottle',
+    ],
+    'DEFAULT_THROTTLE_RATES': {
+        'anon': '120/minute',
+        'user': '1200/minute',
+    }
+}
+
+# Production Security Headers & Cookies
+if not DEBUG:
+    SESSION_COOKIE_SECURE = True
+    CSRF_COOKIE_SECURE = True
+    SESSION_COOKIE_HTTPONLY = True
+    CSRF_COOKIE_HTTPONLY = False  # Allows frontend SPA to read CSRF token if needed
+    SECURE_BROWSER_XSS_FILTER = True
+    SECURE_CONTENT_TYPE_NOSNIFF = True
+    X_FRAME_OPTIONS = 'DENY'
+    SECURE_HSTS_SECONDS = int(os.getenv('SECURE_HSTS_SECONDS', '31536000'))
+    SECURE_HSTS_INCLUDE_SUBDOMAINS = True
+    SECURE_HSTS_PRELOAD = True
+    SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
