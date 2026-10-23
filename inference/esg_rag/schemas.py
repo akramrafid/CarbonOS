@@ -43,49 +43,21 @@ class ExtractedParameter(BaseModel):
     value: float
     unit: str
     scope: str # Scope 1, Scope 2, Scope 3
-    source_page: Optional[int] = 1
+    source_page: Optional[int] = None
     raw_snippet: str
-    confidence: float
-
-class CategoryMetric(BaseModel):
-    id: str
-    name: str
-    icon: Optional[str] = "zap"
-    spend_bdt: float
-    carbon_kg: float
-    carbon_tonnes: float
-    percentage: float
-    scope: str
-    unit: str
-    quantity: float
-    emission_factor: float
-    factor_citation: str
-    status: Optional[str] = "verified"
-
-class TopImpactCategory(BaseModel):
-    rank: int
-    id: str
-    name: str
-    carbon_kg: float
-    carbon_tonnes: float
-    percentage: float
+    # Extraction-model confidence only (None for rule-based matches). Never a verification score.
+    confidence: Optional[float] = None
 
 class ExtractionResponse(BaseModel):
     filename: str
     tenant_id: str
     parameters: Dict[str, float]
     details: List[ExtractedParameter]
-    overall_confidence: float
-    audit_seal: bool
-    verified_at: str
+    overall_confidence: Optional[float] = None
+    extraction_method: str
+    extracted_at: str
     summary: str
-    total_footprint_kg: Optional[float] = None
-    total_footprint_tonnes: Optional[float] = None
-    total_spend_bdt: Optional[float] = None
-    trend_vs_last_month: Optional[float] = -8.0
-    categories: Optional[List[CategoryMetric]] = None
-    top_impact_categories: Optional[List[TopImpactCategory]] = None
-    quick_tips: Optional[List[str]] = None
+    review_status: str = "REVIEW_REQUIRED"
 
 class EmissionFactorItem(BaseModel):
     id: str

@@ -39,7 +39,7 @@
 | POST `/organizations` | any authenticated user | `{name, is_demo?}` | 201 `{id, name, is_demo, role:"org_owner"}` |
 | GET `/organizations` | any authenticated user | — | `[{id, name, is_demo, role}]` for the caller |
 | POST `/query` | read | `{query (1–2000 chars), corpus?, top_k? (1–20)}` | `QueryResponse` — `confidence` is retrieval similarity, not verification |
-| POST `/extract-footprint` | write | multipart `file` or `raw_text` | `ExtractionResponse` (see P0-2 for authenticity rules) |
+| POST `/extract-footprint` | write | multipart `file` or `raw_text` | `{filename, tenant_id, parameters, details[{param_name,value,unit,scope,source_page?,raw_snippet,confidence?}], overall_confidence?, extraction_method: regex\|llm, extracted_at, summary, review_status: "REVIEW_REQUIRED"}`; 422 if no input, no readable text, or no quantities found. No footprint is computed here |
 | POST `/ingest` | write (global corpora: platform operator) | multipart `file`, `corpus` | `IngestResponse` incl. `duplicate` |
 | GET `/emission-factors` | read | `category?`, `region?` | factor rows |
 | GET `/documents` | read | `corpus?` | caller's tenant docs + global corpora |
@@ -48,8 +48,8 @@
 | GET `/emission-factors/registry` | read | — | static catalogue (unverified, register A12) |
 | POST `/emission-factors/regression-test` | admin | proposed factors | regression report |
 | GET `/atlas-benchmark/run` | read | — | synthetic benchmark (register A13) |
-| GET `/satellite-insets`, GET `/entity-tree` | read | — | demo payloads (register A7–A8) |
-| POST `/detect-utility-segments` | read | `{raw_text}` | detected segments |
+| GET `/satellite-insets`, GET `/entity-tree` | read, **demo org only** (404 otherwise) | — | sample payloads with `data_classification: "DEMO_SAMPLE"` |
+| POST `/detect-utility-segments` | read | `{raw_text}` | only segments present in the text; `excluded_segments` (solar export, kVA, kVARh) never netted; factors `UNVERIFIED`; `review_status: REVIEW_REQUIRED` |
 
 ## Upload rules
 
@@ -57,3 +57,10 @@ Allowed extensions: `.pdf .csv .xlsx .xls .txt .md .docx`. The client filename i
 display-safe basename and never used for storage; files are stored at
 `uploads/<organization_id>/<sha256><ext>`. Re-uploading identical bytes into the same tenant and
 corpus returns the existing document with `duplicate: true`.
+
+## Extraction rules (from P0-2)
+
+* No fabricated fallback anywhere: failures are 422 with a message telling the user to enter values manually.
+* `confidence` is extraction-model confidence only and is `null` for rule-based matches.
+* LLM extraction (Gemini) runs only when `ESG_LLM_EXTRACTION_ENABLED=true`; otherwise documents never leave the server.
+* Nothing in the API sets `verified`, `audit_seal` or similar; `verified_by_audit` is reserved for a recorded human review (not built yet).

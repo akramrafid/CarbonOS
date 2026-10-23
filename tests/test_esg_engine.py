@@ -74,27 +74,5 @@ class TestESGCalculationEngine(unittest.TestCase):
         self.assertGreaterEqual(eval_res["metrics"]["parameter_accuracy_pct"], 90.0)
         self.assertGreaterEqual(eval_res["metrics"]["scope_classification_pct"], 90.0)
 
-    def test_universal_utility_segments_detection(self):
-        from esg_rag.extractor import detect_all_utility_segments
-        test_invoice = """
-        DHAKA ELECTRIC SUPPLY COMPANY (DESCO) INDUSTRIAL HIGH TENSION STATEMENT
-        Account Meter: MTR-DESCO-HT-8821. Billing Period: May 2026.
-        Off-Peak Energy: 85,000 kWh @ 9.20 BDT
-        Peak Hour Energy: 22,000 kWh @ 12.80 BDT
-        Sanctioned Maximum Demand: 400 kVA
-        Captive Natural Gas: 12,500 m3
-        Backup Genset Diesel: 3,400 Liters
-        WASA Water Supply: 4,200 m3
-        Solar Net-Metering Export: 5,000 kWh
-        """
-        res = detect_all_utility_segments(test_invoice)
-        self.assertGreaterEqual(res["total_segments_detected"], 5)
-        self.assertGreater(res["total_emissions_tco2e"], 0)
-        self.assertIn("invoice_meta", res)
-        self.assertIn("audit_seal", res)
-        self.assertTrue(res["audit_seal"].startswith("SHA256-SEAL-"))
-        self.assertIn("scope_breakdown", res)
-        self.assertGreater(res["scope_breakdown"]["scope2_tco2e"], 0)
-
 if __name__ == '__main__':
     unittest.main()

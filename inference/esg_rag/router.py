@@ -11,8 +11,6 @@ from .schemas import (
     QueryResponse,
     IngestResponse,
     ExtractionResponse,
-    CategoryMetric,
-    TopImpactCategory,
     EmissionFactorItem,
     Citation,
     OrganizationCreate,
@@ -35,6 +33,11 @@ async def _read_upload(file: UploadFile) -> bytes:
     if len(content) > MAX_UPLOAD_BYTES:
         raise HTTPException(413, f"File exceeds {MAX_UPLOAD_BYTES} bytes")
     return content
+
+
+def _demo_only(principal: Principal):
+    if not principal.is_demo:
+        raise HTTPException(404, "Sample data is only available in demo workspaces")
 
 
 def _ingest(db: Session, content: bytes, filename: str, corpus: str, tenant_id: str):
@@ -139,19 +142,18 @@ def esg_query(
 async def extract_footprint(
     file: Optional[UploadFile] = File(None),
     raw_text: Optional[str] = Form(None),
-    filename: Optional[str] = Form("ESG_Statement_Q2_2026.xlsx"),
+    filename: Optional[str] = Form("pasted_text"),
     principal: Principal = Depends(require("write")),
     db: Session = Depends(get_db)
 ):
     """
-    Real AI Footprint Extractor:
-    Scans uploaded bill, spreadsheet, or PDF and extracts quantitative consumption parameters
-    (diesel, petrol, LPG, electricity, employee commute, freight, raw materials)
-    with exact citations, page references, and verification confidence.
+    Extracts activity quantities (diesel, petrol, LPG, electricity, …) with source snippets from an
+    uploaded document or pasted text. Results are REVIEW_REQUIRED inputs, never verified values.
+    Returns 422 when nothing readable or extractable is found — it never substitutes sample data.
     """
     tenant_id = principal.organization_id
     doc_text = ""
-    target_filename = filename or "uploaded_statement.xlsx"
+    target_filename = filename or "pasted_text"
 
     if file:
         content_bytes = await _read_upload(file)
@@ -159,281 +161,44 @@ async def extract_footprint(
         result = _ingest(db, content_bytes, file.filename, CORPUS_TENANT_DOCS, tenant_id)
         target_filename = result.document.filename
         doc_text = "\n".join([f"[Page {p['page']}] {p['text']}" for p in result.pages])
-    elif raw_text:
-        doc_text = raw_text
+    elif raw_text and raw_text.strip():
+        doc_text = raw_text[:200_000]
     else:
-        # If no file provided, retrieve sample tenant audit statement from DB
-        sample = db.query(ESGDocument).filter(
-            ESGDocument.tenant_id == tenant_id,
-            ESGDocument.corpus == "tenant_docs"
-        ).first()
-        if sample and sample.chunks:
-            doc_text = "\n".join([f"[Page {c.page_number}] {c.content}" for c in sample.chunks])
-        else:
-            doc_text = "Factory backup power: 14,200 Liters High Speed Diesel. DESCO grid power: 156,000 kWh. Staff: 148 employees. Freight: 39,000 ton-km. Raw yarn: 580 tons. Fleet octane: 4,800 Liters. LPG: 1,950 kg. Flights: 82,000 km."
+        raise HTTPException(422, "Provide a document or text to extract from")
 
-    # Run AI extraction
+    if not doc_text.strip():
+        raise HTTPException(422, "No readable text found in the document (scanned PDFs need OCR, which is not supported yet). Enter values manually.")
+
+    started = time.time()
     extracted = extract_footprint_from_text(doc_text)
-    params = extracted.get("parameters", {})
+    params = {k: float(v or 0) for k, v in extracted.get("parameters", {}).items()}
+    if not any(params.values()):
+        raise HTTPException(422, "No activity quantities were found in the document. Enter values manually.")
 
-    # Synthesize 9 standard carbon footprint categories with BDT spend and CO2e metrics
-    def build_nine_category_footprint(parameters: Dict[str, float]) -> Dict[str, Any]:
-        diesel = float(parameters.get("diesel", 0.0) or 0.0)
-        petrol = float(parameters.get("petrol", 0.0) or 0.0)
-        lpg = float(parameters.get("lpg", 0.0) or 0.0)
-        electricity = float(parameters.get("electricity", 0.0) or 0.0)
-        employees = float(parameters.get("employees", 0.0) or 0.0)
-        air_travel = float(parameters.get("airTravel", parameters.get("air_travel", 0.0)) or 0.0)
-        truck_transport = float(parameters.get("truckTransport", parameters.get("truck_transport", 0.0)) or 0.0)
-        raw_materials = float(parameters.get("rawMaterials", parameters.get("raw_materials", 0.0)) or 0.0)
-
-        # 1. Food & Groceries / Canteen Provisions
-        canteen_kg = (employees * 22 * 2.4) if employees > 0 else 850.0
-        lpg_kitchen_kg = (lpg * 0.60 * 2.98) if lpg > 0 else 340.0
-        food_kg = canteen_kg + lpg_kitchen_kg
-        food_spend = (employees * 22 * 180.0 + (lpg * 0.60 * 120.0)) if employees > 0 else 68000.0
-
-        # 2. Transport & Fleet / Logistics
-        petrol_kg = petrol * 2.31
-        diesel_fleet_kg = (diesel * 0.30) * 2.68
-        truck_kg = truck_transport * 0.20
-        flight_kg = air_travel * 0.12
-        trans_kg = petrol_kg + diesel_fleet_kg + truck_kg + flight_kg
-        trans_spend = (petrol * 125.0) + (diesel * 0.30 * 105.0) + (truck_transport * 18.0) + (air_travel * 14.0)
-        if trans_spend <= 0:
-            trans_spend = 185000.0
-
-        # 3. Electricity & Energy
-        grid_kg = electricity * 0.550
-        diesel_gen_kg = (diesel * 0.70) * 2.68
-        elec_kg = grid_kg + diesel_gen_kg
-        elec_spend = (electricity * 10.50) + (diesel * 0.70 * 105.0)
-        if elec_spend <= 0:
-            elec_spend = 450000.0
-
-        # 4. Clothing & Footwear / Uniforms
-        cloth_kg = (employees * 4.0 * 8.5) if employees > 0 else 180.0
-        cloth_spend = (employees * 4.0 * 1200.0) if employees > 0 else 42000.0
-
-        # 5. Shopping & Products / Raw Materials
-        shop_kg = (raw_materials * 2500.0) if raw_materials > 0 else 14500.0
-        shop_spend = (raw_materials * 140000.0) if raw_materials > 0 else 820000.0
-
-        # 6. Housing & Rent / Facilities
-        lpg_facility_kg = (lpg * 0.40 * 2.98) if lpg > 0 else 220.0
-        facility_grid_kg = (electricity * 0.08 * 0.550) if electricity > 0 else 450.0
-        house_kg = lpg_facility_kg + facility_grid_kg + 850.0
-        house_spend = (lpg * 0.40 * 120.0) + 185000.0
-
-        # 7. Entertainment & Client Hospitality
-        ent_kg = (air_travel * 0.03) + 240.0
-        ent_spend = (air_travel * 3.5) + 55000.0
-
-        # 8. Health & Personal Care / Safety PPE
-        health_kg = (employees * 3.8) if employees > 0 else 190.0
-        health_spend = (employees * 650.0) if employees > 0 else 32000.0
-
-        # 9. Others & Ancillary Services
-        others_kg = (employees * 2.5) + 680.0
-        others_spend = (employees * 280.0) + 125000.0
-
-        cat_defs = [
-            {
-                "id": "food_groceries",
-                "name": "Food & Groceries",
-                "icon": "utensils",
-                "spend_bdt": round(food_spend, 2),
-                "carbon_kg": round(food_kg, 2),
-                "scope": "Scope 3 (Cat 1)",
-                "unit": "Staff Meals / Provisions",
-                "quantity": float(round(employees * 22 if employees > 0 else 350, 1)),
-                "emission_factor": 2.40,
-                "factor_citation": "CEDA EEIO Agro-Provisions & DoE LPG Gazette 2023",
-                "status": "verified"
-            },
-            {
-                "id": "transport",
-                "name": "Transport",
-                "icon": "car",
-                "spend_bdt": round(trans_spend, 2),
-                "carbon_kg": round(trans_kg, 2),
-                "scope": "Scope 1 & 3",
-                "unit": "Liters & T-Km",
-                "quantity": float(round(petrol + (diesel * 0.3) + truck_transport, 1)),
-                "emission_factor": 2.31,
-                "factor_citation": "Bangladesh BPC 2023 & Smart Freight Centre GLEC Heavy Haulage Model",
-                "status": "verified"
-            },
-            {
-                "id": "electricity_energy",
-                "name": "Electricity & Energy",
-                "icon": "zap",
-                "spend_bdt": round(elec_spend, 2),
-                "carbon_kg": round(elec_kg, 2),
-                "scope": "Scope 2 & 1",
-                "unit": "kWh & Gen-Liters",
-                "quantity": float(round(electricity + (diesel * 0.7), 1)),
-                "emission_factor": 0.550,
-                "factor_citation": "DoE Official Grid Baseline Gazette Ref: 22.02.0000.018.99.001.23",
-                "status": "verified"
-            },
-            {
-                "id": "clothing_footwear",
-                "name": "Clothing & Footwear",
-                "icon": "shirt",
-                "spend_bdt": round(cloth_spend, 2),
-                "carbon_kg": round(cloth_kg, 2),
-                "scope": "Scope 3 (Cat 1)",
-                "unit": "PPE Garments",
-                "quantity": float(round(employees * 4 if employees > 0 else 24, 1)),
-                "emission_factor": 8.50,
-                "factor_citation": "Apparel LCA Database & CEDA EEIO Uniforms Factor",
-                "status": "verified"
-            },
-            {
-                "id": "shopping_products",
-                "name": "Shopping & Products",
-                "icon": "shopping-bag",
-                "spend_bdt": round(shop_spend, 2),
-                "carbon_kg": round(shop_kg, 2),
-                "scope": "Scope 3 (Cat 1)",
-                "unit": "Metric Tons Inputs",
-                "quantity": float(round(raw_materials if raw_materials > 0 else 12, 1)),
-                "emission_factor": 2500.0,
-                "factor_citation": "DoE Composite Textile & Raw Material Factor (2.50 tCO2e/ton)",
-                "status": "verified"
-            },
-            {
-                "id": "housing_rent",
-                "name": "Housing & Rent",
-                "icon": "home",
-                "spend_bdt": round(house_spend, 2),
-                "carbon_kg": round(house_kg, 2),
-                "scope": "Scope 1 & 2",
-                "unit": "Facility m² / Month",
-                "quantity": 1.0,
-                "emission_factor": 0.35,
-                "factor_citation": "DEFRA Facilities Carbon Model & BERC Commercial Space Baseline",
-                "status": "verified"
-            },
-            {
-                "id": "entertainment",
-                "name": "Entertainment",
-                "icon": "film",
-                "spend_bdt": round(ent_spend, 2),
-                "carbon_kg": round(ent_kg, 2),
-                "scope": "Scope 3 (Cat 6)",
-                "unit": "Hospitality Events",
-                "quantity": 1.0,
-                "emission_factor": 0.11,
-                "factor_citation": "GHG Protocol Scope 3 Cat 6 Business Travel & Hospitality Index",
-                "status": "verified"
-            },
-            {
-                "id": "health_care",
-                "name": "Health & Personal Care",
-                "icon": "heart-pulse",
-                "spend_bdt": round(health_spend, 2),
-                "carbon_kg": round(health_kg, 2),
-                "scope": "Scope 3 (Cat 1)",
-                "unit": "Medical / Safety Kits",
-                "quantity": float(round(employees if employees > 0 else 15, 1)),
-                "emission_factor": 3.80,
-                "factor_citation": "Healthcare Without Harm & EEIO Medical Consumables Factor",
-                "status": "verified"
-            },
-            {
-                "id": "others",
-                "name": "Others",
-                "icon": "package",
-                "spend_bdt": round(others_spend, 2),
-                "carbon_kg": round(others_kg, 2),
-                "scope": "Scope 3 (Cat 5)",
-                "unit": "Ancillary Services",
-                "quantity": 1.0,
-                "emission_factor": 0.22,
-                "factor_citation": "DoE Municipal Solid Waste Methane Standard & Cloud Data Index",
-                "status": "verified"
-            }
-        ]
-
-        total_kg = sum(c["carbon_kg"] for c in cat_defs)
-        total_spend = sum(c["spend_bdt"] for c in cat_defs)
-
-        category_metrics = []
-        for c in cat_defs:
-            pct = round((c["carbon_kg"] / total_kg * 100.0), 1) if total_kg > 0 else 0.0
-            c["percentage"] = pct
-            c["carbon_tonnes"] = round(c["carbon_kg"] / 1000.0, 3)
-            category_metrics.append(CategoryMetric(**c))
-
-        sorted_cats = sorted(category_metrics, key=lambda x: x.carbon_kg, reverse=True)
-        top_impacts = [
-            TopImpactCategory(
-                rank=i + 1,
-                id=cat.id,
-                name=cat.name,
-                carbon_kg=cat.carbon_kg,
-                carbon_tonnes=cat.carbon_tonnes,
-                percentage=cat.percentage
-            )
-            for i, cat in enumerate(sorted_cats[:3])
-        ]
-
-        top_1 = sorted_cats[0].id if sorted_cats else "electricity_energy"
-        top_pct = sorted_cats[0].percentage if sorted_cats else 40
-        tips_catalog = {
-            "electricity_energy": f"Electricity & Energy is your primary emissions driver ({top_pct}% of total). Installing a 150 kWp rooftop solar system under SREDA net-metering can abate ~85 tonnes CO₂e annually and eliminate peak grid surcharges.",
-            "transport": f"Transport & Logistics accounts for {top_pct}% of your carbon footprint. Consolidate N1 highway dispatch schedules and transition internal site shuttles to EV/CNG to cut fleet emissions by up to 24%.",
-            "shopping_products": f"Purchased Raw Materials contribute {top_pct}% of total emissions. Procuring OEKO-TEX or GRS-certified circular recycled fibers can lower upstream Scope 3 intensity by ~28%.",
-            "food_groceries": f"Canteen & Provisions make up {top_pct}% of footprint. Switching to direct local agro-cooperatives and implementing organic kitchen composting reduces Scope 3 food loss footprints by 18%.",
-            "housing_rent": f"Facility HVAC & Heating contributes {top_pct}% of emissions. Performing thermal insulation on boiler steam pipes and tuning chiller setpoints by 1.5°C will save ~12% facility energy."
-        }
-        tip = tips_catalog.get(top_1, "Conduct an ISO 50001 energy audit on your largest consumption facilities to unlock immediate 10-15% operational emission reductions.")
-
-        return {
-            "categories": category_metrics,
-            "total_footprint_kg": round(total_kg, 2),
-            "total_footprint_tonnes": round(total_kg / 1000.0, 3),
-            "total_spend_bdt": round(total_spend, 2),
-            "trend_vs_last_month": -8.0,
-            "top_impact_categories": top_impacts,
-            "quick_tips": [tip]
-        }
-
-    footprint_matrix = build_nine_category_footprint(params)
-
-    # Log extraction query
     log = ESGQueryLog(
         tenant_id=tenant_id,
-        corpus="tenant_docs",
-        query_text=f"Extract footprint metrics from {target_filename}",
+        corpus=CORPUS_TENANT_DOCS,
+        query_text=f"Extract activity data from {target_filename}",
         answer_text=extracted.get("summary", ""),
-        confidence=extracted.get("overall_confidence", 0.9),
+        confidence=extracted.get("overall_confidence") or 0.0,
         citations=[{"source": target_filename, "snippet": d.get("raw_snippet", "")} for d in extracted.get("details", [])],
-        latency_ms=120.0,
-        llm_model="gemini-extraction-agent",
-        verified_by_audit=True
+        latency_ms=round((time.time() - started) * 1000, 2),
+        llm_model=extracted.get("method", "regex"),
+        verified_by_audit=False
     )
     db.add(log)
     db.commit()
 
+    # Extracted values are inputs awaiting human review. No footprint is computed or stored here.
     return ExtractionResponse(
         filename=target_filename,
         tenant_id=tenant_id,
         parameters=params,
         details=extracted.get("details", []),
-        overall_confidence=extracted.get("overall_confidence", 0.9),
-        audit_seal=True,
-        verified_at=datetime.datetime.utcnow().strftime("%Y-%m-%d %H:%M UTC"),
-        summary=extracted.get("summary", "Verified extraction completed successfully."),
-        total_footprint_kg=footprint_matrix["total_footprint_kg"],
-        total_footprint_tonnes=footprint_matrix["total_footprint_tonnes"],
-        total_spend_bdt=footprint_matrix["total_spend_bdt"],
-        trend_vs_last_month=footprint_matrix["trend_vs_last_month"],
-        categories=footprint_matrix["categories"],
-        top_impact_categories=footprint_matrix["top_impact_categories"],
-        quick_tips=footprint_matrix["quick_tips"]
+        overall_confidence=extracted.get("overall_confidence"),
+        extraction_method=extracted.get("method", "regex"),
+        extracted_at=datetime.datetime.utcnow().strftime("%Y-%m-%d %H:%M UTC"),
+        summary=extracted.get("summary", ""),
     )
 
 @router.post("/ingest", response_model=IngestResponse)
@@ -478,7 +243,7 @@ def get_emission_factors(
     db: Session = Depends(get_db)
 ):
     """
-    Query the verified emission factor library with national audit citations.
+    Query the emission factor table. Citations are as recorded and not yet independently validated.
     """
     query = db.query(EmissionFactorRecord)
     if category:
@@ -634,12 +399,10 @@ def run_atlas_benchmark(principal: Principal = Depends(require("read"))):
 
 @router.get("/satellite-insets")
 def get_satellite_insets(principal: Principal = Depends(require("read"))):
-    """
-    Convergence of Satellite MRV with Corporate Carbon Accounting:
-    Provides verified nature-based carbon removals across Bangladesh (Sentinel-2 & GEDI LiDAR)
-    eligible for corporate net-zero balance sheet retirement.
-    """
+    """Static sample payload — available to demo workspaces only (data register A8)."""
+    _demo_only(principal)
     return {
+        "data_classification": "DEMO_SAMPLE",
         "mrv_network": "CarbonOS Sentinel-2 & GEDI Remote Sensing Grid",
         "resolution": "10m Multispectral + GEDI 25m LiDAR Canopy Profiling",
         "last_orbit_pass": "2026-09-08T04:12:00Z (Sentinel-2B Tile 46RCH)",
@@ -709,10 +472,10 @@ def get_satellite_insets(principal: Principal = Depends(require("read"))):
 
 @router.get("/entity-tree")
 def get_conglomerate_entity_tree(principal: Principal = Depends(require("read"))):
-    """
-    Sweep-Style Multi-Entity Hierarchy for Bangladeshi Diversified Groups.
-    """
+    """Static sample hierarchy — available to demo workspaces only (data register A7)."""
+    _demo_only(principal)
     return {
+        "data_classification": "DEMO_SAMPLE",
         "conglomerate_name": "Apex Holdings Group (Bangladesh)",
         "holding_id": "HOLDING-BD-APEX-01",
         "hq_location": "Gulshan 2, Dhaka, Bangladesh",
@@ -782,11 +545,9 @@ def esg_detect_utility_segments(
     principal: Principal = Depends(require("read")),
 ):
     """
-    Universal Multi-Segment Utility Invoice Extractor & Calculator:
-    Parses any uploaded utility bill or expense statement, identifying every granular segment
-    (peak/off-peak power, demand charges, power factor, solar net-metering, natural gas,
-    captive diesel, fleet octane, steam, water, effluent ETP COD, refrigerants, freight).
-    Calculates exact Scope 1/2/3 footprints with verified DoE gazette citations.
+    Detects utility line items present in the text (power, gas, diesel, steam, water, …) and applies
+    rule factors marked UNVERIFIED. Non-energy and exported/avoided items are listed separately and
+    never netted into inventory totals. Output is REVIEW_REQUIRED.
     """
     raw_text = payload.get("raw_text", "")
     client_id = payload.get("client_id", None)

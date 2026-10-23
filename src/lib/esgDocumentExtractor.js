@@ -4,7 +4,7 @@
  * Identifies document types (Electricity Bills, Fuel/Petroleum Invoices, Freight Waybills,
  * Flights/Travel, Raw Materials/Procurement, and Multi-Scope Corporate ESG Audits).
  * Extracts quantitative GHG activity metrics across Scope 1, Scope 2, and Scope 3
- * with verbatim citations and ISO 14064 assurance data.
+ * with verbatim snippets. Output is unreviewed input data, never an assured or verified result.
  */
 
 // Helper to sanitize and parse numbers with commas
@@ -269,7 +269,7 @@ export function parseDocumentTextToEsgParams(text, fileName = 'sample.pdf') {
         scope: "Scope 2",
         source_page: 1,
         raw_snippet: `Units Consumed Summation (${unitMatches.map(m => cleanNumber(m[1]).toLocaleString()).join(' + ')}): ${electricity.toLocaleString()} kWh`,
-        confidence: 0.99
+        confidence: null
       });
     }
 
@@ -290,7 +290,7 @@ export function parseDocumentTextToEsgParams(text, fileName = 'sample.pdf') {
             scope: "Scope 2",
             source_page: 1,
             raw_snippet: `Calculated from Meter Readings: Present (${curr.toLocaleString()}) - Previous (${prev.toLocaleString()}) = ${electricity.toLocaleString()} kWh`,
-            confidence: 0.99
+            confidence: null
           });
         }
       }
@@ -309,24 +309,11 @@ export function parseDocumentTextToEsgParams(text, fileName = 'sample.pdf') {
           scope: "Scope 2",
           source_page: 1,
           raw_snippet: eMatch[0].trim().slice(0, 140),
-          confidence: 0.98
+          confidence: null
         });
       }
     }
 
-    // Default to fallback if nothing found at all
-    if (electricity === 0) {
-      electricity = 18640;
-      details.push({
-        param_name: "electricity",
-        value: 18640,
-        unit: "kWh",
-        scope: "Scope 2",
-        source_page: 1,
-        raw_snippet: `Electricity utility draw from ${fileName}: 18,640 kWh consumed`,
-        confidence: 0.95
-      });
-    }
 
     if (spendBdt > 0) {
       details.push({
@@ -352,7 +339,7 @@ export function parseDocumentTextToEsgParams(text, fileName = 'sample.pdf') {
         scope: "Scope 1",
         source_page: 1,
         raw_snippet: dMatch[0].trim().slice(0, 140),
-        confidence: 0.99
+        confidence: null
       });
     }
   } else if (docType === 'GAS_BILL') {
@@ -366,7 +353,7 @@ export function parseDocumentTextToEsgParams(text, fileName = 'sample.pdf') {
         scope: "Scope 1",
         source_page: 1,
         raw_snippet: gMatch[0].trim().slice(0, 140),
-        confidence: 0.98
+        confidence: null
       });
     }
   } else if (docType === 'FREIGHT_BILL') {
@@ -381,7 +368,7 @@ export function parseDocumentTextToEsgParams(text, fileName = 'sample.pdf') {
         scope: "Scope 3",
         source_page: 1,
         raw_snippet: tMatch[0].trim().slice(0, 140),
-        confidence: 0.98
+        confidence: null
       });
     }
   } else if (docType === 'FLIGHT_BILL') {
@@ -395,7 +382,7 @@ export function parseDocumentTextToEsgParams(text, fileName = 'sample.pdf') {
         scope: "Scope 3",
         source_page: 1,
         raw_snippet: fMatch[0].trim().slice(0, 140),
-        confidence: 0.97
+        confidence: null
       });
     }
   } else if (docType === 'RAW_MATERIALS_BILL') {
@@ -409,7 +396,7 @@ export function parseDocumentTextToEsgParams(text, fileName = 'sample.pdf') {
         scope: "Scope 3",
         source_page: 1,
         raw_snippet: rMatch[0].trim().slice(0, 140),
-        confidence: 0.98
+        confidence: null
       });
     }
   } else {
@@ -420,68 +407,51 @@ export function parseDocumentTextToEsgParams(text, fileName = 'sample.pdf') {
                normText.match(/(\d+[\d,]*\.?\d*)\s*(?:kwh|units|mwh)\b/i);
     if (eM) {
       electricity = cleanNumber(eM[1]);
-      details.push({ param_name: "electricity", value: electricity, unit: "kWh", scope: "Scope 2", source_page: 1, raw_snippet: eM[0].trim().slice(0, 140), confidence: 0.99 });
+      details.push({ param_name: "electricity", value: electricity, unit: "kWh", scope: "Scope 2", source_page: 1, raw_snippet: eM[0].trim().slice(0, 140), confidence: null });
     }
 
     const dM = normText.match(/(?:high\s*speed\s*diesel|hsd|generator diesel|backup power|diesel fuel|diesel)\D{0,40}?(\d+[\d,]*\.?\d*)\s*(?:liters?|litres?|ltrs?|l\b)/i);
     if (dM) {
       diesel = cleanNumber(dM[1]);
-      details.push({ param_name: "diesel", value: diesel, unit: "Liters", scope: "Scope 1", source_page: 1, raw_snippet: dM[0].trim().slice(0, 140), confidence: 0.98 });
+      details.push({ param_name: "diesel", value: diesel, unit: "Liters", scope: "Scope 1", source_page: 1, raw_snippet: dM[0].trim().slice(0, 140), confidence: null });
     }
 
     const pM = normText.match(/(?:octane(?:-?95|-?92)?|petrol|fleet transport|motor spirit|gasoline)\D{0,35}?(\d+[\d,]*\.?\d*)\s*(?:liters?|litres?|ltrs?|l\b)/i);
     if (pM) {
       petrol = cleanNumber(pM[1]);
-      details.push({ param_name: "petrol", value: petrol, unit: "Liters", scope: "Scope 1", source_page: 1, raw_snippet: pM[0].trim().slice(0, 140), confidence: 0.96 });
+      details.push({ param_name: "petrol", value: petrol, unit: "Liters", scope: "Scope 1", source_page: 1, raw_snippet: pM[0].trim().slice(0, 140), confidence: null });
     }
 
     const lM = normText.match(/(?:lpg|liquefied petroleum gas|commercial lpg|canteen lpg|boiler auxiliary)\D{0,35}?(\d+[\d,]*\.?\d*)\s*(?:kg|kilograms?|cylinders?|m3)/i);
     if (lM) {
       lpg = cleanNumber(lM[1]);
-      details.push({ param_name: "lpg", value: lpg, unit: "kg", scope: "Scope 1", source_page: 1, raw_snippet: lM[0].trim().slice(0, 140), confidence: 0.97 });
+      details.push({ param_name: "lpg", value: lpg, unit: "kg", scope: "Scope 1", source_page: 1, raw_snippet: lM[0].trim().slice(0, 140), confidence: null });
     }
 
     const empM = normText.match(/(?:workforce|personnel|permanent factory personnel|staff|headcount|employees?|workers?)\D{0,35}?(\d+[\d,]*)/i);
     if (empM) {
       employees = cleanNumber(empM[1]);
-      details.push({ param_name: "employees", value: employees, unit: "Staff", scope: "Scope 3", source_page: 1, raw_snippet: empM[0].trim().slice(0, 140), confidence: 0.98 });
+      details.push({ param_name: "employees", value: employees, unit: "Staff", scope: "Scope 3", source_page: 1, raw_snippet: empM[0].trim().slice(0, 140), confidence: null });
     }
 
     const fM = normText.match(/(?:executive flights?|air travel|marketing trips?|flights?|overseas travel|sales air travel)\D{0,35}?(\d+[\d,]*\.?\d*)\s*(?:passenger-kilometers?|p-km|km|kilometers?)/i);
     if (fM) {
       airTravel = cleanNumber(fM[1]);
-      details.push({ param_name: "airTravel", value: airTravel, unit: "km", scope: "Scope 3", source_page: 1, raw_snippet: fM[0].trim().slice(0, 140), confidence: 0.95 });
+      details.push({ param_name: "airTravel", value: airTravel, unit: "km", scope: "Scope 3", source_page: 1, raw_snippet: fM[0].trim().slice(0, 140), confidence: null });
     }
 
     const trkM = normText.match(/(?:freight|truck transport|container shipments?|logistics|cargo|haulage)\D{0,35}?(\d+[\d,]*\.?\d*)\s*(?:ton-kilometers?|tonne-kilometers?|t-km|ton-km)/i);
     if (trkM) {
       truckTransport = cleanNumber(trkM[1]);
-      details.push({ param_name: "truckTransport", value: truckTransport, unit: "T-Km", scope: "Scope 3", source_page: 1, raw_snippet: trkM[0].trim().slice(0, 140), confidence: 0.97 });
+      details.push({ param_name: "truckTransport", value: truckTransport, unit: "T-Km", scope: "Scope 3", source_page: 1, raw_snippet: trkM[0].trim().slice(0, 140), confidence: null });
     }
 
     const rawM = normText.match(/(?:raw materials?|yarn|fabric|cotton|polymers?|textile inputs?|purchased goods|steel)\D{0,35}?(\d+[\d,]*\.?\d*)\s*(?:metric tons?|tons?|tonnes?|mts?)/i);
     if (rawM) {
       rawMaterials = cleanNumber(rawM[1]);
-      details.push({ param_name: "rawMaterials", value: rawMaterials, unit: "Tons", scope: "Scope 3", source_page: 1, raw_snippet: rawM[0].trim().slice(0, 140), confidence: 0.96 });
+      details.push({ param_name: "rawMaterials", value: rawMaterials, unit: "Tons", scope: "Scope 3", source_page: 1, raw_snippet: rawM[0].trim().slice(0, 140), confidence: null });
     }
 
-    // If a multi-scope document had no parameters extracted, use Dexterity baseline
-    if (details.length === 0) {
-      electricity = 156000;
-      diesel = 14200;
-      petrol = 4800;
-      lpg = 1950;
-      employees = 148;
-      airTravel = 82000;
-      truckTransport = 39000;
-      rawMaterials = 580;
-      if (spendBdt === 0) spendBdt = 14850000;
-      details.push(
-        { param_name: "electricity", value: electricity, unit: "kWh", scope: "Scope 2", source_page: 1, raw_snippet: `DESCO Grid active electricity: ${electricity.toLocaleString()} kWh`, confidence: 0.99 },
-        { param_name: "diesel", value: diesel, unit: "Liters", scope: "Scope 1", source_page: 1, raw_snippet: `High Speed Diesel generator fuel: ${diesel.toLocaleString()} Liters`, confidence: 0.98 },
-        { param_name: "rawMaterials", value: rawMaterials, unit: "Tons", scope: "Scope 3", source_page: 2, raw_snippet: `Purchased raw cotton fabric yarn: ${rawMaterials.toLocaleString()} metric tons`, confidence: 0.96 }
-      );
-    }
   }
 
   const finalParams = {
@@ -525,19 +495,18 @@ export async function extractESGFromDocument(file) {
       text = await file.text();
     }
   } catch (readErr) {
-    console.warn("Client text extraction error:", readErr);
-    text = `Statement file: ${fileName}`;
+    throw new Error(`Could not read text from ${fileName}`);
   }
 
   const parsed = parseDocumentTextToEsgParams(text, fileName);
 
   return {
     filename: fileName,
-    tenant_id: "default_tenant",
-    overall_confidence: 0.99,
-    audit_seal: true,
-    verified_at: new Date().toISOString().replace('T', ' ').substring(0, 16) + " UTC",
-    summary: `Extracted ${parsed.details.length} activity metrics from ${fileName} with ISO 14064 assurance (${parsed.documentType}).`,
+    overall_confidence: null,
+    extraction_method: "client-regex",
+    review_status: "REVIEW_REQUIRED",
+    extracted_at: new Date().toISOString().replace('T', ' ').substring(0, 16) + " UTC",
+    summary: `Rule-based parser matched ${parsed.details.length} activity value(s) in ${fileName}. Review before use.`,
     documentType: parsed.documentType,
     primaryCategory: parsed.primaryCategory,
     parameters: parsed.parameters,

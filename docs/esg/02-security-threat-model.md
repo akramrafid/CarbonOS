@@ -14,10 +14,10 @@ supplier collaborator, platform operator, compromised LLM output / prompt-inject
 | T3 | Tampering: path traversal — upload filename joined into path (`../../x`) → arbitrary file write as the service user | `ingest.ingest_document` | P0 | Fixed in P0-1 |
 | T4 | Tampering: `corpus` form field joined into `fallback_{corpus}.json` path → arbitrary `.json` write; and any caller can poison global `regulatory`/`emission_factors` corpora read by every tenant | `/ingest` | P0 | Fixed in P0-1 |
 | T5 | DoS: unbounded upload size read fully into memory; no type allow-list | `/ingest`, `/extract-footprint` | P1 | Size + extension limits in P0-1; rate limiting open |
-| T6 | Info disclosure: customer document text sent to Gemini without consent; API key in URL query string | `extractor.extract_parameters_with_gemini`, `generator` | P0 (privacy) | LLM extraction disabled unless explicitly enabled (P0-2); key-in-URL open |
-| T7 | Repudiation / integrity: fabricated values labelled `verified`/`audit_seal` | server + client | P0 (trust) | P0-2 |
+| T6 | Info disclosure: customer document text sent to Gemini without consent; API key in URL query string | `extractor.extract_parameters_with_gemini`, `generator` | P0 (privacy) | Fixed P0-2: LLM extraction only when `ESG_LLM_EXTRACTION_ENABLED=true`; key-in-URL still open |
+| T7 | Repudiation / integrity: fabricated values labelled `verified`/`audit_seal` | server + client | P0 (trust) | Fixed P0-2 for API + extraction/RAG paths; dashboard overview KPIs still fabricated (register A24) |
 | T8 | Prompt injection via uploaded documents into RAG answers | `generator.build_grounded_prompt` | P1 | Prompt marks context untrusted; no tests yet |
-| T9 | Info disclosure: stack traces / raw exceptions — `ingest` stores `str(e)` as page text | `ingest.extract_text_from_file` | P2 | Open |
+| T9 | Info disclosure: stack traces / raw exceptions — `ingest` stores `str(e)` as page text | `ingest.extract_text_from_file` | P2 | Fixed P0-2: parse failures return no pages; error text is never indexed |
 | T10 | Secrets in repo: OpenWeatherMap key (farmers AI), Django insecure default secret, `DEBUG=True` default, `ALLOWED_HOSTS=*` | out-of-ESG modules | P1 | **Human rotation checklist below**; code not modified (out of scope) |
 | T11 | Customer uploads committed to Git (`inference/chroma_data/uploads`) | repo | P1 | Upload dir gitignored in P0-1; historic files are seed samples |
 | T12 | CORS `allow_credentials=True` with `allow_methods/headers=*` | `inference/main.py` | P2 | Bearer-token auth does not rely on cookies; revisit with cookie sessions |

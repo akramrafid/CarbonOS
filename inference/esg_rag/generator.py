@@ -26,7 +26,7 @@ RETRIEVED CONTEXT DATA:
 USER QUERY:
 {query}
 
-Provide a structured, authoritative, audit-ready answer with clear citations:"""
+Provide a concise answer with clear citations. Do not state that any figure is verified, audited or compliant:"""
     return prompt
 
 def generate_answer_with_gemini(prompt: str) -> Tuple[str, str]:
@@ -72,13 +72,13 @@ def generate_local_fallback_answer(query: str, chunks: List[RetrievedChunk]) -> 
     Directly extracts relevant sentences from top retrieved chunks.
     """
     if not chunks:
-        return "Insufficient verified data available in indexed climate documents.", "local-heuristic-synthesizer"
+        return "Insufficient data in the indexed documents to answer this question.", "retrieval-only"
 
     top = chunks[0]
-    ans = f"Based on verified repository records from **{top.filename}** (Page {top.page}):\n\n"
+    ans = "AI answer generation is unavailable. Most relevant retrieved passage (not a generated or verified answer):\n\n"
     ans += f"> \"{top.content.strip()[:400]}...\"\n\n"
-    ans += f"**Audit Citation:** [Source: {top.filename}, Page {top.page} | Corpus: {top.corpus}] (Relevance: {round(top.score, 3) * 100}%)."
-    return ans, "local-fallback"
+    ans += f"[Source: {top.filename}, Page {top.page} | Corpus: {top.corpus}] (retrieval similarity {round(top.score, 3)})"
+    return ans, "retrieval-only"
 
 def generate_answer(query: str, retrieval_result: Dict[str, Any]) -> Dict[str, Any]:
     """
@@ -92,7 +92,7 @@ def generate_answer(query: str, retrieval_result: Dict[str, Any]) -> Dict[str, A
 
     if insufficient or not chunks:
         return {
-            "answer": "Insufficient verified data in the current CarbonOS knowledge base to answer this inquiry with regulatory audit standards. Please upload relevant source documents or contact an accredited ESG auditor.",
+            "answer": "Insufficient data in the indexed documents to answer this question. Upload relevant source documents or consult a qualified ESG adviser.",
             "model_used": "carbonos-policy-guard",
             "insufficient_data": True
         }

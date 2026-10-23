@@ -77,18 +77,13 @@ def extract_text_from_file(file_path: str, filename: str) -> List[Dict[str, Any]
 
     try:
         if ext == ".pdf":
-            try:
-                import pdfplumber
-                with pdfplumber.open(file_path) as pdf:
-                    for i, p in enumerate(pdf.pages):
-                        txt = p.extract_text() or ""
-                        if txt.strip():
-                            pages_data.append({"page": i + 1, "text": txt})
-            except Exception as pe:
-                print(f"[ESG RAG] pdfplumber failed ({pe}), attempting PyPDF/raw")
-                with open(file_path, "rb") as f:
-                    content = f.read().decode('latin-1', errors='ignore')
-                    pages_data.append({"page": 1, "text": content})
+            # Scanned PDFs yield no text: callers must report that, not parse raw bytes.
+            import pdfplumber
+            with pdfplumber.open(file_path) as pdf:
+                for i, p in enumerate(pdf.pages):
+                    txt = p.extract_text() or ""
+                    if txt.strip():
+                        pages_data.append({"page": i + 1, "text": txt})
 
         elif ext in [".xlsx", ".xls"]:
             import pandas as pd
@@ -103,24 +98,21 @@ def extract_text_from_file(file_path: str, filename: str) -> List[Dict[str, Any]
             df = pd.read_csv(file_path)
             pages_data.append({"page": 1, "text": df.to_string()})
 
-        elif ext in [".docx", ".doc"]:
-            try:
-                import docx
-                doc = docx.Document(file_path)
-                full_text = "\n".join([p.text for p in doc.paragraphs if p.text.strip()])
-                pages_data.append({"page": 1, "text": full_text})
-            except Exception as de:
-                with open(file_path, "r", encoding="utf-8", errors="ignore") as f:
-                    pages_data.append({"page": 1, "text": f.read()})
+        elif ext == ".docx":
+            import docx
+            doc = docx.Document(file_path)
+            full_text = "\n".join([p.text for p in doc.paragraphs if p.text.strip()])
+            pages_data.append({"page": 1, "text": full_text})
         else:
             with open(file_path, "r", encoding="utf-8", errors="ignore") as f:
                 pages_data.append({"page": 1, "text": f.read()})
 
     except Exception as e:
-        print(f"[ESG RAG] Error extracting text from {filename}: {e}")
-        pages_data.append({"page": 1, "text": f"Error parsing document content: {str(e)}"})
+        # Never index the error text as if it were document content.
+        print(f"[ESG RAG] Text extraction failed for {filename}: {type(e).__name__}")
+        return []
 
-    return pages_data
+    return [p for p in pages_data if p["text"].strip()]
 
 def chunk_text(pages: List[Dict[str, Any]], chunk_size: int = CHUNK_SIZE, overlap: int = CHUNK_OVERLAP) -> List[Dict[str, Any]]:
     """Splits document pages into overlapping semantic text chunks."""

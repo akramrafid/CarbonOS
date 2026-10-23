@@ -41,3 +41,40 @@ no sign-in yet, so live ESG API calls from the SPA now return 401 until P0-4 (Id
 **Blocked.** P0-4 login UI — needs the identity-provider decision.
 
 **Next slice.** P0-2 data authenticity (remove fabricated fallbacks server + client).
+
+---
+
+## Batch 2 — P0-2 data authenticity (branch `esg/p0-security-baseline`)
+
+**Objective.** No ESG workflow returns invented values or self-awarded "verified/audited" labels.
+
+**Files changed.**
+- `inference/esg_rag/router.py` — `/extract-footprint` returns 422 on missing/unreadable/empty input; the invented 9-category footprint, `audit_seal`, constant trend and sample-text fallbacks are gone; extraction log never marked verified; `/entity-tree` and `/satellite-insets` demo-org only and labelled `DEMO_SAMPLE`.
+- `inference/esg_rag/extractor.py` — regex "standard verified baseline" removed; rule matches carry `confidence: null`; LLM extraction behind `ESG_LLM_EXTRACTION_ENABLED`; utility segment detector reports only matched lines, drops invented meter IDs/invoice metadata/tariff costs, excludes solar export/kVA/kVARh from totals, fixes "Peak" matching inside "Off-Peak" (double count).
+- `inference/esg_rag/ingest.py` — parse failures return no pages (no raw-byte or error-text indexing); `.doc` dropped (unsupported).
+- `inference/esg_rag/generator.py` — fallback labelled "retrieval-only … not a generated or verified answer"; prompt forbids claiming verification.
+- `inference/esg_rag/schemas.py` — `ExtractionResponse` reshaped (`review_status`, `extraction_method`, optional confidence).
+- `src/lib/esgApi.js` (new) — bearer-token client; never sends a tenant id; errors surface as messages.
+- `src/lib/esgDocumentExtractor.js` — removed electricity 18,640 and Dexterity-baseline fallbacks, invented confidences and assurance labels.
+- `src/pages/platform/SaaSDashboard.jsx` — extraction/RAG/factor-sync use `esgFetch`; failures show errors and leave inputs for manual entry; demo sample labelled; "AUDIT VERIFIED" badge, "Audit Traceable Response", default 95 % confidence and 320 ms latency removed; review banner on the metrics step.
+- `tests/esg_harness.py` (new shared harness), `tests/test_esg_authenticity.py` (new, 10 tests), `tests/test_esg_engine.py` (old segment test asserting the audit seal replaced by the new suite).
+- `scripts/esg-browser-check.mjs` (new) — headless browser check of upload failure, demo labelling, RAG unavailable state, console errors.
+
+**Tests run.**
+```
+.venv-esg/bin/python -m unittest discover -s tests -p "test_esg*.py"   → Ran 28 tests … OK
+python3 -m unittest tests.test_orchestrator                            → Ran 34 tests … OK
+npm run build                                                          → exit 0
+node scripts/esg-browser-check.mjs (vite dev on :5199)                 → all checks true, 0 console errors, exit 0
+```
+Playwright MCP could not run (Chrome not installed); the puppeteer check above is the browser evidence.
+HawkScan DAST: NOT RUN (no running API and no `HAWK_API_KEY`).
+
+**Still fabricated (open, see register A9–A14, A22–A25).** Dashboard overview KPIs (2,450 tCO2e, "9.3 AI score",
+"Audited against ISO 14064-1"), the client category matrix, factor catalogue citations, the `/duckdb-calculate`
+engine and the studio components. These need the P1 ledger + calculation engine to replace them, not relabelling.
+
+**Status.** P0-2: CODE_COMPLETE for API and extraction/RAG paths; PARTIAL for the dashboard as a whole.
+
+**Next slice.** P0-3 CI (add `test` script + Python ESG job so the workflow can pass), then P1 domain model
+(Alembic, facility, reporting period, activity ledger with Decimal) and factor registry. P0-4 login stays BLOCKED on the IdP decision.
