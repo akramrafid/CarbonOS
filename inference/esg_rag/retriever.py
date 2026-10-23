@@ -98,6 +98,10 @@ def retrieve(
     chroma = get_chroma_client()
 
     for c in target_corpora:
+        # Strict tenant boundary: unauthenticated or tenantless callers cannot access tenant documents
+        if c == CORPUS_TENANT_DOCS and (not tenant_id or not str(tenant_id).strip()):
+            continue
+
         chunks_for_corpus: List[RetrievedChunk] = []
         
         # 1. Try ChromaDB
@@ -119,6 +123,10 @@ def retrieve(
                     distances = results["distances"][0]
                     
                     for i in range(len(docs)):
+                        # Defense-in-depth: verify metadata tenant_id explicitly
+                        if c == CORPUS_TENANT_DOCS and metas[i].get("tenant_id") != tenant_id:
+                            continue
+
                         # In cosine space, distance is 1 - similarity
                         score = 1.0 - distances[i] if distances[i] is not None else 0.5
                         chunks_for_corpus.append(RetrievedChunk(

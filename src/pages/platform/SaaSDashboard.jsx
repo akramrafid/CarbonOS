@@ -71,6 +71,9 @@ import { AtlasBenchmarkStudio } from './components/AtlasBenchmarkStudio';
 import { ConglomerateTreeStudio } from './components/ConglomerateTreeStudio';
 import { CLIENT_PROFILES } from './clientProfiles';
 import { UniversalUtilityExtractor } from './components/UniversalUtilityExtractor';
+import { ActivityEvidenceWorkspace } from './components/ActivityEvidenceWorkspace';
+import { EsgReportGenerator } from './components/EsgReportGenerator';
+import { VerificationReadinessCenter } from './components/VerificationReadinessCenter';
 import { extractESGFromDocument, parseDocumentTextToEsgParams } from '../../lib/esgDocumentExtractor';
 
 const FASTAPI_API_URL = import.meta.env.VITE_FASTAPI_API_URL || 'http://localhost:8000';
@@ -1480,7 +1483,7 @@ const SaaSDashboard = () => {
               {[
                 { name: 'Dashboard', label: lang === 'bn' ? 'ড্যাশবোর্ড' : 'Dashboard', icon: Grid },
                 { name: 'Materiality', label: lang === 'bn' ? 'ম্যাটেরিয়ালিটি' : 'Materiality', icon: Compass },
-                { name: 'Audit & Compliance', label: lang === 'bn' ? 'অডিট ও কমপ্লায়েন্স' : 'Audit & Compliance', icon: CheckCircle2 },
+                { name: 'Audit & Compliance', label: lang === 'bn' ? 'অডিট ও কমপ্লায়েন্স' : 'Audit & Compliance', icon: CheckCircle2, badge: 'ISO 14064' },
                 { name: 'Tasks', label: lang === 'bn' ? 'টাস্ক তালিকা' : 'Tasks', icon: CheckCircle, badge: openTasksCount > 0 ? `${openTasksCount} left` : null },
                 { name: 'Calendar', label: lang === 'bn' ? 'ক্যালেন্ডার' : 'Calendar', icon: CalendarIcon },
                 { name: 'Analytics', label: lang === 'bn' ? 'অ্যানালিটিক্স' : 'Analytics', icon: BarChart2 },
@@ -1537,6 +1540,8 @@ const SaaSDashboard = () => {
             </span>
             <nav className="space-y-1">
               {[
+                { name: 'Activity & Evidence', label: lang === 'bn' ? 'অ্যাক্টিভিটি ও এভিডেন্স' : 'Activity & Evidence', icon: Layers, badge: 'ISO 14064' },
+                { name: 'ESG Reports', label: lang === 'bn' ? 'ইএসজি রিপোর্ট' : 'ESG Reports', icon: FileText, badge: 'Audit-Ready' },
                 { name: 'DuckDB Engine', label: lang === 'bn' ? 'ডাকডিবি ইঞ্জিন' : 'DuckDB Engine', icon: Zap, badge: 'Sub-25ms' },
                 { name: 'Utility Invoices', label: lang === 'bn' ? 'ইউটিলিটি ইনভয়েস' : 'Utility Invoices', icon: FileText, badge: 'Universal' },
                 { name: 'Satellite MRV', label: lang === 'bn' ? 'স্যাটেলাইট এমআরভি' : 'Satellite MRV', icon: Globe, badge: 'GEDI' },
@@ -4137,227 +4142,13 @@ const SaaSDashboard = () => {
 
         {/* -------------------- TAB CONTENT: AUDIT & COMPLIANCE -------------------- */}
         {activeMenu === 'Audit & Compliance' && (
-          <div className="space-y-8 text-left text-white">
-            
-            {/* Page Title & Controls */}
-            <div className="bg-[#08130C] border border-[#152B1D] rounded-3xl p-6 lg:p-8 shadow-xl flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
-              <div>
-                <h1 className="font-sans font-bold text-3xl text-white flex items-center">
-                  <CheckCircle2 className="w-8 h-8 text-[#4ADE80] mr-2" />
-                  Audit & Compliance Center
-                </h1>
-                <p className="text-sm text-[#7C9A88] mt-1 font-sans">
-                  Manage third party assurance reviews, base-year restructuring, and CBAM customs export reports.
-                </p>
-              </div>
-
-              {/* Auditor Mode Toggle */}
-              <div className="flex items-center space-x-3 bg-[#040906] px-4 py-2.5 rounded-2xl border border-[#152B1D] self-start md:self-auto">
-                <span className="text-xs font-sans font-bold text-white">Auditor View Lock:</span>
-                <button 
-                  onClick={() => {
-                    setIsAuditorMode(!isAuditorMode);
-                    showToast(
-                      !isAuditorMode 
-                        ? "Auditor Mode active. System metrics locked for assurance review." 
-                        : "Auditor read-only lock disabled. Editing unlocked.",
-                      "info"
-                    );
-                  }}
-                  className={`w-12 h-6 flex items-center rounded-full p-1 transition-all focus:outline-none ${
-                    isAuditorMode ? 'bg-[#00C853]' : 'bg-[#1F3D29]'
-                  }`}
-                >
-                  <div className={`bg-white w-4 h-4 rounded-full shadow-md transform transition-all ${
-                    isAuditorMode ? 'translate-x-6' : 'translate-x-0'
-                  }`} />
-                </button>
-              </div>
-            </div>
-
-            {/* Base Year Recalculation & CBAM Reports Grid */}
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-              
-              {/* Card A: Base Year Recalculation Policy */}
-              <div className="bg-[#08130C] border border-[#152B1D] rounded-3xl p-6 shadow-xl space-y-4">
-                <h3 className="font-sans font-bold text-base text-white border-b border-[#152B1D] pb-2">Base Year Recalculation Policy</h3>
-                <p className="text-xs text-[#7C9A88] leading-relaxed font-sans">
-                  The GHG Protocol mandates adjusting baseline emissions when structural changes (mergers, acquisitions, or divestitures) alter corporate boundaries by &gt; 5%.
-                </p>
-
-                <div className="space-y-3 pt-2">
-                  <div className="grid grid-cols-2 gap-4">
-                    <div>
-                      <label className="block text-[10px] font-bold text-[#64748B] uppercase mb-1">Base Year</label>
-                      <input 
-                        type="number"
-                        value={baseYear}
-                        onChange={(e) => setBaseYear(parseInt(e.target.value) || 2025)}
-                        disabled={isAuditorMode}
-                        className="w-full text-xs font-mono p-2 border border-[#E2E8F0] rounded-lg focus:outline-none focus:border-[#0F291B] bg-[#F8F9FA] disabled:opacity-60 disabled:cursor-not-allowed"
-                      />
-                    </div>
-                    <div>
-                      <label className="block text-[10px] font-bold text-[#64748B] uppercase mb-1">Baseline Emissions (tCO₂e)</label>
-                      <input 
-                        type="number"
-                        value={baseYearEmissions}
-                        onChange={(e) => setBaseYearEmissions(parseFloat(e.target.value) || 0)}
-                        disabled={isAuditorMode}
-                        className="w-full text-xs font-mono p-2 border border-[#E2E8F0] rounded-lg focus:outline-none focus:border-[#0F291B] bg-[#F8F9FA] disabled:opacity-60 disabled:cursor-not-allowed"
-                      />
-                    </div>
-                  </div>
-
-                  <div>
-                    <label className="block text-[10px] font-bold text-[#64748B] uppercase mb-1">Structural Adjustment (Acquisitions/Divestments tCO₂e)</label>
-                    <div className="flex gap-2">
-                      <input 
-                        type="number"
-                        placeholder="e.g. +120 or -80"
-                        onChange={(e) => setAcquisitionsDivestments(parseFloat(e.target.value) || 0)}
-                        disabled={isAuditorMode}
-                        className="flex-1 text-xs font-mono p-2 border border-[#E2E8F0] rounded-lg focus:outline-none focus:border-[#0F291B] bg-[#F8F9FA] disabled:opacity-60 disabled:cursor-not-allowed"
-                      />
-                      <button 
-                        onClick={() => {
-                          setBaseYearEmissions(prev => parseFloat((prev + acquisitionsDivestments).toFixed(2)));
-                          showToast(`Baseline recalculated successfully by ${acquisitionsDivestments > 0 ? '+' : ''}${acquisitionsDivestments} tCO₂e!`, "success");
-                        }}
-                        disabled={isAuditorMode}
-                        className="bg-[#00C853] hover:bg-[#00E676] disabled:bg-[#94A3B8] text-white px-4 py-2 rounded-lg text-xs font-mono font-bold transition-all shadow-sm disabled:cursor-not-allowed cursor-pointer"
-                      >
-                        Adjust
-                      </button>
-                    </div>
-                  </div>
-
-                  <div className="bg-[#F8F9FA] p-3 rounded-xl border border-[#E2E8F0] flex justify-between items-center text-xs">
-                    <span className="font-sans text-[#64748B]">Adjusted Baseline ({baseYear}):</span>
-                    <span className="font-mono font-bold text-[#0F291B]">{baseYearEmissions} tCO₂e</span>
-                  </div>
-                </div>
-              </div>
-
-              {/* Card B: CBAM Certificate Exporter */}
-              <div className="bg-white border border-[#E2E8F0] rounded-3xl p-6 shadow-sm space-y-4">
-                <h3 className="font-sans font-bold text-base text-[#0F291B] border-b border-[#F1F5F9] pb-2">CBAM Export Declaration</h3>
-                <p className="text-xs text-[#64748B] leading-relaxed font-sans">
-                  Calculate and export embedded greenhouse gas emissions certificates for industrial commodities exported to the European Union market.
-                </p>
-
-                <div className="space-y-3 pt-2">
-                  <div>
-                    <label className="block text-[10px] font-bold text-[#64748B] uppercase mb-1">Export Commodity Sector</label>
-                    <select 
-                      value={cbamCommodity}
-                      onChange={(e) => setCbamCommodity(e.target.value)}
-                      className="w-full text-xs font-sans font-bold text-[#0F291B] p-2 border border-[#E2E8F0] rounded-lg focus:outline-none focus:border-[#0F291B] bg-white cursor-pointer"
-                    >
-                      <option value="Steel">Steel & Iron Products</option>
-                      <option value="Aluminium">Aluminium Extrusions & Castings</option>
-                      <option value="Cement">Portland Cement & Clinkers</option>
-                      <option value="Fertilizers">Ammonia & Nitrogenous Fertilizers</option>
-                    </select>
-                  </div>
-
-                  <div>
-                    <label className="block text-[10px] font-bold text-[#64748B] uppercase mb-1">Export Net Weight (Metric Tons)</label>
-                    <input 
-                      type="number"
-                      value={cbamWeight}
-                      onChange={(e) => setCbamWeight(parseFloat(e.target.value) || 0)}
-                      className="w-full text-xs font-mono p-2 border border-[#E2E8F0] rounded-lg focus:outline-none focus:border-[#0F291B] bg-[#F8F9FA]"
-                    />
-                  </div>
-
-                  <div className="bg-[#F8F9FA] p-3 rounded-xl border border-[#E2E8F0] flex justify-between items-center text-xs">
-                    <span className="font-sans text-[#64748B]">Embedded Carbon (CBAM):</span>
-                    <span className="font-mono font-bold text-[#0F291B]">
-                      {parseFloat((cbamWeight * (cbamCommodity === 'Steel' ? 1.85 : cbamCommodity === 'Aluminium' ? 6.42 : cbamCommodity === 'Cement' ? 0.92 : 2.15)).toFixed(2))} tCO₂e
-                    </span>
-                  </div>
-
-                  <button 
-                    onClick={() => showToast(`CBAM Declaration Certificate for ${cbamWeight} Tons of ${cbamCommodity} exported!`, "success")}
-                    className="w-full bg-[#00C853] hover:bg-[#00E676] text-white font-mono font-bold text-xs py-2.5 px-4 rounded-xl transition-all shadow-sm flex items-center justify-center space-x-1.5 cursor-pointer"
-                  >
-                    <Download className="w-3.5 h-3.5 text-white" />
-                    <span className="text-white font-mono font-bold">Generate CBAM Declaration</span>
-                  </button>
-                </div>
-              </div>
-
-            </div>
-
-            {/* Traceable Audit Trail Log */}
-            <div className="bg-white border border-[#E2E8F0] rounded-3xl p-6 lg:p-8 shadow-sm space-y-4">
-              <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center border-b border-[#F1F5F9] pb-4 gap-2">
-                <div>
-                  <h3 className="font-sans font-bold text-lg text-[#0F291B]">Traceable Audit Trail Log</h3>
-                  <p className="text-xs text-[#64748B] mt-0.5">Calculations verified under GHG Protocol and ISAE 3410 assurance guidelines.</p>
-                </div>
-                <span className="bg-emerald/10 text-emerald text-[10px] px-3 py-1 rounded-full font-bold border border-emerald/20">
-                  EF Library: DEFRA 2025 v1.4
-                </span>
-              </div>
-
-              <div className="overflow-x-auto">
-                <table className="w-full text-left font-sans text-xs min-w-[800px]">
-                  <thead>
-                    <tr className="text-[#64748B] font-bold border-b border-[#F1F5F9] pb-2.5">
-                      <th className="py-2.5">Emissions Source</th>
-                      <th>Activity Data</th>
-                      <th>Emission Factor (EF)</th>
-                      <th>Assurance Formula</th>
-                      <th>Scope</th>
-                      <th>Evidence Doc</th>
-                      <th className="text-right">Footprint</th>
-                    </tr>
-                  </thead>
-                  <tbody className="divide-y divide-[#F1F5F9]">
-                    {[
-                      { name: "Diesel Backup Generators", data: `${inputs.diesel} L`, factor: `${ef.diesel} kgCO2e/L`, formula: "Activity × EF / 1000", scope: "Scope 1", doc: "diesel_invoice_Q2.pdf", value: `${((parseFloat(inputs.diesel) || 0) * ef.diesel / 1000).toFixed(2)} t` },
-                      { name: "Executive Transport Vehicles", data: `${inputs.petrol} L`, factor: `${ef.petrol} kgCO2e/L`, formula: "Activity × EF / 1000", scope: "Scope 1", doc: "fuel_receipts_june.xlsx", value: `${((parseFloat(inputs.petrol) || 0) * ef.petrol / 1000).toFixed(2)} t` },
-                      { name: "Purchased Grid Power (Location-based)", data: `${inputs.electricity} kWh`, factor: `${ef.electricity} kgCO2e/kWh`, formula: "Activity × Grid EF / 1000", scope: "Scope 2 (Loc)", doc: "dhaka_power_june.pdf", value: `${results.scope2} t` },
-                      { name: "Purchased Grid Power (Market-based)", data: `${inputs.electricity} kWh`, factor: `${marketFactor} kgCO2e/kWh`, formula: "Activity × Green tariff EF / 1000", scope: "Scope 2 (Mkt)", doc: "green_ppa_contract.pdf", value: `${results.scope2Market} t` },
-                      { name: "Employee Daily Commute", data: `${inputs.employees} Staff`, factor: `${ef.employees} tCO2e/emp/yr`, formula: "Staff Count × EF", scope: "Scope 3", doc: "hr_roster_2026.csv", value: `${(parseFloat(inputs.employees) || 0) * ef.employees} t` },
-                      { name: "Supplier Logistics (Truck Transport)", data: `${inputs.truckTransport} t-km`, factor: `${ef.truckTransport} kgCO2e/t-km`, formula: "Activity × EF / 1000", scope: "Scope 3", doc: "freight_logistics_q2.pdf", value: `${((parseFloat(inputs.truckTransport) || 0) * ef.truckTransport / 1000).toFixed(2)} t` }
-                    ].map((row, idx) => (
-                      <tr key={idx} className="hover:bg-[#F8F9FA]">
-                        <td className="py-3.5 font-bold text-[#0F291B]">{row.name}</td>
-                        <td className="font-mono text-[11px]">{row.data}</td>
-                        <td className="font-mono text-[11px] text-slate-600">{row.factor}</td>
-                        <td className="font-mono text-[10px] text-slate-400">{row.formula}</td>
-                        <td>
-                          <span className={`px-2 py-0.5 rounded-full text-[9px] font-bold ${
-                            row.scope.includes("Scope 1") 
-                              ? 'bg-amber/10 text-amber' 
-                              : row.scope.includes("Scope 2")
-                                ? 'bg-emerald/10 text-emerald'
-                                : 'bg-purple-600/10 text-purple-600'
-                          }`}>
-                            {row.scope}
-                          </span>
-                        </td>
-                        <td>
-                          <button 
-                            onClick={() => showToast(`Opening audit evidence: ${row.doc}`, "info")}
-                            className="text-xs font-semibold text-[#0F291B] hover:underline flex items-center space-x-1"
-                          >
-                            <FileText className="w-3.5 h-3.5 text-slate-400" />
-                            <span className="font-mono text-[11px] text-slate-600">{row.doc}</span>
-                          </button>
-                        </td>
-                        <td className="text-right font-mono font-bold text-[#0F291B]">{row.value} CO₂e</td>
-                      </tr>
-                    ))}
-                  </tbody>
-                </table>
-              </div>
-            </div>
-
-          </div>
+          <VerificationReadinessCenter 
+            activeClientId={activeClientId}
+            isLight={isLight}
+            locale={locale}
+            currency={currency}
+            showToast={showToast}
+          />
         )}
 
         {/* -------------------- TAB CONTENT: TASKS -------------------- */}
@@ -4885,6 +4676,26 @@ const SaaSDashboard = () => {
 
         {activeMenu === 'Entity Tree' && (
           <ConglomerateTreeStudio isLight={isLight} locale={locale} />
+        )}
+
+        {activeMenu === 'Activity & Evidence' && (
+          <ActivityEvidenceWorkspace 
+            activeClientId={activeClientId}
+            isLight={isLight}
+            locale={locale}
+            currency={currency}
+            showToast={showToast}
+          />
+        )}
+
+        {activeMenu === 'ESG Reports' && (
+          <EsgReportGenerator 
+            activeClientId={activeClientId}
+            isLight={isLight}
+            locale={locale}
+            currency={currency}
+            showToast={showToast}
+          />
         )}
 
       </main>
