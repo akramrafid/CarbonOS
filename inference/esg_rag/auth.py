@@ -49,6 +49,8 @@ class Principal:
 class Identity:
     sub: str
     is_platform_operator: bool
+    # Only set when the identity provider asserts the address is verified (OIDC email_verified).
+    verified_email: Optional[str] = None
 
 
 def _operator_subs() -> set:
@@ -92,7 +94,9 @@ def get_identity(authorization: Optional[str] = Header(None)) -> Identity:
         log.info("rejected ESG token: %s", type(e).__name__)
         raise HTTPException(401, "Invalid or expired token", headers={"WWW-Authenticate": "Bearer"})
     sub = str(claims["sub"])
-    return Identity(sub=sub, is_platform_operator=sub in _operator_subs())
+    email = claims.get("email") if claims.get("email_verified") is True else None
+    return Identity(sub=sub, is_platform_operator=sub in _operator_subs(),
+                    verified_email=email.strip().lower() if isinstance(email, str) else None)
 
 
 def get_principal(

@@ -131,3 +131,12 @@ No UI yet for these routes; no factors shipped (by policy — see FACTOR_REGISTR
 - `tests/e2e/esg-authenticity.spec.ts` replaces the ad-hoc `scripts/esg-browser-check.mjs`; `tests/js/esgDocumentExtractor.test.mjs` (new).
 - `frontend-quality.yml`: `npm test -- --runInBand` (Jest flag) → `npm test`. Its contract job still fails on pre-existing findings (not ESG).
 - Evidence: [TEST_EVIDENCE.md](TEST_EVIDENCE.md). CI itself has **not run** (nothing pushed).
+
+---
+
+## Batch 5 — P1-2 members and invitations
+
+- `inference/esg_rag/members.py` (new): member list/role change/removal (owner-only owner changes, last-owner protection), invitations (hashed single-use tokens, 7-day expiry, verified-email binding, revocation), all audited.
+- `auth.py`: `Identity.verified_email` from OIDC `email` + `email_verified`.
+- `tests/test_esg_members.py` (6 tests). ESG suites: Ran 62 — OK on SQLite (1 skipped) and PostgreSQL.
+- Limitation: CarbonOS does not send email; the inviter shares the one-time token. Needs an email provider decision.

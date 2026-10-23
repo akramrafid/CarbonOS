@@ -91,3 +91,14 @@ with `limit` (1–200, default 50) and `offset`. Domain rule violations: 403 (ro
 | GET `/periods/{id}/snapshots` | read | revisions with sha256 |
 | GET `/snapshots/{id}/export?format=json\|csv` | read | byte-identical on every call; `X-Content-SHA256` header |
 | GET `/audit-events?entity_id` | review | newest first |
+
+## Members & invitations (P1-2)
+
+| Method & path | Permission | Notes |
+|---|---|---|
+| GET `/members` | admin | `[{id, user_sub, role, created_at}]` |
+| PATCH `/members/{id}` | admin | `{role}`; only owners grant/alter the owner role; last owner cannot be demoted (409) |
+| DELETE `/members/{id}` | admin | last owner cannot be removed (409) |
+| POST `/invitations` | admin | `{email, role}` → 201 with `token` **shown once** (stored as SHA-256; expires in 7 days; no email is sent) |
+| GET `/invitations` · DELETE `/invitations/{id}` | admin | list (no tokens) · revoke |
+| POST `/invitations/accept` | any authenticated user | `{token}`; token's `email` claim must equal the invited address **and** `email_verified` must be true. Any mismatch / expiry / reuse / revocation → the same 404 |
