@@ -9,6 +9,8 @@ import SetupPanel from './SetupPanel';
 import FactorsPanel from './FactorsPanel';
 import LedgerPanel from './LedgerPanel';
 import ReportsPanel from './ReportsPanel';
+import MetricsPanel from './MetricsPanel';
+import DisclosuresPanel from './DisclosuresPanel';
 import { AuditPanel, MembersPanel } from './PeoplePanel';
 
 const PERMS = {
@@ -136,7 +138,7 @@ export default function EsgWorkspace() {
   const perms = PERMS[org.role] || [];
   const can = { write: perms.includes('write'), review: perms.includes('review'), admin: perms.includes('admin') };
   const tabs = [
-    ['setup', 'Setup'], ['factors', 'Emission factors'], ['ledger', 'Activity ledger'], ['reports', 'Calculation & reports'],
+    ['setup', 'Setup'], ['factors', 'Emission factors'], ['ledger', 'Activity ledger'], ['metrics', 'E/S/G metrics'], ['reports', 'Calculation & reports'], ['disclosures', 'Disclosures'],
     ...(can.admin ? [['members', 'Members']] : []), ...(can.review ? [['audit', 'Audit trail']] : []),
   ];
 
@@ -162,6 +164,8 @@ export default function EsgWorkspace() {
         {tab === 'factors' && <FactorsPanel canAdmin={can.admin} me={me?.sub} types={ref.types} />}
         {tab === 'ledger' && <LedgerPanel me={me?.sub} can={can} types={ref.types} periods={ref.periods} facilities={ref.facilities} />}
         {tab === 'reports' && <ReportsPanel me={me?.sub} can={can} periods={ref.periods} facilities={ref.facilities} onPeriodsChanged={loadRef} />}
+        {tab === 'metrics' && <MetricsPanel me={me?.sub} can={can} periods={ref.periods} facilities={ref.facilities} />}
+        {tab === 'disclosures' && <DisclosuresPanel me={me?.sub} can={can} periods={ref.periods} />}
         {tab === 'members' && <MembersPanel />}
         {tab === 'audit' && <AuditPanel />}
       </div>

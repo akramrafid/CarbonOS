@@ -165,3 +165,15 @@ identity provider** — needs a provider instance (choice still open) and its JW
 
 **Not done.** Bangla localisation of the new workspace (English only); PDF export; email delivery of invitations;
 the legacy `/platform/saas-dashboard` still shows fabricated overview KPIs (register A24).
+
+---
+
+## Batch 7 — Legacy dashboard labelled DEMO; P1-4 E/S/G metrics and disclosure coverage
+
+- Legacy `/platform/saas-dashboard`: fixed DEMO banner linking to `/platform/esg`; assurance/compliance claims removed (register A24).
+- `metrics_catalog.py` (17 aggregated E/S/G metrics, fixed units, validated breakdowns, no individual records), `disclosures_catalog.py` (GRI selected + IFRS S2 templates, references flagged for verification).
+- Tables `esg_metric_observation`, `esg_disclosure_response` — migration `0002` (adds tables only; verified on PostgreSQL + SQLite, no drift, downgrade/upgrade).
+- `esg_metrics.py`: observation workflow (duplicate rejection, SoD, supersede), coverage computation from locked snapshots + approved metrics, response workflow (NOT_APPLICABLE needs rationale; approval blocked while data missing or narrative absent; publish admin-only, then read-only), CSV gap report.
+- Period lock now also requires no pending metric observations; approved metrics are part of the input hash and the snapshot (`esg_metrics`).
+- UI: "E/S/G metrics" and "Disclosures" tabs. Journey e2e extended (water metric → approval → disclosure coverage shows Scope 2 evidence, Scope 3 gap, no "compliant").
+- Tests: ESG unittest Ran 72 — OK on SQLite (1 skipped) and PostgreSQL; Playwright 28 passed (4 viewports).

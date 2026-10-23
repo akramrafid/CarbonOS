@@ -22,7 +22,7 @@ from . import accounting
 from .auth import Principal
 from .ledger_models import (
     ActivityRecord, AuditEvent, CalculationLine, CalculationRun, EmissionFactor, Facility, LegalEntity,
-    ReportingPeriod, ReportSnapshot, _now,
+    MetricObservation, ReportingPeriod, ReportSnapshot, _now,
 )
 from .models import ESGOrganization
 
@@ -300,12 +300,13 @@ def update_activity(db, principal, rec_id, data):
 
 
 def _transition(db, principal, rec, from_status, values, action, data=None):
-    n = db.execute(update(ActivityRecord).where(ActivityRecord.id == rec.id, ActivityRecord.status == from_status)
-                   .values(**values)).rowcount
+    """Conditional status change: concurrent callers cannot both succeed (second gets 409)."""
+    model = type(rec)
+    n = db.execute(update(model).where(model.id == rec.id, model.status == from_status).values(**values)).rowcount
     if n != 1:
         db.rollback()
         raise DomainError(409, f"Record is no longer {from_status}")
-    audit(db, principal, action, "activity_record", rec.id, data)
+    audit(db, principal, action, model.__tablename__.removeprefix("esg_"), rec.id, data)
 
 
 def submit_activity(db, principal, rec_id):
@@ -352,7 +353,13 @@ def _calc_inputs(db, principal, period):
     return acts, facs, factors
 
 
-def _input_hash(period, acts, facs, factors) -> str:
+def _approved_metric_ids(db, principal, period):
+    return [m.id for m in db.query(MetricObservation.id).filter(
+        MetricObservation.organization_id == principal.organization_id, MetricObservation.period_id == period.id,
+        MetricObservation.status == "APPROVED").order_by(MetricObservation.id)]
+
+
+def _input_hash(period, acts, facs, factors, metric_ids=()) -> str:
     payload = {
         "methodology": accounting.METHODOLOGY_VERSION,
         "boundary": period.boundary_method,
@@ -360,6 +367,7 @@ def _input_hash(period, acts, facs, factors) -> str:
                         a.factor_id, a.market_factor_id] for a in acts],
         "facilities": [[f.id, f.grid_region, f.operational_control, f.financial_control, f.equity_share_pct] for f in facs],
         "factors": [[f.id, f.version, f.kgco2e_per_unit, f.status] for f in factors],
+        "metrics": list(metric_ids),  # approved E/S/G observations are immutable, so ids identify them
     }
     return hashlib.sha256(canonical_json(payload).encode()).hexdigest()
 
@@ -380,7 +388,8 @@ def calculate_period(db, principal, period_id):
     run = CalculationRun(
         organization_id=principal.organization_id, period_id=period.id, period_revision=period.revision,
         methodology_version=result.methodology_version, boundary_method=result.boundary_method,
-        input_sha256=_input_hash(period, acts, facs, factors), scope1_kg=result.scope1_kg,
+        input_sha256=_input_hash(period, acts, facs, factors, _approved_metric_ids(db, principal, period)),
+        scope1_kg=result.scope1_kg,
         scope2_location_kg=result.scope2_location_kg, scope2_market_kg=result.scope2_market_kg,
         blocking=result.blocking, exceptions=result.exceptions, excluded=result.excluded,
         memo=_jsonable(result.memo), by_facility=_jsonable(result.by_facility), created_by=principal.sub,
@@ -405,11 +414,14 @@ def lock_period(db, principal, period_id, run_id):
     pending = db.query(ActivityRecord).filter(ActivityRecord.organization_id == principal.organization_id,
                                               ActivityRecord.period_id == period.id,
                                               ActivityRecord.status.in_(("DRAFT", "SUBMITTED"))).count()
+    pending += db.query(MetricObservation).filter(MetricObservation.organization_id == principal.organization_id,
+                                                  MetricObservation.period_id == period.id,
+                                                  MetricObservation.status.in_(("DRAFT", "SUBMITTED"))).count()
     if pending:
-        raise DomainError(409, f"{pending} activity record(s) are still DRAFT or SUBMITTED")
+        raise DomainError(409, f"{pending} activity record(s) or metric observation(s) are still DRAFT or SUBMITTED")
     if run.blocking:
         raise DomainError(409, "Calculation has blocking data-quality exceptions")
-    if _input_hash(period, *_calc_inputs(db, principal, period)) != run.input_sha256:
+    if _input_hash(period, *_calc_inputs(db, principal, period), _approved_metric_ids(db, principal, period)) != run.input_sha256:
         raise DomainError(409, "Data or factors changed since this calculation; recalculate before locking")
     if run.created_by == principal.sub:
         raise DomainError(403, "Separation of duties: the approver must differ from the preparer of the calculation")
@@ -489,6 +501,12 @@ def _report_content(db, principal, period, run):
                                                      "source_publisher", "source_document", "source_url",
                                                      "source_table_ref", "source_year", "is_custom", "approved_by")}
                          for f in factors],
+        "esg_metrics": [{"metric_key": m.metric_key, "facility_id": m.facility_id, "dimensions": m.dimensions,
+                         "value": m.value, "unit": m.unit, "observation_id": m.id, "approved_by": m.reviewed_by}
+                        for m in db.query(MetricObservation).filter(
+                            MetricObservation.organization_id == principal.organization_id,
+                            MetricObservation.period_id == period.id, MetricObservation.status == "APPROVED")
+                        .order_by(MetricObservation.metric_key, MetricObservation.id)],
         "exceptions": run.exceptions,
         "excluded": run.excluded,
         "memo_items": run.memo,

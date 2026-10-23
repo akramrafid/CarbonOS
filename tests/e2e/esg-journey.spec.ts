@@ -102,6 +102,19 @@ test("organization admin completes the Scope 2 journey to a locked, reproducible
   await owner.getByRole("button", { name: "Approve", exact: true }).click();
   await expect(owner.getByText("Record approved.")).toBeVisible();
 
+  // Environmental metric with evidence, independently approved.
+  await contrib.getByRole("button", { name: "E/S/G metrics" }).click();
+  const mf = contrib.getByRole("form", { name: "New metric observation" });
+  await mf.getByLabel("Metric").selectOption("water_withdrawal");
+  await mf.getByLabel("Value (m3)").fill("1200");
+  await mf.getByLabel("Breakdown: source").selectOption("groundwater");
+  await mf.getByLabel("Evidence reference").fill("WASA bills 2025");
+  await mf.getByRole("button", { name: "Save draft" }).click();
+  await contrib.getByRole("button", { name: "Submit" }).click();
+  await owner.getByRole("button", { name: "E/S/G metrics" }).click();
+  await owner.getByRole("button", { name: "Approve" }).click();
+  await expect(owner.getByText("Observation approved.")).toBeVisible();
+
   // Contributor prepares the calculation; contributors cannot lock.
   await contrib.getByRole("button", { name: "Calculation & reports" }).click();
   await contrib.getByRole("button", { name: "Run calculation" }).click();
@@ -128,6 +141,15 @@ test("organization admin completes the Scope 2 journey to a locked, reproducible
   expect(exports[0]).toBe(exports[1]);
   expect(exports[0]).toContain("total_tco2e,scope2_location_based,5.000");
   expect(exports[0]).toContain("Not externally assured or verified.");
+
+  // Disclosure coverage: evidence linked from the locked snapshot, gaps explicit, never "compliant".
+  await owner.getByRole("button", { name: "Disclosures" }).click();
+  const scope2 = owner.getByRole("row").filter({ hasText: "GRI 305-2" });
+  await expect(scope2.getByText("scope2_location_tco2e: 5.000")).toBeVisible();
+  await expect(owner.getByRole("row").filter({ hasText: "GRI 303-3" }).getByText(/water_withdrawal: 1 approved value/)).toBeVisible();
+  await expect(owner.getByRole("row").filter({ hasText: "GRI 305-3" }).getByText("Scope 3 accounting is not implemented")).toBeVisible();
+  await expect(owner.getByText(/gaps remain/)).toBeVisible();
+  await expect(owner.getByText(/\bcompliant\b/i)).toHaveCount(0);
 
   // Audit trail records the journey.
   await owner.getByRole("button", { name: "Audit trail" }).click();

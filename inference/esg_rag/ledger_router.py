@@ -314,3 +314,103 @@ def list_audit_events(entity_id: Optional[str] = None, limit: int = Limit, offse
                       p: Principal = Depends(require("review")), db: Session = Depends(get_db)):
     filters = [AuditEvent.entity_id == entity_id] if entity_id else []
     return _list(db, AuditEvent, p, limit, offset, *filters, order=AuditEvent.id.desc())
+
+
+# --- E/S/G metrics and disclosures -------------------------------------------------------------
+
+from . import esg_metrics  # noqa: E402
+from . import disclosures_catalog  # noqa: E402
+from .ledger_models import MetricObservation  # noqa: E402
+from .metrics_catalog import METRICS  # noqa: E402
+
+
+class MetricIn(BaseModel):
+    period_id: str
+    facility_id: Optional[str] = None
+    metric_key: str
+    value: NonNeg
+    dimensions: dict = Field(default_factory=dict)
+    source_document_id: Optional[str] = None
+    evidence_ref: Optional[str] = Field(None, max_length=200)
+    evidence_snippet: Optional[str] = Field(None, max_length=2000)
+    notes: Optional[str] = Field(None, max_length=2000)
+    supersedes_id: Optional[str] = None
+    idempotency_key: Optional[str] = Field(None, max_length=100)
+
+
+class DisclosureIn(BaseModel):
+    status: Literal["DRAFT", "IN_REVIEW", "NOT_APPLICABLE"]
+    narrative: Optional[str] = Field(None, max_length=20000)
+    applicability_rationale: Optional[str] = Field(None, max_length=4000)
+    evidence_refs: list = Field(default_factory=list, max_length=50)
+
+
+@router.get("/metric-definitions")
+def metric_definitions(p: Principal = Depends(require("read"))):
+    return [{"metric_key": k, **v} for k, v in METRICS.items()]
+
+
+@router.post("/metrics")
+def create_metric(body: MetricIn, p: Principal = Depends(require("read")), db: Session = Depends(get_db)):
+    obs, created = run(esg_metrics.create_observation, db, p, body.model_dump())
+    return {**out(obs), "created": created}
+
+
+@router.post("/metrics/{obs_id}/submit")
+def submit_metric(obs_id: str, p: Principal = Depends(require("read")), db: Session = Depends(get_db)):
+    return out(run(esg_metrics.submit_observation, db, p, obs_id))
+
+
+@router.post("/metrics/{obs_id}/approve")
+def approve_metric(obs_id: str, body: ReviewIn = ReviewIn(), p: Principal = Depends(require("read")),
+                   db: Session = Depends(get_db)):
+    return out(run(esg_metrics.review_observation, db, p, obs_id, True, body.comment))
+
+
+@router.post("/metrics/{obs_id}/reject")
+def reject_metric(obs_id: str, body: ReviewIn, p: Principal = Depends(require("read")), db: Session = Depends(get_db)):
+    return out(run(esg_metrics.review_observation, db, p, obs_id, False, body.comment))
+
+
+@router.get("/metrics")
+def list_metrics(period_id: Optional[str] = None, pillar: Optional[str] = None, limit: int = Limit,
+                 offset: int = Offset, p: Principal = Depends(require("read")), db: Session = Depends(get_db)):
+    filters = [MetricObservation.period_id == period_id] if period_id else []
+    if pillar:
+        filters.append(MetricObservation.metric_key.in_([k for k, v in METRICS.items() if v["pillar"] == pillar]))
+    return _list(db, MetricObservation, p, limit, offset, *filters, order=MetricObservation.metric_key)
+
+
+@router.get("/disclosure-frameworks")
+def disclosure_frameworks(p: Principal = Depends(require("read"))):
+    return [{"framework": k, "name": v["name"], "template_version": v["template_version"],
+             "verification_status": v["verification_status"], "materiality": v["materiality"],
+             "requirements": len(v["requirements"])} for k, v in disclosures_catalog.FRAMEWORKS.items()]
+
+
+@router.get("/periods/{period_id}/disclosures/{framework}")
+def disclosure_coverage(period_id: str, framework: str, format: Literal["json", "csv"] = "json",
+                        p: Principal = Depends(require("read")), db: Session = Depends(get_db)):
+    report = run(esg_metrics.coverage, db, p, period_id, framework)
+    if format == "csv":
+        return PlainTextResponse(esg_metrics.gap_report_csv(report), media_type="text/csv", headers={
+            "Content-Disposition": f'attachment; filename="gap-report-{framework}-{period_id}.csv"'})
+    return report
+
+
+@router.put("/periods/{period_id}/disclosures/{framework}/{ref}")
+def save_disclosure(period_id: str, framework: str, ref: str, body: DisclosureIn, p: Principal = Depends(require("read")),
+                    db: Session = Depends(get_db)):
+    return out(run(esg_metrics.save_response, db, p, period_id, framework, ref, body.model_dump()))
+
+
+@router.post("/periods/{period_id}/disclosures/{framework}/{ref}/approve")
+def approve_disclosure(period_id: str, framework: str, ref: str, p: Principal = Depends(require("read")),
+                       db: Session = Depends(get_db)):
+    return out(run(esg_metrics.approve_response, db, p, period_id, framework, ref))
+
+
+@router.post("/periods/{period_id}/disclosures/{framework}/{ref}/publish")
+def publish_disclosure(period_id: str, framework: str, ref: str, p: Principal = Depends(require("read")),
+                       db: Session = Depends(get_db)):
+    return out(run(esg_metrics.approve_response, db, p, period_id, framework, ref, True))

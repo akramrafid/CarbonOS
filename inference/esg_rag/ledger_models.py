@@ -295,3 +295,71 @@ class Invitation(EsgBase):
     accepted_by = Column(String(255))
     accepted_at = Column(DateTime(timezone=True))
     revoked_at = Column(DateTime(timezone=True))
+
+
+class MetricObservation(EsgBase):
+    """Aggregated E/S/G figure for a period (optionally a facility), with evidence and review."""
+    __tablename__ = "esg_metric_observation"
+    __table_args__ = (
+        UniqueConstraint("organization_id", "idempotency_key", name="uq_esg_metric_idempotency"),
+        ForeignKeyConstraint(["organization_id", "period_id"],
+                             ["esg_reporting_period.organization_id", "esg_reporting_period.id"],
+                             name="fk_esg_metric_period"),
+        ForeignKeyConstraint(["organization_id", "facility_id"], ["esg_facility.organization_id", "esg_facility.id"],
+                             name="fk_esg_metric_facility"),
+        CheckConstraint(_in("status", ACTIVITY_STATUSES), name="ck_esg_metric_status"),
+        CheckConstraint("value >= 0", name="ck_esg_metric_nonnegative"),
+        CheckConstraint("reviewed_by IS NULL OR reviewed_by <> created_by", name="ck_esg_metric_dual_control"),
+        Index("ix_esg_metric_period_key", "organization_id", "period_id", "metric_key"),
+    )
+
+    id = Column(String(36), primary_key=True, default=_id)
+    organization_id = _org_fk()
+    period_id = Column(String(36), nullable=False)
+    facility_id = Column(String(36))  # NULL = organization-wide figure
+    metric_key = Column(String(60), nullable=False)
+    dimensions = Column(JSON, nullable=False, default=dict)
+    dimension_key = Column(String(300), nullable=False, default="")
+    value = Column(QTY, nullable=False)
+    unit = Column(String(20), nullable=False)
+    source_document_id = Column(String(36))
+    evidence_ref = Column(String(200))
+    evidence_snippet = Column(Text)
+    notes = Column(Text)
+    status = Column(String(12), nullable=False, default="DRAFT")
+    supersedes_id = Column(String(36), ForeignKey("esg_metric_observation.id"))
+    idempotency_key = Column(String(100))
+    created_by = Column(String(255), nullable=False)
+    created_at = Column(DateTime(timezone=True), default=_now, nullable=False)
+    submitted_at = Column(DateTime(timezone=True))
+    reviewed_by = Column(String(255))
+    reviewed_at = Column(DateTime(timezone=True))
+    review_comment = Column(Text)
+
+
+class DisclosureResponse(EsgBase):
+    __tablename__ = "esg_disclosure_response"
+    __table_args__ = (
+        UniqueConstraint("organization_id", "period_id", "framework", "requirement_ref", name="uq_esg_disclosure_response"),
+        ForeignKeyConstraint(["organization_id", "period_id"],
+                             ["esg_reporting_period.organization_id", "esg_reporting_period.id"],
+                             name="fk_esg_disclosure_period"),
+        CheckConstraint("status IN ('NOT_STARTED','NOT_APPLICABLE','DRAFT','IN_REVIEW','APPROVED','PUBLISHED')",
+                        name="ck_esg_disclosure_status"),
+        CheckConstraint("status <> 'NOT_APPLICABLE' OR applicability_rationale IS NOT NULL", name="ck_esg_disclosure_rationale"),
+        CheckConstraint("approved_by IS NULL OR approved_by <> updated_by", name="ck_esg_disclosure_dual_control"),
+    )
+
+    id = Column(String(36), primary_key=True, default=_id)
+    organization_id = _org_fk()
+    period_id = Column(String(36), nullable=False)
+    framework = Column(String(30), nullable=False)
+    requirement_ref = Column(String(60), nullable=False)
+    status = Column(String(15), nullable=False, default="NOT_STARTED")
+    narrative = Column(Text)
+    applicability_rationale = Column(Text)
+    evidence_refs = Column(JSON, nullable=False, default=list)
+    updated_by = Column(String(255), nullable=False)
+    updated_at = Column(DateTime(timezone=True), default=_now, nullable=False)
+    approved_by = Column(String(255))
+    approved_at = Column(DateTime(timezone=True))

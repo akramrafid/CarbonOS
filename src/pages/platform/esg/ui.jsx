@@ -131,6 +131,8 @@ export function StatusBadge({ status }) {
     APPROVED: 'bg-emerald/15 text-emerald-300', LOCKED: 'bg-emerald/15 text-emerald-300',
     SUBMITTED: 'bg-amber/15 text-amber-300', DRAFT: 'bg-mist/15 text-mist', OPEN: 'bg-mist/15 text-mist',
     REJECTED: 'bg-red-500/15 text-red-300', SUPERSEDED: 'bg-mist/10 text-mist line-through', RETIRED: 'bg-mist/10 text-mist',
+    PUBLISHED: 'bg-emerald/15 text-emerald-300', IN_REVIEW: 'bg-amber/15 text-amber-300', MISSING_DATA: 'bg-red-500/15 text-red-300',
+    NOT_STARTED: 'bg-mist/15 text-mist', NOT_APPLICABLE: 'bg-mist/10 text-mist',
   }[status] || 'bg-mist/15 text-mist';
   return <span className={`rounded px-2 py-0.5 font-mono text-[11px] ${tone}`}>{status}</span>;
 }
