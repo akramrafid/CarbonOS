@@ -144,6 +144,7 @@ def regex_heuristic_extraction(document_text: str) -> Dict[str, Any]:
         "summary": f"Rule-based parser matched {len(details)} activity value(s). Values require human review.",
         "overall_confidence": None,
         "method": "regex",
+        "status": "METRICS_DETECTED" if details else "NO_METRICS_DETECTED",
     }
 
 def llm_extraction_enabled() -> bool:
@@ -396,4 +397,5 @@ def detect_all_utility_segments(document_text: str, client_id: str = None) -> Di
         },
         "review_status": "REVIEW_REQUIRED",
         "method_note": "Rule-based text match with unverified factors; not an audited or verified result.",
+        "status": "SEGMENTS_DETECTED" if detected_segments or excluded_segments else "NO_SEGMENTS_DETECTED",
     }

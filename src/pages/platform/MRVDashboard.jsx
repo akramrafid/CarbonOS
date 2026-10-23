@@ -12,7 +12,7 @@ import {
   Download
 } from 'lucide-react';
 
-const DJANGO_API_URL = import.meta.env.VITE_DJANGO_API_URL || 'http://localhost:8000';
+const DJANGO_API_URL = import.meta.env.VITE_DJANGO_API_URL || 'http://localhost:8001';
 
 // Custom SVG Chart component for Telemetry History
 const TelemetryChart = ({ history, metricType }) => {
@@ -145,7 +145,7 @@ const TelemetryChart = ({ history, metricType }) => {
 };
 
 const MRVDashboard = () => {
-  const BLYNK_TOKEN = "wwKSjCxjjeox9NoiH1hkiet359mok4Wf";
+  const BLYNK_TOKEN = import.meta.env.VITE_BLYNK_AUTH_TOKEN || "";
 
   const [trends, setTrends] = useState([]);
   const [trendsLoading, setTrendsLoading] = useState(true);
@@ -170,7 +170,7 @@ const MRVDashboard = () => {
 
   // Fetch crop diagnostic trends
   const fetchTrends = () => {
-    fetch(`${DJANGO_API_URL}/api/farmers-ai/api/mrv/carbon-health-trends/`)
+    fetch(`${DJANGO_API_URL}/api/farmers-ai/mrv/carbon-health-trends/`)
       .then(res => res.json())
       .then(data => {
         if (!data.error && Array.isArray(data)) {
@@ -187,7 +187,7 @@ const MRVDashboard = () => {
   // Fetch telemetry history from Django API
   const fetchTelemetryHistory = async () => {
     try {
-      const res = await fetch(`${DJANGO_API_URL}/api/farmers-ai/api/mrv/telemetry/history/`);
+      const res = await fetch(`${DJANGO_API_URL}/api/farmers-ai/mrv/telemetry/history/`);
       if (!res.ok) throw new Error('Failed to fetch history');
       const data = await res.json();
       if (Array.isArray(data)) {
@@ -232,7 +232,7 @@ const MRVDashboard = () => {
 
     // Save to Django Server
     try {
-      const res = await fetch(`${DJANGO_API_URL}/api/farmers-ai/api/mrv/telemetry/save/`, {
+      const res = await fetch(`${DJANGO_API_URL}/api/farmers-ai/mrv/telemetry/save/`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json'
@@ -258,6 +258,13 @@ const MRVDashboard = () => {
 
   // Fetch live Blynk data (checked with hardware connectivity)
   const fetchBlynkLive = async () => {
+    if (!BLYNK_TOKEN) {
+      setDeviceConnected(false);
+      setBlynkError("Blynk auth token not configured (Sandbox telemetry mode).");
+      setMetrics({ temp: null, hum: null, air: null, co2: null });
+      setTelemetryLoading(false);
+      return;
+    }
     try {
       // 1. Verify if device is connected
       const connRes = await fetch(`https://blynk.cloud/external/api/isHardwareConnected?token=${BLYNK_TOKEN}`);

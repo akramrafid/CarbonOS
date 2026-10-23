@@ -74,5 +74,79 @@ class TestESGCalculationEngine(unittest.TestCase):
         self.assertGreaterEqual(eval_res["metrics"]["parameter_accuracy_pct"], 90.0)
         self.assertGreaterEqual(eval_res["metrics"]["scope_classification_pct"], 90.0)
 
+    def test_audit_seal_and_factor_provenance(self):
+        sample_activities = {
+            "diesel": 10000,
+            "electricity": 50000
+        }
+        res = calculate_activity_footprint(sample_activities, reporting_period="2026-Q2", tenant_id="tenant-rmg-01")
+        self.assertIn("audit_seal", res)
+        self.assertTrue(res["audit_seal"].startswith("SHA256-SEAL-"))
+        self.assertEqual(res["reporting_period"], "2026-Q2")
+        self.assertEqual(res["tenant_id"], "tenant-rmg-01")
+        
+        # Verify provenance metadata
+        prov = res.get("factor_provenance", {})
+        self.assertIn("diesel", prov)
+        self.assertEqual(prov["diesel"]["factor_id"], "EF-BD-DIESEL-01")
+        self.assertEqual(prov["diesel"]["unit"], "kg CO2e / Liter")
+        self.assertIn("DoE Gazette", prov["diesel"]["gazette_ref"])
+        
+        self.assertIn("electricity_cm", prov)
+        self.assertEqual(prov["electricity_cm"]["factor_id"], "EF-BD-GRID-CM-01")
+        self.assertEqual(prov["electricity_cm"]["factor_value"], 0.550)
+        self.assertIn("Combined Margin", prov["electricity_cm"]["name"])
+        self.assertIn("DoE & SREDA", prov["electricity_cm"]["source"])
+
+    def test_scenario_j_factor_versioning_reproducibility(self):
+        """Scenario J: Pinning a historical factor version ensures historical approved reports reproduce identically."""
+        activities = {"diesel": 10000}
+        
+        # Current v2026.1 calculation: 10,000 * 2.68 / 1000 = 26.8 tCO2e
+        calc_v2026 = calculate_activity_footprint(activities, factor_version="v2026.1-NATIONAL")
+        self.assertAlmostEqual(calc_v2026["scope1"]["diesel_tco2e"], 26.8, places=2)
+        
+        # Simulated factor update in production (e.g. diesel updated to 2.75 for future periods)
+        future_updated_factors = {"diesel": 2.75}
+        calc_future = calculate_activity_footprint(activities, factors=future_updated_factors)
+        self.assertAlmostEqual(calc_future["scope1"]["diesel_tco2e"], 27.5, places=2)
+        
+        # Re-running the historical calculation pinned to v2026.1-NATIONAL must NOT change historical numbers
+        calc_historical_restored = calculate_activity_footprint(activities, factor_version="v2026.1-NATIONAL")
+        self.assertEqual(calc_historical_restored["scope1"]["diesel_tco2e"], calc_v2026["scope1"]["diesel_tco2e"])
+        self.assertEqual(calc_historical_restored["audit_seal"], calc_v2026["audit_seal"])
+
+    def test_scenario_f_invalid_document_no_fabricated_metrics(self):
+        """
+        Master Prompt Phase 9.1 & Regression Scenario F:
+        A user uploads an invalid or malformed source document.
+        Expected: Safe validation response, no invented consumption values, zero emissions,
+        and no fabricated utility segments.
+        """
+        from esg_rag.extractor import regex_heuristic_extraction, detect_all_utility_segments
+        
+        # 1. Test malformed / non-utility text with regex_heuristic_extraction
+        malformed_doc = "Board Meeting Minutes: Executive committee approved Q3 office catering supplier."
+        res_heuristic = regex_heuristic_extraction(malformed_doc)
+        
+        self.assertEqual(res_heuristic.get("status"), "NO_METRICS_DETECTED")
+        self.assertIsNone(res_heuristic.get("overall_confidence"))  # rule match: no model confidence
+        self.assertEqual(sum(res_heuristic["parameters"].values()), 0.0)
+        self.assertEqual(len(res_heuristic["details"]), 0)
+        
+        # Must NOT invent default 14,200 L diesel or 156,000 kWh electricity
+        self.assertEqual(res_heuristic["parameters"]["diesel"], 0.0)
+        self.assertEqual(res_heuristic["parameters"]["electricity"], 0.0)
+        
+        # 2. Test malformed text with detect_all_utility_segments
+        res_segments = detect_all_utility_segments(malformed_doc)
+        self.assertEqual(res_segments.get("status"), "NO_SEGMENTS_DETECTED")
+        self.assertEqual(res_segments.get("total_segments_detected"), 0)
+        self.assertEqual(res_segments.get("total_emissions_tco2e"), 0.0)
+        self.assertEqual(len(res_segments.get("segments", [])), 0)
+        self.assertNotIn("audit_seal", res_segments)  # software never seals or verifies extracted data
+        self.assertEqual(res_segments.get("review_status"), "REVIEW_REQUIRED")
+
 if __name__ == '__main__':
     unittest.main()
+

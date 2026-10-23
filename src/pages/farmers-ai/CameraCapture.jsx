@@ -184,8 +184,8 @@ const CameraCapture = ({ isInline = false, onBack = null, onScanComplete = null 
       formData.append('gps_lat', deviceCoords.lat);
       formData.append('gps_lng', deviceCoords.lng);
 
-      const djangoApiUrl = import.meta.env.VITE_DJANGO_API_URL || 'http://localhost:8000';
-      const response = await fetch(`${djangoApiUrl}/api/diagnose`, {
+      const djangoApiUrl = import.meta.env.VITE_DJANGO_API_URL || 'http://localhost:8001';
+      const response = await fetch(`${djangoApiUrl}/api/farmers-ai/diagnose/`, {
         method: 'POST',
         body: formData,
       });

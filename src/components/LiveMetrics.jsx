@@ -66,7 +66,7 @@ const STATIONS = [
 
 const LiveMetrics = () => {
   const containerRef = useRef(null);
-  const BLYNK_TOKEN = "wwKSjCxjjeox9NoiH1hkiet359mok4Wf";
+  const BLYNK_TOKEN = import.meta.env.VITE_BLYNK_AUTH_TOKEN || "";
 
   const [activeStation, setActiveStation] = useState(STATIONS[0]);
   const [metrics, setMetrics] = useState({
@@ -102,6 +102,19 @@ const LiveMetrics = () => {
 
   const fetchLiveBlynkData = async () => {
     setIsRefreshing(true);
+    if (!BLYNK_TOKEN) {
+      setMetrics({
+        temp: 29.2,
+        hum: 68.5,
+        air: 114,
+        co2: 424
+      });
+      setError("Hardware telemetry gateway offline. Displaying reference baseline (Simulated).");
+      setLastUpdated(new Date().toLocaleTimeString());
+      setLoading(false);
+      setIsRefreshing(false);
+      return;
+    }
     try {
       const res = await fetch(`https://blynk.cloud/external/api/getAll?token=${BLYNK_TOKEN}`);
       if (!res.ok) throw new Error(`HTTP error! status: ${res.status}`);
@@ -125,7 +138,7 @@ const LiveMetrics = () => {
         air: 114,
         co2: 424
       });
-      setError("Direct Blynk gateway ping returned timeout. Displaying verified local sensor cache.");
+      setError("Direct Blynk gateway ping returned timeout. Displaying reference baseline (Simulated).");
       setLastUpdated(new Date().toLocaleTimeString());
     } finally {
       setLoading(false);

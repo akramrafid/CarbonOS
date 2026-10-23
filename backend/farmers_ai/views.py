@@ -2,6 +2,7 @@ from rest_framework.decorators import api_view, parser_classes
 from rest_framework.parsers import MultiPartParser, FormParser
 from rest_framework.response import Response
 from rest_framework import status
+import os
 import requests
 from .models import Diagnosis, WeatherRiskSnapshot, AgronomistReview, CarbonTelemetry
 from django.db.models import Count, Q
@@ -9,7 +10,7 @@ from channels.layers import get_channel_layer
 from asgiref.sync import async_to_sync
 from .risk_engine import calculate_disease_risk
 
-FASTAPI_URL = "http://127.0.0.1:8001/predict"
+FASTAPI_URL = os.getenv("FASTAPI_URL", "http://127.0.0.1:8000/predict")
 
 @api_view(['POST'])
 @parser_classes([MultiPartParser, FormParser])
@@ -54,6 +55,40 @@ def diagnose(request):
                 field_id=field_id,
                 valid_until__gte=timezone.now()
             ).order_by('-created_at').first()
+
+        # Phase 11.2 & Scenario E: Prohibit untrained inference
+        if result.get("status") == "MODEL_UNAVAILABLE":
+            diag = Diagnosis.objects.create(
+                species=result.get('species', species),
+                disease="Diagnosis Unavailable",
+                confidence=0.0,
+                severity="unknown",
+                needs_agronomist_review=True,
+                field_id=field_id,
+                model_version=request.data.get('model_version', 'v1.0.0-unavailable'),
+                treatment_shown=result.get('message_bn', 'মডেল অনুপলব্ধ। কৃষি কর্মকর্তার পরামর্শ নিন।'),
+                weather_snapshot=weather_snapshot
+            )
+            contract_payload = {
+                'status': 'MODEL_UNAVAILABLE',
+                'diagnosis_id': str(diag.id),
+                'species': diag.species,
+                'disease': 'Diagnosis Unavailable',
+                'confidence': 0.0,
+                'severity': 'unknown',
+                'needs_agronomist_review': True,
+                'heatmap_url': None,
+                'treatment_plan': {
+                    'text_bn': result.get('message_bn', 'বর্তমানে স্বয়ংক্রিয় রোগ নির্ণয় মডেল অনুপলব্ধ। অনুগ্রহ করে অভিজ্ঞ কৃষি কর্মকর্তার সাথে যোগাযোগ করুন।'),
+                    'voice_url': None
+                },
+                'weather_risk': {
+                    'index': 0.0,
+                    'summary_bn': "আবহাওয়া ঝুঁকি স্বাভাবিক",
+                    'valid_until': None
+                }
+            }
+            return Response(contract_payload, status=status.HTTP_200_OK)
 
         # Save basic diagnosis to DB
         diag = Diagnosis.objects.create(

@@ -23,6 +23,7 @@ class TestDMRVSatelliteIngestion(unittest.TestCase):
     @classmethod
     def setUpClass(cls):
         cls.engine = SatelliteEngine()
+        cls.engine.ee_initialized = False  # Explicitly isolate and test STAC live ingestion path
         cls.stac = STACEngine()
         # Sundarbans Mangrove Reserve Bounding Box [min_lng, min_lat, max_lng, max_lat]
         cls.sundarbans_bbox = [89.50, 22.25, 89.60, 22.35]
@@ -124,6 +125,7 @@ class TestDMRVSatelliteIngestion(unittest.TestCase):
         """Verify that when STAC API endpoint fails or times out, SatelliteEngine falls back cleanly to simulation."""
         # Create a satellite engine with broken STAC URL
         broken_engine = SatelliteEngine()
+        broken_engine.ee_initialized = False
         broken_engine.stac_engine = STACEngine(stac_url="https://invalid.stac.endpoint.example.com/v1", timeout=1)
         
         result = broken_engine.run_analysis(

@@ -69,8 +69,17 @@ SPECIES_COUNTS = {
 device = torch.device('cpu')
 model = MultiHeadFarmerAIModel(SPECIES_COUNTS)
 model_path = os.path.join(os.path.dirname(__file__), '../backend/multi_head_farmer_ai.pth')
+checkpoint_loaded = False
 if os.path.exists(model_path):
-    model.load_state_dict(torch.load(model_path, map_location=device, weights_only=True))
+    try:
+        model.load_state_dict(torch.load(model_path, map_location=device, weights_only=True))
+        checkpoint_loaded = True
+        print(f"Loaded trained Farmers AI checkpoint from {model_path}")
+    except Exception as e:
+        print(f"Warning: Failed to load checkpoint from {model_path}: {e}")
+        checkpoint_loaded = False
+else:
+    print(f"Notice: Checkpoint {model_path} not found. Local model marked untrained.")
 model.eval()
 
 # Grad-CAM Hooks
@@ -242,6 +251,22 @@ async def predict(
 
     # Fallback to local model if Gemini failed
     if not gemini_success:
+        if not checkpoint_loaded:
+            # Prohibit untrained inference (Master Prompt Section 11.2 & Scenario E)
+            print("[Farmers AI] Untrained inference prohibited: checkpoint unavailable and Gemini failed.")
+            return {
+                "status": "MODEL_UNAVAILABLE",
+                "error": "Trained crop diagnosis model checkpoint unavailable and cloud inference unreachable.",
+                "species": species,
+                "disease": "Diagnosis Unavailable",
+                "confidence": 0.0,
+                "severity": "unknown",
+                "needs_agronomist_review": True,
+                "message_bn": "বর্তমানে স্বয়ংক্রিয় রোগ নির্ণয় মডেল অনুপলব্ধ। অনুগ্রহ করে অভিজ্ঞ কৃষি কর্মকর্তার সাথে যোগাযোগ করুন।",
+                "heatmap_url": None,
+                "data_origin": "model_unavailable"
+            }
+
         # Auto-detect the species among 8 products by running all heads!
         best_species = species
         max_conf = -1.0
