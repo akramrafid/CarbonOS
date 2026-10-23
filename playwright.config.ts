@@ -14,10 +14,15 @@ export default defineConfig({
     colorScheme: "light",
     reducedMotion: "no-preference",
   },
+  webServer: process.env.BASE_URL ? undefined : {
+    command: "npm run dev -- --port 3000 --strictPort",
+    url: "http://127.0.0.1:3000",
+    reuseExistingServer: !process.env.CI,
+  },
   projects: [
     { name: "desktop-chromium", use: { ...devices["Desktop Chrome"], viewport: { width: 1440, height: 900 } } },
     { name: "tablet-chromium", use: { ...devices["Desktop Chrome"], viewport: { width: 1024, height: 900 } } },
-    { name: "mobile-chromium", use: { ...devices["iPhone 13"], viewport: { width: 375, height: 812 } } },
+    { name: "mobile-chromium", use: { ...devices["iPhone 13"], browserName: "chromium", viewport: { width: 375, height: 812 } } },
     { name: "small-mobile-chromium", use: { ...devices["Pixel 5"], viewport: { width: 320, height: 720 } } },
   ],
 });

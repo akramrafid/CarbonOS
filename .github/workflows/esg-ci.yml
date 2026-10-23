@@ -1,0 +1,61 @@
+name: esg-ci
+
+on:
+  pull_request:
+  push:
+    branches: [main, master]
+
+permissions:
+  contents: read
+
+jobs:
+  backend:
+    runs-on: ubuntu-latest
+    services:
+      postgres:
+        image: postgres:16
+        env:
+          POSTGRES_USER: esg
+          POSTGRES_PASSWORD: esg
+          POSTGRES_DB: esg_test
+        ports: ["5432:5432"]
+        options: >-
+          --health-cmd "pg_isready -U esg" --health-interval 5s --health-timeout 5s --health-retries 10
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: pip
+          cache-dependency-path: inference/requirements-esg.txt
+      - run: pip install -r inference/requirements-esg.txt
+      - name: Orchestrator tests
+        run: python -m unittest tests.test_orchestrator
+      - name: ESG tests (SQLite)
+        run: python -m unittest discover -s tests -p "test_esg*.py" -v
+      - name: ESG tests (PostgreSQL + Alembic migrations)
+        env:
+          ESG_TEST_DATABASE_URL: postgresql+psycopg2://esg:esg@localhost:5432/esg_test
+        run: python -m unittest discover -s tests -p "test_esg*.py" -v
+      - name: Migrations match models
+        working-directory: inference
+        run: |
+          python -c "
+          from alembic import command
+          from esg_rag.database import alembic_config
+          command.check(alembic_config('postgresql+psycopg2://esg:esg@localhost:5432/esg_test'))"
+
+  frontend:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+      - run: npm ci
+      - run: npm run lint
+      - run: npm test
+      - run: npm run build
+      - run: npx playwright install --with-deps chromium
+      - run: npx playwright test tests/e2e/esg-authenticity.spec.ts

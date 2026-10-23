@@ -120,3 +120,14 @@ winner (PostgreSQL); retries idempotent; cross-tenant access 404 and DB-level co
 No UI yet for these routes; no factors shipped (by policy — see FACTOR_REGISTRY.md).
 
 **Next.** CI workflow; members/invitations; ledger UI screens; replace fabricated dashboard KPIs (A24) with ledger data.
+
+---
+
+## Batch 4 — P0-3 CI that can pass
+
+- `.github/workflows/esg-ci.yml` (new): backend job (orchestrator tests, ESG suites on SQLite and a PostgreSQL 16 service, `alembic check`); frontend job (lint, unit, build, Playwright).
+- `package.json`: `lint` (= `tsc`) and `test` (`node --test`) scripts now exist; `@playwright/test` dev dependency.
+- `playwright.config.ts`: `webServer` (vite on :3000) so the suite is self-contained; the "mobile-chromium" project now really uses Chromium.
+- `tests/e2e/esg-authenticity.spec.ts` replaces the ad-hoc `scripts/esg-browser-check.mjs`; `tests/js/esgDocumentExtractor.test.mjs` (new).
+- `frontend-quality.yml`: `npm test -- --runInBand` (Jest flag) → `npm test`. Its contract job still fails on pre-existing findings (not ESG).
+- Evidence: [TEST_EVIDENCE.md](TEST_EVIDENCE.md). CI itself has **not run** (nothing pushed).
