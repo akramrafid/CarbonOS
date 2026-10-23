@@ -186,3 +186,13 @@ the legacy `/platform/saas-dashboard` still shows fabricated overview KPIs (regi
 - `SafeCsvWriter` for snapshot and gap-report CSV exports (formula injection).
 - `tests/test_esg_hardening.py` (5): injected document cannot pull another tenant's content into the LLM prompt and sits after the untrusted-data rules; rate limits per user; CSV neutralisation incl. a malicious organization name in an exported report.
 - ESG unittest: Ran 77 — OK on SQLite (1 skipped) and PostgreSQL.
+
+---
+
+## Batch 9 — Documentation consolidation and full verification
+
+- Phase 0 docs renamed to the maintained deliverable names (ARCHITECTURE, THREAT_MODEL, ROADMAP, API_CONTRACTS); new
+  `README.md` index, `DOCUMENT_AI_EVALUATION.md` (status: not evaluated), `RELEASE_READINESS.md` (gates + human actions).
+- `playwright.config.ts`: quote the Python path (repo paths with spaces/parentheses broke the API web server).
+- Full gate: ESG unittest 77 OK on SQLite (1 skipped) and PostgreSQL 16; orchestrator 34 OK; lint/unit/build OK;
+  Playwright 28 passed on 4 viewports.

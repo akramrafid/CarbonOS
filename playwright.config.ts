@@ -27,7 +27,7 @@ export default defineConfig({
       env: { VITE_FASTAPI_API_URL: "http://127.0.0.1:8100", VITE_E2E_TEST_HOOK: "true" },
     },
     {
-      command: `${process.env.ESG_PYTHON ?? "python"} -m uvicorn esg_app:app --port 8100`,
+      command: `${JSON.stringify(process.env.ESG_PYTHON ?? "python")} -m uvicorn esg_app:app --port 8100`,
       cwd: "inference",
       url: "http://127.0.0.1:8100/readyz",
       reuseExistingServer: !process.env.CI,
