@@ -140,3 +140,28 @@ No UI yet for these routes; no factors shipped (by policy — see FACTOR_REGISTR
 - `auth.py`: `Identity.verified_email` from OIDC `email` + `email_verified`.
 - `tests/test_esg_members.py` (6 tests). ESG suites: Ran 62 — OK on SQLite (1 skipped) and PostgreSQL.
 - Limitation: CarbonOS does not send email; the inviter shares the one-time token. Needs an email provider decision.
+
+---
+
+## Batch 6 — P1-3 workspace UI, OIDC sign-in, standalone ESG service
+
+**Objective.** Make the brief's customer journey usable in a browser without editing code or the database.
+
+- `inference/esg_app.py` (new): ESG API without torch/farmers stack; request ids, no stack traces, security headers, `/healthz` `/readyz`, production config validation. `tests/test_esg_app.py` (2).
+- New API: `/me`, `/activity-types`, `/periods/{id}/calculations`; `document_id` in extraction responses.
+- `src/lib/esgAuth.js` (new): OIDC Authorization Code + PKCE via `oidc-client-ts` (any OIDC provider: set `VITE_OIDC_ISSUER`, `VITE_OIDC_CLIENT_ID`, optional `VITE_OIDC_AUDIENCE`); tokens in sessionStorage, never localStorage. Test-only token hook compiled in only when `VITE_E2E_TEST_HOOK=true` (verified absent from the production bundle).
+- `src/pages/platform/esg/` (new): `/platform/esg` workspace — sign-in, invitation acceptance, organization create/switch, demo badge; Setup (legal entities, facilities, periods), Emission factors (cited drafts, second-person approval), Activity ledger (manual or document-extracted values with evidence, submit/approve/reject/correct), Calculation & reports (totals, exceptions, line trace, preparer-≠-approver lock, restatement, CSV/JSON export), Members & invitations, Audit trail. Explicit loading/empty/error states; labelled controls; keyboard focus rings; works at 320 px.
+- `tests/e2e/esg-journey.spec.ts` (new): three users through the real UI and API — create org → structure → invite two colleagues (verified-email links) → cited factor approved by another admin → contributor enters 10 MWh with evidence and submits → owner approves → contributor calculates (5 tCO₂e; market-based "Not reported") → owner locks → two CSV exports byte-identical → audit trail entries. Plus signed-out visitor sees no data.
+
+**Tests run.**
+```
+ESG unittest  SQLite: Ran 65 — OK (1 skipped) · PostgreSQL 16: Ran 65 — OK
+npm run lint / npm test / npm run build → OK
+ESG_PYTHON=../.venv-esg/bin/python npx playwright test → 24 passed (desktop, tablet, 375 px, 320 px)
+```
+
+**Status.** CODE_COMPLETE; journey VERIFIED locally with an HS256 test token. **Not verified against a real
+identity provider** — needs a provider instance (choice still open) and its JWKS/issuer/audience/client id.
+
+**Not done.** Bangla localisation of the new workspace (English only); PDF export; email delivery of invitations;
+the legacy `/platform/saas-dashboard` still shows fabricated overview KPIs (register A24).

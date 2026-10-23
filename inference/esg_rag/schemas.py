@@ -50,6 +50,7 @@ class ExtractedParameter(BaseModel):
 
 class ExtractionResponse(BaseModel):
     filename: str
+    document_id: Optional[str] = None  # stored source document (None for pasted text)
     tenant_id: str
     parameters: Dict[str, float]
     details: List[ExtractedParameter]

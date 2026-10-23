@@ -271,6 +271,23 @@ class ConcurrencyTest(LedgerTestCase):
         self.assertEqual([e["action"] for e in events].count("activity.approve"), 1)
 
 
+class ReferenceEndpointsTest(LedgerTestCase):
+    def test_me_activity_types_and_period_calculations(self):
+        self.assertEqual(self.call("GET", "contrib-a", "/me", status=200).json()["sub"], "contrib-a")
+        types = self.call("GET", "viewer-a", "/activity-types", status=200).json()
+        elec = next(t for t in types["inventory"] if t["activity_type"] == "electricity")
+        self.assertEqual((elec["scope"], elec["canonical_unit"]), ("2", "kWh"))
+        self.assertIn("MWh", elec["accepted_units"])
+        gas = next(t for t in types["inventory"] if t["activity_type"] == "natural_gas")
+        self.assertEqual(gas["accepted_units"], ["m3"])
+        self.approved()
+        first = self.post("contrib-a", f"/periods/{self.period}/calculate")
+        second = self.post("admin-a", f"/periods/{self.period}/calculate")
+        listed = self.call("GET", "viewer-a", f"/periods/{self.period}/calculations", status=200).json()
+        self.assertEqual([r["id"] for r in listed["items"]][:2], [second["id"], first["id"]])
+        self.assertEqual(self.call("GET", "user-b", f"/periods/{self.period}/calculations").json()["total"], 0)
+
+
 class LedgerIsolationTest(LedgerTestCase):
     def test_other_tenant_cannot_see_or_reference_records(self):
         rec = self.approved()

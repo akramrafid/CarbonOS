@@ -102,3 +102,16 @@ with `limit` (1–200, default 50) and `offset`. Domain rule violations: 403 (ro
 | POST `/invitations` | admin | `{email, role}` → 201 with `token` **shown once** (stored as SHA-256; expires in 7 days; no email is sent) |
 | GET `/invitations` · DELETE `/invitations/{id}` | admin | list (no tokens) · revoke |
 | POST `/invitations/accept` | any authenticated user | `{token}`; token's `email` claim must equal the invited address **and** `email_verified` must be true. Any mismatch / expiry / reuse / revocation → the same 404 |
+
+## Additions (P1-3)
+
+| Method & path | Permission | Notes |
+|---|---|---|
+| GET `/me` | any authenticated user | `{sub, verified_email, is_platform_operator}` — UI hints only |
+| GET `/activity-types` | read | inventory/memo types, scope, canonical and accepted units, methodology version |
+| GET `/periods/{id}/calculations` | read | runs newest first (so a second person can review and lock) |
+| POST `/extract-footprint` | write | response now includes `document_id` of the stored source document |
+
+Standalone service: `cd inference && uvicorn esg_app:app` — `/healthz`, `/readyz` (DB check), `X-Request-Id` on
+every response, generic 500 body with request id (no stack traces), `ESG_ENV=production` refuses to start without
+OIDC JWKS + issuer + audience, PostgreSQL, explicit origins, and data-processing terms if LLM extraction is enabled.

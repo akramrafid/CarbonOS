@@ -62,6 +62,13 @@ def create_organization(
     return {"id": org.id, "name": org.name, "is_demo": org.is_demo, "role": "org_owner"}
 
 
+@router.get("/me")
+def whoami(identity: Identity = Depends(get_identity)):
+    """The caller's subject id (used by the UI for separation-of-duties hints; the API enforces it)."""
+    return {"sub": identity.sub, "verified_email": identity.verified_email,
+            "is_platform_operator": identity.is_platform_operator}
+
+
 @router.get("/organizations")
 def list_my_organizations(identity: Identity = Depends(get_identity), db: Session = Depends(get_db)):
     """Organizations the caller belongs to (for the organization switcher)."""
@@ -154,12 +161,14 @@ async def extract_footprint(
     tenant_id = principal.organization_id
     doc_text = ""
     target_filename = filename or "pasted_text"
+    document_id = None
 
     if file:
         content_bytes = await _read_upload(file)
         # Ingest document into the caller's tenant corpus so it's searchable via RAG
         result = _ingest(db, content_bytes, file.filename, CORPUS_TENANT_DOCS, tenant_id)
         target_filename = result.document.filename
+        document_id = result.document.id
         doc_text = "\n".join([f"[Page {p['page']}] {p['text']}" for p in result.pages])
     elif raw_text and raw_text.strip():
         doc_text = raw_text[:200_000]
@@ -192,6 +201,7 @@ async def extract_footprint(
     # Extracted values are inputs awaiting human review. No footprint is computed or stored here.
     return ExtractionResponse(
         filename=target_filename,
+        document_id=document_id,
         tenant_id=tenant_id,
         parameters=params,
         details=extracted.get("details", []),

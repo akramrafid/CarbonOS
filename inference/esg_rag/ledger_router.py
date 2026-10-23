@@ -135,6 +135,21 @@ Limit = Query(50, ge=1, le=200)
 Offset = Query(0, ge=0)
 
 
+@router.get("/activity-types")
+def activity_types(p: Principal = Depends(require("read"))):
+    """Inventory and memo activity types with canonical and accepted input units."""
+    from . import accounting
+    accepted = lambda canon: sorted(u for u, (dim, _) in accounting.UNITS.items() if dim == accounting.UNITS[canon][0])
+    return {
+        "inventory": [{"activity_type": k, "scope": scope, "canonical_unit": unit,
+                       "accepted_units": ["m3"] if k == "natural_gas" else accepted(unit)}
+                      for k, (scope, unit) in accounting.ACTIVITY_TYPES.items()],
+        "memo": [{"activity_type": k, "canonical_unit": unit, "accepted_units": accepted(unit)}
+                 for k, unit in accounting.MEMO_ACTIVITY_TYPES.items()],
+        "methodology_version": accounting.METHODOLOGY_VERSION,
+    }
+
+
 # --- structure ---------------------------------------------------------------------------
 
 @router.post("/legal-entities", status_code=201)
@@ -245,6 +260,14 @@ def list_activities(period_id: Optional[str] = None, facility_id: Optional[str] 
 @router.post("/periods/{period_id}/calculate", status_code=201)
 def calculate(period_id: str, p: Principal = Depends(require("read")), db: Session = Depends(get_db)):
     return out(run(ledger.calculate_period, db, p, period_id))
+
+
+@router.get("/periods/{period_id}/calculations")
+def list_calculations(period_id: str, limit: int = Limit, offset: int = Offset, p: Principal = Depends(require("read")),
+                      db: Session = Depends(get_db)):
+    """Runs for a period, newest first, so an approver can review the preparer's calculation."""
+    return _list(db, CalculationRun, p, limit, offset, CalculationRun.period_id == period_id,
+                 order=CalculationRun.created_at.desc())
 
 
 @router.get("/calculations/{run_id}")
