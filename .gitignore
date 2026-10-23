@@ -36,3 +36,7 @@ venv/
 # Akram-Stack
 STOP
 .akstack.lock
+
+# ESG local env and tenant uploads (never commit customer documents)
+.venv-esg/
+inference/chroma_data/uploads/*/

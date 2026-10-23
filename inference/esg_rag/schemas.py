@@ -8,11 +8,15 @@ class Citation(BaseModel):
     snippet: str
     relevance_score: float
 
+class OrganizationCreate(BaseModel):
+    name: str = Field(..., min_length=1, max_length=200)
+    is_demo: bool = False
+
 class QueryRequest(BaseModel):
-    query: str
+    # No tenant field: the tenant is derived from the authenticated membership.
+    query: str = Field(..., min_length=1, max_length=2000)
     corpus: Optional[str] = "all" # regulatory, emission_factors, tenant_docs, or all
-    tenant_id: Optional[str] = "default_tenant"
-    top_k: Optional[int] = 5
+    top_k: Optional[int] = Field(5, ge=1, le=20)
     temperature: Optional[float] = 0.2
 
 class QueryResponse(BaseModel):
@@ -31,6 +35,7 @@ class IngestResponse(BaseModel):
     corpus: str
     chunks_created: int
     tenant_id: str
+    duplicate: bool = False
     message: str
 
 class ExtractedParameter(BaseModel):

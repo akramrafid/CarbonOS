@@ -19,3 +19,4 @@ pydantic
 pdfplumber
 python-docx
 chromadb
+PyJWT[crypto]>=2.8

@@ -5,7 +5,7 @@ from sqlalchemy.orm import Session
 from typing import List, Optional, Dict, Any
 
 from .database import get_db
-from .models import ESGDocument, ESGQueryLog, EmissionFactorRecord
+from .models import ESGDocument, ESGQueryLog, EmissionFactorRecord, ESGOrganization, ESGMembership
 from .schemas import (
     QueryRequest,
     QueryResponse,
@@ -14,14 +14,62 @@ from .schemas import (
     CategoryMetric,
     TopImpactCategory,
     EmissionFactorItem,
-    Citation
+    Citation,
+    OrganizationCreate,
 )
-from .ingest import ingest_document, extract_text_from_file
+from .auth import Identity, Principal, get_identity, require
+from .config import CORPUS_TENANT_DOCS, CORPUS_REGULATORY, CORPUS_EMISSION_FACTORS
+from .ingest import ingest_document, IngestRejected, MAX_UPLOAD_BYTES
 from .retriever import retrieve
 from .generator import generate_answer
 from .extractor import extract_footprint_from_text, detect_all_utility_segments
 
 router = APIRouter(prefix="/api/esg", tags=["ESG RAG Intelligence"])
+
+# Global corpora are shared by every tenant, so only platform operators may write them.
+GLOBAL_CORPUS_OWNER = {CORPUS_REGULATORY: "global_regulatory", CORPUS_EMISSION_FACTORS: "global_ef"}
+
+
+async def _read_upload(file: UploadFile) -> bytes:
+    content = await file.read(MAX_UPLOAD_BYTES + 1)
+    if len(content) > MAX_UPLOAD_BYTES:
+        raise HTTPException(413, f"File exceeds {MAX_UPLOAD_BYTES} bytes")
+    return content
+
+
+def _ingest(db: Session, content: bytes, filename: str, corpus: str, tenant_id: str):
+    try:
+        return ingest_document(db=db, file_bytes=content, filename=filename, corpus=corpus, tenant_id=tenant_id)
+    except IngestRejected as e:
+        raise HTTPException(422, str(e))
+
+
+@router.post("/organizations", status_code=201)
+def create_organization(
+    body: OrganizationCreate,
+    identity: Identity = Depends(get_identity),
+    db: Session = Depends(get_db),
+):
+    """Create a tenant organization; the caller becomes its owner."""
+    org = ESGOrganization(name=body.name.strip(), is_demo=body.is_demo, created_by_sub=identity.sub)
+    db.add(org)
+    db.flush()
+    db.add(ESGMembership(organization_id=org.id, user_sub=identity.sub, role="org_owner"))
+    db.commit()
+    return {"id": org.id, "name": org.name, "is_demo": org.is_demo, "role": "org_owner"}
+
+
+@router.get("/organizations")
+def list_my_organizations(identity: Identity = Depends(get_identity), db: Session = Depends(get_db)):
+    """Organizations the caller belongs to (for the organization switcher)."""
+    rows = (
+        db.query(ESGMembership, ESGOrganization)
+        .join(ESGOrganization, ESGOrganization.id == ESGMembership.organization_id)
+        .filter(ESGMembership.user_sub == identity.sub, ESGOrganization.archived_at.is_(None))
+        .order_by(ESGOrganization.name)
+        .all()
+    )
+    return [{"id": o.id, "name": o.name, "is_demo": o.is_demo, "role": m.role} for m, o in rows]
 
 @router.get("/health")
 def esg_health_check():
@@ -37,19 +85,21 @@ def esg_health_check():
 @router.post("/query", response_model=QueryResponse)
 def esg_query(
     request: QueryRequest,
+    principal: Principal = Depends(require("read")),
     db: Session = Depends(get_db)
 ):
     """
-    Query the ESG RAG system across regulatory, emission factors, and tenant corpora.
-    Returns grounded, audit-traceable answers with source citations and confidence.
+    Query the ESG RAG system across regulatory, emission factors, and the caller's tenant corpus.
+    Returns grounded answers with source citations. Retrieval similarity is not verification.
     """
     start_time = time.time()
+    tenant_id = principal.organization_id
 
     # 1. Retrieve relevant chunks
     retrieval_res = retrieve(
         query=request.query,
         corpus=request.corpus or "all",
-        tenant_id=request.tenant_id or "default_tenant",
+        tenant_id=tenant_id,
         top_k=request.top_k or 5
     )
 
@@ -61,15 +111,15 @@ def esg_query(
 
     # 3. Log query in audit trail
     log = ESGQueryLog(
-        tenant_id=request.tenant_id or "default_tenant",
+        tenant_id=tenant_id,
         corpus=request.corpus or "all",
         query_text=request.query,
         answer_text=gen_res["answer"],
         confidence=retrieval_res.get("best_score", 0.0),
         citations=citations_data,
         latency_ms=latency,
-        llm_model=gen_res.get("model_used", "gemini-2.5-flash"),
-        verified_by_audit=not gen_res.get("insufficient_data", False)
+        llm_model=gen_res.get("model_used", "unknown"),
+        verified_by_audit=False
     )
     db.add(log)
     db.commit()
@@ -90,7 +140,7 @@ async def extract_footprint(
     file: Optional[UploadFile] = File(None),
     raw_text: Optional[str] = Form(None),
     filename: Optional[str] = Form("ESG_Statement_Q2_2026.xlsx"),
-    tenant_id: str = Form("default_tenant"),
+    principal: Principal = Depends(require("write")),
     db: Session = Depends(get_db)
 ):
     """
@@ -99,28 +149,16 @@ async def extract_footprint(
     (diesel, petrol, LPG, electricity, employee commute, freight, raw materials)
     with exact citations, page references, and verification confidence.
     """
+    tenant_id = principal.organization_id
     doc_text = ""
     target_filename = filename or "uploaded_statement.xlsx"
 
     if file:
-        target_filename = file.filename
-        content_bytes = await file.read()
-        
-        # Ingest document into tenant corpus so it's searchable via RAG
-        doc_rec = ingest_document(
-            db=db,
-            file_bytes=content_bytes,
-            filename=target_filename,
-            corpus="tenant_docs",
-            tenant_id=tenant_id
-        )
-
-        # Extract text from the newly stored file
-        import os
-        from .config import CHROMA_PERSIST_DIR
-        temp_path = os.path.join(CHROMA_PERSIST_DIR, "uploads", f"{doc_rec.checksum[:10]}_{target_filename}")
-        pages = extract_text_from_file(temp_path, target_filename)
-        doc_text = "\n".join([f"[Page {p['page']}] {p['text']}" for p in pages])
+        content_bytes = await _read_upload(file)
+        # Ingest document into the caller's tenant corpus so it's searchable via RAG
+        result = _ingest(db, content_bytes, file.filename, CORPUS_TENANT_DOCS, tenant_id)
+        target_filename = result.document.filename
+        doc_text = "\n".join([f"[Page {p['page']}] {p['text']}" for p in result.pages])
     elif raw_text:
         doc_text = raw_text
     else:
@@ -401,21 +439,25 @@ async def extract_footprint(
 @router.post("/ingest", response_model=IngestResponse)
 async def ingest_file(
     file: UploadFile = File(...),
-    corpus: str = Form("tenant_docs"),
-    tenant_id: str = Form("default_tenant"),
+    corpus: str = Form(CORPUS_TENANT_DOCS),
+    principal: Principal = Depends(require("write")),
     db: Session = Depends(get_db)
 ):
     """
-    Ingest a PDF, XLSX, CSV, or TXT file into the RAG vector store with tenant isolation.
+    Ingest a PDF, XLSX, CSV, TXT, MD or DOCX file into the caller's tenant corpus.
+    Global corpora (regulatory, emission_factors) are writable only by platform operators.
     """
-    content = await file.read()
-    doc = ingest_document(
-        db=db,
-        file_bytes=content,
-        filename=file.filename,
-        corpus=corpus,
-        tenant_id=tenant_id
-    )
+    if corpus == CORPUS_TENANT_DOCS:
+        tenant_id = principal.organization_id
+    elif corpus in GLOBAL_CORPUS_OWNER and principal.is_platform_operator:
+        tenant_id = GLOBAL_CORPUS_OWNER[corpus]
+    elif corpus in GLOBAL_CORPUS_OWNER:
+        raise HTTPException(403, "Only platform operators may write global corpora")
+    else:
+        raise HTTPException(422, "Unknown corpus")
+
+    content = await _read_upload(file)
+    doc, _pages, duplicate = _ingest(db, content, file.filename, corpus, tenant_id)
 
     return IngestResponse(
         document_id=doc.id,
@@ -423,13 +465,16 @@ async def ingest_file(
         corpus=doc.corpus,
         chunks_created=doc.chunk_count,
         tenant_id=doc.tenant_id,
-        message=f"Document '{file.filename}' successfully processed, embedded, and indexed."
+        duplicate=duplicate,
+        message=(f"Document '{doc.filename}' was already ingested; existing record returned." if duplicate
+                 else f"Document '{doc.filename}' processed and indexed.")
     )
 
 @router.get("/emission-factors")
 def get_emission_factors(
     category: Optional[str] = None,
     region: Optional[str] = "Bangladesh",
+    principal: Principal = Depends(require("read")),
     db: Session = Depends(get_db)
 ):
     """
@@ -459,13 +504,14 @@ def get_emission_factors(
 
 @router.get("/documents")
 def list_documents(
-    tenant_id: str = "default_tenant",
     corpus: Optional[str] = None,
+    principal: Principal = Depends(require("read")),
     db: Session = Depends(get_db)
 ):
-    """List ingested documents for a tenant with chunk counts and provenance."""
+    """List the caller's tenant documents plus global corpora, with provenance."""
     q = db.query(ESGDocument).filter(
-        (ESGDocument.tenant_id == tenant_id) | (ESGDocument.tenant_id.in_(["global_regulatory", "global_ef"]))
+        (ESGDocument.tenant_id == principal.organization_id)
+        | (ESGDocument.tenant_id.in_(list(GLOBAL_CORPUS_OWNER.values())))
     )
     if corpus:
         q = q.filter(ESGDocument.corpus == corpus)
@@ -486,13 +532,14 @@ def list_documents(
 
 @router.get("/audit-trail")
 def get_audit_trail(
-    tenant_id: str = "default_tenant",
     limit: int = 15,
+    principal: Principal = Depends(require("review")),
     db: Session = Depends(get_db)
 ):
-    """Retrieve audit log of recent RAG queries and extractions."""
+    """Retrieve the caller's tenant log of recent RAG queries and extractions."""
+    limit = max(1, min(limit, 100))
     logs = db.query(ESGQueryLog).filter(
-        ESGQueryLog.tenant_id == tenant_id
+        ESGQueryLog.tenant_id == principal.organization_id
     ).order_by(ESGQueryLog.created_at.desc()).limit(limit).all()
 
     return [
@@ -515,7 +562,8 @@ def get_audit_trail(
 
 @router.post("/duckdb-calculate")
 def duckdb_calculate(
-    payload: Dict[str, Any] = Body(...)
+    payload: Dict[str, Any] = Body(...),
+    principal: Principal = Depends(require("read")),
 ):
     """
     In-Process DuckDB-Style OLAP Calculation Endpoint.
@@ -549,7 +597,7 @@ def duckdb_calculate(
     }
 
 @router.get("/emission-factors/registry")
-def get_factor_registry():
+def get_factor_registry(principal: Principal = Depends(require("read"))):
     """
     Retrieve typed, versioned emission factor catalog with DoE Gazette citations.
     """
@@ -564,7 +612,8 @@ def get_factor_registry():
 
 @router.post("/emission-factors/regression-test")
 def run_factor_regression(
-    payload: Dict[str, Any] = Body(...)
+    payload: Dict[str, Any] = Body(...),
+    principal: Principal = Depends(require("admin")),
 ):
     """
     Watershed-style regression testing:
@@ -576,7 +625,7 @@ def run_factor_regression(
     return run_factor_regression_test(proposed, tolerance_pct=tolerance)
 
 @router.get("/atlas-benchmark/run")
-def run_atlas_benchmark():
+def run_atlas_benchmark(principal: Principal = Depends(require("read"))):
     """
     Run the ATLAS invoice extraction & classification benchmark suite.
     """
@@ -584,7 +633,7 @@ def run_atlas_benchmark():
     return run_atlas_eval_suite()
 
 @router.get("/satellite-insets")
-def get_satellite_insets():
+def get_satellite_insets(principal: Principal = Depends(require("read"))):
     """
     Convergence of Satellite MRV with Corporate Carbon Accounting:
     Provides verified nature-based carbon removals across Bangladesh (Sentinel-2 & GEDI LiDAR)
@@ -659,7 +708,7 @@ def get_satellite_insets():
     }
 
 @router.get("/entity-tree")
-def get_conglomerate_entity_tree():
+def get_conglomerate_entity_tree(principal: Principal = Depends(require("read"))):
     """
     Sweep-Style Multi-Entity Hierarchy for Bangladeshi Diversified Groups.
     """
@@ -729,7 +778,8 @@ def get_conglomerate_entity_tree():
 
 @router.post("/detect-utility-segments")
 def esg_detect_utility_segments(
-    payload: Dict[str, Any] = Body(default={})
+    payload: Dict[str, Any] = Body(default={}),
+    principal: Principal = Depends(require("read")),
 ):
     """
     Universal Multi-Segment Utility Invoice Extractor & Calculator:

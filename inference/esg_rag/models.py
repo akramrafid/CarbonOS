@@ -1,4 +1,4 @@
-from sqlalchemy import Column, String, Float, Boolean, DateTime, Integer, Text, ForeignKey, JSON
+from sqlalchemy import Column, String, Float, Boolean, DateTime, Integer, Text, ForeignKey, JSON, UniqueConstraint, CheckConstraint
 from sqlalchemy.orm import relationship
 from carbon_monitoring.database import Base
 import datetime
@@ -6,6 +6,38 @@ import uuid
 
 def generate_uuid():
     return str(uuid.uuid4())
+
+ESG_ROLES = (
+    "org_owner", "esg_admin", "data_contributor", "facility_manager",
+    "auditor", "executive_viewer", "supplier_collaborator",
+)
+
+
+class ESGOrganization(Base):
+    """A tenant. Its id is the tenant_id stored on every tenant-owned ESG row."""
+    __tablename__ = 'esg_organization'
+
+    id = Column(String(36), primary_key=True, default=generate_uuid)
+    name = Column(String(200), nullable=False)
+    # Demo workspaces may show sample data; production orgs never do.
+    is_demo = Column(Boolean, nullable=False, default=False)
+    created_by_sub = Column(String(255), nullable=False)
+    created_at = Column(DateTime, default=datetime.datetime.utcnow, nullable=False)
+    archived_at = Column(DateTime, nullable=True)
+
+
+class ESGMembership(Base):
+    __tablename__ = 'esg_membership'
+    __table_args__ = (
+        UniqueConstraint('organization_id', 'user_sub', name='uq_esg_membership_org_user'),
+        CheckConstraint("role IN ('" + "','".join(ESG_ROLES) + "')", name='ck_esg_membership_role'),
+    )
+
+    id = Column(String(36), primary_key=True, default=generate_uuid)
+    organization_id = Column(String(36), ForeignKey('esg_organization.id', ondelete='CASCADE'), nullable=False, index=True)
+    user_sub = Column(String(255), nullable=False, index=True)
+    role = Column(String(40), nullable=False)
+    created_at = Column(DateTime, default=datetime.datetime.utcnow, nullable=False)
 
 class ESGDocument(Base):
     __tablename__ = 'esg_rag_document'
@@ -53,7 +85,8 @@ class ESGQueryLog(Base):
     retrieved_chunk_ids = Column(JSON, nullable=True)
     latency_ms = Column(Float, default=0.0)
     llm_model = Column(String(50), default="gemini-2.5-flash")
-    verified_by_audit = Column(Boolean, default=True)
+    # Software never verifies an answer; only a recorded human/auditor review may set this.
+    verified_by_audit = Column(Boolean, default=False)
     created_at = Column(DateTime, default=datetime.datetime.utcnow)
 
 
