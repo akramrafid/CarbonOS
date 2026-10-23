@@ -514,6 +514,18 @@ def _report_content(db, principal, period, run):
     }
 
 
+class SafeCsvWriter:
+    """csv.writer that neutralises spreadsheet formula injection: text cells starting with
+    = + - @ (or tab/CR) are prefixed with an apostrophe so spreadsheets treat them as text."""
+
+    def __init__(self, out):
+        self._w = csv.writer(out, lineterminator="\n")
+
+    def writerow(self, row):
+        self._w.writerow([f"'{v}" if isinstance(v, str) and v[:1] in ("=", "+", "-", "@", "\t", "\r") else v
+                          for v in row])
+
+
 def export_snapshot(snap: ReportSnapshot, fmt: str) -> str:
     if fmt == "json":
         return snap.content
@@ -521,7 +533,7 @@ def export_snapshot(snap: ReportSnapshot, fmt: str) -> str:
         raise DomainError(422, "format must be json or csv")
     c = json.loads(snap.content)
     out = io.StringIO()
-    w = csv.writer(out, lineterminator="\n")
+    w = SafeCsvWriter(out)
     w.writerow(["organization", c["organization"]["name"]])
     w.writerow(["period", c["period"]["name"], c["period"]["start_date"], c["period"]["end_date"]])
     w.writerow(["boundary_method", c["period"]["boundary_method"], "revision", c["period"]["revision"]])

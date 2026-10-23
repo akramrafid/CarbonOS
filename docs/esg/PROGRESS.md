@@ -177,3 +177,12 @@ the legacy `/platform/saas-dashboard` still shows fabricated overview KPIs (regi
 - Period lock now also requires no pending metric observations; approved metrics are part of the input hash and the snapshot (`esg_metrics`).
 - UI: "E/S/G metrics" and "Disclosures" tabs. Journey e2e extended (water metric → approval → disclosure coverage shows Scope 2 evidence, Scope 3 gap, no "compliant").
 - Tests: ESG unittest Ran 72 — OK on SQLite (1 skipped) and PostgreSQL; Playwright 28 passed (4 viewports).
+
+---
+
+## Batch 8 — Hardening: prompt injection, rate limits, CSV injection
+
+- `ratelimit.py` (new): per-user sliding window on `/query` (AI) and `/ingest`, `/extract-footprint` (uploads); 429 + `Retry-After`. In-process only (documented ceiling).
+- `SafeCsvWriter` for snapshot and gap-report CSV exports (formula injection).
+- `tests/test_esg_hardening.py` (5): injected document cannot pull another tenant's content into the LLM prompt and sits after the untrusted-data rules; rate limits per user; CSV neutralisation incl. a malicious organization name in an exported report.
+- ESG unittest: Ran 77 — OK on SQLite (1 skipped) and PostgreSQL.

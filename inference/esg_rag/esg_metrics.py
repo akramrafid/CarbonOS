@@ -6,7 +6,6 @@ approved values immutable (corrections supersede), duplicates for the same perio
 breakdown rejected. Disclosure coverage is computed from locked GHG snapshots and approved metrics;
 it is never presented as compliance.
 """
-import csv
 import io
 import json
 from decimal import Decimal
@@ -15,7 +14,7 @@ from typing import Optional
 from sqlalchemy.exc import IntegrityError
 
 from . import disclosures_catalog as dc
-from .ledger import DomainError, _get, _need, _now, _open_period, _transition, audit
+from .ledger import DomainError, _get, _need, _now, _open_period, _transition, audit, SafeCsvWriter
 from .ledger_models import DisclosureResponse, Facility, MetricObservation, ReportingPeriod, ReportSnapshot
 from .metrics_catalog import METRICS, MetricError, validate
 
@@ -251,7 +250,7 @@ def approve_response(db, principal, period_id, framework, ref, publish=False):
 
 def gap_report_csv(report) -> str:
     out = io.StringIO()
-    w = csv.writer(out, lineterminator="\n")
+    w = SafeCsvWriter(out)
     w.writerow(["framework", report["name"], "template", report["template_version"], "references", report["verification_status"]])
     w.writerow(["period", report["period"]["name"], "statement", report["statement"]])
     w.writerow([])

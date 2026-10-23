@@ -16,6 +16,7 @@ from .schemas import (
     OrganizationCreate,
 )
 from .auth import Identity, Principal, get_identity, require
+from .ratelimit import limited
 from .config import CORPUS_TENANT_DOCS, CORPUS_REGULATORY, CORPUS_EMISSION_FACTORS
 from .ingest import ingest_document, IngestRejected, MAX_UPLOAD_BYTES
 from .retriever import retrieve
@@ -95,7 +96,7 @@ def esg_health_check():
 @router.post("/query", response_model=QueryResponse)
 def esg_query(
     request: QueryRequest,
-    principal: Principal = Depends(require("read")),
+    principal: Principal = Depends(limited("ai", "read")),
     db: Session = Depends(get_db)
 ):
     """
@@ -150,7 +151,7 @@ async def extract_footprint(
     file: Optional[UploadFile] = File(None),
     raw_text: Optional[str] = Form(None),
     filename: Optional[str] = Form("pasted_text"),
-    principal: Principal = Depends(require("write")),
+    principal: Principal = Depends(limited("upload", "write")),
     db: Session = Depends(get_db)
 ):
     """
@@ -215,7 +216,7 @@ async def extract_footprint(
 async def ingest_file(
     file: UploadFile = File(...),
     corpus: str = Form(CORPUS_TENANT_DOCS),
-    principal: Principal = Depends(require("write")),
+    principal: Principal = Depends(limited("upload", "write")),
     db: Session = Depends(get_db)
 ):
     """

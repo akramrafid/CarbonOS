@@ -16,12 +16,14 @@ supplier collaborator, platform operator, compromised LLM output / prompt-inject
 | T5 | DoS: unbounded upload size read fully into memory; no type allow-list | `/ingest`, `/extract-footprint` | P1 | Size + extension limits in P0-1; rate limiting open |
 | T6 | Info disclosure: customer document text sent to Gemini without consent; API key in URL query string | `extractor.extract_parameters_with_gemini`, `generator` | P0 (privacy) | Fixed P0-2: LLM extraction only when `ESG_LLM_EXTRACTION_ENABLED=true`; key-in-URL still open |
 | T7 | Repudiation / integrity: fabricated values labelled `verified`/`audit_seal` | server + client | P0 (trust) | Fixed P0-2 for API + extraction/RAG paths; dashboard overview KPIs still fabricated (register A24) |
-| T8 | Prompt injection via uploaded documents into RAG answers | `generator.build_grounded_prompt` | P1 | Prompt marks context untrusted; no tests yet |
+| T8 | Prompt injection via uploaded documents into RAG answers | `generator.build_grounded_prompt` | P1 | Mitigated: tenant filter applied before the model (other tenants' text never reaches the prompt); injected text sits in the data section after untrusted-data rules; nothing the model returns can set verification. Tested in `test_esg_hardening.py`. Residual: a tenant can still mislead *its own* answers |
 | T9 | Info disclosure: stack traces / raw exceptions — `ingest` stores `str(e)` as page text | `ingest.extract_text_from_file` | P2 | Fixed P0-2: parse failures return no pages; error text is never indexed |
 | T10 | Secrets in repo: OpenWeatherMap key (farmers AI), Django insecure default secret, `DEBUG=True` default, `ALLOWED_HOSTS=*` | out-of-ESG modules | P1 | **Human rotation checklist below**; code not modified (out of scope) |
 | T11 | Customer uploads committed to Git (`inference/chroma_data/uploads`) | repo | P1 | Upload dir gitignored in P0-1; historic files are seed samples |
 | T12 | CORS `allow_credentials=True` with `allow_methods/headers=*` | `inference/main.py` | P2 | Bearer-token auth does not rely on cookies; revisit with cookie sessions |
-| T13 | No rate limiting / request timeouts on ESG routes | FastAPI | P1 | Open |
+| T13 | No rate limiting / request timeouts on ESG routes | FastAPI | P1 | Partly fixed: per-user sliding-window limits on AI query (20/min) and upload/extraction (30/min), per process (`ratelimit.py`). Open: shared limits across replicas, PDF-parse timeouts |
+| T14 | Spreadsheet formula injection in CSV exports (org/facility names, narratives) | snapshot and gap-report CSV | P1 | Fixed: `SafeCsvWriter` prefixes `= + - @` cells; tested |
+| T15 | Stack traces / internals in API errors | standalone service | P2 | Fixed in `esg_app.py`: generic 500 with request id; tested |
 
 ## Controls introduced in P0-1
 
