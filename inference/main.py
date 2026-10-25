@@ -18,8 +18,14 @@ from dotenv import load_dotenv
 env_path = os.path.join(os.path.dirname(__file__), '.env')
 load_dotenv(dotenv_path=env_path)
 
-# Add backend directory to sys.path to import model
-sys.path.append(os.path.join(os.path.dirname(__file__), '../backend'))
+# Add inference directory and backend directory to sys.path
+inference_dir = os.path.dirname(os.path.abspath(__file__))
+if inference_dir not in sys.path:
+    sys.path.insert(0, inference_dir)
+
+backend_dir = os.path.join(inference_dir, '../backend')
+if backend_dir not in sys.path:
+    sys.path.append(backend_dir)
 from ml_pipeline.model import MultiHeadFarmerAIModel
 from carbon_monitoring.router import router as carbon_router
 from carbon_monitoring.database import init_db

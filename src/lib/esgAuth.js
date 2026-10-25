@@ -46,27 +46,84 @@ export function clearStoredDemoSession() {
   safeStorage(() => sessionStorage.removeItem(DEMO_SESSION_KEY));
 }
 
-export async function requestDemoSession() {
-  const res = await fetch(`${API_BASE}/api/esg/demo/session`, {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-  });
-  if (!res.ok) {
-    const detail = await res.text().catch(() => '');
-    throw new Error(`Demo session initialization failed (${res.status}): ${detail}`);
-  }
-  const data = await res.json();
+export function createLocalOfflineDemoSession() {
+  const demoId = `offline-${Math.random().toString(36).slice(2, 10)}`;
+  const tenantId = 'org-demo-bangladesh-benchmark';
+  const ownerToken = `demo-offline-owner-${demoId}`;
+  const reviewerToken = `demo-offline-reviewer-${demoId}`;
+  const expiresAt = Math.floor(Date.now() / 1000) + 7200;
+
   const sessionData = {
-    ...data,
+    access_token: ownerToken,
+    token: ownerToken,
+    token_type: 'bearer',
+    expires_in: 7200,
+    tenant_id: tenantId,
+    organization_id: tenantId,
+    organization_name: 'Dhaka Apparel Mills Ltd [SAMPLE DATA]',
+    role: 'org_owner',
+    reviewer_token: reviewerToken,
+    reviewer_role: 'auditor',
+    is_demo: true,
+    isOfflineDemo: true,
+    expires_at: expiresAt,
     active_persona: 'owner',
-    expires_at: Math.floor(Date.now() / 1000) + (data.expires_in || 3600),
+    personas: {
+      owner: {
+        sub: `demo-user-${demoId}`,
+        role: 'org_owner',
+        token: ownerToken,
+      },
+      reviewer: {
+        sub: `demo-user-${demoId}-reviewer`,
+        role: 'auditor',
+        token: reviewerToken,
+      },
+    },
+    disclaimer: 'DEMO WORKSPACE — SAMPLE DATA / NOT ASSURED. Dual-control approval simulation available via reviewer persona.',
   };
   saveDemoSession(sessionData);
   return sessionData;
 }
 
+export async function requestDemoSession() {
+  try {
+    const controller = typeof AbortController !== 'undefined' ? new AbortController() : null;
+    const timeout = controller ? setTimeout(() => controller.abort(), 4000) : null;
+    const res = await fetch(`${API_BASE}/api/esg/demo/session`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      signal: controller?.signal,
+    }).finally(() => {
+      if (timeout) clearTimeout(timeout);
+    });
+
+    if (!res.ok) {
+      console.warn(`Remote demo session unavailable (${res.status}), using resilient client-side demo session.`);
+      return createLocalOfflineDemoSession();
+    }
+    const data = await res.json();
+    const sessionData = {
+      ...data,
+      active_persona: 'owner',
+      expires_at: Math.floor(Date.now() / 1000) + (data.expires_in || 3600),
+    };
+    saveDemoSession(sessionData);
+    return sessionData;
+  } catch (err) {
+    console.warn('Backend service unreachable, activating resilient client-side demo session:', err);
+    return createLocalOfflineDemoSession();
+  }
+}
+
 export async function resetDemoSession() {
   const current = getStoredDemoSession();
+  if (current?.isOfflineDemo) {
+    clearStoredDemoSession();
+    const newSession = createLocalOfflineDemoSession();
+    setEsgSession({ token: newSession.access_token, organizationId: newSession.tenant_id });
+    return newSession;
+  }
   const token = current?.access_token;
   if (token) {
     try {
@@ -169,8 +226,9 @@ export async function loadSession() {
     try {
       demo = await requestDemoSession();
     } catch (err) {
-      console.warn('Could not auto-provision ESG demo session:', err);
-      return null;
+      console.warn('Could not auto-provision remote ESG demo session, falling back to local offline demo:', err);
+      demo = createLocalOfflineDemoSession();
+      saveDemoSession(demo);
     }
   }
 
@@ -183,12 +241,23 @@ export async function loadSession() {
       name: `${personaLabel}`,
       email: null,
       isDemo: true,
+      isOfflineDemo: Boolean(demo.isOfflineDemo),
       activePersona,
       demoSession: demo,
     };
   }
 
-  return null;
+  demo = createLocalOfflineDemoSession();
+  saveDemoSession(demo);
+  setEsgSession({ token: demo.access_token, organizationId: demo.tenant_id });
+  return {
+    name: 'Demo Manager (Owner)',
+    email: null,
+    isDemo: true,
+    isOfflineDemo: true,
+    activePersona: 'owner',
+    demoSession: demo,
+  };
 }
 
 export const signIn = () => getManager()?.signinRedirect();

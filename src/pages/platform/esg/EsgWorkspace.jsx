@@ -2,8 +2,8 @@
 // Role checks here only hide controls; the API enforces every permission.
 import { useCallback, useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { esgGet, esgSend, hasEsgToken, setEsgSession } from '../../../lib/esgApi';
-import { authConfigured, completeSignIn, loadSession, resetDemoSession, signIn, signOut, switchDemoPersona } from '../../../lib/esgAuth';
+import { esgGet, esgSend, hasEsgToken, resetOfflineStore, setEsgSession } from '../../../lib/esgApi';
+import { authConfigured, completeSignIn, createLocalOfflineDemoSession, loadSession, resetDemoSession, saveDemoSession, signIn, signOut, switchDemoPersona } from '../../../lib/esgAuth';
 import { Button, Input, Notice, Panel, Select, useAction } from './ui';
 import SetupPanel from './SetupPanel';
 import FactorsPanel from './FactorsPanel';
@@ -120,6 +120,7 @@ export default function EsgWorkspace() {
 
   const handleResetDemo = async () => {
     await action.run(async () => {
+      resetOfflineStore();
       await resetDemoSession();
       await refreshAll();
       await loadRef();
@@ -149,12 +150,25 @@ export default function EsgWorkspace() {
 
   if (!user) {
     return shell(
-      <Panel title="ESG Workspace Offline" description="Unable to connect to the ESG service to provision a workspace session.">
+      <Panel title="ESG Workspace Offline" description="Unable to connect to the remote ESG cloud service.">
         <p className="text-sm text-amber-300">
-          The backend API service is unreachable. Please verify that the API server is running on {import.meta.env?.VITE_FASTAPI_API_URL || 'http://localhost:8000'}.
+          The remote API server ({import.meta.env?.VITE_FASTAPI_API_URL || 'https://carbonos-inference.onrender.com'}) is currently cold-starting or unreachable.
         </p>
-        <div className="mt-4 flex gap-3">
-          <Button onClick={() => window.location.reload()}>Retry connection</Button>
+        <p className="mt-2 text-xs text-mist">
+          You can immediately launch the interactive client-side demo workspace with Bangladesh manufacturing benchmark data, dual-control persona switching, and GHG Protocol calculation engine.
+        </p>
+        <div className="mt-4 flex flex-wrap gap-3">
+          <Button
+            onClick={async () => {
+              const demo = createLocalOfflineDemoSession();
+              saveDemoSession(demo);
+              await refreshAll();
+              await loadRef();
+            }}
+          >
+            Launch Demo Workspace
+          </Button>
+          <Button variant="secondary" onClick={() => window.location.reload()}>Retry remote connection</Button>
           {authConfigured && <Button variant="secondary" onClick={signIn}>Sign in with SSO</Button>}
         </div>
       </Panel>,
@@ -192,7 +206,14 @@ export default function EsgWorkspace() {
                 <span className="inline-block rounded bg-amber-400/20 px-2 py-0.5 font-mono text-[11px] font-semibold uppercase tracking-wider text-amber-300">
                   DEMO WORKSPACE — SAMPLE DATA / NOT ASSURED
                 </span>
-                <span className="font-mono text-[11px] text-amber-200/70">Ephemeral zero-friction evaluation</span>
+                <span className="font-mono text-[11px] text-amber-200/70">
+                  {user?.isOfflineDemo ? 'Interactive client-side evaluation' : 'Ephemeral zero-friction evaluation'}
+                </span>
+                {user?.isOfflineDemo && (
+                  <span className="inline-block rounded bg-emerald-500/20 px-2 py-0.5 font-mono text-[11px] font-semibold uppercase tracking-wider text-emerald-400">
+                    Offline Resilient
+                  </span>
+                )}
               </div>
               <p className="text-mist">
                 Synthetic Bangladesh spinning & manufacturing benchmarks. Backend tenant isolation and segregation of duties are strictly enforced.
