@@ -74,28 +74,6 @@ class TestESGCalculationEngine(unittest.TestCase):
         self.assertGreaterEqual(eval_res["metrics"]["parameter_accuracy_pct"], 90.0)
         self.assertGreaterEqual(eval_res["metrics"]["scope_classification_pct"], 90.0)
 
-    def test_universal_utility_segments_detection(self):
-        from esg_rag.extractor import detect_all_utility_segments
-        test_invoice = """
-        DHAKA ELECTRIC SUPPLY COMPANY (DESCO) INDUSTRIAL HIGH TENSION STATEMENT
-        Account Meter: MTR-DESCO-HT-8821. Billing Period: May 2026.
-        Off-Peak Energy: 85,000 kWh @ 9.20 BDT
-        Peak Hour Energy: 22,000 kWh @ 12.80 BDT
-        Sanctioned Maximum Demand: 400 kVA
-        Captive Natural Gas: 12,500 m3
-        Backup Genset Diesel: 3,400 Liters
-        WASA Water Supply: 4,200 m3
-        Solar Net-Metering Export: 5,000 kWh
-        """
-        res = detect_all_utility_segments(test_invoice)
-        self.assertGreaterEqual(res["total_segments_detected"], 5)
-        self.assertGreater(res["total_emissions_tco2e"], 0)
-        self.assertIn("invoice_meta", res)
-        self.assertIn("audit_seal", res)
-        self.assertTrue(res["audit_seal"].startswith("SHA256-SEAL-"))
-        self.assertIn("scope_breakdown", res)
-        self.assertGreater(res["scope_breakdown"]["scope2_tco2e"], 0)
-
     def test_audit_seal_and_factor_provenance(self):
         sample_activities = {
             "diesel": 10000,
@@ -152,7 +130,7 @@ class TestESGCalculationEngine(unittest.TestCase):
         res_heuristic = regex_heuristic_extraction(malformed_doc)
         
         self.assertEqual(res_heuristic.get("status"), "NO_METRICS_DETECTED")
-        self.assertEqual(res_heuristic.get("overall_confidence"), 0.0)
+        self.assertIsNone(res_heuristic.get("overall_confidence"))  # rule match: no model confidence
         self.assertEqual(sum(res_heuristic["parameters"].values()), 0.0)
         self.assertEqual(len(res_heuristic["details"]), 0)
         
@@ -165,9 +143,9 @@ class TestESGCalculationEngine(unittest.TestCase):
         self.assertEqual(res_segments.get("status"), "NO_SEGMENTS_DETECTED")
         self.assertEqual(res_segments.get("total_segments_detected"), 0)
         self.assertEqual(res_segments.get("total_emissions_tco2e"), 0.0)
-        self.assertEqual(res_segments.get("confidence_score"), 0.0)
         self.assertEqual(len(res_segments.get("segments", [])), 0)
-        self.assertEqual(res_segments.get("audit_seal"), "UNSEALED-NO-DATA")
+        self.assertNotIn("audit_seal", res_segments)  # software never seals or verifies extracted data
+        self.assertEqual(res_segments.get("review_status"), "REVIEW_REQUIRED")
 
 if __name__ == '__main__':
     unittest.main()

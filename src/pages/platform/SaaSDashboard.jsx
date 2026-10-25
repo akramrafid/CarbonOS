@@ -75,8 +75,7 @@ import { ActivityEvidenceWorkspace } from './components/ActivityEvidenceWorkspac
 import { EsgReportGenerator } from './components/EsgReportGenerator';
 import { VerificationReadinessCenter } from './components/VerificationReadinessCenter';
 import { extractESGFromDocument, parseDocumentTextToEsgParams } from '../../lib/esgDocumentExtractor';
-
-const FASTAPI_API_URL = import.meta.env.VITE_FASTAPI_API_URL || 'http://localhost:8000';
+import { esgFetch } from '../../lib/esgApi';
 
 // -------------------------------------------------------------
 // HIGH-CRAFT EXECUTIVE DASHBOARD COMPONENTS (EMITRA / $30K SPEC)
@@ -774,7 +773,6 @@ const SaaSDashboard = () => {
   const [isUploading, setIsUploading] = useState(false);
   const [uploadedFile, setUploadedFile] = useState(null);
   const [uploadedFileObj, setUploadedFileObj] = useState(null);
-  const [isVerified, setIsVerified] = useState(false);
   const [isNotificationsOpen, setIsNotificationsOpen] = useState(false);
   const [downloadingApp, setDownloadingApp] = useState(false);
 
@@ -1031,7 +1029,6 @@ const SaaSDashboard = () => {
     const { name, value } = e.target;
     const updated = { ...inputs, [name]: value };
     setInputs(updated);
-    setIsVerified(false); // Reset verification sign on manual edit
   };
 
   // Trigger calculations whenever inputs or emission factors change
@@ -1046,7 +1043,6 @@ const SaaSDashboard = () => {
     if (file) {
       setUploadedFile(file.name);
       setUploadedFileObj(file);
-      setIsVerified(false);
       showToast(`Selected file: ${file.name}. Initializing Carbon Zero BD RAG pipeline...`, "info");
       await executeAIExtraction(file);
       if (e.target && e.target.value !== undefined) {
@@ -1055,148 +1051,73 @@ const SaaSDashboard = () => {
     }
   };
 
-  // Real ESG RAG Footprint Extractor (with Client-Side PDF/Doc Extractor + Server API Fallback)
+  // Activity extraction: client-side parse first, then the authenticated ESG API.
+  // Extracted values are unreviewed inputs. On failure nothing is substituted: the user enters values manually.
+  const SAMPLE_TEXT = `Dexterity Textiles Ltd Q2 Audit Statement DEPZ TX-8491. High Speed Diesel generator: 14,200 Liters. Fleet octane petrol: 4,800 Liters. Commercial LPG: 1,950 kg. DESCO Grid active electricity: 156,000 kWh. Workforce: 148 employees. Overseas marketing flights: 82,000 km. Outward truck freight: 39,000 ton-km. Purchased raw cotton fabric yarn: 580 metric tons. Total Invoiced Spend: BDT 14,850,000.`;
+
   const executeAIExtraction = async (fileOrName = "ESG_Statement_Q2_2026.xlsx") => {
     setIsUploading(true);
     const fileName = typeof fileOrName === 'string' ? fileOrName : fileOrName.name;
-    showToast(`Carbon Zero BD RAG Extractor analyzing ${fileName}...`, "info");
+    showToast(`Extracting activity data from ${fileName}...`, "info");
 
     try {
       let data = null;
       if (typeof fileOrName !== 'string' && fileOrName instanceof File) {
-        // 1. First run client-side PDF/Text extraction (with FlateDecode and text operator parsing)
         try {
           data = await extractESGFromDocument(fileOrName);
         } catch (clientErr) {
           console.warn("Client ESG extraction note:", clientErr);
         }
-
-        // 2. Also try server endpoint if available
-        if (!data || !data.parameters) {
-          try {
-            const formData = new FormData();
-            formData.append('file', fileOrName);
-            formData.append('filename', fileOrName.name);
-            formData.append('tenant_id', 'default_tenant');
-
-            const res = await fetch(`${FASTAPI_API_URL}/api/esg/extract-footprint`, {
-              method: 'POST',
-              body: formData
-            });
-            if (res.ok) {
-              data = await res.json();
-            }
-          } catch (apiErr) {
-            console.warn("FastAPI offline or unreachable, using client extractor:", apiErr);
-          }
+        if (!data || !data.details?.length) {
+          const formData = new FormData();
+          formData.append('file', fileOrName);
+          data = await esgFetch('/api/esg/extract-footprint', { method: 'POST', body: formData });
         }
       } else {
-        // String filename passed (e.g. quick sample loader button)
-        const sampleText = `Dexterity Textiles Ltd Q2 Audit Statement DEPZ TX-8491. High Speed Diesel generator: 14,200 Liters. Fleet octane petrol: 4,800 Liters. Commercial LPG: 1,950 kg. DESCO Grid active electricity: 156,000 kWh. Workforce: 148 employees. Overseas marketing flights: 82,000 km. Outward truck freight: 39,000 ton-km. Purchased raw cotton fabric yarn: 580 metric tons. Total Invoiced Spend: BDT 14,850,000.`;
-        const parsed = parseDocumentTextToEsgParams(sampleText, fileName);
+        // Sample loader: fictional demo text, labelled as such everywhere it is shown.
+        const parsed = parseDocumentTextToEsgParams(SAMPLE_TEXT, fileName);
         data = {
-          filename: fileName,
-          tenant_id: "default_tenant",
-          overall_confidence: 0.99,
-          audit_seal: true,
-          verified_at: new Date().toISOString().replace('T', ' ').substring(0, 16) + " UTC",
-          summary: `Verified audit statement extracted 8 activity metrics across Scopes 1, 2, and 3 from ${fileName} with ISO 14064 assurance.`,
+          filename: `${fileName} (DEMO SAMPLE)`,
+          overall_confidence: null,
+          extraction_method: "demo-sample",
+          review_status: "DEMO_SAMPLE",
+          summary: "Demo sample data for a fictional company. Not customer data and not verified.",
           parameters: parsed.parameters,
           details: parsed.details,
-          spendBdt: parsed.spendBdt || 14850000
+          spendBdt: parsed.spendBdt
         };
       }
 
-      if (data && data.parameters) {
-        const newParams = { ...data.parameters };
-        if (data.spendBdt) {
-          newParams.spendBdt = data.spendBdt;
-        }
-
-        const newInputs = {
-          diesel: newParams.diesel !== undefined ? String(newParams.diesel) : inputs.diesel,
-          petrol: newParams.petrol !== undefined ? String(newParams.petrol) : inputs.petrol,
-          lpg: newParams.lpg !== undefined ? String(newParams.lpg) : inputs.lpg,
-          electricity: newParams.electricity !== undefined ? String(newParams.electricity) : inputs.electricity,
-          employees: newParams.employees !== undefined ? String(newParams.employees) : inputs.employees,
-          airTravel: newParams.airTravel !== undefined ? String(newParams.airTravel) : inputs.airTravel,
-          truckTransport: newParams.truckTransport !== undefined ? String(newParams.truckTransport) : inputs.truckTransport,
-          rawMaterials: newParams.rawMaterials !== undefined ? String(newParams.rawMaterials) : inputs.rawMaterials,
-        };
-
-        if (newParams.spendBdt) {
-          newInputs.spendBdt = newParams.spendBdt;
-        }
-
-        setInputs(newInputs);
-        calculateEmissions(newInputs, ef);
-        setExtractionResult(data);
-        setShowExtractionEvidence(true);
-        setIsVerified(true);
-        setExtractionStep(2);
-      } else {
-        throw new Error("Could not parse parameters from document");
+      if (!data || !data.details?.length) {
+        throw new Error("No activity quantities were found in the document.");
       }
-    } catch (err) {
-      console.warn("Extraction processing fallback:", err);
-      // High-assurance audit extraction fallback with real citation traces
-      const fallbackData = {
-        filename: fileName,
-        tenant_id: "default_tenant",
-        overall_confidence: 0.98,
-        audit_seal: true,
-        verified_at: new Date().toISOString().replace('T', ' ').substring(0, 16) + " UTC",
-        summary: "Verified audit statement extracted 8 activity metrics across Scopes 1, 2, and 3 with ISO 14064 assurance.",
-        parameters: {
-          diesel: 14200,
-          petrol: 4800,
-          lpg: 1950,
-          electricity: 156000,
-          employees: 148,
-          airTravel: 82000,
-          truckTransport: 39000,
-          rawMaterials: 580,
-          spendBdt: 14850000
-        },
-        details: [
-          { param_name: "diesel", value: 14200, unit: "Liters", scope: "Scope 1", source_page: 2, raw_snippet: "Cummins 1250 kVA diesel generator ran for 312 hours. Total High Speed Diesel (HSD) drawn: 14,200 Liters.", confidence: 0.99 },
-          { param_name: "petrol", value: 4800, unit: "Liters", scope: "Scope 1", source_page: 2, raw_snippet: "Fleet transport shuttles and delivery vans consumed 4,800 Liters of Octane-95.", confidence: 0.95 },
-          { param_name: "lpg", value: 1950, unit: "kg", scope: "Scope 1", source_page: 3, raw_snippet: "Canteen & Boiler Auxiliary: 1,950 kg of commercial LPG consumed.", confidence: 0.96 },
-          { param_name: "electricity", value: 156000, unit: "kWh", scope: "Scope 2", source_page: 4, raw_snippet: "DESCO Grid Power (Substation Meter ID: DESCO-HT-99210): Total active power consumed: 156,000 kWh.", confidence: 1.0 },
-          { param_name: "employees", value: 148, unit: "Staff", scope: "Scope 3", source_page: 5, raw_snippet: "Workforce: Total registered permanent factory personnel: 148 full-time employees.", confidence: 0.98 },
-          { param_name: "airTravel", value: 82000, unit: "km", scope: "Scope 3", source_page: 6, raw_snippet: "8 overseas marketing trips to Frankfurt and London totaling 82,000 passenger-kilometers.", confidence: 0.94 },
-          { param_name: "truckTransport", value: 39000, unit: "T-Km", scope: "Scope 3", source_page: 7, raw_snippet: "12 container shipments dispatched via N1 highway to Chattogram Seaport totaling 39,000 ton-kilometers.", confidence: 0.97 },
-          { param_name: "rawMaterials", value: 580, unit: "Tons", scope: "Scope 3", source_page: 8, raw_snippet: "Raw Yarn & Fabric Inward: Purchased 580 metric tons of composite cotton-polyester yarn.", confidence: 0.96 }
-        ]
-      };
 
-      setInputs({
-        diesel: '14200',
-        petrol: '4800',
-        lpg: '1950',
-        electricity: '156000',
-        employees: '148',
-        airTravel: '82000',
-        truckTransport: '39000',
-        rawMaterials: '580'
-      });
-      calculateEmissions(fallbackData.parameters, ef);
-      setExtractionResult(fallbackData);
+      const newParams = { ...data.parameters };
+      const newInputs = { ...inputs };
+      for (const key of ['diesel', 'petrol', 'lpg', 'electricity', 'employees', 'airTravel', 'truckTransport', 'rawMaterials']) {
+        if (newParams[key] !== undefined) newInputs[key] = String(newParams[key]);
+      }
+      if (data.spendBdt) newInputs.spendBdt = data.spendBdt;
+
+      setInputs(newInputs);
+      calculateEmissions(newInputs, ef);
+      setExtractionResult(data);
       setShowExtractionEvidence(true);
-      setIsVerified(true);
       setExtractionStep(2);
-    } finally {
-      setIsUploading(false);
       setTasks(prev => prev.map(t => t.id === 2 ? { ...t, completed: true } : t));
       setNotifications(prev => [
-        { id: Date.now(), text: `Carbon Zero BD RAG Extractor verified report: ${fileName}`, read: false, time: "Just now" },
+        { id: Date.now(), text: `Extracted ${data.details.length} value(s) from ${fileName} — review required`, read: false, time: "Just now" },
         ...prev
       ]);
-      showToast("Carbon Zero BD RAG extraction and verification completed!", "success");
+      showToast(`Extracted ${data.details.length} value(s). Review each value before use.`, "success");
+    } catch (err) {
+      showToast(`Extraction failed: ${err.message || "unknown error."} Enter values manually.`, "error");
+    } finally {
+      setIsUploading(false);
     }
   };
 
-  // Handle RAG Ask AI queries (connected to /api/esg/query)
+  // Ask AI (POST /api/esg/query). On failure show an unavailable state — never a synthesized answer.
   const executeRagQuery = async (overrideQuery = null) => {
     const q = overrideQuery || ragQuery;
     if (!q || !q.trim()) return;
@@ -1205,85 +1126,49 @@ const SaaSDashboard = () => {
     setRagQuery(q);
 
     try {
-      const res = await fetch(`${FASTAPI_API_URL}/api/esg/query`, {
+      const data = await esgFetch('/api/esg/query', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          query: q,
-          corpus: ragCorpus,
-          tenant_id: 'default_tenant',
-          top_k: 5
-        })
+        body: JSON.stringify({ query: q, corpus: ragCorpus, top_k: 5 })
       });
-
-      if (res.ok) {
-        const data = await res.json();
-        setRagResponse(data);
-      } else {
-        throw new Error("Backend query error");
-      }
+      setRagResponse(data);
     } catch (err) {
-      console.warn("RAG query backend unreachable, using verified synthesis fallback:", err);
-      // Factual citation fallback
-      let ansText = "";
-      let cites = [];
-
-      if (q.toLowerCase().includes("grid") || q.toLowerCase().includes("electricity") || q.toLowerCase().includes("ef")) {
-        ansText = `The official grid emission factors for Bangladesh, as per the Department of Environment (DoE) and SREDA study (2023-2024), are:\n\n• **Operating Margin (OM):** 0.612 kg CO₂e / kWh [Source: DoE_SREDA_Grid_and_Fuel_Emission_Factors_2023.txt, Page 1]\n• **Build Margin (BM):** 0.488 kg CO₂e / kWh [Source: DoE_SREDA_Grid_and_Fuel_Emission_Factors_2023.txt, Page 1]\n• **Combined Margin (CM) Official Factor:** 0.550 kg CO₂e / kWh (0.55 tCO₂e / MWh) [Source: DoE_SREDA_Grid_and_Fuel_Emission_Factors_2023.txt, Page 1]\n\nCited from DoE Gazette Notification Ref: 22.02.0000.018.99.001.23.`;
-        cites = [{ source: "DoE_SREDA_Grid_and_Fuel_Emission_Factors_2023.txt", page: 1, section: "Corpus: emission_factors", snippet: "Combined Margin (CM) Official Factor: 0.550 kg CO2e / kWh (0.55 tCO2e / MWh). Gazette Ref: 22.02.0000.018.99.001.23", relevance_score: 0.98 }];
-      } else if (q.toLowerCase().includes("ndc") || q.toLowerCase().includes("target") || q.toLowerCase().includes("commit")) {
-        ansText = `Under Bangladesh's Updated Nationally Determined Contributions (NDC 2021):\n\n• **Unconditional Target:** Reduce emissions by 27.56 Mt CO₂e (6.73% below BAU) by 2030 using domestic budget.\n• **Conditional Target:** Additional 61.9 Mt CO₂e (15.12% reduction) with international climate finance, reaching 21.85% total reduction.\n• **Industrial Focus:** Mandatory SREDA energy audits and waste heat recovery for export facilities.`;
-        cites = [{ source: "Bangladesh_Updated_NDC_and_ECR_2023.txt", page: 1, section: "Corpus: regulatory", snippet: "Bangladesh committed to reduce its GHG emissions by 27.56 Mt CO2e below BAU levels by 2030 unconditionally.", relevance_score: 0.96 }];
-      } else if (q.toLowerCase().includes("cbam") || q.toLowerCase().includes("eu") || q.toLowerCase().includes("export")) {
-        ansText = `Under EU CBAM (Regulation 2023/956):\n\n• **Transitional Phase (2023-2025):** Mandatory quarterly reporting of direct Scope 1 and embedded indirect Scope 2 emissions without financial tariffs.\n• **Definitive Phase (2026+):** Exporters must submit verified emissions certificates matching EU ETS carbon pricing.\n• **Impact on Bangladesh:** Key exposure in steel, aluminum, and chemical sub-sectors. Verified MRV documentation via Carbon Zero BD is accepted.`;
-        cites = [{ source: "Bangladesh_Updated_NDC_and_ECR_2023.txt", page: 2, section: "Corpus: regulatory", snippet: "EU CBAM requires Scope 1 and Scope 2 disclosure per metric ton of exported goods.", relevance_score: 0.94 }];
-      } else {
-        ansText = `Based on verified records in the Carbon Zero BD repository, your query "${q}" is grounded in the National Environmental Guidelines and corporate emission ledgers.\n\nAll Scope 1, 2, and 3 accounting adheres to the GHG Protocol Corporate Standard with Bangladesh-specific emission factors.`;
-        cites = [{ source: "DoE_SREDA_Grid_and_Fuel_Emission_Factors_2023.txt", page: 1, section: "Corpus: emission_factors", snippet: "All calculations verified against DoE / SREDA national emission inventories.", relevance_score: 0.88 }];
-      }
-
       setRagResponse({
         query: q,
-        answer: ansText,
-        confidence: 0.95,
-        citations: cites,
+        answer: `The ESG assistant is unavailable: ${err.message} No answer was generated.`,
+        confidence: null,
+        citations: [],
         corpus: ragCorpus,
-        model_used: "gemini-2.5-flash",
-        insufficient_data: false,
-        latency_ms: 320.0
+        model_used: "unavailable",
+        insufficient_data: true,
+        latency_ms: null
       });
     } finally {
       setIsRagLoading(false);
     }
   };
 
-  // Sync emission factors with official DoE / IPCC database
+  // Load emission factors from the ESG API. On failure the current factors stay and the user is told so.
   const syncOfficialFactors = async () => {
     setIsSyncingFactors(true);
-    showToast("Connecting to DoE & IPCC National Factor Library...", "info");
     try {
-      const res = await fetch(`${FASTAPI_API_URL}/api/esg/emission-factors`);
-      if (res.ok) {
-        const factors = await res.json();
-        // Update state factors if returned
-        const newEf = { ...ef };
-        factors.forEach(item => {
-          if (item.fuel_or_activity.toLowerCase().includes("diesel")) newEf.diesel = item.factor_value;
-          if (item.fuel_or_activity.toLowerCase().includes("petrol")) newEf.petrol = item.factor_value;
-          if (item.fuel_or_activity.toLowerCase().includes("lpg")) newEf.lpg = item.factor_value;
-          if (item.fuel_or_activity.toLowerCase().includes("grid")) newEf.electricity = item.factor_value;
-          if (item.fuel_or_activity.toLowerCase().includes("commute")) newEf.employees = item.factor_value;
-          if (item.fuel_or_activity.toLowerCase().includes("air")) newEf.airTravel = item.factor_value;
-          if (item.fuel_or_activity.toLowerCase().includes("truck")) newEf.truckTransport = item.factor_value;
-          if (item.fuel_or_activity.toLowerCase().includes("raw")) newEf.rawMaterials = item.factor_value;
-        });
-        setEf(newEf);
-        showToast("Synchronized 8 emission factors with DoE & IPCC official registry!", "success");
-      } else {
-        throw new Error("Factors fetch failed");
-      }
+      const factors = await esgFetch('/api/esg/emission-factors');
+      const newEf = { ...ef };
+      factors.forEach(item => {
+        const name = item.fuel_or_activity.toLowerCase();
+        if (name.includes("diesel")) newEf.diesel = item.factor_value;
+        if (name.includes("petrol")) newEf.petrol = item.factor_value;
+        if (name.includes("lpg")) newEf.lpg = item.factor_value;
+        if (name.includes("grid")) newEf.electricity = item.factor_value;
+        if (name.includes("commute")) newEf.employees = item.factor_value;
+        if (name.includes("air")) newEf.airTravel = item.factor_value;
+        if (name.includes("truck")) newEf.truckTransport = item.factor_value;
+        if (name.includes("raw")) newEf.rawMaterials = item.factor_value;
+      });
+      setEf(newEf);
+      showToast(`Loaded ${factors.length} factor(s) from the ESG factor table. Citations are not yet independently validated.`, "success");
     } catch (e) {
-      showToast("Synchronized with verified local DoE 2023 factor library.", "success");
+      showToast(`Factors not updated: ${e.message}`, "error");
     } finally {
       setIsSyncingFactors(false);
     }
@@ -1303,7 +1188,6 @@ const SaaSDashboard = () => {
     };
     setInputs(cleared);
     setUploadedFile(null);
-    setIsVerified(false);
     showToast("Calculator inputs cleared.", "info");
   };
 
@@ -1419,7 +1303,12 @@ const SaaSDashboard = () => {
     <div className={`min-h-screen flex relative platform-saas-dashboard transition-colors duration-300 ${
       isLight ? 'bg-[#F4F6F4] text-[#0F2417]' : 'bg-[#040906] text-[#E0EFE7]'
     }`}>
-      
+      {/* This legacy dashboard shows illustrative figures; real accounting lives in /platform/esg (register A24). */}
+      <p role="note" className="fixed inset-x-0 bottom-0 z-40 bg-amber-400 px-4 py-2 text-center font-mono text-[11px] font-bold text-black">
+        DEMO DASHBOARD — figures are illustrative, not your organization&apos;s data and not assured.{' '}
+        <a href="/platform/esg" className="underline">Open the ESG accounting workspace</a>
+      </p>
+
       {/* FLOAT TOAST NOTIFICATION */}
       {toast.show && (
         <div className={`fixed bottom-6 right-6 z-50 flex items-center space-x-3 px-4.5 py-3.5 rounded-2xl shadow-xl border transition-all transform duration-300 animate-fade-in ${
@@ -2097,8 +1986,8 @@ const SaaSDashboard = () => {
                 <div className={`pt-3 border-t text-[11px] font-sans flex items-center justify-between ${
                   isLight ? 'border-[#E8ECE8] text-[#557361]' : 'border-[#122418] text-[#7C9A88]'
                 }`}>
-                  <span>Audited against ISO 14064-1</span>
-                  <span className="font-mono text-[#00C853] font-bold">Top 5% in Sector</span>
+                  <span>Illustrative demo figures</span>
+                  <span className="font-mono text-amber-500 font-bold">DEMO</span>
                 </div>
               </div>
 
@@ -2302,8 +2191,8 @@ const SaaSDashboard = () => {
                 <div className={`pt-3 border-t text-[10px] font-mono flex items-center justify-between ${
                   isLight ? 'border-[#E8ECE8] text-[#557361]' : 'border-[#122418] text-[#7C9A88]'
                 }`}>
-                  <span>ISO 14064 Assurance</span>
-                  <span className="text-[#00C853] font-semibold">DoE 2026 Compliant</span>
+                  <span>Demo data</span>
+                  <span className="text-amber-500 font-semibold">Not assured</span>
                 </div>
               </div>
 
@@ -2699,7 +2588,7 @@ const SaaSDashboard = () => {
                     {[
                       { step: 1, label: "1. Ingest & Upload", sub: "Raw Bills & Invoices" },
                       { step: 2, label: "2. Refine & Categorize", sub: "9 Categories & Impact" },
-                      { step: 3, label: "3. Audit Assurance", sub: "ISO 14064 Citations" }
+                      { step: 3, label: "3. Evidence", sub: "Source snippets" }
                     ].map(s => {
                       const isActive = extractionStep === s.step;
                       return (
@@ -2741,7 +2630,7 @@ const SaaSDashboard = () => {
                           <Database className={`w-4 h-4 ${isLight ? 'text-[#00873E]' : 'text-[#4ADE80]'}`} />
                         </div>
                         <div className="text-left">
-                          <div className={`text-xs font-bold ${isLight ? 'text-[#0F2417]' : 'text-white'}`}>Quick Test with Audited Baseline</div>
+                          <div className={`text-xs font-bold ${isLight ? 'text-[#0F2417]' : 'text-white'}`}>Quick Test with Demo Sample</div>
                           <div className={`text-[11px] ${isLight ? 'text-[#41634E]' : 'text-[#9EBFAB]'}`}>Load Dexterity Textiles Ltd Q2 Audit Statement (DEPZ TX-8491)</div>
                         </div>
                       </div>
@@ -2752,7 +2641,7 @@ const SaaSDashboard = () => {
                         className="text-xs font-bold font-mono px-3.5 py-1.5 rounded-xl bg-[#00C853] hover:bg-[#00E676] text-white transition-all shadow-sm flex items-center space-x-1.5 shrink-0 cursor-pointer"
                       >
                         <Sparkles className="w-3.5 h-3.5 text-white" />
-                        <span className="text-white font-mono font-bold">Load Verified Sample Document</span>
+                        <span className="text-white font-mono font-bold">Load Demo Sample (fictional)</span>
                       </button>
                     </div>
 
@@ -2813,7 +2702,7 @@ const SaaSDashboard = () => {
                         </button>
                       </div>
 
-                      {isVerified && (
+                      {extractionResult && (
                         <div className={`flex items-center space-x-2.5 px-4 py-2.5 rounded-xl border ${
                           isLight 
                             ? 'bg-[#E8F8EE] border-[#C2E9CF] text-[#00873E]' 
@@ -2823,8 +2712,8 @@ const SaaSDashboard = () => {
                           <div className="text-left leading-none">
                             <div className={`font-mono text-[9px] uppercase tracking-wider font-bold ${
                               isLight ? 'text-[#00873E]' : 'text-[#A7F3D0]'
-                            }`}>Audit Assurance</div>
-                            <div className={`font-sans font-bold text-xs ${isLight ? 'text-[#0F2417]' : 'text-white'}`}>CARBON ZERO BD AUDIT VERIFIED</div>
+                            }`}>Status</div>
+                            <div className={`font-sans font-bold text-xs ${isLight ? 'text-[#0F2417]' : 'text-white'}`}>{extractionResult.review_status === 'DEMO_SAMPLE' ? 'DEMO SAMPLE — NOT CUSTOMER DATA' : 'UNREVIEWED — REVIEW REQUIRED'}</div>
                           </div>
                         </div>
                       )}
@@ -2868,7 +2757,7 @@ const SaaSDashboard = () => {
                           </div>
                         </div>
                         <div className={`text-xs ${isLight ? 'text-[#64748B]' : 'text-[#7C9A88]'}`}>
-                          Calculated from {activeMatrix.categories.filter(c => c.carbonKg > 0).length} active corporate emission categories • ISO 14064 Compliant
+                          Calculated from {activeMatrix.categories.filter(c => c.carbonKg > 0).length} active corporate emission categories • estimate, not assured
                         </div>
                       </div>
 
@@ -2945,7 +2834,14 @@ const SaaSDashboard = () => {
 
                   {/* STEP 2: Refine & Analyze Category Matrix & Top Impacts */}
                   <div className={`space-y-6 ${extractionStep === 2 ? 'block' : 'hidden'}`}>
-                    
+                    {extractionResult && (
+                      <p role="status" className="rounded-xl border border-amber-500/40 bg-amber-500/10 px-4 py-2.5 font-mono text-[11px] font-bold text-amber-600 dark:text-amber-300">
+                        {extractionResult.review_status === 'DEMO_SAMPLE'
+                          ? 'DEMO SAMPLE — fictional data, not customer data. Figures below are illustrative estimates.'
+                          : 'UNREVIEWED — extracted values must be reviewed before use. Figures below are estimates with unverified factors.'}
+                      </p>
+                    )}
+
                     {/* Visual Category Distribution (Donut) & Top Impact Categories (2 Columns) */}
                     <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
                       
@@ -3281,11 +3177,11 @@ const SaaSDashboard = () => {
                           <div className="flex items-center space-x-2">
                             <ShieldCheck className="w-4 h-4 text-[#00C853]" />
                             <span className={`font-sans font-bold text-xs ${isLight ? 'text-[#0F2417]' : 'text-white'}`}>
-                              Audited Extraction Traceability — {extractionResult.filename}
+                              Extraction Evidence — {extractionResult.filename}
                             </span>
                           </div>
                           <span className={`font-mono text-[10px] ${isLight ? 'text-[#41634E]' : 'text-[#9EBFAB]'}`}>
-                            Confidence: {Math.round((extractionResult.overall_confidence || 0.98) * 100)}% • ISO 14064 Ready
+                            {extractionResult.overall_confidence == null ? 'Rule-based match (no model confidence)' : `Extraction-model confidence: ${Math.round(extractionResult.overall_confidence * 100)}%`} • Not verified
                           </span>
                         </div>
 
@@ -3299,7 +3195,7 @@ const SaaSDashboard = () => {
                                 <th className="py-3 px-3 w-36 min-w-[120px]">Scope</th>
                                 <th className="py-3 px-3 w-44 min-w-[140px]">Extracted Value</th>
                                 <th className="py-3 px-3 w-28 min-w-[95px]">Source Page</th>
-                                <th className="py-3 px-3 min-w-[260px]">Verbatim Audit Quote</th>
+                                <th className="py-3 px-3 min-w-[260px]">Source Snippet</th>
                                 <th className="py-3 px-3 w-28 min-w-[90px] text-right">Confidence</th>
                               </tr>
                             </thead>
@@ -3334,7 +3230,7 @@ const SaaSDashboard = () => {
                                     <span className={`inline-block px-2.5 py-0.5 rounded-full text-[9px] font-bold border ${
                                       isLight ? 'bg-[#E8F8EE] text-[#00873E] border-[#C2E9CF]' : 'bg-[#0D2B1A] text-[#4ADE80] border-[#1B4D2E]'
                                     }`}>
-                                      {Math.round((item.confidence || 0.95) * 100)}%
+                                      {item.confidence == null ? '—' : `${Math.round(item.confidence * 100)}%`}
                                     </span>
                                   </td>
                                 </tr>
@@ -3352,7 +3248,7 @@ const SaaSDashboard = () => {
                           No Extracted Audit Traces Yet
                         </div>
                         <p className={`text-xs ${isLight ? 'text-slate-500' : 'text-slate-400'}`}>
-                          Ingest a document or click "Load Verified Sample Document" to generate verifiable ISO 14064 citation traces.
+                          Ingest a document or click "Load Demo Sample (fictional)" to see extracted values with their source snippets.
                         </p>
                         <button
                           type="button"
@@ -3745,18 +3641,18 @@ const SaaSDashboard = () => {
                             <span className={`font-mono text-[9px] font-bold px-2 py-0.5 rounded uppercase border ${
                               isLight ? 'bg-white text-[#00873E] border-[#BCE7CB]' : 'bg-[#0D2B1A] text-[#4ADE80] border-[#1B4D2E]'
                             }`}>
-                              {ragResponse.model_used || "Carbon Zero BD RAG Engine"}
+                              {ragResponse.model_used || "unknown"}
                             </span>
                             <span className={`font-sans font-bold text-xs ${isLight ? 'text-[#0F2417]' : 'text-white'}`}>
-                              Audit Traceable Response
+                              {ragResponse.insufficient_data ? 'No answer available' : 'AI response with sources — not verified'}
                             </span>
                           </div>
                           <div className={`flex items-center space-x-2 font-mono text-[10px] ${
                             isLight ? 'text-[#41634E]' : 'text-[#9EBFAB]'
                           }`}>
-                            <span>Confidence: {Math.round((ragResponse.confidence || 0.95) * 100)}%</span>
+                            <span>Retrieval similarity: {ragResponse.confidence == null ? '—' : `${Math.round(ragResponse.confidence * 100)}%`}</span>
                             <span>•</span>
-                            <span>{ragResponse.latency_ms || 320}ms</span>
+                            <span>{ragResponse.latency_ms == null ? '—' : `${ragResponse.latency_ms}ms`}</span>
                           </div>
                         </div>
 

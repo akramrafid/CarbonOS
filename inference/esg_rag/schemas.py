@@ -8,11 +8,15 @@ class Citation(BaseModel):
     snippet: str
     relevance_score: float
 
+class OrganizationCreate(BaseModel):
+    name: str = Field(..., min_length=1, max_length=200)
+    is_demo: bool = False
+
 class QueryRequest(BaseModel):
-    query: str
+    # No tenant field: the tenant is derived from the authenticated membership.
+    query: str = Field(..., min_length=1, max_length=2000)
     corpus: Optional[str] = "all" # regulatory, emission_factors, tenant_docs, or all
-    tenant_id: Optional[str] = "default_tenant"
-    top_k: Optional[int] = 5
+    top_k: Optional[int] = Field(5, ge=1, le=20)
     temperature: Optional[float] = 0.2
 
 class QueryResponse(BaseModel):
@@ -31,6 +35,7 @@ class IngestResponse(BaseModel):
     corpus: str
     chunks_created: int
     tenant_id: str
+    duplicate: bool = False
     message: str
 
 class ExtractedParameter(BaseModel):
@@ -38,49 +43,22 @@ class ExtractedParameter(BaseModel):
     value: float
     unit: str
     scope: str # Scope 1, Scope 2, Scope 3
-    source_page: Optional[int] = 1
+    source_page: Optional[int] = None
     raw_snippet: str
-    confidence: float
-
-class CategoryMetric(BaseModel):
-    id: str
-    name: str
-    icon: Optional[str] = "zap"
-    spend_bdt: float
-    carbon_kg: float
-    carbon_tonnes: float
-    percentage: float
-    scope: str
-    unit: str
-    quantity: float
-    emission_factor: float
-    factor_citation: str
-    status: Optional[str] = "verified"
-
-class TopImpactCategory(BaseModel):
-    rank: int
-    id: str
-    name: str
-    carbon_kg: float
-    carbon_tonnes: float
-    percentage: float
+    # Extraction-model confidence only (None for rule-based matches). Never a verification score.
+    confidence: Optional[float] = None
 
 class ExtractionResponse(BaseModel):
     filename: str
+    document_id: Optional[str] = None  # stored source document (None for pasted text)
     tenant_id: str
     parameters: Dict[str, float]
     details: List[ExtractedParameter]
-    overall_confidence: float
-    audit_seal: bool
-    verified_at: str
+    overall_confidence: Optional[float] = None
+    extraction_method: str
+    extracted_at: str
     summary: str
-    total_footprint_kg: Optional[float] = None
-    total_footprint_tonnes: Optional[float] = None
-    total_spend_bdt: Optional[float] = None
-    trend_vs_last_month: Optional[float] = -8.0
-    categories: Optional[List[CategoryMetric]] = None
-    top_impact_categories: Optional[List[TopImpactCategory]] = None
-    quick_tips: Optional[List[str]] = None
+    review_status: str = "REVIEW_REQUIRED"
 
 class EmissionFactorItem(BaseModel):
     id: str

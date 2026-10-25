@@ -6,9 +6,12 @@
   "scripts": {
     "dev": "vite --host",
     "build": "tsc && vite build",
-    "preview": "vite preview"
+    "preview": "vite preview",
+    "lint": "tsc",
+    "test": "node --test tests/js/*.test.mjs"
   },
   "devDependencies": {
+    "@playwright/test": "^1.56.1",
     "@vitejs/plugin-react": "^6.0.2",
     "autoprefixer": "^10.5.0",
     "postcss": "^8.5.15",
@@ -23,6 +26,7 @@
     "i18next": "^26.2.0",
     "leaflet": "^1.9.4",
     "lucide-react": "^1.16.0",
+    "oidc-client-ts": "^3.3.0",
     "onnxruntime-web": "^1.27.0",
     "react": "^19.2.6",
     "react-countup": "^6.5.3",

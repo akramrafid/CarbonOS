@@ -23,6 +23,8 @@ const CarbonRegistry = React.lazy(() => import('./pages/platform/CarbonRegistry'
 const VerificationWorkflow = React.lazy(() => import('./pages/platform/VerificationWorkflow'));
 const AIDetection = React.lazy(() => import('./pages/platform/AIDetection'));
 const SaaSDashboard = React.lazy(() => import('./pages/platform/SaaSDashboard'));
+const EsgWorkspace = React.lazy(() => import('./pages/platform/esg/EsgWorkspace'));
+const EsgCallback = React.lazy(() => import('./pages/platform/esg/EsgWorkspace').then((m) => ({ default: m.EsgCallback })));
 const Impact = React.lazy(() => import('./pages/platform/Impact'));
 const CarbonMonitoring = React.lazy(() => import('./pages/platform/CarbonMonitoring'));
 
@@ -76,6 +78,8 @@ function App() {
           <Route path="/platform/marketplace" element={<MarketplaceBrowse />} />
           <Route path="/platform/ai-detection" element={<AIDetection />} />
           <Route path="/platform/saas-dashboard" element={<SaaSDashboard />} />
+          <Route path="/platform/esg" element={<EsgWorkspace />} />
+          <Route path="/platform/esg/callback" element={<EsgCallback />} />
           <Route path="/platform/impact" element={<Impact />} />
           <Route path="/carbon-monitoring" element={<CarbonMonitoring />} />
 

@@ -2,7 +2,7 @@ import os
 import hashlib
 import json
 import re
-from typing import List, Dict, Any, Optional
+from typing import List, Dict, Any, Optional, NamedTuple
 from sqlalchemy.orm import Session
 from .config import (
     CHROMA_PERSIST_DIR,
@@ -11,7 +11,8 @@ from .config import (
     EMBEDDING_MODEL,
     CORPUS_REGULATORY,
     CORPUS_EMISSION_FACTORS,
-    CORPUS_TENANT_DOCS
+    CORPUS_TENANT_DOCS,
+    VALID_CORPORA
 )
 from .models import ESGDocument, ESGChunk
 
@@ -76,18 +77,13 @@ def extract_text_from_file(file_path: str, filename: str) -> List[Dict[str, Any]
 
     try:
         if ext == ".pdf":
-            try:
-                import pdfplumber
-                with pdfplumber.open(file_path) as pdf:
-                    for i, p in enumerate(pdf.pages):
-                        txt = p.extract_text() or ""
-                        if txt.strip():
-                            pages_data.append({"page": i + 1, "text": txt})
-            except Exception as pe:
-                print(f"[ESG RAG] pdfplumber failed ({pe}), attempting PyPDF/raw")
-                with open(file_path, "rb") as f:
-                    content = f.read().decode('latin-1', errors='ignore')
-                    pages_data.append({"page": 1, "text": content})
+            # Scanned PDFs yield no text: callers must report that, not parse raw bytes.
+            import pdfplumber
+            with pdfplumber.open(file_path) as pdf:
+                for i, p in enumerate(pdf.pages):
+                    txt = p.extract_text() or ""
+                    if txt.strip():
+                        pages_data.append({"page": i + 1, "text": txt})
 
         elif ext in [".xlsx", ".xls"]:
             import pandas as pd
@@ -102,24 +98,21 @@ def extract_text_from_file(file_path: str, filename: str) -> List[Dict[str, Any]
             df = pd.read_csv(file_path)
             pages_data.append({"page": 1, "text": df.to_string()})
 
-        elif ext in [".docx", ".doc"]:
-            try:
-                import docx
-                doc = docx.Document(file_path)
-                full_text = "\n".join([p.text for p in doc.paragraphs if p.text.strip()])
-                pages_data.append({"page": 1, "text": full_text})
-            except Exception as de:
-                with open(file_path, "r", encoding="utf-8", errors="ignore") as f:
-                    pages_data.append({"page": 1, "text": f.read()})
+        elif ext == ".docx":
+            import docx
+            doc = docx.Document(file_path)
+            full_text = "\n".join([p.text for p in doc.paragraphs if p.text.strip()])
+            pages_data.append({"page": 1, "text": full_text})
         else:
             with open(file_path, "r", encoding="utf-8", errors="ignore") as f:
                 pages_data.append({"page": 1, "text": f.read()})
 
     except Exception as e:
-        print(f"[ESG RAG] Error extracting text from {filename}: {e}")
-        pages_data.append({"page": 1, "text": f"Error parsing document content: {str(e)}"})
+        # Never index the error text as if it were document content.
+        print(f"[ESG RAG] Text extraction failed for {filename}: {type(e).__name__}")
+        return []
 
-    return pages_data
+    return [p for p in pages_data if p["text"].strip()]
 
 def chunk_text(pages: List[Dict[str, Any]], chunk_size: int = CHUNK_SIZE, overlap: int = CHUNK_OVERLAP) -> List[Dict[str, Any]]:
     """Splits document pages into overlapping semantic text chunks."""
@@ -156,6 +149,40 @@ def chunk_text(pages: List[Dict[str, Any]], chunk_size: int = CHUNK_SIZE, overla
 
     return chunks
 
+ALLOWED_EXTENSIONS = {".pdf", ".csv", ".xlsx", ".xls", ".txt", ".md", ".docx"}
+MAX_UPLOAD_BYTES = int(os.getenv("ESG_MAX_UPLOAD_BYTES", str(20 * 1024 * 1024)))
+
+
+class IngestRejected(ValueError):
+    """Upload refused before anything is stored."""
+
+
+class IngestResult(NamedTuple):
+    document: ESGDocument
+    pages: List[Dict[str, Any]]
+    duplicate: bool
+
+
+def safe_filename(filename: Optional[str]) -> str:
+    """Display-safe basename. Never used to build a storage path."""
+    base = re.split(r"[\\/]", filename or "")[-1]
+    base = re.sub(r"[^A-Za-z0-9._ -]", "_", base).strip(" .")[:120]
+    ext = os.path.splitext(base)[1].lower()
+    if not base or ext not in ALLOWED_EXTENSIONS:
+        raise IngestRejected(f"Unsupported file type. Allowed: {', '.join(sorted(ALLOWED_EXTENSIONS))}")
+    return base
+
+
+def _storage_path(tenant_id: str, checksum: str, ext: str) -> str:
+    """Server-generated path: uploads/<tenant>/<sha256><ext>, contained in the upload root."""
+    root = os.path.realpath(os.path.join(CHROMA_PERSIST_DIR, "uploads"))
+    tenant_dir = re.sub(r"[^A-Za-z0-9_-]", "_", tenant_id)
+    path = os.path.realpath(os.path.join(root, tenant_dir, checksum + ext))
+    if not path.startswith(root + os.sep):
+        raise IngestRejected("Invalid storage location")
+    return path
+
+
 def ingest_document(
     db: Session,
     file_bytes: bytes,
@@ -163,21 +190,37 @@ def ingest_document(
     corpus: str = CORPUS_TENANT_DOCS,
     tenant_id: str = "default_tenant",
     meta_info: Optional[Dict[str, Any]] = None
-) -> ESGDocument:
+) -> IngestResult:
     """
-    Ingests document into SQLite audit tables and ChromaDB vector store.
-    Strict tenant isolation enforced by tenant_id metadata and collections.
+    Ingests document into the audit tables and vector store for one tenant.
+    The caller is responsible for deriving tenant_id from an authenticated principal.
+    Re-uploading identical bytes to the same tenant/corpus returns the existing document.
     """
-    checksum = hashlib.sha256(file_bytes).hexdigest()
+    if corpus not in VALID_CORPORA:
+        raise IngestRejected("Unknown corpus")
+    filename = safe_filename(filename)
+    if not file_bytes:
+        raise IngestRejected("Empty file")
+    if len(file_bytes) > MAX_UPLOAD_BYTES:
+        raise IngestRejected(f"File exceeds {MAX_UPLOAD_BYTES} bytes")
 
-    # Save to temp location for parsers
-    temp_dir = os.path.join(CHROMA_PERSIST_DIR, "uploads")
-    os.makedirs(temp_dir, exist_ok=True)
-    temp_path = os.path.join(temp_dir, f"{checksum[:10]}_{filename}")
-    with open(temp_path, "wb") as f:
+    ext = os.path.splitext(filename)[1].lower()
+    checksum = hashlib.sha256(file_bytes).hexdigest()
+    path = _storage_path(tenant_id, checksum, ext)
+
+    existing = db.query(ESGDocument).filter(
+        ESGDocument.tenant_id == tenant_id,
+        ESGDocument.corpus == corpus,
+        ESGDocument.checksum == checksum,
+    ).first()
+    if existing is not None and os.path.exists(path):
+        return IngestResult(existing, extract_text_from_file(path, filename), True)
+
+    os.makedirs(os.path.dirname(path), exist_ok=True)
+    with open(path, "wb") as f:
         f.write(file_bytes)
 
-    pages = extract_text_from_file(temp_path, filename)
+    pages = extract_text_from_file(path, filename)
     chunk_data = chunk_text(pages)
 
     # Create document record
@@ -185,7 +228,7 @@ def ingest_document(
         tenant_id=tenant_id,
         corpus=corpus,
         filename=filename,
-        file_type=os.path.splitext(filename)[1].replace('.', ''),
+        file_type=ext.replace('.', ''),
         file_size=len(file_bytes),
         checksum=checksum,
         chunk_count=len(chunk_data),
@@ -269,4 +312,4 @@ def ingest_document(
 
     db.commit()
     db.refresh(doc_rec)
-    return doc_rec
+    return IngestResult(doc_rec, pages, False)

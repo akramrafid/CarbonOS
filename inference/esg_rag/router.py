@@ -5,23 +5,82 @@ from sqlalchemy.orm import Session
 from typing import List, Optional, Dict, Any
 
 from .database import get_db
-from .models import ESGDocument, ESGQueryLog, EmissionFactorRecord
+from .models import ESGDocument, ESGQueryLog, EmissionFactorRecord, ESGOrganization, ESGMembership
 from .schemas import (
     QueryRequest,
     QueryResponse,
     IngestResponse,
     ExtractionResponse,
-    CategoryMetric,
-    TopImpactCategory,
     EmissionFactorItem,
-    Citation
+    Citation,
+    OrganizationCreate,
 )
-from .ingest import ingest_document, extract_text_from_file
+from .auth import Identity, Principal, get_identity, require
+from .ratelimit import limited
+from .config import CORPUS_TENANT_DOCS, CORPUS_REGULATORY, CORPUS_EMISSION_FACTORS
+from .ingest import ingest_document, IngestRejected, MAX_UPLOAD_BYTES
 from .retriever import retrieve
 from .generator import generate_answer
 from .extractor import extract_footprint_from_text, detect_all_utility_segments
 
 router = APIRouter(prefix="/api/esg", tags=["ESG RAG Intelligence"])
+
+# Global corpora are shared by every tenant, so only platform operators may write them.
+GLOBAL_CORPUS_OWNER = {CORPUS_REGULATORY: "global_regulatory", CORPUS_EMISSION_FACTORS: "global_ef"}
+
+
+async def _read_upload(file: UploadFile) -> bytes:
+    content = await file.read(MAX_UPLOAD_BYTES + 1)
+    if len(content) > MAX_UPLOAD_BYTES:
+        raise HTTPException(413, f"File exceeds {MAX_UPLOAD_BYTES} bytes")
+    return content
+
+
+def _demo_only(principal: Principal):
+    if not principal.is_demo:
+        raise HTTPException(404, "Sample data is only available in demo workspaces")
+
+
+def _ingest(db: Session, content: bytes, filename: str, corpus: str, tenant_id: str):
+    try:
+        return ingest_document(db=db, file_bytes=content, filename=filename, corpus=corpus, tenant_id=tenant_id)
+    except IngestRejected as e:
+        raise HTTPException(422, str(e))
+
+
+@router.post("/organizations", status_code=201)
+def create_organization(
+    body: OrganizationCreate,
+    identity: Identity = Depends(get_identity),
+    db: Session = Depends(get_db),
+):
+    """Create a tenant organization; the caller becomes its owner."""
+    org = ESGOrganization(name=body.name.strip(), is_demo=body.is_demo, created_by_sub=identity.sub)
+    db.add(org)
+    db.flush()
+    db.add(ESGMembership(organization_id=org.id, user_sub=identity.sub, role="org_owner"))
+    db.commit()
+    return {"id": org.id, "name": org.name, "is_demo": org.is_demo, "role": "org_owner"}
+
+
+@router.get("/me")
+def whoami(identity: Identity = Depends(get_identity)):
+    """The caller's subject id (used by the UI for separation-of-duties hints; the API enforces it)."""
+    return {"sub": identity.sub, "verified_email": identity.verified_email,
+            "is_platform_operator": identity.is_platform_operator}
+
+
+@router.get("/organizations")
+def list_my_organizations(identity: Identity = Depends(get_identity), db: Session = Depends(get_db)):
+    """Organizations the caller belongs to (for the organization switcher)."""
+    rows = (
+        db.query(ESGMembership, ESGOrganization)
+        .join(ESGOrganization, ESGOrganization.id == ESGMembership.organization_id)
+        .filter(ESGMembership.user_sub == identity.sub, ESGOrganization.archived_at.is_(None))
+        .order_by(ESGOrganization.name)
+        .all()
+    )
+    return [{"id": o.id, "name": o.name, "is_demo": o.is_demo, "role": m.role} for m, o in rows]
 
 @router.get("/health")
 def esg_health_check():
@@ -37,19 +96,21 @@ def esg_health_check():
 @router.post("/query", response_model=QueryResponse)
 def esg_query(
     request: QueryRequest,
+    principal: Principal = Depends(limited("ai", "read")),
     db: Session = Depends(get_db)
 ):
     """
-    Query the ESG RAG system across regulatory, emission factors, and tenant corpora.
-    Returns grounded, audit-traceable answers with source citations and confidence.
+    Query the ESG RAG system across regulatory, emission factors, and the caller's tenant corpus.
+    Returns grounded answers with source citations. Retrieval similarity is not verification.
     """
     start_time = time.time()
+    tenant_id = principal.organization_id
 
     # 1. Retrieve relevant chunks
     retrieval_res = retrieve(
         query=request.query,
         corpus=request.corpus or "all",
-        tenant_id=request.tenant_id or "default_tenant",
+        tenant_id=tenant_id,
         top_k=request.top_k or 5
     )
 
@@ -61,15 +122,15 @@ def esg_query(
 
     # 3. Log query in audit trail
     log = ESGQueryLog(
-        tenant_id=request.tenant_id or "default_tenant",
+        tenant_id=tenant_id,
         corpus=request.corpus or "all",
         query_text=request.query,
         answer_text=gen_res["answer"],
         confidence=retrieval_res.get("best_score", 0.0),
         citations=citations_data,
         latency_ms=latency,
-        llm_model=gen_res.get("model_used", "gemini-2.5-flash"),
-        verified_by_audit=not gen_res.get("insufficient_data", False)
+        llm_model=gen_res.get("model_used", "unknown"),
+        verified_by_audit=False
     )
     db.add(log)
     db.commit()
@@ -89,329 +150,90 @@ def esg_query(
 async def extract_footprint(
     file: Optional[UploadFile] = File(None),
     raw_text: Optional[str] = Form(None),
-    filename: Optional[str] = Form("ESG_Statement_Q2_2026.xlsx"),
-    tenant_id: str = Form("default_tenant"),
+    filename: Optional[str] = Form("pasted_text"),
+    principal: Principal = Depends(limited("upload", "write")),
     db: Session = Depends(get_db)
 ):
     """
-    Real AI Footprint Extractor:
-    Scans uploaded bill, spreadsheet, or PDF and extracts quantitative consumption parameters
-    (diesel, petrol, LPG, electricity, employee commute, freight, raw materials)
-    with exact citations, page references, and verification confidence.
+    Extracts activity quantities (diesel, petrol, LPG, electricity, …) with source snippets from an
+    uploaded document or pasted text. Results are REVIEW_REQUIRED inputs, never verified values.
+    Returns 422 when nothing readable or extractable is found — it never substitutes sample data.
     """
+    tenant_id = principal.organization_id
     doc_text = ""
-    target_filename = filename or "uploaded_statement.xlsx"
+    target_filename = filename or "pasted_text"
+    document_id = None
 
     if file:
-        target_filename = file.filename
-        content_bytes = await file.read()
-        
-        # Ingest document into tenant corpus so it's searchable via RAG
-        doc_rec = ingest_document(
-            db=db,
-            file_bytes=content_bytes,
-            filename=target_filename,
-            corpus="tenant_docs",
-            tenant_id=tenant_id
-        )
-
-        # Extract text from the newly stored file
-        import os
-        from .config import CHROMA_PERSIST_DIR
-        temp_path = os.path.join(CHROMA_PERSIST_DIR, "uploads", f"{doc_rec.checksum[:10]}_{target_filename}")
-        pages = extract_text_from_file(temp_path, target_filename)
-        doc_text = "\n".join([f"[Page {p['page']}] {p['text']}" for p in pages])
-    elif raw_text:
-        doc_text = raw_text
+        content_bytes = await _read_upload(file)
+        # Ingest document into the caller's tenant corpus so it's searchable via RAG
+        result = _ingest(db, content_bytes, file.filename, CORPUS_TENANT_DOCS, tenant_id)
+        target_filename = result.document.filename
+        document_id = result.document.id
+        doc_text = "\n".join([f"[Page {p['page']}] {p['text']}" for p in result.pages])
+    elif raw_text and raw_text.strip():
+        doc_text = raw_text[:200_000]
     else:
-        # If no file provided, retrieve sample tenant audit statement from DB
-        sample = db.query(ESGDocument).filter(
-            ESGDocument.tenant_id == tenant_id,
-            ESGDocument.corpus == "tenant_docs"
-        ).first()
-        if sample and sample.chunks:
-            doc_text = "\n".join([f"[Page {c.page_number}] {c.content}" for c in sample.chunks])
-        else:
-            doc_text = ""
+        raise HTTPException(422, "Provide a document or text to extract from")
 
-    # Run AI extraction
+    if not doc_text.strip():
+        raise HTTPException(422, "No readable text found in the document (scanned PDFs need OCR, which is not supported yet). Enter values manually.")
+
+    started = time.time()
     extracted = extract_footprint_from_text(doc_text)
-    params = extracted.get("parameters", {})
+    params = {k: float(v or 0) for k, v in extracted.get("parameters", {}).items()}
+    if not any(params.values()):
+        raise HTTPException(422, "No activity quantities were found in the document. Enter values manually.")
 
-    # Synthesize 9 standard carbon footprint categories with BDT spend and CO2e metrics
-    def build_nine_category_footprint(parameters: Dict[str, float]) -> Dict[str, Any]:
-        diesel = float(parameters.get("diesel", 0.0) or 0.0)
-        petrol = float(parameters.get("petrol", 0.0) or 0.0)
-        lpg = float(parameters.get("lpg", 0.0) or 0.0)
-        electricity = float(parameters.get("electricity", 0.0) or 0.0)
-        employees = float(parameters.get("employees", 0.0) or 0.0)
-        air_travel = float(parameters.get("airTravel", parameters.get("air_travel", 0.0)) or 0.0)
-        truck_transport = float(parameters.get("truckTransport", parameters.get("truck_transport", 0.0)) or 0.0)
-        raw_materials = float(parameters.get("rawMaterials", parameters.get("raw_materials", 0.0)) or 0.0)
-
-        # 1. Food & Groceries / Canteen Provisions
-        canteen_kg = (employees * 22 * 2.4) if employees > 0 else 0.0
-        lpg_kitchen_kg = (lpg * 0.60 * 2.98) if lpg > 0 else 0.0
-        food_kg = canteen_kg + lpg_kitchen_kg
-        food_spend = (employees * 22 * 180.0 + (lpg * 0.60 * 120.0)) if (employees > 0 or lpg > 0) else 0.0
-
-        # 2. Transport & Fleet / Logistics
-        petrol_kg = petrol * 2.31
-        diesel_fleet_kg = (diesel * 0.30) * 2.68
-        truck_kg = truck_transport * 0.20
-        flight_kg = air_travel * 0.12
-        trans_kg = petrol_kg + diesel_fleet_kg + truck_kg + flight_kg
-        trans_spend = (petrol * 125.0) + (diesel * 0.30 * 105.0) + (truck_transport * 18.0) + (air_travel * 14.0)
-
-        # 3. Electricity & Energy
-        grid_kg = electricity * 0.550
-        diesel_gen_kg = (diesel * 0.70) * 2.68
-        elec_kg = grid_kg + diesel_gen_kg
-        elec_spend = (electricity * 10.50) + (diesel * 0.70 * 105.0)
-
-        # 4. Clothing & Footwear / Uniforms
-        cloth_kg = (employees * 4.0 * 8.5) if employees > 0 else 0.0
-        cloth_spend = (employees * 4.0 * 1200.0) if employees > 0 else 0.0
-
-        # 5. Shopping & Products / Raw Materials
-        shop_kg = (raw_materials * 2500.0) if raw_materials > 0 else 0.0
-        shop_spend = (raw_materials * 140000.0) if raw_materials > 0 else 0.0
-
-        # 6. Housing & Rent / Facilities
-        lpg_facility_kg = (lpg * 0.40 * 2.98) if lpg > 0 else 0.0
-        facility_grid_kg = (electricity * 0.08 * 0.550) if electricity > 0 else 0.0
-        house_kg = lpg_facility_kg + facility_grid_kg
-        house_spend = (lpg * 0.40 * 120.0) if lpg > 0 else 0.0
-
-        # 7. Entertainment & Client Hospitality
-        ent_kg = (air_travel * 0.03) if air_travel > 0 else 0.0
-        ent_spend = (air_travel * 3.5) if air_travel > 0 else 0.0
-
-        # 8. Health & Personal Care / Safety PPE
-        health_kg = (employees * 3.8) if employees > 0 else 0.0
-        health_spend = (employees * 650.0) if employees > 0 else 0.0
-
-        # 9. Others & Ancillary Services
-        others_kg = (employees * 2.5) if employees > 0 else 0.0
-        others_spend = (employees * 280.0) if employees > 0 else 0.0
-
-        cat_defs = [
-            {
-                "id": "food_groceries",
-                "name": "Food & Groceries",
-                "icon": "utensils",
-                "spend_bdt": round(food_spend, 2),
-                "carbon_kg": round(food_kg, 2),
-                "scope": "Scope 3 (Cat 1)",
-                "unit": "Staff Meals / Provisions",
-                "quantity": float(round(employees * 22, 1)) if employees > 0 else 0.0,
-                "emission_factor": 2.40,
-                "factor_citation": "CEDA EEIO Agro-Provisions & DoE LPG Gazette 2023",
-                "status": "verified" if food_kg > 0 else "zero_activity"
-            },
-            {
-                "id": "transport",
-                "name": "Transport",
-                "icon": "car",
-                "spend_bdt": round(trans_spend, 2),
-                "carbon_kg": round(trans_kg, 2),
-                "scope": "Scope 1 & 3",
-                "unit": "Liters & T-Km",
-                "quantity": float(round(petrol + (diesel * 0.3) + truck_transport, 1)),
-                "emission_factor": 2.31,
-                "factor_citation": "Bangladesh BPC 2023 & Smart Freight Centre GLEC Heavy Haulage Model",
-                "status": "verified" if trans_kg > 0 else "zero_activity"
-            },
-            {
-                "id": "electricity_energy",
-                "name": "Electricity & Energy",
-                "icon": "zap",
-                "spend_bdt": round(elec_spend, 2),
-                "carbon_kg": round(elec_kg, 2),
-                "scope": "Scope 2 & 1",
-                "unit": "kWh & Gen-Liters",
-                "quantity": float(round(electricity + (diesel * 0.7), 1)),
-                "emission_factor": 0.550,
-                "factor_citation": "DoE Official Grid Baseline Gazette Ref: 22.02.0000.018.99.001.23",
-                "status": "verified" if elec_kg > 0 else "zero_activity"
-            },
-            {
-                "id": "clothing_footwear",
-                "name": "Clothing & Footwear",
-                "icon": "shirt",
-                "spend_bdt": round(cloth_spend, 2),
-                "carbon_kg": round(cloth_kg, 2),
-                "scope": "Scope 3 (Cat 1)",
-                "unit": "PPE Garments",
-                "quantity": float(round(employees * 4, 1)) if employees > 0 else 0.0,
-                "emission_factor": 8.50,
-                "factor_citation": "Apparel LCA Database & CEDA EEIO Uniforms Factor",
-                "status": "verified" if cloth_kg > 0 else "zero_activity"
-            },
-            {
-                "id": "shopping_products",
-                "name": "Shopping & Products",
-                "icon": "shopping-bag",
-                "spend_bdt": round(shop_spend, 2),
-                "carbon_kg": round(shop_kg, 2),
-                "scope": "Scope 3 (Cat 1)",
-                "unit": "Metric Tons Inputs",
-                "quantity": float(round(raw_materials, 1)) if raw_materials > 0 else 0.0,
-                "emission_factor": 2500.0,
-                "factor_citation": "DoE Composite Textile & Raw Material Factor (2.50 tCO2e/ton)",
-                "status": "verified" if shop_kg > 0 else "zero_activity"
-            },
-            {
-                "id": "housing_rent",
-                "name": "Housing & Rent",
-                "icon": "home",
-                "spend_bdt": round(house_spend, 2),
-                "carbon_kg": round(house_kg, 2),
-                "scope": "Scope 1 & 2",
-                "unit": "Facility m² / Month",
-                "quantity": 1.0 if (lpg > 0 or electricity > 0) else 0.0,
-                "emission_factor": 0.35,
-                "factor_citation": "DEFRA Facilities Carbon Model & BERC Commercial Space Baseline",
-                "status": "verified" if house_kg > 0 else "zero_activity"
-            },
-            {
-                "id": "entertainment",
-                "name": "Entertainment",
-                "icon": "film",
-                "spend_bdt": round(ent_spend, 2),
-                "carbon_kg": round(ent_kg, 2),
-                "scope": "Scope 3 (Cat 6)",
-                "unit": "Hospitality Events",
-                "quantity": float(round(air_travel, 1)) if air_travel > 0 else 0.0,
-                "emission_factor": 0.11,
-                "factor_citation": "GHG Protocol Scope 3 Cat 6 Business Travel & Hospitality Index",
-                "status": "verified" if ent_kg > 0 else "zero_activity"
-            },
-            {
-                "id": "health_care",
-                "name": "Health & Personal Care",
-                "icon": "heart-pulse",
-                "spend_bdt": round(health_spend, 2),
-                "carbon_kg": round(health_kg, 2),
-                "scope": "Scope 3 (Cat 1)",
-                "unit": "Medical / Safety Kits",
-                "quantity": float(round(employees, 1)) if employees > 0 else 0.0,
-                "emission_factor": 3.80,
-                "factor_citation": "Healthcare Without Harm & EEIO Medical Consumables Factor",
-                "status": "verified" if health_kg > 0 else "zero_activity"
-            },
-            {
-                "id": "others",
-                "name": "Others",
-                "icon": "package",
-                "spend_bdt": round(others_spend, 2),
-                "carbon_kg": round(others_kg, 2),
-                "scope": "Scope 3 (Cat 5)",
-                "unit": "Ancillary Services",
-                "quantity": float(round(employees, 1)) if employees > 0 else 0.0,
-                "emission_factor": 0.22,
-                "factor_citation": "DoE Municipal Solid Waste Methane Standard & Cloud Data Index",
-                "status": "verified" if others_kg > 0 else "zero_activity"
-            }
-        ]
-
-        total_kg = sum(c["carbon_kg"] for c in cat_defs)
-        total_spend = sum(c["spend_bdt"] for c in cat_defs)
-
-        category_metrics = []
-        for c in cat_defs:
-            pct = round((c["carbon_kg"] / total_kg * 100.0), 1) if total_kg > 0 else 0.0
-            c["percentage"] = pct
-            c["carbon_tonnes"] = round(c["carbon_kg"] / 1000.0, 3)
-            category_metrics.append(CategoryMetric(**c))
-
-        sorted_cats = sorted(category_metrics, key=lambda x: x.carbon_kg, reverse=True)
-        top_impacts = [
-            TopImpactCategory(
-                rank=i + 1,
-                id=cat.id,
-                name=cat.name,
-                carbon_kg=cat.carbon_kg,
-                carbon_tonnes=cat.carbon_tonnes,
-                percentage=cat.percentage
-            )
-            for i, cat in enumerate(sorted_cats[:3])
-        ]
-
-        top_1 = sorted_cats[0].id if sorted_cats else "electricity_energy"
-        top_pct = sorted_cats[0].percentage if sorted_cats else 40
-        tips_catalog = {
-            "electricity_energy": f"Electricity & Energy is your primary emissions driver ({top_pct}% of total). Installing a 150 kWp rooftop solar system under SREDA net-metering can abate ~85 tonnes CO₂e annually and eliminate peak grid surcharges.",
-            "transport": f"Transport & Logistics accounts for {top_pct}% of your carbon footprint. Consolidate N1 highway dispatch schedules and transition internal site shuttles to EV/CNG to cut fleet emissions by up to 24%.",
-            "shopping_products": f"Purchased Raw Materials contribute {top_pct}% of total emissions. Procuring OEKO-TEX or GRS-certified circular recycled fibers can lower upstream Scope 3 intensity by ~28%.",
-            "food_groceries": f"Canteen & Provisions make up {top_pct}% of footprint. Switching to direct local agro-cooperatives and implementing organic kitchen composting reduces Scope 3 food loss footprints by 18%.",
-            "housing_rent": f"Facility HVAC & Heating contributes {top_pct}% of emissions. Performing thermal insulation on boiler steam pipes and tuning chiller setpoints by 1.5°C will save ~12% facility energy."
-        }
-        tip = tips_catalog.get(top_1, "Conduct an ISO 50001 energy audit on your largest consumption facilities to unlock immediate 10-15% operational emission reductions.")
-
-        return {
-            "categories": category_metrics,
-            "total_footprint_kg": round(total_kg, 2),
-            "total_footprint_tonnes": round(total_kg / 1000.0, 3),
-            "total_spend_bdt": round(total_spend, 2),
-            "trend_vs_last_month": -8.0,
-            "top_impact_categories": top_impacts,
-            "quick_tips": [tip]
-        }
-
-    footprint_matrix = build_nine_category_footprint(params)
-
-    # Log extraction query
     log = ESGQueryLog(
         tenant_id=tenant_id,
-        corpus="tenant_docs",
-        query_text=f"Extract footprint metrics from {target_filename}",
+        corpus=CORPUS_TENANT_DOCS,
+        query_text=f"Extract activity data from {target_filename}",
         answer_text=extracted.get("summary", ""),
-        confidence=extracted.get("overall_confidence", 0.9),
+        confidence=extracted.get("overall_confidence") or 0.0,
         citations=[{"source": target_filename, "snippet": d.get("raw_snippet", "")} for d in extracted.get("details", [])],
-        latency_ms=120.0,
-        llm_model="gemini-extraction-agent",
-        verified_by_audit=True
+        latency_ms=round((time.time() - started) * 1000, 2),
+        llm_model=extracted.get("method", "regex"),
+        verified_by_audit=False
     )
     db.add(log)
     db.commit()
 
+    # Extracted values are inputs awaiting human review. No footprint is computed or stored here.
     return ExtractionResponse(
         filename=target_filename,
+        document_id=document_id,
         tenant_id=tenant_id,
         parameters=params,
         details=extracted.get("details", []),
-        overall_confidence=extracted.get("overall_confidence", 0.9),
-        audit_seal=True,
-        verified_at=datetime.datetime.utcnow().strftime("%Y-%m-%d %H:%M UTC"),
-        summary=extracted.get("summary", "Verified extraction completed successfully."),
-        total_footprint_kg=footprint_matrix["total_footprint_kg"],
-        total_footprint_tonnes=footprint_matrix["total_footprint_tonnes"],
-        total_spend_bdt=footprint_matrix["total_spend_bdt"],
-        trend_vs_last_month=footprint_matrix["trend_vs_last_month"],
-        categories=footprint_matrix["categories"],
-        top_impact_categories=footprint_matrix["top_impact_categories"],
-        quick_tips=footprint_matrix["quick_tips"]
+        overall_confidence=extracted.get("overall_confidence"),
+        extraction_method=extracted.get("method", "regex"),
+        extracted_at=datetime.datetime.utcnow().strftime("%Y-%m-%d %H:%M UTC"),
+        summary=extracted.get("summary", ""),
     )
 
 @router.post("/ingest", response_model=IngestResponse)
 async def ingest_file(
     file: UploadFile = File(...),
-    corpus: str = Form("tenant_docs"),
-    tenant_id: str = Form("default_tenant"),
+    corpus: str = Form(CORPUS_TENANT_DOCS),
+    principal: Principal = Depends(limited("upload", "write")),
     db: Session = Depends(get_db)
 ):
     """
-    Ingest a PDF, XLSX, CSV, or TXT file into the RAG vector store with tenant isolation.
+    Ingest a PDF, XLSX, CSV, TXT, MD or DOCX file into the caller's tenant corpus.
+    Global corpora (regulatory, emission_factors) are writable only by platform operators.
     """
-    content = await file.read()
-    doc = ingest_document(
-        db=db,
-        file_bytes=content,
-        filename=file.filename,
-        corpus=corpus,
-        tenant_id=tenant_id
-    )
+    if corpus == CORPUS_TENANT_DOCS:
+        tenant_id = principal.organization_id
+    elif corpus in GLOBAL_CORPUS_OWNER and principal.is_platform_operator:
+        tenant_id = GLOBAL_CORPUS_OWNER[corpus]
+    elif corpus in GLOBAL_CORPUS_OWNER:
+        raise HTTPException(403, "Only platform operators may write global corpora")
+    else:
+        raise HTTPException(422, "Unknown corpus")
+
+    content = await _read_upload(file)
+    doc, _pages, duplicate = _ingest(db, content, file.filename, corpus, tenant_id)
 
     return IngestResponse(
         document_id=doc.id,
@@ -419,17 +241,20 @@ async def ingest_file(
         corpus=doc.corpus,
         chunks_created=doc.chunk_count,
         tenant_id=doc.tenant_id,
-        message=f"Document '{file.filename}' successfully processed, embedded, and indexed."
+        duplicate=duplicate,
+        message=(f"Document '{doc.filename}' was already ingested; existing record returned." if duplicate
+                 else f"Document '{doc.filename}' processed and indexed.")
     )
 
 @router.get("/emission-factors")
 def get_emission_factors(
     category: Optional[str] = None,
     region: Optional[str] = "Bangladesh",
+    principal: Principal = Depends(require("read")),
     db: Session = Depends(get_db)
 ):
     """
-    Query the verified emission factor library with national audit citations.
+    Query the emission factor table. Citations are as recorded and not yet independently validated.
     """
     query = db.query(EmissionFactorRecord)
     if category:
@@ -455,13 +280,14 @@ def get_emission_factors(
 
 @router.get("/documents")
 def list_documents(
-    tenant_id: str = "default_tenant",
     corpus: Optional[str] = None,
+    principal: Principal = Depends(require("read")),
     db: Session = Depends(get_db)
 ):
-    """List ingested documents for a tenant with chunk counts and provenance."""
+    """List the caller's tenant documents plus global corpora, with provenance."""
     q = db.query(ESGDocument).filter(
-        (ESGDocument.tenant_id == tenant_id) | (ESGDocument.tenant_id.in_(["global_regulatory", "global_ef"]))
+        (ESGDocument.tenant_id == principal.organization_id)
+        | (ESGDocument.tenant_id.in_(list(GLOBAL_CORPUS_OWNER.values())))
     )
     if corpus:
         q = q.filter(ESGDocument.corpus == corpus)
@@ -482,13 +308,14 @@ def list_documents(
 
 @router.get("/audit-trail")
 def get_audit_trail(
-    tenant_id: str = "default_tenant",
     limit: int = 15,
+    principal: Principal = Depends(require("review")),
     db: Session = Depends(get_db)
 ):
-    """Retrieve audit log of recent RAG queries and extractions."""
+    """Retrieve the caller's tenant log of recent RAG queries and extractions."""
+    limit = max(1, min(limit, 100))
     logs = db.query(ESGQueryLog).filter(
-        ESGQueryLog.tenant_id == tenant_id
+        ESGQueryLog.tenant_id == principal.organization_id
     ).order_by(ESGQueryLog.created_at.desc()).limit(limit).all()
 
     return [
@@ -511,7 +338,8 @@ def get_audit_trail(
 
 @router.post("/duckdb-calculate")
 def duckdb_calculate(
-    payload: Dict[str, Any] = Body(...)
+    payload: Dict[str, Any] = Body(...),
+    principal: Principal = Depends(require("read")),
 ):
     """
     In-Process DuckDB-Style OLAP Calculation Endpoint.
@@ -545,7 +373,7 @@ def duckdb_calculate(
     }
 
 @router.get("/emission-factors/registry")
-def get_factor_registry():
+def get_factor_registry(principal: Principal = Depends(require("read"))):
     """
     Retrieve typed, versioned emission factor catalog with DoE Gazette citations.
     """
@@ -560,7 +388,8 @@ def get_factor_registry():
 
 @router.post("/emission-factors/regression-test")
 def run_factor_regression(
-    payload: Dict[str, Any] = Body(...)
+    payload: Dict[str, Any] = Body(...),
+    principal: Principal = Depends(require("admin")),
 ):
     """
     Watershed-style regression testing:
@@ -572,7 +401,7 @@ def run_factor_regression(
     return run_factor_regression_test(proposed, tolerance_pct=tolerance)
 
 @router.get("/atlas-benchmark/run")
-def run_atlas_benchmark():
+def run_atlas_benchmark(principal: Principal = Depends(require("read"))):
     """
     Run the ATLAS invoice extraction & classification benchmark suite.
     """
@@ -580,13 +409,11 @@ def run_atlas_benchmark():
     return run_atlas_eval_suite()
 
 @router.get("/satellite-insets")
-def get_satellite_insets():
-    """
-    Convergence of Satellite MRV with Corporate Carbon Accounting:
-    Provides verified nature-based carbon removals across Bangladesh (Sentinel-2 & GEDI LiDAR)
-    eligible for corporate net-zero balance sheet retirement.
-    """
+def get_satellite_insets(principal: Principal = Depends(require("read"))):
+    """Static sample payload — available to demo workspaces only (data register A8)."""
+    _demo_only(principal)
     return {
+        "data_classification": "DEMO_SAMPLE",
         "mrv_network": "CarbonOS Sentinel-2 & GEDI Remote Sensing Grid",
         "resolution": "10m Multispectral + GEDI 25m LiDAR Canopy Profiling",
         "last_orbit_pass": "2026-09-08T04:12:00Z (Sentinel-2B Tile 46RCH)",
@@ -655,11 +482,11 @@ def get_satellite_insets():
     }
 
 @router.get("/entity-tree")
-def get_conglomerate_entity_tree():
-    """
-    Sweep-Style Multi-Entity Hierarchy for Bangladeshi Diversified Groups.
-    """
+def get_conglomerate_entity_tree(principal: Principal = Depends(require("read"))):
+    """Static sample hierarchy — available to demo workspaces only (data register A7)."""
+    _demo_only(principal)
     return {
+        "data_classification": "DEMO_SAMPLE",
         "conglomerate_name": "Apex Holdings Group (Bangladesh)",
         "holding_id": "HOLDING-BD-APEX-01",
         "hq_location": "Gulshan 2, Dhaka, Bangladesh",
@@ -725,17 +552,24 @@ def get_conglomerate_entity_tree():
 
 @router.post("/detect-utility-segments")
 def esg_detect_utility_segments(
-    payload: Dict[str, Any] = Body(default={})
+    payload: Dict[str, Any] = Body(default={}),
+    principal: Principal = Depends(require("read")),
 ):
     """
-    Universal Multi-Segment Utility Invoice Extractor & Calculator:
-    Parses any uploaded utility bill or expense statement, identifying every granular segment
-    (peak/off-peak power, demand charges, power factor, solar net-metering, natural gas,
-    captive diesel, fleet octane, steam, water, effluent ETP COD, refrigerants, freight).
-    Calculates exact Scope 1/2/3 footprints with verified DoE gazette citations.
+    Detects utility line items present in the text (power, gas, diesel, steam, water, …) and applies
+    rule factors marked UNVERIFIED. Non-energy and exported/avoided items are listed separately and
+    never netted into inventory totals. Output is REVIEW_REQUIRED.
     """
     raw_text = payload.get("raw_text", "")
     client_id = payload.get("client_id", None)
     return detect_all_utility_segments(raw_text, client_id=client_id)
 
 
+
+
+# Ledger routes (facilities, periods, factors, activities, calculations, snapshots) share the /api/esg prefix.
+from .ledger_router import router as _ledger_router  # noqa: E402
+router.include_router(_ledger_router)
+
+from .members import router as _members_router  # noqa: E402
+router.include_router(_members_router)
