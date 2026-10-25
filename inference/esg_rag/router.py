@@ -573,3 +573,6 @@ router.include_router(_ledger_router)
 
 from .members import router as _members_router  # noqa: E402
 router.include_router(_members_router)
+
+from .demo import router as _demo_router  # noqa: E402
+router.include_router(_demo_router)

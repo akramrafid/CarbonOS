@@ -8,6 +8,8 @@ X-Organization-Id only selects among the caller's own memberships.
 """
 import logging
 import os
+import secrets
+import time
 from dataclasses import dataclass
 from functools import lru_cache
 from typing import Optional
@@ -20,6 +22,55 @@ from .database import get_db
 from .models import ESGMembership, ESGOrganization
 
 log = logging.getLogger("esg.auth")
+
+_ephemeral_demo_secret: Optional[str] = None
+
+
+def get_access_mode() -> str:
+    env_mode = os.getenv("ESG_ACCESS_MODE", "").strip().lower()
+    if env_mode in ("protected", "isolated_demo", "demo", "local_dev", "private_single_tenant", "oidc"):
+        return "isolated_demo" if env_mode == "demo" else env_mode
+    if os.getenv("ESG_ENV") == "production":
+        return "protected"
+    # When ESG_ACCESS_MODE is not specified, fail-closed to protected
+    return "protected"
+
+
+def get_jwt_secret() -> str:
+    global _ephemeral_demo_secret
+    secret = os.getenv("ESG_AUTH_JWT_SECRET")
+    if secret:
+        return secret
+    # If ESG_AUTH_JWT_SECRET was explicitly set to empty string, fail closed
+    if os.environ.get("ESG_AUTH_JWT_SECRET") == "":
+        return ""
+    mode = get_access_mode()
+    if mode in ("isolated_demo", "local_dev") and os.getenv("ESG_ENV") != "production":
+        if not _ephemeral_demo_secret:
+            _ephemeral_demo_secret = secrets.token_hex(32)
+        return _ephemeral_demo_secret
+    return ""
+
+
+def mint_token(sub: str, exp_seconds: int = 7200, is_demo: bool = False, **extra) -> str:
+    secret = get_jwt_secret()
+    if not secret or len(secret) < 32:
+        raise HTTPException(503, "Cannot mint token: JWT secret is not configured")
+    now = int(time.time())
+    claims = {
+        "sub": sub,
+        "exp": now + exp_seconds,
+        "iat": now,
+        "is_demo": is_demo,
+        **extra,
+    }
+    issuer = os.getenv("ESG_AUTH_ISSUER")
+    if issuer:
+        claims["iss"] = issuer
+    audience = os.getenv("ESG_AUTH_AUDIENCE")
+    if audience:
+        claims["aud"] = audience
+    return jwt.encode(claims, secret, algorithm="HS256")
 
 ROLE_PERMISSIONS = {
     "org_owner": {"read", "write", "review", "admin"},
@@ -64,7 +115,7 @@ def _jwks_client(url: str) -> jwt.PyJWKClient:
 
 def _decode(token: str) -> dict:
     jwks_url = os.getenv("ESG_AUTH_JWKS_URL")
-    secret = os.getenv("ESG_AUTH_JWT_SECRET")
+    secret = get_jwt_secret()
     issuer = os.getenv("ESG_AUTH_ISSUER") or None
     audience = os.getenv("ESG_AUTH_AUDIENCE") or None
     options = {"require": ["exp", "sub"], "verify_aud": audience is not None}

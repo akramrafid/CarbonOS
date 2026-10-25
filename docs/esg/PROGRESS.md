@@ -196,3 +196,31 @@ the legacy `/platform/saas-dashboard` still shows fabricated overview KPIs (regi
 - `playwright.config.ts`: quote the Python path (repo paths with spaces/parentheses broke the API web server).
 - Full gate: ESG unittest 77 OK on SQLite (1 skipped) and PostgreSQL 16; orchestrator 34 OK; lint/unit/build OK;
   Playwright 28 passed on 4 viewports.
+
+---
+
+## Batch 10 — Zero-Friction Isolated Demo Mode & Dual Control Persona Simulation
+
+**Objective.** Provide direct entry to `/platform/esg` in a safe, isolated demo configuration without visible login/signup screens or external IdP subscriptions, while maintaining fail-closed tenant isolation, dual-control segregation of duties, and zero client-specified tenant trust.
+
+**Files changed.**
+- `inference/esg_rag/demo.py` (new) — Zero-friction demo router with `POST /api/esg/demo/session` (ephemeral tenant creation `demo-<hex>`, seeds realistic Bangladesh benchmarks for East Delta University, Revoo EV, PolyJute Asia), `POST /api/esg/demo/reset` (cascading cleanup across 11 child tables and re-seeding while preserving org ID), `GET /api/esg/demo/status`.
+- `inference/esg_rag/auth.py` — Strict fail-closed `get_access_mode()` defaulting to `"protected"`; returns `""` when `ESG_AUTH_JWT_SECRET` is unconfigured/empty to guarantee 503 instead of falling back to ephemeral keys.
+- `inference/esg_rag/router.py` — Mounted demo sub-router under `/api/esg/demo`.
+- `src/lib/esgAuth.js` — Auto-provisions demo session via `/api/esg/demo/session` when unauthenticated; stores session tokens strictly in `sessionStorage` (cleared on tab close); exposes `switchDemoPersona()` and `resetDemoSession()`.
+- `src/pages/platform/esg/EsgWorkspace.jsx` — Direct access without auth wall; renders persistent `DEMO WORKSPACE — SAMPLE DATA / NOT ASSURED` watermark banner with tenant ID, Dual Control persona toggle (`Owner (Submitter)` vs `Auditor (Reviewer)`), and "Reset Demo" button.
+- `tests/test_esg_demo_mode.py` (new, 5 tests) — Tests demo bootstrap, incognito cross-tenant isolation, dual-control reviewer persona approval, tenant reset idempotency, and fail-closed denial in protected mode.
+- `tests/test_esg_security.py` — Updated route enumeration and fail-closed checks.
+- Docs: `FULL_COMPLETION_MATRIX.md`, `DEMO_MODE_SECURITY.md`, `FACTOR_SOURCE_REGISTER.md`, `REPORTING_FRAMEWORK_MAPPING.md`, `DEPLOYMENT_AND_RECOVERY.md`, `EXTERNAL_APPROVALS_REQUIRED.md`, `NO-LOGIN-DEMO-IMPLEMENTATION.md`, updated `RELEASE_READINESS.md`.
+
+**Tests run.**
+```
+python -m unittest discover -s tests -p "test_esg*.py" → Ran 85 tests … OK (1 skipped: PostgreSQL-only)
+python -m unittest tests.test_orchestrator             → Ran 34 tests … OK
+python -m orchestrator doctor                          → 0 issues found
+npm test                                               → 2 passed
+npm run build                                          → exit 0
+```
+
+**Status.** `ESG_FEATURE_COMPLETE: VERIFIED`, `DEMO_READY: VERIFIED`. `PILOT_READY: GATED`, `PRODUCTION_READY: GATED` (gated on external IdP, accredited verifier review, DPA/penetration testing).
+

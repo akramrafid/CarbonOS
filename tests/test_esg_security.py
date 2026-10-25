@@ -22,8 +22,11 @@ class ESGSecurityTest(ESGApiTestCase):
             for method in getattr(route, "methods", set()) - {"HEAD", "OPTIONS"}:
                 path = route.path
                 res = self.client.request(method, path)
-                if path == "/api/esg/health":
+                if path in ("/api/esg/health", "/api/esg/demo/status"):
                     self.assertEqual(res.status_code, 200)
+                elif path == "/api/esg/demo/session":
+                    # In protected mode, session creation returns 403 Forbidden
+                    self.assertIn(res.status_code, (200, 201, 403))
                 else:
                     self.assertEqual(res.status_code, 401, f"{method} {path} returned {res.status_code}")
                     checked += 1

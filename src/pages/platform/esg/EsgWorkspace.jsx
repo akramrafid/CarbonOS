@@ -3,7 +3,7 @@
 import { useCallback, useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { esgGet, esgSend, hasEsgToken, setEsgSession } from '../../../lib/esgApi';
-import { authConfigured, completeSignIn, loadSession, signIn, signOut } from '../../../lib/esgAuth';
+import { authConfigured, completeSignIn, loadSession, resetDemoSession, signIn, signOut, switchDemoPersona } from '../../../lib/esgAuth';
 import { Button, Input, Notice, Panel, Select, useAction } from './ui';
 import SetupPanel from './SetupPanel';
 import FactorsPanel from './FactorsPanel';
@@ -26,7 +26,7 @@ function safeStorage(fn) {
 }
 
 export default function EsgWorkspace() {
-  const [user, setUser] = useState(undefined); // undefined = loading, null = signed out
+  const [user, setUser] = useState(undefined); // undefined = loading, null = signed out / offline
   const [me, setMe] = useState(null);
   const [orgs, setOrgs] = useState(null);
   const [orgId, setOrgId] = useState(null);
@@ -49,6 +49,19 @@ export default function EsgWorkspace() {
     setEsgSession({ organizationId: pick });
     setOrgId(pick);
   }, []);
+
+  const refreshAll = useCallback(async () => {
+    let u = null;
+    try { u = await loadSession(); } catch { u = null; }
+    setUser(u);
+    if (!u || !hasEsgToken()) return;
+    try {
+      setMe(await esgGet('/api/esg/me'));
+      await loadOrgs();
+    } catch (e) {
+      setLoadError(e.message);
+    }
+  }, [loadOrgs]);
 
   useEffect(() => {
     const invite = new URLSearchParams(window.location.search).get('invite');
@@ -95,6 +108,24 @@ export default function EsgWorkspace() {
     if (org) { safeStorage(() => localStorage.setItem(ORG_KEY, org.id)); await loadOrgs(); }
   };
 
+  const handlePersonaChange = async (newPersona) => {
+    try {
+      switchDemoPersona(newPersona);
+      await refreshAll();
+      await loadRef();
+    } catch (err) {
+      setLoadError(err.message);
+    }
+  };
+
+  const handleResetDemo = async () => {
+    await action.run(async () => {
+      await resetDemoSession();
+      await refreshAll();
+      await loadRef();
+    }, 'Demo workspace successfully reset to initial benchmark state.');
+  };
+
   const shell = (children) => (
     <main className="mx-auto max-w-6xl space-y-6 px-4 pb-16 pt-28 sm:px-6">
       <header className="flex flex-wrap items-end justify-between gap-4">
@@ -102,21 +133,30 @@ export default function EsgWorkspace() {
           <p className="font-mono text-[11px] uppercase tracking-wider text-emerald">CarbonOS ESG</p>
           <h1 className="font-serif text-4xl text-registry">GHG accounting workspace</h1>
         </div>
-        {user && <div className="flex items-center gap-3 text-sm text-mist">{user.name}<Button variant="secondary" onClick={signOut}>Sign out</Button></div>}
+        {user && (
+          <div className="flex items-center gap-3 text-sm text-mist">
+            <span>{user.name}</span>
+            <Button variant="secondary" onClick={signOut}>Sign out</Button>
+          </div>
+        )}
       </header>
       <Notice error={action.error || loadError} message={action.message} />
       {children}
     </main>
   );
 
-  if (user === undefined) return shell(<p role="status" className="text-mist">Loading…</p>);
+  if (user === undefined) return shell(<p role="status" className="text-mist">Loading workspace…</p>);
 
   if (!user) {
     return shell(
-      <Panel title="Sign in" description="The ESG workspace holds your organization's accounting records and requires an account.">
-        {authConfigured
-          ? <Button onClick={signIn}>Sign in</Button>
-          : <p className="text-sm text-amber-300">Sign-in is not configured for this deployment (set VITE_OIDC_ISSUER and VITE_OIDC_CLIENT_ID). No data is shown without authentication.</p>}
+      <Panel title="ESG Workspace Offline" description="Unable to connect to the ESG service to provision a workspace session.">
+        <p className="text-sm text-amber-300">
+          The backend API service is unreachable. Please verify that the API server is running on {import.meta.env?.VITE_FASTAPI_API_URL || 'http://localhost:8000'}.
+        </p>
+        <div className="mt-4 flex gap-3">
+          <Button onClick={() => window.location.reload()}>Retry connection</Button>
+          {authConfigured && <Button variant="secondary" onClick={signIn}>Sign in with SSO</Button>}
+        </div>
       </Panel>,
     );
   }
@@ -144,13 +184,60 @@ export default function EsgWorkspace() {
 
   return shell(
     <>
+      {(user?.isDemo || org.is_demo) && (
+        <aside aria-label="Demo notice" className="rounded-xl border border-amber-500/30 bg-amber-950/20 p-4 text-xs">
+          <div className="flex flex-wrap items-center justify-between gap-3">
+            <div className="space-y-1">
+              <div className="flex items-center gap-2">
+                <span className="inline-block rounded bg-amber-400/20 px-2 py-0.5 font-mono text-[11px] font-semibold uppercase tracking-wider text-amber-300">
+                  DEMO WORKSPACE — SAMPLE DATA / NOT ASSURED
+                </span>
+                <span className="font-mono text-[11px] text-amber-200/70">Ephemeral zero-friction evaluation</span>
+              </div>
+              <p className="text-mist">
+                Synthetic Bangladesh spinning & manufacturing benchmarks. Backend tenant isolation and segregation of duties are strictly enforced.
+              </p>
+            </div>
+            <div className="flex flex-wrap items-center gap-2">
+              <span className="text-[11px] text-mist">Dual-control persona:</span>
+              <div className="inline-flex rounded-lg border border-mist/20 p-0.5">
+                <button
+                  type="button"
+                  onClick={() => handlePersonaChange('owner')}
+                  className={`rounded-md px-2.5 py-1 font-mono text-[11px] transition-colors ${
+                    user?.activePersona !== 'reviewer' ? 'bg-emerald text-carbon font-semibold' : 'text-mist hover:text-registry'
+                  }`}
+                >
+                  Submitter (Owner)
+                </button>
+                <button
+                  type="button"
+                  onClick={() => handlePersonaChange('reviewer')}
+                  className={`rounded-md px-2.5 py-1 font-mono text-[11px] transition-colors ${
+                    user?.activePersona === 'reviewer' ? 'bg-emerald text-carbon font-semibold' : 'text-mist hover:text-registry'
+                  }`}
+                >
+                  Auditor (Reviewer)
+                </button>
+              </div>
+              <Button variant="secondary" onClick={handleResetDemo} disabled={action.busy}>
+                Reset demo data
+              </Button>
+            </div>
+          </div>
+        </aside>
+      )}
+
       <div className="flex flex-wrap items-end gap-4">
         {orgs.length > 1
           ? <div className="w-72"><Select label="Organization" value={orgId} onChange={(e) => switchOrg(e.target.value)} options={orgs.map((o) => [o.id, o.name])} /></div>
           : <p className="text-lg text-registry">{org.name}</p>}
         <span className="rounded bg-mist/15 px-2 py-1 font-mono text-[11px] text-mist">Role: {org.role}</span>
-        {org.is_demo && <span className="rounded bg-amber/20 px-2 py-1 font-mono text-[11px] text-amber-300">DEMO WORKSPACE — NOT PRODUCTION DATA</span>}
+        {org.is_demo && !user?.isDemo && (
+          <span className="rounded bg-amber/20 px-2 py-1 font-mono text-[11px] text-amber-300">DEMO WORKSPACE — NOT PRODUCTION DATA</span>
+        )}
       </div>
+
       <nav aria-label="ESG workspace sections" className="flex gap-2 overflow-x-auto pb-1">
         {tabs.map(([key, label]) => (
           <button key={key} type="button" onClick={() => setTab(key)} aria-current={tab === key ? 'page' : undefined}
