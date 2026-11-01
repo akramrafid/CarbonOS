@@ -13,7 +13,8 @@ export default function FactorsPanel({ canAdmin, me, types }) {
     const v = formValues(form);
     const type = inventory.find((t) => t.activity_type === v.activity_type);
     const body = { ...v, unit: type?.canonical_unit, source_year: Number(v.source_year),
-                   method: type?.scope === '1' ? 'direct' : v.method };
+                   method: type?.scope === '1' ? 'direct' : v.method,
+                   factor_kind: type?.scope === '1' ? undefined : v.factor_kind };
     if (await action.run(() => esgSend('POST', '/api/esg/factors', body), 'Factor saved as DRAFT. A second admin must approve it.')) {
       form.reset();
       factors.reload();
@@ -36,6 +37,7 @@ export default function FactorsPanel({ canAdmin, me, types }) {
           { key: 'activity_type', label: 'Activity' },
           { key: 'kgco2e_per_unit', label: 'kgCO₂e / unit', render: (f) => `${f.kgco2e_per_unit} / ${f.unit}` },
           { key: 'method', label: 'Method' },
+          { key: 'factor_kind', label: 'Kind', render: (f) => f.factor_kind || '—' },
           { key: 'region', label: 'Region' },
           { key: 'source_publisher', label: 'Source', render: (f) => (
             <span>{f.source_publisher} — {f.source_document} ({f.source_year}){f.source_table_ref ? `, ${f.source_table_ref}` : ''}
@@ -52,9 +54,13 @@ export default function FactorsPanel({ canAdmin, me, types }) {
           <Input label="Factor family" name="family" required pattern="[A-Za-z0-9._\-]+" hint="Same family = new version" />
           <Select label="Activity" name="activity_type" options={inventory.map((t) => [t.activity_type, `${t.activity_type} (Scope ${t.scope}, per ${t.canonical_unit})`])} />
           <Select label="Scope 2 method" name="method" hint="Ignored for Scope 1 (direct)" options={[['location', 'Location-based'], ['market', 'Market-based']]} />
+          <Select label="Factor kind" name="factor_kind"
+                  hint="Location-based electricity must be the grid average. CDM combined margins are rejected."
+                  options={[['', 'Not applicable (Scope 1)'], ['grid_average', 'Grid average'],
+                            ['supplier_specific', 'Supplier-specific (market-based)'], ['residual_mix', 'Residual mix (market-based)']]} />
           <Input label="kgCO₂e per canonical unit" name="kgco2e_per_unit" type="number" min="0" step="any" required />
           <Input label="Region" name="region" required hint="Matched to facility factor region" />
-          <Select label="GWP basis" name="gwp_basis" options={[['AR5', 'IPCC AR5'], ['AR6', 'IPCC AR6'], ['AR4', 'IPCC AR4']]} />
+          <Select label="GWP basis" name="gwp_basis" options={[['AR6', 'IPCC AR6 (default)'], ['AR5', 'IPCC AR5'], ['AR4', 'IPCC AR4']]} />
           <Input label="Valid from" name="valid_from" type="date" required />
           <Input label="Valid to" name="valid_to" type="date" />
           <Input label="Publisher" name="source_publisher" required maxLength={200} />

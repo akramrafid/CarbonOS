@@ -111,7 +111,7 @@ def seed_demo_organization(
     now_utc = datetime.datetime.now(datetime.timezone.utc)
     org_suffix = org.id[:8]
 
-    # Factor A: Bangladesh National Grid 2023
+    # Factor A: demo placeholder for a grid-average factor. Not a published factor; no source exists.
     factor_grid = EmissionFactor(
         organization_id=org.id,
         family=f"grid-electricity-bd-{org_suffix}",
@@ -122,11 +122,12 @@ def seed_demo_organization(
         region="BD-NATIONAL-GRID",
         gwp_basis="AR5",
         method="location",
+        factor_kind="grid_average",
         valid_from=datetime.date(2024, 1, 1),
-        source_publisher="Department of Environment, Bangladesh / IEA",
-        source_document="Grid Emission Factor of Bangladesh 2023 Study",
-        source_url="http://doe.gov.bd/reports/grid-ef-2023.pdf",
-        source_year=2023,
+        source_publisher="DEMO PLACEHOLDER (not a published factor)",
+        source_document="Illustrative demo value; no primary source",
+        source_url=None,
+        source_year=2024,
         status="APPROVED",
         is_custom=False,
         created_by="system_demo_seed",

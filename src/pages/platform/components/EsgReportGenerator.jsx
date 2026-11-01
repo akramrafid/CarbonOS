@@ -28,7 +28,7 @@ import { generateClientActivityData } from './ActivityEvidenceWorkspace';
 
 // Helper for number formatting
 const fmt = (num, decimals = 2) => {
-  if (num === null || num === undefined || isNaN(num)) return '0.00';
+  if (num === null || num === undefined || isNaN(num)) return '—'; // missing is not zero
   return Number(num).toLocaleString('en-US', {
     minimumFractionDigits: decimals,
     maximumFractionDigits: decimals
@@ -151,7 +151,7 @@ All calculations follow the standard formula:
 \`Emissions (tCO₂e) = Activity Data × Emission Factor ÷ 1000\`
 
 **Primary Lineage References:**
-- **Grid Power (Bangladesh):** 0.550 kg CO₂e/kWh (Bangladesh Department of Environment Gazette SRO 2023)
+- **Grid Power (Bangladesh):** no approved grid-average factor yet; location-based Scope 2 excludes grid kWh until one is approved (a CDM combined margin is not used)
 - **Diesel Combustion:** 2.680 kg CO₂e/L (DEFRA 2024 / IPCC AR6 Guidelines)
 - **Octane / Petrol:** 2.310 kg CO₂e/L (DEFRA 2024 Mobile Fleet Standards)
 - **Freight Logistics:** 0.200 kg CO₂e/t-km (Smart Freight Centre GLEC Framework)
@@ -348,7 +348,7 @@ ${activeClient.assignedAuditor}
                 {fmt(scope2LocationTotal, 2)} <span className="text-xs">tCO₂e</span>
               </span>
               <span className="text-[10px] text-gray-400 block mt-0.5">
-                0.550 kg/kWh DoE Grid
+                Grid-average factor pending approval
               </span>
             </div>
 
@@ -443,8 +443,8 @@ ${activeClient.assignedAuditor}
             <div className="grid grid-cols-1 md:grid-cols-2 gap-3 text-xs pt-2">
               <div className="p-3 rounded-xl bg-black/40 border border-[#152B1D] font-mono">
                 <span className="text-[10px] text-gray-400 block uppercase">Scope 2 Location Grid Factor</span>
-                <span className="font-bold text-[#00E676] text-sm block mt-0.5">0.550 kg CO₂e / kWh</span>
-                <span className="text-[10px] text-gray-400 block mt-1">Source: Bangladesh Department of Environment (DoE) SRO Gazette 2023</span>
+                <span className="font-bold text-amber-400 text-sm block mt-0.5">Not set: grid-average factor pending approval</span>
+                <span className="text-[10px] text-gray-400 block mt-1">No official Bangladesh grid factor located; CarbonOS derives a DRAFT grid average from BPDB data</span>
               </div>
 
               <div className="p-3 rounded-xl bg-black/40 border border-[#152B1D] font-mono">

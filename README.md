@@ -10,7 +10,6 @@
 [![TailwindCSS](https://img.shields.io/badge/TailwindCSS-v3.4-38B2AC?logo=tailwindcss&logoColor=white)](https://tailwindcss.com/)
 [![ChromaDB](https://img.shields.io/badge/ChromaDB-Vector_RAG-FF6F00)](https://www.trychroma.com/)
 [![Article 6 Aligned](https://img.shields.io/badge/Paris_Agreement-Article_6.2_/_6.4-00C853)](https://unfccc.int/)
-[![Bangladesh DoE](https://img.shields.io/badge/DoE_S.R.O.-349_/_ECR_2023-1B5E20)](http://doe.portal.gov.bd/)
 
 <p align="center">
   <b>Bridging grassroots rural climate projects with enterprise corporate carbon accounting, satellite MRV, IoT emissions telemetry, and sovereign carbon credit registries for Bangladesh.</b>
@@ -32,7 +31,7 @@
 
 **CarbonOS Bangladesh** is the nation's premier sovereign climate-tech operating system. Developed specifically for Bangladesh’s unique industrial and ecological landscape, CarbonOS solves the fundamental structural challenges of developing-nation decarbonization:
 
-1. **Sovereign Regulatory Grounding**: Hardcoded to Bangladesh Department of Environment (DoE) & SREDA national grid emission factors (`0.550 kg CO₂e / kWh`), Environment Conservation Rules 2023 (ECR 2023 / S.R.O. 349), and Updated NDC 2021 mitigation pathways.
+1. **Sovereign Regulatory Grounding**: No default grid factor: location-based Scope 2 needs an approved grid-average factor, and a CDM combined margin is rejected in code and by a database check. Environment Conservation Rules 2023 are S.R.O. No. 53 (not a GHG inventory rule); Updated NDC 2021 targets are cited from the NDC.
 2. **Export Compliance for Industrial Giants**: Purpose-built for Bangladesh's Ready-Made Garments (RMG), Textiles, Steel, Pharmaceuticals, and Cement exporters navigating European Union Carbon Border Adjustment Mechanism (EU CBAM) and CSRD disclosures.
 3. **Dual-Reporting Scope 2 Accounting**: Implements simultaneous Location-Based and Market-Based electricity accounting per GHG Protocol Scope 2 Guidance, directly linked to live industrial IoT sensor feeds.
 4. **Multi-Corpus Citation RAG**: Grounded AI assistant that retrieves verbatim legal clauses, gazette page numbers, and corporate utility statements with $0 required recurring API costs.
@@ -61,7 +60,7 @@
 * **Executive $30,000 USD B2B Dashboard**: Dual-theme (Obsidian Black & Mint/Honeydew Light) interface engineered for C-suite sustainability directors and factory general managers.
 * **Scope 1, 2 & 3 Emissions Engine**:
   * **Scope 1**: Direct emissions from natural gas boilers, captive diesel generators, and mobile company fleets.
-  * **Scope 2 (Dual Reporting)**: Simultaneous calculation of Location-based (0.550 kg CO₂e/kWh grid average) vs. Market-based (contractual PPAs, rooftop solar net-metering).
+  * **Scope 2 (Dual Reporting)**: Simultaneous calculation of Location-based (approved grid-average factor) vs. Market-based (supplier-specific rate or residual mix; the grid average only where no residual mix exists, disclosed).
   * **Scope 3**: Supply chain transportation, raw cotton/fabric upstream logistics, and employee business travel.
 * **Custom Data Visualizations**:
   * **Semi-Circular Gauge**: Live visual target indicator showing emissions budget utilization with animated pointer and safety zones.
@@ -71,8 +70,8 @@
 
 ### 2. Multi-Corpus RAG & Regulatory Copilot (`inference/esg_rag`)
 * **Multi-Corpus Vector Indexing**: ChromaDB vector store organized into three distinct document namespaces:
-  1. `regulatory`: Bangladesh Updated NDC 2021, Environment Conservation Rules 2023 (S.R.O. 349).
-  2. `emission_factors`: DoE 2023 Gazette (Ref: 22.02.0000.018.99.001.23) and IPCC AR6 reference metrics.
+  1. `regulatory`: Bangladesh Updated NDC 2021, Environment Conservation Rules 2023 (S.R.O. No. 53).
+  2. `emission_factors`: a status note on Bangladesh grid and fuel factors (no official grid factor located) and IPCC 2006 references.
   3. `tenant_docs`: Private factory energy statements, boiler fuel logs, and third-party audit reports.
 * **Verbatim Citation Retrieval**: Every AI-generated answer provides exact document titles, page numbers, and quote snippets.
 * **Dual Synthesis Architecture**: High-speed reasoning powered by Google Gemini 2.5 Flash with an automated, local deterministic fallback rule engine in case of offline conditions or API limits.
@@ -133,7 +132,7 @@ flowchart TB
     subgraph External ["External Data & Hardware"]
         Blynk["Blynk Cloud IoT Sensors\n(Factory Hardware)"]
         Sentinel["Sentinel-2 Satellite Imagery\n(Copernicus Hub)"]
-        DoEGazette["Bangladesh DoE Gazette\n(Ref: 22.02.0000.018.99.001.23)"]
+        DoEGazette["Factor status note\n(no official BD grid factor)"]
     end
 
     UI --> SaaS & RAG_UI & Registry_UI & Farmer_UI & IoT_UI
@@ -363,7 +362,7 @@ python -m orchestrator.cli frontend-check     # Quality gate for UI & design tok
 | **Backend & Inference API** | ⭐ **9.5 / 10** | FastAPI + Uvicorn, dual-router topology (`esg_rag`, `carbon_monitoring`), robust local fallback |
 | **Multi-Corpus RAG** | ⭐ **9.5 / 10** | ChromaDB with dense embeddings, verbatim citations, zero cross-tenant leakage |
 | **IoT & Telemetry** | ⭐ **9.0 / 10** | Live Blynk cloud sensor stream (exhaust temp, humidity, CO₂ ppm) with auto-reconnect |
-| **Regulatory Grounding** | ⭐ **10 / 10** | Bangladesh DoE 2023 Gazette, SREDA grid emission factor (`0.550`), S.R.O. 349, EU CBAM |
+| **Regulatory Grounding** | Under review | ECR 2023 = S.R.O. No. 53 (cited); no official Bangladesh grid factor located; EU CBAM scope corrected |
 | **Orchestrator & Testing** | ⭐ **10 / 10** | 34 / 34 unit tests green, `akstack` CLI lint clean, deterministic disk state |
 
 ---

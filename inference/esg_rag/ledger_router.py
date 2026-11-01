@@ -55,8 +55,10 @@ class FactorIn(BaseModel):
     unit: str
     kgco2e_per_unit: NonNeg
     region: str = Field(..., min_length=1, max_length=50)
-    gwp_basis: Literal["AR4", "AR5", "AR6"]
+    # AR6 by default: IFRS S2 requires the latest IPCC assessment. AR5/AR4 stay selectable for restatement.
+    gwp_basis: Literal["AR4", "AR5", "AR6"] = "AR6"
     method: Literal["direct", "location", "market"]
+    factor_kind: Optional[Literal["grid_average", "grid_combined_margin", "supplier_specific", "residual_mix"]] = None
     valid_from: dt.date
     valid_to: Optional[dt.date] = None
     source_publisher: str = Field(..., min_length=1, max_length=200)
@@ -146,6 +148,10 @@ def activity_types(p: Principal = Depends(require("read"))):
                       for k, (scope, unit) in accounting.ACTIVITY_TYPES.items()],
         "memo": [{"activity_type": k, "canonical_unit": unit, "accepted_units": accepted(unit)}
                  for k, unit in accounting.MEMO_ACTIVITY_TYPES.items()],
+        # Kinds a factor may declare per (activity type, method); empty list = leave factor_kind empty.
+        "factor_kinds": {f"{k}:{m}": [kind for kind in accounting.allowed_factor_kinds(k, m) if kind]
+                         for k, (scope, _) in accounting.ACTIVITY_TYPES.items()
+                         for m in (("direct",) if scope == "1" else ("location", "market"))},
         "methodology_version": accounting.METHODOLOGY_VERSION,
     }
 

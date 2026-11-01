@@ -369,19 +369,21 @@ def duckdb_calculate(
         "audit_hash": f"SHA256-{audit_hash[:16].upper()}",
         "activity_accounting": act_res,
         "spend_eeio_accounting": spend_res,
-        "consolidated_total_tco2e": round(act_res["totals"]["location_based_tco2e"] + spend_res["total_emissions_tco2e"], 3)
+        "consolidated_total_tco2e": (None if act_res["totals"]["location_based_tco2e"] is None else
+                                     round(act_res["totals"]["location_based_tco2e"] + spend_res["total_emissions_tco2e"], 3))
     }
 
 @router.get("/emission-factors/registry")
 def get_factor_registry(principal: Principal = Depends(require("read"))):
     """
-    Retrieve typed, versioned emission factor catalog with DoE Gazette citations.
+    Legacy demo factor catalog. No primary source was located for its values: every entry is UNVERIFIED
+    and none is used by the ledger. It holds no grid factor (location-based Scope 2 needs an approved
+    grid-average factor in the ledger's factor registry).
     """
     from .factor_registry import FACTOR_REGISTRY_CATALOG
     return {
         "catalog_version": "v2026.1-NATIONAL",
-        "governing_body": "Department of Environment (DoE) & SREDA Bangladesh",
-        "gazette_reference": "Ref: 22.02.0000.018.99.001.23",
+        "catalog_status": "UNVERIFIED_LEGACY_DEMO_CATALOG",
         "total_factors": len(FACTOR_REGISTRY_CATALOG),
         "factors": FACTOR_REGISTRY_CATALOG
     }

@@ -180,8 +180,8 @@ UTILITY_SEGMENT_RULES = [
         "scope": "Scope 2",
         "pattern": r'(?i)(?:off[- ]?peak(?:\s+energy|\s+units)?|flat\s+energy)[\s:=]*([0-9,]+(?:\.[0-9]+)?)\s*(?:kwh|units)?',
         "unit": "kWh",
-        "factor": 0.550,
-        "factor_citation": "Bangladesh DoE Grid Baseline Gazette Ref: 22.02.0000.018.99.001.23"
+        "factor": None,
+        "factor_citation": "No default: location-based Scope 2 uses an approved grid-average factor for every TOU register"
     },
     {
         "id": "elec_peak",
@@ -190,8 +190,8 @@ UTILITY_SEGMENT_RULES = [
         "scope": "Scope 2",
         "pattern": r'(?i)(?:(?<![-\w])peak(?:\s+hour)?(?:\s+energy|\s+units)?)[\s:=]*([0-9,]+(?:\.[0-9]+)?)\s*(?:kwh|units)?',
         "unit": "kWh",
-        "factor": 0.620,
-        "factor_citation": "DoE Grid Peak Generation Surcharge Model (Peaking Gas Turbines)"
+        "factor": None,
+        "factor_citation": "No default: location-based Scope 2 uses an approved grid-average factor for every TOU register"
     },
     {
         "id": "solar_netmeter",
@@ -200,8 +200,8 @@ UTILITY_SEGMENT_RULES = [
         "scope": "Scope 2 (Avoided / Credit)",
         "pattern": r'(?i)(?:solar\s+export|net[- ]?metering|solar\s+generation|solar\s+inflow)[\s:=]*([0-9,]+(?:\.[0-9]+)?)\s*(?:kwh|units)?',
         "unit": "kWh",
-        "factor": -0.550,
-        "factor_citation": "SREDA Bangladesh Net-Metering Guidelines & DoE Displacement Factor"
+        "factor": None,
+        "factor_citation": "Memo item: exported electricity is never netted against Scope 2"
     },
     {
         "id": "demand_charge",
@@ -231,7 +231,7 @@ UTILITY_SEGMENT_RULES = [
         "pattern": r'(?i)(?:natural\s+gas|gas\s+consumption|titas|karnaphuli|cng)[\s:=]*([0-9,]+(?:\.[0-9]+)?)\s*(?:m3|cubic\s*meter|mmbtu|mcf)?',
         "unit": "m³",
         "factor": 2.020,
-        "factor_citation": "Petrobangla & DoE Gas Emission Factor Ref: 22.02.0000.018.99.001.23"
+        "factor_citation": "UNVERIFIED legacy constant: no primary source located"
     },
     {
         "id": "captive_diesel",
@@ -241,7 +241,7 @@ UTILITY_SEGMENT_RULES = [
         "pattern": r'(?i)(?:diesel|hsd|generator\s+fuel|backup\s+genset)[\s:=]*([0-9,]+(?:\.[0-9]+)?)\s*(?:l|liter|litres)?',
         "unit": "Liters",
         "factor": 2.680,
-        "factor_citation": "Bangladesh DoE High Speed Diesel Gazette Notice 2023"
+        "factor_citation": "UNVERIFIED legacy constant: no primary source located"
     },
     {
         "id": "fleet_octane",
@@ -251,7 +251,7 @@ UTILITY_SEGMENT_RULES = [
         "pattern": r'(?i)(?:octane|petrol|motor\s+spirit|fleet\s+fuel)[\s:=]*([0-9,]+(?:\.[0-9]+)?)\s*(?:l|liter|litres)?',
         "unit": "Liters",
         "factor": 2.310,
-        "factor_citation": "BPC / DoE Motor Spirit & Octane Factor Gazette 2023"
+        "factor_citation": "UNVERIFIED legacy constant: no primary source located"
     },
     {
         "id": "commercial_lpg",
@@ -261,7 +261,7 @@ UTILITY_SEGMENT_RULES = [
         "pattern": r'(?i)(?:lpg|propane|gas\s+cylinder|autogas)[\s:=]*([0-9,]+(?:\.[0-9]+)?)\s*(?:kg|cylinders)?',
         "unit": "kg",
         "factor": 2.980,
-        "factor_citation": "DoE Liquefied Petroleum Gas Standard Factor"
+        "factor_citation": "UNVERIFIED legacy constant: no primary source located"
     },
     {
         "id": "saturated_steam",
@@ -300,8 +300,8 @@ UTILITY_SEGMENT_RULES = [
         "scope": "Scope 1",
         "pattern": r'(?i)(?:refrigerant|r[- ]?410a|r[- ]?134a|chiller\s+gas|freon)[\s:=]*([0-9,]+(?:\.[0-9]+)?)\s*(?:kg)?',
         "unit": "kg",
-        "factor": 2088.0,
-        "factor_citation": "IPCC AR6 Global Warming Potential (GWP) for R-410A"
+        "factor": 2255.5,
+        "factor_citation": "IPCC AR6 WG1 Table 7.SM.7 GWP-100: R-410A = 0.5 x HFC-32 (771) + 0.5 x HFC-125 (3740)"
     },
     {
         "id": "port_freight",
@@ -344,6 +344,7 @@ def detect_all_utility_segments(document_text: str, client_id: str = None) -> Di
     detected_segments = []
     excluded_segments = []
     scope_totals = {"Scope 1": 0.0, "Scope 2": 0.0, "Scope 3": 0.0}
+    incomplete = set()  # scopes with a detected line but no factor: their totals are None, not 0
 
     for rule in UTILITY_SEGMENT_RULES:
         match = re.search(rule["pattern"], document_text or "")
@@ -377,23 +378,27 @@ def detect_all_utility_segments(document_text: str, client_id: str = None) -> Di
             excluded_segments.append(segment)
             continue
 
+        scope = next(sc for sc in scope_totals if rule["scope"].startswith(sc))
+        if rule["factor"] is None:
+            segment["emissions_kg"] = segment["emissions_tco2e"] = None
+            segment["factor_status"] = "MISSING_GRID_AVERAGE_FACTOR"
+            incomplete.add(scope)
+            detected_segments.append(segment)
+            continue
         emissions_t = qty * rule["factor"] / 1000.0
         segment["emissions_kg"] = round(qty * rule["factor"], 2)
         segment["emissions_tco2e"] = round(emissions_t, 3)
-        for scope in scope_totals:
-            if rule["scope"].startswith(scope):
-                scope_totals[scope] += emissions_t
+        scope_totals[scope] += emissions_t
         detected_segments.append(segment)
 
     return {
         "segments": detected_segments,
         "excluded_segments": excluded_segments,
         "total_segments_detected": len(detected_segments),
-        "total_emissions_tco2e": round(sum(scope_totals.values()), 3),
+        "total_emissions_tco2e": None if incomplete else round(sum(scope_totals.values()), 3),
         "scope_breakdown": {
-            "scope1_tco2e": round(scope_totals["Scope 1"], 3),
-            "scope2_tco2e": round(scope_totals["Scope 2"], 3),
-            "scope3_tco2e": round(scope_totals["Scope 3"], 3),
+            f"scope{n}_tco2e": None if f"Scope {n}" in incomplete else round(scope_totals[f"Scope {n}"], 3)
+            for n in (1, 2, 3)
         },
         "review_status": "REVIEW_REQUIRED",
         "method_note": "Rule-based text match with unverified factors; not an audited or verified result.",

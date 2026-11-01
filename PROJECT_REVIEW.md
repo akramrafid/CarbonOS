@@ -14,7 +14,7 @@
 
 The codebase exhibits exceptional craftsmanship:
 1. **Executive UI Quality**: The Enterprise ESG SaaS suite (`/platform/saas-dashboard`) achieves the standard of a **$30,000 USD B2B SaaS platform**, featuring bespoke, hardware-accelerated SVG visualizations (Semi-Circular Target Gauge, 12-Month Catmull-Rom Trend Chart, Segmented Progress Bars), floating glassmorphic headers, and seamless dual-theme toggling (Obsidian Dark and 5-Color Mint Light).
-2. **Sovereign Regulatory Grounding**: All calculations are rigorously tied to official Bangladesh Department of Environment (DoE) & SREDA Grid Emission Factor Gazettes (`0.550 kg CO₂e / kWh`), Environment Conservation Rules 2023 (ECR 2023 / S.R.O. 349), and European Union CBAM export requirements.
+2. **Sovereign Regulatory Grounding**: Bangladesh rules are cited from primary sources (ECR 2023 = S.R.O. No. 53; EU CBAM covers iron/steel, aluminium, cement, fertilisers, hydrogen and electricity, not garments). No official Bangladesh grid factor has been located; the former 0.550 "DoE Gazette" combined margin was withdrawn (no source located; wrong factor kind for Scope 2).
 3. **Multi-Corpus Grounded RAG**: Implements ChromaDB dense vector indexing (`all-MiniLM-L6-v2`) with verbatim citations, page-number references, and a zero-cost local deterministic fallback engine.
 4. **Physical IoT & Computer Vision**: Integrates live Blynk Cloud IoT sensor streams from factory boilers and generators alongside a multi-head PyTorch CNN with Grad-CAM explainability for 41 crop disease classes across 8 Bangladesh crops.
 5. **Rock-Solid Engineering Discipline**: Automated frontend production builds (`tsc && vite build`) compile with **0 errors**, all **34 orchestrator unit tests** are 100% green, and system linting passes with zero errors.
@@ -126,7 +126,7 @@ The application features a meticulously crafted dual-theme engine:
 ## 🛡️ 5. Security, Tenant Boundaries & Regulatory Compliance
 
 ### Sovereign Regulatory Rigor (Score: 10 / 10)
-* **DoE Gazette Invariant**: Enforces the official Bangladesh Combined Margin Grid Emission Factor of **`0.550 kg CO₂e / kWh`** (Gazette Ref: `22.02.0000.018.99.001.23`).
+* **Grid factor invariant**: location-based Scope 2 accepts only an approved grid-average factor; a combined-margin factor is rejected in code and by a database check (the former 0.550 "DoE Gazette" combined margin was withdrawn (no source located; wrong factor kind for Scope 2)).
 * **Article 6 Compatibility**: Methodologies for solar irrigation and AWD rice align with UNFCCC Article 6.2 (ITMOs) and Article 6.4 crediting mechanisms.
 * **EU CBAM Alignment**: Dual Scope 2 reporting satisfies European Union Regulation (EU) 2023/956 rules for imported embedded emissions in energy-intensive goods.
 

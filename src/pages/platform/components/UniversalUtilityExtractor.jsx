@@ -38,11 +38,11 @@ const PRELOADED_INVOICE_TEMPLATES = {
     tariff: "E-1 Institutional Educational Tariff",
     raw_text: "EAST DELTA UNIVERSITY CAMPUS OPERATIONS. BPDB Chittagong High Tension Meter: BPDB-CTG-HT-44910. Flat Off-Peak Energy: 142,000 kWh @ 7.80 BDT. Peak Hour Energy: 48,000 kWh @ 11.20 BDT. Rooftop Solar Net-Metering Export Credit: 18,500 kWh @ 7.50 BDT. Maximum Sanctioned Demand: 350 kVA. Campus Bus Backup Diesel Fuel: 2,800 Liters. WASA Deep Tubewell Water Withdrawal: 9,200 m3.",
     segments: [
-      { id: "elec_offpeak", name: "Off-Peak Academic Power", type: "Electricity", scope: "Scope 2", qty: 142000, unit: "kWh", factor: 0.550, citation: "DoE Grid Baseline Gazette Ref: 22.02.0000.018.99.001.23", emissions_t: 78.10, cost_bdt: 1107600, confidence: 0.99, snippet: "Flat Off-Peak Energy: 142,000 kWh @ 7.80 BDT", status: "PENDING_AUDIT" },
-      { id: "elec_peak", name: "Peak Hour AC & Labs (17:00-23:00)", type: "Electricity", scope: "Scope 2", qty: 48000, unit: "kWh", factor: 0.620, citation: "DoE Grid Peaking Gas Surcharge", emissions_t: 29.76, cost_bdt: 537600, confidence: 0.98, snippet: "Peak Hour Energy: 48,000 kWh @ 11.20 BDT", status: "PENDING_AUDIT" },
-      { id: "solar_netmeter", name: "Rooftop Solar PV Export Credit", type: "Renewable Generation", scope: "Scope 2 (Avoided)", qty: 18500, unit: "kWh", factor: -0.550, citation: "SREDA Bangladesh Net-Metering Scheme", emissions_t: -10.18, cost_bdt: 138750, confidence: 1.0, snippet: "Rooftop Solar Net-Metering Export Credit: 18,500 kWh", status: "PENDING_AUDIT" },
+      { id: "elec_offpeak", name: "Off-Peak Academic Power", type: "Electricity", scope: "Scope 2", qty: 142000, unit: "kWh", factor: null, citation: "Grid-average factor required (none approved)", emissions_t: null, cost_bdt: 1107600, confidence: 0.99, snippet: "Flat Off-Peak Energy: 142,000 kWh @ 7.80 BDT", status: "PENDING_AUDIT" },
+      { id: "elec_peak", name: "Peak Hour AC & Labs (17:00-23:00)", type: "Electricity", scope: "Scope 2", qty: 48000, unit: "kWh", factor: null, citation: "Grid-average factor required (none approved)", emissions_t: null, cost_bdt: 537600, confidence: 0.98, snippet: "Peak Hour Energy: 48,000 kWh @ 11.20 BDT", status: "PENDING_AUDIT" },
+      { id: "solar_netmeter", name: "Rooftop Solar PV Export Credit", type: "Renewable Generation", scope: "Memo (export, never netted)", qty: 18500, unit: "kWh", factor: null, citation: "Memo item: exported kWh are never subtracted from Scope 2", emissions_t: 0, cost_bdt: 138750, confidence: 1.0, snippet: "Rooftop Solar Net-Metering Export Credit: 18,500 kWh", status: "PENDING_AUDIT" },
       { id: "demand_charge", name: "Sanctioned Campus Demand", type: "Grid Capacity Tariff", scope: "Infrastructure", qty: 350, unit: "kVA", factor: 0.0, citation: "BERC Educational Tariff Schedule", emissions_t: 0.0, cost_bdt: 52500, confidence: 0.97, snippet: "Maximum Sanctioned Demand: 350 kVA", status: "PENDING_AUDIT" },
-      { id: "captive_diesel", name: "Campus Generator & Shuttle Diesel", type: "Fossil Fuel", scope: "Scope 1", qty: 2800, unit: "Liters", factor: 2.680, citation: "Bangladesh DoE HSD Gazette Notice", emissions_t: 7.50, cost_bdt: 294000, confidence: 0.96, snippet: "Campus Bus Backup Diesel Fuel: 2,800 Liters", status: "PENDING_AUDIT" },
+      { id: "captive_diesel", name: "Campus Generator & Shuttle Diesel", type: "Fossil Fuel", scope: "Scope 1", qty: 2800, unit: "Liters", factor: 2.680, citation: "UNVERIFIED legacy constant", emissions_t: 7.50, cost_bdt: 294000, confidence: 0.96, snippet: "Campus Bus Backup Diesel Fuel: 2,800 Liters", status: "PENDING_AUDIT" },
       { id: "wasa_water", name: "WASA & Campus Tubewell Extraction", type: "Water Supply", scope: "Scope 3 (Cat 1)", qty: 9200, unit: "m³", factor: 0.344, citation: "DEFRA Water Supply Carbon Metric", emissions_t: 3.16, cost_bdt: 386400, confidence: 0.95, snippet: "WASA Deep Tubewell Water Withdrawal: 9,200 m3", status: "PENDING_AUDIT" }
     ]
   },
@@ -54,10 +54,10 @@ const PRELOADED_INVOICE_TEMPLATES = {
     tariff: "HT-3 Industrial Heavy Manufacturing",
     raw_text: "REVOO ELECTRIC VEHICLES ASSEMBLY PLANT. DESCO Gazipur Substation HT-3 Meter: DESCO-GZ-HT-8821. Off-Peak Assembly Energy: 108,000 kWh @ 9.20 BDT. Battery Formation & High-Rate Pack Charging: 34,000 kWh @ 12.80 BDT. Sanctioned Demand: 500 kVA. Power Factor Reactive Surcharge: 2,800 kVARh. Captive Genset HSD Diesel: 1,200 Liters. Chittagong Port Battery Cell Drayage: 46,000 Ton-km.",
     segments: [
-      { id: "elec_offpeak", name: "Off-Peak Assembly Robotics", type: "Electricity", scope: "Scope 2", qty: 108000, unit: "kWh", factor: 0.550, citation: "DoE Grid Baseline Gazette Ref: 22.02.0000.018.99.001.23", emissions_t: 59.40, cost_bdt: 993600, confidence: 0.99, snippet: "Off-Peak Assembly Energy: 108,000 kWh @ 9.20 BDT", status: "PENDING_AUDIT" },
-      { id: "elec_peak", name: "Battery Pack Formation Charging", type: "Electricity", scope: "Scope 2", qty: 34000, unit: "kWh", factor: 0.620, citation: "DoE Grid Peaking Gas Surcharge", emissions_t: 21.08, cost_bdt: 435200, confidence: 0.98, snippet: "Battery Formation & High-Rate Pack Charging: 34,000 kWh", status: "PENDING_AUDIT" },
-      { id: "power_factor_penalty", name: "Power Factor Reactive Loss", type: "Grid Efficiency", scope: "Scope 2", qty: 2800, unit: "kVARh", factor: 0.080, citation: "DESCO Substation Line Loss Metric", emissions_t: 0.22, cost_bdt: 12600, confidence: 0.96, snippet: "Power Factor Reactive Surcharge: 2,800 kVARh", status: "PENDING_AUDIT" },
-      { id: "captive_diesel", name: "Testing Backup HSD Diesel", type: "Fossil Fuel", scope: "Scope 1", qty: 1200, unit: "Liters", factor: 2.680, citation: "Bangladesh DoE HSD Gazette Notice", emissions_t: 3.22, cost_bdt: 126000, confidence: 0.97, snippet: "Captive Genset HSD Diesel: 1,200 Liters", status: "PENDING_AUDIT" },
+      { id: "elec_offpeak", name: "Off-Peak Assembly Robotics", type: "Electricity", scope: "Scope 2", qty: 108000, unit: "kWh", factor: null, citation: "Grid-average factor required (none approved)", emissions_t: null, cost_bdt: 993600, confidence: 0.99, snippet: "Off-Peak Assembly Energy: 108,000 kWh @ 9.20 BDT", status: "PENDING_AUDIT" },
+      { id: "elec_peak", name: "Battery Pack Formation Charging", type: "Electricity", scope: "Scope 2", qty: 34000, unit: "kWh", factor: null, citation: "Grid-average factor required (none approved)", emissions_t: null, cost_bdt: 435200, confidence: 0.98, snippet: "Battery Formation & High-Rate Pack Charging: 34,000 kWh", status: "PENDING_AUDIT" },
+      { id: "power_factor_penalty", name: "Power Factor Reactive Loss", type: "Grid Efficiency", scope: "Memo (reactive energy)", qty: 2800, unit: "kVARh", factor: null, citation: "Reactive energy is not consumed energy: no emissions", emissions_t: 0, cost_bdt: 12600, confidence: 0.96, snippet: "Power Factor Reactive Surcharge: 2,800 kVARh", status: "PENDING_AUDIT" },
+      { id: "captive_diesel", name: "Testing Backup HSD Diesel", type: "Fossil Fuel", scope: "Scope 1", qty: 1200, unit: "Liters", factor: 2.680, citation: "UNVERIFIED legacy constant", emissions_t: 3.22, cost_bdt: 126000, confidence: 0.97, snippet: "Captive Genset HSD Diesel: 1,200 Liters", status: "PENDING_AUDIT" },
       { id: "port_freight", name: "Port Battery Cell Drayage Haulage", type: "Logistics", scope: "Scope 3 (Cat 4)", qty: 46000, unit: "Ton-km", factor: 0.200, citation: "Smart Freight Centre GLEC Heavy Goods Road Transport", emissions_t: 9.20, cost_bdt: 828000, confidence: 0.97, snippet: "Chittagong Port Battery Cell Drayage: 46,000 Ton-km", status: "PENDING_AUDIT" }
     ]
   },
@@ -69,11 +69,11 @@ const PRELOADED_INVOICE_TEMPLATES = {
     tariff: "Captive Industrial Cogeneration & Thermal",
     raw_text: "POLYJUTE ASIA ECO-PACKAGING MILL. KGDC Gas Meter: KGDC-IND-9092. Captive Natural Gas Boiler: 24,500 m3 @ 30.00 BDT. Industrial High-Pressure Saturated Steam: 140 Metric Tons @ 2400 BDT. WASA Industrial Water Supply: 8,500 m3 @ 42.00 BDT. Effluent Treatment Plant (ETP) Discharged Volume: 6,200 m3 @ 25.00 BDT. Backup Generator HSD: 4,200 Liters. Process Solid Waste Landfill Divert: 28 Tons.",
     segments: [
-      { id: "natural_gas", name: "Captive Natural Gas for Boiler", type: "Fossil Fuel", scope: "Scope 1", qty: 24500, unit: "m³", factor: 2.020, citation: "Petrobangla & DoE Gas Factor Ref: 22.02.0000.018.99.001.23", emissions_t: 49.49, cost_bdt: 735000, confidence: 0.99, snippet: "Captive Natural Gas Boiler: 24,500 m3 @ 30.00 BDT", status: "PENDING_AUDIT" },
+      { id: "natural_gas", name: "Captive Natural Gas for Boiler", type: "Fossil Fuel", scope: "Scope 1", qty: 24500, unit: "m³", factor: 2.020, citation: "UNVERIFIED legacy constant", emissions_t: 49.49, cost_bdt: 735000, confidence: 0.99, snippet: "Captive Natural Gas Boiler: 24,500 m3 @ 30.00 BDT", status: "PENDING_AUDIT" },
       { id: "saturated_steam", name: "Purchased High-Pressure Steam", type: "Thermal Energy", scope: "Scope 2", qty: 140, unit: "Metric Tons", factor: 180.0, citation: "GHG Protocol Scope 2 Purchased Steam Guidance", emissions_t: 25.20, cost_bdt: 336000, confidence: 0.98, snippet: "Industrial High-Pressure Saturated Steam: 140 Metric Tons", status: "PENDING_AUDIT" },
       { id: "wasa_water", name: "Jute Retting Water Intake", type: "Water Supply", scope: "Scope 3 (Cat 1)", qty: 8500, unit: "m³", factor: 0.344, citation: "DEFRA Water Treatment Metric", emissions_t: 2.92, cost_bdt: 357000, confidence: 0.96, snippet: "WASA Industrial Water Supply: 8,500 m3 @ 42.00 BDT", status: "PENDING_AUDIT" },
       { id: "etp_effluent", name: "ETP Anaerobic Effluent Discharge", type: "Effluent", scope: "Scope 1", qty: 6200, unit: "m³", factor: 0.780, citation: "IPCC Wastewater Treatment Standard", emissions_t: 4.84, cost_bdt: 155000, confidence: 0.97, snippet: "Effluent Treatment Plant (ETP) Discharged Volume: 6,200 m3", status: "PENDING_AUDIT" },
-      { id: "captive_diesel", name: "Mill Backup Power HSD", type: "Fossil Fuel", scope: "Scope 1", qty: 4200, unit: "Liters", factor: 2.680, citation: "Bangladesh DoE HSD Gazette Notice", emissions_t: 11.26, cost_bdt: 441000, confidence: 0.96, snippet: "Backup Generator HSD: 4,200 Liters", status: "PENDING_AUDIT" },
+      { id: "captive_diesel", name: "Mill Backup Power HSD", type: "Fossil Fuel", scope: "Scope 1", qty: 4200, unit: "Liters", factor: 2.680, citation: "UNVERIFIED legacy constant", emissions_t: 11.26, cost_bdt: 441000, confidence: 0.96, snippet: "Backup Generator HSD: 4,200 Liters", status: "PENDING_AUDIT" },
       { id: "solid_waste", name: "Biodegradable Offcut Landfill Diversion", type: "Waste", scope: "Scope 3 (Cat 5)", qty: 28, unit: "Tons", factor: 450.0, citation: "DoE Municipal Solid Waste Methane Standard", emissions_t: 12.60, cost_bdt: 33600, confidence: 0.95, snippet: "Process Solid Waste Landfill Divert: 28 Tons", status: "PENDING_AUDIT" }
     ]
   }
@@ -107,7 +107,7 @@ export const UniversalUtilityExtractor = ({
     scope: "Scope 2",
     qty: "",
     unit: "kWh",
-    factor: "0.550",
+    factor: "",
     cost_bdt: ""
   });
 
@@ -157,9 +157,9 @@ export const UniversalUtilityExtractor = ({
           scope: seg.scope || "Scope 2",
           qty: seg.quantity || 0,
           unit: seg.unit || "kWh",
-          factor: seg.emission_factor || 0.550,
-          citation: seg.citation || "DoE Gazette Baseline",
-          emissions_t: seg.emissions_t || 0,
+          factor: seg.emission_factor ?? null,
+          citation: seg.factor_citation || seg.citation || "Factor required",
+          emissions_t: seg.emissions_tco2e ?? null,
           cost_bdt: seg.cost_bdt || 0,
           confidence: seg.confidence || 0.95,
           snippet: seg.snippet || `Extracted from ${file.name}`,
@@ -212,9 +212,9 @@ export const UniversalUtilityExtractor = ({
     const idx = editingSegment.index;
     const oldSeg = segments[idx];
     const newQty = parseFloat(editingSegment.qty) || 0;
-    const newFactor = parseFloat(editingSegment.factor) || 0;
+    const newFactor = editingSegment.factor === "" || editingSegment.factor == null ? null : parseFloat(editingSegment.factor);
     const newCost = parseFloat(editingSegment.cost_bdt) || 0;
-    const newEmissions = (newQty * newFactor) / 1000.0;
+    const newEmissions = newFactor == null ? null : (newQty * newFactor) / 1000.0;
 
     const updatedSeg = {
       ...oldSeg,
@@ -223,7 +223,7 @@ export const UniversalUtilityExtractor = ({
       factor: newFactor,
       unit: editingSegment.unit,
       cost_bdt: newCost,
-      emissions_t: parseFloat(newEmissions.toFixed(2)),
+      emissions_t: newEmissions == null ? null : parseFloat(newEmissions.toFixed(2)),
       status: "CORRECTED_BY_AUDITOR",
       audit_note: editingSegment.reason || "Auditor manual adjustment"
     };
@@ -307,7 +307,7 @@ export const UniversalUtilityExtractor = ({
     setSegments([...segments, item]);
     setAuditLog([auditEvent, ...auditLog]);
     setShowAddSegmentModal(false);
-    setNewSegment({ name: "", type: "Electricity", scope: "Scope 2", qty: "", unit: "kWh", factor: "0.550", cost_bdt: "" });
+    setNewSegment({ name: "", type: "Electricity", scope: "Scope 2", qty: "", unit: "kWh", factor: "", cost_bdt: "" });
   };
 
   // Commit to active client's ledger with deterministic cryptographic seal
@@ -609,13 +609,13 @@ export const UniversalUtilityExtractor = ({
                     </td>
 
                     <td className="p-3.5 max-w-xs">
-                      <div className="font-mono text-[11px] text-emerald-400 font-semibold">{seg.factor} kgCO₂e/{seg.unit}</div>
+                      <div className="font-mono text-[11px] text-emerald-400 font-semibold">{seg.factor == null ? "Factor required" : `${seg.factor} kgCO₂e/${seg.unit}`}</div>
                       <div className="text-[9px] text-gray-400 truncate">{seg.citation}</div>
                     </td>
 
                     <td className="p-3.5 text-right font-mono font-bold text-sm">
                       <span className={isRejected ? 'line-through text-gray-500' : (seg.emissions_t < 0 ? 'text-emerald-400' : 'text-white')}>
-                        {seg.emissions_t.toFixed(2)} t
+                        {seg.emissions_t == null ? "—" : `${seg.emissions_t.toFixed(2)} t`}
                       </span>
                     </td>
 
@@ -669,7 +669,7 @@ export const UniversalUtilityExtractor = ({
       <div className="flex flex-col sm:flex-row items-center justify-between gap-4 pt-4 border-t border-white/10">
         <div className="flex items-center space-x-2 text-xs text-gray-400">
           <ShieldCheck className="w-4 h-4 text-[#00C853]" />
-          <span>All approved line-items are bound by GHG Protocol Corporate Standard & Bangladesh DoE S.R.O. 349.</span>
+          <span>Line items follow the GHG Protocol Corporate Standard. Nothing here is audited, verified or assured.</span>
         </div>
 
         <button
@@ -748,7 +748,7 @@ export const UniversalUtilityExtractor = ({
                   <input 
                     type="number" 
                     step="any"
-                    value={editingSegment.factor}
+                    value={editingSegment.factor ?? ""}
                     onChange={(e) => setEditingSegment({...editingSegment, factor: e.target.value})}
                     required
                     className="w-full p-2.5 rounded-xl bg-[#040A06] border border-white/10 text-white focus:outline-none focus:border-amber-400 font-mono text-emerald-400 font-bold"
@@ -891,7 +891,7 @@ export const UniversalUtilityExtractor = ({
                     step="any"
                     value={newSegment.factor}
                     onChange={(e) => setNewSegment({...newSegment, factor: e.target.value})}
-                    placeholder="0.550"
+                    placeholder="Approved factor"
                     required
                     className="w-full p-2.5 rounded-xl bg-[#040A06] border border-white/10 text-white focus:outline-none focus:border-[#00C853]"
                   />

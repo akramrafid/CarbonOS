@@ -127,6 +127,18 @@ def visible_factors(db, principal):
         or_(EmissionFactor.organization_id == principal.organization_id, EmissionFactor.organization_id.is_(None)))
 
 
+def _check_factor_kind(data):
+    """Same rule as accounting.factor_kind_error and the ck_esg_factor_* constraints, as a clear 422."""
+    kind = data.get("factor_kind")
+    if kind in accounting.MARGIN_FACTOR_KINDS and data["method"] in ("location", "market"):
+        raise DomainError(422, "A combined-margin factor is a CDM project-baseline metric, not a grid average; "
+                               "it cannot be used for Scope 2. Location-based Scope 2 needs the grid average rate.")
+    allowed = accounting.allowed_factor_kinds(data["activity_type"], data["method"])
+    if kind not in allowed:
+        names = ", ".join(k for k in allowed if k) or "none (leave empty)"
+        raise DomainError(422, f"factor_kind for {data['activity_type']}/{data['method']} must be: {names}")
+
+
 def create_factor(db, principal, data, platform_wide=False):
     """New DRAFT factor version. Organization factors are custom; platform factors need an operator."""
     if platform_wide:
@@ -143,6 +155,7 @@ def create_factor(db, principal, data, platform_wide=False):
     scope = accounting.ACTIVITY_TYPES[data["activity_type"]][0]
     if (scope == "1") != (data["method"] == "direct"):
         raise DomainError(422, "Scope 1 factors use method 'direct'; Scope 2 factors use 'location' or 'market'")
+    _check_factor_kind(data)
     latest = db.query(EmissionFactor.version).filter(EmissionFactor.family == family) \
         .order_by(EmissionFactor.version.desc()).first()
     payload = {k: v for k, v in data.items() if k != "family"}
@@ -382,7 +395,7 @@ def calculate_period(db, principal, period_id):
         {f.id: accounting.Facility(f.id, f.grid_region, f.operational_control, f.financial_control,
                                    Decimal(f.equity_share_pct), f.legal_entity_id) for f in facs},
         [accounting.Factor(f.id, f.version, f.family, f.activity_type, f.unit, Decimal(f.kgco2e_per_unit), f.region,
-                           f.gwp_basis, f.method, f.valid_from, f.valid_to) for f in factors],
+                           f.gwp_basis, f.method, f.valid_from, f.valid_to, kind=f.factor_kind) for f in factors],
         period.boundary_method,
     )
     run = CalculationRun(
@@ -497,7 +510,7 @@ def _report_content(db, principal, period, run):
                                               "inclusion_share", "factor_id", "factor_version", "factor_value",
                                               "emissions_kg", "formula")} for l in lines],
         "factors_used": [{k: getattr(f, k) for k in ("id", "family", "version", "activity_type", "unit",
-                                                     "kgco2e_per_unit", "region", "gwp_basis", "method",
+                                                     "kgco2e_per_unit", "region", "gwp_basis", "method", "factor_kind",
                                                      "source_publisher", "source_document", "source_url",
                                                      "source_table_ref", "source_year", "is_custom", "approved_by")}
                          for f in factors],

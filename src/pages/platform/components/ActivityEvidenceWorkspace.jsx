@@ -27,7 +27,7 @@ import { CLIENT_PROFILES } from '../clientProfiles';
 
 // Helper for number formatting
 const fmt = (num, decimals = 2) => {
-  if (num === null || num === undefined || isNaN(num)) return '0.00';
+  if (num === null || num === undefined || isNaN(num)) return '—'; // missing is not zero
   return Number(num).toLocaleString('en-US', {
     minimumFractionDigits: decimals,
     maximumFractionDigits: decimals
@@ -68,8 +68,8 @@ export const generateClientActivityData = (client) => {
       amountBdt: Math.round(elecQty * 11.85),
       sha256: "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
       verifiedBy: client.assignedAuditor || "Senior ESG Assurance Lead",
-      status: "Verified",
-      notes: "Substation meter telemetry cross-verified with Bangladesh DoE Grid Factor (0.550 kg CO₂e/kWh)."
+      status: "Reviewed",
+      notes: "Substation meter reading. Grid-average factor pending approval, so no emissions are calculated yet."
     },
     {
       id: `EVD-${client.id.toUpperCase().slice(0, 4)}-002`,
@@ -145,10 +145,10 @@ export const generateClientActivityData = (client) => {
       quantity: elecQty,
       unit: "kWh",
       emissionFactorId: "EF-BD-GRID-2024",
-      emissionFactorVersion: "v2024.1 (DoE SRO Gazette)",
-      kgCO2ePerUnit: 0.550,
-      tCO2e: parseFloat(((elecQty * 0.550) / 1000).toFixed(2)),
-      formula: "Qty (kWh) × 0.550 kg CO₂e/kWh ÷ 1000",
+      emissionFactorVersion: "Not set (grid-average factor pending approval)",
+      kgCO2ePerUnit: null,
+      tCO2e: null,
+      formula: "Qty (kWh) × approved grid-average factor ÷ 1000 (factor pending)",
       dataSource: "High-Tension Utility Substation Meter",
       evidenceId: `EVD-${client.id.toUpperCase().slice(0, 4)}-001`,
       evidenceFileName: client.sampleInvoiceName || `${client.name}_Electricity_Utility_Statement.pdf`,
@@ -1171,7 +1171,7 @@ export const ActivityEvidenceWorkspace = ({
                       let defaultFactor = '2.68';
                       let defaultUnit = 'Liters';
                       if (sc.includes('Scope 2')) {
-                        defaultFactor = '0.550';
+                        defaultFactor = ''; // enter an approved grid-average factor
                         defaultUnit = 'kWh';
                       } else if (sc.includes('Scope 3')) {
                         defaultFactor = '0.20';

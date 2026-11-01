@@ -11,7 +11,7 @@
 
 | # | Capability | Current Status | Supporting Backend / Modules | Verifiable Evidence | Roadmap & Next Milestones |
 |---|---|---|---|---|---|
-| 1 | **Enterprise Carbon Accounting** | `VERIFIED_READY` | `inference/esg_rag/calculation_engine.py`, `factor_registry.py` | Scope 1, 2, 3 calculations; verified DoE Combined Margin (`0.550 kg/kWh`); SHA256 audit seals (`test_esg_engine.py`). | Expand Scope 3 supplier activity factors and product lifecycle accounting. |
+| 1 | **Enterprise Carbon Accounting** | `IN_PROGRESS` | `inference/esg_rag/calculation_engine.py`, `factor_registry.py` | Scope 1, 2, 3 calculations; the former 0.550 "DoE Gazette" combined margin was withdrawn (no source located; wrong factor kind for Scope 2); SHA256 audit seals (`test_esg_engine.py`). | Expand Scope 3 supplier activity factors and product lifecycle accounting. |
 | 2 | **ESG Data Management & Reporting** | `VERIFIED_READY` | `inference/esg_rag/router.py`, `src/pages/platform/SaaSDashboard.jsx` | 9-category breakdown, facility comparisons, audit trail exports, executive KPI metrics. | Add formal BRSR and CSRD export format templates. |
 | 3 | **Multi-Organization & Multi-Facility Operations** | `PARTIALLY_IMPLEMENTED` | `inference/esg_rag/retriever.py`, Django tenant models | Tenant-isolated vector retrieval (`test_tenant_isolation.py`); organization filtering in DB queries. | Build multi-tenant self-serve facility onboarding wizard in frontend. |
 | 4 | **AI-Assisted Utility Document Processing** | `VERIFIED_READY` | `inference/esg_rag/extractor.py`, `router.py` | Universal regex & multi-segment bill parser with zero-fabrication fallback; extraction confidence scores. | Introduce side-by-side human-in-the-loop PDF review canvas before ledger commit. |

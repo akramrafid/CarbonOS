@@ -24,7 +24,7 @@ const INITIAL_FACTORS = [
     version: "v2026.1-NATIONAL",
     tier: "Tier 2 (National)",
     citation: "DoE & PetroBangla Energy Standard 2023",
-    gazette: "Gazette Ref: 22.02.0000.018.99.001.23"
+    gazette: "UNVERIFIED: no primary source located"
   },
   {
     id: "EF-BD-PETROL-01",
@@ -36,7 +36,7 @@ const INITIAL_FACTORS = [
     version: "v2026.1-NATIONAL",
     tier: "Tier 2 (National)",
     citation: "PetroBangla Density Standard Benchmark",
-    gazette: "ECR 2023 Schedule 4"
+    gazette: "UNVERIFIED: no primary source located"
   },
   {
     id: "EF-BD-LPG-01",
@@ -48,19 +48,7 @@ const INITIAL_FACTORS = [
     version: "v2026.1-NATIONAL",
     tier: "Tier 2 (National)",
     citation: "SREDA Industrial Thermal Benchmark",
-    gazette: "SREDA/Audit/Gas/2023"
-  },
-  {
-    id: "EF-BD-GRID-CM-01",
-    name: "National Grid Combined Margin (CM)",
-    category: "Scope 2",
-    factor_value: 0.550,
-    unit: "kg CO₂e / kWh",
-    uncertainty: "±1.8%",
-    version: "v2026.1-NATIONAL",
-    tier: "Tier 2 (UNFCCC CDM)",
-    citation: "DoE & SREDA Grid Emission Factor Study (FY2022-23)",
-    gazette: "DoE Gazette Ref: 22.02.0000.018.99.001.23"
+    gazette: "UNVERIFIED: no primary source located"
   },
   {
     id: "EF-BD-GREEN-TARIFF-01",
@@ -72,7 +60,7 @@ const INITIAL_FACTORS = [
     version: "v2026.1-NATIONAL",
     tier: "Tier 3 (Facility PPA)",
     citation: "SREDA Net-Metering Standard 2022",
-    gazette: "SREDA-NMP-2022"
+    gazette: "UNVERIFIED: no primary source located"
   },
   {
     id: "EF-BD-COMMUTE-01",
@@ -84,7 +72,7 @@ const INITIAL_FACTORS = [
     version: "v2026.1-NATIONAL",
     tier: "Tier 2 (Survey N=12k)",
     citation: "BGMEA & ILO Decent Work Transport Survey",
-    gazette: "ILO-BGMEA-ESG-2023"
+    gazette: "UNVERIFIED: no primary source located"
   },
   {
     id: "EF-BD-FREIGHT-N1-01",
@@ -96,7 +84,7 @@ const INITIAL_FACTORS = [
     version: "v2026.1-NATIONAL",
     tier: "Tier 2 (Telemetry)",
     citation: "Roads & Highways Department Logistics Study",
-    gazette: "RHD/Freight/2023-11"
+    gazette: "UNVERIFIED: no primary source located"
   },
   {
     id: "EF-BD-RAW-YARN-01",
@@ -108,7 +96,7 @@ const INITIAL_FACTORS = [
     version: "v2026.1-NATIONAL",
     tier: "Tier 2 (BTMA Model)",
     citation: "Bangladesh Textile Mills Association (BTMA)",
-    gazette: "BTMA-MFA-2023"
+    gazette: "UNVERIFIED: no primary source located"
   }
 ];
 
@@ -254,7 +242,7 @@ export const FactorRegistryStudio = ({ isLight, locale }) => {
               <th className="pb-3 font-semibold">Category</th>
               <th className="pb-3 font-semibold">Factor Value</th>
               <th className="pb-3 font-semibold">Uncertainty</th>
-              <th className="pb-3 font-semibold">Version & Gazette Citation</th>
+              <th className="pb-3 font-semibold">Version & citation status</th>
               <th className="pb-3 font-semibold text-right">Action</th>
             </tr>
           </thead>

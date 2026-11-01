@@ -16,9 +16,15 @@ from esg_rag.accounting import (  # noqa: E402
 JAN1, DEC31 = dt.date(2025, 1, 1), dt.date(2025, 12, 31)
 
 
-def factor(id, activity_type, unit, value, method, family=None, version=1, region="BD", gwp="AR5", valid_from=JAN1):
+DEFAULT_KIND = {("electricity", "location"): "grid_average", ("electricity", "market"): "supplier_specific"}
+
+
+def factor(id, activity_type, unit, value, method, family=None, version=1, region="BD", gwp="AR5", valid_from=JAN1,
+           kind="default"):
+    kind = DEFAULT_KIND.get((activity_type, method)) if kind == "default" else kind
     return Factor(id=id, version=version, family=family or id, activity_type=activity_type, unit=unit,
-                  kgco2e_per_unit=D(value), region=region, gwp_basis=gwp, method=method, valid_from=valid_from)
+                  kgco2e_per_unit=D(value), region=region, gwp_basis=gwp, method=method, valid_from=valid_from,
+                  kind=kind)
 
 
 def act(id, fac, activity_type, qty, unit, start=dt.date(2025, 3, 1), end=dt.date(2025, 3, 31), **kw):
@@ -129,6 +135,53 @@ class CalculationTests(unittest.TestCase):
         r2 = calculate(list(reversed(acts)), FAC, [GRID], "operational_control")
         self.assertEqual([l.formula for l in r1.lines], [l.formula for l in r2.lines])
         self.assertEqual(r1.scope2_location_kg, r2.scope2_location_kg)
+
+
+class Scope2FactorKindTests(unittest.TestCase):
+    """Regression: location-based Scope 2 is the grid AVERAGE rate. A CDM combined margin (a project
+    baseline metric, e.g. the 0.550 once hard-coded here) must never produce a Scope 2 line."""
+
+    def codes(self, r):
+        return [e["code"] for e in r.exceptions]
+
+    def test_combined_margin_never_produces_a_scope2_line(self):
+        cm = factor("cm", "electricity", "kWh", "0.55", "location", kind="grid_combined_margin")
+        for acts in ([act("a1", "f1", "electricity", "1000", "kWh")],
+                     [act("a1", "f1", "electricity", "1000", "kWh", factor_id="cm")]):
+            r = calculate(acts, FAC, [cm], "operational_control")
+            self.assertEqual(r.lines, [])
+            self.assertEqual(r.scope2_location_kg, 0)
+            self.assertIn("MARGIN_FACTOR_NOT_ALLOWED", self.codes(r))
+            self.assertTrue(r.blocking)
+
+    def test_combined_margin_rejected_as_market_factor(self):
+        cm = factor("cm-mkt", "electricity", "kWh", "0.55", "market", kind="grid_combined_margin")
+        r = calculate([act("a1", "f1", "electricity", "1000", "kWh", market_factor_id="cm-mkt")], FAC, [GRID, cm],
+                      "operational_control")
+        self.assertIsNone(r.scope2_market_kg)
+        self.assertIn("MARGIN_FACTOR_NOT_ALLOWED", self.codes(r))
+        self.assertTrue(r.blocking)
+
+    def test_margin_is_skipped_when_a_grid_average_exists(self):
+        cm = factor("cm", "electricity", "kWh", "0.55", "location", kind="grid_combined_margin")
+        r = calculate([act("a1", "f1", "electricity", "1000", "kWh")], FAC, [GRID, cm], "operational_control")
+        self.assertEqual([l.factor_id for l in r.lines], ["grid"])
+        self.assertFalse(r.blocking)
+
+    def test_location_factor_must_declare_grid_average(self):
+        undeclared = factor("u", "electricity", "kWh", "0.5", "location", kind=None)
+        residual = factor("rm", "electricity", "kWh", "0.6", "location", kind="residual_mix")
+        for f, code in ((undeclared, "FACTOR_KIND_UNDECLARED"), (residual, "FACTOR_KIND_NOT_ALLOWED")):
+            r = calculate([act("a1", "f1", "electricity", "10", "kWh")], FAC, [f], "operational_control")
+            self.assertEqual((r.lines, self.codes(r)), ([], [code, "MISSING_MARKET_BASED_INPUT"]))
+
+    def test_market_grid_average_fallback_is_disclosed(self):
+        fallback = factor("grid-mkt", "electricity", "kWh", "0.5", "market", kind="grid_average")
+        r = calculate([act("a1", "f1", "electricity", "1000", "kWh", market_factor_id="grid-mkt")], FAC,
+                      [GRID, fallback], "operational_control")
+        self.assertEqual(r.scope2_market_kg, D("500"))
+        fb = next(e for e in r.exceptions if e["code"] == "MARKET_BASED_GRID_AVERAGE_FALLBACK")
+        self.assertFalse(fb["blocking"])
 
 
 if __name__ == "__main__":

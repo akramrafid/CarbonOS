@@ -48,7 +48,7 @@ export const DuckDBEngineView = ({
 
   const defaultResults = {
     scope1: ((parseFloat(safeInputs.diesel || 0) * 2.68 + parseFloat(safeInputs.petrol || 0) * 2.31 + parseFloat(safeInputs.lpg || 0) * 2.98) / 1000).toFixed(2),
-    scope2: (parseFloat(safeInputs.electricity || 0) * 0.55 / 1000).toFixed(2),
+    scope2: null, // no default grid factor: location-based Scope 2 needs an approved grid-average factor
     scope3: ((parseFloat(safeInputs.employees || 0) * 0.40) + (parseFloat(safeInputs.truckTransport || 0) * 0.20 / 1000) + (parseFloat(safeInputs.rawMaterials || 0) * 2.50)).toFixed(2)
   };
   const safeResults = { ...defaultResults, ...(activityResults || {}) };
@@ -248,10 +248,10 @@ export const DuckDBEngineView = ({
           <div className={`p-5 rounded-3xl border ${isLight ? 'bg-white border-gray-200' : 'bg-[#0A160F] border-[#1B4D2E]'}`}>
             <div className="flex items-center justify-between mb-4">
               <span className="text-xs font-mono font-bold text-cyan-500 uppercase tracking-wider">Scope 2 Grid</span>
-              <span className="text-lg font-bold font-mono text-cyan-500">{safeResults?.scope2 || 0} tCO₂e</span>
+              <span className="text-lg font-bold font-mono text-cyan-500">{safeResults?.scope2 ?? '—'} tCO₂e</span>
             </div>
             <p className={`text-xs mb-4 ${isLight ? 'text-gray-500' : 'text-gray-400'}`}>
-              Grid electricity via Bangladesh National Combined Margin (0.550 kg CO₂e/kWh).
+              Grid electricity × an approved grid-average factor (location-based). No default factor is applied.
             </p>
             <div className="space-y-2.5 text-xs font-mono">
               <div className="flex justify-between py-1 border-b border-gray-100 dark:border-gray-800">
@@ -259,8 +259,8 @@ export const DuckDBEngineView = ({
                 <span className="font-bold">{safeInputs.electricity} kWh</span>
               </div>
               <div className="flex justify-between py-1 border-b border-gray-100 dark:border-gray-800">
-                <span className={isLight ? 'text-gray-600' : 'text-gray-400'}>Location Factor (DoE Gazette)</span>
-                <span className="font-bold text-emerald-500">0.550 kg/kWh</span>
+                <span className={isLight ? 'text-gray-600' : 'text-gray-400'}>Location factor (grid average)</span>
+                <span className="font-bold text-amber-500">Not set: needs approval</span>
               </div>
               <div className="flex justify-between py-1">
                 <span className={isLight ? 'text-gray-600' : 'text-gray-400'}>Market Factor (Solar PPA)</span>

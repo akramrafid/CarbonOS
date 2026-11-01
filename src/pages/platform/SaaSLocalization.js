@@ -27,9 +27,9 @@ export const SaaSLocales = {
     // Header & Badges
     auditorModeActive: "Auditor Mode Active",
     auditorModeInactive: "Auditor Mode Off",
-    nationalGridFactorLabel: "National Grid EF: 0.550 kg CO₂e/kWh",
-    gazetteRef: "DoE Gazette Ref: 22.02.0000.018.99.001.23",
-    verifiedSeal: "ISO 14064-1 Audited",
+    nationalGridFactorLabel: "Grid factor: approved grid average only",
+    gazetteRef: "No official Bangladesh grid factor located",
+    verifiedSeal: "Not assured",
     exportAssurancePack: "Export Assurance Pack",
 
     // KPI Cards
@@ -123,9 +123,9 @@ export const SaaSLocales = {
     // Header & Badges
     auditorModeActive: "অডিটর মোড সক্রিয়",
     auditorModeInactive: "অডিটর মোড বন্ধ",
-    nationalGridFactorLabel: "জাতীয় গ্রিড ফ্যাক্টর: ০.৫৫০ কেজি CO₂e/kWh",
-    gazetteRef: "পরিবেশ অধিদপ্তর গেজেট নং: ২২.০২.০০০০.০১৮.৯৯.০০১.২৩",
-    verifiedSeal: "আইএসও ১৪০৬৪-১ নিরীক্ষিত",
+    nationalGridFactorLabel: "গ্রিড ফ্যাক্টর: শুধুমাত্র অনুমোদিত গ্রিড গড়",
+    gazetteRef: "কোনো সরকারি বাংলাদেশ গ্রিড ফ্যাক্টর পাওয়া যায়নি",
+    verifiedSeal: "নিশ্চয়তা প্রদান করা হয়নি",
     exportAssurancePack: "অ্যাসুরেন্স প্যাক ডাউনলোড",
 
     // KPI Cards

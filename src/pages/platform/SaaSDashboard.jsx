@@ -423,7 +423,7 @@ const BANGLADESH_DISTRICTS = [
 const NINE_CATEGORIES_CONFIG = [
   { id: 'food_groceries', name: 'Food & Groceries', icon: Utensils, color: '#F59E0B', defaultScope: 'Scope 3', defaultUnit: 'Staff Meals', defaultFactor: 2.40 },
   { id: 'transport', name: 'Transport', icon: Car, color: '#00E5FF', defaultScope: 'Scope 1 & 3', defaultUnit: 'Liters / T-Km', defaultFactor: 2.31 },
-  { id: 'electricity_energy', name: 'Electricity & Energy', icon: Zap, color: '#00C853', defaultScope: 'Scope 2 & 1', defaultUnit: 'kWh & Gen-Liters', defaultFactor: 0.55 },
+  { id: 'electricity_energy', name: 'Electricity & Energy', icon: Zap, color: '#00C853', defaultScope: 'Scope 2 & 1', defaultUnit: 'kWh & Gen-Liters', defaultFactor: null },
   { id: 'clothing_footwear', name: 'Clothing & Footwear', icon: Shirt, color: '#EC4899', defaultScope: 'Scope 3', defaultUnit: 'PPE Garments', defaultFactor: 8.50 },
   { id: 'shopping_products', name: 'Shopping & Products', icon: ShoppingBag, color: '#A855F7', defaultScope: 'Scope 3', defaultUnit: 'Metric Tons Inputs', defaultFactor: 2500.0 },
   { id: 'housing_rent', name: 'Housing & Rent', icon: Home, color: '#3B82F6', defaultScope: 'Scope 1 & 2', defaultUnit: 'Facility m²', defaultFactor: 0.35 },
@@ -432,7 +432,7 @@ const NINE_CATEGORIES_CONFIG = [
   { id: 'others', name: 'Others', icon: Package, color: '#94A3B8', defaultScope: 'Scope 3', defaultUnit: 'Ancillary Services', defaultFactor: 0.22 },
 ];
 
-const computeCategoryMatrix = (rawParams = {}, customAddedItems = [], adjustments = {}) => {
+const computeCategoryMatrix = (rawParams = {}, customAddedItems = [], adjustments = {}, gridFactor = null) => {
   const diesel = parseFloat(rawParams.diesel) || 0;
   const petrol = parseFloat(rawParams.petrol) || 0;
   const lpg = parseFloat(rawParams.lpg) || 0;
@@ -457,8 +457,9 @@ const computeCategoryMatrix = (rawParams = {}, customAddedItems = [], adjustment
   let transSpend = (petrol * 125) + (diesel * 0.30 * 105) + (truckTransport * 18) + (airTravel * 14);
   if (transSpend <= 0) transSpend = 185000;
 
-  // 3. Electricity & Energy
-  const gridKg = electricity * 0.550;
+  // 3. Electricity & Energy. No default grid factor: grid kWh carry emissions only once an approved
+  // grid-average factor (location-based Scope 2) is entered.
+  const gridKg = gridFactor == null ? 0 : electricity * gridFactor;
   const dieselGenKg = (diesel * 0.70) * 2.68;
   let elecKg = gridKg + dieselGenKg;
   let elecSpend = (electricity * 10.50) + (diesel * 0.70 * 105);
@@ -474,7 +475,7 @@ const computeCategoryMatrix = (rawParams = {}, customAddedItems = [], adjustment
 
   // 6. Housing & Rent
   const lpgFacKg = (lpg > 0 ? lpg * 0.40 * 2.98 : 220);
-  const facGridKg = (electricity > 0 ? electricity * 0.08 * 0.55 : 450);
+  const facGridKg = (electricity > 0 ? (gridFactor == null ? 0 : electricity * 0.08 * gridFactor) : 450);
   let houseKg = lpgFacKg + facGridKg + 850;
   let houseSpend = (lpg * 0.40 * 120) + 185000;
 
@@ -725,7 +726,7 @@ const SaaSDashboard = () => {
     diesel: 2.68, // kg CO2e / Liter
     petrol: 2.31, // kg CO2e / Liter
     lpg: 2.98, // kg CO2e / kg
-    electricity: 0.55, // kg CO2e / kWh (Bangladesh grid average)
+    electricity: null, // kg CO2e / kWh: no default. Location-based Scope 2 needs an approved grid-average factor.
     employees: 0.40, // tCO2e / employee / year average commute
     airTravel: 0.12, // kg CO2e / km
     truckTransport: 0.20, // kg CO2e / ton-km
@@ -999,8 +1000,9 @@ const SaaSDashboard = () => {
     // Scope 1: Direct emissions (fuels converted to tons by dividing by 1000)
     const scope1 = ((dVal * factors.diesel) + (pVal * factors.petrol) + (lVal * factors.lpg)) / 1000;
 
-    // Scope 2 Location-based (default factor)
-    const scope2 = (eVal * factors.electricity) / 1000;
+    // Scope 2 location-based: grid AVERAGE factor only, never a default. Missing factor → null, not 0.
+    const scope2Missing = eVal > 0 && factors.electricity == null;
+    const scope2 = scope2Missing ? null : (eVal * (factors.electricity || 0)) / 1000;
     
     // Scope 2 Market-based (uses custom marketFactor, which defaults to 0.12 kg CO2e / kWh)
     const scope2Market = (eVal * marketFactor) / 1000;
@@ -1011,12 +1013,13 @@ const SaaSDashboard = () => {
                    ((truckVal * factors.truckTransport) / 1000) + 
                    (rawVal * factors.rawMaterials);
 
-    const total = scope1 + scope2 + scope3;
+    const total = scope1 + (scope2 ?? 0) + scope3; // excludes Scope 2 while its factor is missing (flagged)
     const totalMarket = scope1 + scope2Market + scope3;
 
     setResults({
       scope1: parseFloat(scope1.toFixed(2)),
-      scope2: parseFloat(scope2.toFixed(2)),
+      scope2: scope2 === null ? null : parseFloat(scope2.toFixed(2)),
+      scope2Missing,
       scope2Market: parseFloat(scope2Market.toFixed(2)),
       scope3: parseFloat(scope3.toFixed(2)),
       total: parseFloat(total.toFixed(2)),
@@ -1297,7 +1300,7 @@ const SaaSDashboard = () => {
 
   // Active 9-Category Footprint Matrix (auto-cascades custom items & category adjustments)
   const activeParams = extractionResult ? (extractionResult.parameters || inputs) : inputs;
-  const activeMatrix = computeCategoryMatrix(activeParams, customItems, categoryAdjustments);
+  const activeMatrix = computeCategoryMatrix(activeParams, customItems, categoryAdjustments, ef.electricity);
 
   return (
     <div className={`min-h-screen flex relative platform-saas-dashboard transition-colors duration-300 ${
@@ -2083,6 +2086,7 @@ const SaaSDashboard = () => {
                   <div className="mt-3 text-center">
                     <div className={`font-sans font-extrabold text-2xl tracking-tight ${isLight ? 'text-[#0F2417]' : 'text-white'}`}>
                       {results.total} <span className="text-xs font-mono font-normal text-[#00C853]">tCO2e</span>
+                      {results.scope2Missing && <span className="block text-[10px] font-mono font-normal text-amber-500">excl. Scope 2 (grid-average factor needed)</span>}
                     </div>
                     <div className="flex items-center justify-center space-x-6 text-[10px] font-mono text-[#7C9A88] mt-1">
                       <span>0%</span>
@@ -2219,6 +2223,7 @@ const SaaSDashboard = () => {
                     isLight ? 'text-[#0F2417]' : 'text-white'
                   }`}>
                     {results.total} <span className={`text-xs font-mono font-normal ${isLight ? 'text-[#0B4D26]' : 'text-[#A7F3D0]'}`}>tCO2e</span>
+                    {results.scope2Missing && <span className="block text-[10px] font-mono font-normal text-amber-500">excl. Scope 2 (grid-average factor needed)</span>}
                   </div>
                 </div>
                 <div className="flex justify-between items-center mt-4">
@@ -2283,8 +2288,11 @@ const SaaSDashboard = () => {
                     <div>
                       <span className={`text-[9px] font-semibold uppercase block ${isLight ? 'text-[#7D9A8A]' : 'text-[#557361]'}`}>Location</span>
                       <span className={`font-sans font-bold text-xl ${isLight ? 'text-[#0F2417]' : 'text-white'}`}>
-                        {results.scope2} <span className="text-[10px] font-mono font-normal text-[#7C9A88]">t</span>
+                        {results.scope2 ?? '—'} <span className="text-[10px] font-mono font-normal text-[#7C9A88]">t</span>
                       </span>
+                      {results.scope2Missing && (
+                        <span className="block text-[9px] text-amber-500">Needs an approved grid-average factor</span>
+                      )}
                     </div>
                     <div>
                       <span className={`text-[9px] font-semibold uppercase block ${isLight ? 'text-[#7D9A8A]' : 'text-[#557361]'}`}>Market</span>
@@ -4242,7 +4250,11 @@ const SaaSDashboard = () => {
                 <div className="space-y-1.5">
                   <div className="flex justify-between text-xs font-sans">
                     <span className="font-bold text-[#0F291B]">Scope 2 (Electricity Consumption)</span>
-                    <span className="font-mono font-semibold text-emerald">{results.scope2} tCO2e ({results.total > 0 ? ((results.scope2 / results.total) * 100).toFixed(0) : 0}%)</span>
+                    <span className="font-mono font-semibold text-emerald">
+                      {results.scope2Missing
+                        ? 'Grid-average factor needed'
+                        : `${results.scope2} tCO2e (${results.total > 0 ? ((results.scope2 / results.total) * 100).toFixed(0) : 0}%)`}
+                    </span>
                   </div>
                   <div className="w-full bg-[#F1F5F9] h-2.5 rounded-full overflow-hidden">
                     <div 
@@ -4286,7 +4298,9 @@ const SaaSDashboard = () => {
                 </div>
                 <div className="p-3 bg-[#F8F9FA] rounded-xl">
                   <span className="text-[#64748B] block mb-1">Electricity</span>
-                  <span className="font-bold font-mono text-[#0F291B]">{((parseFloat(inputs.electricity) || 0) * ef.electricity / 1000).toFixed(2)} tCO2e</span>
+                  <span className="font-bold font-mono text-[#0F291B]">
+                    {ef.electricity == null ? '— (no grid-average factor)' : `${((parseFloat(inputs.electricity) || 0) * ef.electricity / 1000).toFixed(2)} tCO2e`}
+                  </span>
                 </div>
               </div>
             </div>
@@ -4431,12 +4445,15 @@ const SaaSDashboard = () => {
                     />
                   </div>
                   <div>
-                    <label className="block text-xs font-bold text-[#64748B] uppercase mb-1">Grid Power (kg CO₂e/kWh)</label>
-                    <input 
+                    <label className="block text-xs font-bold text-[#64748B] uppercase mb-1">Grid average, location-based (kg CO₂e/kWh)</label>
+                    <input
                       type="number"
-                      step="0.01"
-                      value={ef.electricity}
-                      onChange={(e) => setEf({ ...ef, electricity: parseFloat(e.target.value) || 0 })}
+                      step="0.001"
+                      min="0"
+                      placeholder="Approved grid-average factor"
+                      title="Location-based Scope 2 uses the grid's average emission rate. A CDM combined margin is not allowed."
+                      value={ef.electricity ?? ''}
+                      onChange={(e) => setEf({ ...ef, electricity: e.target.value === '' ? null : parseFloat(e.target.value) })}
                       className="w-full text-xs font-mono p-2 border border-[#E2E8F0] rounded-lg focus:outline-none focus:border-[#0F291B] bg-[#F8F9FA]"
                     />
                   </div>
@@ -4491,7 +4508,7 @@ const SaaSDashboard = () => {
                 },
                 {
                   q: "What is Scope 2 Indirect Electricity Emissions?",
-                  a: "Scope 2 accounts for greenhouse gas emissions from the generation of purchased electricity, steam, heating, and cooling consumed by the reporting company. In Bangladesh, grid electricity factors average around 0.55 kgCO2e/kWh due to natural gas power station footprints."
+                  a: "Scope 2 accounts for greenhouse gas emissions from the generation of purchased electricity, steam, heating, and cooling consumed by the reporting company. Location-based Scope 2 multiplies purchased kWh by the grid's average emission rate; a CDM combined margin is a project-baseline metric and is not used. CarbonOS ships no default Bangladesh grid factor: each factor is cited and approved by a second person."
                 },
                 {
                   q: "What is Scope 3 Value Chain Emissions?",

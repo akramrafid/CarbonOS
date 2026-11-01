@@ -12,16 +12,17 @@ import json
 import hashlib
 from typing import Dict, Any, List, Optional
 
-# Default Bangladesh National Emission Factors (DoE & SREDA 2023 Gazette)
+# Legacy illustrative constants for the demo calculator. UNVERIFIED: no primary source was located
+# for them, and the ledger never uses them (docs/esg/FACTOR_REGISTRY.md). There is deliberately no
+# grid factor: location-based Scope 2 needs the grid AVERAGE rate from an approved factor, passed as
+# factors["electricity_grid_average"]; market-based needs factors["electricity_market"]. A missing
+# Scope 2 factor gives None, never a default. (The former 0.550 was a CDM combined margin.)
+UNVERIFIED = "UNVERIFIED legacy demo constant: no primary source located; not for inventory use"
 DEFAULT_ACTIVITY_FACTORS = {
-    "diesel": 2.68,        # kg CO2e / Liter (DoE & PetroBangla 2023)
-    "petrol": 2.31,        # kg CO2e / Liter (DoE & PetroBangla 2023)
-    "lpg": 2.98,           # kg CO2e / kg (DoE & SREDA 2023)
-    "cng": 2.75,           # kg CO2e / m3 (PetroBangla standard)
-    "electricity_cm": 0.550, # kg CO2e / kWh (Combined Margin Official Factor: DoE Gazette 22.02.0000.018.99.001.23)
-    "electricity_om": 0.612, # kg CO2e / kWh (Operating Margin)
-    "electricity_bm": 0.488, # kg CO2e / kWh (Build Margin)
-    "electricity_market": 0.120, # kg CO2e / kWh (SREDA Green Tariff / Solar Rooftop PPA)
+    "diesel": 2.68,        # kg CO2e / Liter
+    "petrol": 2.31,        # kg CO2e / Liter
+    "lpg": 2.98,           # kg CO2e / kg
+    "cng": 2.75,           # kg CO2e / m3
     "employees": 0.40,     # tCO2e / employee / year (Dhaka RMG Commuting Benchmark)
     "air_travel": 0.12,    # kg CO2e / passenger-km (ICAO / DEFRA Short-Haul)
     "truck_transport": 0.20, # kg CO2e / ton-km (N1 Dhaka-Chattogram 65% laden benchmark)
@@ -96,8 +97,6 @@ def calculate_activity_footprint(
                     elif "petrol" in act_key: version_overrides["petrol"] = val
                     elif "lpg" in act_key: version_overrides["lpg"] = val
                     elif "cng" in act_key: version_overrides["cng"] = val
-                    elif "electricity" in act_key and "operating" in act_key: version_overrides["electricity_om"] = val
-                    elif "electricity" in act_key: version_overrides["electricity_cm"] = val
                     elif "commute" in act_key: version_overrides["employees"] = val
                     elif "freight" in act_key: version_overrides["truck_transport"] = val
                     elif "raw" in act_key: version_overrides["raw_materials"] = val
@@ -118,10 +117,19 @@ def calculate_activity_footprint(
     scope1_cng = (cng_m3 * ef.get("cng", 2.75)) / 1000.0
     scope1_total = scope1_diesel + scope1_petrol + scope1_lpg + scope1_cng
 
-    # Scope 2 (Indirect Electricity)
+    # Scope 2 (Indirect Electricity): caller-supplied factors only; None when consumption has no factor.
     electricity_kwh = float(activities.get("electricity", 0.0) or 0.0)
-    scope2_location = (electricity_kwh * ef["electricity_cm"]) / 1000.0
-    scope2_market = (electricity_kwh * ef["electricity_market"]) / 1000.0
+    grid_average = ef.get("electricity_grid_average")
+    market_factor = ef.get("electricity_market")
+    exceptions = []
+    if electricity_kwh and grid_average is None:
+        exceptions.append({"code": "MISSING_GRID_AVERAGE_FACTOR", "blocking": True,
+                           "detail": "Location-based Scope 2 needs an approved grid-average factor; none supplied."})
+    if electricity_kwh and market_factor is None:
+        exceptions.append({"code": "MISSING_MARKET_BASED_INPUT", "blocking": False,
+                           "detail": "No supplier-specific, contractual or residual-mix factor supplied."})
+    scope2_location = None if electricity_kwh and grid_average is None else electricity_kwh * (grid_average or 0) / 1000.0
+    scope2_market = None if electricity_kwh and market_factor is None else electricity_kwh * (market_factor or 0) / 1000.0
 
     # Scope 3 (Value Chain Activity)
     employees = float(activities.get("employees", 0.0) or 0.0)
@@ -135,110 +143,50 @@ def calculate_activity_footprint(
     scope3_raw = raw_materials_t * ef["raw_materials"]
     scope3_total = scope3_commute + scope3_air + scope3_freight + scope3_raw
 
-    grand_total_location = scope1_total + scope2_location + scope3_total
-    grand_total_market = scope1_total + scope2_market + scope3_total
+    grand_total_location = None if scope2_location is None else scope1_total + scope2_location + scope3_total
+    grand_total_market = None if scope2_market is None else scope1_total + scope2_market + scope3_total
+
+    def r3(value):
+        return None if value is None else round(value, 3)
 
     latency_ms = round((time.perf_counter() - start_time) * 1000, 3)
 
+    def provenance(factor_id, name, key, unit):
+        return {"factor_id": factor_id, "name": name, "factor_value": ef.get(key), "unit": unit,
+                "source": UNVERIFIED, "gazette_ref": None, "version": resolved_version}
+
     factor_provenance = {
-        "diesel": {
-            "factor_id": "EF-BD-DIESEL-01",
-            "name": "High-Speed Diesel (HSD) Stationary Combustion",
-            "factor_value": ef["diesel"],
-            "unit": "kg CO2e / Liter",
-            "source": "Department of Environment (DoE) & PetroBangla Energy Statistics",
-            "gazette_ref": "DoE Gazette Notification Ref: 22.02.0000.018.99.001.23",
-            "version": resolved_version,
-            "uncertainty_pct": 2.5
-        },
-        "petrol": {
-            "factor_id": "EF-BD-PETROL-01",
-            "name": "Motor Spirit / Octane-95 Mobile Combustion",
-            "factor_value": ef["petrol"],
-            "unit": "kg CO2e / Liter",
-            "source": "PetroBangla & Eastern Refinery Standard Density Benchmark",
-            "gazette_ref": "DoE ECR 2023 Schedule 4",
-            "version": resolved_version,
-            "uncertainty_pct": 3.0
-        },
-        "lpg": {
-            "factor_id": "EF-BD-LPG-01",
-            "name": "Commercial Liquefied Petroleum Gas (LPG)",
-            "factor_value": ef["lpg"],
-            "unit": "kg CO2e / kg",
-            "source": "SREDA Industrial Thermal Benchmark 2023",
-            "gazette_ref": "SREDA/Audit/Gas/2023-09",
-            "version": resolved_version,
-            "uncertainty_pct": 4.0
-        },
-        "cng": {
-            "factor_id": "EF-BD-CNG-01",
-            "name": "Compressed Natural Gas (CNG)",
-            "factor_value": ef.get("cng", 2.75),
-            "unit": "kg CO2e / m3",
-            "source": "PetroBangla standard distribution mix",
-            "gazette_ref": "PetroBangla/Gas/2023-01",
-            "version": resolved_version,
-            "uncertainty_pct": 3.5
-        },
-        "electricity_cm": {
-            "factor_id": "EF-BD-GRID-CM-01",
-            "name": "National Electricity Grid Combined Margin (CM)",
-            "factor_value": ef["electricity_cm"],
-            "unit": "kg CO2e / kWh",
-            "source": "DoE & SREDA Grid Emission Factor Study (FY2022-23 Dispatch Data)",
-            "gazette_ref": "Gazette Ref: 22.02.0000.018.99.001.23",
-            "version": resolved_version,
-            "uncertainty_pct": 1.8
+        "diesel": provenance("EF-BD-DIESEL-01", "High-Speed Diesel (HSD) Stationary Combustion", "diesel",
+                             "kg CO2e / Liter"),
+        "petrol": provenance("EF-BD-PETROL-01", "Motor Spirit / Octane-95 Mobile Combustion", "petrol",
+                             "kg CO2e / Liter"),
+        "lpg": provenance("EF-BD-LPG-01", "Commercial Liquefied Petroleum Gas (LPG)", "lpg", "kg CO2e / kg"),
+        "cng": provenance("EF-BD-CNG-01", "Compressed Natural Gas (CNG)", "cng", "kg CO2e / m3"),
+        "electricity_grid_average": {
+            "factor_id": None, "name": "Grid electricity, location-based (grid average emission rate)",
+            "factor_kind": "grid_average", "factor_value": grid_average, "unit": "kg CO2e / kWh",
+            "source": "Caller-supplied approved factor" if grid_average is not None
+            else "MISSING: CarbonOS has no default grid factor", "gazette_ref": None, "version": resolved_version,
         },
         "electricity_market": {
-            "factor_id": "EF-BD-GREEN-TARIFF-01",
-            "name": "On-Site Solar PV / SREDA Corporate Green Tariff",
-            "factor_value": ef["electricity_market"],
-            "unit": "kg CO2e / kWh",
-            "source": "SREDA Net-Metering Guidelines & IDCOL Solar Standard",
-            "gazette_ref": "SREDA-NMP-2022",
-            "version": resolved_version,
-            "uncertainty_pct": 5.0
+            "factor_id": None, "name": "Grid electricity, market-based", "factor_value": market_factor,
+            "unit": "kg CO2e / kWh", "source": "Caller-supplied approved factor" if market_factor is not None
+            else "MISSING: no market-based instrument supplied", "gazette_ref": None, "version": resolved_version,
         },
-        "employees": {
-            "factor_id": "EF-BD-COMMUTE-01",
-            "name": "Dhaka Industrial Worker Multi-Modal Commute",
-            "factor_value": ef["employees"],
-            "unit": "tCO2e / employee / year",
-            "source": "BGMEA & ILO Decent Work Transport Modal Survey",
-            "gazette_ref": "ILO-BGMEA-ESG-2023",
-            "version": resolved_version,
-            "uncertainty_pct": 6.5
-        },
-        "truck_transport": {
-            "factor_id": "EF-BD-FREIGHT-N1-01",
-            "name": "Medium-Heavy Goods Vehicle (N1 Dhaka-Chattogram Corridor)",
-            "factor_value": ef["truck_transport"],
-            "unit": "kg CO2e / ton-km",
-            "source": "Roads & Highways Department (RHD) Bangladesh Logistics Carbon Study",
-            "gazette_ref": "RHD/Freight/2023-11",
-            "version": resolved_version,
-            "uncertainty_pct": 4.2
-        },
-        "raw_materials": {
-            "factor_id": "EF-BD-RAW-YARN-01",
-            "name": "Composite Cotton-Polyester Yarn Blend (50/50)",
-            "factor_value": ef["raw_materials"],
-            "unit": "tCO2e / metric ton",
-            "source": "Bangladesh Textile Mills Association (BTMA) Material Flow Model",
-            "gazette_ref": "BTMA-MFA-2023",
-            "version": resolved_version,
-            "uncertainty_pct": 5.8
-        }
+        "employees": provenance("EF-BD-COMMUTE-01", "Dhaka Industrial Worker Multi-Modal Commute", "employees",
+                                "tCO2e / employee / year"),
+        "truck_transport": provenance("EF-BD-FREIGHT-N1-01", "Medium-Heavy Goods Vehicle (N1 Dhaka-Chattogram Corridor)",
+                                      "truck_transport", "kg CO2e / ton-km"),
+        "raw_materials": provenance("EF-BD-RAW-YARN-01", "Composite Cotton-Polyester Yarn Blend (50/50)",
+                                    "raw_materials", "tCO2e / metric ton"),
     }
 
     # Deterministic Cryptographic Seal (Canonical Hash of Activity + Factors + Totals)
     seal_data = {
         "activities": {k: float(v) for k, v in activities.items() if v},
         "factor_version": resolved_version,
-        "grand_total_location_tco2e": round(grand_total_location, 3),
-        "grand_total_market_tco2e": round(grand_total_market, 3),
+        "grand_total_location_tco2e": r3(grand_total_location),
+        "grand_total_market_tco2e": r3(grand_total_market),
         "reporting_period": reporting_period or "2026-Q2",
         "tenant_id": tenant_id or "default_tenant"
     }
@@ -261,14 +209,14 @@ def calculate_activity_footprint(
             "cng_tco2e": round(scope1_cng, 3),
             "total_tco2e": round(scope1_total, 3),
             "formula": "Sum(Fuel Volume * Factor / 1000)",
-            "primary_source": "DoE / SREDA Bangladesh National Fuel Factors 2023"
+            "primary_source": UNVERIFIED
         },
         "scope2": {
-            "location_based_tco2e": round(scope2_location, 3),
-            "market_based_tco2e": round(scope2_market, 3),
-            "location_factor": ef["electricity_cm"],
-            "market_factor": ef["electricity_market"],
-            "grid_citation": "DoE Gazette Ref: 22.02.0000.018.99.001.23 (Combined Margin 0.550 kgCO2e/kWh)"
+            "location_based_tco2e": r3(scope2_location),
+            "market_based_tco2e": r3(scope2_market),
+            "location_factor": grid_average,
+            "location_factor_kind": "grid_average",
+            "market_factor": market_factor,
         },
         "scope3": {
             "employee_commute_tco2e": round(scope3_commute, 3),
@@ -279,10 +227,10 @@ def calculate_activity_footprint(
             "scope3_categories": ["Cat 1 (Purchased Goods)", "Cat 4 (Upstream Freight)", "Cat 6 (Business Travel)", "Cat 7 (Employee Commute)"]
         },
         "totals": {
-            "location_based_tco2e": round(grand_total_location, 3),
-            "market_based_tco2e": round(grand_total_market, 3),
-            "clean_energy_offset_benefit": round(max(0, scope2_location - scope2_market), 3)
+            "location_based_tco2e": r3(grand_total_location),
+            "market_based_tco2e": r3(grand_total_market),
         },
+        "exceptions": exceptions,
         "factor_provenance": factor_provenance
     }
 

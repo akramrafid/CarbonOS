@@ -44,14 +44,24 @@ Raw quantity and unit are stored alongside the normalised value.
    validity window; the highest version per factor family is used.
 3. No candidate → `MISSING_FACTOR` (blocking). Several families → `AMBIGUOUS_FACTOR` (blocking) — the user
    must select one. No default or fallback value exists anywhere.
-4. Factors with different GWP bases in one run → `MIXED_GWP_BASIS` (blocking).
+4. Factors with different GWP bases in one run → `MIXED_GWP_BASIS` (blocking). New factors default to
+   **AR6** (IFRS S2 requires the latest IPCC assessment); AR5 stays selectable for restatements.
+5. A factor whose kind is not allowed for its method is never used (see below).
 
 ## Scope 2 dual reporting
 
-* Location-based uses `method = location` factors.
-* Market-based uses `method = market` factors (supplier-specific rate, contractual instrument or residual mix
-  entered and approved by the organization). If **any** electricity record lacks one, the market-based total
-  is `null` and the report shows `MISSING_INPUTS`; each record gets a non-blocking `MISSING_MARKET_BASED_INPUT`.
+* Location-based uses `method = location` factors of kind **`grid_average`**: the average emission rate of the
+  grid where the electricity is consumed (GHG Protocol Scope 2 Guidance). An undeclared kind blocks
+  (`FACTOR_KIND_UNDECLARED`).
+* A **combined margin** (CDM Tool 07 OM/BM/CM) is a project-baseline metric, never a Scope 2 factor. It is
+  rejected by the API (422), the library (`MARGIN_FACTOR_NOT_ALLOWED`, blocking) and the database check
+  `ck_esg_factor_no_margin_scope2`. The 0.550 kg CO2e/kWh once hard-coded as "location-based" was a combined
+  margin with an unlocated citation and has been removed.
+* Market-based uses `method = market` factors of kind `supplier_specific` or `residual_mix` (contractual
+  instruments are entered as supplier-specific). Where no residual mix exists, a `grid_average` market factor
+  is allowed and disclosed as `MARKET_BASED_GRID_AVERAGE_FALLBACK` (non-blocking). If **any** electricity
+  record lacks a market factor, the market-based total is `null` and the report shows `MISSING_INPUTS`; each
+  record gets a non-blocking `MISSING_MARKET_BASED_INPUT`.
 * `electricity_export` and `onsite_renewable_generation` are memo items: reported, never added to or
   subtracted from Scope 2. Offsets and avoided emissions are not part of the inventory.
 

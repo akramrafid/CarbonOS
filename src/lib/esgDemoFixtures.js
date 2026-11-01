@@ -69,7 +69,7 @@ export function getInitialDemoState() {
       co2_factor: '0.621000',
       ch4_factor: '0.000021',
       n2o_factor: '0.000012',
-      source: 'Department of Environment (DoE) Bangladesh National Grid Baseline 2023',
+      source: 'DEMO PLACEHOLDER (not a published factor)',
       status: 'approved',
       first_approved_by: 'system',
       second_approved_by: 'chief_sustainability_officer',

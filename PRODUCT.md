@@ -38,7 +38,7 @@ By grounding all calculations in verified Bangladesh Department of Environment (
 
 Unlike generic Western carbon accounting platforms (e.g., Watershed, Persefoni) that apply broad global averages or lack localized South Asian grid coefficients, CarbonOS offers:
 
-1. **Sovereign Regulatory Grounding**: Native incorporation of the Bangladesh Department of Environment & SREDA Grid Emission Factor Gazette (`0.550 kg CO₂e / kWh`), Environment Conservation Rules 2023 (ECR 2023 / S.R.O. 349), and Bangladesh Updated NDC 2021.
+1. **Sovereign Regulatory Grounding**: Bangladesh rules cited from primary sources: Environment Conservation Rules 2023 (S.R.O. No. 53, not a GHG inventory rule) and the Updated NDC 2021. No official Bangladesh grid emission factor has been located; CarbonOS derives a DRAFT grid average from BPDB data and uses it only after second-person approval.
 2. **Dual-Reporting Scope 2 Accounting**: Implements both Location-Based and Market-Based accounting methods side-by-side with contractual PPA adjustments and captive rooftop solar net-metering.
 3. **Multi-Corpus Grounded RAG with Verbatim Citations**: A ChromaDB vector store that quotes exact gazette clauses, page numbers, and factory utility statement line-items.
 4. **Live Industrial IoT Hardware Integration**: Direct WebSocket streaming from physical ESP8266/ESP32 sensor nodes connected to factory generators and boilers via Blynk Cloud.
@@ -55,7 +55,7 @@ Unlike generic Western carbon accounting platforms (e.g., Watershed, Persefoni) 
   * Captive Generation: Diesel generators (`2.68 kg CO₂e / L`) providing emergency power during grid shedding.
   * Mobile Fleet: Company-owned transport and logistics vans.
 * **Scope 2 (Indirect Electricity Emissions - Dual Reporting)**:
-  * **Location-Based Method**: Multiplies metered electricity consumption (kWh) by the Bangladesh national grid average factor (`0.550 kg CO₂e / kWh`).
+  * **Location-Based Method**: Multiplies metered electricity consumption (kWh) by an approved grid-average factor (no default; a CDM combined margin is rejected).
   * **Market-Based Method**: Reflects contractual supplier-specific emission factors, Green Energy Tariffs (GET), and on-site rooftop solar net-metering deductions.
 * **Scope 3 (Value Chain Emissions)**:
   * Upstream transportation & freight manifests.
@@ -67,8 +67,8 @@ Unlike generic Western carbon accounting platforms (e.g., Watershed, Persefoni) 
 
 ### 5.2 Multi-Corpus RAG & Regulatory Copilot (`inference/esg_rag`)
 * **Corpus Partitioning**:
-  * `regulatory`: Bangladesh Updated NDC (2021), Environment Conservation Rules 2023 (S.R.O. 349).
-  * `emission_factors`: DoE 2023 Gazette (Ref: 22.02.0000.018.99.001.23) and IPCC Guidelines for National Greenhouse Gas Inventories.
+  * `regulatory`: Bangladesh Updated NDC (2021), Environment Conservation Rules 2023 (S.R.O. No. 53).
+  * `emission_factors`: factor status note (no official Bangladesh grid factor located) and IPCC Guidelines for National Greenhouse Gas Inventories.
   * `tenant_docs`: Scoped factory utility statements, fuel delivery receipts, and previous year audit statements.
 * **Auditability Contract**: All outputs must return:
   1. `answer`: Grounded synthesis.
@@ -150,9 +150,9 @@ Unlike generic Western carbon accounting platforms (e.g., Watershed, Persefoni) 
 
 | Regulation / Gazette | Official Reference | Key Parameters Ingested |
 |---|---|---|
-| **Bangladesh DoE Grid Emission Factor** | Ref: `22.02.0000.018.99.001.23` (DoE & SREDA Gazette 2023) | **0.550 kg CO₂e / kWh** (Combined Margin Grid Emission Factor) |
+| **Bangladesh grid emission factor** | No official source located (earlier citation withdrawn) | DRAFT grid average derived from BPDB data, pending approval; the former 0.550 was a combined margin and is not used |
 | **Bangladesh Updated NDC 2021** | Ministry of Environment, Forest and Climate Change (MoEFCC) | Unconditional: 6.73% GHG reduction; Conditional: 15.12% reduction by 2030 |
-| **Environment Conservation Rules 2023** | S.R.O. No. 349-Law/2023 (ECR 2023) | Industrial red/orange category environmental clearance thresholds & air quality standards |
+| **Environment Conservation Rules 2023** | S.R.O. No. 53-Ain/2023, Bangladesh Gazette 5 March 2023 | Green/Yellow/Orange/Red industrial categories, environmental clearance, EIA, discharge standards (no GHG inventory requirement) |
 | **EU CBAM Regulation** | Regulation (EU) 2023/956 | Scope 1 & embedded Scope 2 reporting requirements for industrial goods exported to the EU |
 | **IPCC Sixth Assessment Report (AR6)** | IPCC Working Group I Technical Summary | Methane ($\text{CH}_4$) 100-year GWP = **27.9**; Nitrous Oxide ($\text{N}_2\text{O}$) GWP = **273** |
 | **Factory Benchmark Statement** | Dexterity Textiles Ltd Q2 2026 Audit (DEPZ TX-8491) | 482.4 t CO₂e audited quarterly baseline |

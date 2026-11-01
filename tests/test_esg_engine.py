@@ -18,7 +18,7 @@ class TestESGCalculationEngine(unittest.TestCase):
             "diesel": 14200,   # 14,200 * 2.68 / 1000 = 38.056 t
             "petrol": 4800,    # 4,800 * 2.31 / 1000 = 11.088 t
             "lpg": 1950,       # 1,950 * 2.98 / 1000 = 5.811 t
-            "electricity": 156000, # 156,000 * 0.550 / 1000 = 85.800 t
+            "electricity": 156000, # no default grid factor: location-based Scope 2 needs a supplied one
             "employees": 148,  # 148 * 0.40 = 59.200 t
             "airTravel": 82000, # 82,000 * 0.12 / 1000 = 9.840 t
             "truckTransport": 39000, # 39,000 * 0.20 / 1000 = 7.800 t
@@ -28,12 +28,16 @@ class TestESGCalculationEngine(unittest.TestCase):
         
         # Verify Scope 1 total: 38.056 + 11.088 + 5.811 = 54.955
         self.assertAlmostEqual(res["scope1"]["total_tco2e"], 54.955, places=2)
-        # Verify Scope 2 location total: 85.80
-        self.assertAlmostEqual(res["scope2"]["location_based_tco2e"], 85.80, places=2)
+        # Regression: no CDM combined margin (formerly 0.550) stands in for the grid average.
+        self.assertIsNone(res["scope2"]["location_based_tco2e"])
+        self.assertIsNone(res["totals"]["location_based_tco2e"])
+        self.assertIn("MISSING_GRID_AVERAGE_FACTOR", [e["code"] for e in res["exceptions"]])
         # Verify Scope 3 total: 59.2 + 9.84 + 7.8 + 1450 = 1526.84
         self.assertAlmostEqual(res["scope3"]["total_tco2e"], 1526.84, places=2)
-        # Verify grand total
-        self.assertAlmostEqual(res["totals"]["location_based_tco2e"], 54.955 + 85.80 + 1526.84, places=2)
+        # A caller-supplied grid-average factor (TEST value, not a published factor): 156,000 * 0.5 / 1000 = 78 t
+        res = calculate_activity_footprint(sample_activities, {"electricity_grid_average": 0.5})
+        self.assertAlmostEqual(res["scope2"]["location_based_tco2e"], 78.0, places=2)
+        self.assertAlmostEqual(res["totals"]["location_based_tco2e"], 54.955 + 78.0 + 1526.84, places=2)
         self.assertIn("DuckDB", res["engine"])
 
     def test_spend_eeio_calculation(self):
@@ -54,7 +58,9 @@ class TestESGCalculationEngine(unittest.TestCase):
         self.assertIn("180GB", est_large["memory_tier"])
 
     def test_factor_registry_and_regression_testing(self):
-        self.assertGreaterEqual(len(FACTOR_REGISTRY_CATALOG), 8)
+        self.assertGreaterEqual(len(FACTOR_REGISTRY_CATALOG), 7)
+        self.assertFalse([f for f in FACTOR_REGISTRY_CATALOG if "margin" in f["name"].lower()])
+        self.assertTrue(all(f["gazette_ref"] is None for f in FACTOR_REGISTRY_CATALOG))
 
         # Proposed minimal update (< 2% variance)
         minor_bump = {"diesel": 2.69}
@@ -90,13 +96,12 @@ class TestESGCalculationEngine(unittest.TestCase):
         self.assertIn("diesel", prov)
         self.assertEqual(prov["diesel"]["factor_id"], "EF-BD-DIESEL-01")
         self.assertEqual(prov["diesel"]["unit"], "kg CO2e / Liter")
-        self.assertIn("DoE Gazette", prov["diesel"]["gazette_ref"])
-        
-        self.assertIn("electricity_cm", prov)
-        self.assertEqual(prov["electricity_cm"]["factor_id"], "EF-BD-GRID-CM-01")
-        self.assertEqual(prov["electricity_cm"]["factor_value"], 0.550)
-        self.assertIn("Combined Margin", prov["electricity_cm"]["name"])
-        self.assertIn("DoE & SREDA", prov["electricity_cm"]["source"])
+        # No primary source was located for the legacy constants: no gazette reference is claimed.
+        self.assertIsNone(prov["diesel"]["gazette_ref"])
+        self.assertIn("UNVERIFIED", prov["diesel"]["source"])
+        self.assertNotIn("electricity_cm", prov)
+        self.assertIsNone(prov["electricity_grid_average"]["factor_value"])
+        self.assertEqual(prov["electricity_grid_average"]["factor_kind"], "grid_average")
 
     def test_scenario_j_factor_versioning_reproducibility(self):
         """Scenario J: Pinning a historical factor version ensures historical approved reports reproduce identically."""

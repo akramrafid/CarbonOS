@@ -39,7 +39,7 @@ The transformation of CarbonOS Bangladesh from a promising prototype into an ent
                                        ▼
 ┌────────────────────────────────────────────────────────────────────────────────┐
 │ PHASE 4: Enterprise Carbon Accounting Core (P1)                                │
-│ - GHG-01: Locking of Bangladesh DoE Grid Factor (0.550 kg CO₂e/kWh)           │
+│ - GHG-01: Approved grid average only (no CM default)                          │
 │ - GHG-02: Multi-facility data models (Org -> Division -> Facility -> Meter)    │
 │ - GHG-03: Scope 1, 2, and initial Scope 3 (Purchased Goods - RMG) ledgers     │
 └──────────────────────────────────────┬─────────────────────────────────────────┘

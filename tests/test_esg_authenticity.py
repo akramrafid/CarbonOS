@@ -113,11 +113,16 @@ class UtilitySegmentTest(unittest.TestCase):
         self.assertEqual(qty, {"elec_offpeak": 85000.0, "elec_peak": 22000.0, "captive_diesel": 3400.0})
         excluded = {s["segment_id"] for s in res["excluded_segments"]}
         self.assertEqual(excluded, {"solar_netmeter", "demand_charge"})
-        # Scope 2 = location-based kWh lines only; exported solar is not subtracted.
-        self.assertAlmostEqual(res["scope_breakdown"]["scope2_tco2e"], (85000 * 0.550 + 22000 * 0.620) / 1000, places=3)
+        # Exported solar is not subtracted, and no default grid factor exists: kWh lines carry no emissions
+        # until an approved grid-average factor is applied, so Scope 2 and the total are None, not a guess.
+        self.assertIsNone(res["scope_breakdown"]["scope2_tco2e"])
+        self.assertIsNone(res["total_emissions_tco2e"])
+        status = {s["segment_id"]: s["factor_status"] for s in res["segments"]}
+        self.assertEqual(status, {"elec_offpeak": "MISSING_GRID_AVERAGE_FACTOR",
+                                  "elec_peak": "MISSING_GRID_AVERAGE_FACTOR", "captive_diesel": "UNVERIFIED"})
+        self.assertAlmostEqual(res["scope_breakdown"]["scope1_tco2e"], 3400 * 2.68 / 1000, places=3)
         self.assertNotIn("audit_seal", res)
         self.assertEqual(res["review_status"], "REVIEW_REQUIRED")
-        self.assertTrue(all(s["factor_status"] == "UNVERIFIED" for s in res["segments"]))
 
     def test_sparse_text_yields_nothing(self):
         res = detect_all_utility_segments("hello")

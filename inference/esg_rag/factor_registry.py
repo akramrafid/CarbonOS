@@ -7,7 +7,9 @@ from typing import Dict, Any, List, Optional
 import copy
 import datetime
 
-# Typed Emission Factor Registry
+# Legacy demo catalog (not used by the ledger). No primary source was located for these values, so every
+# entry is UNVERIFIED. It holds no grid factor: the former 0.550 "combined margin" and 0.612 "operating
+# margin" are CDM project-baseline metrics, never location-based Scope 2 factors.
 FACTOR_REGISTRY_CATALOG = [
     {
         "factor_id": "EF-BD-DIESEL-01",
@@ -21,7 +23,8 @@ FACTOR_REGISTRY_CATALOG = [
         "region": "Bangladesh",
         "tier": "Tier 2 (National Model)",
         "source_citation": "Department of Environment (DoE) & PetroBangla Energy Statistics",
-        "gazette_ref": "DoE Gazette Notification Ref: 22.02.0000.018.99.001.23",
+        "gazette_ref": None,
+        "source_status": "UNVERIFIED: no primary source located",
         "effective_date": "2024-01-01",
         "status": "active"
     },
@@ -37,7 +40,8 @@ FACTOR_REGISTRY_CATALOG = [
         "region": "Bangladesh",
         "tier": "Tier 2 (National Model)",
         "source_citation": "PetroBangla & Eastern Refinery Standard Density Benchmark",
-        "gazette_ref": "DoE ECR 2023 Schedule 4",
+        "gazette_ref": None,
+        "source_status": "UNVERIFIED: no primary source located",
         "effective_date": "2024-01-01",
         "status": "active"
     },
@@ -53,41 +57,10 @@ FACTOR_REGISTRY_CATALOG = [
         "region": "Bangladesh",
         "tier": "Tier 2 (National Model)",
         "source_citation": "SREDA Industrial Thermal Benchmark 2023",
-        "gazette_ref": "SREDA/Audit/Gas/2023-09",
+        "gazette_ref": None,
+        "source_status": "UNVERIFIED: no primary source located",
         "effective_date": "2023-07-01",
         "status": "active"
-    },
-    {
-        "factor_id": "EF-BD-GRID-CM-01",
-        "name": "National Electricity Grid Combined Margin (CM)",
-        "category": "Scope 2",
-        "fuel_or_activity": "Electricity (Location-Based)",
-        "factor_value": 0.550,
-        "unit": "kg CO2e / kWh",
-        "uncertainty_pct": 1.8,
-        "version": "v2026.1-NATIONAL",
-        "region": "Bangladesh",
-        "tier": "Tier 2 (UNFCCC CDM Tool)",
-        "source_citation": "DoE & SREDA Grid Emission Factor Study (FY2022-23 Dispatch Data)",
-        "gazette_ref": "Gazette Ref: 22.02.0000.018.99.001.23",
-        "effective_date": "2023-11-15",
-        "status": "active"
-    },
-    {
-        "factor_id": "EF-BD-GRID-OM-01",
-        "name": "National Electricity Grid Operating Margin (OM)",
-        "category": "Scope 2",
-        "fuel_or_activity": "Electricity (Operating Margin)",
-        "factor_value": 0.612,
-        "unit": "kg CO2e / kWh",
-        "uncertainty_pct": 2.1,
-        "version": "v2024.1-HISTORIC",
-        "region": "Bangladesh",
-        "tier": "Tier 2 (UNFCCC CDM Tool)",
-        "source_citation": "BPDB Generation Margin Merit Order Curve",
-        "gazette_ref": "BPDB Annual Dispatch Report 2023",
-        "effective_date": "2023-01-01",
-        "status": "archived"
     },
     {
         "factor_id": "EF-BD-GREEN-TARIFF-01",
@@ -101,7 +74,8 @@ FACTOR_REGISTRY_CATALOG = [
         "region": "Bangladesh",
         "tier": "Tier 3 (Facility PPA)",
         "source_citation": "SREDA Net-Metering Guidelines & IDCOL Solar Standard",
-        "gazette_ref": "SREDA-NMP-2022",
+        "gazette_ref": None,
+        "source_status": "UNVERIFIED: no primary source located",
         "effective_date": "2024-01-01",
         "status": "active"
     },
@@ -117,7 +91,8 @@ FACTOR_REGISTRY_CATALOG = [
         "region": "Bangladesh",
         "tier": "Tier 2 (Survey Sample N=12,400)",
         "source_citation": "BGMEA & ILO Decent Work Transport Modal Survey",
-        "gazette_ref": "ILO-BGMEA-ESG-2023",
+        "gazette_ref": None,
+        "source_status": "UNVERIFIED: no primary source located",
         "effective_date": "2024-01-01",
         "status": "active"
     },
@@ -133,7 +108,8 @@ FACTOR_REGISTRY_CATALOG = [
         "region": "Bangladesh",
         "tier": "Tier 2 (Highway Telemetry)",
         "source_citation": "Roads & Highways Department (RHD) Bangladesh Logistics Carbon Study",
-        "gazette_ref": "RHD/Freight/2023-11",
+        "gazette_ref": None,
+        "source_status": "UNVERIFIED: no primary source located",
         "effective_date": "2024-01-01",
         "status": "active"
     },
@@ -149,7 +125,8 @@ FACTOR_REGISTRY_CATALOG = [
         "region": "Bangladesh",
         "tier": "Tier 2 (BTMA Benchmark)",
         "source_citation": "Bangladesh Textile Mills Association (BTMA) Material Flow Model",
-        "gazette_ref": "BTMA-MFA-2023",
+        "gazette_ref": None,
+        "source_status": "UNVERIFIED: no primary source located",
         "effective_date": "2024-01-01",
         "status": "active"
     }
@@ -208,12 +185,17 @@ def get_catalog_factors_dict() -> Dict[str, float]:
         if "diesel" in key: d["diesel"] = item["factor_value"]
         elif "petrol" in key: d["petrol"] = item["factor_value"]
         elif "lpg" in key: d["lpg"] = item["factor_value"]
-        elif "electricity" in key and "margin" not in key: d["electricity"] = item["factor_value"]
+        elif "electricity" in key and "market" in key: d["electricity_market"] = item["factor_value"]
         elif "commute" in key: d["employees"] = item["factor_value"]
         elif "freight" in key: d["truckTransport"] = item["factor_value"]
         elif "raw" in key: d["rawMaterials"] = item["factor_value"]
     d["airTravel"] = 0.12
     return d
+
+def _comparable_total(res: Dict[str, Any]) -> float:
+    """Scope 1 + 3, plus location-based Scope 2 when a grid-average factor was supplied (else None → 0)."""
+    return res["scope1"]["total_tco2e"] + res["scope3"]["total_tco2e"] + (res["scope2"]["location_based_tco2e"] or 0)
+
 
 def run_factor_regression_test(
     proposed_factors: Dict[str, float],
@@ -235,8 +217,8 @@ def run_factor_regression_test(
         baseline_res = calculate_activity_footprint(customer["activities"], baseline_factors)
         proposed_res = calculate_activity_footprint(customer["activities"], {**baseline_factors, **proposed_factors})
 
-        base_total = baseline_res["totals"]["location_based_tco2e"]
-        prop_total = proposed_res["totals"]["location_based_tco2e"]
+        base_total = _comparable_total(baseline_res)
+        prop_total = _comparable_total(proposed_res)
         delta_tco2e = round(prop_total - base_total, 3)
         delta_pct = round(((prop_total - base_total) / base_total) * 100, 2) if base_total > 0 else 0.0
 
@@ -258,7 +240,8 @@ def run_factor_regression_test(
             "passed": not flagged,
             "scope_breakdown": {
                 "scope1_delta": round(proposed_res["scope1"]["total_tco2e"] - baseline_res["scope1"]["total_tco2e"], 3),
-                "scope2_delta": round(proposed_res["scope2"]["location_based_tco2e"] - baseline_res["scope2"]["location_based_tco2e"], 3),
+                "scope2_delta": round((proposed_res["scope2"]["location_based_tco2e"] or 0)
+                                      - (baseline_res["scope2"]["location_based_tco2e"] or 0), 3),
                 "scope3_delta": round(proposed_res["scope3"]["total_tco2e"] - baseline_res["scope3"]["total_tco2e"], 3)
             }
         })

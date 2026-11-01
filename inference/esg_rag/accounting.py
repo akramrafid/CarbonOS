@@ -10,6 +10,9 @@ Rules enforced here (see docs/esg/ACCOUNTING_METHODOLOGY.md):
   region and validity dates. No factor → MISSING_FACTOR exception, never a default value.
 * Scope 2 location-based and market-based totals are separate. Market-based is None unless
   every electricity record has a market factor (no invented residual mix).
+* Every Scope 2 electricity factor declares its kind. Location-based uses the grid AVERAGE
+  emission rate only. Combined-margin factors (CDM Tool 07 project baselines) never produce a
+  Scope 2 line: MARGIN_FACTOR_NOT_ALLOWED. The same rule is a database check constraint.
 * Memo items (electricity export, on-site renewable generation) are reported, never netted.
 * Organizational boundary: operational control / financial control include 0 % or 100 %;
   equity share applies the equity percentage.
@@ -38,6 +41,13 @@ MEMO_ACTIVITY_TYPES: Dict[str, str] = {
     "onsite_renewable_generation": "kWh",
 }
 BOUNDARY_METHODS = ("operational_control", "financial_control", "equity_share")
+
+FACTOR_KINDS = ("grid_average", "grid_combined_margin", "supplier_specific", "residual_mix")
+# CDM Tool 07 margins answer "what does one added MWh displace?" for a project baseline, not
+# "how carbon-intensive is the grid I draw from?", so they are never inventory factors.
+MARGIN_FACTOR_KINDS = ("grid_combined_margin",)
+FACTOR_KIND_ERRORS = ("MARGIN_FACTOR_NOT_ALLOWED", "UNKNOWN_FACTOR_KIND", "FACTOR_KIND_UNDECLARED",
+                      "FACTOR_KIND_NOT_ALLOWED")
 
 # unit -> (dimension, size in the dimension's base unit). Exact conversion constants only.
 UNITS: Dict[str, Tuple[str, Decimal]] = {
@@ -113,6 +123,7 @@ class Factor:
     method: str  # "direct" (Scope 1), "location" or "market" (Scope 2)
     valid_from: dt.date
     valid_to: Optional[dt.date] = None
+    kind: Optional[str] = None  # one of FACTOR_KINDS for Scope 2; None for Scope 1
 
 
 @dataclass(frozen=True)
@@ -175,6 +186,29 @@ def inclusion_share(facility: Facility, boundary_method: str) -> Decimal:
     raise ValueError(f"Unknown boundary method '{boundary_method}'")
 
 
+def allowed_factor_kinds(activity_type: str, method: str) -> Tuple[Optional[str], ...]:
+    """Factor kinds that may produce a line for this activity type and method (None = undeclared)."""
+    if method == "direct":
+        return (None,)
+    if activity_type == "electricity":
+        if method == "location":
+            return ("grid_average",)
+        # Scope 2 Guidance market-based hierarchy: supplier rate, residual mix, and the grid average
+        # only where no residual mix exists (disclosed as MARKET_BASED_GRID_AVERAGE_FALLBACK).
+        return ("supplier_specific", "residual_mix", "grid_average")
+    return (None, "supplier_specific")  # purchased steam has no grid; supplier or default rate
+
+
+def factor_kind_error(f: Factor) -> Optional[str]:
+    if f.kind in MARGIN_FACTOR_KINDS:
+        return "MARGIN_FACTOR_NOT_ALLOWED"
+    if f.kind is not None and f.kind not in FACTOR_KINDS:
+        return "UNKNOWN_FACTOR_KIND"
+    if f.kind not in allowed_factor_kinds(f.activity_type, f.method):
+        return "FACTOR_KIND_UNDECLARED" if f.kind is None else "FACTOR_KIND_NOT_ALLOWED"
+    return None
+
+
 def _usable(f: Factor, a: Activity, region: str, method: str) -> bool:
     return (
         f.activity_type == a.activity_type
@@ -196,10 +230,14 @@ def select_factor(a: Activity, region: str, method: str, factors: List[Factor],
         if not (f.activity_type == a.activity_type and f.method == method and f.unit == a.unit
                 and f.valid_from <= a.period_start and (f.valid_to is None or a.period_end <= f.valid_to)):
             return None, "SELECTED_FACTOR_NOT_APPLICABLE"
-        return f, None
+        kind_error = factor_kind_error(f)
+        return (None, kind_error) if kind_error else (f, None)
     candidates = [f for f in factors if _usable(f, a, region, method)]
+    eligible = [f for f in candidates if factor_kind_error(f) is None]
+    if candidates and not eligible:
+        return None, factor_kind_error(min(candidates, key=lambda f: f.id))
     latest: Dict[str, Factor] = {}
-    for f in candidates:
+    for f in eligible:
         if f.family not in latest or f.version > latest[f.family].version:
             latest[f.family] = f
     if not latest:
@@ -277,13 +315,19 @@ def calculate(activities: List[Activity], facilities: Dict[str, Facility], facto
         if a.activity_type == "electricity":
             has_electricity = True
             mf, merr = select_factor(a, fac.region, "market", factors, a.market_factor_id)
-            if merr:
+            if merr in FACTOR_KIND_ERRORS:
+                market_complete = False
+                exception(merr, a)
+            elif merr:
                 market_complete = False
                 exception("MISSING_MARKET_BASED_INPUT", a, blocking=False,
                           detail="No supplier-specific, contractual instrument or residual-mix factor approved")
             else:
                 market_total = add_line(a, fac, "2", "market", mf, share)
                 res.scope2_market_kg = (res.scope2_market_kg or Decimal(0)) + market_total
+                if mf.kind == "grid_average":
+                    exception("MARKET_BASED_GRID_AVERAGE_FALLBACK", a, blocking=False,
+                              detail="No residual mix available; grid-average rate used and disclosed")
 
     if has_electricity and not market_complete:
         res.scope2_market_kg = None  # partial market-based totals are never reported as complete

@@ -36,7 +36,7 @@
   - The hash canonically binds: `factor_version`, `reporting_period`, `tenant_id`, and exact sorted parameter values.
   - Every emission factor used carries verified provenance:
     - Diesel: `2.68 kg CO₂e / L` (DoE Bangladesh Gazette 2023)
-    - Grid Electricity: `0.550 kg CO₂e / kWh` (DoE Combined Margin, Ref: 22.02.0000.018.99.001.23)
+    - Grid Electricity: no default factor (the former 0.550 "DoE Gazette" combined margin was withdrawn (no source located; wrong factor kind for Scope 2))
     - Captive Gas: `2.15 kg CO₂e / m³` (DoE National GHG Inventory Guidelines)
   - Historical reports pinned to `v2026.1-NATIONAL` reproduce identical numbers even if future factor catalogs change.
 - **Verification:** Tested in `tests/test_esg_engine.py` (`test_scenario_j_factor_versioning_reproducibility` and `test_audit_seal_and_factor_provenance`).
@@ -65,7 +65,7 @@
 | Component | Ingestion / Processing Source | Output Classification | Audit Seal / Provenance |
 |---|---|---|---|
 | **Scope 1 Fuel Combustion** | Generator logbooks, Fuel receipts | `GENUINE_COMPUTED` | SHA256-SEAL with DoE Gazette 2023 |
-| **Scope 2 Purchased Grid Power** | DESCO / BPDB / NESCO Statements | `GENUINE_COMPUTED` | SHA256-SEAL with DoE Combined Margin |
+| **Scope 2 Purchased Grid Power** | DESCO / BPDB / NESCO Statements | `PENDING_FACTOR` | No emissions until an approved grid-average factor exists |
 | **Scope 3 Upstream & Logistics** | Freight consignment notes, EEIO | `ESTIMATE_EXPLICIT` | SFC GLEC & CEDA EEIO citations |
 | **Crop Health Diagnosis** | Field leaf photos | `GENUINE_COMPUTED` / `MODEL_UNAVAILABLE` | Checkpoint verified; no untrained execution |
 | **National Registry Bridge** | Ministry NDC Bridge API | `SANDBOX_ACCEPTED` (`data_origin = "simulation"`) | Marked local sandbox |

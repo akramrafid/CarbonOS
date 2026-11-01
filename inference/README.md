@@ -31,8 +31,8 @@ inference/
 ### 1. Multi-Corpus RAG & Citation Engine (`esg_rag`)
 * **Vector Store**: ChromaDB with `sentence-transformers/all-MiniLM-L6-v2` (384-dimensional dense semantic embeddings).
 * **Corpus Segregation**:
-  * `regulatory`: Bangladesh Updated NDC 2021, Environment Conservation Rules 2023 (S.R.O. 349).
-  * `emission_factors`: Bangladesh Department of Environment (DoE) & SREDA Grid Gazette (`0.550 kg CO₂e / kWh`), IPCC AR6 constants.
+  * `regulatory`: Bangladesh Updated NDC 2021, Environment Conservation Rules 2023 (S.R.O. No. 53).
+  * `emission_factors`: a status note on Bangladesh grid and fuel factors (no official grid factor located), IPCC 2006 references.
   * `tenant_docs`: Private factory bills, diesel generator delivery slips, and previous audit statements isolated by `tenant_id`.
 * **Dual Synthesis Mechanism**:
   * **Online**: Google Gemini 2.5 Flash with strict prompt engineering mandating verbatim clause citations and page numbers.

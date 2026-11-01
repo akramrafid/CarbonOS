@@ -13,7 +13,7 @@ Every known fabricated, estimated, simulated or unverified value source in the E
 | A6 | `extractor` rule `solar_netmeter` factor −0.550 | Subtracts exported solar from Scope 2 | METHOD ERROR | P0-2: solar export, kVA demand and kVARh reported in `excluded_segments`, never netted into totals |
 | A7 | `router.py` `/entity-tree` | Hardcoded "Apex Holdings Group" emissions | DEMO | Demo-org only P0-2 |
 | A8 | `router.py` `/satellite-insets` | Hardcoded project ratings ("AAA", permanence 98.4) | DEMO | Demo-org only P0-2 |
-| A9 | `calculation_engine.DEFAULT_ACTIVITY_FACTORS` | Grid 0.550, market 0.120, commute 0.40 t/employee etc. attributed to "DoE Gazette 22.02.0000.018.99.001.23" | UNVERIFIED CITATION | Open → P1 factor registry |
+| A9 | `calculation_engine.DEFAULT_ACTIVITY_FACTORS` | Grid 0.550, market 0.120, commute 0.40 t/employee etc. attributed to "DoE Gazette 22.02.0000.018.99.001.23" | UNVERIFIED CITATION | WITHDRAWN (Step 0): citation removed; no grid default; location-based needs an approved grid average |
 | A10 | `calculation_engine` | `max(latency, 0.42)` fake latency floor; "DuckDB" engine label without DuckDB | FALSE LABEL | Open → replaced by P1 engine |
 | A11 | `/duckdb-calculate` `audit_hash` | Hash includes current time → not reproducible, presented as audit seal | FALSE LABEL | Open → P1 |
 | A12 | `factor_registry.FACTOR_REGISTRY_CATALOG` | Gazette refs, uncertainty % not validated | UNVERIFIED CITATION | Open → P1 |

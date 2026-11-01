@@ -59,7 +59,7 @@ const STATIONS = [
     hardware: 'NDIR Flue Gas Optical Sensor Array',
     isLiveFeed: false,
     mockData: { temp: 34.6, hum: 62.0, air: 185, co2: 680 },
-    protocol: 'DoE Stack Baseline 0.550 kg/kWh',
+    protocol: 'Illustrative sensor feed (not a regulatory baseline)',
     baselineCo2: 430,
   }
 ];

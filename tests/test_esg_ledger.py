@@ -13,9 +13,10 @@ import unittest
 sys.path.insert(0, os.path.dirname(__file__))
 from esg_harness import ESGApiTestCase, auth  # noqa: E402
 from sqlalchemy.exc import IntegrityError  # noqa: E402
-from esg_rag.ledger_models import ActivityRecord  # noqa: E402
+from esg_rag.ledger_models import ActivityRecord, EmissionFactor  # noqa: E402
 
 API = "/api/esg"
+DEFAULT_KIND = {("electricity", "location"): "grid_average", ("electricity", "market"): "supplier_specific"}
 
 
 class LedgerTestCase(ESGApiTestCase):
@@ -47,6 +48,7 @@ class LedgerTestCase(ESGApiTestCase):
     def factor(self, family, activity_type, unit, value, method, author="user-a", approver="admin-a", **extra):
         body = {"family": family, "activity_type": activity_type, "unit": unit, "kgco2e_per_unit": value,
                 "region": "TEST-GRID", "gwp_basis": "AR5", "method": method, "valid_from": "2024-01-01",
+                "factor_kind": DEFAULT_KIND.get((activity_type, method)),
                 "source_publisher": "TEST FIXTURE", "source_document": "Not a real factor", "source_year": 2024, **extra}
         fid = self.post(author, "/factors", body)["id"]
         self.post(approver, f"/factors/{fid}/approve")
@@ -238,6 +240,64 @@ class WorkflowRulesTest(LedgerTestCase):
             self.approved(period_id=p, facility_id=fac, activity_type="diesel", quantity="1000", unit="L")
         run = self.post("contrib-a", f"/periods/{p}/calculate")
         self.assertEqual(run["scope1_kg"], "3780.000000")  # 2700 + 40% × 2700
+
+
+class FactorKindTest(LedgerTestCase):
+    """Regression: location-based Scope 2 is the grid AVERAGE rate; a CDM combined margin can never
+    reach Scope 2 through the API, the ORM schema or the migrated schema."""
+    BASE = {"family": "kind", "activity_type": "electricity", "unit": "kWh", "kgco2e_per_unit": "0.55",
+            "region": "TEST-GRID", "valid_from": "2024-01-01", "source_publisher": "T", "source_document": "T",
+            "source_year": 2024}
+
+    def test_api_rejects_margin_and_undeclared_kinds(self):
+        for method in ("location", "market"):
+            res = self.call("POST", "user-a", "/factors", {**self.BASE, "method": method,
+                                                           "factor_kind": "grid_combined_margin"}, status=422)
+            self.assertIn("combined-margin", res.json()["detail"])
+        self.call("POST", "user-a", "/factors", {**self.BASE, "method": "location"}, status=422)
+        self.call("POST", "user-a", "/factors", {**self.BASE, "method": "location", "factor_kind": "residual_mix"},
+                  status=422)
+        self.call("POST", "user-a", "/factors", {**self.BASE, "activity_type": "diesel", "unit": "L",
+                                                 "method": "direct", "factor_kind": "grid_average"}, status=422)
+        created = self.post("user-a", "/factors", {**self.BASE, "method": "location", "factor_kind": "grid_average"})
+        self.assertEqual((created["factor_kind"], created["gwp_basis"]), ("grid_average", "AR6"))  # AR6 default
+
+    def test_database_rejects_margin_factor_for_scope2(self):
+        for activity_type, method, kind in (("electricity", "location", "grid_combined_margin"),
+                                            ("electricity", "market", "grid_combined_margin"),
+                                            ("electricity", "location", "residual_mix"),
+                                            ("diesel", "direct", "grid_average")):
+            db = self.Session()
+            db.add(EmissionFactor(organization_id=self.org_a, family=f"raw-{method}-{kind}", version=1,
+                                  activity_type=activity_type, unit="kWh", kgco2e_per_unit=1, region="R",
+                                  gwp_basis="AR6", method=method, factor_kind=kind, valid_from=dt.date(2024, 1, 1),
+                                  source_publisher="T", source_document="T", source_year=2024, created_by="raw-sql"))
+            with self.assertRaises(IntegrityError, msg=f"{activity_type}/{method}/{kind}"):
+                db.commit()
+            db.rollback()
+            db.close()
+
+
+class MigrationConstraintTest(unittest.TestCase):
+    def test_migrated_schema_rejects_margin_factor_for_scope2(self):
+        import tempfile
+        from sqlalchemy import create_engine, text
+        from esg_rag.database import upgrade
+        url = "sqlite:///" + os.path.join(tempfile.mkdtemp(prefix="esg-migration-"), "esg.sqlite3")
+        upgrade(url)
+        engine = create_engine(url)
+        insert = text(
+            "INSERT INTO esg_emission_factor (id, family, version, activity_type, unit, kgco2e_per_unit, region, "
+            "gwp_basis, method, factor_kind, valid_from, source_publisher, source_document, source_year, is_custom, "
+            "status, created_by, created_at) VALUES (:id, :id, 1, 'electricity', 'kWh', 0.5, 'R', 'AR6', :method, "
+            ":kind, '2024-01-01', 'T', 'T', 2024, 0, 'DRAFT', 'u', '2024-01-01 00:00:00')")
+        with engine.begin() as conn:
+            conn.execute(insert, {"id": "average", "method": "location", "kind": "grid_average"})
+        for method in ("location", "market"):
+            with self.assertRaises(IntegrityError, msg=method):
+                with engine.begin() as conn:
+                    conn.execute(insert, {"id": f"cm-{method}", "method": method, "kind": "grid_combined_margin"})
+        engine.dispose()
 
 
 @unittest.skipUnless(os.environ.get("ESG_TEST_DATABASE_URL"), "needs PostgreSQL for real concurrency")

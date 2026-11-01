@@ -21,7 +21,7 @@ The CarbonOS ESG RAG engine (`inference/esg_rag/retriever.py`) provides evidence
 [ ChromaDB Multi-Collection Vector Search with Strict Tenant Filter ]
    ├─ Public Shared Corpora:
    │    • Bangladesh DoE Official Gazette Notifications
-   │    • SREDA Grid Emission Factors & Combined Margin Ref
+   │    • Grid/fuel factor status note (no official BD grid factor)
    │    • Verra VM0047 Afforestation / Reforestation Methodologies
    │    • EU CBAM Textile Sector Compliance Guidance
    └─ Private Tenant Corpus:

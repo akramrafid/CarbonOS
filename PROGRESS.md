@@ -80,7 +80,7 @@
 
 ### 2026-09-03 14:30 — PHASE 1 SIGN-OFF COMPLETE
 **Coordinator:** akstack
-**Built:** Stakeholder personas (Farhan Rahman, Engr. Masud Alam, Dr. Nusrat Jahan, Abul Kashem), capability matrix, and sovereign regulatory mapping (DoE Gazette Ref: 22.02.0000.018.99.001.23, Updated NDC 2021, ECR 2023 / S.R.O. 349).
+**Built:** Stakeholder personas (Farhan Rahman, Engr. Masud Alam, Dr. Nusrat Jahan, Abul Kashem), capability matrix, and regulatory mapping (Updated NDC 2021, ECR 2023 = S.R.O. No. 53; the earlier "DoE Gazette 22.02.0000.018.99.001.23" citation was withdrawn because no such document was found).
 **Verification Summary:** Human review and sign-off on `PRODUCT.md` and `plan.md` §1-2.
 **Git Tag:** `phase-1-complete`
 **Status:** COMPLETED
@@ -105,7 +105,7 @@
 **Built:** 
   1. Executive $30,000 USD B2B ESG Enterprise SaaS suite (`/platform/saas-dashboard`) with dual-theme perfection, floating island headers, and auditor view.
   2. Native SVG data visualizations: Semi-Circular Target Gauge, 12-Month Catmull-Rom Trend Chart, Segmented Progress Bars, and Micro-Bar Charts.
-  3. Scope 1, 2 (Location vs. Market dual reporting), and 3 calculation engine with Bangladesh DoE 0.550 kg CO₂e/kWh factor.
+  3. Scope 1, 2 (Location vs. Market dual reporting), and 3 calculation engine (the 0.550 kg CO₂e/kWh grid factor was later withdrawn as an unsourced combined margin).
   4. Multi-Corpus RAG inference service (`inference/esg_rag`) with ChromaDB, Gemini 2.5 Flash, verbatim citations, and local rule fallback.
   5. Live IoT sensor streaming node (`inference/carbon_monitoring`) polling Blynk Cloud hardware (exhaust temp, humidity, gas ppm).
   6. HarvestGuard mobile crop diagnosis suite (`/farmers-ai`) with PyTorch CNN (EfficientNet-B3) and Grad-CAM lesion explainability.

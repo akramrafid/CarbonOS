@@ -65,7 +65,7 @@ export const VerificationReadinessCenter = ({
   // CBAM State
   const [cbamSector, setCbamSector] = useState(client.sector.includes('Packaging') ? 'Jute & Polymer Composites' : 'Steel & Industrial Metals');
   const [cbamExportTons, setCbamExportTons] = useState(1500);
-  const [cbamElectricityOrigin, setCbamElectricityOrigin] = useState('National Grid (DoE Bangladesh 0.550 kg/kWh)');
+  const [cbamElectricityOrigin, setCbamElectricityOrigin] = useState('National grid (grid-average factor pending approval)');
 
   // Verifier Checklist Items (8-point ISO 14064-1 & GHG Protocol assurance protocol)
   const [checklist, setChecklist] = useState([
@@ -93,9 +93,9 @@ export const VerificationReadinessCenter = ({
       id: 'chk-3',
       code: 'GHG-SCOPE2-DUAL',
       title: 'Scope 2 Dual-Reporting (Location & Market)',
-      description: 'Location-based reporting via DoE grid factor (0.550 kg CO₂e/kWh) plus market-based contractual green tariff / solar PPA adjustments.',
+      description: 'Location-based reporting with an approved grid-average factor (none approved yet) plus market-based contractual instruments where they exist.',
       owner: 'Lead ESG Controller',
-      status: 'Verified',
+      status: 'Needs Review',
       evidenceRef: 'EV-UTIL-DESCO-HT',
       requiredForAssurance: 'Limited & Reasonable'
     },
@@ -157,8 +157,8 @@ export const VerificationReadinessCenter = ({
       id: 'inq-1',
       verifier: 'SGS / Bureau Veritas Assurance Team',
       question: 'What is the institutional basis for the Scope 2 electricity grid factor in Bangladesh?',
-      response: 'The factor 0.550 kg CO₂e/kWh is published by the Department of Environment (DoE), Ministry of Environment, Forest and Climate Change, Government of Bangladesh in the 2024 National Grid Carbon Intensity Baseline Report. All meter billing reconciles with DESCO / DPDC bulk power utility accounts.',
-      status: 'Addressed',
+      response: 'No official Bangladesh grid factor has been located. The 0.550 kg CO₂e/kWh shown earlier was a CDM combined margin with an unlocated citation and has been withdrawn. CarbonOS derives a DRAFT grid-average factor from BPDB annual-report data; it is used only after a second person approves it.',
+      status: 'Open',
       date: '2026-03-28'
     },
     {

@@ -1,24 +1,36 @@
 
-BANGLADESH NATIONALLY DETERMINED CONTRIBUTIONS (UPDATED NDC 2021)
-Ministry of Environment, Forest and Climate Change (MoEFCC), Government of the People's Republic of Bangladesh.
+BANGLADESH CLIMATE AND ENVIRONMENT RULES: SOURCE NOTES
+Prepared by CarbonOS for retrieval. Not an official text: read the primary documents before relying on it.
 
-1. EXECUTIVE SUMMARY & TARGETS:
-Bangladesh committed to reduce its greenhouse gas (GHG) emissions by 27.56 Mt CO2e (6.73%) below Business-As-Usual (BAU) levels by 2030 unconditionally using domestic resources.
-With international support (finance, technology transfer, capacity building), Bangladesh commits to an additional conditional reduction of 61.9 Mt CO2e (15.12%), achieving a cumulative total reduction of 89.46 Mt CO2e (21.85%) by 2030.
+1. UPDATED NATIONALLY DETERMINED CONTRIBUTIONS (NDC), submitted to the UNFCCC in August 2021
+Ministry of Environment, Forest and Climate Change (MoEFCC). Base year 2012; sectors: Energy, IPPU, AFOLU, Waste.
+- Unconditional: reduce GHG emissions by 27.56 Mt CO2e (6.73%) below business-as-usual (BAU) by 2030.
+- Conditional on international support: a further 61.9 Mt CO2e (15.12%), i.e. 21.85% below BAU in total
+  (89.47 Mt CO2e as summarised by UNDP and UNEP).
+- A later NDC (NDC 3.0) was reported submitted in September 2025. Check the UNFCCC NDC registry for the current text.
 
-2. SECTORAL ALLOCATIONS:
-- Energy Sector (Power, Industry, Transport, Buildings): Accounts for 96.1% of unconditional mitigation actions.
-- Industry & Manufacturing: Mandatory adoption of high-efficiency gas generators, waste heat recovery systems, and solar rooftop installations under SREDA guidelines.
-- Agriculture, Forestry and Other Land Use (AFOLU): Scaling Alternate Wetting and Drying (AWD) rice irrigation to reduce methane emissions across 1.2 million hectares by 2030.
+2. ENVIRONMENT CONSERVATION RULES, 2023 (ECR 2023)
+- Bangladesh Gazette Extraordinary, Sunday 5 March 2023, page 3009: S.R.O. No. 53-Ain/2023, made by MoEFCC under
+  section 20 of the Bangladesh Environment Conservation Act, 1995. It repealed the Environment Conservation Rules, 1997.
+- Content (FAOLEX abstract, listed by UNEP LEAP): complaints about pollution; sampling notices; classification of
+  industrial units and projects into Green, Yellow, Orange and Red categories; environmental clearance and location
+  clearance certificates; EIA and environmental management plans; appeals; water quality and liquid-waste
+  standards; effluent treatment plants; fees.
+- ECR 2023 is not a GHG inventory rule. Neither the FAOLEX abstract nor the machine-readable parts of the gazetted
+  text require reporting or verification of Scope 1 or Scope 2 emissions, and the rules name no MRV software.
 
-3. ENVIRONMENT CONSERVATION RULES 2023 (ECR 2023):
-Published under S.R.O. No. 349-Act/2023 by Department of Environment (DoE).
-- Categorization: Red, Orange, Green industrial categorization now includes mandatory carbon footprint disclosure for Class-A textile, steel, cement, and chemical manufacturing facilities.
-- Environmental Clearance Certificate (ECC): Requires verified annual Scope 1 and Scope 2 emissions inventory submitted via certified MRV portals like CarbonOS.
+3. EU CARBON BORDER ADJUSTMENT MECHANISM (CBAM): Regulation (EU) 2023/956, amended by Regulation (EU) 2025/2083
+- Covered goods: iron and steel, aluminium, cement, fertilisers, hydrogen and electricity.
+  Garments and textiles are NOT covered.
+- Transitional period, 1 October 2023 to 31 December 2025: quarterly reports of embedded emissions, no payment.
+- Definitive period from 1 January 2026: authorised CBAM declarants surrender CBAM certificates for the embedded
+  emissions of covered goods they import. Certificate sales open on 1 February 2027; the first annual declaration
+  and surrender, for 2026 imports, are due by 30 September 2027.
+- De minimis: an importer bringing in no more than 50 tonnes a year of covered goods (electricity and hydrogen
+  excluded) is exempt.
+- CBAM counts "embedded emissions" per tonne of product (direct emissions, and for some goods indirect emissions
+  from electricity). That is not the same as a company's GHG Protocol Scope 1 and Scope 2 inventory.
 
-4. EU CBAM COMPLIANCE (CARBON BORDER ADJUSTMENT MECHANISM):
-EU Regulation 2023/956 on Carbon Border Adjustment Mechanism affects direct and indirect emissions for goods imported into the European Union.
-- Transitional Period (2023-2025): Quarterly reporting of embedded emissions without financial adjustments.
-- Definitive Period (2026 onwards): Importers must purchase CBAM certificates corresponding to the carbon price difference between EU ETS and domestic carbon prices.
-- Covered sectors impacting Bangladesh exports: Steel, Aluminum, and downstream electrical components.
-- Reporting requirements: Direct Scope 1 emissions and Indirect Scope 2 electricity emissions per metric ton of exported goods.
+Sources: UNFCCC NDC registry and UNDP Bangladesh NDC 2021 summary; Bangladesh Gazette of 5 March 2023 (FAOLEX
+BGD219240, https://faolex.fao.org/docs/pdf/BGD219240.pdf); UNEP LEAP entry "Environment Conservation Rules, 2023
+(SRO No. 53)"; Regulation (EU) 2023/956 and Regulation (EU) 2025/2083; EPA Ireland CBAM guidance.

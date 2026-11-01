@@ -150,7 +150,7 @@ const Hero = () => {
               </span>
               <span className="text-white/20">|</span>
               <span className="font-sans text-[11px] text-white/80 hidden sm:inline">
-                MoEFCC S.R.O. 349 Aligned
+                GHG Protocol Scope 1 &amp; 2 method
               </span>
               <span className="bg-emerald/15 text-emerald border border-emerald/30 font-mono text-[9px] px-1.5 py-0.5 rounded font-bold">
                 97% DIRECT PAYOUT
@@ -206,7 +206,7 @@ const Hero = () => {
             <div className="flex flex-wrap gap-6 pt-6 border-t border-white/10 w-full">
               <div className="hero-trust-badge flex items-center space-x-2 text-xs text-white/70">
                 <CheckCircle2 size={16} className="text-emerald" />
-                <span>DoE Baseline: 0.550 kg CO₂e/kWh</span>
+                <span>Cited, second-person-approved factors only</span>
               </div>
               <div className="hero-trust-badge flex items-center space-x-2 text-xs text-white/70">
                 <ShieldCheck size={16} className="text-emerald" />

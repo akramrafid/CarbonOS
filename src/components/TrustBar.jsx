@@ -3,8 +3,8 @@ import { ShieldCheck, CheckCircle2, Globe2, Award, FileCheck, Layers } from 'luc
 
 const TrustBar = () => {
   const items = [
-    { label: "MoEFCC S.R.O. 349 Aligned", badge: "STATUTORY", icon: ShieldCheck },
-    { label: "DoE Grid Baseline 0.550 kg CO₂e/kWh", badge: "OFFICIAL", icon: CheckCircle2 },
+    { label: "GHG Protocol Corporate Standard", badge: "METHOD", icon: ShieldCheck },
+    { label: "No default grid factor: cited, approved factors only", badge: "POLICY", icon: CheckCircle2 },
     { label: "UNFCCC Article 6.2 ITMO Ready", badge: "GLOBAL", icon: Globe2 },
     { label: "Verra VCS & Gold Standard Synced", badge: "REGISTRY", icon: Award },
     { label: "ISO 14064-2 Verified Telemetry", badge: "AUDIT", icon: FileCheck },

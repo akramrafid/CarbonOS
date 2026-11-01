@@ -36,6 +36,7 @@ PERIOD_STATUSES = ("OPEN", "LOCKED")
 ACTIVITY_STATUSES = ("DRAFT", "SUBMITTED", "APPROVED", "REJECTED", "SUPERSEDED")
 FACTOR_STATUSES = ("DRAFT", "APPROVED", "RETIRED")
 FACTOR_METHODS = ("direct", "location", "market")
+FACTOR_KINDS = ("grid_average", "grid_combined_margin", "supplier_specific", "residual_mix")
 SOURCE_TYPES = ("manual", "document", "csv")
 BOUNDARY_METHODS = ("operational_control", "financial_control", "equity_share")
 
@@ -116,6 +117,13 @@ class EmissionFactor(EsgBase):
         CheckConstraint("kgco2e_per_unit >= 0", name="ck_esg_factor_nonnegative"),
         CheckConstraint("valid_to IS NULL OR valid_to >= valid_from", name="ck_esg_factor_validity"),
         CheckConstraint("approved_by IS NULL OR approved_by <> created_by", name="ck_esg_factor_dual_control"),
+        CheckConstraint("factor_kind IS NULL OR " + _in("factor_kind", FACTOR_KINDS), name="ck_esg_factor_kind"),
+        # Location-based Scope 2 is the grid AVERAGE rate; a CDM combined margin is never a Scope 2 factor.
+        CheckConstraint("NOT (factor_kind = 'grid_combined_margin' AND method IN ('location','market'))",
+                        name="ck_esg_factor_no_margin_scope2"),
+        CheckConstraint("NOT (activity_type = 'electricity' AND method = 'location' AND factor_kind <> 'grid_average')",
+                        name="ck_esg_factor_location_grid_average"),
+        CheckConstraint("method <> 'direct' OR factor_kind IS NULL", name="ck_esg_factor_direct_kind"),
     )
 
     id = Column(String(36), primary_key=True, default=_id)
@@ -129,6 +137,8 @@ class EmissionFactor(EsgBase):
     region = Column(String(50), nullable=False)
     gwp_basis = Column(String(20), nullable=False)
     method = Column(String(10), nullable=False)
+    # NULL only on rows created before migration 0003; new Scope 2 electricity factors must declare it.
+    factor_kind = Column(String(30))
     valid_from = Column(Date, nullable=False)
     valid_to = Column(Date)
     source_publisher = Column(String(200), nullable=False)
