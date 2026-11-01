@@ -4,7 +4,7 @@ Decimals are serialised as strings so no precision is lost to JSON floats.
 """
 import datetime as dt
 from decimal import Decimal
-from typing import Literal, Optional
+from typing import List, Literal, Optional
 
 from fastapi import APIRouter, Depends, HTTPException, Query
 from fastapi.responses import PlainTextResponse
@@ -23,6 +23,8 @@ router = APIRouter(tags=["ESG Ledger"])
 
 Boundary = Literal["operational_control", "financial_control", "equity_share"]
 NonNeg = condecimal(ge=0, max_digits=28, decimal_places=10)
+Pct = condecimal(ge=0, le=1000, max_digits=12, decimal_places=6)  # 95 % half-width, % of the value
+Grade = Literal["metered", "billed", "estimated", "default"]
 
 
 class LegalEntityIn(BaseModel):
@@ -47,13 +49,24 @@ class PeriodIn(BaseModel):
     start_date: dt.date
     end_date: dt.date
     boundary_method: Boundary
+    # AR6 by default (IFRS S2: latest IPCC assessment); AR5 stays selectable.
+    gwp_basis: Literal["AR5", "AR6"] = "AR6"
+
+
+class GasComponentIn(BaseModel):
+    gas: Literal["CO2", "CO2_biogenic", "CH4_fossil", "CH4_non_fossil", "N2O"]
+    kg_per_unit: NonNeg
+    uncertainty_pct: Optional[Pct] = None
 
 
 class FactorIn(BaseModel):
     family: str = Field(..., min_length=1, max_length=80, pattern=r"^[A-Za-z0-9._-]+$")
     activity_type: str
     unit: str
-    kgco2e_per_unit: NonNeg
+    # CO2e-only factor value, or computed by the service from gas_components with gwp_basis.
+    kgco2e_per_unit: Optional[NonNeg] = None
+    gas_components: Optional[List[GasComponentIn]] = Field(None, max_length=5)
+    uncertainty_pct: Optional[Pct] = None
     region: str = Field(..., min_length=1, max_length=50)
     # AR6 by default: IFRS S2 requires the latest IPCC assessment. AR5/AR4 stay selectable for restatement.
     gwp_basis: Literal["AR4", "AR5", "AR6"] = "AR6"
@@ -67,6 +80,24 @@ class FactorIn(BaseModel):
     source_table_ref: Optional[str] = Field(None, max_length=200)
     source_year: int = Field(..., ge=1990, le=2100)
     licence_note: Optional[str] = Field(None, max_length=2000)
+
+
+class HeatingValueIn(BaseModel):
+    gcv: condecimal(gt=0, max_digits=18, decimal_places=8)
+    gcv_unit: Literal["MJ/m3", "kcal/m3", "Btu/scf"] = "MJ/m3"
+    ncv_to_gcv: condecimal(gt=0, le=1, max_digits=7, decimal_places=6)
+    reference_conditions: str = Field(..., min_length=1, max_length=100)
+    source: str = Field(..., min_length=1, max_length=300)
+    is_default: bool = False
+    uncertainty_pct: Optional[Pct] = None
+
+
+class MassBalanceIn(BaseModel):
+    opening_kg: NonNeg
+    purchased_kg: NonNeg
+    recovered_kg: NonNeg
+    closing_kg: NonNeg
+    capacity_increase_kg: NonNeg = Decimal(0)
 
 
 class ActivityIn(BaseModel):
@@ -87,6 +118,13 @@ class ActivityIn(BaseModel):
     notes: Optional[str] = Field(None, max_length=2000)
     supersedes_id: Optional[str] = None
     idempotency_key: Optional[str] = Field(None, max_length=100)
+    data_quality: Optional[Grade] = None
+    uncertainty_pct: Optional[Pct] = None
+    generator_id: Optional[str] = Field(None, max_length=100)
+    heating_value: Optional[HeatingValueIn] = None
+    volume_correction: Optional[condecimal(gt=0, max_digits=18, decimal_places=10)] = None
+    refrigerant: Optional[str] = Field(None, max_length=30)
+    mass_balance: Optional[MassBalanceIn] = None
 
 
 class ActivityPatch(BaseModel):
@@ -100,6 +138,8 @@ class ActivityPatch(BaseModel):
     factor_id: Optional[str] = None
     market_factor_id: Optional[str] = None
     notes: Optional[str] = Field(None, max_length=2000)
+    data_quality: Optional[Grade] = None
+    uncertainty_pct: Optional[Pct] = None
 
 
 class ReviewIn(BaseModel):

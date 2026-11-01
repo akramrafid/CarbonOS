@@ -5,11 +5,15 @@ import { Button, Input, Loading, Notice, Panel, Select, StatusBadge, Table, useA
 
 const tonnes = (kg) => (kg == null ? null : (Number(kg) / 1000).toLocaleString(undefined, { maximumFractionDigits: 3 }));
 
-function Total({ label, kg, note }) {
+function Total({ label, kg, note, unc }) {
+  const coverage = unc?.coverage_pct != null && Number(unc.coverage_pct) < 100 ? `, covers ${unc.coverage_pct}% of emissions` : '';
   return (
     <div className="rounded-xl border border-mist/20 bg-carbon/50 p-4">
       <div className="font-mono text-[11px] uppercase tracking-wider text-mist">{label}</div>
       <div className="mt-1 text-2xl text-registry">{kg == null ? 'Not reported' : `${tonnes(kg)} tCO₂e`}</div>
+      {unc?.uncertainty_pct != null && (
+        <div className="mt-1 text-xs text-mist">±{unc.uncertainty_pct}% (95 %, IPCC Approach 1{coverage})</div>
+      )}
       {note && <div className="mt-1 text-xs text-mist">{note}</div>}
     </div>
   );
@@ -76,13 +80,13 @@ export default function ReportsPanel({ can, me, periods, facilities, onPeriodsCh
         {run && (
           <div className="space-y-4">
             <div className="grid gap-3 sm:grid-cols-3">
-              <Total label="Scope 1" kg={run.scope1_kg} />
-              <Total label="Scope 2 — location-based" kg={run.scope2_location_kg} />
-              <Total label="Scope 2 — market-based" kg={run.scope2_market_kg}
+              <Total label="Scope 1" kg={run.scope1_kg} unc={run.uncertainty?.scope1} />
+              <Total label="Scope 2 — location-based" kg={run.scope2_location_kg} unc={run.uncertainty?.scope2_location} />
+              <Total label="Scope 2 — market-based" kg={run.scope2_market_kg} unc={run.uncertainty?.scope2_market}
                 note={run.scope2_market_kg == null ? 'Missing market-based inputs for some electricity; not estimated.' : null} />
             </div>
             <p className="text-xs text-mist">Prepared by {run.created_by} at {run.created_at}{run.period_revision !== period?.revision ? ' (earlier revision)' : ''}.</p>
-            <p className="text-xs text-mist">Boundary: {run.boundary_method.replace('_', ' ')} · Methodology {run.methodology_version} · Inputs {run.input_sha256.slice(0, 12)}… · Scope 3 not included.</p>
+            <p className="text-xs text-mist">Boundary: {run.boundary_method.replace('_', ' ')} · Methodology {run.methodology_version} · GWP {run.gwp_basis || 'not recorded'} · Inputs {run.input_sha256.slice(0, 12)}… · Scope 3 not included.</p>
             {run.exceptions.length > 0 && (
               <Table caption="Data-quality exceptions" rowKey="key" rows={run.exceptions.map((x, i) => ({ ...x, key: i }))} columns={[
                 { key: 'code', label: 'Exception', render: (x) => <span className={x.blocking ? 'text-red-300' : 'text-amber-300'}>{x.code}{x.blocking ? ' (blocks lock)' : ''}</span> },

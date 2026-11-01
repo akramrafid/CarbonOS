@@ -37,6 +37,7 @@ ACTIVITY_STATUSES = ("DRAFT", "SUBMITTED", "APPROVED", "REJECTED", "SUPERSEDED")
 FACTOR_STATUSES = ("DRAFT", "APPROVED", "RETIRED")
 FACTOR_METHODS = ("direct", "location", "market")
 FACTOR_KINDS = ("grid_average", "grid_combined_margin", "supplier_specific", "residual_mix")
+DATA_QUALITY_GRADES = ("metered", "billed", "estimated", "default")
 SOURCE_TYPES = ("manual", "document", "csv")
 BOUNDARY_METHODS = ("operational_control", "financial_control", "equity_share")
 
@@ -93,6 +94,7 @@ class ReportingPeriod(EsgBase):
         CheckConstraint("end_date > start_date", name="ck_esg_period_dates"),
         CheckConstraint(_in("status", PERIOD_STATUSES), name="ck_esg_period_status"),
         CheckConstraint(_in("boundary_method", BOUNDARY_METHODS), name="ck_esg_period_boundary"),
+        CheckConstraint("gwp_basis IS NULL OR gwp_basis IN ('AR5','AR6')", name="ck_esg_period_gwp_basis"),
     )
 
     id = Column(String(36), primary_key=True, default=_id)
@@ -101,6 +103,8 @@ class ReportingPeriod(EsgBase):
     start_date = Column(Date, nullable=False)
     end_date = Column(Date, nullable=False)
     boundary_method = Column(String(30), nullable=False)
+    # Inventory GWP basis; factors on another basis block (MIXED_GWP_BASIS). NULL = period created before 0004.
+    gwp_basis = Column(String(10))
     status = Column(String(10), nullable=False, default="OPEN")
     revision = Column(Integer, nullable=False, default=1)
     created_by = Column(String(255), nullable=False)
@@ -139,6 +143,10 @@ class EmissionFactor(EsgBase):
     method = Column(String(10), nullable=False)
     # NULL only on rows created before migration 0003; new Scope 2 electricity factors must declare it.
     factor_kind = Column(String(30))
+    # Gas-level factor: [{"gas": "CO2", "kg_per_unit": "56.1", "uncertainty_pct": "3.92"}, ...]. kgco2e_per_unit is
+    # then computed from it with gwp_basis by the service. NULL = a CO2e-only factor.
+    gas_components = Column(JSON)
+    uncertainty_pct = Column(Numeric(12, 6))  # 95 % half-width in %, for CO2e-only factors
     valid_from = Column(Date, nullable=False)
     valid_to = Column(Date)
     source_publisher = Column(String(200), nullable=False)
@@ -169,6 +177,8 @@ class ActivityRecord(EsgBase):
         CheckConstraint("quantity >= 0 AND quantity_raw >= 0", name="ck_esg_activity_nonnegative"),
         CheckConstraint("activity_end >= activity_start", name="ck_esg_activity_dates"),
         CheckConstraint("reviewed_by IS NULL OR reviewed_by <> created_by", name="ck_esg_activity_dual_control"),
+        CheckConstraint("data_quality IS NULL OR " + _in("data_quality", DATA_QUALITY_GRADES),
+                        name="ck_esg_activity_data_quality"),
         Index("ix_esg_activity_period_status", "organization_id", "period_id", "status"),
     )
 
@@ -190,6 +200,13 @@ class ActivityRecord(EsgBase):
     evidence_snippet = Column(Text)
     factor_id = Column(String(36), ForeignKey("esg_emission_factor.id"))
     market_factor_id = Column(String(36), ForeignKey("esg_emission_factor.id"))
+    data_quality = Column(String(12))  # metered / billed / estimated / default
+    uncertainty_pct = Column(Numeric(12, 6))  # activity data, 95 % half-width in %
+    generator_id = Column(String(100))  # links generator fuel to captive_generation_output
+    heating_value = Column(JSON)  # natural gas: gcv_mj_per_m3, ncv_to_gcv, reference_conditions, source, ...
+    volume_correction = Column(QTY)  # billed m3 → m3 at the heating value's reference conditions
+    refrigerant = Column(String(30))
+    mass_balance = Column(JSON)  # refrigerant kg: opening, purchased, recovered, closing, capacity_increase
     notes = Column(Text)
     status = Column(String(12), nullable=False, default="DRAFT")
     supersedes_id = Column(String(36), ForeignKey("esg_activity_record.id"))
@@ -226,6 +243,8 @@ class CalculationRun(EsgBase):
     excluded = Column(JSON, nullable=False)
     memo = Column(JSON, nullable=False)
     by_facility = Column(JSON, nullable=False)
+    gwp_basis = Column(String(10))
+    uncertainty = Column(JSON)  # IPCC Approach 1 summary per total
     created_by = Column(String(255), nullable=False)
     created_at = Column(DateTime(timezone=True), default=_now, nullable=False)
 
@@ -242,11 +261,15 @@ class CalculationLine(EsgBase):
     quantity = Column(QTY, nullable=False)
     unit = Column(String(10), nullable=False)
     inclusion_share = Column(Numeric(12, 8), nullable=False)
-    factor_id = Column(String(36), ForeignKey("esg_emission_factor.id"), nullable=False)
-    factor_version = Column(Integer, nullable=False)
+    factor_id = Column(String(36), ForeignKey("esg_emission_factor.id"))  # NULL for GWP-based refrigerant lines
+    factor_version = Column(Integer)
     factor_value = Column(QTY, nullable=False)
     emissions_kg = Column(KG, nullable=False)
     formula = Column(Text, nullable=False)
+    data_quality = Column(String(12))
+    uncertainty_pct = Column(Numeric(12, 6))
+    factor_ref = Column(String(200))  # e.g. "IPCC AR6 GWP-100 R-410A" when there is no factor row
+    details = Column(JSON)  # heating value conversion, gas breakdown, mass balance
 
 
 class ReportSnapshot(EsgBase):

@@ -27,9 +27,10 @@ def factor(id, activity_type, unit, value, method, family=None, version=1, regio
                   kind=kind)
 
 
-def act(id, fac, activity_type, qty, unit, start=dt.date(2025, 3, 1), end=dt.date(2025, 3, 31), **kw):
+def act(id, fac, activity_type, qty, unit, start=dt.date(2025, 3, 1), end=dt.date(2025, 3, 31), data_quality="billed",
+        **kw):
     return Activity(id=id, facility_id=fac, activity_type=activity_type, quantity=D(qty), unit=unit,
-                    period_start=start, period_end=end, **kw)
+                    period_start=start, period_end=end, data_quality=data_quality, **kw)
 
 
 FAC = {"f1": Facility("f1", "BD", True, True, D(100))}

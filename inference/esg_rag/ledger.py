@@ -18,7 +18,7 @@ from sqlalchemy import or_, update
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy.orm import Session
 
-from . import accounting
+from . import accounting, gwp
 from .auth import Principal
 from .ledger_models import (
     ActivityRecord, AuditEvent, CalculationLine, CalculationRun, EmissionFactor, Facility, LegalEntity,
@@ -139,6 +139,27 @@ def _check_factor_kind(data):
         raise DomainError(422, f"factor_kind for {data['activity_type']}/{data['method']} must be: {names}")
 
 
+def _factor_values(data):
+    """A gas-level factor's CO2e per unit is computed here from its gases and GWP basis, never typed in."""
+    gases = data.get("gas_components")
+    if not gases:
+        if data.get("kgco2e_per_unit") is None:
+            raise DomainError(422, "Give kgco2e_per_unit or gas_components")
+        return data
+    if data["gwp_basis"] not in gwp.GWP100:
+        raise DomainError(422, f"Gas-level factors need a supported GWP basis: {', '.join(sorted(gwp.GWP100))}")
+    comps = tuple(accounting.GasComponent(g["gas"], Decimal(str(g["kg_per_unit"])), _dec(g.get("uncertainty_pct")))
+                  for g in gases)
+    if len({c.gas for c in comps}) != len(comps):
+        raise DomainError(422, "Each gas may appear once")
+    computed = accounting.gas_factor_co2e(comps, data["gwp_basis"])
+    given = data.get("kgco2e_per_unit")
+    if given is not None and abs(Decimal(str(given)) - computed) > Decimal("0.000001"):
+        raise DomainError(422, f"kgco2e_per_unit {given} does not match the gas components "
+                               f"({computed} at {data['gwp_basis']})")
+    return {**data, "kgco2e_per_unit": computed, "gas_components": _jsonable(gases)}
+
+
 def create_factor(db, principal, data, platform_wide=False):
     """New DRAFT factor version. Organization factors are custom; platform factors need an operator."""
     if platform_wide:
@@ -150,12 +171,16 @@ def create_factor(db, principal, data, platform_wide=False):
         org_id, family = principal.organization_id, f"{principal.organization_id}:{data['family']}"
     if data["activity_type"] not in accounting.ACTIVITY_TYPES:
         raise DomainError(422, "Factors apply to inventory activity types only")
-    if data["unit"] != accounting.canonical_unit(data["activity_type"]):
-        raise DomainError(422, f"Factor unit must be kgCO2e per {accounting.canonical_unit(data['activity_type'])}")
+    if data["activity_type"] == "refrigerant":
+        raise DomainError(422, "Refrigerant GWPs are pinned by the methodology (IPCC AR6/AR5); no factor is entered")
+    units = (accounting.canonical_unit(data["activity_type"]), accounting.ENERGY_BASIS_UNITS.get(data["activity_type"]))
+    if data["unit"] not in units:
+        raise DomainError(422, f"Factor unit must be kgCO2e per {' or per '.join(u for u in units if u)}")
     scope = accounting.ACTIVITY_TYPES[data["activity_type"]][0]
     if (scope == "1") != (data["method"] == "direct"):
         raise DomainError(422, "Scope 1 factors use method 'direct'; Scope 2 factors use 'location' or 'market'")
     _check_factor_kind(data)
+    data = _factor_values(dict(data))
     latest = db.query(EmissionFactor.version).filter(EmissionFactor.family == family) \
         .order_by(EmissionFactor.version.desc()).first()
     payload = {k: v for k, v in data.items() if k != "family"}
@@ -233,6 +258,58 @@ def _overlap(db, principal, rec_id, data, supersedes_id):
     return q.first()
 
 
+MASS_BALANCE_KEYS = ("opening_kg", "purchased_kg", "recovered_kg", "closing_kg", "capacity_increase_kg")
+
+
+def _dec(v) -> Optional[Decimal]:
+    return None if v is None else Decimal(str(v))
+
+
+def _scope1_fields(data):
+    """Validate heating value, refrigerant and generator fields; JSON parts are stored with decimal strings."""
+    at = data["activity_type"]
+    hv = data.get("heating_value")
+    if hv is not None:
+        if at != "natural_gas":
+            raise DomainError(422, "A heating value applies to natural gas only")
+        try:
+            gcv = accounting.heating_value_mj_per_m3(hv["gcv"], hv["gcv_unit"])
+        except accounting.UnitError as e:
+            raise DomainError(422, str(e))
+        data["heating_value"] = _jsonable({**hv, "gcv_mj_per_m3": gcv})
+    if data.get("volume_correction") is not None and at != "natural_gas":
+        raise DomainError(422, "A volume correction applies to natural gas only")
+    if at == "electricity" and data.get("generator_id"):
+        raise DomainError(422, "Generator output is a memo item (captive_generation_output), never Scope 2 electricity")
+    if at != "refrigerant":
+        if data.get("refrigerant") or data.get("mass_balance"):
+            raise DomainError(422, "Refrigerant and mass balance apply to refrigerant records only")
+        return data
+    name, mb = data.get("refrigerant"), data.get("mass_balance")
+    if not name or gwp.refrigerant_composition(name) is None:
+        known = ", ".join(sorted(set(gwp.BLENDS) | set(gwp.ALIASES)))
+        raise DomainError(422, f"Unknown refrigerant '{name}'. Known: {known}")
+    if mb is None:
+        raise DomainError(422, "A refrigerant record needs its mass balance (opening, purchased, recovered, closing kg)")
+    net = accounting.MassBalance(*(Decimal(str(mb[k])) for k in MASS_BALANCE_KEYS)).net_kg()
+    if net < 0:
+        raise DomainError(422, f"Mass balance is negative ({net} kg): check stock counts and recovered quantities")
+    return {**data, "quantity": net, "unit": "kg", "mass_balance": _jsonable(mb)}
+
+
+def _captive_meter_clash(db, principal, data):
+    """Grid electricity and captive generator output never share a meter in overlapping periods."""
+    other = {"electricity": "captive_generation_output",
+             "captive_generation_output": "electricity"}.get(data["activity_type"])
+    if not other or not data.get("meter_ref"):
+        return None
+    return db.query(ActivityRecord).filter(
+        ActivityRecord.organization_id == principal.organization_id, ActivityRecord.facility_id == data["facility_id"],
+        ActivityRecord.activity_type == other, ActivityRecord.meter_ref == data["meter_ref"],
+        ActivityRecord.status.notin_(("REJECTED", "SUPERSEDED")),
+        ActivityRecord.activity_start <= data["activity_end"], ActivityRecord.activity_end >= data["activity_start"]).first()
+
+
 def create_activity(db, principal, data):
     """Create a DRAFT activity record. Overlapping records for the same facility, activity and meter
     are rejected (prevents double counting); identical idempotency keys return the original."""
@@ -246,6 +323,7 @@ def create_activity(db, principal, data):
     _get(db, Facility, principal, data["facility_id"])
     if data["activity_type"] not in accounting.ACTIVITY_TYPES and data["activity_type"] not in accounting.MEMO_ACTIVITY_TYPES:
         raise DomainError(422, "Unknown activity type")
+    data = _scope1_fields(dict(data))
     if data["activity_end"] < data["activity_start"]:
         raise DomainError(422, "activity_end must not be before activity_start")
     if data["activity_start"] < period.start_date or data["activity_end"] > period.end_date:
@@ -261,6 +339,10 @@ def create_activity(db, principal, data):
     if clash:
         raise DomainError(409, f"Overlaps existing record {clash.id} for the same facility, activity and meter "
                                "(possible double counting). Use a different meter reference or supersede it.")
+    captive = _captive_meter_clash(db, principal, data)
+    if captive:
+        raise DomainError(409, f"Meter {data['meter_ref']} already carries {captive.activity_type} record {captive.id}: "
+                               "captive generator kWh are never also Scope 2 electricity (double counting)")
 
     quantity = _normalized(data)
     rec = ActivityRecord(
@@ -376,8 +458,11 @@ def _input_hash(period, acts, facs, factors, metric_ids=()) -> str:
     payload = {
         "methodology": accounting.METHODOLOGY_VERSION,
         "boundary": period.boundary_method,
+        "gwp_basis": period.gwp_basis,
         "activities": [[a.id, a.facility_id, a.activity_type, a.quantity, a.unit, a.activity_start, a.activity_end,
-                        a.factor_id, a.market_factor_id] for a in acts],
+                        a.factor_id, a.market_factor_id, a.meter_ref, a.data_quality, a.uncertainty_pct,
+                        a.generator_id, a.heating_value, a.volume_correction, a.refrigerant, a.mass_balance]
+                       for a in acts],
         "facilities": [[f.id, f.grid_region, f.operational_control, f.financial_control, f.equity_share_pct] for f in facs],
         "factors": [[f.id, f.version, f.kgco2e_per_unit, f.status] for f in factors],
         "metrics": list(metric_ids),  # approved E/S/G observations are immutable, so ids identify them
@@ -385,18 +470,38 @@ def _input_hash(period, acts, facs, factors, metric_ids=()) -> str:
     return hashlib.sha256(canonical_json(payload).encode()).hexdigest()
 
 
+def _accounting_activity(a):
+    hv, mb = a.heating_value, a.mass_balance
+    return accounting.Activity(
+        a.id, a.facility_id, a.activity_type, Decimal(a.quantity), a.unit, a.activity_start, a.activity_end,
+        a.factor_id, a.market_factor_id, meter_ref=a.meter_ref, data_quality=a.data_quality,
+        uncertainty_pct=_dec(a.uncertainty_pct), generator_id=a.generator_id,
+        heating_value=accounting.HeatingValue(
+            Decimal(hv["gcv_mj_per_m3"]), Decimal(hv["ncv_to_gcv"]), hv["reference_conditions"], hv["source"],
+            bool(hv.get("is_default")), _dec(hv.get("uncertainty_pct"))) if hv else None,
+        volume_correction=_dec(a.volume_correction) or Decimal(1), refrigerant=a.refrigerant,
+        mass_balance=accounting.MassBalance(*(Decimal(mb[k]) for k in MASS_BALANCE_KEYS)) if mb else None)
+
+
+def _accounting_factor(f):
+    return accounting.Factor(
+        f.id, f.version, f.family, f.activity_type, f.unit, Decimal(f.kgco2e_per_unit), f.region, f.gwp_basis,
+        f.method, f.valid_from, f.valid_to, kind=f.factor_kind,
+        gases=tuple(accounting.GasComponent(g["gas"], Decimal(g["kg_per_unit"]), _dec(g.get("uncertainty_pct")))
+                    for g in (f.gas_components or [])),
+        uncertainty_pct=_dec(f.uncertainty_pct))
+
+
 def calculate_period(db, principal, period_id):
     _need(principal, "write")
     period = _open_period(db, principal, period_id)
     acts, facs, factors = _calc_inputs(db, principal, period)
     result = accounting.calculate(
-        [accounting.Activity(a.id, a.facility_id, a.activity_type, Decimal(a.quantity), a.unit, a.activity_start,
-                             a.activity_end, a.factor_id, a.market_factor_id) for a in acts],
+        [_accounting_activity(a) for a in acts],
         {f.id: accounting.Facility(f.id, f.grid_region, f.operational_control, f.financial_control,
                                    Decimal(f.equity_share_pct), f.legal_entity_id) for f in facs},
-        [accounting.Factor(f.id, f.version, f.family, f.activity_type, f.unit, Decimal(f.kgco2e_per_unit), f.region,
-                           f.gwp_basis, f.method, f.valid_from, f.valid_to, kind=f.factor_kind) for f in factors],
-        period.boundary_method,
+        [_accounting_factor(f) for f in factors],
+        period.boundary_method, gwp_basis=period.gwp_basis,
     )
     run = CalculationRun(
         organization_id=principal.organization_id, period_id=period.id, period_revision=period.revision,
@@ -406,11 +511,12 @@ def calculate_period(db, principal, period_id):
         scope2_location_kg=result.scope2_location_kg, scope2_market_kg=result.scope2_market_kg,
         blocking=result.blocking, exceptions=result.exceptions, excluded=result.excluded,
         memo=_jsonable(result.memo), by_facility=_jsonable(result.by_facility), created_by=principal.sub,
+        gwp_basis=result.gwp_basis, uncertainty=_jsonable(result.uncertainty),
     )
     db.add(run)
     db.flush()
     for line in result.lines:
-        db.add(CalculationLine(run_id=run.id, **line.__dict__))
+        db.add(CalculationLine(run_id=run.id, **{**line.__dict__, "details": _jsonable(line.details)}))
     audit(db, principal, "calculation.run", "calculation_run", run.id,
           {"period_id": period.id, "blocking": result.blocking, "input_sha256": run.input_sha256})
     db.commit()
@@ -492,6 +598,7 @@ def _report_content(db, principal, period, run):
         "period": {"id": period.id, "name": period.name, "start_date": period.start_date, "end_date": period.end_date,
                    "boundary_method": period.boundary_method, "revision": period.revision},
         "methodology_version": run.methodology_version,
+        "gwp_basis": run.gwp_basis,
         "calculation_run_id": run.id,
         "input_sha256": run.input_sha256,
         "prepared_by": run.created_by,
@@ -508,11 +615,14 @@ def _report_content(db, principal, period, run):
                          **{k: _t(v) for k, v in vals.items()}} for fid, vals in sorted(run.by_facility.items())],
         "lines": [{k: getattr(l, k) for k in ("activity_id", "facility_id", "scope", "method", "quantity", "unit",
                                               "inclusion_share", "factor_id", "factor_version", "factor_value",
-                                              "emissions_kg", "formula")} for l in lines],
+                                              "factor_ref", "emissions_kg", "formula", "data_quality",
+                                              "uncertainty_pct", "details")} for l in lines],
+        "uncertainty": run.uncertainty,
         "factors_used": [{k: getattr(f, k) for k in ("id", "family", "version", "activity_type", "unit",
                                                      "kgco2e_per_unit", "region", "gwp_basis", "method", "factor_kind",
                                                      "source_publisher", "source_document", "source_url",
-                                                     "source_table_ref", "source_year", "is_custom", "approved_by")}
+                                                     "source_table_ref", "source_year", "is_custom", "approved_by",
+                                                     "gas_components", "uncertainty_pct")}
                          for f in factors],
         "esg_metrics": [{"metric_key": m.metric_key, "facility_id": m.facility_id, "dimensions": m.dimensions,
                          "value": m.value, "unit": m.unit, "observation_id": m.id, "approved_by": m.reviewed_by}
@@ -556,10 +666,10 @@ def export_snapshot(snap: ReportSnapshot, fmt: str) -> str:
         w.writerow(["total_tco2e", k, "" if v is None else v])
     w.writerow([])
     cols = ["activity_id", "facility_id", "scope", "method", "quantity", "unit", "inclusion_share", "factor_id",
-            "factor_version", "factor_value", "emissions_kg", "formula"]
+            "factor_version", "factor_value", "factor_ref", "emissions_kg", "formula", "data_quality", "uncertainty_pct"]
     w.writerow(cols)
-    for line in c["lines"]:
-        w.writerow([line[k] for k in cols])
+    for line in c["lines"]:  # snapshots locked before methodology 1.1 lack the newer columns
+        w.writerow(["" if line.get(k) is None else line[k] for k in cols])
     w.writerow([])
     for d in c["disclaimers"]:
         w.writerow(["disclaimer", d])

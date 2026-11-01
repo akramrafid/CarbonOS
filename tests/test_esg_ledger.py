@@ -7,6 +7,7 @@ Run against PostgreSQL + Alembic by setting ESG_TEST_DATABASE_URL (see docs/esg/
 """
 import datetime as dt
 import os
+from decimal import Decimal
 import sys
 import unittest
 
@@ -47,7 +48,7 @@ class LedgerTestCase(ESGApiTestCase):
 
     def factor(self, family, activity_type, unit, value, method, author="user-a", approver="admin-a", **extra):
         body = {"family": family, "activity_type": activity_type, "unit": unit, "kgco2e_per_unit": value,
-                "region": "TEST-GRID", "gwp_basis": "AR5", "method": method, "valid_from": "2024-01-01",
+                "region": "TEST-GRID", "gwp_basis": "AR6", "method": method, "valid_from": "2024-01-01",
                 "factor_kind": DEFAULT_KIND.get((activity_type, method)),
                 "source_publisher": "TEST FIXTURE", "source_document": "Not a real factor", "source_year": 2024, **extra}
         fid = self.post(author, "/factors", body)["id"]
@@ -276,6 +277,85 @@ class FactorKindTest(LedgerTestCase):
                 db.commit()
             db.rollback()
             db.close()
+
+
+class Scope1LedgerTest(LedgerTestCase):
+    """Step 2 through the API: gas on an energy basis, refrigerant mass balance, captive generation and
+    data quality. Factor values are TEST fixtures (gas mirrors IPCC 2006 Vol. 2 Table 2.3 per GJ)."""
+    HV = {"gcv": "38.0", "gcv_unit": "MJ/m3", "ncv_to_gcv": "0.9", "reference_conditions": "15 C, 101.325 kPa",
+          "source": "TEST certificate", "uncertainty_pct": "1"}
+    GAS = {"family": "gas-gj", "activity_type": "natural_gas", "unit": "GJ", "region": "TEST-GRID", "gwp_basis": "AR6",
+           "method": "direct", "valid_from": "2024-01-01", "source_publisher": "TEST", "source_document": "TEST",
+           "source_year": 2024, "gas_components": [{"gas": "CO2", "kg_per_unit": "56.1", "uncertainty_pct": "3.92"},
+                                                   {"gas": "CH4_fossil", "kg_per_unit": "0.001", "uncertainty_pct": "200"},
+                                                   {"gas": "N2O", "kg_per_unit": "0.0001", "uncertainty_pct": "200"}]}
+
+    def test_gas_on_energy_basis_with_quality_and_uncertainty(self):
+        f = self.post("user-a", "/factors", self.GAS)
+        self.assertEqual(f["kgco2e_per_unit"], "56.1571000000")  # computed from gases at AR6, never typed in
+        self.post("admin-a", f"/factors/{f['id']}/approve")
+        self.approved(activity_type="natural_gas", quantity="10000", unit="m3", heating_value=self.HV,
+                      data_quality="billed", meter_ref="GAS-1")
+        run = self.post("contrib-a", f"/periods/{self.period}/calculate")
+        self.assertEqual((run["scope1_kg"], run["gwp_basis"], run["blocking"]), ("19205.728200", "AR6", False))
+        line = self.call("GET", "viewer-a", f"/calculations/{run['id']}", status=200).json()["lines"][0]
+        self.assertEqual((line["data_quality"], Decimal(line["details"]["energy_gj_ncv"])), ("billed", Decimal(342)))
+        self.assertGreater(float(run["uncertainty"]["scope1"]["uncertainty_pct"]), 4)
+
+        self.approved(activity_type="natural_gas", quantity="500", unit="m3", meter_ref="GAS-2", data_quality="billed")
+        run = self.post("contrib-a", f"/periods/{self.period}/calculate")
+        self.assertIn("MISSING_HEATING_VALUE", [e["code"] for e in run["exceptions"]])
+        self.assertTrue(run["blocking"])
+
+    def test_factor_inputs_are_validated(self):
+        self.call("POST", "user-a", "/factors", {**self.GAS, "kgco2e_per_unit": "50"}, status=422)
+        self.call("POST", "user-a", "/factors", {**self.GAS, "gas_components": self.GAS["gas_components"] * 2}, status=422)
+        self.call("POST", "user-a", "/factors", {**self.GAS, "activity_type": "diesel"}, status=422)  # GJ is gas-only
+        self.call("POST", "user-a", "/factors", {**self.GAS, "activity_type": "refrigerant", "unit": "kg",
+                                                 "gas_components": None, "kgco2e_per_unit": "2000"}, status=422)
+        self.call("POST", "user-a", "/factors", {**self.GAS, "gas_components": None}, status=422)
+
+    def test_refrigerant_quantity_comes_from_the_mass_balance(self):
+        mb = {"opening_kg": "100", "purchased_kg": "30", "recovered_kg": "5", "closing_kg": "110"}
+        rec = self.approved(activity_type="refrigerant", quantity="0", unit="kg", refrigerant="R-410A", mass_balance=mb,
+                            data_quality="metered", meter_ref="CHILLER-1")
+        self.assertEqual(rec["quantity"], "15.0000000000")
+        bad = {**mb, "closing_kg": "500"}
+        self.assertEqual(self.activity(activity_type="refrigerant", unit="kg", refrigerant="R-410A", mass_balance=bad,
+                                       meter_ref="C2").status_code, 422)
+        self.assertEqual(self.activity(activity_type="refrigerant", unit="kg", refrigerant="R-999", mass_balance=mb,
+                                       meter_ref="C3").status_code, 422)
+        run = self.post("contrib-a", f"/periods/{self.period}/calculate")
+        line = self.call("GET", "viewer-a", f"/calculations/{run['id']}").json()["lines"][0]
+        self.assertEqual((run["scope1_kg"], line["factor_id"], line["factor_ref"]),
+                         ("33832.500000", None, "IPCC AR6 GWP-100 R-410A"))
+
+    def test_captive_generator_kwh_cannot_also_be_grid_electricity(self):
+        self.assertEqual(self.activity(activity_type="captive_generation_output", quantity="3500", meter_ref="GEN-1",
+                                       generator_id="G1").status_code, 200)
+        dup = self.activity(quantity="3500", meter_ref="GEN-1")
+        self.assertEqual(dup.status_code, 409)
+        self.assertIn("double counting", dup.json()["detail"])
+        self.assertEqual(self.activity(meter_ref="GRID-9", generator_id="G1").status_code, 422)
+        self.assertEqual(self.activity(meter_ref="GRID-1").status_code, 200)
+
+    def test_locked_export_carries_quality_columns(self):
+        self.approved(data_quality="billed")
+        run = self.post("contrib-a", f"/periods/{self.period}/calculate")
+        snap = self.post("user-a", f"/periods/{self.period}/lock", {"calculation_run_id": run["id"]})
+        csv_text = self.call("GET", "viewer-a", f"/snapshots/{snap['id']}/export?format=csv", status=200).text
+        header = next(l for l in csv_text.splitlines() if l.startswith("activity_id,"))
+        self.assertTrue(header.endswith("data_quality,uncertainty_pct"))
+        report = self.call("GET", "viewer-a", f"/snapshots/{snap['id']}/export?format=json").json()
+        self.assertEqual((report["gwp_basis"], report["lines"][0]["data_quality"]), ("AR6", "billed"))
+        self.assertIn("scope1", report["uncertainty"])
+
+    def test_period_gwp_basis_must_match_factors(self):
+        p = self.post("user-a", "/periods", {"name": "FY2025-AR5", "start_date": "2025-01-01", "end_date": "2025-12-31",
+                                             "boundary_method": "operational_control", "gwp_basis": "AR5"})["id"]
+        self.approved(period_id=p, data_quality="billed")
+        run = self.post("contrib-a", f"/periods/{p}/calculate")
+        self.assertIn("MIXED_GWP_BASIS", [e["code"] for e in run["exceptions"]])  # AR6 test factors, AR5 period
 
 
 class MigrationConstraintTest(unittest.TestCase):
