@@ -14,6 +14,7 @@ const resources = {
         framework: "Framework",
         registry: "Registry",
         pricing: "Pricing",
+        esg: "ESG",
         live: "BD REGISTRY: LIVE",
         requestDemo: "[Request Demo]"
       },
@@ -80,6 +81,7 @@ const resources = {
         framework: "ফ্রেমওয়ার্ক",
         registry: "রেজিস্ট্রি",
         pricing: "মূল্যতালিকা",
+        esg: "ইএসজি (ESG)",
         live: "বিডি রেজিস্ট্রি: লাইভ",
         requestDemo: "[ডেমো অনুরোধ করুন]"
       },

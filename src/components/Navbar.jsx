@@ -26,7 +26,7 @@ const Navbar = () => {
     }
   }, []);
 
-  // Handle hash-based nav clicks (Platform, Sectors, Pricing)
+  // Handle hash-based nav clicks (Platform, Sectors)
   const handleHashClick = useCallback((e, hash) => {
     e.preventDefault();
     closeMenu();
@@ -70,7 +70,7 @@ const Navbar = () => {
     { id: 'Marketplace', key: 'marketplace', path: '/platform/marketplace' },
     { id: 'Carbon Registry', key: 'carbonRegistry', path: '/platform/carbon-registry' },
     { id: 'Sectors', key: 'sectors' }, 
-    { id: 'Pricing', key: 'pricing' }
+    { id: 'ESG', key: 'esg', path: '/platform/saas-dashboard' }
   ];
 
   return (
@@ -97,7 +97,7 @@ const Navbar = () => {
         {/* Center: Desktop Navigation Links */}
         <div className="hidden lg:flex items-center space-x-1 bg-white/[0.03] border border-white/5 rounded-full p-1.5 backdrop-blur-sm shrink-0">
           {navLinks.map((item) => {
-            const isHash = ['Platform', 'Sectors', 'Pricing'].includes(item.id);
+            const isHash = ['Platform', 'Sectors'].includes(item.id);
             const hash = item.id.toLowerCase();
 
             if (item.path) {
@@ -135,7 +135,7 @@ const Navbar = () => {
 
           {/* Request Demo Pill Button */}
           <Link
-            to="/platform/saas"
+            to="/platform/saas-dashboard"
             className="font-mono text-[11px] font-bold text-white bg-[#0A1F13] hover:bg-[#00C853] hover:text-[#0A1F13] border border-[#00C853]/40 px-3.5 py-1.5 rounded-full transition-all duration-300 shadow-[0_0_12px_rgba(0,200,83,0.15)] ml-2 whitespace-nowrap shrink-0"
           >
             [Request Demo]
@@ -198,7 +198,7 @@ const Navbar = () => {
       >
         <div className="flex flex-col items-center space-y-6 w-full px-6">
           {navLinks.map((item) => {
-            const isHash = ['Platform', 'Sectors', 'Pricing'].includes(item.id);
+            const isHash = ['Platform', 'Sectors'].includes(item.id);
             const hash = item.id.toLowerCase();
 
             if (item.path) {
@@ -237,7 +237,7 @@ const Navbar = () => {
             }
           })}
           
-          <Link to="/platform/saas" onClick={closeMenu} className="w-full max-w-sm mt-4 bg-emerald text-carbon font-sans font-bold text-lg px-8 py-4 rounded-full transition-colors shadow-lg flex items-center justify-center">
+          <Link to="/platform/saas-dashboard" onClick={closeMenu} className="w-full max-w-sm mt-4 bg-emerald text-carbon font-sans font-bold text-lg px-8 py-4 rounded-full transition-colors shadow-lg flex items-center justify-center">
             {t('nav.requestDemo')}
           </Link>
           

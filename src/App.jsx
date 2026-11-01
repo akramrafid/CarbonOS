@@ -78,6 +78,8 @@ function App() {
           <Route path="/platform/marketplace" element={<MarketplaceBrowse />} />
           <Route path="/platform/ai-detection" element={<AIDetection />} />
           <Route path="/platform/saas-dashboard" element={<SaaSDashboard />} />
+          <Route path="/platform/saas" element={<SaaSDashboard />} />
+          <Route path="/esg" element={<SaaSDashboard />} />
           <Route path="/platform/esg" element={<EsgWorkspace />} />
           <Route path="/platform/esg/callback" element={<EsgCallback />} />
           <Route path="/platform/impact" element={<Impact />} />
