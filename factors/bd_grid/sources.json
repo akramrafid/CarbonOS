@@ -1,13 +1,19 @@
 {
-  "description": "Pinned sources for the Bangladesh grid factor derivation. A source is usable only with url, sha256 and the exact tables and pages extracted.",
+  "description": "Source register for the Bangladesh grid factor. Documents go in factors/bd_grid/sources/; `python -m factors.bd_grid.sources` records each file's SHA-256 under \"files\". A source is usable only with its SHA-256 and the exact tables and pages extracted.",
   "sources": [
     {
       "id": "bpdb_ar_2022_23",
       "title": "BPDB Annual Report 2022-23",
       "url": "https://bpdb.portal.gov.bd/sites/default/files/files/bpdb.portal.gov.bd/page/771c9a89_a06c_4c2f_9b8c_699d17ed769a/2024-01-09-11-54-9f8a57197b00016ccc7cbf5301b83957.pdf",
       "sha256": null,
-      "status": "NOT_DOWNLOADED: on 2026-11-01 the server presented a self-signed 'Kubernetes Ingress Controller Fake Certificate', so the file could not be fetched over verified TLS. Provide the PDF (or a copy whose SHA-256 the user confirms).",
-      "tables": []
+      "status": "AWAITING_OWNER_FILE: the portal serves a self-signed certificate, so it is not downloaded here; the owner places the PDF in sources/",
+      "tables": [
+        "p.62 Year Wise Energy Generation (National): Method A denominator",
+        "p.65 public-sector fuel totals: partial cross-check only",
+        "pp.58-60 installed capacity: Method B fuel and technology",
+        "pp.116-120 energy purchased from IPPs, rental and India: Method B and imports by supplier",
+        "p.120 BPDB own plants: net generation (fuel cost in Tk only, so not a fuel input)"
+      ]
     },
     {
       "id": "bpdb_ar_2023_24",
@@ -38,7 +44,7 @@
       "title": "India CEA CO2 Baseline Database (import factor), or plant-specific data for Adani Godda",
       "url": null,
       "sha256": null,
-      "status": "NOT_DOWNLOADED: https://cea.nic.in/cdm-co2-baseline-database/ returned 404 on 2026-11-01.",
+      "status": "AWAITING_OWNER_FILE: latest CEA CO2 Baseline Database (weighted average incl. cross-border)",
       "tables": []
     },
     {
@@ -47,7 +53,10 @@
       "url": "https://www.ipcc-nggip.iges.or.jp/public/2006gl/pdf/2_Volume2/V2_1_Ch1_Introduction.pdf",
       "sha256": "e391cd4676d0891cd77f67d3bd76e0e6775386b468ce5ce7ebe2311a6ea1ac45",
       "status": "PINNED (retrieved 2026-11-01)",
-      "tables": ["Table 1.2 (pp. 1.18-1.19)", "Table 1.4 (pp. 1.23-1.24)"]
+      "tables": [
+        "Table 1.2 (pp. 1.18-1.19)",
+        "Table 1.4 (pp. 1.23-1.24)"
+      ]
     },
     {
       "id": "ipcc_2006_v2_ch2",
@@ -55,7 +64,50 @@
       "url": "https://www.ipcc-nggip.iges.or.jp/public/2006gl/pdf/2_Volume2/V2_2_Ch2_Stationary_Combustion.pdf",
       "sha256": "a25d9f96d7672df391b328de79d4cfd812c07fe79d5cf4a30d23d82d8f02985b",
       "status": "PINNED (retrieved 2026-11-01)",
-      "tables": ["Table 2.2 (p. 2.16)"]
+      "tables": [
+        "Table 2.2 (p. 2.16)"
+      ]
+    },
+    {
+      "id": "petrobangla_ar",
+      "title": "Petrobangla Annual Report (gas sales to the power sector, captive excluded; heating value with reference conditions if published)",
+      "url": null,
+      "sha256": null,
+      "status": "AWAITING_OWNER_FILE: owner to place it in sources/",
+      "tables": []
+    },
+    {
+      "id": "bpc_ar",
+      "title": "Bangladesh Petroleum Corporation Annual Report (HFO and HSD sales to power)",
+      "url": null,
+      "sha256": null,
+      "status": "AWAITING_OWNER_FILE: owner to place it in sources/",
+      "tables": []
+    },
+    {
+      "id": "coal_operators",
+      "title": "Operator reports for Barapukuria, Payra, Rampal and Matarbari (coal tonnes and NCV)",
+      "url": null,
+      "sha256": null,
+      "status": "AWAITING_OWNER_FILE",
+      "tables": []
+    },
+    {
+      "id": "ifi_harmonized_grid_ef",
+      "title": "IFI Harmonized Grid Emission Factor dataset v2.0 (Bangladesh)",
+      "url": null,
+      "sha256": null,
+      "status": "AWAITING_FILE: values in references.json come from the owner's spec",
+      "tables": []
+    },
+    {
+      "id": "ember_bangladesh",
+      "title": "Ember yearly electricity data, Bangladesh",
+      "url": null,
+      "sha256": null,
+      "status": "NOT_DOWNLOADED",
+      "tables": []
     }
-  ]
+  ],
+  "files": []
 }

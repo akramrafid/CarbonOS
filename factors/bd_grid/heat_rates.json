@@ -1,0 +1,19 @@
+{
+  "description": "Technology heat-rate ranges for Method B, kJ per kWh of net generation on a net calorific basis. Every range must cite its document, table and page and carry status CITED; build.py ignores anything else, so Method B stays BLOCKED until real, cited ranges are entered.",
+  "technologies": {
+    "ccgt": {"fuel": "natural_gas", "low_kj_per_kwh": null, "central_kj_per_kwh": null, "high_kj_per_kwh": null, "source": null, "status": "NOT_SOURCED"},
+    "ocgt": {"fuel": "natural_gas", "low_kj_per_kwh": null, "central_kj_per_kwh": null, "high_kj_per_kwh": null, "source": null, "status": "NOT_SOURCED"},
+    "gas_engine": {"fuel": "natural_gas", "low_kj_per_kwh": null, "central_kj_per_kwh": null, "high_kj_per_kwh": null, "source": null, "status": "NOT_SOURCED"},
+    "gas_steam_turbine": {"fuel": "natural_gas", "low_kj_per_kwh": null, "central_kj_per_kwh": null, "high_kj_per_kwh": null, "source": null, "status": "NOT_SOURCED"},
+    "hfo_engine": {"fuel": "residual_fuel_oil", "low_kj_per_kwh": null, "central_kj_per_kwh": null, "high_kj_per_kwh": null, "source": null, "status": "NOT_SOURCED"},
+    "diesel_engine": {"fuel": "gas_diesel_oil", "low_kj_per_kwh": null, "central_kj_per_kwh": null, "high_kj_per_kwh": null, "source": null, "status": "NOT_SOURCED"},
+    "subcritical_coal": {"fuel": "coal", "low_kj_per_kwh": null, "central_kj_per_kwh": null, "high_kj_per_kwh": null, "source": null, "status": "NOT_SOURCED"},
+    "supercritical_coal": {"fuel": "coal", "low_kj_per_kwh": null, "central_kj_per_kwh": null, "high_kj_per_kwh": null, "source": null, "status": "NOT_SOURCED"},
+    "ultra_supercritical_coal": {"fuel": "coal", "low_kj_per_kwh": null, "central_kj_per_kwh": null, "high_kj_per_kwh": null, "source": null, "status": "NOT_SOURCED"}
+  },
+  "candidate_sources_to_read": [
+    "Plant-specific heat rates or efficiencies, where BPDB or the operator publishes them",
+    "UNFCCC CDM Methodological Tool 07 (emission factor for an electricity system), its annex of default power-plant efficiencies: conservative single values, so they bound one side of a range only",
+    "US EIA Electric Power Annual, average operating heat rates by prime mover and energy source: US fleet, so wide bounds only"
+  ]
+}

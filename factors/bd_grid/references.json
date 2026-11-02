@@ -1,0 +1,19 @@
+{
+  "description": "External references for acceptance A2. A derived value more than 5 % from a reference, without a written explanation in the year's explanations.reference_gap, blocks approval.",
+  "ifi_harmonized_grid_ef": {
+    "version": "v2.0",
+    "country": "BD",
+    "combined_margin_firm_kg_per_kwh": 0.502,
+    "combined_margin_intermittent_kg_per_kwh": 0.565,
+    "compare_with": "CDM Tool 07 combined margins from Method B (reconciliation only)",
+    "source": "Values as stated in the owner's specification. The IFI dataset file is not yet in factors/bd_grid/sources/; check these values against it before relying on the comparison.",
+    "status": "UNVERIFIED_FROM_SPEC"
+  },
+  "ember": {
+    "kg_per_kwh_by_calendar_year": {},
+    "compare_with": "Method A supply-weighted average (Ember is calendar-year; the fiscal year spans two calendar years)",
+    "source": null,
+    "status": "NOT_DOWNLOADED: read Ember's method and emission factors before comparing"
+  },
+  "iea": {"status": "NOT_USED: licensed data, needs the owner's approval"}
+}

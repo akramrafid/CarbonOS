@@ -33,6 +33,8 @@ jobs:
         run: python -m unittest tests.test_orchestrator
       - name: ESG tests (SQLite)
         run: python -m unittest discover -s tests -p "test_esg*.py" -v
+      - name: Grid factor derivation (synthetic inputs)
+        run: python -m unittest tests.test_bd_grid -v
       - name: ESG tests (PostgreSQL + Alembic migrations)
         env:
           ESG_TEST_DATABASE_URL: postgresql+psycopg2://esg:esg@localhost:5432/esg_test
