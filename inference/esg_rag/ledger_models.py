@@ -41,6 +41,7 @@ DATA_QUALITY_GRADES = ("metered", "billed", "estimated", "default")
 SOURCE_TYPES = ("manual", "document", "csv")
 BOUNDARY_METHODS = ("operational_control", "financial_control", "equity_share")
 EQUIPMENT_KINDS = ("generator", "refrigeration")
+EQUIPMENT_EVENT_TYPES = ("install", "retire", "recharge")
 
 
 def _org_fk():
@@ -110,6 +111,37 @@ class Equipment(EsgBase):
     rated_kw = Column(Numeric(12, 3))
     created_by = Column(String(255), nullable=False)
     created_at = Column(DateTime(timezone=True), default=_now, nullable=False)
+
+
+class EquipmentEvent(EsgBase):
+    """Dated register event for a refrigeration unit: install (full charge of one gas), retire (whole unit) or
+    recharge (kg added after a leak). Append-only: a wrong event is voided with a reason, never edited or deleted."""
+    __tablename__ = "esg_equipment_event"
+    __table_args__ = (
+        ForeignKeyConstraint(["organization_id", "equipment_id"], ["esg_equipment.organization_id", "esg_equipment.id"],
+                             name="fk_esg_equipment_event_equipment"),
+        CheckConstraint(_in("event_type", EQUIPMENT_EVENT_TYPES), name="ck_esg_equipment_event_type"),
+        CheckConstraint("(event_type = 'retire' AND refrigerant IS NULL AND charge_kg IS NULL) OR "
+                        "(event_type <> 'retire' AND refrigerant IS NOT NULL AND charge_kg > 0)",
+                        name="ck_esg_equipment_event_charge"),
+        CheckConstraint("voided_at IS NULL OR void_reason IS NOT NULL", name="ck_esg_equipment_event_void"),
+        Index("ix_esg_equipment_event_equipment", "equipment_id", "event_date"),
+    )
+
+    id = Column(String(36), primary_key=True, default=_id)
+    organization_id = _org_fk()
+    equipment_id = Column(String(36), nullable=False)
+    event_type = Column(String(10), nullable=False)
+    event_date = Column(Date, nullable=False)
+    refrigerant = Column(String(30))  # install / recharge only
+    charge_kg = Column(KG)  # install: full charge of this gas in the unit; recharge: kg added
+    source_ref = Column(String(200))
+    evidence_snippet = Column(Text)
+    created_by = Column(String(255), nullable=False)
+    created_at = Column(DateTime(timezone=True), default=_now, nullable=False)
+    voided_at = Column(DateTime(timezone=True))
+    voided_by = Column(String(255))
+    void_reason = Column(Text)
 
 
 class ReportingPeriod(EsgBase):
@@ -232,7 +264,8 @@ class ActivityRecord(EsgBase):
     heating_value = Column(JSON)  # natural gas: gcv_mj_per_m3, ncv_to_gcv, reference_conditions, source, ...
     volume_correction = Column(QTY)  # billed m3 → m3 at the heating value's reference conditions
     refrigerant = Column(String(30))
-    mass_balance = Column(JSON)  # refrigerant kg: opening, purchased, recovered, closing, capacity_increase
+    # refrigerant kg: stored_start/end, purchased, returned_or_sold, plus the register's equipment_charge_start/end
+    mass_balance = Column(JSON)
     notes = Column(Text)
     status = Column(String(12), nullable=False, default="DRAFT")
     supersedes_id = Column(String(36), ForeignKey("esg_activity_record.id"))

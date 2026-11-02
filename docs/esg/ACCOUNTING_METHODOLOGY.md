@@ -1,4 +1,4 @@
-# Accounting Methodology — `carbonos-ghg-scope12-1.1`
+# Accounting Methodology — `carbonos-ghg-scope12-1.2`
 
 Status: **CODE_COMPLETE, not METHODOLOGY_VALIDATED.** A qualified GHG practitioner must review this
 before any customer relies on it. No third-party certification or verification is claimed.
@@ -87,9 +87,24 @@ checked against configurable plausibility bands (defaults: diesel 0.20–0.45 L/
 `GENERATOR_FUEL_MISSING`, a fuel without a configured band → `GENERATOR_BAND_NOT_CONFIGURED` (both reported, not
 blocking).
 
-**Refrigerants.** `emissions kg = opening + purchased − recovered − closing − capacity_increase` (charge put
-into new equipment is not emitted). CO2e = kg × GWP-100 of the period's GWP basis; no factor row is used.
-Negative balance → `NEGATIVE_MASS_BALANCE`. HCFC-22 is a Montreal Protocol gas: reported as memo
+**Refrigerants (methodology 1.2).** Per gas and record:
+
+    E = (stored_start − stored_end) + (purchased − returned_or_sold) + (equipment_charge_start − equipment_charge_end)
+
+Stored = gas in cylinders, outside equipment. The record carries the four inventory terms; the two equipment-charge
+terms are the total full (nameplate) charge of that gas in service at the start and at the end of the record's
+dates, taken from the facility's dated equipment register (`esg_equipment` units of kind `refrigeration`,
+`esg_equipment_event` install / retire / recharge events). An install or retire dated inside the record's dates
+changes the end charge only, so filling a new unit from purchased gas, or retiring a unit with full recovery, nets
+to zero; a top-up after a leak is emitted. Register events are append-only (void with a reason). This is the
+material-balance form of the US EPA Center for Corporate Climate Leadership guidance on direct fugitive emissions
+(decrease in inventory + purchases − sales − increase in full charge); the formula is the owner's instruction C2,
+and the EPA wording has not been re-checked against the PDF in this round.
+
+CO2e = kg × GWP-100 of the period's GWP basis; no factor row is used. A negative balance is `DATA_INCONSISTENT`
+(blocking): rejected at entry (422) and in the calculation, never clamped to zero. A record approved against one
+register state and calculated against another is `REFRIGERANT_REGISTER_CHANGED` (blocking) until it is corrected.
+Register events are part of the calculation input hash. HCFC-22 is a Montreal Protocol gas: reported as memo
 `montreal_protocol_gases_kgco2e`, never in Scope 1.
 
 **Biomass.** Gas-level factors carry `CO2_biogenic` (memo, outside the scopes), `CH4_non_fossil` and `N2O`.

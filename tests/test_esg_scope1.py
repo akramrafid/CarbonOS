@@ -151,12 +151,16 @@ class CaptiveGenerationTest(unittest.TestCase):
         self.assertIn("GENERATOR_EFFICIENCY_OUT_OF_BAND", codes(calculate(acts, FAC, [GAS_GJ], "operational_control")))
 
 
+def balance(stored_start, stored_end, purchased, returned=0, charge_start=0, charge_end=0):
+    return MassBalance(D(stored_start), D(stored_end), D(purchased), D(returned), D(charge_start), D(charge_end))
+
+
 class RefrigerantTest(unittest.TestCase):
     def ref(self, name, *mb, **kw):
-        return act("r1", "refrigerant", "0", "kg", refrigerant=name, mass_balance=MassBalance(*map(D, mb)), **kw)
+        return act("r1", "refrigerant", "0", "kg", refrigerant=name, mass_balance=balance(*mb), **kw)
 
     def test_mass_balance_times_ar6_gwp(self):
-        r = calculate([self.ref("R-410A", 100, 30, 5, 110)], FAC, [], "operational_control")
+        r = calculate([self.ref("R-410A", 100, 110, 30, 5)], FAC, [], "operational_control")
         self.assertEqual(r.gwp_basis, "AR6")
         self.assertEqual(r.lines[0].quantity, D(15))
         self.assertEqual(r.lines[0].factor_value, D("2255.50"))  # 0.5 × 771 + 0.5 × 3740
@@ -165,7 +169,7 @@ class RefrigerantTest(unittest.TestCase):
         self.assertEqual(r.lines[0].factor_ref, "IPCC AR6 GWP-100 R-410A")
 
     def test_ar5_is_selectable(self):
-        r = calculate([self.ref("R-410A", 100, 30, 5, 110)], FAC, [], "operational_control", gwp_basis="AR5")
+        r = calculate([self.ref("R-410A", 100, 110, 30, 5)], FAC, [], "operational_control", gwp_basis="AR5")
         self.assertEqual(r.scope1_kg, D("28852.500000"))  # 15 × (0.5 × 677 + 0.5 × 3170)
 
     def test_blend_gwps(self):
@@ -174,33 +178,53 @@ class RefrigerantTest(unittest.TestCase):
         self.assertEqual(gwp.refrigerant_gwp("R-134a", "AR6")[0], D(1530))
         self.assertEqual(gwp.refrigerant_gwp("R-410A", "AR4"), (None, False))
 
-    def test_capacity_increase_is_not_emitted(self):
-        mb = MassBalance(D(100), D(130), D(0), D(110), capacity_increase_kg=D(100))
-        r = calculate([act("r1", "refrigerant", "0", "kg", refrigerant="R-32", mass_balance=mb)], FAC, [],
-                      "operational_control")
+    # D3: the four register scenarios. Unit: 10 kg full charge of R-410A.
+    def test_d3_new_unit_filled_from_a_purchase_emits_nothing(self):
+        r = calculate([self.ref("R-410A", 0, 0, 10, 0, 0, 10)], FAC, [], "operational_control")
+        self.assertEqual((r.lines[0].quantity, r.scope1_kg, codes(r)), (D(0), D(0), []))
+
+    def test_d3_unit_retired_with_full_recovery_emits_nothing(self):
+        for recovered in ((0, 10, 0, 0, 10, 0),   # recovered into storage cylinders
+                          (0, 0, 0, 10, 10, 0)):  # recovered and returned to the supplier
+            r = calculate([self.ref("R-410A", *recovered)], FAC, [], "operational_control")
+            self.assertEqual((r.lines[0].quantity, r.scope1_kg), (D(0), D(0)), recovered)
+
+    def test_d3_top_up_after_a_leak_emits_the_top_up(self):
+        r = calculate([self.ref("R-410A", 0, 0, 2, 0, 10, 10)], FAC, [], "operational_control")
+        self.assertEqual(r.lines[0].quantity, D(2))
+        self.assertEqual(r.scope1_kg, D("4511.000000"))  # 2 kg × 2255.5
+
+    def test_d3_negative_balance_is_data_inconsistent_never_zero(self):
+        r = calculate([self.ref("R-410A", 0, 5, 0, 0, 10, 10)], FAC, [], "operational_control")
+        self.assertEqual((r.lines, r.scope1_kg, codes(r)), ([], 0, ["DATA_INCONSISTENT"]))
+        self.assertTrue(r.blocking)
+        self.assertIn("-5", r.exceptions[0]["detail"])
+
+    def test_charge_added_to_equipment_is_not_emitted(self):
+        r = calculate([self.ref("R-32", 100, 110, 130, 0, 0, 100)], FAC, [], "operational_control")
         self.assertEqual(r.lines[0].quantity, D(20))
 
     def test_hcfc22_is_reported_outside_scope1(self):
-        r = calculate([self.ref("R-22", 50, 10, 0, 45)], FAC, [], "operational_control")
+        r = calculate([self.ref("R-22", 50, 45, 10, 0)], FAC, [], "operational_control")
         self.assertEqual((r.lines, r.scope1_kg), ([], 0))
         self.assertEqual(r.memo["montreal_protocol_gases_kgco2e"], D("29400.000000"))  # 15 × 1960
         self.assertIn("Montreal Protocol", r.excluded[0]["reason"])
 
     def test_bad_balances_block(self):
-        for name, mb, code in (("R-410A", (10, 0, 0, 20), "NEGATIVE_MASS_BALANCE"),
-                               ("R-999", (10, 0, 0, 5), "UNKNOWN_REFRIGERANT_OR_GWP_BASIS")):
+        for name, mb, code in (("R-410A", (10, 20, 0, 0), "DATA_INCONSISTENT"),
+                               ("R-999", (10, 5, 0, 0), "UNKNOWN_REFRIGERANT_OR_GWP_BASIS")):
             r = calculate([self.ref(name, *mb)], FAC, [], "operational_control")
             self.assertEqual(codes(r), [code])
         r = calculate([act("r1", "refrigerant", "0", "kg", refrigerant="R-410A")], FAC, [], "operational_control")
         self.assertEqual(codes(r), ["MISSING_MASS_BALANCE"])
 
     def test_mass_balance_uncertainty_follows_eq_3_2(self):
-        r = calculate([self.ref("R-410A", 100, 30, 5, 110)], FAC, [], "operational_control")
+        r = calculate([self.ref("R-410A", 100, 110, 30, 5)], FAC, [], "operational_control")
         expected = math.sqrt(200 ** 2 + 60 ** 2 + 10 ** 2 + 220 ** 2) / 15  # 2 % on every term, net 15 kg
         self.assertAlmostEqual(float(r.lines[0].uncertainty_pct), expected, places=2)
 
     def test_gwp_basis_must_match_factors(self):
-        r = calculate([self.ref("R-410A", 100, 30, 5, 110), act("d1", "diesel", "10", "L")], FAC,
+        r = calculate([self.ref("R-410A", 100, 110, 30, 5), act("d1", "diesel", "10", "L")], FAC,
                       [factor("d5", "diesel", "L", "2.7", gwp="AR5")], "operational_control", gwp_basis="AR6")
         self.assertIn("MIXED_GWP_BASIS", codes(r))
 

@@ -11,6 +11,7 @@ import datetime as dt
 import hashlib
 import io
 import json
+from dataclasses import replace
 from decimal import Decimal
 from typing import Optional
 
@@ -21,7 +22,8 @@ from sqlalchemy.orm import Session
 from . import accounting, gwp
 from .auth import Principal
 from .ledger_models import (
-    ActivityRecord, AuditEvent, CalculationLine, CalculationRun, EmissionFactor, Equipment, Facility, LegalEntity,
+    ActivityRecord, AuditEvent, CalculationLine, CalculationRun, EmissionFactor, Equipment, EquipmentEvent, Facility,
+    LegalEntity,
     MetricObservation, ReportingPeriod, ReportSnapshot, _now,
 )
 from .models import ESGOrganization
@@ -138,6 +140,91 @@ def create_equipment(db, principal, data):
     audit(db, principal, "equipment.create", "equipment", eq.id, data)
     db.commit()
     return eq
+
+
+def _refrigerant_key(name):
+    return gwp.ALIASES.get(name, name)
+
+
+def create_equipment_event(db, principal, equipment_id, data):
+    """Append a dated install / retire / recharge event to a refrigeration unit's register."""
+    _need(principal, "write")
+    eq = _get(db, Equipment, principal, equipment_id)
+    if eq.kind != "refrigeration":
+        raise DomainError(422, "Register events apply to refrigeration units")
+    kind, day = data["event_type"], data["event_date"]
+    live = db.query(EquipmentEvent).filter(EquipmentEvent.equipment_id == eq.id, EquipmentEvent.voided_at.is_(None)).all()
+    installs = [e for e in live if e.event_type == "install"]
+    retired = next((e for e in live if e.event_type == "retire"), None)
+    if kind == "retire":
+        if data.get("refrigerant") or data.get("charge_kg") is not None:
+            raise DomainError(422, "A retire event retires the whole unit: give no refrigerant or charge")
+        if not any(e.event_date <= day for e in installs):
+            raise DomainError(422, "Cannot retire a unit before it was installed")
+    else:
+        name = data.get("refrigerant")
+        if not name or gwp.refrigerant_composition(name) is None:
+            raise DomainError(422, f"Unknown refrigerant '{name}'")
+        if data.get("charge_kg") is None:
+            raise DomainError(422, f"A {kind} event needs charge_kg (> 0)")
+        same_gas = [e for e in installs if _refrigerant_key(e.refrigerant) == _refrigerant_key(name)]
+        if kind == "install" and same_gas:
+            raise DomainError(409, f"{name} is already installed in {eq.equipment_ref}; void that event to correct it")
+        if kind == "recharge" and not any(e.event_date <= day for e in same_gas):
+            raise DomainError(422, f"{eq.equipment_ref} has no {name} installed on {day}")
+    if retired is not None and (kind == "retire" or retired.event_date <= day):
+        raise DomainError(409, f"{eq.equipment_ref} was retired on {retired.event_date}")
+    event = EquipmentEvent(organization_id=principal.organization_id, equipment_id=eq.id, created_by=principal.sub, **data)
+    db.add(event)
+    db.flush()
+    audit(db, principal, f"equipment_event.{kind}", "equipment_event", event.id, {**data, "equipment_id": eq.id})
+    db.commit()
+    return event
+
+
+def void_equipment_event(db, principal, event_id, reason):
+    _need(principal, "admin")
+    event = _get(db, EquipmentEvent, principal, event_id)
+    n = db.execute(update(EquipmentEvent).where(EquipmentEvent.id == event.id, EquipmentEvent.voided_at.is_(None))
+                   .values(voided_at=_now(), voided_by=principal.sub, void_reason=reason)).rowcount
+    if n != 1:
+        db.rollback()
+        raise DomainError(409, "Event is already void")
+    audit(db, principal, "equipment_event.void", "equipment_event", event.id, {"reason": reason})
+    db.commit()
+    db.refresh(event)
+    return event
+
+
+def _load_register(db, principal):
+    """Live (not voided) register events with their unit's facility, in date order."""
+    return db.query(EquipmentEvent, Equipment.facility_id).join(
+        Equipment, (Equipment.id == EquipmentEvent.equipment_id) & (Equipment.organization_id == EquipmentEvent.organization_id)
+    ).filter(EquipmentEvent.organization_id == principal.organization_id, EquipmentEvent.voided_at.is_(None)) \
+        .order_by(EquipmentEvent.event_date, EquipmentEvent.id).all()
+
+
+def _register_charges(register, facility_id, refrigerant, start, end):
+    """Full charge of this gas in service at the start of `start` and at the end of `end`: (start kg, end kg,
+    kg recharged in the window, ids of the events used). An install or retire dated inside the window changes the
+    end charge only, so filling a new unit from purchased gas nets to zero."""
+    key = _refrigerant_key(refrigerant)
+    events = [e for e, fac in register if fac == facility_id]
+    retired = {e.equipment_id: e.event_date for e in events if e.event_type == "retire"}
+    installs = [e for e in events if e.event_type == "install" and _refrigerant_key(e.refrigerant) == key]
+
+    def charge(day, inclusive):
+        return sum((Decimal(e.charge_kg) for e in installs
+                    if (e.event_date <= day if inclusive else e.event_date < day)
+                    and (e.equipment_id not in retired
+                         or (retired[e.equipment_id] > day if inclusive else retired[e.equipment_id] >= day))),
+                   Decimal(0))
+    recharges = [e for e in events if e.event_type == "recharge" and _refrigerant_key(e.refrigerant) == key
+                 and start <= e.event_date <= end]
+    units = {e.equipment_id for e in installs}
+    used = sorted({e.id for e in installs} | {e.id for e in recharges}
+                  | {e.id for e in events if e.event_type == "retire" and e.equipment_id in units})
+    return charge(start, False), charge(end, True), sum((Decimal(e.charge_kg) for e in recharges), Decimal(0)), used
 
 
 # Activity types that may carry a generator_ref: generator fuels and the generator's own (memo) output.
@@ -298,7 +385,9 @@ def _overlap(db, principal, rec_id, data, supersedes_id):
     return q.first()
 
 
-MASS_BALANCE_KEYS = ("opening_kg", "purchased_kg", "recovered_kg", "closing_kg", "capacity_increase_kg")
+# Inventory terms entered on the record; the equipment-charge terms come from the dated register.
+MASS_BALANCE_KEYS = ("stored_start_kg", "stored_end_kg", "purchased_kg", "returned_or_sold_kg")
+CHARGE_KEYS = ("equipment_charge_start_kg", "equipment_charge_end_kg")
 
 
 def _dec(v) -> Optional[Decimal]:
@@ -321,20 +410,33 @@ def _scope1_fields(data):
         raise DomainError(422, "A volume correction applies to natural gas only")
     if at == "electricity" and data.get("generator_ref"):
         raise DomainError(422, "Generator output is a memo item (captive_generation_output), never Scope 2 electricity")
-    if at != "refrigerant":
-        if data.get("refrigerant") or data.get("mass_balance"):
-            raise DomainError(422, "Refrigerant and mass balance apply to refrigerant records only")
+    if at != "refrigerant" and (data.get("refrigerant") or data.get("mass_balance")):
+        raise DomainError(422, "Refrigerant and mass balance apply to refrigerant records only")
+    return data
+
+
+def _refrigerant_fields(db, principal, data):
+    """Refrigerant quantity = the mass balance, with the equipment charge taken from the facility's register."""
+    if data["activity_type"] != "refrigerant":
         return data
     name, mb = data.get("refrigerant"), data.get("mass_balance")
     if not name or gwp.refrigerant_composition(name) is None:
         known = ", ".join(sorted(set(gwp.BLENDS) | set(gwp.ALIASES)))
         raise DomainError(422, f"Unknown refrigerant '{name}'. Known: {known}")
     if mb is None:
-        raise DomainError(422, "A refrigerant record needs its mass balance (opening, purchased, recovered, closing kg)")
-    net = accounting.MassBalance(*(Decimal(str(mb[k])) for k in MASS_BALANCE_KEYS)).net_kg()
-    if net < 0:
-        raise DomainError(422, f"Mass balance is negative ({net} kg): check stock counts and recovered quantities")
-    return {**data, "quantity": net, "unit": "kg", "mass_balance": _jsonable(mb)}
+        raise DomainError(422, "A refrigerant record needs its mass balance (stored start/end, purchased, "
+                               "returned or sold kg)")
+    terms = {k: Decimal(str(mb.get(k) or 0)) for k in MASS_BALANCE_KEYS}
+    start_kg, end_kg, recharged, used = _register_charges(_load_register(db, principal), data["facility_id"], name,
+                                                          data["activity_start"], data["activity_end"])
+    balance = accounting.MassBalance(**terms, equipment_charge_start_kg=start_kg, equipment_charge_end_kg=end_kg)
+    net = balance.net_kg()
+    if net < 0:  # rejected, never clamped to zero
+        raise DomainError(422, f"DATA_INCONSISTENT: mass balance {balance.formula()} = {net} kg is negative. Check stock "
+                               "counts, purchase and return records and the equipment register.")
+    stored = {**terms, "equipment_charge_start_kg": start_kg, "equipment_charge_end_kg": end_kg,
+              "recharged_kg": recharged, "register_event_ids": used}
+    return {**data, "quantity": net, "unit": "kg", "mass_balance": _jsonable(stored)}
 
 
 def _captive_meter_clash(db, principal, data):
@@ -363,7 +465,7 @@ def create_activity(db, principal, data):
     _get(db, Facility, principal, data["facility_id"])
     if data["activity_type"] not in accounting.ACTIVITY_TYPES and data["activity_type"] not in accounting.MEMO_ACTIVITY_TYPES:
         raise DomainError(422, "Unknown activity type")
-    data = _scope1_fields(dict(data))
+    data = _refrigerant_fields(db, principal, _scope1_fields(dict(data)))
     _check_generator(db, principal, data)
     if data["activity_end"] < data["activity_start"]:
         raise DomainError(422, "activity_end must not be before activity_start")
@@ -495,7 +597,7 @@ def _approved_metric_ids(db, principal, period):
         MetricObservation.status == "APPROVED").order_by(MetricObservation.id)]
 
 
-def _input_hash(period, acts, facs, factors, metric_ids=()) -> str:
+def _input_hash(period, acts, facs, factors, metric_ids=(), register=()) -> str:
     payload = {
         "methodology": accounting.METHODOLOGY_VERSION,
         "boundary": period.boundary_method,
@@ -507,6 +609,9 @@ def _input_hash(period, acts, facs, factors, metric_ids=()) -> str:
         "facilities": [[f.id, f.grid_region, f.operational_control, f.financial_control, f.equity_share_pct] for f in facs],
         "factors": [[f.id, f.version, f.kgco2e_per_unit, f.status] for f in factors],
         "metrics": list(metric_ids),  # approved E/S/G observations are immutable, so ids identify them
+        # A voided or new register event changes refrigerant equipment charges, so it invalidates a run.
+        "equipment_register": [[e.id, e.equipment_id, e.event_type, e.event_date, e.refrigerant, e.charge_kg]
+                               for e, _ in register],
     }
     return hashlib.sha256(canonical_json(payload).encode()).hexdigest()
 
@@ -521,7 +626,28 @@ def _accounting_activity(a):
             Decimal(hv["gcv_mj_per_m3"]), Decimal(hv["ncv_to_gcv"]), hv["reference_conditions"], hv["source"],
             bool(hv.get("is_default")), _dec(hv.get("uncertainty_pct"))) if hv else None,
         volume_correction=_dec(a.volume_correction) or Decimal(1), refrigerant=a.refrigerant,
-        mass_balance=accounting.MassBalance(*(Decimal(mb[k]) for k in MASS_BALANCE_KEYS)) if mb else None)
+        mass_balance=accounting.MassBalance(
+            **{k: Decimal(str(mb.get(k) or 0)) for k in MASS_BALANCE_KEYS + CHARGE_KEYS},
+            recharged_kg=_dec(mb.get("recharged_kg")), register_event_ids=tuple(mb.get("register_event_ids") or ()))
+        if mb else None)
+
+
+def _with_register(a, rec, register, exceptions):
+    """Refrigerant equipment charge as the register gives it now. A record approved against another register state
+    is blocked (REFRIGERANT_REGISTER_CHANGED) until it is corrected, so what a reviewer approved is what is used."""
+    if rec.activity_type != "refrigerant" or a.mass_balance is None or not rec.refrigerant:
+        return a
+    start_kg, end_kg, recharged, used = _register_charges(register, rec.facility_id, rec.refrigerant,
+                                                          rec.activity_start, rec.activity_end)
+    mb = a.mass_balance
+    if (start_kg, end_kg) != (mb.equipment_charge_start_kg, mb.equipment_charge_end_kg):
+        exceptions.append({"code": "REFRIGERANT_REGISTER_CHANGED", "activity_id": rec.id, "facility_id": rec.facility_id,
+                           "activity_type": "refrigerant", "blocking": True,
+                           "detail": f"Register now gives {start_kg} → {end_kg} kg {rec.refrigerant}; the record was "
+                                     f"approved with {mb.equipment_charge_start_kg} → {mb.equipment_charge_end_kg} kg. "
+                                     "Correct (supersede) the record."})
+    return replace(a, mass_balance=replace(mb, equipment_charge_start_kg=start_kg, equipment_charge_end_kg=end_kg,
+                                           recharged_kg=recharged, register_event_ids=tuple(used)))
 
 
 def _accounting_factor(f):
@@ -537,17 +663,20 @@ def calculate_period(db, principal, period_id):
     _need(principal, "write")
     period = _open_period(db, principal, period_id)
     acts, facs, factors = _calc_inputs(db, principal, period)
+    register = _load_register(db, principal)
+    register_exceptions = []
     result = accounting.calculate(
-        [_accounting_activity(a) for a in acts],
+        [_with_register(_accounting_activity(a), a, register, register_exceptions) for a in acts],
         {f.id: accounting.Facility(f.id, f.grid_region, f.operational_control, f.financial_control,
                                    Decimal(f.equity_share_pct), f.legal_entity_id) for f in facs},
         [_accounting_factor(f) for f in factors],
         period.boundary_method, gwp_basis=period.gwp_basis,
     )
+    result.exceptions.extend(register_exceptions)
     run = CalculationRun(
         organization_id=principal.organization_id, period_id=period.id, period_revision=period.revision,
         methodology_version=result.methodology_version, boundary_method=result.boundary_method,
-        input_sha256=_input_hash(period, acts, facs, factors, _approved_metric_ids(db, principal, period)),
+        input_sha256=_input_hash(period, acts, facs, factors, _approved_metric_ids(db, principal, period), register),
         scope1_kg=result.scope1_kg,
         scope2_location_kg=result.scope2_location_kg, scope2_market_kg=result.scope2_market_kg,
         blocking=result.blocking, exceptions=result.exceptions, excluded=result.excluded,
@@ -581,7 +710,8 @@ def lock_period(db, principal, period_id, run_id):
         raise DomainError(409, f"{pending} activity record(s) or metric observation(s) are still DRAFT or SUBMITTED")
     if run.blocking:
         raise DomainError(409, "Calculation has blocking data-quality exceptions")
-    if _input_hash(period, *_calc_inputs(db, principal, period), _approved_metric_ids(db, principal, period)) != run.input_sha256:
+    if _input_hash(period, *_calc_inputs(db, principal, period), _approved_metric_ids(db, principal, period),
+                   _load_register(db, principal)) != run.input_sha256:
         raise DomainError(409, "Data or factors changed since this calculation; recalculate before locking")
     if run.created_by == principal.sub:
         raise DomainError(403, "Separation of duties: the approver must differ from the preparer of the calculation")

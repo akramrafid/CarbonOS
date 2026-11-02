@@ -18,8 +18,11 @@ Rules enforced here (see docs/esg/ACCOUNTING_METHODOLOGY.md):
   identified by (facility, generator_ref): the same reference at two facilities is two generators.
 * Natural gas on an energy basis: billed m3 × volume correction × GCV × NCV/GCV → GJ (NCV). No
   heating value → MISSING_HEATING_VALUE; a declared default heating value → HIGH_UNCERTAINTY.
-* Refrigerants: mass balance × GWP of the methodology's GWP basis. Montreal Protocol gases
-  (HCFCs) are reported separately, outside the Scope 1 total.
+* Refrigerants: mass balance × GWP of the methodology's GWP basis, where
+  E = (stored_start − stored_end) + (purchased − returned_or_sold) + (equipment_charge_start − equipment_charge_end)
+  and the equipment charge comes from the facility's dated equipment register. A negative balance is
+  DATA_INCONSISTENT (blocking), never clamped to zero. Montreal Protocol gases (HCFCs) are reported
+  separately, outside the Scope 1 total.
 * Biomass: CH4 and N2O are Scope 1; biogenic CO2 is reported outside the scopes.
 * Every line carries a data-quality grade and an uncertainty propagated with IPCC 2006 Vol. 1
   Ch. 3 Approach 1 (Eq. 3.1 for products, Eq. 3.2 for sums).
@@ -35,7 +38,7 @@ from typing import Dict, List, Optional, Tuple
 
 from . import gwp
 
-METHODOLOGY_VERSION = "carbonos-ghg-scope12-1.1"
+METHODOLOGY_VERSION = "carbonos-ghg-scope12-1.2"
 
 # activity_type -> (scope, canonical unit)
 ACTIVITY_TYPES: Dict[str, Tuple[str, str]] = {
@@ -218,16 +221,30 @@ class HeatingValue:
 
 @dataclass(frozen=True)
 class MassBalance:
-    """Refrigerant mass balance, kg of refrigerant. Emissions = opening + purchased − recovered − closing −
-    capacity_increase (charge put into new equipment is not emitted)."""
-    opening_kg: Decimal
+    """Refrigerant mass balance for one gas over the record's dates, kg:
+    E = (stored_start − stored_end) + (purchased − returned_or_sold) + (equipment_charge_start − equipment_charge_end).
+    Stored = gas held in cylinders, outside equipment. Equipment charge = total full (nameplate) charge of the units
+    in service at the start and at the end, from the dated register. Filling a new unit from purchased gas or
+    retiring a unit with full recovery nets to zero; a top-up after a leak is emitted."""
+    stored_start_kg: Decimal
+    stored_end_kg: Decimal
     purchased_kg: Decimal
-    recovered_kg: Decimal
-    closing_kg: Decimal
-    capacity_increase_kg: Decimal = Decimal(0)
+    returned_or_sold_kg: Decimal
+    equipment_charge_start_kg: Decimal = Decimal(0)
+    equipment_charge_end_kg: Decimal = Decimal(0)
+    recharged_kg: Optional[Decimal] = None  # register top-ups in the period: shown for review, not in the formula
+    register_event_ids: Tuple[str, ...] = ()
+
+    def signed_terms(self) -> List[Decimal]:
+        return [self.stored_start_kg, -self.stored_end_kg, self.purchased_kg, -self.returned_or_sold_kg,
+                self.equipment_charge_start_kg, -self.equipment_charge_end_kg]
 
     def net_kg(self) -> Decimal:
-        return self.opening_kg + self.purchased_kg - self.recovered_kg - self.closing_kg - self.capacity_increase_kg
+        return sum(self.signed_terms(), Decimal(0))
+
+    def formula(self) -> str:
+        return (f"(({self.stored_start_kg} − {self.stored_end_kg}) + ({self.purchased_kg} − {self.returned_or_sold_kg})"
+                f" + ({self.equipment_charge_start_kg} − {self.equipment_charge_end_kg}))")
 
 
 @dataclass(frozen=True)
@@ -540,11 +557,13 @@ def calculate(activities: List[Activity], facilities: Dict[str, Facility], facto
 
     def refrigerant_line(a, fac, share):
         if a.mass_balance is None or not a.refrigerant:
-            exception("MISSING_MASS_BALANCE", a, detail="Refrigerant needs opening, purchased, recovered and closing stock")
+            exception("MISSING_MASS_BALANCE", a, detail="Refrigerant needs stored, purchased and returned/sold kg")
             return
-        net = a.mass_balance.net_kg()
-        if net < 0:
-            exception("NEGATIVE_MASS_BALANCE", a, detail=f"{net} kg: check stock counts and recovered quantities")
+        mb = a.mass_balance
+        net = mb.net_kg()
+        if net < 0:  # never clamped to zero: a missing invoice or a wrong count must be found and fixed
+            exception("DATA_INCONSISTENT", a, detail=f"Mass balance {mb.formula()} = {net} kg is negative: check stock "
+                                                     "counts, purchase and return records and the equipment register")
             return
         value, montreal = gwp.refrigerant_gwp(a.refrigerant, basis)
         if value is None:
@@ -556,17 +575,20 @@ def calculate(activities: List[Activity], facilities: Dict[str, Facility], facto
             res.excluded.append({"activity_id": a.id, "facility_id": fac.id,
                                  "reason": f"{a.refrigerant} is a Montreal Protocol gas: reported separately"})
             return
-        mb, u = a.mass_balance, activity_uncertainty(a)
-        unc = combine_sum([(mb.opening_kg, u), (mb.purchased_kg, u), (-mb.recovered_kg, u), (-mb.closing_kg, u),
-                           (-mb.capacity_increase_kg, u)]) if net else None
+        u = activity_uncertainty(a)
+        unc = combine_sum([(t, u) for t in mb.signed_terms()]) if net else None
         gwp_bases.add(basis)
         res.scope1_kg += record(a, fac, "1", "direct", Line(
             activity_id=a.id, facility_id=a.facility_id, scope="1", method="direct", quantity=net, unit="kg",
             inclusion_share=share, factor_id=None, factor_version=None, factor_value=value, emissions_kg=kg,
-            formula=(f"({mb.opening_kg} + {mb.purchased_kg} − {mb.recovered_kg} − {mb.closing_kg} − "
-                     f"{mb.capacity_increase_kg}) kg {a.refrigerant} × GWP {value} ({basis}) × {share} share = {kg} kgCO2e"),
+            formula=(f"{mb.formula()} kg {a.refrigerant} × GWP {value} ({basis}) × {share} share = {kg} kgCO2e"),
             factor_ref=f"IPCC {basis} GWP-100 {a.refrigerant}", uncertainty_pct=_pct(unc),
-            details={"refrigerant": a.refrigerant, "net_kg": net}))
+            details={"refrigerant": a.refrigerant, "net_kg": net, "stored_start_kg": mb.stored_start_kg,
+                     "stored_end_kg": mb.stored_end_kg, "purchased_kg": mb.purchased_kg,
+                     "returned_or_sold_kg": mb.returned_or_sold_kg,
+                     "equipment_charge_start_kg": mb.equipment_charge_start_kg,
+                     "equipment_charge_end_kg": mb.equipment_charge_end_kg, "recharged_kg": mb.recharged_kg,
+                     "register_event_ids": list(mb.register_event_ids)}))
 
     for a in acts:
         fac = facilities.get(a.facility_id)

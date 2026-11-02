@@ -104,11 +104,25 @@ class HeatingValueIn(BaseModel):
 
 
 class MassBalanceIn(BaseModel):
-    opening_kg: NonNeg
+    # Gas in cylinders and the gas flows of the record's dates. The equipment-charge terms of the balance are not
+    # entered here: they come from the facility's dated equipment register (POST /equipment/{id}/events).
+    stored_start_kg: NonNeg
+    stored_end_kg: NonNeg
     purchased_kg: NonNeg
-    recovered_kg: NonNeg
-    closing_kg: NonNeg
-    capacity_increase_kg: NonNeg = Decimal(0)
+    returned_or_sold_kg: NonNeg = Decimal(0)
+
+
+class EquipmentEventIn(BaseModel):
+    event_type: Literal["install", "retire", "recharge"]
+    event_date: dt.date
+    refrigerant: Optional[str] = Field(None, max_length=30)  # install / recharge
+    charge_kg: Optional[condecimal(gt=0, max_digits=28, decimal_places=6)] = None  # install: full charge; recharge: added
+    source_ref: Optional[str] = Field(None, max_length=200)
+    evidence_snippet: Optional[str] = Field(None, max_length=2000)
+
+
+class VoidIn(BaseModel):
+    reason: str = Field(..., min_length=1, max_length=2000)
 
 
 class ActivityIn(BaseModel):
@@ -242,6 +256,26 @@ def list_equipment(facility_id: Optional[str] = None, kind: Optional[str] = None
     filters = [c for c in (Equipment.facility_id == facility_id if facility_id else None,
                            Equipment.kind == kind if kind else None) if c is not None]
     return _list(db, Equipment, p, limit, offset, *filters, order=Equipment.equipment_ref)
+
+
+@router.post("/equipment/{equipment_id}/events", status_code=201)
+def create_equipment_event(equipment_id: str, body: EquipmentEventIn, p: Principal = Depends(require("read")),
+                           db: Session = Depends(get_db)):
+    return out(run(ledger.create_equipment_event, db, p, equipment_id, body.model_dump()))
+
+
+@router.get("/equipment/{equipment_id}/events")
+def list_equipment_events(equipment_id: str, limit: int = Limit, offset: int = Offset,
+                          p: Principal = Depends(require("read")), db: Session = Depends(get_db)):
+    from .ledger_models import EquipmentEvent
+    return _list(db, EquipmentEvent, p, limit, offset, EquipmentEvent.equipment_id == equipment_id,
+                 order=EquipmentEvent.event_date)
+
+
+@router.post("/equipment-events/{event_id}/void")
+def void_equipment_event(event_id: str, body: VoidIn, p: Principal = Depends(require("read")),
+                         db: Session = Depends(get_db)):
+    return out(run(ledger.void_equipment_event, db, p, event_id, body.reason))
 
 
 @router.post("/periods", status_code=201)

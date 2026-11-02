@@ -316,11 +316,11 @@ class Scope1LedgerTest(LedgerTestCase):
         self.call("POST", "user-a", "/factors", {**self.GAS, "gas_components": None}, status=422)
 
     def test_refrigerant_quantity_comes_from_the_mass_balance(self):
-        mb = {"opening_kg": "100", "purchased_kg": "30", "recovered_kg": "5", "closing_kg": "110"}
+        mb = {"stored_start_kg": "100", "purchased_kg": "30", "returned_or_sold_kg": "5", "stored_end_kg": "110"}
         rec = self.approved(activity_type="refrigerant", quantity="0", unit="kg", refrigerant="R-410A", mass_balance=mb,
                             data_quality="metered", meter_ref="CHILLER-1")
         self.assertEqual(rec["quantity"], "15.0000000000")
-        bad = {**mb, "closing_kg": "500"}
+        bad = {**mb, "stored_end_kg": "500"}
         self.assertEqual(self.activity(activity_type="refrigerant", unit="kg", refrigerant="R-410A", mass_balance=bad,
                                        meter_ref="C2").status_code, 422)
         self.assertEqual(self.activity(activity_type="refrigerant", unit="kg", refrigerant="R-999", mass_balance=mb,
@@ -333,6 +333,42 @@ class Scope1LedgerTest(LedgerTestCase):
     def generator(self, ref, facility=None, status=201):
         return self.call("POST", "user-a", "/equipment", {"facility_id": facility or self.fac, "equipment_ref": ref,
                                                           "kind": "generator", "fuel": "diesel"}, status=status)
+
+    def unit(self, ref="AC-1"):
+        return self.post("user-a", "/equipment", {"facility_id": self.fac, "equipment_ref": ref, "kind": "refrigeration"})
+
+    def event(self, unit, status=201, **body):
+        return self.call("POST", "contrib-a", f"/equipment/{unit}/events", body, status=status).json()
+
+    def test_d3_equipment_register_drives_the_charge_terms(self):
+        unit = self.unit()["id"]
+        install = self.event(unit, event_type="install", event_date="2025-03-10", refrigerant="R-410A", charge_kg="10")
+        self.event(unit, status=409, event_type="install", event_date="2025-03-12", refrigerant="R-410A", charge_kg="4")
+        self.event(unit, status=422, event_type="recharge", event_date="2025-03-01", refrigerant="R-410A", charge_kg="2")
+        filled = {"stored_start_kg": "0", "stored_end_kg": "0", "purchased_kg": "10", "returned_or_sold_kg": "0"}
+        rec = self.approved(activity_type="refrigerant", quantity="0", unit="kg", refrigerant="R-410A", meter_ref="AC-1",
+                            mass_balance=filled, activity_start="2025-03-01", activity_end="2025-03-31",
+                            data_quality="metered")
+        charges = [Decimal(rec["mass_balance"][k]) for k in ("equipment_charge_start_kg", "equipment_charge_end_kg")]
+        self.assertEqual((Decimal(rec["quantity"]), charges), (0, [0, 10]))  # new unit filled from purchased gas
+        leak = {"stored_start_kg": "0", "stored_end_kg": "0", "purchased_kg": "2", "returned_or_sold_kg": "0"}
+        self.event(unit, event_type="recharge", event_date="2025-04-20", refrigerant="R-410A", charge_kg="2")
+        topup = self.approved(activity_type="refrigerant", quantity="0", unit="kg", refrigerant="R-410A",
+                              meter_ref="AC-1", mass_balance=leak, activity_start="2025-04-01",
+                              activity_end="2025-04-30", data_quality="metered")
+        self.assertEqual((Decimal(topup["quantity"]), Decimal(topup["mass_balance"]["recharged_kg"])), (2, 2))
+        short = {"stored_start_kg": "0", "stored_end_kg": "3", "purchased_kg": "0", "returned_or_sold_kg": "0"}
+        res = self.activity(activity_type="refrigerant", unit="kg", refrigerant="R-410A", meter_ref="AC-1",
+                            mass_balance=short, activity_start="2025-05-01", activity_end="2025-05-31")
+        self.assertEqual(res.status_code, 422)
+        self.assertIn("DATA_INCONSISTENT", res.json()["detail"])  # rejected, never stored as zero
+
+        run = self.post("contrib-a", f"/periods/{self.period}/calculate")
+        self.assertEqual((run["scope1_kg"], run["blocking"]), ("4511.000000", False))
+        self.call("POST", "user-a", f"/equipment-events/{install['id']}/void", {"reason": "TEST wrong date"}, status=200)
+        run = self.post("contrib-a", f"/periods/{self.period}/calculate")
+        self.assertIn("REFRIGERANT_REGISTER_CHANGED", [e["code"] for e in run["exceptions"]])
+        self.assertTrue(run["blocking"])
 
     def test_captive_generator_kwh_cannot_also_be_grid_electricity(self):
         self.generator("G1")
@@ -373,7 +409,7 @@ class Scope1LedgerTest(LedgerTestCase):
         self.assertIn("scope1", report["uncertainty"])
 
     def test_run_mixing_refrigerant_and_factored_lines_locks(self):
-        mb = {"opening_kg": "100", "purchased_kg": "30", "recovered_kg": "5", "closing_kg": "110"}
+        mb = {"stored_start_kg": "100", "purchased_kg": "30", "returned_or_sold_kg": "5", "stored_end_kg": "110"}
         self.approved(activity_type="refrigerant", quantity="0", unit="kg", refrigerant="R-410A", mass_balance=mb,
                       data_quality="metered", meter_ref="CHILLER-1")
         self.approved(data_quality="billed")
