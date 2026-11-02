@@ -20,17 +20,24 @@ Ministry of Environment, Forest and Climate Change (MoEFCC). Base year 2012; sec
   text require reporting or verification of Scope 1 or Scope 2 emissions, and the rules name no MRV software.
 
 3. EU CARBON BORDER ADJUSTMENT MECHANISM (CBAM): Regulation (EU) 2023/956, amended by Regulation (EU) 2025/2083
-- Covered goods: iron and steel, aluminium, cement, fertilisers, hydrogen and electricity.
+   of 8 October 2025. Articles below are those of Regulation (EU) 2023/956 as amended; "2025/2083 Art. 1(n)" names
+   the amending point of Regulation (EU) 2025/2083.
+- Covered goods (Annex I): iron and steel, aluminium, cement, fertilisers, hydrogen and electricity.
   Garments and textiles are NOT covered.
-- Transitional period, 1 October 2023 to 31 December 2025: quarterly reports of embedded emissions, no payment.
-- Definitive period from 1 January 2026: authorised CBAM declarants surrender CBAM certificates for the embedded
-  emissions of covered goods they import. Certificate sales open on 1 February 2027; the first annual declaration
-  and surrender, for 2026 imports, are due by 30 September 2027.
-- De minimis: an importer bringing in no more than 50 tonnes a year of covered goods (electricity and hydrogen
-  excluded) is exempt.
+- Transitional period, 1 October 2023 to 31 December 2025 (Article 32): quarterly CBAM reports of embedded
+  emissions (Article 35), no payment.
+- Definitive period from 1 January 2026 (Article 36(2)(b), 2025/2083 Art. 1(27)): authorised CBAM declarants
+  surrender CBAM certificates for the embedded emissions of covered goods they import.
+- Certificate sales open on 1 February 2027 (Article 20(1), 2025/2083 Art. 1(16); Article 36(2)(d)).
+- The first annual CBAM declaration and the first surrender, for 2026 imports, are due by 30 September 2027
+  (Article 6(1), 2025/2083 Art. 1(5); Article 22(1), 2025/2083 Art. 1(18)).
+- De minimis (Article 2a, inserted by 2025/2083 Art. 1(2); Annex VII point 1): an importer whose imports in a
+  calendar year total no more than 50 tonnes net mass is exempt. The threshold does not apply to electricity or
+  hydrogen (Article 2a(4)).
 - CBAM counts "embedded emissions" per tonne of product (direct emissions, and for some goods indirect emissions
   from electricity). That is not the same as a company's GHG Protocol Scope 1 and Scope 2 inventory.
 
 Sources: UNFCCC NDC registry and UNDP Bangladesh NDC 2021 summary; Bangladesh Gazette of 5 March 2023 (FAOLEX
 BGD219240, https://faolex.fao.org/docs/pdf/BGD219240.pdf); UNEP LEAP entry "Environment Conservation Rules, 2023
-(SRO No. 53)"; Regulation (EU) 2023/956 and Regulation (EU) 2025/2083; EPA Ireland CBAM guidance.
+(SRO No. 53)"; Regulation (EU) 2023/956 (EUR-Lex CELEX 32023R0956) and Regulation (EU) 2025/2083 (EUR-Lex CELEX
+32025R2083, OJ text read 2026-11-02); EPA Ireland CBAM guidance.
