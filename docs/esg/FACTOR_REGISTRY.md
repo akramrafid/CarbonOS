@@ -25,8 +25,8 @@ Every Scope 2 electricity factor declares `factor_kind`:
 
 | Kind | Allowed for | Meaning |
 |---|---|---|
-| `grid_average` | location-based (required); market-based only where no residual mix exists (disclosed as `MARKET_BASED_GRID_AVERAGE_FALLBACK`) | Average emission rate of the grid where the electricity is consumed |
-| `supplier_specific` | market-based | Utility or supplier emission rate, or a contractual instrument |
+| `grid_average` | location-based (required); market-based as the last level, where no instrument, supplier rate or residual mix applies (flagged `MARKET_FALLBACK_GRID_AVERAGE` and disclosed) | Average emission rate of the grid where the electricity is consumed |
+| `supplier_specific` | market-based, when the record selects it (`market_factor_id`) | Emission rate of the utility or supplier the electricity is bought from. Certificates and PPAs are contractual instruments (`/contractual-instruments`), not factors |
 | `residual_mix` | market-based | Grid mix after contractual claims are removed |
 | `grid_combined_margin` | **never** | CDM Tool 07 project-baseline metric (OM/BM/CM). Rejected by the API (422), the calculation library (`MARGIN_FACTOR_NOT_ALLOWED`) and the check constraint `ck_esg_factor_no_margin_scope2` |
 

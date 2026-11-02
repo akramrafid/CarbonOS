@@ -83,7 +83,10 @@ export default function ReportsPanel({ can, me, periods, facilities, onPeriodsCh
               <Total label="Scope 1" kg={run.scope1_kg} unc={run.uncertainty?.scope1} />
               <Total label="Scope 2 — location-based" kg={run.scope2_location_kg} unc={run.uncertainty?.scope2_location} />
               <Total label="Scope 2 — market-based" kg={run.scope2_market_kg} unc={run.uncertainty?.scope2_market}
-                note={run.scope2_market_kg == null ? 'Missing market-based inputs for some electricity; not estimated.' : null} />
+                note={run.scope2_market_kg == null ? 'Missing market-based inputs for some electricity; not estimated.'
+                  : run.exceptions.some((x) => x.code === 'MARKET_FALLBACK_GRID_AVERAGE')
+                    ? 'Grid-average fallback for some electricity (no qualifying instrument, supplier rate or residual mix); disclosed in the report.'
+                    : null} />
             </div>
             <p className="text-xs text-mist">Prepared by {run.created_by} at {run.created_at}{run.period_revision !== period?.revision ? ' (earlier revision)' : ''}.</p>
             <p className="text-xs text-mist">Boundary: {run.boundary_method.replace('_', ' ')} · Methodology {run.methodology_version} · GWP {run.gwp_basis || 'not recorded'} · Inputs {run.input_sha256.slice(0, 12)}… · Scope 3 not included.</p>

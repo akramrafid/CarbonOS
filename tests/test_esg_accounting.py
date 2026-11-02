@@ -91,12 +91,12 @@ class CalculationTests(unittest.TestCase):
         self.assertEqual(r.scope2_market_kg, D("100"))
         self.assertEqual({l.method for l in r.lines}, {"location", "market"})
 
-    def test_missing_market_input_is_not_invented(self):
+    def test_market_based_falls_back_to_the_grid_average_and_says_so(self):
         acts = [act("a1", "f1", "electricity", "1000", "kWh")]
         r = calculate(acts, FAC, [GRID], "operational_control")
-        self.assertIsNone(r.scope2_market_kg)
-        self.assertEqual(r.exceptions[0]["code"], "MISSING_MARKET_BASED_INPUT")
-        self.assertFalse(r.blocking)  # location-based inventory is still complete
+        self.assertEqual(r.scope2_market_kg, D("500"))  # Scope 2 Guidance level 4; see test_esg_market_based.py
+        self.assertEqual(r.exceptions[0]["code"], "MARKET_FALLBACK_GRID_AVERAGE")
+        self.assertFalse(r.blocking)
 
     def test_memo_items_never_change_totals(self):
         base = calculate([act("a1", "f1", "electricity", "1000", "kWh")], FAC, [GRID], "operational_control")
@@ -166,7 +166,7 @@ class Scope2FactorKindTests(unittest.TestCase):
     def test_margin_is_skipped_when_a_grid_average_exists(self):
         cm = factor("cm", "electricity", "kWh", "0.55", "location", kind="grid_combined_margin")
         r = calculate([act("a1", "f1", "electricity", "1000", "kWh")], FAC, [GRID, cm], "operational_control")
-        self.assertEqual([l.factor_id for l in r.lines], ["grid"])
+        self.assertEqual({l.factor_id for l in r.lines}, {"grid"})  # location line and the market fallback line
         self.assertFalse(r.blocking)
 
     def test_location_factor_must_declare_grid_average(self):
@@ -181,7 +181,7 @@ class Scope2FactorKindTests(unittest.TestCase):
         r = calculate([act("a1", "f1", "electricity", "1000", "kWh", market_factor_id="grid-mkt")], FAC,
                       [GRID, fallback], "operational_control")
         self.assertEqual(r.scope2_market_kg, D("500"))
-        fb = next(e for e in r.exceptions if e["code"] == "MARKET_BASED_GRID_AVERAGE_FALLBACK")
+        fb = next(e for e in r.exceptions if e["code"] == "MARKET_FALLBACK_GRID_AVERAGE")
         self.assertFalse(fb["blocking"])
 
 

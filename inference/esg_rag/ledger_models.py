@@ -13,6 +13,7 @@ from sqlalchemy import (
     Index, Integer, Numeric, String, Text, UniqueConstraint,
 )
 
+from .accounting import INSTRUMENT_TYPES
 from .database import EsgBase
 from .models import ESGOrganization  # noqa: F401  (FK target on the same metadata)
 
@@ -173,6 +174,53 @@ class GasCertificate(EsgBase):
     valid_from = Column(Date, nullable=False)
     valid_to = Column(Date, nullable=False)
     uncertainty_pct = Column(Numeric(12, 6))
+    source_document_id = Column(String(36))
+    evidence_snippet = Column(Text)
+    status = Column(String(10), nullable=False, default="DRAFT")
+    created_by = Column(String(255), nullable=False)
+    created_at = Column(DateTime(timezone=True), default=_now, nullable=False)
+    approved_by = Column(String(255))
+    approved_at = Column(DateTime(timezone=True))
+
+
+class ContractualInstrument(EsgBase):
+    """A contractual instrument for market-based Scope 2 (Scope 2 Guidance ch. 6-7): energy attribute certificates retired
+    for the reporting entity (e.g. I-RECs) or a power purchase agreement conveying the generation's attributes. It covers
+    one facility's grid electricity inside [applies_from, applies_to] of one reporting period, so its MWh cannot be
+    applied in two periods. Each Scope 2 Quality Criterion it meets is attested with its evidence; a second person
+    approves it before a calculation uses it."""
+    __tablename__ = "esg_contractual_instrument"
+    __table_args__ = (
+        UniqueConstraint("organization_id", "id", name="uq_esg_instrument_org_id"),
+        ForeignKeyConstraint(["organization_id", "facility_id"], ["esg_facility.organization_id", "esg_facility.id"],
+                             name="fk_esg_instrument_facility"),
+        ForeignKeyConstraint(["organization_id", "period_id"],
+                             ["esg_reporting_period.organization_id", "esg_reporting_period.id"],
+                             name="fk_esg_instrument_period"),
+        CheckConstraint(_in("status", FACTOR_STATUSES), name="ck_esg_instrument_status"),
+        CheckConstraint(_in("instrument_type", INSTRUMENT_TYPES), name="ck_esg_instrument_type"),
+        CheckConstraint("mwh > 0 AND emission_rate_kg_per_kwh >= 0", name="ck_esg_instrument_values"),
+        CheckConstraint("applies_to >= applies_from AND generation_end >= generation_start",
+                        name="ck_esg_instrument_dates"),
+        CheckConstraint("approved_by IS NULL OR approved_by <> created_by", name="ck_esg_instrument_dual_control"),
+    )
+
+    id = Column(String(36), primary_key=True, default=_id)
+    organization_id = _org_fk()
+    facility_id = Column(String(36), nullable=False)
+    period_id = Column(String(36), nullable=False)
+    instrument_type = Column(String(40), nullable=False)
+    instrument_ref = Column(String(200), nullable=False)  # certificate serial range or contract reference
+    registry = Column(String(100))  # tracking system the certificates were retired in
+    generation_market = Column(String(50), nullable=False)  # grid region of the generating plant
+    generation_technology = Column(String(50))
+    generation_start = Column(Date, nullable=False)  # vintage of the generation the instrument conveys
+    generation_end = Column(Date, nullable=False)
+    mwh = Column(Numeric(28, 6), nullable=False)
+    emission_rate_kg_per_kwh = Column(Numeric(18, 8), nullable=False)
+    applies_from = Column(Date, nullable=False)
+    applies_to = Column(Date, nullable=False)
+    quality_criteria = Column(JSON, nullable=False)  # {criterion: the evidence that it is met}
     source_document_id = Column(String(36))
     evidence_snippet = Column(Text)
     status = Column(String(10), nullable=False, default="DRAFT")

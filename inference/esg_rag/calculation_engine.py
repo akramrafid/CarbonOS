@@ -125,11 +125,17 @@ def calculate_activity_footprint(
     if electricity_kwh and grid_average is None:
         exceptions.append({"code": "MISSING_GRID_AVERAGE_FACTOR", "blocking": True,
                            "detail": "Location-based Scope 2 needs an approved grid-average factor; none supplied."})
-    if electricity_kwh and market_factor is None:
+    # Market-based (Scope 2 Guidance hierarchy): a supplied market factor, otherwise the grid average, disclosed.
+    if electricity_kwh and market_factor is None and grid_average is not None:
+        exceptions.append({"code": "MARKET_FALLBACK_GRID_AVERAGE", "blocking": False,
+                           "detail": "No contractual instrument, supplier-specific rate or residual mix supplied; the "
+                                     "grid-average rate is used and disclosed."})
+    elif electricity_kwh and market_factor is None:
         exceptions.append({"code": "MISSING_MARKET_BASED_INPUT", "blocking": False,
-                           "detail": "No supplier-specific, contractual or residual-mix factor supplied."})
+                           "detail": "No market-based input and no grid-average factor supplied."})
+    market_rate = market_factor if market_factor is not None else grid_average
     scope2_location = None if electricity_kwh and grid_average is None else electricity_kwh * (grid_average or 0) / 1000.0
-    scope2_market = None if electricity_kwh and market_factor is None else electricity_kwh * (market_factor or 0) / 1000.0
+    scope2_market = None if electricity_kwh and market_rate is None else electricity_kwh * (market_rate or 0) / 1000.0
 
     # Scope 3 (Value Chain Activity)
     employees = float(activities.get("employees", 0.0) or 0.0)

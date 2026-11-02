@@ -4,7 +4,7 @@ Decimals are serialised as strings so no precision is lost to JSON floats.
 """
 import datetime as dt
 from decimal import Decimal
-from typing import List, Literal, Optional
+from typing import Annotated, Dict, List, Literal, Optional
 
 from fastapi import APIRouter, Depends, HTTPException, Query
 from fastapi.responses import PlainTextResponse
@@ -132,6 +132,28 @@ class GasCertificateIn(BaseModel):
     valid_from: dt.date
     valid_to: dt.date
     uncertainty_pct: Optional[Pct] = None
+    source_document_id: Optional[str] = None
+    evidence_snippet: Optional[str] = Field(None, max_length=2000)
+
+
+Evidence = Annotated[str, Field(min_length=1, max_length=2000)]
+
+
+class ContractualInstrumentIn(BaseModel):
+    facility_id: str
+    period_id: str
+    instrument_type: Literal["energy_attribute_certificate", "power_purchase_agreement"]
+    instrument_ref: str = Field(..., min_length=1, max_length=200)  # certificate serial range or contract reference
+    registry: Optional[str] = Field(None, max_length=100)
+    generation_market: str = Field(..., min_length=1, max_length=50)  # grid region of the generating plant
+    generation_technology: Optional[str] = Field(None, max_length=50)
+    generation_start: dt.date
+    generation_end: dt.date
+    mwh: condecimal(gt=0, max_digits=28, decimal_places=6)
+    emission_rate_kg_per_kwh: condecimal(ge=0, max_digits=18, decimal_places=8)
+    applies_from: dt.date
+    applies_to: dt.date
+    quality_criteria: Dict[str, Evidence]  # Scope 2 Quality Criterion → the evidence that it is met
     source_document_id: Optional[str] = None
     evidence_snippet: Optional[str] = Field(None, max_length=2000)
 
@@ -309,6 +331,28 @@ def list_gas_certificates(facility_id: Optional[str] = None, limit: int = Limit,
     from .ledger_models import GasCertificate
     filters = [GasCertificate.facility_id == facility_id] if facility_id else []
     return _list(db, GasCertificate, p, limit, offset, *filters, order=GasCertificate.valid_from)
+
+
+@router.post("/contractual-instruments", status_code=201)
+def create_contractual_instrument(body: ContractualInstrumentIn, p: Principal = Depends(require("read")),
+                                  db: Session = Depends(get_db)):
+    return out(run(ledger.create_contractual_instrument, db, p, body.model_dump()))
+
+
+@router.post("/contractual-instruments/{instrument_id}/approve")
+def approve_contractual_instrument(instrument_id: str, p: Principal = Depends(require("read")),
+                                   db: Session = Depends(get_db)):
+    return out(run(ledger.approve_contractual_instrument, db, p, instrument_id))
+
+
+@router.get("/contractual-instruments")
+def list_contractual_instruments(period_id: Optional[str] = None, facility_id: Optional[str] = None,
+                                 limit: int = Limit, offset: int = Offset,
+                                 p: Principal = Depends(require("read")), db: Session = Depends(get_db)):
+    from .ledger_models import ContractualInstrument
+    filters = ([ContractualInstrument.period_id == period_id] if period_id else []) + \
+        ([ContractualInstrument.facility_id == facility_id] if facility_id else [])
+    return _list(db, ContractualInstrument, p, limit, offset, *filters, order=ContractualInstrument.applies_from)
 
 
 @router.post("/periods", status_code=201)

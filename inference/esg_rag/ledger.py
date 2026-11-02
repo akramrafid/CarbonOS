@@ -12,7 +12,7 @@ import hashlib
 import io
 import json
 from dataclasses import replace
-from decimal import Decimal
+from decimal import ROUND_HALF_UP, Decimal
 from typing import Optional
 
 from sqlalchemy import or_, update
@@ -23,12 +23,12 @@ from . import accounting, gwp
 from .auth import Principal
 from .ledger_models import (
     ActivityRecord, AuditEvent, CalculationLine, CalculationRun, EmissionFactor, Equipment, EquipmentEvent, Facility,
-    GasCertificate, LegalEntity,
+    ContractualInstrument, GasCertificate, LegalEntity,
     MetricObservation, ReportingPeriod, ReportSnapshot, _now,
 )
 from .models import ESGOrganization
 
-REPORT_SCHEMA = "carbonos.esg.report/1"
+REPORT_SCHEMA = "carbonos.esg.report/2"
 DISCLAIMERS = [
     "Internal calculation prepared with CarbonOS. Not externally assured or verified.",
     "Scope 3 emissions are not included in this report.",
@@ -301,6 +301,70 @@ def _with_certificate(a, rec, certificates):
         Decimal(cert.gcv_mj_per_m3), Decimal(cert.ncv_to_gcv), cert.reference_conditions,
         f"gas certificate {cert.certificate_ref} ({cert.distributor}), valid {cert.valid_from}..{cert.valid_to}",
         False, _dec(cert.uncertainty_pct)))
+
+
+# --- contractual instruments (market-based Scope 2, level 1) ------------------------------------
+
+def create_contractual_instrument(db, principal, data):
+    """Certificates or a PPA as DRAFT evidence, with the evidence for each Scope 2 Quality Criterion it meets; a second
+    person approves it. It covers one facility inside one reporting period, so its MWh cannot be applied twice."""
+    _need(principal, "write")
+    _get(db, Facility, principal, data["facility_id"])
+    period = _open_period(db, principal, data["period_id"])
+    if not period.start_date <= data["applies_from"] <= data["applies_to"] <= period.end_date:
+        raise DomainError(422, "applies_from..applies_to must lie inside the reporting period")
+    if data["generation_end"] < data["generation_start"]:
+        raise DomainError(422, "generation_end must not be before generation_start")
+    allowed = accounting.QUALITY_CRITERIA + accounting.DIRECT_CONTRACT_CRITERIA
+    unknown = sorted(set(data["quality_criteria"]) - set(allowed))
+    if unknown:
+        raise DomainError(422, f"Unknown quality criteria {', '.join(unknown)}; allowed: {', '.join(allowed)}")
+    claimed = db.query(ContractualInstrument.id).filter(
+        ContractualInstrument.organization_id == principal.organization_id,
+        ContractualInstrument.instrument_type == data["instrument_type"],
+        ContractualInstrument.instrument_ref == data["instrument_ref"],
+        ContractualInstrument.status != "RETIRED").first()
+    if claimed:
+        raise DomainError(409, f"{data['instrument_ref']} is already entered ({claimed[0]}); an instrument is claimed once")
+    inst = ContractualInstrument(organization_id=principal.organization_id, status="DRAFT", created_by=principal.sub,
+                                 **data)
+    db.add(inst)
+    db.flush()
+    audit(db, principal, "contractual_instrument.create", "contractual_instrument", inst.id, data)
+    db.commit()
+    return inst
+
+
+def approve_contractual_instrument(db, principal, inst_id):
+    _need(principal, "review")
+    inst = _get(db, ContractualInstrument, principal, inst_id)
+    _open_period(db, principal, inst.period_id)
+    if inst.created_by == principal.sub:
+        raise DomainError(403, "An instrument must be approved by someone other than the person who entered it")
+    n = db.execute(update(ContractualInstrument).where(ContractualInstrument.id == inst.id,
+                                                       ContractualInstrument.status == "DRAFT")
+                   .values(status="APPROVED", approved_by=principal.sub, approved_at=_now())).rowcount
+    if n != 1:
+        db.rollback()
+        raise DomainError(409, "Only DRAFT instruments can be approved")
+    audit(db, principal, "contractual_instrument.approve", "contractual_instrument", inst.id)
+    db.commit()
+    db.refresh(inst)
+    return inst
+
+
+def _approved_instruments(db, principal, period):
+    return db.query(ContractualInstrument).filter(ContractualInstrument.organization_id == principal.organization_id,
+                                                  ContractualInstrument.period_id == period.id,
+                                                  ContractualInstrument.status == "APPROVED") \
+        .order_by(ContractualInstrument.applies_from, ContractualInstrument.id).all()
+
+
+def _accounting_instrument(i):
+    return accounting.Instrument(
+        i.id, i.facility_id, i.instrument_type, i.instrument_ref, i.generation_market, Decimal(i.mwh),
+        Decimal(i.emission_rate_kg_per_kwh), i.applies_from, i.applies_to,
+        criteria=tuple(sorted(k for k, v in (i.quality_criteria or {}).items() if str(v).strip())))
 
 
 # --- emission factors ------------------------------------------------------------------
@@ -655,7 +719,7 @@ def _approved_metric_ids(db, principal, period):
         MetricObservation.status == "APPROVED").order_by(MetricObservation.id)]
 
 
-def _input_hash(period, acts, facs, factors, metric_ids=(), register=(), certificates=()) -> str:
+def _input_hash(period, acts, facs, factors, metric_ids=(), register=(), certificates=(), instruments=()) -> str:
     payload = {
         "methodology": accounting.METHODOLOGY_VERSION,
         "boundary": period.boundary_method,
@@ -672,6 +736,9 @@ def _input_hash(period, acts, facs, factors, metric_ids=(), register=(), certifi
                                for e, _ in register],
         "gas_certificates": [[c.id, c.facility_id, c.gcv_mj_per_m3, c.ncv_to_gcv, c.valid_from, c.valid_to]
                              for c in certificates],
+        "contractual_instruments": [[i.id, i.facility_id, i.instrument_type, i.instrument_ref, i.generation_market,
+                                     i.mwh, i.emission_rate_kg_per_kwh, i.applies_from, i.applies_to,
+                                     i.quality_criteria] for i in instruments],
     }
     return hashlib.sha256(canonical_json(payload).encode()).hexdigest()
 
@@ -725,6 +792,7 @@ def calculate_period(db, principal, period_id):
     acts, facs, factors = _calc_inputs(db, principal, period)
     register = _load_register(db, principal)
     certificates = _approved_certificates(db, principal)
+    instruments = _approved_instruments(db, principal, period)
     register_exceptions = []
     result = accounting.calculate(
         [_with_certificate(_with_register(_accounting_activity(a), a, register, register_exceptions), a, certificates)
@@ -733,13 +801,14 @@ def calculate_period(db, principal, period_id):
                                    Decimal(f.equity_share_pct), f.legal_entity_id) for f in facs},
         [_accounting_factor(f) for f in factors],
         period.boundary_method, gwp_basis=period.gwp_basis,
+        instruments=[_accounting_instrument(i) for i in instruments],
     )
     result.exceptions.extend(register_exceptions)
     run = CalculationRun(
         organization_id=principal.organization_id, period_id=period.id, period_revision=period.revision,
         methodology_version=result.methodology_version, boundary_method=result.boundary_method,
         input_sha256=_input_hash(period, acts, facs, factors, _approved_metric_ids(db, principal, period), register,
-                                 certificates),
+                                 certificates, instruments),
         scope1_kg=result.scope1_kg,
         scope2_location_kg=result.scope2_location_kg, scope2_market_kg=result.scope2_market_kg,
         blocking=result.blocking, exceptions=result.exceptions, excluded=result.excluded,
@@ -774,7 +843,8 @@ def lock_period(db, principal, period_id, run_id):
     if run.blocking:
         raise DomainError(409, "Calculation has blocking data-quality exceptions")
     if _input_hash(period, *_calc_inputs(db, principal, period), _approved_metric_ids(db, principal, period),
-                   _load_register(db, principal), _approved_certificates(db, principal)) != run.input_sha256:
+                   _load_register(db, principal), _approved_certificates(db, principal),
+                   _approved_instruments(db, principal, period)) != run.input_sha256:
         raise DomainError(409, "Data or factors changed since this calculation; recalculate before locking")
     if run.created_by == principal.sub:
         raise DomainError(403, "Separation of duties: the approver must differ from the preparer of the calculation")
@@ -820,12 +890,54 @@ def _t(kg):
     return None if kg is None else accounting.to_tonnes(Decimal(kg))
 
 
+MARKET_HIERARCHY_TEXT = ("GHG Protocol Scope 2 Guidance (2015), market-based method: (1) contractual instruments that "
+                         "meet the Scope 2 Quality Criteria; (2) a supplier-specific emission rate; (3) a residual mix; "
+                         "(4) otherwise the grid-average emission rate, disclosed.")
+
+
+def _market_disclosure(db, principal, period, lines, facilities):
+    """What the market-based total rests on, by hierarchy level, and the statement the Scope 2 Guidance asks for when
+    the grid average stands in for a residual mix."""
+    kwh = {level: Decimal(0) for level in accounting.MARKET_LEVELS}
+    applied, regions = {}, set()
+    for line in lines:
+        level = (line.details or {}).get("market_level") if line.method == "market" else None
+        if level not in kwh:
+            continue
+        kwh[level] += Decimal(line.quantity)
+        if level == "contractual_instrument":
+            iid = line.details["instrument_id"]
+            applied[iid] = applied.get(iid, Decimal(0)) + Decimal(line.quantity)
+        elif level == "grid_average":
+            regions.add(facilities[line.facility_id].grid_region if line.facility_id in facilities else "unknown")
+    total, fallback = sum(kwh.values(), Decimal(0)), kwh["grid_average"]
+    share = (fallback / total * 100).quantize(accounting.PCT_PRECISION, rounding=ROUND_HALF_UP) if total else None
+    fields = ("id", "facility_id", "instrument_type", "instrument_ref", "registry", "generation_market",
+              "generation_technology", "generation_start", "generation_end", "mwh", "emission_rate_kg_per_kwh",
+              "applies_from", "applies_to", "quality_criteria", "approved_by")
+    return {
+        "hierarchy": MARKET_HIERARCHY_TEXT,
+        "kwh_by_level": kwh,
+        "grid_average_fallback_kwh": fallback,
+        "grid_average_fallback_share_pct": share,
+        "statement": (f"{format(fallback.normalize(), 'f')} kWh ({share} % of the electricity in the market-based total) "
+                      "use the grid-average emission rate: no qualifying contractual instrument, supplier-specific rate "
+                      f"or residual mix applies (no residual mix is available for {', '.join(sorted(regions))}). For "
+                      "this electricity the market-based and location-based results are equal, and the grid average "
+                      "may include renewable attributes that others have claimed." if fallback else None),
+        "instruments": [{**{k: getattr(i, k) for k in fields}, "kwh_applied": applied.get(i.id, Decimal(0)),
+                         "kwh_not_applied": Decimal(i.mwh) * 1000 - applied.get(i.id, Decimal(0))}
+                        for i in _approved_instruments(db, principal, period)],
+    }
+
+
 def _report_content(db, principal, period, run):
     org = db.get(ESGOrganization, principal.organization_id)
     lines = db.query(CalculationLine).filter(CalculationLine.run_id == run.id).order_by(CalculationLine.id).all()
     factor_ids = sorted({l.factor_id for l in lines if l.factor_id})  # refrigerant lines have no factor row
     factors = db.query(EmissionFactor).filter(EmissionFactor.id.in_(factor_ids)).order_by(EmissionFactor.id).all() if factor_ids else []
     facilities = {f.id: f for f in db.query(Facility).filter(Facility.organization_id == principal.organization_id)}
+    market = _market_disclosure(db, principal, period, lines, facilities)
     return {
         "schema": REPORT_SCHEMA,
         "organization": {"id": org.id, "name": org.name},
@@ -841,10 +953,12 @@ def _report_content(db, principal, period, run):
             "scope1": _t(run.scope1_kg),
             "scope2_location_based": _t(run.scope2_location_kg),
             "scope2_market_based": _t(run.scope2_market_kg),
-            "scope2_market_based_status": "COMPLETE" if run.scope2_market_kg is not None else "MISSING_INPUTS",
+            "scope2_market_based_status": ("MISSING_INPUTS" if run.scope2_market_kg is None else
+                                           "GRID_AVERAGE_FALLBACK" if market["grid_average_fallback_kwh"] else "COMPLETE"),
             "scope3": None,
             "scope3_status": "NOT_INCLUDED",
         },
+        "scope2_market_based_disclosure": market,
         "by_facility": [{"facility_id": fid, "facility_name": facilities[fid].name if fid in facilities else None,
                          **{k: _t(v) for k, v in vals.items()}} for fid, vals in sorted(run.by_facility.items())],
         "lines": [{k: getattr(l, k) for k in ("activity_id", "facility_id", "scope", "method", "quantity", "unit",
@@ -898,6 +1012,9 @@ def export_snapshot(snap: ReportSnapshot, fmt: str) -> str:
     w.writerow(["prepared_by", c["prepared_by"], "approved_by", c["approved_by"]])
     for k, v in c["totals_tco2e"].items():
         w.writerow(["total_tco2e", k, "" if v is None else v])
+    statement = (c.get("scope2_market_based_disclosure") or {}).get("statement")
+    if statement:  # snapshots locked before report schema 2 have no market-based disclosure
+        w.writerow(["scope2_market_based_disclosure", statement])
     w.writerow([])
     cols = ["activity_id", "facility_id", "scope", "method", "quantity", "unit", "inclusion_share", "factor_id",
             "factor_version", "factor_value", "factor_ref", "emissions_kg", "formula", "data_quality", "uncertainty_pct"]

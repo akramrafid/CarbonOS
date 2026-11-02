@@ -1,4 +1,4 @@
-# Accounting Methodology — `carbonos-ghg-scope12-1.2`
+# Accounting Methodology — `carbonos-ghg-scope12-1.3`
 
 Status: **CODE_COMPLETE, not METHODOLOGY_VALIDATED.** A qualified GHG practitioner must review this
 before any customer relies on it. No third-party certification or verification is claimed.
@@ -59,11 +59,34 @@ Raw quantity and unit are stored alongside the normalised value.
   rejected by the API (422), the library (`MARGIN_FACTOR_NOT_ALLOWED`, blocking) and the database check
   `ck_esg_factor_no_margin_scope2`. The 0.550 kg CO2e/kWh once hard-coded as "location-based" was a combined
   margin with an unlocated citation and has been removed.
-* Market-based uses `method = market` factors of kind `supplier_specific` or `residual_mix` (contractual
-  instruments are entered as supplier-specific). Where no residual mix exists, a `grid_average` market factor
-  is allowed and disclosed as `MARKET_BASED_GRID_AVERAGE_FALLBACK` (non-blocking). If **any** electricity
-  record lacks a market factor, the market-based total is `null` and the report shows `MISSING_INPUTS`; each
-  record gets a non-blocking `MISSING_MARKET_BASED_INPUT`.
+* Market-based follows the Scope 2 Guidance hierarchy (methodology 1.3), for each grid-electricity record:
+  1. **Contractual instruments** (`POST /contractual-instruments`, table `esg_contractual_instrument`): energy
+     attribute certificates retired for the reporting entity (e.g. I-RECs), or a power purchase agreement that
+     conveys the generation's attributes. Each is entered for one facility and one reporting period with its MWh,
+     the emission rate it conveys, its vintage, the dates it applies to and the evidence for every Scope 2 Quality
+     Criterion it meets (Scope 2 Guidance ch. 7): `conveys_emission_rate`, `unique_claim`, `retired_for_entity`,
+     `vintage_close_to_consumption`, and for a PPA also `exclusive_transfer`. Same market is checked, not attested:
+     the generation market must equal the facility's grid region. A second person approves it. Approved instruments
+     are applied first, by kWh, to the facility's records that lie wholly inside their dates, in date order. No kWh
+     is applied twice, and the same reference entered twice fails `unique_claim`. An instrument that misses a
+     criterion is not used (`INSTRUMENT_FAILS_QUALITY_CRITERIA`); kWh it cannot apply are reported
+     (`INSTRUMENT_KWH_UNUSED`) and never carried into another period.
+  2. **Supplier-specific rate**: a `supplier_specific` factor the record selects (`market_factor_id`). The rate
+     belongs to a supply contract, which a grid region does not identify, so it is never applied by region alone;
+     when one exists and a record does not select it, `SUPPLIER_RATE_NOT_SELECTED` (non-blocking).
+  3. **Residual mix**: a `residual_mix` factor for the facility's grid region, applied without a selection.
+  4. **Otherwise the grid average**: a market `grid_average` factor or, without one, the record's location-based
+     rate. Each such record is flagged `MARKET_FALLBACK_GRID_AVERAGE` (non-blocking) and the report states the kWh,
+     their share and the grid regions. Bangladesh publishes no residual mix, so for Bangladeshi electricity not
+     covered by instruments this is the normal case: market-based then equals location-based for that electricity,
+     and the grid average may include attributes that others have claimed.
+
+  A selected factor that ranks below a level that applies is `MARKET_HIERARCHY_VIOLATION`; a selected factor for
+  another grid region is `MARKET_FACTOR_OTHER_MARKET`. Both block. The market-based total is `null`
+  (`MISSING_MARKET_BASED_INPUT`, report status `MISSING_INPUTS`) only when not even a grid average applies. The
+  report (schema `carbonos.esg.report/2`) has `scope2_market_based_disclosure`: kWh by level, every approved
+  instrument with the kWh applied and not applied, and the fallback statement. `scope2_market_based_status` is
+  `COMPLETE`, `GRID_AVERAGE_FALLBACK` or `MISSING_INPUTS`.
 * `electricity_export` and `onsite_renewable_generation` are memo items: reported, never added to or
   subtracted from Scope 2. Offsets and avoided emissions are not part of the inventory.
 

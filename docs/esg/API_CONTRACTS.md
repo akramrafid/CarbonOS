@@ -79,6 +79,11 @@ with `limit` (1–200, default 50) and `offset`. Domain rule violations: 403 (ro
 | POST `/factors[?platform_wide=true]` | admin (platform: operator) | creates DRAFT version; unit must be the activity's canonical unit; Scope 1 → `direct`, Scope 2 → `location`/`market` |
 | POST `/factors/{id}/approve` | admin (platform: operator), not the author | DRAFT → APPROVED, then immutable |
 | GET `/factors?status&activity_type` | read | organization + platform factors |
+| POST `/contractual-instruments` | write | `{facility_id, period_id, instrument_type (energy_attribute_certificate\|power_purchase_agreement), instrument_ref, registry?, generation_market, generation_technology?, generation_start, generation_end, mwh, emission_rate_kg_per_kwh, applies_from, applies_to, quality_criteria: {criterion: evidence}, source_document_id?, evidence_snippet?}` → DRAFT; dates inside the period; unknown criterion → 422; the same reference twice → 409 |
+| POST `/contractual-instruments/{id}/approve` | review, not the author | DRAFT → APPROVED; used from the next calculation of its period |
+| GET `/contractual-instruments?period_id&facility_id` | read | |
+| POST `/gas-certificates` · POST `/gas-certificates/{id}/approve` · GET `/gas-certificates?facility_id` | write · review, not the author · read | distributor's gas-analysis certificate with its validity period; an approved one replaces a record's heating value |
+| POST/GET `/equipment` · POST/GET `/equipment/{id}/events` · POST `/equipment-events/{id}/void` | admin / read · write / read · admin | facility equipment register: generators (unique `(facility_id, equipment_ref)`) and refrigeration units with dated install / retire / recharge events |
 | POST `/activities` | write | `{facility_id, period_id, activity_type, quantity, unit, activity_start, activity_end, meter_ref?, source_type, source_document_id?, source_ref?, evidence_snippet?, factor_id?, market_factor_id?, notes?, supersedes_id?, idempotency_key?}` → record + `created` |
 | PATCH `/activities/{id}` | write | DRAFT/REJECTED only; audit keeps before/after |
 | POST `/activities/{id}/submit` | write | DRAFT/REJECTED → SUBMITTED |

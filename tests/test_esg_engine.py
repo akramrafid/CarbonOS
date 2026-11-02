@@ -37,6 +37,8 @@ class TestESGCalculationEngine(unittest.TestCase):
         # A caller-supplied grid-average factor (TEST value, not a published factor): 156,000 * 0.5 / 1000 = 78 t
         res = calculate_activity_footprint(sample_activities, {"electricity_grid_average": 0.5})
         self.assertAlmostEqual(res["scope2"]["location_based_tco2e"], 78.0, places=2)
+        self.assertAlmostEqual(res["scope2"]["market_based_tco2e"], 78.0, places=2)  # grid-average fallback
+        self.assertIn("MARKET_FALLBACK_GRID_AVERAGE", [e["code"] for e in res["exceptions"]])
         self.assertAlmostEqual(res["totals"]["location_based_tco2e"], 54.955 + 78.0 + 1526.84, places=2)
         self.assertIn("DuckDB", res["engine"])
 

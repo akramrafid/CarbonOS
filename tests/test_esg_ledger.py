@@ -75,7 +75,8 @@ class JourneyTest(LedgerTestCase):
         run = self.post("contrib-a", f"/periods/{self.period}/calculate")
         self.assertEqual(run["scope2_location_kg"], "6172.500000")
         self.assertEqual(run["scope1_kg"], "2700.000000")
-        self.assertIsNone(run["scope2_market_kg"])  # no market-based input → not invented
+        self.assertEqual(run["scope2_market_kg"], "6172.500000")  # grid-average fallback, flagged and disclosed
+        self.assertIn("MARKET_FALLBACK_GRID_AVERAGE", [e["code"] for e in run["exceptions"]])
         trace = self.call("GET", "viewer-a", f"/calculations/{run['id']}", status=200).json()
         self.assertIn(elec["id"], {l["activity_id"] for l in trace["lines"]})
         self.assertIn("12345.0000000000 kWh × 0.5000000000", trace["lines"][0]["formula"] + trace["lines"][1]["formula"])
@@ -88,7 +89,7 @@ class JourneyTest(LedgerTestCase):
         csv1 = self.call("GET", "viewer-a", f"/snapshots/{snap['id']}/export?format=csv", status=200).text
         report = first.json()
         self.assertEqual(report["totals_tco2e"]["scope2_location_based"], "6.173")
-        self.assertEqual(report["totals_tco2e"]["scope2_market_based_status"], "MISSING_INPUTS")
+        self.assertEqual(report["totals_tco2e"]["scope2_market_based_status"], "GRID_AVERAGE_FALLBACK")
         self.assertEqual(report["totals_tco2e"]["scope3_status"], "NOT_INCLUDED")
         self.assertIn("Not externally assured or verified.", report["disclaimers"][0])
         self.assertNotRegex(first.text.lower(), r"\bcompliant\b|\baudited\b")
