@@ -21,6 +21,7 @@ BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 sys.path.append(BASE_DIR)
 sys.path.append(os.path.join(BASE_DIR, "inference"))
 
+import _isolated_db  # noqa: F401,E402  (temporary database, never backend/db.sqlite3)
 from inference.carbon_monitoring.database import init_db, SessionLocal
 from inference.carbon_monitoring.models import CarbonResult, GroundTruthPlot, EstimateProvenance
 from inference.carbon_monitoring.router import router as carbon_router
