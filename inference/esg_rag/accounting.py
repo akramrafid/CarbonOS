@@ -27,7 +27,7 @@ Rules enforced here (see docs/esg/ACCOUNTING_METHODOLOGY.md):
 * Mixed GWP bases across factors used in one run are a blocking exception.
 """
 from collections import defaultdict
-from dataclasses import dataclass, field
+from dataclasses import dataclass, field, replace
 from decimal import Decimal, ROUND_HALF_UP
 import datetime as dt
 from typing import Dict, List, Optional, Tuple
@@ -367,6 +367,44 @@ def select_factor(a: Activity, region: str, method: str, factors: List[Factor],
     return next(iter(latest.values())), None
 
 
+def month_segments(a: Activity) -> List[Activity]:
+    """Calendar-month pieces of an activity, quantity pro rata by days (uniform consumption assumed);
+    the last piece takes the remainder so the pieces sum exactly to the activity."""
+    days = Decimal((a.period_end - a.period_start).days + 1)
+    pieces, start = [], a.period_start
+    while start <= a.period_end:
+        next_month = (start.replace(day=28) + dt.timedelta(days=4)).replace(day=1)
+        end = min(next_month - dt.timedelta(days=1), a.period_end)
+        pieces.append((start, end))
+        start = end + dt.timedelta(days=1)
+    out, allocated = [], Decimal(0)
+    for i, (s, e) in enumerate(pieces):
+        q = (a.quantity - allocated if i == len(pieces) - 1
+             else (a.quantity * Decimal((e - s).days + 1) / days).quantize(Decimal("0.0000000001"), rounding=ROUND_HALF_UP))
+        allocated += q
+        out.append(replace(a, quantity=q, period_start=s, period_end=e))
+    return out
+
+
+def factor_pieces(a: Activity, region: str, method: str, factors: List[Factor],
+                  explicit_id: Optional[str]) -> Tuple[List[Tuple[Activity, Factor]], Optional[str]]:
+    """The factor for the whole record or, when no single factor covers its dates (e.g. a bill spanning the
+    July fiscal-year change), one factor per activity month. An explicit selection is never split."""
+    f, err = select_factor(a, region, method, factors, explicit_id)
+    if not err:
+        return [(a, f)], None
+    if err != "MISSING_FACTOR" or explicit_id or (a.period_start.year, a.period_start.month) == (
+            a.period_end.year, a.period_end.month):
+        return [], err
+    pieces = []
+    for seg in month_segments(a):
+        sf, serr = select_factor(seg, region, method, factors, None)
+        if serr:
+            return [], serr
+        pieces.append((seg, sf))
+    return pieces, None
+
+
 # --- line arithmetic ---------------------------------------------------------------------------
 
 def factor_quantity(a: Activity, f: Factor) -> Tuple[Optional[Decimal], Dict[str, object], Optional[str]]:
@@ -483,6 +521,17 @@ def calculate(activities: List[Activity], facilities: Dict[str, Facility], facto
         line = factor_line(a, fac, scope, method, f, share)
         return None if line is None else record(a, fac, scope, method, line)
 
+    def add_pieces(a, fac, scope, method, pieces, share):
+        total = Decimal(0)
+        for seg, f in pieces:
+            line = factor_line(seg, fac, scope, method, f, share)
+            if line is None:
+                continue
+            if len(pieces) > 1:
+                line.details = {**line.details, "month_segment": f"{seg.period_start}..{seg.period_end}"}
+            total += record(seg, fac, scope, method, line)
+        return total
+
     def refrigerant_line(a, fac, share):
         if a.mass_balance is None or not a.refrigerant:
             exception("MISSING_MASS_BALANCE", a, detail="Refrigerant needs opening, purchased, recovered and closing stock")
@@ -539,11 +588,10 @@ def calculate(activities: List[Activity], facilities: Dict[str, Facility], facto
             refrigerant_line(a, fac, share)
             continue
         if scope == "1":
-            f, err = select_factor(a, fac.region, "direct", factors, a.factor_id)
+            pieces, err = factor_pieces(a, fac.region, "direct", factors, a.factor_id)
             if err:
                 exception(err, a)
-            else:
-                res.scope1_kg += add(a, fac, "1", "direct", f, share) or Decimal(0)
+            res.scope1_kg += add_pieces(a, fac, "1", "direct", pieces, share)
             continue
 
         # Captive generator output is a memo item; its fuel is already Scope 1. Never also Scope 2.
@@ -553,14 +601,13 @@ def calculate(activities: List[Activity], facilities: Dict[str, Facility], facto
             continue
 
         # Scope 2: location-based always required; market-based only from explicit/approved inputs.
-        f, err = select_factor(a, fac.region, "location", factors, a.factor_id)
+        pieces, err = factor_pieces(a, fac.region, "location", factors, a.factor_id)
         if err:
             exception(err, a)
-        else:
-            res.scope2_location_kg += add(a, fac, "2", "location", f, share) or Decimal(0)
+        res.scope2_location_kg += add_pieces(a, fac, "2", "location", pieces, share)
         if a.activity_type == "electricity":
             has_electricity = True
-            mf, merr = select_factor(a, fac.region, "market", factors, a.market_factor_id)
+            market_pieces, merr = factor_pieces(a, fac.region, "market", factors, a.market_factor_id)
             if merr in FACTOR_KIND_ERRORS:
                 market_complete = False
                 exception(merr, a)
@@ -569,9 +616,9 @@ def calculate(activities: List[Activity], facilities: Dict[str, Facility], facto
                 exception("MISSING_MARKET_BASED_INPUT", a, blocking=False,
                           detail="No supplier-specific, contractual instrument or residual-mix factor approved")
             else:
-                market_total = add(a, fac, "2", "market", mf, share) or Decimal(0)
+                market_total = add_pieces(a, fac, "2", "market", market_pieces, share)
                 res.scope2_market_kg = (res.scope2_market_kg or Decimal(0)) + market_total
-                if mf.kind == "grid_average":
+                if any(mf.kind == "grid_average" for _, mf in market_pieces):
                     exception("MARKET_BASED_GRID_AVERAGE_FALLBACK", a, blocking=False,
                               detail="No residual mix available; grid-average rate used and disclosed")
 

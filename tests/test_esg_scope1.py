@@ -240,5 +240,42 @@ class DataQualityAndUncertaintyTest(unittest.TestCase):
         self.assertEqual(combine_sum([(D(100), D(10))]), D(10))
 
 
+class FiscalYearSplitTest(unittest.TestCase):
+    """Step 1.7: a bill spanning the 1 July fiscal-year change takes each month's grid factor (TEST values)."""
+    FY25 = Factor("g25", 1, "bd-grid", "electricity", "kWh", D("0.6"), "BD", "AR6", "location", dt.date(2024, 7, 1),
+                  dt.date(2025, 6, 30), kind="grid_average", uncertainty_pct=D(5))
+    FY26 = Factor("g26", 2, "bd-grid", "electricity", "kWh", D("0.5"), "BD", "AR6", "location", dt.date(2025, 7, 1),
+                  dt.date(2026, 6, 30), kind="grid_average", uncertainty_pct=D(5))
+
+    def bill(self, start, end, qty="3000", **kw):
+        return Activity("e1", "f1", "electricity", D(qty), "kWh", start, end, data_quality="billed", **kw)
+
+    def location(self, r):
+        return [(l.factor_id, l.quantity) for l in r.lines if l.method == "location"]
+
+    def test_bill_spanning_fiscal_years_is_split_by_month(self):
+        r = calculate([self.bill(dt.date(2025, 6, 16), dt.date(2025, 7, 15))], FAC, [self.FY25, self.FY26],
+                      "operational_control")
+        self.assertEqual(self.location(r), [("g25", D(1500)), ("g26", D(1500))])
+        self.assertEqual(r.scope2_location_kg, D("1650.000000"))  # 1500 × 0.6 + 1500 × 0.5
+        self.assertEqual((r.lines[0].activity_id, r.lines[0].details["month_segment"]), ("e1", "2025-06-16..2025-06-30"))
+        r = calculate([self.bill(dt.date(2025, 6, 20), dt.date(2025, 7, 9))], FAC, [self.FY25, self.FY26],
+                      "operational_control")
+        self.assertEqual(r.scope2_location_kg, D("1665.000000"))  # 11/20 × 3000 × 0.6 + 9/20 × 3000 × 0.5
+
+    def test_pieces_sum_exactly(self):
+        from esg_rag.accounting import month_segments
+        segs = month_segments(self.bill(dt.date(2025, 1, 1), dt.date(2025, 3, 31), qty="1000"))
+        self.assertEqual([s.period_end for s in segs], [dt.date(2025, 1, 31), dt.date(2025, 2, 28), dt.date(2025, 3, 31)])
+        self.assertEqual(sum(s.quantity for s in segs), D(1000))
+
+    def test_no_split_when_a_month_has_no_factor_or_a_factor_was_chosen(self):
+        r = calculate([self.bill(dt.date(2025, 6, 16), dt.date(2025, 7, 15))], FAC, [self.FY25], "operational_control")
+        self.assertEqual((self.location(r), codes(r)[0]), ([], "MISSING_FACTOR"))
+        r = calculate([self.bill(dt.date(2025, 6, 16), dt.date(2025, 7, 15), factor_id="g25")], FAC,
+                      [self.FY25, self.FY26], "operational_control")
+        self.assertEqual(codes(r)[0], "SELECTED_FACTOR_NOT_APPLICABLE")
+
+
 if __name__ == "__main__":
     unittest.main()

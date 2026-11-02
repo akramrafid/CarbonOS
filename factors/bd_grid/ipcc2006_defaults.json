@@ -1,0 +1,52 @@
+{
+  "description": "IPCC 2006 Guidelines defaults used by the Bangladesh grid derivation. Each value is [default, lower 95 %, upper 95 %]; IPCC fits lognormal distributions to these limits. Values read from the primary PDFs listed in sources.",
+  "sources": {
+    "V2_1_Ch1_Introduction.pdf": {
+      "url": "https://www.ipcc-nggip.iges.or.jp/public/2006gl/pdf/2_Volume2/V2_1_Ch1_Introduction.pdf",
+      "sha256": "e391cd4676d0891cd77f67d3bd76e0e6775386b468ce5ce7ebe2311a6ea1ac45",
+      "used": "Table 1.2 net calorific values, pp. 1.18-1.19"
+    },
+    "V2_2_Ch2_Stationary_Combustion.pdf": {
+      "url": "https://www.ipcc-nggip.iges.or.jp/public/2006gl/pdf/2_Volume2/V2_2_Ch2_Stationary_Combustion.pdf",
+      "sha256": "a25d9f96d7672df391b328de79d4cfd812c07fe79d5cf4a30d23d82d8f02985b",
+      "used": "Table 2.2 energy industries, kg per TJ on a net calorific basis, p. 2.16"
+    }
+  },
+  "fuels": {
+    "natural_gas": {
+      "ipcc_name": "Natural Gas",
+      "ncv_tj_per_gg": [48.0, 46.5, 50.4],
+      "co2_kg_per_tj": [56100, 54300, 58300],
+      "ch4_kg_per_tj": [1, 0.3, 3],
+      "n2o_kg_per_tj": [0.1, 0.03, 0.3]
+    },
+    "residual_fuel_oil": {
+      "ipcc_name": "Residual Fuel Oil",
+      "ncv_tj_per_gg": [40.4, 39.8, 41.7],
+      "co2_kg_per_tj": [77400, 75500, 78800],
+      "ch4_kg_per_tj": [3, 1, 10],
+      "n2o_kg_per_tj": [0.6, 0.2, 2]
+    },
+    "gas_diesel_oil": {
+      "ipcc_name": "Gas/Diesel Oil",
+      "ncv_tj_per_gg": [43.0, 41.4, 43.3],
+      "co2_kg_per_tj": [74100, 72600, 74800],
+      "ch4_kg_per_tj": [3, 1, 10],
+      "n2o_kg_per_tj": [0.6, 0.2, 2]
+    },
+    "other_bituminous_coal": {
+      "ipcc_name": "Other Bituminous Coal",
+      "ncv_tj_per_gg": [25.8, 19.9, 30.5],
+      "co2_kg_per_tj": [94600, 89500, 99700],
+      "ch4_kg_per_tj": [1, 0.3, 3],
+      "n2o_kg_per_tj": [1.5, 0.5, 5]
+    },
+    "sub_bituminous_coal": {
+      "ipcc_name": "Sub-Bituminous Coal",
+      "ncv_tj_per_gg": [18.9, 11.5, 26.0],
+      "co2_kg_per_tj": [96100, 92800, 100000],
+      "ch4_kg_per_tj": [1, 0.3, 3],
+      "n2o_kg_per_tj": [1.5, 0.5, 5]
+    }
+  }
+}

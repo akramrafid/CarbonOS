@@ -1,0 +1,61 @@
+{
+  "description": "Pinned sources for the Bangladesh grid factor derivation. A source is usable only with url, sha256 and the exact tables and pages extracted.",
+  "sources": [
+    {
+      "id": "bpdb_ar_2022_23",
+      "title": "BPDB Annual Report 2022-23",
+      "url": "https://bpdb.portal.gov.bd/sites/default/files/files/bpdb.portal.gov.bd/page/771c9a89_a06c_4c2f_9b8c_699d17ed769a/2024-01-09-11-54-9f8a57197b00016ccc7cbf5301b83957.pdf",
+      "sha256": null,
+      "status": "NOT_DOWNLOADED: on 2026-11-01 the server presented a self-signed 'Kubernetes Ingress Controller Fake Certificate', so the file could not be fetched over verified TLS. Provide the PDF (or a copy whose SHA-256 the user confirms).",
+      "tables": []
+    },
+    {
+      "id": "bpdb_ar_2023_24",
+      "title": "BPDB Annual Report 2023-24",
+      "url": null,
+      "sha256": null,
+      "status": "NOT_LOCATED: no public URL found by search on 2026-11-01. Provide the PDF.",
+      "tables": []
+    },
+    {
+      "id": "bpdb_ar_2024_25",
+      "title": "BPDB Annual Report 2024-25",
+      "url": null,
+      "sha256": null,
+      "status": "NOT_LOCATED: no public URL found by search on 2026-11-01. Provide the PDF if published.",
+      "tables": []
+    },
+    {
+      "id": "petrobangla_heating_value",
+      "title": "Petrobangla annual report or gas quality data (GCV and its reference conditions)",
+      "url": null,
+      "sha256": null,
+      "status": "NOT_LOCATED: needed to convert BPDB gas MMCF to TJ.",
+      "tables": []
+    },
+    {
+      "id": "india_cea_co2_baseline",
+      "title": "India CEA CO2 Baseline Database (import factor), or plant-specific data for Adani Godda",
+      "url": null,
+      "sha256": null,
+      "status": "NOT_DOWNLOADED: https://cea.nic.in/cdm-co2-baseline-database/ returned 404 on 2026-11-01.",
+      "tables": []
+    },
+    {
+      "id": "ipcc_2006_v2_ch1",
+      "title": "2006 IPCC Guidelines Vol. 2 Ch. 1",
+      "url": "https://www.ipcc-nggip.iges.or.jp/public/2006gl/pdf/2_Volume2/V2_1_Ch1_Introduction.pdf",
+      "sha256": "e391cd4676d0891cd77f67d3bd76e0e6775386b468ce5ce7ebe2311a6ea1ac45",
+      "status": "PINNED (retrieved 2026-11-01)",
+      "tables": ["Table 1.2 (pp. 1.18-1.19)", "Table 1.4 (pp. 1.23-1.24)"]
+    },
+    {
+      "id": "ipcc_2006_v2_ch2",
+      "title": "2006 IPCC Guidelines Vol. 2 Ch. 2 Stationary Combustion",
+      "url": "https://www.ipcc-nggip.iges.or.jp/public/2006gl/pdf/2_Volume2/V2_2_Ch2_Stationary_Combustion.pdf",
+      "sha256": "a25d9f96d7672df391b328de79d4cfd812c07fe79d5cf4a30d23d82d8f02985b",
+      "status": "PINNED (retrieved 2026-11-01)",
+      "tables": ["Table 2.2 (p. 2.16)"]
+    }
+  ]
+}
