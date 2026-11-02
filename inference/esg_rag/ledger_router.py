@@ -121,6 +121,21 @@ class EquipmentEventIn(BaseModel):
     evidence_snippet: Optional[str] = Field(None, max_length=2000)
 
 
+class GasCertificateIn(BaseModel):
+    facility_id: str
+    distributor: str = Field(..., min_length=1, max_length=100)
+    certificate_ref: str = Field(..., min_length=1, max_length=200)
+    gcv: condecimal(gt=0, max_digits=18, decimal_places=8)
+    gcv_unit: Literal["MJ/m3", "kcal/m3", "Btu/scf"] = "MJ/m3"
+    ncv_to_gcv: condecimal(gt=0, le=1, max_digits=7, decimal_places=6)
+    reference_conditions: str = Field(..., min_length=1, max_length=100)
+    valid_from: dt.date
+    valid_to: dt.date
+    uncertainty_pct: Optional[Pct] = None
+    source_document_id: Optional[str] = None
+    evidence_snippet: Optional[str] = Field(None, max_length=2000)
+
+
 class VoidIn(BaseModel):
     reason: str = Field(..., min_length=1, max_length=2000)
 
@@ -276,6 +291,24 @@ def list_equipment_events(equipment_id: str, limit: int = Limit, offset: int = O
 def void_equipment_event(event_id: str, body: VoidIn, p: Principal = Depends(require("read")),
                          db: Session = Depends(get_db)):
     return out(run(ledger.void_equipment_event, db, p, event_id, body.reason))
+
+
+@router.post("/gas-certificates", status_code=201)
+def create_gas_certificate(body: GasCertificateIn, p: Principal = Depends(require("read")), db: Session = Depends(get_db)):
+    return out(run(ledger.create_gas_certificate, db, p, body.model_dump()))
+
+
+@router.post("/gas-certificates/{cert_id}/approve")
+def approve_gas_certificate(cert_id: str, p: Principal = Depends(require("read")), db: Session = Depends(get_db)):
+    return out(run(ledger.approve_gas_certificate, db, p, cert_id))
+
+
+@router.get("/gas-certificates")
+def list_gas_certificates(facility_id: Optional[str] = None, limit: int = Limit, offset: int = Offset,
+                          p: Principal = Depends(require("read")), db: Session = Depends(get_db)):
+    from .ledger_models import GasCertificate
+    filters = [GasCertificate.facility_id == facility_id] if facility_id else []
+    return _list(db, GasCertificate, p, limit, offset, *filters, order=GasCertificate.valid_from)
 
 
 @router.post("/periods", status_code=201)

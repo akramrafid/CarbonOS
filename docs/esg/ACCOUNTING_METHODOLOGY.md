@@ -75,6 +75,7 @@ distributor's or Petrobangla's heating value: `GJ = billed m3 × volume_correcti
 the reference conditions and the NCV/GCV ratio are stated on the record. No heating value →
 `MISSING_HEATING_VALUE` (blocking). A declared default heating value is allowed but flagged
 `HIGH_UNCERTAINTY`. Volume-basis gas factors (per m3) remain usable.
+At facility level the distributor's gas-analysis certificate is preferred: a certificate stored as evidence with its validity period (`esg_gas_certificate`, approved by a second person) replaces the record's heating value whenever its validity covers the whole record; the line names the certificate, and certificates are part of the calculation input hash.
 
 **Captive generation.** Generator fuel is Scope 1. Generator kWh are the memo item
 `captive_generation_output` and are never also Scope 2: an electricity record carrying a `generator_ref`, or a

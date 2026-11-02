@@ -23,7 +23,7 @@ from . import accounting, gwp
 from .auth import Principal
 from .ledger_models import (
     ActivityRecord, AuditEvent, CalculationLine, CalculationRun, EmissionFactor, Equipment, EquipmentEvent, Facility,
-    LegalEntity,
+    GasCertificate, LegalEntity,
     MetricObservation, ReportingPeriod, ReportSnapshot, _now,
 )
 from .models import ESGOrganization
@@ -243,6 +243,64 @@ def _check_generator(db, principal, data):
                                     Equipment.equipment_ref == ref).first()
     if eq is None or eq.kind != "generator":
         raise DomainError(422, f"Generator '{ref}' is not registered at this facility (POST /equipment)")
+
+
+# --- gas-analysis certificates -----------------------------------------------------------
+
+def create_gas_certificate(db, principal, data):
+    """A distributor's gas-analysis certificate as DRAFT evidence; a second person approves it."""
+    _need(principal, "write")
+    _get(db, Facility, principal, data["facility_id"])
+    if data["valid_to"] < data["valid_from"]:
+        raise DomainError(422, "valid_to must not be before valid_from")
+    try:
+        gcv = accounting.heating_value_mj_per_m3(data.pop("gcv"), data.pop("gcv_unit"))
+    except accounting.UnitError as e:
+        raise DomainError(422, str(e))
+    cert = GasCertificate(organization_id=principal.organization_id, gcv_mj_per_m3=gcv, status="DRAFT",
+                          created_by=principal.sub, **data)
+    db.add(cert)
+    db.flush()
+    audit(db, principal, "gas_certificate.create", "gas_certificate", cert.id, {**data, "gcv_mj_per_m3": gcv})
+    db.commit()
+    return cert
+
+
+def approve_gas_certificate(db, principal, cert_id):
+    _need(principal, "review")
+    cert = _get(db, GasCertificate, principal, cert_id)
+    if cert.created_by == principal.sub:
+        raise DomainError(403, "A certificate must be approved by someone other than the person who entered it")
+    n = db.execute(update(GasCertificate).where(GasCertificate.id == cert.id, GasCertificate.status == "DRAFT")
+                   .values(status="APPROVED", approved_by=principal.sub, approved_at=_now())).rowcount
+    if n != 1:
+        db.rollback()
+        raise DomainError(409, "Only DRAFT certificates can be approved")
+    audit(db, principal, "gas_certificate.approve", "gas_certificate", cert.id)
+    db.commit()
+    db.refresh(cert)
+    return cert
+
+
+def _approved_certificates(db, principal):
+    return db.query(GasCertificate).filter(GasCertificate.organization_id == principal.organization_id,
+                                           GasCertificate.status == "APPROVED") \
+        .order_by(GasCertificate.facility_id, GasCertificate.valid_from.desc(), GasCertificate.id).all()
+
+
+def _with_certificate(a, rec, certificates):
+    """At facility level the distributor's certificate is preferred: an approved certificate whose validity covers
+    the whole record replaces the record's heating value (latest valid_from wins)."""
+    if rec.activity_type != "natural_gas":
+        return a
+    cert = next((c for c in certificates if c.facility_id == rec.facility_id
+                 and c.valid_from <= rec.activity_start and rec.activity_end <= c.valid_to), None)
+    if cert is None:
+        return a
+    return replace(a, heating_value=accounting.HeatingValue(
+        Decimal(cert.gcv_mj_per_m3), Decimal(cert.ncv_to_gcv), cert.reference_conditions,
+        f"gas certificate {cert.certificate_ref} ({cert.distributor}), valid {cert.valid_from}..{cert.valid_to}",
+        False, _dec(cert.uncertainty_pct)))
 
 
 # --- emission factors ------------------------------------------------------------------
@@ -597,7 +655,7 @@ def _approved_metric_ids(db, principal, period):
         MetricObservation.status == "APPROVED").order_by(MetricObservation.id)]
 
 
-def _input_hash(period, acts, facs, factors, metric_ids=(), register=()) -> str:
+def _input_hash(period, acts, facs, factors, metric_ids=(), register=(), certificates=()) -> str:
     payload = {
         "methodology": accounting.METHODOLOGY_VERSION,
         "boundary": period.boundary_method,
@@ -612,6 +670,8 @@ def _input_hash(period, acts, facs, factors, metric_ids=(), register=()) -> str:
         # A voided or new register event changes refrigerant equipment charges, so it invalidates a run.
         "equipment_register": [[e.id, e.equipment_id, e.event_type, e.event_date, e.refrigerant, e.charge_kg]
                                for e, _ in register],
+        "gas_certificates": [[c.id, c.facility_id, c.gcv_mj_per_m3, c.ncv_to_gcv, c.valid_from, c.valid_to]
+                             for c in certificates],
     }
     return hashlib.sha256(canonical_json(payload).encode()).hexdigest()
 
@@ -664,9 +724,11 @@ def calculate_period(db, principal, period_id):
     period = _open_period(db, principal, period_id)
     acts, facs, factors = _calc_inputs(db, principal, period)
     register = _load_register(db, principal)
+    certificates = _approved_certificates(db, principal)
     register_exceptions = []
     result = accounting.calculate(
-        [_with_register(_accounting_activity(a), a, register, register_exceptions) for a in acts],
+        [_with_certificate(_with_register(_accounting_activity(a), a, register, register_exceptions), a, certificates)
+         for a in acts],
         {f.id: accounting.Facility(f.id, f.grid_region, f.operational_control, f.financial_control,
                                    Decimal(f.equity_share_pct), f.legal_entity_id) for f in facs},
         [_accounting_factor(f) for f in factors],
@@ -676,7 +738,8 @@ def calculate_period(db, principal, period_id):
     run = CalculationRun(
         organization_id=principal.organization_id, period_id=period.id, period_revision=period.revision,
         methodology_version=result.methodology_version, boundary_method=result.boundary_method,
-        input_sha256=_input_hash(period, acts, facs, factors, _approved_metric_ids(db, principal, period), register),
+        input_sha256=_input_hash(period, acts, facs, factors, _approved_metric_ids(db, principal, period), register,
+                                 certificates),
         scope1_kg=result.scope1_kg,
         scope2_location_kg=result.scope2_location_kg, scope2_market_kg=result.scope2_market_kg,
         blocking=result.blocking, exceptions=result.exceptions, excluded=result.excluded,
@@ -711,7 +774,7 @@ def lock_period(db, principal, period_id, run_id):
     if run.blocking:
         raise DomainError(409, "Calculation has blocking data-quality exceptions")
     if _input_hash(period, *_calc_inputs(db, principal, period), _approved_metric_ids(db, principal, period),
-                   _load_register(db, principal)) != run.input_sha256:
+                   _load_register(db, principal), _approved_certificates(db, principal)) != run.input_sha256:
         raise DomainError(409, "Data or factors changed since this calculation; recalculate before locking")
     if run.created_by == principal.sub:
         raise DomainError(403, "Separation of duties: the approver must differ from the preparer of the calculation")

@@ -148,6 +148,40 @@ class EquipmentEvent(EsgBase):
     void_reason = Column(Text)
 
 
+class GasCertificate(EsgBase):
+    """A distributor's gas-analysis certificate for one facility, kept as evidence with its validity period.
+    Once a second person approves it, it is the facility's heating value for natural gas used inside that period."""
+    __tablename__ = "esg_gas_certificate"
+    __table_args__ = (
+        UniqueConstraint("organization_id", "id", name="uq_esg_gas_certificate_org_id"),
+        ForeignKeyConstraint(["organization_id", "facility_id"], ["esg_facility.organization_id", "esg_facility.id"],
+                             name="fk_esg_gas_certificate_facility"),
+        CheckConstraint(_in("status", FACTOR_STATUSES), name="ck_esg_gas_certificate_status"),
+        CheckConstraint("valid_to >= valid_from", name="ck_esg_gas_certificate_validity"),
+        CheckConstraint("gcv_mj_per_m3 > 0 AND ncv_to_gcv > 0 AND ncv_to_gcv <= 1", name="ck_esg_gas_certificate_values"),
+        CheckConstraint("approved_by IS NULL OR approved_by <> created_by", name="ck_esg_gas_certificate_dual_control"),
+    )
+
+    id = Column(String(36), primary_key=True, default=_id)
+    organization_id = _org_fk()
+    facility_id = Column(String(36), nullable=False)
+    distributor = Column(String(100), nullable=False)
+    certificate_ref = Column(String(200), nullable=False)
+    gcv_mj_per_m3 = Column(Numeric(18, 8), nullable=False)
+    ncv_to_gcv = Column(Numeric(7, 6), nullable=False)
+    reference_conditions = Column(String(100), nullable=False)
+    valid_from = Column(Date, nullable=False)
+    valid_to = Column(Date, nullable=False)
+    uncertainty_pct = Column(Numeric(12, 6))
+    source_document_id = Column(String(36))
+    evidence_snippet = Column(Text)
+    status = Column(String(10), nullable=False, default="DRAFT")
+    created_by = Column(String(255), nullable=False)
+    created_at = Column(DateTime(timezone=True), default=_now, nullable=False)
+    approved_by = Column(String(255))
+    approved_at = Column(DateTime(timezone=True))
+
+
 class ReportingPeriod(EsgBase):
     __tablename__ = "esg_reporting_period"
     __table_args__ = (

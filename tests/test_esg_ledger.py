@@ -370,6 +370,30 @@ class Scope1LedgerTest(LedgerTestCase):
         self.assertIn("REFRIGERANT_REGISTER_CHANGED", [e["code"] for e in run["exceptions"]])
         self.assertTrue(run["blocking"])
 
+    def test_an_approved_gas_certificate_is_preferred_over_a_declared_default(self):
+        f = self.post("user-a", "/factors", self.GAS)
+        self.post("admin-a", f"/factors/{f['id']}/approve")
+        default = {"gcv": "40", "gcv_unit": "MJ/m3", "ncv_to_gcv": "0.9", "reference_conditions": "15 C, 101.325 kPa",
+                   "source": "TEST declared default", "is_default": True}
+        self.approved(activity_type="natural_gas", quantity="10000", unit="m3", meter_ref="GAS-1",
+                      heating_value=default, data_quality="billed", activity_start="2025-03-01",
+                      activity_end="2025-03-31")
+        run = self.post("contrib-a", f"/periods/{self.period}/calculate")
+        self.assertIn("HIGH_UNCERTAINTY", [e["code"] for e in run["exceptions"]])
+        cert = self.post("contrib-a", "/gas-certificates", {
+            "facility_id": self.fac, "distributor": "TEST distributor", "certificate_ref": "TEST-GA-1", "gcv": "38",
+            "ncv_to_gcv": "0.9", "reference_conditions": "15 C, 101.325 kPa", "valid_from": "2025-01-01",
+            "valid_to": "2025-06-30", "evidence_snippet": "TEST certificate"})
+        self.call("POST", "contrib-a", f"/gas-certificates/{cert['id']}/approve", status=403)  # author cannot approve
+        stale = run
+        self.post("user-a", f"/gas-certificates/{cert['id']}/approve")
+        run = self.post("contrib-a", f"/periods/{self.period}/calculate")
+        self.assertNotIn("HIGH_UNCERTAINTY", [e["code"] for e in run["exceptions"]])
+        line = self.call("GET", "viewer-a", f"/calculations/{run['id']}").json()["lines"][0]
+        self.assertEqual(Decimal(line["details"]["energy_gj_ncv"]), Decimal("342"))  # 10 000 × 38 × 0.9 / 1000
+        self.assertIn("TEST-GA-1", line["details"]["heating_value_source"])
+        self.assertNotEqual(run["input_sha256"], stale["input_sha256"])
+
     def test_captive_generator_kwh_cannot_also_be_grid_electricity(self):
         self.generator("G1")
         self.assertEqual(self.activity(activity_type="captive_generation_output", quantity="3500", meter_ref="GEN-1",
