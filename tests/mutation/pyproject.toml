@@ -1,0 +1,15 @@
+# mutmut 3.8 settings for mutation testing of the accounting library (acceptance A4: score >= 80 %).
+# Used only by the "mutation" job in .github/workflows/esg-ci.yml. mutmut needs fork(), so it runs on Linux.
+# The job copies inference/ to src/ and this file to pyproject.toml in a temporary workspace: mutmut derives a mutant's
+# module from its path under src/, which then equals the path the tests import (esg_rag.accounting).
+[tool.mutmut]
+source_paths = ["src/"]
+only_mutate = ["src/esg_rag/accounting.py"]
+# Library tests only; the ledger API tests also reach accounting.py but are too slow to rerun for every mutant.
+pytest_add_cli_args_test_selection = [
+    "tests/test_esg_accounting.py",
+    "tests/test_esg_scope1.py",
+    "tests/test_esg_market_based.py",
+    "tests/test_esg_properties.py",
+    "-k", "not Ledger",
+]

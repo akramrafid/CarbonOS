@@ -15,6 +15,20 @@ npm test                      # client extractor unit tests
 ESG_PYTHON="$PWD/.venv-esg/bin/python" npx playwright test  # starts vite :3000 + ESG API :8100; 4 viewports
 ```
 
+Property, OCR and mutation tests (methodology 1.3):
+
+```bash
+python -m pytest tests/test_esg_properties.py            # Hypothesis, 100 examples per property (HYPOTHESIS_PROFILE=ci)
+TESSERACT_CMD=/path/to/tesseract ESG_REQUIRE_OCR=1 python -m unittest tests.test_esg_ocr_smoke   # needs ben + eng
+```
+
+Mutation testing needs `fork()`, so it runs in CI on Linux (job `mutation` in `.github/workflows/esg-ci.yml`):
+`inference/` is copied to `src/` in a temporary workspace with `tests/mutation/pyproject.toml`, then
+`mutmut run` (mutmut 3.8.0, `HYPOTHESIS_PROFILE=mutation`), `mutmut export-cicd-stats` and
+`python tests/mutation/score.py mutants/mutmut-cicd-stats.json --minimum 80`, which fails the job below 80 %
+((killed + timeout) / (total − skipped)). Only `inference/esg_rag/accounting.py` is mutated; the library tests kill
+the mutants (the ledger API tests are left out because they are too slow to rerun per mutant).
+
 ## Suites
 
 | Suite | Tests | Covers (brief §14 item) |
@@ -29,6 +43,9 @@ ESG_PYTHON="$PWD/.venv-esg/bin/python" npx playwright test  # starts vite :3000 
 | `test_esg_hardening.py` | 5 | RAG injection cannot reach other tenants or change rules (11); rate limits; CSV formula injection |
 | `test_esg_app.py` | 2 | production config refuses insecure settings; no stack traces; request ids |
 | `test_esg_engine.py` | 5 | legacy engine (asserts legacy constants — not evidence of correctness) |
+| `test_esg_market_based.py` | 15 | D5: market-based hierarchy, one test per level (instruments meeting the Scope 2 Quality Criteria, selected supplier rate, residual mix, grid-average fallback flagged and disclosed), hierarchy violations, instrument dual control and the report disclosure |
+| `test_esg_properties.py` | 19 | Hypothesis properties: unit constants agree with pint, additivity, rejected dimensions; Bengali digits; totals = lines = facilities; order independence; memo items; scaling; equity share; instrument kWh applied at most once; month splits; refrigerant balance never clamped; rule evaluator matches Decimal and rejects injection |
+| `test_esg_ocr_smoke.py` | 1 | local Tesseract (ben + eng) reads Bengali digits and English words of a synthetic image with boxes; CI sets `ESG_REQUIRE_OCR=1` so it cannot skip |
 | `tests/js/esgDocumentExtractor.test.mjs` | 2 | client extractor never invents values |
 | `tests/e2e/esg-authenticity.spec.ts` | 5 × 4 viewports | legacy dashboard: upload failure, demo labelling, assistant unavailable, DEMO banner, no page errors |
 | `tests/e2e/esg-journey.spec.ts` | 2 × 4 viewports | three-user journey through UI + real API to a locked, reproducible report and disclosure coverage (18: works at 375 px and 320 px); signed-out visitor sees nothing |
@@ -45,6 +62,8 @@ ESG_PYTHON="$PWD/.venv-esg/bin/python" npx playwright test  # starts vite :3000 
 | `ESG_PYTHON=../.venv-esg/bin/python npx playwright test` | 28 passed |
 
 ## Not run / known gaps
+
+* Mutation score of `accounting.py` (A4): measured only by the CI `mutation` job, which has not run (nothing pushed).
 
 * Brief §14 item 10 (supplier data) — supplier portal not built.
 * HawkScan DAST — no `HAWK_API_KEY`. Secret history scan — not run.

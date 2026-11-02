@@ -45,3 +45,6 @@ inference/chroma_data/uploads/*/
 docs/qa/playwright-report/
 test-results/
 inference/.e2e_store/
+
+# Hypothesis caches (unicode tables, temp files; the example database is disabled in tests/test_esg_properties.py)
+.hypothesis/

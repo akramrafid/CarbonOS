@@ -9,6 +9,7 @@ None unless it was measured (Tesseract word confidence). Nothing here confirms a
 Documents never leave the machine: PDF text comes from pdfplumber, OCR from a local Tesseract (ben+eng).
 """
 import datetime as dt
+import os
 from dataclasses import dataclass, field, replace
 from typing import Dict, List, Optional, Sequence, Tuple
 
@@ -111,6 +112,8 @@ def document_from_image(path: str, lang: str = "ben+eng") -> Document:
         from PIL import Image
     except ImportError as e:
         raise OCRUnavailable("Install Tesseract with the 'ben' and 'eng' language data and pytesseract") from e
+    if os.environ.get("TESSERACT_CMD"):  # a local install that is not on PATH (the Windows installer does not add it)
+        pytesseract.pytesseract.tesseract_cmd = os.environ["TESSERACT_CMD"]
     data = pytesseract.image_to_data(Image.open(path), lang=lang, output_type=pytesseract.Output.DICT)
     words = []
     for i, text in enumerate(data["text"]):
