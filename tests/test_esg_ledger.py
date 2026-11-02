@@ -330,14 +330,36 @@ class Scope1LedgerTest(LedgerTestCase):
         self.assertEqual((run["scope1_kg"], line["factor_id"], line["factor_ref"]),
                          ("33832.500000", None, "IPCC AR6 GWP-100 R-410A"))
 
+    def generator(self, ref, facility=None, status=201):
+        return self.call("POST", "user-a", "/equipment", {"facility_id": facility or self.fac, "equipment_ref": ref,
+                                                          "kind": "generator", "fuel": "diesel"}, status=status)
+
     def test_captive_generator_kwh_cannot_also_be_grid_electricity(self):
+        self.generator("G1")
         self.assertEqual(self.activity(activity_type="captive_generation_output", quantity="3500", meter_ref="GEN-1",
-                                       generator_id="G1").status_code, 200)
+                                       generator_ref="G1").status_code, 200)
         dup = self.activity(quantity="3500", meter_ref="GEN-1")
         self.assertEqual(dup.status_code, 409)
         self.assertIn("double counting", dup.json()["detail"])
-        self.assertEqual(self.activity(meter_ref="GRID-9", generator_id="G1").status_code, 422)
+        self.assertEqual(self.activity(meter_ref="GRID-9", generator_ref="G1").status_code, 422)
         self.assertEqual(self.activity(meter_ref="GRID-1").status_code, 200)
+
+    def test_generator_refs_are_unique_per_facility(self):
+        other = self.post("user-a", "/facilities", {"legal_entity_id": self.le, "name": "Gazipur Plant",
+                                                     "country": "BD", "grid_region": "TEST-GRID"})["id"]
+        self.generator("G1")
+        self.generator("G1", facility=other)  # the same reference at another facility is another generator
+        self.assertIn("already registered", self.generator("G1", status=409).json()["detail"])
+        self.call("POST", "contrib-a", "/equipment", {"facility_id": self.fac, "equipment_ref": "G2",
+                                                      "kind": "generator"}, status=403)  # register is admin data
+        listed = self.call("GET", "viewer-a", f"/equipment?facility_id={other}", status=200).json()
+        self.assertEqual([e["equipment_ref"] for e in listed["items"]], ["G1"])
+
+        fuel = dict(activity_type="diesel", quantity="100", unit="L", meter_ref="TANK-1")
+        self.assertEqual(self.activity(generator_ref="G7", **fuel).status_code, 422)  # not registered here
+        self.assertEqual(self.activity(generator_ref="G1", **fuel).status_code, 200)
+        self.assertEqual(self.activity(activity_type="refrigerant", unit="kg", refrigerant="R-410A", meter_ref="AC-1",
+                                       generator_ref="G1").status_code, 422)  # generators link fuel and output only
 
     def test_locked_export_carries_quality_columns(self):
         self.approved(data_quality="billed")
@@ -391,6 +413,26 @@ class MigrationConstraintTest(unittest.TestCase):
             with self.assertRaises(IntegrityError, msg=method):
                 with engine.begin() as conn:
                     conn.execute(insert, {"id": f"cm-{method}", "method": method, "kind": "grid_combined_margin"})
+        engine.dispose()
+
+    def test_migrated_schema_keeps_equipment_refs_unique_per_facility(self):
+        import tempfile
+        from sqlalchemy import create_engine, text
+        from esg_rag.database import upgrade
+        url = "sqlite:///" + os.path.join(tempfile.mkdtemp(prefix="esg-migration-"), "esg.sqlite3")
+        upgrade(url)
+        engine = create_engine(url)
+        insert = text("INSERT INTO esg_equipment (id, organization_id, facility_id, equipment_ref, kind, created_by, "
+                      "created_at) VALUES (:id, 'org', :fac, 'G1', 'generator', 'u', '2024-01-01 00:00:00')")
+        with engine.begin() as conn:
+            conn.execute(insert, {"id": "e1", "fac": "fac-1"})
+            conn.execute(insert, {"id": "e2", "fac": "fac-2"})  # same reference, other facility
+            cols = [r[1] for r in conn.execute(text("PRAGMA table_info(esg_activity_record)"))]
+        self.assertIn("generator_ref", cols)
+        self.assertNotIn("generator_id", cols)
+        with self.assertRaises(IntegrityError):
+            with engine.begin() as conn:
+                conn.execute(insert, {"id": "e3", "fac": "fac-1"})
         engine.dispose()
 
 

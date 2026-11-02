@@ -26,7 +26,7 @@ const STATIONS = [
     type: 'Solar Irrigation & Grid Feed',
     hardware: 'NodeMCU ESP8266EX • DHT22 • MQ-135',
     isLiveFeed: true,
-    protocol: 'DoE MRV-2026/049',
+    protocol: 'CarbonOS MRV-2026/049 (internal)',
     baselineCo2: 418,
   },
   {
@@ -48,7 +48,7 @@ const STATIONS = [
     hardware: 'Telemetry Soil Chamber & Water Loggers',
     isLiveFeed: false,
     mockData: { temp: 31.2, hum: 71.5, air: 82, co2: 445 },
-    protocol: 'UNFCCC AMS-III.AU Aligned',
+    protocol: 'UNFCCC AMS-III.AU (reference)',
     baselineCo2: 420,
   },
   {
@@ -381,7 +381,7 @@ const LiveMetrics = () => {
 
             <div className="flex items-center justify-between pt-3 border-t border-white/5 text-[11px] font-mono text-white/50">
               <span>Sensor: MQ-135 NDIR</span>
-              <span className="text-cyan-400">DoE Baseline Aligned</span>
+              <span className="text-cyan-400">Baseline: modelled</span>
             </div>
           </div>
 
@@ -405,7 +405,7 @@ const LiveMetrics = () => {
 
             <div className="flex items-center justify-between pt-3 border-t border-white/5 text-[11px] font-mono text-white/50">
               <span>Delta: +{(metrics.co2 && activeStation.baselineCo2 ? Math.max(0, metrics.co2 - activeStation.baselineCo2) : 6)} ppm</span>
-              <span className="text-emerald-400 font-semibold">Verified MRV</span>
+              <span className="text-emerald-400 font-semibold">MRV telemetry (unverified)</span>
             </div>
           </div>
 
@@ -422,7 +422,7 @@ const LiveMetrics = () => {
                 Hardware-Attested Ecological Integrity Ledger
               </div>
               <div className="text-[11px] font-mono text-white/50">
-                Data signed via hardware ECDSA keypair • Ingested directly to Carbon Zero BD Sovereign Clearing Protocol
+                Data signed via hardware ECDSA keypair • Ingested directly to the Carbon Zero BD clearing ledger
               </div>
             </div>
           </div>

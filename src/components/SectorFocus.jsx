@@ -32,9 +32,9 @@ const sectors = [
     name: 'Alternate Wetting & Drying (AWD)',
     desc: 'Low-methane rice cultivation cutting anaerobic emissions by 38% with field water loggers.',
     market: '2.10M tCO₂e/yr',
-    methodology: 'AMS-III.AU Aligned',
-    funding: 'Prime Sovereign Asset',
-    additionality: 'Co-Benefit Verified',
+    methodology: 'AMS-III.AU',
+    funding: 'Prime Asset',
+    additionality: 'Co-Benefits (unverified)',
     color: 'from-emerald-400/20 to-teal-500/20',
     borderColor: 'group-hover:border-emerald-500/40',
     iconColor: 'text-emerald-400',
@@ -59,7 +59,7 @@ const sectors = [
     desc: 'Municipal solid waste biomethanation in Dhaka & Chattogram turning landfill gas into clean power.',
     market: '600,000 tCO₂e/yr',
     methodology: 'ACM0022 Multi-City',
-    funding: 'Article 6.2 Pipeline',
+    funding: 'Article 6.2 candidate (not authorized)',
     additionality: 'Circular Infrastructure',
     color: 'from-cyan-400/20 to-blue-500/20',
     borderColor: 'group-hover:border-cyan-500/40',
@@ -84,7 +84,7 @@ const sectors = [
     name: 'Brick Kiln Modernization (HHK/Tunnel)',
     desc: 'Transforming legacy Fixed Chimney Kilns (FCK) to energy-efficient Zigzag & Hybrid Hoffman Kilns.',
     market: '780,000 tCO₂e/yr',
-    methodology: 'DoE S.R.O. Mandated CEMS',
+    methodology: 'CEMS (continuous emissions monitoring)',
     funding: 'Available Allocation',
     additionality: 'Black Carbon Mitigation',
     color: 'from-rose-400/20 to-amber-500/20',
@@ -107,7 +107,7 @@ const SectorFocus = () => {
         {/* Header */}
         <div className="mb-20 text-center max-w-3xl mx-auto">
           <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-emerald-950/50 border border-emerald-500/30 text-emerald-400 font-mono text-xs font-semibold uppercase tracking-wider mb-5 shadow-[0_0_15px_rgba(16,185,129,0.12)]">
-            <span>Bangladesh Sovereign Positive List</span>
+            <span>CarbonOS priority sectors</span>
           </div>
 
           <h2 className="text-3xl sm:text-4xl lg:text-5xl font-sans font-bold tracking-tight text-white leading-tight">
@@ -115,7 +115,7 @@ const SectorFocus = () => {
           </h2>
 
           <p className="font-sans text-base sm:text-lg text-white/70 mt-4 leading-relaxed">
-            Six priority sectors verified under Bangladesh's National Carbon Framework and Article 6.2 bilateral rules, offering verifiable additionality and direct social co-benefits.
+            Six priority sectors where Bangladeshi projects can show measurable reductions and direct social co-benefits.
           </p>
         </div>
 
@@ -194,7 +194,7 @@ const SectorFocus = () => {
         {/* Positive List Institutional Footnote */}
         <div className="mt-12 text-center">
           <p className="text-xs font-mono text-white/40 max-w-xl mx-auto">
-            All listed sectors adhere to the Ministry of Environment, Forest and Climate Change (MoEFCC) National Carbon Registry rules. Verified third-party audit reports available on-chain.
+            Sector listings are informational. No project here has been registered or verified by a regulator or a third party.
           </p>
         </div>
 

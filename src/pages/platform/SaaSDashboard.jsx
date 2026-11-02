@@ -759,7 +759,6 @@ const SaaSDashboard = () => {
   const [isAuditorMode, setIsAuditorMode] = useState(false);
 
   // Dual Scope 2 Settings
-  const [marketFactor, setMarketFactor] = useState(0.12); // kg CO2e / kWh (green tariff)
   
   // Base Year Recalculation State
   const [baseYear, setBaseYear] = useState(2025);
@@ -1004,8 +1003,9 @@ const SaaSDashboard = () => {
     const scope2Missing = eVal > 0 && factors.electricity == null;
     const scope2 = scope2Missing ? null : (eVal * (factors.electricity || 0)) / 1000;
     
-    // Scope 2 Market-based (uses custom marketFactor, which defaults to 0.12 kg CO2e / kWh)
-    const scope2Market = (eVal * marketFactor) / 1000;
+    // Scope 2 market-based: no contractual instrument, supplier rate or residual mix (none is published for
+    // Bangladesh), so the Scope 2 Guidance hierarchy falls back to the grid average, disclosed as a fallback.
+    const scope2Market = scope2;
 
     // Scope 3: Value Chain emissions (commutes in tons, travel/freight converted, raw materials in tons)
     const scope3 = (empVal * factors.employees) + 
@@ -1014,13 +1014,13 @@ const SaaSDashboard = () => {
                    (rawVal * factors.rawMaterials);
 
     const total = scope1 + (scope2 ?? 0) + scope3; // excludes Scope 2 while its factor is missing (flagged)
-    const totalMarket = scope1 + scope2Market + scope3;
+    const totalMarket = scope1 + (scope2Market ?? 0) + scope3;
 
     setResults({
       scope1: parseFloat(scope1.toFixed(2)),
       scope2: scope2 === null ? null : parseFloat(scope2.toFixed(2)),
       scope2Missing,
-      scope2Market: parseFloat(scope2Market.toFixed(2)),
+      scope2Market: scope2Market === null ? null : parseFloat(scope2Market.toFixed(2)),
       scope3: parseFloat(scope3.toFixed(2)),
       total: parseFloat(total.toFixed(2)),
       totalMarket: parseFloat(totalMarket.toFixed(2))
@@ -1037,7 +1037,7 @@ const SaaSDashboard = () => {
   // Trigger calculations whenever inputs or emission factors change
   useEffect(() => {
     calculateEmissions(inputs, ef);
-  }, [inputs, ef, marketFactor]);
+  }, [inputs, ef]);
 
   // Handle drag and drop file upload
   const handleFileDrop = async (e) => {
@@ -2297,15 +2297,16 @@ const SaaSDashboard = () => {
                     <div>
                       <span className={`text-[9px] font-semibold uppercase block ${isLight ? 'text-[#7D9A8A]' : 'text-[#557361]'}`}>Market</span>
                       <span className="font-sans font-bold text-xl text-[#00C853]">
-                        {results.scope2Market} <span className="text-[10px] font-mono font-normal text-[#7C9A88]">t</span>
+                        {results.scope2Market ?? '—'} <span className="text-[10px] font-mono font-normal text-[#7C9A88]">t</span>
                       </span>
+                      <span className="block text-[9px] text-amber-500">Grid-average fallback: no instruments or residual mix</span>
                     </div>
                   </div>
                 </div>
                 <div className={`flex justify-between items-center mt-3 text-[10px] ${isLight ? 'text-[#557361]' : 'text-[#7C9A88]'}`}>
                   <span>Purchased Power</span>
                   <span className="font-mono text-[9px] text-[#00C853] font-bold">
-                    Loc: {results.scope2Missing ? '—' : `${results.total > 0 ? ((results.scope2 / results.total) * 100).toFixed(0) : 0}%`} | Mkt: {results.totalMarket > 0 ? ((results.scope2Market / results.totalMarket) * 100).toFixed(0) : 0}%
+                    Loc: {results.scope2Missing ? '—' : `${results.total > 0 ? ((results.scope2 / results.total) * 100).toFixed(0) : 0}%`} | Mkt: {results.scope2Market == null ? '—' : `${results.totalMarket > 0 ? ((results.scope2Market / results.totalMarket) * 100).toFixed(0) : 0}%`}
                   </span>
                 </div>
               </div>

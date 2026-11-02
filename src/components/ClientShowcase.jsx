@@ -74,7 +74,7 @@ const ClientShowcase = () => {
                 <span className="w-1.5 h-1.5 rounded-full bg-[#00E676] animate-pulse shrink-0" />
                 <ShieldCheck className="w-3.5 h-3.5 text-[#00C853] shrink-0" />
                 <span className="text-[11px] sm:text-xs font-mono font-semibold tracking-wide text-[#34D399] whitespace-nowrap">
-                  Verified Client
+                  Client
                 </span>
               </div>
               <a
@@ -131,7 +131,7 @@ const ClientShowcase = () => {
             <span className="text-[#00E676] font-extrabold font-mono text-base sm:text-lg">
               {client.activeInsets.toLocaleString()} tCO₂e
             </span>
-            <span className="text-gray-400 text-xs ml-1.5 font-sans">Verified Offset</span>
+            <span className="text-gray-400 text-xs ml-1.5 font-sans">Offset</span>
           </div>
         </div>
       </div>
@@ -164,7 +164,7 @@ const ClientShowcase = () => {
 
           <p className="text-sm sm:text-base text-gray-400 leading-relaxed font-sans">
             From electric mobility and smart student transit to circular jute biopolymers and premier universities, 
-            see how Bangladesh’s industry leaders use <strong className="text-white font-semibold">CarbonZero BD</strong> for verified ESG carbon accounting.
+            see how Bangladesh’s industry leaders use <strong className="text-white font-semibold">CarbonZero BD</strong> for ESG carbon accounting.
           </p>
         </div>
 
@@ -233,7 +233,7 @@ const ClientShowcase = () => {
                 Join Bangladesh's Premier Sustainability Leaders
               </h4>
               <p className="text-xs sm:text-sm text-gray-300 font-sans mt-0.5">
-                Onboard your enterprise in 24 hours with automated PDF utility invoice extraction and DoE gazette compliance.
+                Onboard your enterprise in 24 hours with automated PDF utility invoice extraction and a GHG Protocol Scope 1 and 2 method.
               </p>
             </div>
           </div>

@@ -58,7 +58,9 @@ class TestESGCalculationEngine(unittest.TestCase):
         self.assertIn("180GB", est_large["memory_tier"])
 
     def test_factor_registry_and_regression_testing(self):
-        self.assertGreaterEqual(len(FACTOR_REGISTRY_CATALOG), 7)
+        self.assertGreaterEqual(len(FACTOR_REGISTRY_CATALOG), 6)
+        # The unsourced 0.12 "green tariff" market factor was removed with the 0.550 grid factor.
+        self.assertFalse([f for f in FACTOR_REGISTRY_CATALOG if "market" in f["fuel_or_activity"].lower()])
         self.assertFalse([f for f in FACTOR_REGISTRY_CATALOG if "margin" in f["name"].lower()])
         self.assertTrue(all(f["gazette_ref"] is None for f in FACTOR_REGISTRY_CATALOG))
 

@@ -282,11 +282,11 @@ const BANGLADESH_BORDER = [
 
 // Predefined quarterly telemetry dataset for sovereign Bangladesh MRV
 const TELEMETRY_QUARTERS = [
-  { id: '2025-q1', label: '2025 Q1', ndvi: 0.584, biomass: 184.2, carbon: 87.5, baseline: 0.510, baselineBiomass: 165.0, baselineCarbon: 78.4, status: 'Historical Verified', cloudCover: '4.2%', sensor: 'Sentinel-2A' },
-  { id: '2025-q2', label: '2025 Q2', ndvi: 0.628, biomass: 198.5, carbon: 94.3, baseline: 0.525, baselineBiomass: 168.0, baselineCarbon: 79.8, status: 'Historical Verified', cloudCover: '2.8%', sensor: 'Sentinel-2B' },
-  { id: '2025-q3', label: '2025 Q3', ndvi: 0.604, biomass: 192.1, carbon: 91.2, baseline: 0.535, baselineBiomass: 170.5, baselineCarbon: 81.0, status: 'Historical Verified', cloudCover: '5.1%', sensor: 'Sentinel-2A' },
-  { id: '2025-q4', label: '2025 Q4', ndvi: 0.655, biomass: 206.4, carbon: 98.0, baseline: 0.540, baselineBiomass: 172.0, baselineCarbon: 81.7, status: 'Historical Verified', cloudCover: '1.9%', sensor: 'Sentinel-2B' },
-  { id: '2026-q1', label: '2026 Q1', ndvi: 0.712, biomass: 224.8, carbon: 106.8, baseline: 0.550, baselineBiomass: 175.0, baselineCarbon: 83.1, status: 'Audited Sentinel Pass', cloudCover: '2.4%', sensor: 'Sentinel-2A' },
+  { id: '2025-q1', label: '2025 Q1', ndvi: 0.584, biomass: 184.2, carbon: 87.5, baseline: 0.510, baselineBiomass: 165.0, baselineCarbon: 78.4, status: 'Historical (unverified)', cloudCover: '4.2%', sensor: 'Sentinel-2A' },
+  { id: '2025-q2', label: '2025 Q2', ndvi: 0.628, biomass: 198.5, carbon: 94.3, baseline: 0.525, baselineBiomass: 168.0, baselineCarbon: 79.8, status: 'Historical (unverified)', cloudCover: '2.8%', sensor: 'Sentinel-2B' },
+  { id: '2025-q3', label: '2025 Q3', ndvi: 0.604, biomass: 192.1, carbon: 91.2, baseline: 0.535, baselineBiomass: 170.5, baselineCarbon: 81.0, status: 'Historical (unverified)', cloudCover: '5.1%', sensor: 'Sentinel-2A' },
+  { id: '2025-q4', label: '2025 Q4', ndvi: 0.655, biomass: 206.4, carbon: 98.0, baseline: 0.540, baselineBiomass: 172.0, baselineCarbon: 81.7, status: 'Historical (unverified)', cloudCover: '1.9%', sensor: 'Sentinel-2B' },
+  { id: '2026-q1', label: '2026 Q1', ndvi: 0.712, biomass: 224.8, carbon: 106.8, baseline: 0.550, baselineBiomass: 175.0, baselineCarbon: 83.1, status: 'Sentinel pass (unaudited)', cloudCover: '2.4%', sensor: 'Sentinel-2A' },
   { id: '2026-q2', label: '2026 Q2', ndvi: 0.748, biomass: 236.8, carbon: 112.5, baseline: 0.565, baselineBiomass: 178.5, baselineCarbon: 84.8, status: 'Latest Active Epoch', cloudCover: '1.4%', sensor: 'Sentinel-2B' },
   { id: '2026-q3', label: '2026 Q3', ndvi: 0.724, biomass: 229.4, carbon: 109.0, baseline: 0.575, baselineBiomass: 181.0, baselineCarbon: 86.0, status: 'Projected Telemetry', cloudCover: '3.2%', sensor: 'Sentinel-2A' },
   { id: '2026-q4', label: '2026 Q4', ndvi: 0.782, biomass: 247.9, carbon: 117.8, baseline: 0.585, baselineBiomass: 183.5, baselineCarbon: 87.2, status: 'Projected Telemetry', cloudCover: '1.8%', sensor: 'Sentinel-2B' },
@@ -354,7 +354,7 @@ const LAYER_CONFIG = {
     ticks: ['Dense Forest (95%)', 'Canopy Mosaic (60%)', 'Non-Forest (<20%)'],
     metricUnit: 'Canopy Density',
     badgeClass: 'bg-emerald-800 text-white',
-    description: 'FAO sovereign forest mask (>10% tree crown cover, >0.5 ha continuity)'
+    description: 'FAO forest-definition mask (>10% tree crown cover, >0.5 ha continuity)'
   },
   carbon_heatmap: {
     id: 'carbon_heatmap',
@@ -428,18 +428,18 @@ const DEFAULT_VERIFICATION_TASKS = [
 // Default Validator Co-Signatures (Open Forest Protocol Pattern: Cryptographic Multi-Validator Trust)
 const DEFAULT_SIGNATURES = [
   {
-    validator_id: "val_moefcc_bangladesh",
-    validator_name: "Dr. K. R. Hasan",
-    organization: "MoEFCC Sovereign Forestry Audit Directorate",
+    validator_id: "val_demo_a",
+    validator_name: "Demo signer A (fictional)",
+    organization: "Demo validator A (fictional)",
     public_key_hex: "d75a980182b10ab7d54bfed3c964073a0ee172f3daa62325af021a68f707511a",
     signature_hex: "3045022100e4b8a2c1d9f8e7a6b5c4d3e2f1a0b9c8d7e6f5a4b3c2d1e0f9a8b7c6d5e4f3a202201b2c3d4e5f6a7b8c9d0e1f2a3b4c5d6e7f8a9b0c1d2e3f4a5b6c7d8e9f0a1b2c",
     signed_at: "2026-09-15T10:45:12Z",
     algorithm: "Ed25519"
   },
   {
-    validator_id: "val_bv_climate",
-    validator_name: "Sarah Jenkins, VVB Auditor",
-    organization: "Bureau Veritas Climate Solutions (Accredited VVB)",
+    validator_id: "val_demo_b",
+    validator_name: "Demo signer B (fictional)",
+    organization: "Demo validator B (fictional)",
     public_key_hex: "9d61b19deffd5a60ba844af492ec2cc44449c5697b326919703bac031cae7f60",
     signature_hex: "e2b3c4d5e6f708192a3b4c5d6e7f8091a2b3c4d5e6f708192a3b4c5d6e7f8091a2b3c4d5e6f708192a3b4c5d6e7f8091a2b3c4d5e6f708192a3b4c5d6e7f8091",
     signed_at: "2026-09-15T14:30:22Z",
@@ -694,7 +694,7 @@ const CarbonMonitoring = () => {
     ndvi: "0.762",
     biomass: "248.50",
     carbon: "118.04",
-    confidence: "94% (NFI Tier-3 Verified)",
+    confidence: "94% (model estimate, unverified)",
     timestamp: "10:30:00 AM",
     forestType: "Dense Coastal Mangrove"
   });
@@ -779,9 +779,9 @@ const CarbonMonitoring = () => {
   const [provenanceSignatures, setProvenanceSignatures] = useState(DEFAULT_SIGNATURES);
   const [showSignModal, setShowSignModal] = useState(false);
   const [signFormData, setSignFormData] = useState({
-    validator_id: "val_sgs_forestdmrv",
-    validator_name: "Dr. Tariq Ahmed",
-    organization: "SGS Environmental Services & Carbon Audit",
+    validator_id: "val_demo_c",
+    validator_name: "Demo signer C (fictional)",
+    organization: "Demo validator C (fictional)",
     private_key_hex: ""
   });
   const [signingLedger, setSigningLedger] = useState(false);
@@ -1283,7 +1283,7 @@ const CarbonMonitoring = () => {
         avg_ndwi: ecoZone.zone.includes('Sundarbans') ? 0.48 : 0.22,
         forest_area_ha: fallbackAreaHa,
         confidence: 0.94,
-        satellite_sources: "Sentinel-2 MSI & Sentinel-1 SAR (Tier 3 Sovereign AI)",
+        satellite_sources: "Sentinel-2 MSI & Sentinel-1 SAR (Tier 3 model)",
         forest_stratum: stratum,
         carbon_agb_tc_ha: agbCarbon,
         carbon_bgb_tc_ha: bgbCarbon,
@@ -1667,17 +1667,12 @@ const CarbonMonitoring = () => {
                 : 'bg-emerald/10 text-emerald border border-emerald/20'
             }`}>
               <ShieldCheck size={13} />
-              <span>Sovereign Digital MRV</span>
+              <span>Digital MRV (demo)</span>
             </span>
             <span className={`font-mono text-[11px] font-semibold px-2 py-0.5 rounded-md border ${
               isLight ? 'bg-white text-[#475569] border-[#E2E8F0]' : 'bg-[#08130C] text-[#94A3B8] border-[#152B1D]'
             }`}>
-              Verra VM0047 (v1.0) & VM0048
-            </span>
-            <span className={`font-mono text-[11px] font-semibold px-2 py-0.5 rounded-md border ${
-              isLight ? 'bg-white text-[#475569] border-[#E2E8F0]' : 'bg-[#08130C] text-[#94A3B8] border-[#152B1D]'
-            }`}>
-              MoEFCC S.R.O. 349 Aligned
+              Modelled on Verra VM0047 & VM0048 (not validated)
             </span>
             <span className={`font-mono text-[11px] font-semibold px-2 py-0.5 rounded-md border ${
               isLight ? 'bg-white text-[#475569] border-[#E2E8F0]' : 'bg-[#08130C] text-[#94A3B8] border-[#152B1D]'
@@ -1701,12 +1696,12 @@ const CarbonMonitoring = () => {
           <h1 className={`text-3xl md:text-4xl font-extrabold font-sans tracking-tight ${
             isLight ? 'text-[#0F291B]' : 'text-white'
           }`}>
-            Carbon Zero BD Sovereign AI Satellite MRV
+            Carbon Zero BD Satellite MRV (demo)
           </h1>
           <p className={`text-sm leading-relaxed ${
             isLight ? 'text-[#475569]' : 'text-[#94A3B8]'
           }`}>
-            Continuous biomass, multi-pool organic carbon stock, dynamic synthetic baseline counterfactuals, and conformal uncertainty auditing aligned with Verra VM0047/VM0048 and IPCC Tier-3 standards.
+            Continuous biomass, multi-pool organic carbon stock, dynamic synthetic baseline counterfactuals, and conformal uncertainty estimates modelled on Verra VM0047/VM0048 and IPCC Tier 3 methods. Not validated by Verra or any VVB.
           </p>
         </div>
         
@@ -1722,7 +1717,7 @@ const CarbonMonitoring = () => {
           </div>
           <div>
             <div className="text-xs font-bold font-sans">Tier-3 Sentinel-1/2 SAR Feed</div>
-            <div className="text-[10px] font-mono text-emerald mt-0.5">Sovereign GEE & STAC Online</div>
+            <div className="text-[10px] font-mono text-emerald mt-0.5">GEE & STAC sources online</div>
           </div>
         </div>
       </div>
@@ -1825,7 +1820,7 @@ const CarbonMonitoring = () => {
                 </div>
                 <div className="text-xs font-medium text-emerald flex items-center space-x-1.5 mt-3">
                   <TrendingUp size={13} />
-                  <span className="font-mono tabular-nums">±4.2% uncertainty (Tier 3 Verified)</span>
+                  <span className="font-mono tabular-nums">±4.2% uncertainty (model, unverified)</span>
                 </div>
               </div>
 
@@ -1995,7 +1990,7 @@ const CarbonMonitoring = () => {
                 </div>
                 <div className="text-xs font-medium text-emerald mt-3 flex items-center space-x-1.5">
                   <Check size={13} />
-                  <span>Conformal 90% uncertainty verified</span>
+                  <span>Conformal 90% uncertainty (model)</span>
                 </div>
               </div>
 
@@ -2253,7 +2248,7 @@ const CarbonMonitoring = () => {
                   </span>
                 </div>
                 <p className={`text-xs ${isLight ? 'text-[#64748B]' : 'text-[#94A3B8]'}`}>
-                  Quarterly canopy telemetry against verified historical pre-project baselines.
+                  Quarterly canopy telemetry against modelled pre-project baselines.
                 </p>
               </div>
 
@@ -2571,7 +2566,7 @@ const CarbonMonitoring = () => {
                       <div className="flex items-center space-x-2">
                         <span className="w-4 h-0.5 border-t-2 border-dashed border-[#F59E0B]"></span>
                         <span className={`font-semibold ${isLight ? 'text-[#0F291B]' : 'text-white'}`}>
-                          Verified Baseline Trajectory (Pre-Project Level)
+                          Modelled Baseline Trajectory (Pre-Project Level)
                         </span>
                       </div>
                     </div>
@@ -2818,7 +2813,7 @@ const CarbonMonitoring = () => {
                       Jurisdiction Authority
                     </span>
                     <span className={`font-semibold mt-0.5 block text-xs ${isLight ? 'text-[#0F291B]' : 'text-white'}`}>
-                      MoEFCC Bangladesh (S.R.O. 349-Law/2024)
+                      Not authorized by any regulator
                     </span>
                   </div>
                 </div>
@@ -3025,7 +3020,7 @@ const CarbonMonitoring = () => {
                           {rme}%
                         </span>
                         <span className="text-[10px] font-mono text-emerald font-semibold">
-                          ≤ 15% Cap (Compliant)
+                          ≤ 15% cap (within threshold)
                         </span>
                       </div>
                     </div>
@@ -3062,7 +3057,7 @@ const CarbonMonitoring = () => {
                       </span>
                     </div>
                     <p className={`text-[11px] mt-1 leading-relaxed ${isLight ? 'text-[#2E7D32]' : 'text-emerald-300/90'}`}>
-                      Audited under Verra conservativeness principle: 100% of generated additions are fully approved without discount deduction.
+                      Modelled with the Verra conservativeness principle: no precision deduction applies at this uncertainty. Not audited.
                     </p>
                   </div>
                 </div>
@@ -3338,7 +3333,7 @@ const CarbonMonitoring = () => {
                             <td className="py-2.5 px-3 text-right">
                               <span className="inline-flex items-center space-x-1 text-[10px] font-mono px-2 py-0.5 rounded-full bg-emerald/15 text-emerald font-bold border border-emerald/25">
                                 <Check size={10} />
-                                <span>Verified</span>
+                                <span>Demo signature</span>
                               </span>
                             </td>
                           </tr>
@@ -3360,11 +3355,11 @@ const CarbonMonitoring = () => {
                       <h3 className={`font-extrabold text-base md:text-lg font-sans tracking-tight ${
                         isLight ? 'text-[#0F291B]' : 'text-white'
                       }`}>
-                        7. Sovereign VVB Digital Attestation & Verification Certificate
+                        7. VVB Attestation (not yet performed)
                       </h3>
                     </div>
                     <p className={`text-xs ${isLight ? 'text-[#64748B]' : 'text-mist'}`}>
-                      Formal regulatory certification under MoEFCC Bangladesh Sovereign Carbon Framework (S.R.O. 349-Law/2024).
+                      No VVB has attested this calculation. These are the fields a verifier would review and sign.
                     </p>
                   </div>
 
@@ -3372,7 +3367,7 @@ const CarbonMonitoring = () => {
                     isLight ? 'bg-[#E8F8EE] text-[#00873E] border-[#C2E9CF]' : 'bg-emerald/10 text-emerald border-emerald/25'
                   }`}>
                     <Check size={14} />
-                    <span>VERRA VM0047 COMPLIANT</span>
+                    <span>NOT VALIDATED</span>
                   </div>
                 </div>
 
@@ -3381,7 +3376,7 @@ const CarbonMonitoring = () => {
                     isLight ? 'bg-[#F8FAFC] border-[#CBD5E1]' : 'bg-white/[0.02] border-white/10'
                   }`}>
                     <span className={`block font-bold text-xs uppercase tracking-wider mb-2 ${isLight ? 'text-[#64748B]' : 'text-mist'}`}>
-                      Audited Standards
+                      Reference Methodologies
                     </span>
                     <ul className="space-y-1.5 font-medium">
                       <li className="flex items-center space-x-1.5">
@@ -3396,10 +3391,6 @@ const CarbonMonitoring = () => {
                         <Check size={12} className="text-emerald shrink-0" />
                         <span>IPCC 2019 Refinement Tier-3</span>
                       </li>
-                      <li className="flex items-center space-x-1.5">
-                        <Check size={12} className="text-emerald shrink-0" />
-                        <span>MoEFCC S.R.O. 349-Law/2024</span>
-                      </li>
                     </ul>
                   </div>
 
@@ -3407,10 +3398,10 @@ const CarbonMonitoring = () => {
                     isLight ? 'bg-[#F8FAFC] border-[#CBD5E1]' : 'bg-white/[0.02] border-white/10'
                   }`}>
                     <span className={`block font-bold text-xs uppercase tracking-wider mb-2 ${isLight ? 'text-[#64748B]' : 'text-mist'}`}>
-                      VVB Attestation Seal
+                      VVB Attestation
                     </span>
                     <p className={`text-[11px] leading-relaxed ${isLight ? 'text-[#475569]' : 'text-mist'}`}>
-                      The satellite telemetry, synthetic control counterfactual modeling, multi-pool allometry, and conformal error bounds have been systematically verified against sovereign ground-truth NFI plots and verified with zero precision discount penalties.
+                      Not yet attested. A VVB would check the satellite telemetry, synthetic control counterfactual modelling, multi-pool allometry and conformal error bounds against ground-truth plots.
                     </p>
                   </div>
 
@@ -3419,13 +3410,13 @@ const CarbonMonitoring = () => {
                   }`}>
                     <div>
                       <span className={`block font-bold text-xs uppercase tracking-wider mb-1 ${isLight ? 'text-[#64748B]' : 'text-mist'}`}>
-                        Authorized Signature
+                        Signature
                       </span>
                       <span className={`font-serif italic text-sm font-bold block mt-1 ${isLight ? 'text-[#0F291B]' : 'text-white'}`}>
-                        Dr. K. R. Hasan, Lead Carbon Auditor
+                        Not signed
                       </span>
                       <span className={`text-[10px] block ${isLight ? 'text-[#64748B]' : 'text-mist'}`}>
-                        Sovereign MRV Node · Dhaka, Bangladesh
+                        No verifier has signed this dossier
                       </span>
                     </div>
                     <div className="mt-3 pt-2 border-t border-inherit flex items-center justify-between text-[11px] font-mono">
@@ -4661,12 +4652,12 @@ const CarbonMonitoring = () => {
                 isLight ? 'text-[#0F291B]' : 'text-white'
               }`}>
                 <FileText className="text-emerald" size={24} />
-                <span>{isBn ? 'ডিজিটাল এমআরভি এবং ভেরা ভিভিবি অডিট রেজিস্ট্রি' : 'Digital dMRV & Verra VVB Audit Registry'}</span>
+                <span>{isBn ? 'ডিজিটাল এমআরভি এবং ভিভিবি অডিট ওয়ার্কস্পেস' : 'Digital dMRV & VVB Audit Workspace'}</span>
               </h2>
               <p className={`text-xs mt-1 ${isLight ? 'text-[#64748B]' : 'text-mist'}`}>
                 {isBn 
-                  ? 'ভেরা VM0047 v1.0 ও VM0048 নিয়ন্ত্রিত মাল্টি-পুল কার্বন স্টক, ডায়নামিক সিন্থেটিক বেসলাইন এবং SHA-256 লেজার অডিট ডসিয়ার।'
-                  : 'Verra VM0047 v1.0 & VM0048 verified multi-pool carbon stocks, dynamic synthetic baselines, and SHA-256 ledger audit dossiers.'}
+                  ? 'ভেরা VM0047 v1.0 ও VM0048 অনুসারে মডেল করা (যাচাই করা হয়নি) মাল্টি-পুল কার্বন স্টক, ডায়নামিক সিন্থেটিক বেসলাইন এবং SHA-256 লেজার অডিট ডসিয়ার।'
+                  : 'Multi-pool carbon stocks modelled on Verra VM0047 v1.0 & VM0048 (not validated), dynamic synthetic baselines, and SHA-256 ledger audit dossiers.'}
               </p>
             </div>
             
@@ -4869,7 +4860,7 @@ const CarbonMonitoring = () => {
                                     ? 'bg-[#0F291B] border-[#0F291B] text-white hover:bg-[#00873E]' 
                                     : 'bg-white/10 border-white/20 text-white hover:bg-white/20'
                                 }`}
-                                title="Download Official Verra VM0047 Audit Dossier PDF"
+                                title="Download VM0047-format audit dossier PDF (draft)"
                               >
                                 <FileCheck size={12} />
                                 <span>VM0047 Dossier</span>
@@ -5077,7 +5068,7 @@ const CarbonMonitoring = () => {
                     <span>AI Biomass & Carbon Estimation Architecture</span>
                   </h3>
                   <p className={`text-[11px] mt-0.5 ${isLight ? 'text-[#475569]' : 'text-mist'}`}>
-                    Kanop Multi-Modal Sensor Fusion with Sovereign Ground-Truth Gate
+                    Multi-Modal Sensor Fusion with Ground-Truth Gate
                   </p>
                 </div>
                 <span className={`px-2.5 py-1 rounded-full text-[10px] font-mono font-bold uppercase tracking-wider ${
@@ -5116,7 +5107,7 @@ const CarbonMonitoring = () => {
                       </span>
                     </div>
                     <span className="text-[10px] font-medium px-2 py-0.5 rounded-md bg-emerald/10 text-emerald border border-emerald/20">
-                      Baseline Sovereign
+                      Baseline (modelled)
                     </span>
                   </div>
                   <p className={`text-[11px] mt-1.5 ml-6 ${isLight ? 'text-[#475569]' : 'text-mist'}`}>
@@ -5191,7 +5182,7 @@ const CarbonMonitoring = () => {
                   }`}>
                     <div className="flex items-center space-x-1.5 font-bold">
                       <ShieldAlert size={14} className="text-amber-500 shrink-0" />
-                      <span>Sovereign Guardrail: Multi-Modal Real-Data Gate</span>
+                      <span>Guardrail: Multi-Modal Real-Data Gate</span>
                     </div>
                     <p className="text-[10px] leading-relaxed">
                       Deep learning weights are locked against synthetic data hallucinations. Production activation requires ≥ 150 ground-truth NFI field plots. Inferences automatically fall back to <span className="font-mono font-bold">fusion_fallback_rf</span>.
@@ -5594,7 +5585,7 @@ const CarbonMonitoring = () => {
                     required
                     value={signFormData.organization}
                     onChange={(e) => setSignFormData(prev => ({ ...prev, organization: e.target.value }))}
-                    placeholder="SGS Environmental Services"
+                    placeholder="Organization name"
                     className={`w-full border rounded-xl px-3.5 py-2.5 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald ${
                       isLight ? 'bg-[#F8FAFC] border-[#CBD5E1] text-[#0F291B]' : 'bg-white/5 border-white/10 text-white'
                     }`}

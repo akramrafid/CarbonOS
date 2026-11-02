@@ -16,7 +16,8 @@ from .auth import Principal, require
 from .database import get_db
 from .ledger import DomainError
 from .ledger_models import (
-    ActivityRecord, AuditEvent, CalculationLine, CalculationRun, Facility, LegalEntity, ReportingPeriod, ReportSnapshot,
+    ActivityRecord, AuditEvent, CalculationLine, CalculationRun, Equipment, Facility, LegalEntity, ReportingPeriod,
+    ReportSnapshot,
 )
 
 router = APIRouter(tags=["ESG Ledger"])
@@ -42,6 +43,16 @@ class FacilityIn(BaseModel):
     operational_control: bool = True
     financial_control: bool = True
     equity_share_pct: condecimal(ge=0, le=100, max_digits=7, decimal_places=4) = Decimal(100)
+
+
+class EquipmentIn(BaseModel):
+    facility_id: str
+    # Unique per facility: 'G1' at two factories is two generators.
+    equipment_ref: str = Field(..., min_length=1, max_length=100, pattern=r"^[A-Za-z0-9._/-]+$")
+    kind: Literal["generator", "refrigeration"]
+    description: Optional[str] = Field(None, max_length=500)
+    fuel: Optional[Literal["diesel", "natural_gas", "furnace_oil", "petrol", "lpg"]] = None
+    rated_kw: Optional[condecimal(gt=0, max_digits=12, decimal_places=3)] = None
 
 
 class PeriodIn(BaseModel):
@@ -120,7 +131,7 @@ class ActivityIn(BaseModel):
     idempotency_key: Optional[str] = Field(None, max_length=100)
     data_quality: Optional[Grade] = None
     uncertainty_pct: Optional[Pct] = None
-    generator_id: Optional[str] = Field(None, max_length=100)
+    generator_ref: Optional[str] = Field(None, max_length=100)  # a registered generator at this facility
     heating_value: Optional[HeatingValueIn] = None
     volume_correction: Optional[condecimal(gt=0, max_digits=18, decimal_places=10)] = None
     refrigerant: Optional[str] = Field(None, max_length=30)
@@ -218,6 +229,19 @@ def create_facility(body: FacilityIn, p: Principal = Depends(require("read")), d
 def list_facilities(limit: int = Limit, offset: int = Offset, p: Principal = Depends(require("read")),
                     db: Session = Depends(get_db)):
     return _list(db, Facility, p, limit, offset)
+
+
+@router.post("/equipment", status_code=201)
+def create_equipment(body: EquipmentIn, p: Principal = Depends(require("read")), db: Session = Depends(get_db)):
+    return out(run(ledger.create_equipment, db, p, body.model_dump()))
+
+
+@router.get("/equipment")
+def list_equipment(facility_id: Optional[str] = None, kind: Optional[str] = None, limit: int = Limit,
+                   offset: int = Offset, p: Principal = Depends(require("read")), db: Session = Depends(get_db)):
+    filters = [c for c in (Equipment.facility_id == facility_id if facility_id else None,
+                           Equipment.kind == kind if kind else None) if c is not None]
+    return _list(db, Equipment, p, limit, offset, *filters, order=Equipment.equipment_ref)
 
 
 @router.post("/periods", status_code=201)

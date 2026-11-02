@@ -231,10 +231,6 @@ const Pricing = () => {
                 </li>
                 <li className="flex items-start gap-2.5">
                   <CheckCircle2 size={15} className="text-cyan-400 shrink-0 mt-0.5" />
-                  <span>Article 6.2 ITMO authorization & UNFCCC sync protocol</span>
-                </li>
-                <li className="flex items-start gap-2.5">
-                  <CheckCircle2 size={15} className="text-cyan-400 shrink-0 mt-0.5" />
                   <span>White-label ministry portal with multi-department RBAC</span>
                 </li>
                 <li className="flex items-start gap-2.5">
@@ -273,14 +269,6 @@ const Pricing = () => {
           </div>
 
           <div className="flex flex-wrap items-center gap-4 text-xs font-mono text-white/70">
-            <span className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-black/40 border border-white/5">
-              <ShieldCheck size={13} className="text-emerald-400" />
-              <span>SOC-2 Type II Aligned</span>
-            </span>
-            <span className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-black/40 border border-white/5">
-              <FileCheck2 size={13} className="text-cyan-400" />
-              <span>MoEFCC Verified</span>
-            </span>
             <span className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-black/40 border border-white/5">
               <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
               <span>99.98% SLA</span>

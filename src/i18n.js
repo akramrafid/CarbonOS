@@ -56,9 +56,9 @@ const resources = {
         stat1Label: "tCO₂e Reduced",
         stat2Value: "~0ms",
         stat2Label: "Data Reconciliation",
-        award1: "Gov Framework 2026",
-        award2: "VVB Accredited",
-        award3: "Article 6 Aligned"
+        award1: "GHG Protocol method",
+        award2: "Dual control",
+        award3: "Not externally assured"
       },
       footer: {
         ctaTitle: "Ready to Scale Bangladesh's Green Infrastructure?",

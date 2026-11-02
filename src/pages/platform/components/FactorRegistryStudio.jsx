@@ -51,18 +51,6 @@ const INITIAL_FACTORS = [
     gazette: "UNVERIFIED: no primary source located"
   },
   {
-    id: "EF-BD-GREEN-TARIFF-01",
-    name: "Rooftop Solar PV / Green Tariff",
-    category: "Scope 2",
-    factor_value: 0.120,
-    unit: "kg CO₂e / kWh",
-    uncertainty: "±5.0%",
-    version: "v2026.1-NATIONAL",
-    tier: "Tier 3 (Facility PPA)",
-    citation: "SREDA Net-Metering Standard 2022",
-    gazette: "UNVERIFIED: no primary source located"
-  },
-  {
     id: "EF-BD-COMMUTE-01",
     name: "RMG Worker Multi-Modal Commuting",
     category: "Scope 3",

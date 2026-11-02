@@ -27,7 +27,7 @@ export const CheckoutModal = ({ credit, onClose, onSuccess }) => {
           <>
             <button onClick={onClose} className="absolute top-6 right-6 text-mist hover:text-white">✕</button>
             <h2 className="font-sans font-bold text-2xl text-white mb-2">Complete Purchase</h2>
-            <p className="font-sans text-sm text-mist mb-6">You are securing verified carbon credits directly from the source.</p>
+            <p className="font-sans text-sm text-mist mb-6">Demo checkout: no credit is transferred, retired or registered.</p>
             
             <div className="bg-[#080F0B] rounded-xl p-4 border border-white/5 mb-6">
               <div className="flex justify-between items-center mb-2">

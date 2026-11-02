@@ -25,8 +25,8 @@ HV = HeatingValue(gcv_mj_per_m3=D("38.0"), ncv_to_gcv=D("0.9"), reference_condit
                   source="TEST certificate", uncertainty_pct=D(1))
 
 
-def act(id, activity_type, qty, unit, data_quality="billed", **kw):
-    return Activity(id=id, facility_id="f1", activity_type=activity_type, quantity=D(qty), unit=unit,
+def act(id, activity_type, qty, unit, data_quality="billed", facility_id="f1", **kw):
+    return Activity(id=id, facility_id=facility_id, activity_type=activity_type, quantity=D(qty), unit=unit,
                     period_start=dt.date(2025, 3, 1), period_end=dt.date(2025, 3, 31), data_quality=data_quality, **kw)
 
 
@@ -95,8 +95,8 @@ class NaturalGasEnergyBasisTest(unittest.TestCase):
 
 class CaptiveGenerationTest(unittest.TestCase):
     def test_generator_kwh_is_memo_and_never_also_scope2(self):
-        acts = [act("d1", "diesel", "1000", "L", generator_id="G1"),
-                act("o1", "captive_generation_output", "3500", "kWh", generator_id="G1", meter_ref="GEN-1"),
+        acts = [act("d1", "diesel", "1000", "L", generator_ref="G1"),
+                act("o1", "captive_generation_output", "3500", "kWh", generator_ref="G1", meter_ref="GEN-1"),
                 act("e1", "electricity", "5000", "kWh", meter_ref="GRID-1"),
                 act("e2", "electricity", "3500", "kWh", meter_ref="GEN-1")]  # same kWh entered as grid supply
         r = calculate(acts, FAC, [DIESEL, GRID], "operational_control")
@@ -108,29 +108,46 @@ class CaptiveGenerationTest(unittest.TestCase):
         self.assertNotIn("GENERATOR_EFFICIENCY_OUT_OF_BAND", codes(r))  # 0.2857 L/kWh is plausible
 
     def test_electricity_tagged_with_a_generator_is_rejected(self):
-        r = calculate([act("e1", "electricity", "100", "kWh", generator_id="G1")], FAC, [GRID], "operational_control")
+        r = calculate([act("e1", "electricity", "100", "kWh", generator_ref="G1")], FAC, [GRID], "operational_control")
         self.assertEqual(r.scope2_location_kg, 0)
         self.assertIn("DOUBLE_COUNTED_ELECTRICITY", codes(r))
 
     def test_implausible_specific_fuel_consumption_raises(self):
-        acts = [act("d1", "diesel", "1000", "L", generator_id="G1"),
-                act("o1", "captive_generation_output", "1000", "kWh", generator_id="G1")]
+        acts = [act("d1", "diesel", "1000", "L", generator_ref="G1"),
+                act("o1", "captive_generation_output", "1000", "kWh", generator_ref="G1")]
         r = calculate(acts, FAC, [DIESEL], "operational_control")
         out = next(e for e in r.exceptions if e["code"] == "GENERATOR_EFFICIENCY_OUT_OF_BAND")
         self.assertTrue(out["blocking"])
         self.assertIn("1.0000 L/kWh", out["detail"])
 
     def test_missing_generator_output_is_reported(self):
-        r = calculate([act("d1", "diesel", "1000", "L", generator_id="G1")], FAC, [DIESEL], "operational_control")
+        r = calculate([act("d1", "diesel", "1000", "L", generator_ref="G1")], FAC, [DIESEL], "operational_control")
         self.assertIn("GENERATOR_OUTPUT_MISSING", codes(r))
         self.assertFalse(r.blocking)
 
+    def test_generator_refs_are_scoped_per_facility(self):
+        fac2 = {**FAC, "f2": Facility("f2", "BD", True, True, D(100))}
+        acts = [act("d1", "diesel", "1000", "L", generator_ref="G1"),
+                act("o1", "captive_generation_output", "3500", "kWh", generator_ref="G1"),  # 0.2857 L/kWh at f1
+                act("d2", "diesel", "1000", "L", generator_ref="G1", facility_id="f2"),
+                act("o2", "captive_generation_output", "1000", "kWh", generator_ref="G1", facility_id="f2")]
+        r = calculate(acts, fac2, [DIESEL], "operational_control")
+        bad = [e for e in r.exceptions if e["code"] == "GENERATOR_EFFICIENCY_OUT_OF_BAND"]
+        self.assertEqual([(e["facility_id"], e["detail"]) for e in bad],
+                         [("f2", "Generator G1: 1.0000 L/kWh outside 0.20–0.45 L/kWh")])  # not pooled to 0.4444
+
+    def test_generator_output_without_fuel_is_reported(self):
+        r = calculate([act("o1", "captive_generation_output", "3500", "kWh", generator_ref="G9")], FAC, [],
+                      "operational_control")
+        missing = next(e for e in r.exceptions if e["code"] == "GENERATOR_FUEL_MISSING")
+        self.assertEqual((missing["facility_id"], missing["blocking"]), ("f1", False))
+
     def test_gas_engine_heat_rate_band(self):
-        acts = [act("g1", "natural_gas", "10000", "m3", heating_value=HV, generator_id="G2"),
-                act("o2", "captive_generation_output", "36000", "kWh", generator_id="G2")]  # 342 000 MJ / 36 000 kWh
+        acts = [act("g1", "natural_gas", "10000", "m3", heating_value=HV, generator_ref="G2"),
+                act("o2", "captive_generation_output", "36000", "kWh", generator_ref="G2")]  # 342 000 MJ / 36 000 kWh
         r = calculate(acts, FAC, [GAS_GJ], "operational_control")
         self.assertNotIn("GENERATOR_EFFICIENCY_OUT_OF_BAND", codes(r))
-        acts[1] = act("o2", "captive_generation_output", "9000", "kWh", generator_id="G2")  # 38 MJ/kWh
+        acts[1] = act("o2", "captive_generation_output", "9000", "kWh", generator_ref="G2")  # 38 MJ/kWh
         self.assertIn("GENERATOR_EFFICIENCY_OUT_OF_BAND", codes(calculate(acts, FAC, [GAS_GJ], "operational_control")))
 
 

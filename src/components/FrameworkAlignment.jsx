@@ -12,7 +12,7 @@ const SealSVG = () => (
     <path id="curve" d="M 20 50 A 30 30 0 1 1 80 50 A 30 30 0 1 1 20 50" fill="transparent" />
     <text className="font-mono text-[7px]" fill="var(--color-emerald)">
       <textPath href="#curve" startOffset="50%" textAnchor="middle">
-        • BANGLADESH NATIONAL CARBON FRAMEWORK • VERIFIED
+        • BANGLADESH CARBON INFRASTRUCTURE • CITED SOURCES
       </textPath>
     </text>
   </svg>
@@ -106,14 +106,14 @@ const FrameworkAlignment = () => {
           </div>
           <div className="relative">
             <div className="absolute -top-16 -left-8 font-mono text-[120px] text-emerald opacity-10 leading-none">01</div>
-            <h3 className="font-sans font-bold text-3xl lg:text-4xl text-white mb-6 relative z-10">Built on the Official Framework</h3>
+            <h3 className="font-sans font-bold text-3xl lg:text-4xl text-white mb-6 relative z-10">Built Around Published Rules</h3>
             <p className="font-sans text-lg text-mist leading-relaxed mb-8 relative z-10">
-              Designed from day one around Bangladesh's 2024 National Carbon Market Framework. PIN submission flows, MRV data standards, registry ID formats, verification accreditation — all pre-built and pre-compliant. Zero custom configuration required.
+              Designed around Bangladesh's climate rules as they are published. A rule enters the product only with its primary document cited; nothing here is approved or endorsed by a regulator.
             </p>
             <div className="flex space-x-3 relative z-10">
-              <span className="font-mono text-xs text-registry bg-black/40 border border-emerald/20 px-3 py-1.5 rounded">[DOE Bangladesh]</span>
-              <span className="font-mono text-xs text-registry bg-black/40 border border-emerald/20 px-3 py-1.5 rounded">[MoEFCC]</span>
-              <span className="font-mono text-xs text-registry bg-black/40 border border-emerald/20 px-3 py-1.5 rounded">[UNFCCC]</span>
+              <span className="font-mono text-xs text-registry bg-black/40 border border-emerald/20 px-3 py-1.5 rounded">[GHG Protocol]</span>
+              <span className="font-mono text-xs text-registry bg-black/40 border border-emerald/20 px-3 py-1.5 rounded">[ISO 14064-1]</span>
+              <span className="font-mono text-xs text-registry bg-black/40 border border-emerald/20 px-3 py-1.5 rounded">[IPCC 2006]</span>
             </div>
           </div>
         </div>
@@ -156,7 +156,7 @@ const FrameworkAlignment = () => {
             <div className="absolute -top-16 -left-8 font-mono text-[120px] text-emerald opacity-10 leading-none">03</div>
             <h3 className="font-sans font-bold text-3xl lg:text-4xl text-white mb-6 relative z-10">International Standards, Local Execution</h3>
             <p className="font-sans text-lg text-mist leading-relaxed mb-8 relative z-10">
-              Verra VCS. Gold Standard. Article 6 bilateral agreements. CDM legacy compatibility. Your Bangladesh projects speak the language of international carbon buyers in London, Singapore, and Tokyo. First day, full compliance.
+              Verra VCS, Gold Standard, Article 6 and CDM methodologies are referenced, not integrated: CarbonOS has no registry connection or certification. Your Bangladesh projects speak the language of international carbon buyers in London, Singapore, and Tokyo.
             </p>
             <div className="flex flex-wrap gap-3 relative z-10">
               <span className="font-mono text-xs text-registry bg-black/40 border border-emerald/20 px-3 py-1.5 rounded">[Verra VCS]</span>

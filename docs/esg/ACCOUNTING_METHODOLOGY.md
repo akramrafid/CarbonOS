@@ -77,11 +77,15 @@ the reference conditions and the NCV/GCV ratio are stated on the record. No heat
 `HIGH_UNCERTAINTY`. Volume-basis gas factors (per m3) remain usable.
 
 **Captive generation.** Generator fuel is Scope 1. Generator kWh are the memo item
-`captive_generation_output` and are never also Scope 2: an electricity record carrying a `generator_id`, or a
+`captive_generation_output` and are never also Scope 2: an electricity record carrying a `generator_ref`, or a
 meter shared with captive output, is rejected at ingest (422/409) and in the calculation
-(`DOUBLE_COUNTED_ELECTRICITY`, blocking). Specific fuel consumption per generator is checked against
-configurable plausibility bands (defaults: diesel 0.20–0.45 L/kWh, gas engine 7.5–13.0 MJ/kWh) →
-`GENERATOR_EFFICIENCY_OUT_OF_BAND` (blocking) or `GENERATOR_OUTPUT_MISSING`.
+(`DOUBLE_COUNTED_ELECTRICITY`, blocking). A generator is registered per facility in the equipment register
+(`esg_equipment`, unique on facility + reference), so `G1` at two factories is two generators; a fuel or output
+record may only name a registered generator of its own facility. Specific fuel consumption per generator is
+checked against configurable plausibility bands (defaults: diesel 0.20–0.45 L/kWh, gas engine 7.5–13.0 MJ/kWh) →
+`GENERATOR_EFFICIENCY_OUT_OF_BAND` (blocking) or `GENERATOR_OUTPUT_MISSING`; output with no fuel record →
+`GENERATOR_FUEL_MISSING`, a fuel without a configured band → `GENERATOR_BAND_NOT_CONFIGURED` (both reported, not
+blocking).
 
 **Refrigerants.** `emissions kg = opening + purchased − recovered − closing − capacity_increase` (charge put
 into new equipment is not emitted). CO2e = kg × GWP-100 of the period's GWP basis; no factor row is used.

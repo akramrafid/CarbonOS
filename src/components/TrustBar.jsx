@@ -5,9 +5,9 @@ const TrustBar = () => {
   const items = [
     { label: "GHG Protocol Corporate Standard", badge: "METHOD", icon: ShieldCheck },
     { label: "No default grid factor: cited, approved factors only", badge: "POLICY", icon: CheckCircle2 },
-    { label: "UNFCCC Article 6.2 ITMO Ready", badge: "GLOBAL", icon: Globe2 },
-    { label: "Verra VCS & Gold Standard Synced", badge: "REGISTRY", icon: Award },
-    { label: "ISO 14064-2 Verified Telemetry", badge: "AUDIT", icon: FileCheck },
+    { label: "IPCC 2006 defaults, cited by table and page", badge: "SOURCES", icon: Globe2 },
+    { label: "Author and approver are always different people", badge: "CONTROL", icon: Award },
+    { label: "Not externally assured until a verifier signs", badge: "AUDIT", icon: FileCheck },
     { label: "97% Instant Settlement Rail", badge: "LIQUIDITY", icon: Layers }
   ];
 

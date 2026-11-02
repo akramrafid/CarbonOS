@@ -21,7 +21,7 @@ from sqlalchemy.orm import Session
 from . import accounting, gwp
 from .auth import Principal
 from .ledger_models import (
-    ActivityRecord, AuditEvent, CalculationLine, CalculationRun, EmissionFactor, Facility, LegalEntity,
+    ActivityRecord, AuditEvent, CalculationLine, CalculationRun, EmissionFactor, Equipment, Facility, LegalEntity,
     MetricObservation, ReportingPeriod, ReportSnapshot, _now,
 )
 from .models import ESGOrganization
@@ -118,6 +118,44 @@ def create_period(db, principal, data):
     audit(db, principal, "period.create", "reporting_period", period.id, data)
     db.commit()
     return period
+
+
+# --- facility equipment register --------------------------------------------------------
+
+def create_equipment(db, principal, data):
+    """Register a generator or refrigeration unit. Its reference is unique per facility (409 otherwise)."""
+    _need(principal, "admin")
+    _get(db, Facility, principal, data["facility_id"])
+    if data["kind"] != "generator" and data.get("fuel"):
+        raise DomainError(422, "Only generators declare a fuel")
+    eq = Equipment(organization_id=principal.organization_id, created_by=principal.sub, **data)
+    db.add(eq)
+    try:
+        db.flush()
+    except IntegrityError:
+        db.rollback()
+        raise DomainError(409, f"Equipment '{data['equipment_ref']}' is already registered at this facility")
+    audit(db, principal, "equipment.create", "equipment", eq.id, data)
+    db.commit()
+    return eq
+
+
+# Activity types that may carry a generator_ref: generator fuels and the generator's own (memo) output.
+GENERATOR_ACTIVITY_TYPES = ("diesel", "petrol", "lpg", "natural_gas", "furnace_oil", "captive_generation_output")
+
+
+def _check_generator(db, principal, data):
+    ref = data.get("generator_ref")
+    if not ref:
+        return
+    if data["activity_type"] not in GENERATOR_ACTIVITY_TYPES:
+        raise DomainError(422, f"generator_ref applies to generator fuel or captive_generation_output, "
+                               f"not {data['activity_type']}")
+    eq = db.query(Equipment).filter(Equipment.organization_id == principal.organization_id,
+                                    Equipment.facility_id == data["facility_id"],
+                                    Equipment.equipment_ref == ref).first()
+    if eq is None or eq.kind != "generator":
+        raise DomainError(422, f"Generator '{ref}' is not registered at this facility (POST /equipment)")
 
 
 # --- emission factors ------------------------------------------------------------------
@@ -281,7 +319,7 @@ def _scope1_fields(data):
         data["heating_value"] = _jsonable({**hv, "gcv_mj_per_m3": gcv})
     if data.get("volume_correction") is not None and at != "natural_gas":
         raise DomainError(422, "A volume correction applies to natural gas only")
-    if at == "electricity" and data.get("generator_id"):
+    if at == "electricity" and data.get("generator_ref"):
         raise DomainError(422, "Generator output is a memo item (captive_generation_output), never Scope 2 electricity")
     if at != "refrigerant":
         if data.get("refrigerant") or data.get("mass_balance"):
@@ -326,6 +364,7 @@ def create_activity(db, principal, data):
     if data["activity_type"] not in accounting.ACTIVITY_TYPES and data["activity_type"] not in accounting.MEMO_ACTIVITY_TYPES:
         raise DomainError(422, "Unknown activity type")
     data = _scope1_fields(dict(data))
+    _check_generator(db, principal, data)
     if data["activity_end"] < data["activity_start"]:
         raise DomainError(422, "activity_end must not be before activity_start")
     if data["activity_start"] < period.start_date or data["activity_end"] > period.end_date:
@@ -463,7 +502,7 @@ def _input_hash(period, acts, facs, factors, metric_ids=()) -> str:
         "gwp_basis": period.gwp_basis,
         "activities": [[a.id, a.facility_id, a.activity_type, a.quantity, a.unit, a.activity_start, a.activity_end,
                         a.factor_id, a.market_factor_id, a.meter_ref, a.data_quality, a.uncertainty_pct,
-                        a.generator_id, a.heating_value, a.volume_correction, a.refrigerant, a.mass_balance]
+                        a.generator_ref, a.heating_value, a.volume_correction, a.refrigerant, a.mass_balance]
                        for a in acts],
         "facilities": [[f.id, f.grid_region, f.operational_control, f.financial_control, f.equity_share_pct] for f in facs],
         "factors": [[f.id, f.version, f.kgco2e_per_unit, f.status] for f in factors],
@@ -477,7 +516,7 @@ def _accounting_activity(a):
     return accounting.Activity(
         a.id, a.facility_id, a.activity_type, Decimal(a.quantity), a.unit, a.activity_start, a.activity_end,
         a.factor_id, a.market_factor_id, meter_ref=a.meter_ref, data_quality=a.data_quality,
-        uncertainty_pct=_dec(a.uncertainty_pct), generator_id=a.generator_id,
+        uncertainty_pct=_dec(a.uncertainty_pct), generator_ref=a.generator_ref,
         heating_value=accounting.HeatingValue(
             Decimal(hv["gcv_mj_per_m3"]), Decimal(hv["ncv_to_gcv"]), hv["reference_conditions"], hv["source"],
             bool(hv.get("is_default")), _dec(hv.get("uncertainty_pct"))) if hv else None,

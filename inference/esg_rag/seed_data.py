@@ -44,16 +44,6 @@ DEFAULT_FACTORS = [
         "confidence_rating": "UNVERIFIED - no primary source located"
     },
     {
-        "category": "Scope 2",
-        "fuel_or_activity": "Renewable PPA / Green Tariff (Market-based)",
-        "region": "Bangladesh",
-        "factor_value": 0.12,
-        "unit": "kg CO2e / kWh",
-        "source_citation": "SREDA Certified Solar Park Wheeled Tariff Carbon Attribute",
-        "year": 2024,
-        "confidence_rating": "UNVERIFIED - no primary source located"
-    },
-    {
         "category": "Scope 3",
         "fuel_or_activity": "Employee Commute",
         "region": "Bangladesh (Dhaka Metro)",

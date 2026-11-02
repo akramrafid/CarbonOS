@@ -57,7 +57,7 @@ export const MarketplaceBrowse = () => {
   const [copiedId, setCopiedId] = useState(null);
   const [toastMessage, setToastMessage] = useState(null);
 
-  // 18 Verified High-Additionality Bangladesh Carbon Projects
+  // 18 DEMO listings: illustrative Bangladesh project types. None is registered, verified or audited.
   const [credits, setCredits] = useState([
     {
       id: 'BD-2026-CR-000142',
@@ -72,14 +72,14 @@ export const MarketplaceBrowse = () => {
       status: 'AVAILABLE',
       farmer: 'Rahim Uddin (Coop #12)',
       farmerWallet: '01712-984521 (bKash)',
-      verification: 'Verra VCS (VM0042)',
+      verification: 'Demo · Verra VM0042 methodology, not registered',
       vintage: '2026',
-      additionality: 'AAA Sovereign Tier',
-      mrvTelemetry: '🛰️ Sentinel-2 NDVI Verified (+0.42)',
+      additionality: 'Not assessed',
+      mrvTelemetry: '🛰️ Sentinel-2 NDVI (+0.42)',
       coBenefits: 'Groundwater table restoration & zero-diesel pumping',
       sdgs: [1, 7, 13],
       coordinates: '22.8456° N, 89.5403° E',
-      auditor: 'TÜV SÜD South Asia'
+      auditor: 'None (demo listing)'
     },
     {
       id: 'BD-2026-CR-000188',
@@ -94,14 +94,14 @@ export const MarketplaceBrowse = () => {
       status: 'AVAILABLE',
       farmer: 'Sundarbans Conservation Coop #4',
       farmerWallet: '01911-452398 (Nagad)',
-      verification: 'Gold Standard (GS4GG)',
+      verification: 'Demo · Gold Standard GS4GG methodology, not registered',
       vintage: '2026',
-      additionality: 'AAA Sovereign Tier',
+      additionality: 'Not assessed',
       mrvTelemetry: '🛰️ Sentinel-1 SAR Canopy Radar Monitored',
       coBenefits: 'Cyclone storm surge buffer & Bengal tiger habitat',
       sdgs: [13, 14, 15],
       coordinates: '21.9497° N, 89.1833° E',
-      auditor: 'Bureau Veritas India'
+      auditor: 'None (demo listing)'
     },
     {
       id: 'BD-2026-CR-000199',
@@ -116,14 +116,14 @@ export const MarketplaceBrowse = () => {
       status: 'AVAILABLE',
       farmer: 'Fatima Begum (Women Climate Group)',
       farmerWallet: '01815-339201 (bKash)',
-      verification: 'Verra VCS (VM0007)',
+      verification: 'Demo · Verra VM0007 methodology, not registered',
       vintage: '2025',
-      additionality: 'AA+ High Impact',
+      additionality: 'Not assessed',
       mrvTelemetry: '📱 IoT Thermal Usage Sensor Live (99.2% Uptime)',
       coBenefits: '85% indoor particulate reduction & fuel savings',
       sdgs: [3, 5, 13],
       coordinates: '24.8949° N, 91.8687° E',
-      auditor: 'SGS Bangladesh Ltd'
+      auditor: 'None (demo listing)'
     },
     {
       id: 'BD-2026-CR-000204',
@@ -138,14 +138,14 @@ export const MarketplaceBrowse = () => {
       status: 'AVAILABLE',
       farmer: 'Hassan Kabir (Krishak Samity)',
       farmerWallet: '01622-881240 (Nagad)',
-      verification: 'Gold Standard (GS4GG)',
+      verification: 'Demo · Gold Standard GS4GG methodology, not registered',
       vintage: '2026',
-      additionality: 'AAA Sovereign Tier',
+      additionality: 'Not assessed',
       mrvTelemetry: '⚡ Inverter Smart Telemetry Synced',
       coBenefits: '40% vegetable post-harvest loss avoidance',
       sdgs: [2, 7, 12],
       coordinates: '24.7471° N, 90.4203° E',
-      auditor: 'DNV GL Environment'
+      auditor: 'None (demo listing)'
     },
     {
       id: 'BD-2026-CR-000210',
@@ -160,14 +160,14 @@ export const MarketplaceBrowse = () => {
       status: 'AVAILABLE',
       farmer: 'Aminul S. (Green Brick Alliance)',
       farmerWallet: '01713-772901 (bKash)',
-      verification: 'Verra VCS (VM0042)',
+      verification: 'Demo · Verra VM0042 methodology, not registered',
       vintage: '2025',
-      additionality: 'AA+ High Impact',
+      additionality: 'Not assessed',
       mrvTelemetry: '🏭 CEMS Stack Continuous Emission Monitored',
       coBenefits: '60% black carbon soot elimination in Dhaka airshed',
       sdgs: [9, 11, 13],
       coordinates: '23.9999° N, 90.4203° E',
-      auditor: 'TÜV SÜD South Asia'
+      auditor: 'None (demo listing)'
     },
     {
       id: 'BD-2026-CR-000215',
@@ -182,14 +182,14 @@ export const MarketplaceBrowse = () => {
       status: 'AVAILABLE',
       farmer: 'Latifa Akhtar (Jessore Bio-Energy)',
       farmerWallet: '01918-662309 (Nagad)',
-      verification: 'Gold Standard (GS4GG)',
+      verification: 'Demo · Gold Standard GS4GG methodology, not registered',
       vintage: '2026',
-      additionality: 'AAA Sovereign Tier',
+      additionality: 'Not assessed',
       mrvTelemetry: '🔥 Digital Methane Flowmeter IoT Synced',
       coBenefits: 'Organic bio-slurry fertilizer replacement',
       sdgs: [6, 7, 12],
       coordinates: '23.1664° N, 89.2081° E',
-      auditor: 'Bureau Veritas India'
+      auditor: 'None (demo listing)'
     },
     {
       id: 'BD-2026-CR-000221',
@@ -204,14 +204,14 @@ export const MarketplaceBrowse = () => {
       status: 'AVAILABLE',
       farmer: 'Jahangir Mia (AWD Cluster #08)',
       farmerWallet: '01715-992014 (bKash)',
-      verification: 'Verra VCS (VM0042)',
+      verification: 'Demo · Verra VM0042 methodology, not registered',
       vintage: '2026',
-      additionality: 'AAA Sovereign Tier',
+      additionality: 'Not assessed',
       mrvTelemetry: '💧 IoT Perforated Pipe Water Depth: -15cm AWD Confirmed',
       coBenefits: '35% irrigation diesel cut & 45% enteric methane cut',
       sdgs: [1, 2, 13],
       coordinates: '25.7439° N, 89.2752° E',
-      auditor: 'DoE Bangladesh Accredited VVB'
+      auditor: 'None (demo listing)'
     },
     {
       id: 'BD-2026-CR-000225',
@@ -226,14 +226,14 @@ export const MarketplaceBrowse = () => {
       status: 'AVAILABLE',
       farmer: 'Parbatya Indigenous Community Coop',
       farmerWallet: '01819-445012 (Nagad)',
-      verification: 'Gold Standard (GS4GG)',
+      verification: 'Demo · Gold Standard GS4GG methodology, not registered',
       vintage: '2026',
-      additionality: 'AAA Sovereign Tier',
+      additionality: 'Not assessed',
       mrvTelemetry: '🛰️ Sentinel-2 Multispectral Biomass Index +0.58',
       coBenefits: 'Soil erosion protection & indigenous fruit sovereignty',
       sdgs: [1, 10, 15],
       coordinates: '22.3384° N, 92.2570° E',
-      auditor: 'DNV GL Environment'
+      auditor: 'None (demo listing)'
     },
     {
       id: 'BD-2026-CR-000230',
@@ -248,14 +248,14 @@ export const MarketplaceBrowse = () => {
       status: 'AVAILABLE',
       farmer: 'Metro Fabric Mills Ltd (Worker Green Fund)',
       farmerWallet: '01711-200938 (bKash)',
-      verification: 'Verra VCS (VM0042)',
+      verification: 'Demo · Verra VM0042 methodology, not registered',
       vintage: '2025',
-      additionality: 'AA+ High Impact',
-      mrvTelemetry: '⚡ Scada API Grid Export Verified (REB Logged)',
+      additionality: 'Not assessed',
+      mrvTelemetry: '⚡ SCADA grid export (demo)',
       coBenefits: 'Clean energy displaced from heavy fuel oil generators',
       sdgs: [7, 8, 9],
       coordinates: '23.8103° N, 90.4125° E',
-      auditor: 'TÜV SÜD South Asia'
+      auditor: 'None (demo listing)'
     },
     {
       id: 'BD-2026-CR-000235',
@@ -270,14 +270,14 @@ export const MarketplaceBrowse = () => {
       status: 'AVAILABLE',
       farmer: 'Rahimun Nessa (Women Bio-Coop)',
       farmerWallet: '01912-883019 (bKash)',
-      verification: 'Gold Standard (GS4GG)',
+      verification: 'Demo · Gold Standard GS4GG methodology, not registered',
       vintage: '2026',
-      additionality: 'AAA Sovereign Tier',
+      additionality: 'Not assessed',
       mrvTelemetry: '🔥 Smart Gas Meter Direct Cloud Feed',
       coBenefits: 'Replaces firewood for 120 rural village homes',
       sdgs: [3, 5, 7],
       coordinates: '23.9015° N, 89.1205° E',
-      auditor: 'Bureau Veritas India'
+      auditor: 'None (demo listing)'
     },
     {
       id: 'BD-2026-CR-000240',
@@ -292,14 +292,14 @@ export const MarketplaceBrowse = () => {
       status: 'AVAILABLE',
       farmer: 'Nargis Ara (Gram Unnayan)',
       farmerWallet: '01718-449102 (Nagad)',
-      verification: 'Verra VCS (VM0007)',
+      verification: 'Demo · Verra VM0007 methodology, not registered',
       vintage: '2025',
-      additionality: 'AA+ High Impact',
+      additionality: 'Not assessed',
       mrvTelemetry: '📱 Mobile Barcode NFC Survey Verifiable',
       coBenefits: 'Saves 3 hours/day in firewood foraging for girls',
       sdgs: [4, 5, 13],
       coordinates: '25.6279° N, 88.6332° E',
-      auditor: 'SGS Bangladesh Ltd'
+      auditor: 'None (demo listing)'
     },
     {
       id: 'BD-2026-CR-000245',
@@ -314,14 +314,14 @@ export const MarketplaceBrowse = () => {
       status: 'AVAILABLE',
       farmer: 'Tariqul Islam (Barind Solar Coop)',
       farmerWallet: '01714-338290 (bKash)',
-      verification: 'Verra VCS (VM0042)',
+      verification: 'Demo · Verra VM0042 methodology, not registered',
       vintage: '2026',
-      additionality: 'AAA Sovereign Tier',
+      additionality: 'Not assessed',
       mrvTelemetry: '⚡ Remote Telemetry Smart Metering Active',
       coBenefits: 'Groundwater replenishment sensor monitored',
       sdgs: [6, 7, 13],
       coordinates: '24.3745° N, 88.6042° E',
-      auditor: 'DoE Bangladesh Accredited VVB'
+      auditor: 'None (demo listing)'
     },
     {
       id: 'BD-2026-CR-000250',
@@ -336,14 +336,14 @@ export const MarketplaceBrowse = () => {
       status: 'AVAILABLE',
       farmer: 'Coast Alliance Fisherman Association',
       farmerWallet: '01812-774019 (Nagad)',
-      verification: 'Gold Standard (GS4GG)',
+      verification: 'Demo · Gold Standard GS4GG methodology, not registered',
       vintage: '2026',
-      additionality: 'AAA Sovereign Tier',
+      additionality: 'Not assessed',
       mrvTelemetry: '🛰️ Drone LiDAR High-Resolution Tree Biomass',
       coBenefits: 'Estuarine crab habitat & coastal surge embankment defense',
       sdgs: [13, 14, 15],
       coordinates: '21.4272° N, 92.0058° E',
-      auditor: 'Bureau Veritas India'
+      auditor: 'None (demo listing)'
     },
     {
       id: 'BD-2026-CR-000255',
@@ -358,14 +358,14 @@ export const MarketplaceBrowse = () => {
       status: 'AVAILABLE',
       farmer: 'Feni Green Power Worker Initiative',
       farmerWallet: '01817-991204 (bKash)',
-      verification: 'Verra VCS (VM0042)',
+      verification: 'Demo · Verra VM0042 methodology, not registered',
       vintage: '2026',
-      additionality: 'AAA Sovereign Tier',
-      mrvTelemetry: '⚡ Grid Infeed SCADA Direct National Load Dispatch Log',
+      additionality: 'Not assessed',
+      mrvTelemetry: '⚡ Grid infeed SCADA log (demo)',
       coBenefits: 'Coastal renewable grid stability during low-tide monsoon',
       sdgs: [7, 9, 13],
       coordinates: '22.9408° N, 91.3996° E',
-      auditor: 'TÜV SÜD South Asia'
+      auditor: 'None (demo listing)'
     },
     {
       id: 'BD-2026-CR-000260',
@@ -380,14 +380,14 @@ export const MarketplaceBrowse = () => {
       status: 'AVAILABLE',
       farmer: 'Grameen Shakti Island Unit #21',
       farmerWallet: '01716-559102 (bKash)',
-      verification: 'Gold Standard (GS4GG)',
+      verification: 'Demo · Gold Standard GS4GG methodology, not registered',
       vintage: '2025',
-      additionality: 'AAA Sovereign Tier',
+      additionality: 'Not assessed',
       mrvTelemetry: '📱 GSM Battery Telemetry Live Pulse',
       coBenefits: 'Eliminates kerosene fumes in 240 riverine families',
       sdgs: [3, 7, 10],
       coordinates: '22.7010° N, 90.3535° E',
-      auditor: 'DNV GL Environment'
+      auditor: 'None (demo listing)'
     },
     {
       id: 'BD-2026-CR-000265',
@@ -402,14 +402,14 @@ export const MarketplaceBrowse = () => {
       status: 'AVAILABLE',
       farmer: 'Clean City Green Waste Workers Coop',
       farmerWallet: '01913-228910 (Nagad)',
-      verification: 'Verra VCS (VM0042)',
+      verification: 'Demo · Verra VM0042 methodology, not registered',
       vintage: '2026',
-      additionality: 'AA+ High Impact',
+      additionality: 'Not assessed',
       mrvTelemetry: '⚖️ Municipal Weighbridge IoT Digital Ledger',
       coBenefits: 'Prevents open landfill methane fires & produces organic soil',
       sdgs: [11, 12, 13],
       coordinates: '23.6238° N, 90.5000° E',
-      auditor: 'DoE Bangladesh Accredited VVB'
+      auditor: 'None (demo listing)'
     },
     {
       id: 'BD-2026-CR-000270',
@@ -424,14 +424,14 @@ export const MarketplaceBrowse = () => {
       status: 'AVAILABLE',
       farmer: 'Selim Hossain (Regenerative Farmers)',
       farmerWallet: '01811-662908 (bKash)',
-      verification: 'Gold Standard (GS4GG)',
+      verification: 'Demo · Gold Standard GS4GG methodology, not registered',
       vintage: '2026',
-      additionality: 'AAA Sovereign Tier',
+      additionality: 'Not assessed',
       mrvTelemetry: '🛰️ Soil Organic Carbon Satellite Calibration',
       coBenefits: '30% soil moisture retention during dry winter season',
       sdgs: [2, 13, 15],
       coordinates: '23.4607° N, 91.1809° E',
-      auditor: 'Bureau Veritas India'
+      auditor: 'None (demo listing)'
     },
     {
       id: 'BD-2026-CR-000275',
@@ -446,14 +446,14 @@ export const MarketplaceBrowse = () => {
       status: 'AVAILABLE',
       farmer: 'Mominul Huq (AWD Group #14)',
       farmerWallet: '01719-883491 (bKash)',
-      verification: 'Verra VCS (VM0042)',
+      verification: 'Demo · Verra VM0042 methodology, not registered',
       vintage: '2026',
-      additionality: 'AAA Sovereign Tier',
+      additionality: 'Not assessed',
       mrvTelemetry: '💧 Field Perforated Tube Continuous Hydrology Sensor',
       coBenefits: 'Water table recharge & 50% nitrous oxide avoidance',
       sdgs: [1, 6, 13],
       coordinates: '25.6217° N, 88.6450° E',
-      auditor: 'DoE Bangladesh Accredited VVB'
+      auditor: 'None (demo listing)'
     }
   ]);
 
@@ -546,7 +546,7 @@ export const MarketplaceBrowse = () => {
     setCredits(prev => prev.map(c => 
       c.id === creditId ? { ...c, status: 'RETIRED' } : c
     ));
-    setToastMessage(`Credit ${creditId} successfully retired and minted on the National Registry!`);
+    setToastMessage(`Demo only: credit ${creditId} was not retired or registered anywhere.`);
     setTimeout(() => setToastMessage(null), 4000);
   };
 
@@ -577,13 +577,10 @@ export const MarketplaceBrowse = () => {
               <div className="flex flex-wrap items-center gap-2">
                 <span className="font-mono text-[11px] font-bold tracking-widest px-3 py-1 bg-emerald/10 border border-emerald/30 text-emerald rounded-full uppercase flex items-center space-x-1.5">
                   <span className="w-1.5 h-1.5 rounded-full bg-emerald animate-ping mr-1"></span>
-                  CARBON ZERO BD • SOVEREIGN CARBON REGISTRY
+                  CARBON ZERO BD • DEMO MARKETPLACE
                 </span>
                 <span className="font-mono text-[11px] px-2.5 py-1 rounded-full bg-white/5 border border-white/10 text-slate-400">
-                  Article 6.2 Aligned
-                </span>
-                <span className="font-mono text-[11px] px-2.5 py-1 rounded-full bg-white/5 border border-white/10 text-slate-400">
-                  DoE Gazette S.R.O. 349
+                  Demo listings: not registered or verified
                 </span>
               </div>
 
@@ -596,7 +593,7 @@ export const MarketplaceBrowse = () => {
               <p className={`font-sans text-base sm:text-lg max-w-2xl leading-relaxed ${
                 isLight ? 'text-[#413f3f]' : 'text-slate-300'
               }`}>
-                Acquire verified, high-additionality carbon credits directly from Bangladesh's rural climate stewards. 
+                Acquire carbon credits directly from Bangladesh's rural climate stewards. 
                 Full on-chain telemetry, zero double-counting, and <strong className="text-emerald">97% direct liquidity</strong> disbursed to farmer mobile wallets.
               </p>
             </div>
@@ -611,7 +608,7 @@ export const MarketplaceBrowse = () => {
               </div>
               <div className="flex items-center space-x-2 text-slate-400">
                 <ShieldCheck size={16} className="text-amber-500" />
-                <span>Verra VCS & Gold Standard Audited</span>
+                <span>Not yet audited by any standard body</span>
               </div>
               <div className="flex items-center space-x-2 text-slate-400">
                 <Zap size={16} className="text-cyan-400" />
@@ -636,12 +633,12 @@ export const MarketplaceBrowse = () => {
               <span>LIVE SPOT TICKER:</span>
             </span>
             <div className="flex items-center space-x-6 shrink-0">
-              <span className="text-slate-400">BD-SOLAR (VCU): <strong className="text-white">৳1,450/t</strong> <span className="text-emerald font-bold">▲+2.4%</span></span>
-              <span className="text-slate-400">BD-MANGROVE (GS): <strong className="text-white">৳1,820/t</strong> <span className="text-emerald font-bold">▲+3.8%</span></span>
-              <span className="text-slate-400">BD-AWD RICE (VCS): <strong className="text-white">৳1,250/t</strong> <span className="text-emerald font-bold">▲+1.5%</span></span>
-              <span className="text-slate-400">BD-COOKSTOVE (VER): <strong className="text-white">৳980/t</strong> <span className="text-slate-400">▼-0.4%</span></span>
-              <span className="text-slate-400">BD-BIOGAS (GS): <strong className="text-white">৳1,320/t</strong> <span className="text-emerald font-bold">▲+1.9%</span></span>
-              <span className="text-slate-400">BD-BRICK KILN (VCS): <strong className="text-white">৳1,100/t</strong> <span className="text-emerald font-bold">▲+0.8%</span></span>
+              <span className="text-slate-400">BD-SOLAR (demo): <strong className="text-white">৳1,450/t</strong> <span className="text-emerald font-bold">▲+2.4%</span></span>
+              <span className="text-slate-400">BD-MANGROVE (demo): <strong className="text-white">৳1,820/t</strong> <span className="text-emerald font-bold">▲+3.8%</span></span>
+              <span className="text-slate-400">BD-AWD RICE (demo): <strong className="text-white">৳1,250/t</strong> <span className="text-emerald font-bold">▲+1.5%</span></span>
+              <span className="text-slate-400">BD-COOKSTOVE (demo): <strong className="text-white">৳980/t</strong> <span className="text-slate-400">▼-0.4%</span></span>
+              <span className="text-slate-400">BD-BIOGAS (demo): <strong className="text-white">৳1,320/t</strong> <span className="text-emerald font-bold">▲+1.9%</span></span>
+              <span className="text-slate-400">BD-BRICK KILN (demo): <strong className="text-white">৳1,100/t</strong> <span className="text-emerald font-bold">▲+0.8%</span></span>
             </div>
           </div>
 
@@ -649,14 +646,14 @@ export const MarketplaceBrowse = () => {
           <div className="grid grid-cols-2 md:grid-cols-4 divide-y md:divide-y-0 md:divide-x divide-white/5">
             <div className="p-4 sm:p-5">
               <span className="text-[10px] font-mono tracking-wider uppercase text-slate-400 block mb-1">
-                Verified Available Inventory
+                Listed Inventory (demo)
               </span>
               <div className="flex items-baseline space-x-2">
                 <span className="font-mono text-2xl sm:text-3xl font-bold text-white">84,250</span>
                 <span className="font-sans text-xs text-emerald font-semibold">tCO₂e</span>
               </div>
               <span className="text-[10px] text-slate-500 font-mono mt-0.5 block">
-                Issued under MoEFCC Article 6
+                Not issued under any registry
               </span>
             </div>
 
@@ -1202,14 +1199,14 @@ export const MarketplaceBrowse = () => {
                 <div className="flex items-center justify-between">
                   <span className="font-mono text-[10px] uppercase font-bold text-cyan-400 flex items-center space-x-1.5">
                     <Satellite size={13} />
-                    <span>Remote Sensing & Ground Sensor Verification</span>
+                    <span>Remote Sensing & Ground Sensor Data</span>
                   </span>
-                  <span className="text-[10px] font-mono text-emerald">Audit Verified</span>
+                  <span className="text-[10px] font-mono text-emerald">Not audited</span>
                 </div>
                 <p className="text-slate-300">{inspectCredit.mrvTelemetry}</p>
                 <div className="grid grid-cols-2 gap-2 pt-2 text-[11px] font-mono text-slate-400">
                   <div>GPS Coordinates: <span className="text-white">{inspectCredit.coordinates}</span></div>
-                  <div>Accredited Auditor: <span className="text-white">{inspectCredit.auditor}</span></div>
+                  <div>Auditor: <span className="text-white">{inspectCredit.auditor}</span></div>
                 </div>
               </div>
 
@@ -1218,10 +1215,10 @@ export const MarketplaceBrowse = () => {
                 <div className={`p-3.5 rounded-xl border ${
                   isLight ? 'bg-slate-50 border-slate-200' : 'bg-white/5 border-white/5'
                 }`}>
-                  <span className="font-mono text-[10px] text-slate-400 block mb-1">SOVEREIGN ADDITIONALITY</span>
+                  <span className="font-mono text-[10px] text-slate-400 block mb-1">ADDITIONALITY</span>
                   <span className="font-bold text-sm text-emerald block">{inspectCredit.additionality}</span>
                   <p className="text-[11px] text-slate-400 mt-1">
-                    Projects exceed Bangladesh Baseline NDC 2021 criteria under Article 6.2 bilateral trade.
+                    Additionality has not been assessed for these demo listings.
                   </p>
                 </div>
 

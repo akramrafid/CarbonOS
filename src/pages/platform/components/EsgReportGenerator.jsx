@@ -71,10 +71,9 @@ export const EsgReportGenerator = ({
     return scope2.reduce((s, a) => s + (parseFloat(a.tCO2e) || 0), 0);
   }, [activities]);
 
-  // Market-based green power assumption (50% green PPA or solar insets)
-  const scope2MarketTotal = useMemo(() => {
-    return scope2LocationTotal == null ? null : parseFloat((scope2LocationTotal * 0.45).toFixed(2));
-  }, [scope2LocationTotal]);
+  // Market-based: no contractual instrument, supplier rate or residual mix is held for this demo client, so the
+  // Scope 2 Guidance hierarchy falls back to the grid average (MARKET_FALLBACK_GRID_AVERAGE), disclosed below.
+  const scope2MarketTotal = scope2LocationTotal;
 
   const scope3Total = useMemo(() => {
     return activities.filter(a => a.scopeGroup === 'Scope 3').reduce((s, a) => s + (parseFloat(a.tCO2e) || 0), 0);
@@ -129,9 +128,9 @@ export const EsgReportGenerator = ({
 - **Gross Greenhouse Gas Emissions:** ${fmt(totalGrossEmissions, 2)} tCO₂e
 - **Scope 1 (Direct Emissions):** ${fmt(scope1Total, 2)} tCO₂e (${((scope1Total / totalGrossEmissions) * 100).toFixed(1)}%)
 - **Scope 2 (Purchased Electricity - Location-based):** ${scope2LocationTotal == null ? 'not reported: grid-average factor pending approval' : `${fmt(scope2LocationTotal, 2)} tCO₂e (${((scope2LocationTotal / totalGrossEmissions) * 100).toFixed(1)}%)`}
-- **Scope 2 (Purchased Electricity - Market-based):** ${fmt(scope2MarketTotal, 2)} tCO₂e
+- **Scope 2 (Purchased Electricity - Market-based):** ${scope2MarketTotal == null ? 'not reported: grid-average factor pending approval' : `${fmt(scope2MarketTotal, 2)} tCO₂e (grid-average fallback: no contractual instruments, supplier-specific rate or residual mix)`}
 - **Scope 3 (Other Indirect Value Chain):** ${fmt(scope3Total, 2)} tCO₂e (${((scope3Total / totalGrossEmissions) * 100).toFixed(1)}%)
-- **Verified Inset Offsets Retired:** ${fmt(insetsTotal, 2)} tCO₂e (${activeClient.creditVintage} vintage)
+- **Inset Offsets Retired (unverified):** ${fmt(insetsTotal, 2)} tCO₂e (${activeClient.creditVintage} vintage)
 - **Net Residual Footprint:** ${fmt(netEmissions, 2)} tCO₂e
 
 **Sustainability Highlight:** ${activeClient.sustainabilityHighlight}
@@ -360,7 +359,7 @@ ${activeClient.assignedAuditor}
                 {fmt(scope2MarketTotal, 2)} <span className="text-xs">tCO₂e</span>
               </span>
               <span className="text-[10px] text-gray-400 block mt-0.5">
-                With PPA Green Tariffs
+                Grid-average fallback: no instruments or residual mix
               </span>
             </div>
 
@@ -439,7 +438,7 @@ ${activeClient.assignedAuditor}
 
           <div className="p-5 rounded-2xl bg-black/30 border border-[#152B1D] space-y-3">
             <p className="text-xs text-gray-300 leading-relaxed">
-              Emissions quantification utilizes activity data multiplied by verified, source-versioned greenhouse gas emission factors. Original raw activity quantities and physical units are preserved in the permanent audit ledger without lossy conversions.
+              Emissions quantification utilizes activity data multiplied by approved, source-versioned greenhouse gas emission factors. Original raw activity quantities and physical units are preserved in the permanent audit ledger without lossy conversions.
             </p>
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-3 text-xs pt-2">

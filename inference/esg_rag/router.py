@@ -250,13 +250,17 @@ async def ingest_file(
 def get_emission_factors(
     category: Optional[str] = None,
     region: Optional[str] = "Bangladesh",
+    include_retired: bool = False,
     principal: Principal = Depends(require("read")),
     db: Session = Depends(get_db)
 ):
     """
-    Query the emission factor table. Citations are as recorded and not yet independently validated.
+    Query the legacy emission factor table. Citations are as recorded and not yet independently validated.
+    RETIRED rows (withdrawn, kept for audit) are left out unless include_retired is set.
     """
     query = db.query(EmissionFactorRecord)
+    if not include_retired:
+        query = query.filter((EmissionFactorRecord.status.is_(None)) | (EmissionFactorRecord.status != "RETIRED"))
     if category:
         query = query.filter(EmissionFactorRecord.category.ilike(f"%{category}%"))
     if region:
@@ -273,7 +277,9 @@ def get_emission_factors(
             "unit": f.unit,
             "source_citation": f.source_citation,
             "year": f.year,
-            "confidence_rating": f.confidence_rating
+            "confidence_rating": f.confidence_rating,
+            "status": f.status or "ACTIVE",
+            "status_reason": f.status_reason,
         }
         for f in factors
     ]

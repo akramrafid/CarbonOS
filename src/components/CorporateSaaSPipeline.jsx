@@ -32,7 +32,7 @@ const CorporateSaaSPipeline = () => {
     {
       title: "Export",
       sub: "Seamless Compliance Export",
-      desc: "Generate compliance reports in one click. Instantly export formatted data ready for the Bangladesh national MRV system, EU CBAM, or ISO 14064 standards.",
+      desc: "Generate compliance reports in one click. Instantly export formatted data for GHG Protocol Scope 1 and 2 and ISO 14064-1-style inventory statements.",
       statusText: "Active: Generating Reports",
     }
   ];
@@ -527,7 +527,7 @@ const CorporateSaaSPipeline = () => {
                       <div className="w-7 h-7 rounded-full bg-emerald/20 flex items-center justify-center mx-auto mb-1 text-emerald">
                         <ShieldCheck size={16} />
                       </div>
-                      <p className="text-xs font-mono text-emerald uppercase font-bold tracking-wider">VERIFIED</p>
+                      <p className="text-xs font-mono text-emerald uppercase font-bold tracking-wider">REVIEWED</p>
                       <p className="text-[10px] text-mist/60 font-mono tracking-tight mt-0.5">Source Doc</p>
                     </div>
 
@@ -569,7 +569,7 @@ const CorporateSaaSPipeline = () => {
                   </div>
 
                   <span className="text-sm font-sans text-mist/85 mt-3 block text-center">
-                    Emissions are tracked directly to verified original source files
+                    Emissions are traced to the original source files a reviewer approved
                   </span>
                 </div>
               )}
@@ -607,23 +607,23 @@ const CorporateSaaSPipeline = () => {
                     {/* Output Formats targets (Scaled up width & padding) */}
                     {/* BD Gov MRV */}
                     <div className="absolute left-[10px] top-[30px] w-[110px] bg-[#080F0B]/95 border border-white/10 rounded-xl p-3 text-center z-20 hover:border-emerald/40 transition-colors">
-                      <span className="text-[9px] font-mono text-emerald font-bold block mb-1">COMPLIANCE</span>
-                      <span className="text-xs text-white font-mono font-semibold block">BD Gov MRV</span>
-                      <span className="text-[9px] text-[#10b981] font-mono block mt-1 font-bold">✓ Ready</span>
+                      <span className="text-[9px] font-mono text-emerald font-bold block mb-1">METHOD</span>
+                      <span className="text-xs text-white font-mono font-semibold block">GHG Protocol</span>
+                      <span className="text-[9px] text-[#10b981] font-mono block mt-1 font-bold">✓ Scope 1 & 2</span>
                     </div>
 
                     {/* EU CBAM */}
                     <div className="absolute right-[10px] top-[30px] w-[110px] bg-[#080F0B]/95 border border-white/10 rounded-xl p-3 text-center z-20 hover:border-emerald/40 transition-colors">
                       <span className="text-[9px] font-mono text-emerald font-bold block mb-1">REGULATION</span>
                       <span className="text-xs text-white font-mono font-semibold block">EU CBAM</span>
-                      <span className="text-[9px] text-[#10b981] font-mono block mt-1 font-bold">✓ Compliant</span>
+                      <span className="text-[9px] text-[#10b981] font-mono block mt-1 font-bold">Not yet supported</span>
                     </div>
 
                     {/* ISO 14064 */}
                     <div className="absolute left-[175px] bottom-[15px] w-[110px] bg-[#080F0B]/95 border border-white/10 rounded-xl p-3 text-center z-20 hover:border-emerald/40 transition-colors">
                       <span className="text-[9px] font-mono text-emerald font-bold block mb-1">STANDARD</span>
-                      <span className="text-xs text-white font-mono font-semibold block">ISO 14064</span>
-                      <span className="text-[9px] text-[#10b981] font-mono block mt-1 font-bold">✓ Certified</span>
+                      <span className="text-xs text-white font-mono font-semibold block">ISO 14064-1</span>
+                      <span className="text-[9px] text-[#10b981] font-mono block mt-1 font-bold">Statement format</span>
                     </div>
 
                   </div>

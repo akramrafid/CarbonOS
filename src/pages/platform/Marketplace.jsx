@@ -7,7 +7,7 @@ const Marketplace = () => {
         <div className="absolute inset-0 bg-[linear-gradient(to_right,#00C85311_1px,transparent_1px),linear-gradient(to_bottom,#00C85311_1px,transparent_1px)] bg-[size:4rem_4rem] [mask-image:radial-gradient(ellipse_60%_50%_at_50%_0%,#000_70%,transparent_100%)] pointer-events-none"></div>
         <span className="font-mono text-xs text-emerald tracking-widest px-3 py-1 bg-[#0D2B1A]/40 border border-[#00C853]/20 rounded-full mb-6 inline-block z-10">PLATFORM</span>
         <h1 className="serif-drama text-[56px] lg:text-[72px] text-white leading-tight mb-4 z-10">Carbon Marketplace</h1>
-        <p className="font-sans text-lg text-mist max-w-2xl z-10">Connect directly with buyers and trade verified emissions reductions.</p>
+        <p className="font-sans text-lg text-mist max-w-2xl z-10">Connect directly with buyers and trade emissions reductions.</p>
       </div>
 
       <div className="max-w-4xl w-full mx-auto px-6 lg:px-12 mt-16 relative z-10">

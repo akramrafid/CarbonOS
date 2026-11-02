@@ -33,7 +33,7 @@ const PurchaseConfirmModal = ({ credit, creditId, onClose, onPurchaseComplete })
     pricePerTonne: 11000,
     status: 'AVAILABLE',
     farmer: 'Rahim Uddin (Coop #12)',
-    verification: 'Verra VCS (VM0042)',
+    verification: 'Demo · Verra VM0042 methodology, not registered',
     vintage: '2025/2026'
   };
 
@@ -62,7 +62,7 @@ const PurchaseConfirmModal = ({ credit, creditId, onClose, onPurchaseComplete })
   const [cardCvc, setCardCvc] = useState('782');
 
   // Certificate generated details
-  const certificateSerial = `CZBD-RET-2026-${Math.random().toString(36).substring(2, 9).toUpperCase()}`;
+  const certificateSerial = `DEMO-CZBD-RET-2026-${Math.random().toString(36).substring(2, 9).toUpperCase()}`;
   const verificationHash = `0x${Array.from({ length: 40 }, () => Math.floor(Math.random() * 16).toString(16)).join('')}`;
   const settlementDate = new Date().toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' });
 
@@ -152,7 +152,7 @@ const PurchaseConfirmModal = ({ credit, creditId, onClose, onPurchaseComplete })
                 {step === 'configure' && "1. Order & Attribution Setup"}
                 {step === 'payment' && "2. Institutional Payment Gateway"}
                 {step === 'tracking' && "3. Real-Time Settlement Pipeline"}
-                {step === 'certificate' && "Official Carbon Retirement Certificate"}
+                {step === 'certificate' && "Demo Retirement Receipt (not a certificate)"}
               </h2>
             </div>
           </div>
@@ -253,8 +253,8 @@ const PurchaseConfirmModal = ({ credit, creditId, onClose, onPurchaseComplete })
                     }`}
                   >
                     <option value="Scope 1 (Direct Facility Fuel)">Scope 1: Direct Boiler, Generator & Vehicle Fuel</option>
-                    <option value="Scope 2 (Market-Based Electricity)">Scope 2: Grid Electricity (Bangladesh National Factor: 0.550 kg CO₂e/kWh)</option>
-                    <option value="Scope 3 (Supply Chain & Raw Materials)">Scope 3: Upstream Raw Materials & Supply Chain (EU CBAM Compliant)</option>
+                    <option value="Scope 2 (Market-Based Electricity)">Scope 2: Grid Electricity</option>
+                    <option value="Scope 3 (Supply Chain & Raw Materials)">Scope 3: Upstream Raw Materials & Supply Chain</option>
                     <option value="Voluntary Corporate Carbon Neutrality">Voluntary: Corporate Net Zero 2026 Commitment</option>
                   </select>
                 </div>
@@ -271,10 +271,10 @@ const PurchaseConfirmModal = ({ credit, creditId, onClose, onPurchaseComplete })
                   />
                   <label htmlFor="retireImmediately" className="text-xs cursor-pointer">
                     <span className={`font-semibold block ${isLight ? 'text-[#181414]' : 'text-white'}`}>
-                      Instantly Retire & Mint Official MoEFCC Certificate
+                      Retire immediately (demo: nothing is registered)
                     </span>
                     <span className="text-slate-400 text-[11px]">
-                      Permanently retire these credits on the Bangladesh National Registry to prevent double-counting and generate audit proof.
+                      This demo has no registry: nothing is retired, and the receipt is not audit evidence.
                     </span>
                   </label>
                 </div>
@@ -492,8 +492,8 @@ const PurchaseConfirmModal = ({ credit, creditId, onClose, onPurchaseComplete })
                   isLight ? 'bg-[#f2f3ee]/80 border-[#dbf0ea]' : 'bg-[#040A06] border-emerald/20'
                 }`}>
                   <div className="flex items-center justify-between pb-2 border-b border-white/5">
-                    <span className="font-mono font-bold text-emerald">Bangladesh Bank RTGS Escrow Account</span>
-                    <span className="text-[10px] text-slate-400 font-mono">BACS Verified</span>
+                    <span className="font-mono font-bold text-emerald">RTGS Escrow Account (demo)</span>
+                    <span className="text-[10px] text-slate-400 font-mono">Demo</span>
                   </div>
                   <div className="grid grid-cols-2 gap-2 pt-1 font-mono text-[11px]">
                     <div>
@@ -529,7 +529,7 @@ const PurchaseConfirmModal = ({ credit, creditId, onClose, onPurchaseComplete })
                   <span className="font-mono font-bold">৳{farmerRemittance.toLocaleString()}</span>
                 </div>
                 <div className="flex justify-between text-slate-400">
-                  <span>MoEFCC Registry Verification & Gas Fee (3%):</span>
+                  <span>Platform & network fee (3%):</span>
                   <span className="font-mono">৳{registryFee.toLocaleString()}</span>
                 </div>
                 <div className="pt-2 border-t border-white/10 flex justify-between font-bold text-sm">
@@ -592,7 +592,7 @@ const PurchaseConfirmModal = ({ credit, creditId, onClose, onPurchaseComplete })
                   onClick={() => setStep('certificate')}
                   className="text-xs text-emerald underline font-mono hover:text-emerald/80"
                 >
-                  Skip Animation to Certificate →
+                  Skip Animation to Receipt →
                 </button>
               </div>
             </div>
@@ -618,10 +618,10 @@ const PurchaseConfirmModal = ({ credit, creditId, onClose, onPurchaseComplete })
                     </div>
                     <div>
                       <span className="font-mono text-[9px] uppercase tracking-widest text-emerald font-bold block">
-                        SOVEREIGN CLIMATE REGISTRY
+                        CARBONOS DEMO
                       </span>
                       <h3 className="serif-drama text-lg font-bold text-white tracking-wide">
-                        Certificate of Carbon Retirement
+                        Demo Retirement Receipt
                       </h3>
                     </div>
                   </div>
@@ -634,7 +634,7 @@ const PurchaseConfirmModal = ({ credit, creditId, onClose, onPurchaseComplete })
                 {/* Certificate Statement */}
                 <div className="space-y-3 text-xs leading-relaxed my-4">
                   <p className="text-slate-300">
-                    This official certificate certifies that <strong className="text-white underline">{companyName}</strong> (BIN: {taxBin}) has permanently retired and neutralized:
+                    This demo receipt records a simulated retirement for <strong className="text-white underline">{companyName}</strong> (BIN: {taxBin}). Nothing was retired or neutralized:
                   </p>
 
                   {/* Highlight Box */}
@@ -645,7 +645,7 @@ const PurchaseConfirmModal = ({ credit, creditId, onClose, onPurchaseComplete })
                       {activeCredit.tonnage} <span className="text-lg">tCO₂e</span>
                     </span>
                     <span className="text-[11px] font-sans text-slate-300">
-                      Verified Metric Tonnes of Carbon Dioxide Equivalent
+                      Metric tonnes CO₂e (simulated)
                     </span>
                   </div>
 
@@ -695,8 +695,8 @@ const PurchaseConfirmModal = ({ credit, creditId, onClose, onPurchaseComplete })
 
                 {/* Footer seal */}
                 <div className="flex items-center justify-between pt-3 border-t border-emerald/20 text-[10px] text-slate-400">
-                  <span>Ministry of Environment, Forest and Climate Change (MoEFCC) S.R.O. 349 Aligned</span>
-                  <span className="font-bold text-emerald">Verified by Carbon Zero BD</span>
+                  <span>Not a regulatory document. No registry, ministry or verifier issued it.</span>
+                  <span className="font-bold text-emerald">Demo · Carbon Zero BD</span>
                 </div>
               </div>
 
@@ -709,7 +709,7 @@ const PurchaseConfirmModal = ({ credit, creditId, onClose, onPurchaseComplete })
                   }`}
                 >
                   <Printer size={14} />
-                  <span>Print Certificate</span>
+                  <span>Print Demo Receipt</span>
                 </button>
 
                 <button 

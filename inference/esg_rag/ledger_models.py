@@ -40,6 +40,7 @@ FACTOR_KINDS = ("grid_average", "grid_combined_margin", "supplier_specific", "re
 DATA_QUALITY_GRADES = ("metered", "billed", "estimated", "default")
 SOURCE_TYPES = ("manual", "document", "csv")
 BOUNDARY_METHODS = ("operational_control", "financial_control", "equity_share")
+EQUIPMENT_KINDS = ("generator", "refrigeration")
 
 
 def _org_fk():
@@ -84,6 +85,31 @@ class Facility(EsgBase):
     equity_share_pct = Column(Numeric(7, 4), nullable=False, default=100)
     created_at = Column(DateTime(timezone=True), default=_now, nullable=False)
     archived_at = Column(DateTime(timezone=True))
+
+
+class Equipment(EsgBase):
+    """Facility asset register: captive generators and refrigeration / air-conditioning units. The reference is
+    unique per facility, so 'G1' at two factories is two assets (generator fuel and output link through it)."""
+    __tablename__ = "esg_equipment"
+    __table_args__ = (
+        UniqueConstraint("organization_id", "id", name="uq_esg_equipment_org_id"),
+        UniqueConstraint("facility_id", "equipment_ref", name="uq_esg_equipment_facility_ref"),
+        ForeignKeyConstraint(["organization_id", "facility_id"], ["esg_facility.organization_id", "esg_facility.id"],
+                             name="fk_esg_equipment_facility"),
+        CheckConstraint(_in("kind", EQUIPMENT_KINDS), name="ck_esg_equipment_kind"),
+        CheckConstraint("kind = 'generator' OR fuel IS NULL", name="ck_esg_equipment_fuel"),
+    )
+
+    id = Column(String(36), primary_key=True, default=_id)
+    organization_id = _org_fk()
+    facility_id = Column(String(36), nullable=False)
+    equipment_ref = Column(String(100), nullable=False)
+    kind = Column(String(20), nullable=False)
+    description = Column(Text)
+    fuel = Column(String(20))  # generators only: diesel, natural_gas, furnace_oil, ...
+    rated_kw = Column(Numeric(12, 3))
+    created_by = Column(String(255), nullable=False)
+    created_at = Column(DateTime(timezone=True), default=_now, nullable=False)
 
 
 class ReportingPeriod(EsgBase):
@@ -202,7 +228,7 @@ class ActivityRecord(EsgBase):
     market_factor_id = Column(String(36), ForeignKey("esg_emission_factor.id"))
     data_quality = Column(String(12))  # metered / billed / estimated / default
     uncertainty_pct = Column(Numeric(12, 6))  # activity data, 95 % half-width in %
-    generator_id = Column(String(100))  # links generator fuel to captive_generation_output
+    generator_ref = Column(String(100))  # esg_equipment ref at this facility: links generator fuel and output
     heating_value = Column(JSON)  # natural gas: gcv_mj_per_m3, ncv_to_gcv, reference_conditions, source, ...
     volume_correction = Column(QTY)  # billed m3 → m3 at the heating value's reference conditions
     refrigerant = Column(String(30))

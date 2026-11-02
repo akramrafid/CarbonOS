@@ -24,9 +24,9 @@ const Hero = () => {
 
   const tradeStreams = [
     { time: "14:22 BST", desc: "1,200 tCO₂e AWD Rice Rangpur cleared @ ৳15,000/t", detail: "৳17.46M direct to 410 bKash farmer wallets" },
-    { time: "13:58 BST", desc: "3,500 tCO₂e Sundarbans Blue Carbon verified by SGS", detail: "Sentinel-2 NDVI 0.82 · Verra VCS 2491 synced" },
-    { time: "12:40 BST", desc: "800 tCO₂e Solar Irrigation Khulna retired", detail: "Corporate ESG Scope 1 settlement · Tax credit issued" },
-    { time: "11:15 BST", desc: "2,400 tCO₂e Biogas Waste-to-Energy Dhaka minted", detail: "IoT sensor telemetry consensus verified (99.8%)" }
+    { time: "13:58 BST", desc: "3,500 tCO₂e Sundarbans Blue Carbon listed", detail: "Sentinel-2 NDVI 0.82 · not registered with any standard" },
+    { time: "12:40 BST", desc: "800 tCO₂e Solar Irrigation Khulna retired", detail: "Corporate buyer retirement" },
+    { time: "11:15 BST", desc: "2,400 tCO₂e Biogas Waste-to-Energy Dhaka minted", detail: "IoT sensor telemetry consensus (99.8%)" }
   ];
 
   useEffect(() => {
@@ -146,7 +146,7 @@ const Hero = () => {
                 <span className="relative inline-flex rounded-full h-2 w-2 bg-[#00C853]"></span>
               </span>
               <span className="font-mono text-[11px] font-semibold tracking-wider text-emerald uppercase">
-                National Sovereign Protocol v2.4
+                CarbonOS Protocol v2.4
               </span>
               <span className="text-white/20">|</span>
               <span className="font-sans text-[11px] text-white/80 hidden sm:inline">
@@ -160,7 +160,7 @@ const Hero = () => {
             {/* Headline with High-Impact Contrast */}
             <h1 className="flex flex-col mb-6 w-full tracking-tight">
               <span className="hero-h1 font-sans font-extrabold text-4xl sm:text-6xl lg:text-[68px] leading-[1.08] text-white">
-                Bangladesh's Sovereign
+                Bangladesh's
               </span>
               <span className="hero-h1 font-sans font-extrabold text-4xl sm:text-6xl lg:text-[68px] leading-[1.08] text-white">
                 Carbon Infrastructure
@@ -172,7 +172,7 @@ const Hero = () => {
 
             {/* Precision Subtitle */}
             <p className="hero-body font-sans text-base sm:text-lg lg:text-xl text-white/80 max-w-[620px] leading-relaxed mb-8 font-normal">
-              Digitizing, verifying, and securing Bangladesh's national carbon asset pipeline from 1M+ smallholder rural farmers directly to global ESG institutional registries.
+              Digitizing, tracing and securing Bangladesh's carbon asset pipeline from 1M+ smallholder rural farmers directly to global ESG institutional registries.
             </p>
 
             {/* Action Buttons & Fast Proof */}
@@ -181,7 +181,7 @@ const Hero = () => {
                 to="/platform/marketplace" 
                 className="group relative inline-flex items-center justify-center bg-[#00C853] hover:bg-[#00E676] text-[#040A06] font-sans font-bold text-sm sm:text-base px-7 py-4 rounded-full transition-all duration-300 shadow-[0_0_30px_rgba(0,200,83,0.35)] hover:shadow-[0_0_45px_rgba(0,200,83,0.55)] hover:scale-[1.02] active:scale-[0.98]"
               >
-                <span>Explore Verified Credits</span>
+                <span>Explore Credit Listings</span>
                 <ArrowRight size={18} className="ml-2 group-hover:translate-x-1 transition-transform" />
               </Link>
               
@@ -210,11 +210,11 @@ const Hero = () => {
               </div>
               <div className="hero-trust-badge flex items-center space-x-2 text-xs text-white/70">
                 <ShieldCheck size={16} className="text-emerald" />
-                <span>Article 6.2 ITMO Compatible</span>
+                <span>Every ledger line traceable to its evidence</span>
               </div>
               <div className="hero-trust-badge flex items-center space-x-2 text-xs text-white/70">
                 <Globe size={16} className="text-emerald" />
-                <span>Verra VCS & Gold Standard Synced</span>
+                <span>Labelled NOT ASSURED until a verifier signs</span>
               </div>
             </div>
 
@@ -254,7 +254,7 @@ const Hero = () => {
                     <span className="font-mono font-bold text-2xl lg:text-3xl text-white">10.42M</span>
                     <span className="font-mono text-xs text-emerald ml-1 font-semibold">tCO₂e</span>
                   </div>
-                  <span className="font-sans text-[10px] text-emerald/80 mt-1 font-medium">+18.4% YoY Audited</span>
+                  <span className="font-sans text-[10px] text-emerald/80 mt-1 font-medium">+18.4% YoY</span>
                 </div>
 
                 {/* Metric 2 */}
@@ -291,7 +291,7 @@ const Hero = () => {
                   <div className="mt-2">
                     <span className="font-mono font-bold text-2xl lg:text-3xl text-white">৳14,920</span>
                   </div>
-                  <span className="font-sans text-[10px] text-white/60 mt-1">Sovereign Spot Reference</span>
+                  <span className="font-sans text-[10px] text-white/60 mt-1">Indicative spot reference</span>
                 </div>
 
               </div>
@@ -315,21 +315,10 @@ const Hero = () => {
                 </p>
               </div>
 
-              {/* Verified Registry Stamps */}
-              <div className="grid grid-cols-3 gap-2 pt-2 border-t border-white/10">
-                <div className="flex flex-col items-center justify-center p-2 rounded-lg bg-white/[0.02] border border-white/5 text-center">
-                  <span className="font-mono text-[10px] text-emerald font-bold">VCS 2024</span>
-                  <span className="font-sans text-[9px] text-white/50">Verra Integrated</span>
-                </div>
-                <div className="flex flex-col items-center justify-center p-2 rounded-lg bg-white/[0.02] border border-white/5 text-center">
-                  <span className="font-mono text-[10px] text-amber-400 font-bold">GOLD STD</span>
-                  <span className="font-sans text-[9px] text-white/50">Dual Certified</span>
-                </div>
-                <div className="flex flex-col items-center justify-center p-2 rounded-lg bg-white/[0.02] border border-white/5 text-center">
-                  <span className="font-mono text-[10px] text-cyan-400 font-bold">ART 6.2</span>
-                  <span className="font-sans text-[9px] text-white/50">ITMO Compliant</span>
-                </div>
-              </div>
+              {/* No registry integration or third-party certification is claimed. */}
+              <p className="pt-2 border-t border-white/10 font-sans text-[10px] text-white/50">
+                No registry integration or third-party certification is claimed.
+              </p>
 
             </div>
           </div>

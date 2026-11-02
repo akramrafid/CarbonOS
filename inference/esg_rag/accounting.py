@@ -14,7 +14,8 @@ Rules enforced here (see docs/esg/ACCOUNTING_METHODOLOGY.md):
   emission rate only. Combined-margin factors (CDM Tool 07 project baselines) never produce a
   Scope 2 line: MARGIN_FACTOR_NOT_ALLOWED. The same rule is a database check constraint.
 * Memo items (electricity export, on-site renewable and captive generation) are reported, never
-  netted. Generator kWh are never also Scope 2: the generator's fuel is the Scope 1 line.
+  netted. Generator kWh are never also Scope 2: the generator's fuel is the Scope 1 line. A generator is
+  identified by (facility, generator_ref): the same reference at two facilities is two generators.
 * Natural gas on an energy basis: billed m3 × volume correction × GCV × NCV/GCV → GJ (NCV). No
   heating value → MISSING_HEATING_VALUE; a declared default heating value → HIGH_UNCERTAINTY.
 * Refrigerants: mass balance × GWP of the methodology's GWP basis. Montreal Protocol gases
@@ -243,7 +244,7 @@ class Activity:
     meter_ref: Optional[str] = None
     data_quality: Optional[str] = None  # one of DATA_QUALITY_GRADES
     uncertainty_pct: Optional[Decimal] = None  # activity data, half-width of 95 % interval
-    generator_id: Optional[str] = None  # links generator fuel to generator output (memo)
+    generator_ref: Optional[str] = None  # facility-scoped generator (equipment register): fuel and output
     heating_value: Optional[HeatingValue] = None
     volume_correction: Decimal = Decimal(1)  # billed m3 → m3 at the heating value's reference conditions
     refrigerant: Optional[str] = None
@@ -600,7 +601,7 @@ def calculate(activities: List[Activity], facilities: Dict[str, Facility], facto
             continue
 
         # Captive generator output is a memo item; its fuel is already Scope 1. Never also Scope 2.
-        if a.activity_type == "electricity" and (a.generator_id or (a.facility_id, a.meter_ref) in captive_meters):
+        if a.activity_type == "electricity" and (a.generator_ref or (a.facility_id, a.meter_ref) in captive_meters):
             exception("DOUBLE_COUNTED_ELECTRICITY", a,
                       detail="Electricity from a captive generator is not Scope 2; its fuel is the Scope 1 line")
             continue
@@ -645,32 +646,46 @@ def calculate(activities: List[Activity], facilities: Dict[str, Facility], facto
 
 
 def _generator_checks(acts: List[Activity], res: Result, bands: Dict[str, Tuple[Decimal, Decimal, str]]):
-    """Specific fuel consumption per captive generator must fall inside the configured band."""
+    """Specific fuel consumption per captive generator must fall inside the configured band. Generators are keyed
+    by (facility, generator_ref), so 'G1' at two facilities is two generators; output without fuel is reported."""
     lines = {l.activity_id: l for l in res.lines}
     fuel = defaultdict(lambda: defaultdict(Decimal))
+    fuelled = set()  # generators with any fuel record, converted or not
     output = defaultdict(Decimal)
     for a in acts:
-        if not a.generator_id:
+        if not a.generator_ref:
             continue
+        gen = (a.facility_id, a.generator_ref)
         if a.activity_type == "captive_generation_output":
-            output[a.generator_id] += a.quantity
-        elif a.activity_type == "diesel":
-            fuel[a.generator_id]["diesel"] += a.quantity
+            output[gen] += a.quantity
+            continue
+        fuelled.add(gen)
+        if a.activity_type == "diesel":
+            fuel[gen]["diesel"] += a.quantity
         elif a.activity_type == "natural_gas" and a.id in lines and "energy_gj_ncv" in lines[a.id].details:
-            fuel[a.generator_id]["natural_gas"] += lines[a.id].details["energy_gj_ncv"] * Decimal(1000)  # MJ
+            fuel[gen]["natural_gas"] += lines[a.id].details["energy_gj_ncv"] * Decimal(1000)  # MJ
+        elif a.activity_type not in bands:
+            fuel[gen][a.activity_type] += a.quantity
+
+    def flag(code, gen, kind, blocking, detail):
+        res.exceptions.append({"code": code, "activity_id": None, "facility_id": gen[0], "activity_type": kind,
+                               "blocking": blocking, "detail": f"Generator {gen[1]}: {detail}"})
+
+    for gen in sorted(set(output) - fuelled):
+        flag("GENERATOR_FUEL_MISSING", gen, "captive_generation_output", False,
+             f"{output[gen]} kWh output but no fuel record; its Scope 1 fuel may be missing")
     for gen in sorted(fuel):
         for kind, amount in sorted(fuel[gen].items()):
+            if kind not in bands:
+                flag("GENERATOR_BAND_NOT_CONFIGURED", gen, kind, False, f"no plausibility band for {kind}")
+                continue
             low, high, unit = bands[kind]
             if not output[gen]:
-                res.exceptions.append({"code": "GENERATOR_OUTPUT_MISSING", "activity_id": None, "facility_id": None,
-                                       "activity_type": kind, "blocking": False,
-                                       "detail": f"Generator {gen}: no captive_generation_output kWh to check {unit}"})
+                flag("GENERATOR_OUTPUT_MISSING", gen, kind, False, f"no captive_generation_output kWh to check {unit}")
                 continue
             ratio = (amount / output[gen]).quantize(Decimal("0.0001"), rounding=ROUND_HALF_UP)
             if not low <= ratio <= high:
-                res.exceptions.append({"code": "GENERATOR_EFFICIENCY_OUT_OF_BAND", "activity_id": None,
-                                       "facility_id": None, "activity_type": kind, "blocking": True,
-                                       "detail": f"Generator {gen}: {ratio} {unit} outside {low}–{high} {unit}"})
+                flag("GENERATOR_EFFICIENCY_OUT_OF_BAND", gen, kind, True, f"{ratio} {unit} outside {low}–{high} {unit}")
 
 
 def uncertainty_summary(res: Result) -> Dict[str, object]:

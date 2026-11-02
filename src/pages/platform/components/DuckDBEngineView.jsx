@@ -263,8 +263,8 @@ export const DuckDBEngineView = ({
                 <span className="font-bold text-amber-500">Not set: needs approval</span>
               </div>
               <div className="flex justify-between py-1">
-                <span className={isLight ? 'text-gray-600' : 'text-gray-400'}>Market Factor (Solar PPA)</span>
-                <span className="font-bold text-cyan-400">0.120 kg/kWh</span>
+                <span className={isLight ? 'text-gray-600' : 'text-gray-400'}>Market factor</span>
+                <span className="font-bold text-amber-500">None: grid-average fallback</span>
               </div>
             </div>
           </div>

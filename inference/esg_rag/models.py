@@ -104,3 +104,9 @@ class EmissionFactorRecord(Base):
     year = Column(Integer, default=2024)
     confidence_rating = Column(String(20), default="Tier 2 - National")
     created_at = Column(DateTime, default=datetime.datetime.utcnow)
+    # Lifecycle (migration 0005). NULL = active. A withdrawn row is RETIRED with a reason, never deleted or
+    # overwritten: see esg_rag/data_migrations/retire_withdrawn_grid_factor.py.
+    status = Column(String(10))
+    status_reason = Column(Text)
+    status_changed_at = Column(DateTime)
+    status_changed_by = Column(String(255))

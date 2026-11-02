@@ -15,6 +15,12 @@ No official Bangladesh grid emission factor has been located.
 | "Bangladesh National Grid Electricity Baseline", cited to "DoE Gazette Memo Ref: 22.02.0000.018.99.001.23" | 0.637 kg CO2e/kWh | The cited document could not be found. |
 | "Grid Peak Hour Thermal Surcharge Factor", cited to a BERC peaking schedule | 0.620 kg CO2e/kWh | No source located. A peak-hour marginal rate is not a location-based factor: every kWh in a period gets the same grid-average rate. |
 | "Off-Peak Industrial Combined Cycle Baseline" (the 0.550 used in code as a "Combined Margin") | 0.550 kg CO2e/kWh | No source located, and a combined margin (CDM Tool 07) is a project-baseline metric, never a Scope 2 factor. |
+
+Databases seeded before this branch still hold the 0.55 row in the legacy `esg_emission_factors` table. It is
+retired, not deleted, by the data migration `inference/esg_rag/data_migrations/retire_withdrawn_grid_factor.py`:
+dry run by default, `--apply --actor <id>` sets `status = RETIRED` with a reason that cites this branch and writes
+an audit event. The value, unit and citation are never changed. Retired rows are left out of
+`GET /api/esg/emission-factors` unless `include_retired=true`.
 | "Rooftop Solar PV Generation (Avoided Emission)" | −0.637 kg CO2e/kWh | Exported or self-generated electricity is a memo item; it is never a negative factor. |
 
 What replaces them: a DRAFT Bangladesh grid **average** derived by CarbonOS from BPDB annual-report data

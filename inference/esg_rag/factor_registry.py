@@ -63,23 +63,6 @@ FACTOR_REGISTRY_CATALOG = [
         "status": "active"
     },
     {
-        "factor_id": "EF-BD-GREEN-TARIFF-01",
-        "name": "On-Site Solar PV / SREDA Corporate Green Tariff",
-        "category": "Scope 2",
-        "fuel_or_activity": "Electricity (Market-Based)",
-        "factor_value": 0.120,
-        "unit": "kg CO2e / kWh",
-        "uncertainty_pct": 5.0,
-        "version": "v2026.1-NATIONAL",
-        "region": "Bangladesh",
-        "tier": "Tier 3 (Facility PPA)",
-        "source_citation": "SREDA Net-Metering Guidelines & IDCOL Solar Standard",
-        "gazette_ref": None,
-        "source_status": "UNVERIFIED: no primary source located",
-        "effective_date": "2024-01-01",
-        "status": "active"
-    },
-    {
         "factor_id": "EF-BD-COMMUTE-01",
         "name": "Dhaka Industrial Worker Multi-Modal Commute",
         "category": "Scope 3",
