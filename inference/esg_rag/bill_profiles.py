@@ -41,6 +41,9 @@ DOCUMENT_TYPES = ("electricity_ht", "electricity_lt", "gas", "fuel_challan", "re
 LANGUAGES = ("en", "bn")
 TAKES = ("value", "rest", "flag")
 MAX_YAML_BYTES = 200_000
+# Nodes after alias expansion (a shared node counts every time it is reached): a few hundred bytes of nested aliases
+# can otherwise expand to millions of nodes when the document is walked or turned into text.
+MAX_YAML_NODES = 100_000
 MAX_ITEMS = 200
 
 KEY = re.compile(r"^[a-z][a-z0-9_]*(\.[a-z0-9_]+)+$")
@@ -173,10 +176,13 @@ def parse_parameter(raw: dict, groups: Dict[str, Optional[str]]) -> Parameter:
         unit = ledger.get("unit")
         if unit != accounting.canonical_unit(at) or not unit_dimension_ok(unit, dimension or "dimensionless"):
             _fail(where, f"ledger unit must be {accounting.canonical_unit(at)} and match the parameter's dimension")
+    description = raw.get("description", "")
+    if not isinstance(description, str):
+        _fail(where, "description must be text")
     return Parameter(key=key, dtype=dtype, role=role, group=group, labels=dict(labels), aliases=aliases,
                      dimension=dimension, canonical_unit=canonical, allowed_units=allowed, enum=enum,
                      ledger=dict(ledger) if ledger else None, derived=bool(raw.get("derived", False)),
-                     description=str(raw.get("description", ""))[:500])
+                     description=description[:500])
 
 
 def parse_groups(raw) -> Dict[str, Optional[str]]:
@@ -240,6 +246,9 @@ def _check_rule(raw, params, groups, where) -> dict:
     message = raw.get("message", "")
     if not isinstance(message, str) or len(message) > 300:
         _fail(where, f"{code}.message must be text up to 300 characters")
+    unknown = sorted(set(bill_rules.placeholders(message)) - set(params))
+    if unknown:
+        _fail(where, f"{code}.message names unknown parameter(s): {', '.join(unknown)}")
     return {"code": code, "scope": scope, "when": raw.get("when"), "expect": raw.get("expect"),
             "blocking": bool(raw.get("blocking", True)), "message": message}
 
@@ -396,7 +405,13 @@ def validate_profile(doc: dict, params: Dict[str, Parameter], groups, rulesets: 
             "effective_to": end, "detect": detect, "sections": sections, "fields": fields, "tables": tables,
             "rules": rules, "derived": derived, "groups": groups_used,
             "parameters": {k: used[k].as_dict() for k in sorted(used)},
-            "notes": str(doc.get("notes", ""))[:2000]}
+            "notes": _text_field(doc.get("notes", ""), where, "notes")[:2000]}
+
+
+def _text_field(value, where, name) -> str:
+    if not isinstance(value, str):
+        _fail(where, f"{name} must be text")
+    return value
 
 
 def canonical_json(obj) -> str:
@@ -417,9 +432,29 @@ def load_yaml(text: str) -> dict:
         doc = yaml.safe_load(text)
     except yaml.YAMLError as e:
         raise ProfileError(f"Not valid YAML: {e}") from None
+    except RecursionError:
+        raise ProfileError("YAML is nested too deeply") from None
     if not isinstance(doc, dict):
         raise ProfileError("YAML document must be a mapping")
+    if not _within_node_limit(doc, MAX_YAML_NODES):
+        raise ProfileError(f"YAML expands to more than {MAX_YAML_NODES} nodes (check its aliases)")
     return doc
+
+
+def _within_node_limit(doc, limit: int) -> bool:
+    """True if the document, aliases expanded, has at most `limit` nodes. Iterative, and stops once over the limit."""
+    stack, seen = [doc], 0
+    while stack:
+        node = stack.pop()
+        seen += 1
+        if seen > limit:
+            return False
+        if isinstance(node, dict):
+            stack.extend(node.keys())
+            stack.extend(node.values())
+        elif isinstance(node, list):
+            stack.extend(node)
+    return True
 
 
 def profile_documents(doc: dict) -> List[dict]:

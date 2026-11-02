@@ -18,6 +18,9 @@ _MONTHS = {
 MONTHS = {unicodedata.normalize("NFC", name): num for num, names in _MONTHS.items() for name in names}
 
 
+MAX_NUMBER_CHARS = 30
+
+
 class BillParseError(ValueError):
     pass
 
@@ -36,6 +39,8 @@ def parse_number(text: str) -> Decimal:
     s = to_ascii_digits(text).strip().replace(",", "").replace(" ", "")
     if not re.fullmatch(r"-?\d+(\.\d+)?", s):
         raise BillParseError(f"Not a number: {text!r}")
+    if len(s) > MAX_NUMBER_CHARS:  # no bill prints such a number; it would only strain the arithmetic downstream
+        raise BillParseError(f"Too many digits: {text[:40]!r}")
     try:
         return Decimal(s)
     except InvalidOperation as e:
@@ -47,8 +52,15 @@ def parse_date(text: str) -> dt.date:
     s = to_ascii_digits(text).strip()
     m = re.fullmatch(r"(\d{1,2})[-/.](\d{1,2})[-/.](\d{4})", s)
     if m:
-        return dt.date(int(m.group(3)), int(m.group(2)), int(m.group(1)))
+        return _date(int(m.group(3)), int(m.group(2)), int(m.group(1)), text)
     m = re.fullmatch(r"(\d{1,2})\s+([^\d\s,]+),?\s+(\d{4})", s)
     if m and m.group(2).lower() in MONTHS:
-        return dt.date(int(m.group(3)), MONTHS[m.group(2).lower()], int(m.group(1)))
+        return _date(int(m.group(3)), MONTHS[m.group(2).lower()], int(m.group(1)), text)
     raise BillParseError(f"Unrecognised date: {text!r}")
+
+
+def _date(year: int, month: int, day: int, text: str) -> dt.date:
+    try:
+        return dt.date(year, month, day)
+    except ValueError:  # 31-02-2025, month 13, year 0: an OCR misread, not a date
+        raise BillParseError(f"Not a calendar date: {text!r}") from None

@@ -8,7 +8,7 @@ definitions (organization NULL) are created and approved by platform operators o
 """
 import datetime as dt
 import hashlib
-from decimal import Decimal
+from decimal import Decimal, localcontext
 from typing import Dict, List, Optional, Sequence
 
 from sqlalchemy import or_, update
@@ -21,6 +21,8 @@ from .ledger import DomainError, _get, _jsonable, _need, audit
 from .ledger_models import Bill, BillParameter, BillProfile, BillValue, Facility, _now
 
 MAX_PAGES, MAX_WORDS = 20, 20000
+WIDE_PRECISION = 80  # digits for sums and averages of bill values (each value has at most 30 characters)
+MALFORMED = (TypeError, AttributeError, KeyError, ValueError, RecursionError)  # wrong shapes in submitted YAML
 LIVE = ("extracted", "confirmed", "corrected")  # values validation reads
 REVIEWED = ("confirmed", "corrected")
 ANALYSED = ("confirmed", "corrected", "derived")
@@ -55,7 +57,9 @@ def _text(v) -> Optional[str]:
         return "true" if v else "false"
     if isinstance(v, Decimal):
         if v.as_tuple().exponent < -10:
-            v = v.quantize(Decimal("0.0000000001"))
+            with localcontext() as ctx:
+                ctx.prec = WIDE_PRECISION
+                v = v.quantize(Decimal("0.0000000001"))
         return format(v, "f")
     if isinstance(v, dt.date):
         return v.isoformat()
@@ -95,8 +99,11 @@ def _chain(group, groups) -> List[str]:
     return out
 
 
-def _visible_parameters(db, principal):
-    rows = db.query(BillParameter).filter(_visible(BillParameter, principal), BillParameter.status != "RETIRED").all()
+def _visible_parameters(db, principal, platform_only: bool = False):
+    """Latest parameter definitions visible to the principal; platform_only for platform-wide profiles, so that a
+    shared profile never snapshots one organization's own definitions."""
+    scope = BillParameter.organization_id.is_(None) if platform_only else _visible(BillParameter, principal)
+    rows = db.query(BillParameter).filter(scope, BillParameter.status != "RETIRED").all()
     latest = _latest_per_key(rows, "key")
     params, groups = {}, {"bill": None}
     for key, row in latest.items():
@@ -115,6 +122,8 @@ def load_parameters(db, principal, yaml_text: str, platform_wide: bool = False) 
         params, groups = bp.parse_parameters(bp.load_yaml(yaml_text))
     except bp.ProfileError as e:
         raise DomainError(422, str(e))
+    except MALFORMED as e:
+        raise DomainError(422, f"Malformed parameter definitions ({type(e).__name__})")
     _, known_groups, _ = _visible_parameters(db, principal)
     clash = [g for g, parent in groups.items() if g in known_groups and known_groups[g] != parent]
     if clash:
@@ -149,13 +158,15 @@ def _rulesets_for(doc, params, groups) -> Dict[str, dict]:
 def load_profiles(db, principal, yaml_text: str, platform_wide: bool = False) -> List[BillProfile]:
     """New DRAFT profile versions (self-contained: rule sets expanded, parameter definitions snapshotted)."""
     org = _scope(principal, platform_wide)
-    params, groups, rows = _visible_parameters(db, principal)
+    params, groups, rows = _visible_parameters(db, principal, platform_only=platform_wide)
     out = []
     try:
         docs = bp.profile_documents(bp.load_yaml(yaml_text))
         definitions = [bp.validate_profile(d, params, groups, _rulesets_for(d, params, groups)) for d in docs]
     except bp.ProfileError as e:
         raise DomainError(422, str(e))
+    except MALFORMED as e:
+        raise DomainError(422, f"Malformed profile ({type(e).__name__})")
     for defn in definitions:
         defn["parameter_versions"] = {k: {"id": rows[k].id, "version": rows[k].version} for k in defn["parameters"]}
         sha = bp.content_sha256(defn)
@@ -237,6 +248,12 @@ def _value_row(bill: Bill, r: bx.Extracted, profile_version) -> BillValue:
                      value_text=_text(r.value), unit=r.unit, page=r.page, bbox=list(r.bbox) if r.bbox else None,
                      source=r.source, status=r.status,
                      confidence=Decimal(str(round(r.confidence, 5))) if r.confidence is not None else None)
+
+
+def check_upload(db, principal, facility_id: str) -> None:
+    """Role and facility, checked before a file is parsed (parsing is the expensive part)."""
+    _need(principal, "write")
+    _get(db, Facility, principal, facility_id)
 
 
 def create_bill(db, principal, facility_id: str, doc: bx.Document, filename: Optional[str] = None,
@@ -390,9 +407,12 @@ def review_value(db, principal, value_id: int, action: str, value: Optional[str]
         if not (value or "").strip():
             raise DomainError(422, "A correction needs the value printed on the bill")
         p = _bill_profile_params(db, principal, bill)[v.parameter_key]
+        allowed = tuple(p.allowed_units) + ((p.canonical_unit,) if p.canonical_unit else ())
+        if unit is not None and unit not in allowed:
+            raise DomainError(422, f"{p.key}: unit must be one of {', '.join(allowed) or 'none (no unit)'}")
         try:
             normalised, canonical = bx.normalise(p, value, unit)
-        except (bx.BillParseError, ValueError, ArithmeticError) as e:
+        except (bx.BillParseError, ValueError, ArithmeticError, TypeError, AttributeError) as e:
             raise DomainError(422, f"{p.key}: {e}")
         if v.extracted_value_text is None:
             v.extracted_value_text = v.value_text
@@ -565,8 +585,10 @@ def analyse(db, principal, keys: Sequence[str], group_by: Sequence[str], grain: 
     for g in sorted(groups.values(), key=lambda g: tuple(str(g.get(d)) for d in group_by) + (g["key"],)):
         nums = g.pop("values")
         if nums:
-            total = sum(nums, Decimal(0))
-            g.update(sum=_text(total), min=_text(min(nums)), max=_text(max(nums)),
-                     avg=_text((total / len(nums)).quantize(Decimal("0.000001"))))
+            with localcontext() as ctx:  # exact sums of long values; quantize never runs out of digits
+                ctx.prec = WIDE_PRECISION
+                total = sum(nums, Decimal(0))
+                avg = (total / len(nums)).quantize(Decimal("0.000001"))
+            g.update(sum=_text(total), min=_text(min(nums)), max=_text(max(nums)), avg=_text(avg))
         rows.append(g)
     return {"keys": list(keys), "group_by": list(group_by), "grain": grain, "rows": rows}

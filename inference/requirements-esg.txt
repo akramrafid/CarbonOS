@@ -16,6 +16,5 @@ pdfplumber
 PyYAML>=6.0
 pint==0.24.4
 pytesseract==0.3.13  # local OCR; the tesseract binary with the ben and eng models is installed separately
-hypothesis==6.122.3  # property tests
 python-docx
 uvicorn==0.27.0.post1

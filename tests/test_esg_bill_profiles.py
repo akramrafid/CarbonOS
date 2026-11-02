@@ -6,9 +6,11 @@ every value, posting gates, version pinning, tenant isolation and roles. All doc
 import datetime as dt
 import os
 import sys
+import types
 import unittest
 from decimal import Decimal as D
 from pathlib import Path
+from unittest import mock
 
 sys.path.insert(0, os.path.dirname(__file__))
 from esg_harness import ESGApiTestCase, auth  # noqa: E402
@@ -156,6 +158,46 @@ class BillApiTest(ESGApiTestCase):
             "yaml": GRID_YAML.replace("profile_key: synthetic-grid-ht", "profile_key: synthetic-grid-twin")})[0]
         self.ok("POST", "admin-a", f"/bill-profiles/{twin['id']}/approve")
         self.assertEqual(self.bill()["status"], "AMBIGUOUS_PROFILE")
+
+    def test_upload_checks_role_and_facility_before_parsing(self):
+        files = {"file": ("synthetic_bill.pdf", b"%PDF-1.4 synthetic", "application/pdf")}
+        with mock.patch.object(bx, "document_from_pdf", side_effect=AssertionError("parsed before the checks")) as parse:
+            for sub, status in (("viewer-a", 403), ("user-b", 404)):  # a viewer; another organization's user
+                res = self.client.post(API + "/bills/upload", data={"facility_id": self.fac}, files=files,
+                                       headers=auth(sub))
+                self.assertEqual(res.status_code, status, res.text)
+            parse.assert_not_called()
+
+    def test_malformed_definitions_are_422_not_500(self):
+        for text in ("profiles: [1]", "schema: carbonos.bill_profile/1\nprofile_key: [1]",
+                     "a: " + "[" * 3000 + "]" * 3000):
+            with self.subTest(text=text[:30]):
+                self.assertEqual(self.call("POST", "user-a", "/bill-profiles", {"yaml": text}).status_code, 422)
+        self.assertEqual(self.call("POST", "user-a", "/bill-parameters", {
+            "yaml": "schema: carbonos.bill_parameters/1\nparameters: [1]"}).status_code, 422)
+
+    def test_a_correction_takes_only_the_parameters_units_and_long_values_still_aggregate(self):
+        self.definitions()
+        bill = self.bill()
+        total = {(v["parameter_key"], v["group_index"]): v for v in bill["values"]}[("energy.kwh.total", "")]
+        for unit in ("bogus", "m", "kWh*(km/m)**333000"):
+            with self.subTest(unit=unit):
+                res = self.call("POST", "contrib-a", f"/bill-values/{total['id']}/correct", {"value": "50", "unit": unit})
+                self.assertEqual(res.status_code, 422, res.text)
+        self.ok("POST", "contrib-a", f"/bill-values/{total['id']}/correct", {"value": "9" * 24, "unit": "kWh"})
+        res = self.call("GET", "viewer-a", "/bill-analysis", params={"keys": "energy.kwh.total", "group_by": "facility"})
+        self.assertEqual(res.status_code, 200, res.text)
+
+    def test_platform_wide_profiles_snapshot_platform_definitions_only(self):
+        from esg_rag import bill_service
+        self.ok("POST", "user-a", "/bill-parameters", {"yaml": PARAMS_YAML})  # organization A's own definitions
+        db = self.Session()
+        try:
+            who = types.SimpleNamespace(organization_id=self.org_a)
+            self.assertTrue(bill_service._visible_parameters(db, who)[0])
+            self.assertEqual(bill_service._visible_parameters(db, who, platform_only=True)[0], {})
+        finally:
+            db.close()
 
     def test_review_correct_reject_and_map(self):
         self.definitions()

@@ -84,6 +84,22 @@ aggregates confirmed, corrected and derived values (sum, min, max, mean, count) 
 Proof: `tests/test_esg_bill_cases.py` runs every `tests/fixtures/bill_cases/*/case.yaml` (D1). Rule-language
 injection tests: `tests/test_esg_bill_rules.py` (D2).
 
+## Limits
+
+Definitions and documents come from users, so every path is bounded and fails with a 422, never a 500:
+
+* YAML: at most 200 KB and 100 000 nodes after alias expansion (anchors stay usable for shared templates); deep
+  nesting is refused; text fields must be text; a rule message may name only known parameters.
+* Rules: only `RuleError` (when compiled) and `EvalError` (when evaluated) leave the evaluator; numbers are finite,
+  `0 ** negative` is refused and only numbers and dates can be ordered.
+* Bill text: impossible dates and numbers longer than 30 characters are parse errors; corrections take only the
+  parameter's units.
+* Uploads: write role, facility and the upload rate limit are checked before parsing. The file is parsed in memory
+  (nothing written to disk) in the worker pool: at most 15 MB and 20 pages; images PNG, JPEG, TIFF, BMP, GIF or WEBP
+  up to 40 million pixels; local OCR stops after 120 s. A request body limit belongs at the reverse proxy.
+
+Regression tests: `tests/test_esg_bill_hardening.py` and `tests/test_esg_bill_profiles.py`.
+
 ## Seed profiles awaiting a real bill
 
 Electricity HT and LT: DESCO, DPDC, PBS/BREB, NESCO, WZPDCL, BPDB (12). Gas: Titas, Bakhrabad, KGDCL, Jalalabad,

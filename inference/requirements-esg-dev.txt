@@ -1,0 +1,3 @@
+# Test-only tools for CI and local test runs. Production installs requirements-esg.txt only.
+-r requirements-esg.txt
+hypothesis==6.122.3  # property tests

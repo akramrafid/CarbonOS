@@ -14,6 +14,7 @@ Arithmetic is Decimal with a fixed context, so results are deterministic.
 """
 import ast
 import datetime as dt
+import math
 import re
 from dataclasses import dataclass
 from decimal import Context, Decimal, InvalidOperation, ROUND_HALF_UP, localcontext
@@ -102,6 +103,8 @@ def compile_expression(source: str, known_keys: Iterable[str]) -> Expression:
             if isinstance(node.value, bool) or node.value is None:
                 return
             if isinstance(node.value, (int, float, str)):
+                if isinstance(node.value, float) and not math.isfinite(node.value):
+                    raise RuleError("Numbers must be finite")
                 if isinstance(node.value, str) and len(node.value) > 100:
                     raise RuleError("String constants are limited to 100 characters")
                 return
@@ -148,12 +151,20 @@ Lookup = Callable[[str], object]  # key -> scalar Value, list of Values, or rais
 
 
 def evaluate(expr: Expression, lookup: Lookup) -> Value:
-    """Evaluate a compiled expression. Raises Missing when a needed key has no value, EvalError otherwise."""
+    """Evaluate a compiled expression. Raises Missing when a needed key has no value and EvalError for anything else:
+    rules and values come from data, so no other exception ever leaves here."""
     with localcontext(DECIMAL_CONTEXT):
         try:
-            return _eval(expr.tree.body, lookup)
+            value = _eval(expr.tree.body, lookup)
+        except EvalError:
+            raise
         except (InvalidOperation, ArithmeticError) as e:  # Decimal overflow, division by zero, ...
             raise EvalError(f"Arithmetic error in '{expr.source}': {type(e).__name__}") from None
+        except (TypeError, ValueError, KeyError, RecursionError) as e:  # a malformed rule or value, never a 500
+            raise EvalError(f"Cannot evaluate '{expr.source}': {type(e).__name__}") from None
+    if isinstance(value, Decimal) and not value.is_finite():
+        raise EvalError(f"'{expr.source}' does not give a finite number")
+    return value
 
 
 def _num(v) -> Decimal:
@@ -229,6 +240,8 @@ def _binop(op, left, right):
         return a / b
     if b != b.to_integral_value() or abs(b) > MAX_EXPONENT:
         raise EvalError(f"Exponent must be a whole number between -{MAX_EXPONENT} and {MAX_EXPONENT}")
+    if a == 0 and b < 0:
+        raise EvalError("0 cannot be raised to a negative power")
     return a ** int(b)
 
 
@@ -242,8 +255,8 @@ def _compare(op, a, b) -> bool:
         return a == b
     if isinstance(op, ast.NotEq):
         return a != b
-    if isinstance(a, str):
-        raise EvalError("Text can only be compared with == or !=")
+    if not isinstance(a, (Decimal, dt.date)):
+        raise EvalError("Only numbers and dates can be ordered; text and empty values can only be compared with == or !=")
     if isinstance(op, ast.Lt):
         return a < b
     if isinstance(op, ast.LtE):
@@ -297,12 +310,17 @@ def render(template: str, lookup: Lookup) -> str:
     def sub(m):
         try:
             v = lookup(m.group(1))
-        except EvalError:
+        except (EvalError, KeyError):  # no value, or a key the profile does not have (rejected at load)
             return "?"
         if isinstance(v, list):
             return "?"
         return format(v, "f") if isinstance(v, Decimal) else str(v)
     return _PLACEHOLDER.sub(sub, template[:500])
+
+
+def placeholders(template: str) -> List[str]:
+    """Parameter keys named as {placeholders} in a message template."""
+    return _PLACEHOLDER.findall(template or "")
 
 
 def scope_lookup(values: Dict[str, object]) -> Lookup:

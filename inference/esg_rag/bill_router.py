@@ -4,7 +4,6 @@ bill_service. Documents are read locally (pdfplumber / Tesseract); nothing is se
 """
 import hashlib
 import os
-import tempfile
 from typing import List, Literal, Optional
 
 from fastapi import APIRouter, Depends, File, Form, HTTPException, Query, UploadFile
@@ -14,6 +13,7 @@ from sqlalchemy.orm import Session
 from . import bill_extract as bx
 from . import bill_service
 from .auth import Principal, require
+from .ratelimit import limited
 from .database import get_db
 from .ledger_models import Bill, BillParameter, BillProfile
 from .ledger_router import Limit, Offset, _list, out, run
@@ -122,22 +122,20 @@ def create_bill(body: BillIn, p: Principal = Depends(require("read")), db: Sessi
 
 
 @router.post("/bills/upload", status_code=201)
-async def upload_bill(facility_id: str = Form(...), file: UploadFile = File(...), ocr: bool = Form(False),
-                      p: Principal = Depends(require("read")), db: Session = Depends(get_db)):
-    """PDF text layer (pdfplumber) or local OCR (Tesseract ben+eng). The file is read locally and not kept;
-    its SHA-256 and words are."""
-    data = await file.read(MAX_UPLOAD_BYTES + 1)
+def upload_bill(facility_id: str = Form(...), file: UploadFile = File(...), ocr: bool = Form(False),
+                p: Principal = Depends(limited("upload", "write")), db: Session = Depends(get_db)):
+    """PDF text layer (pdfplumber) or local OCR (Tesseract ben+eng), read in memory: the file is not kept, its SHA-256
+    and words are. A plain def, so parsing runs in the worker thread pool, not on the event loop."""
+    run(bill_service.check_upload, db, p, facility_id)  # role and facility before any parsing
+    data = file.file.read(MAX_UPLOAD_BYTES + 1)
     if len(data) > MAX_UPLOAD_BYTES:
         raise HTTPException(413, "Bill files are limited to 15 MB")
     is_pdf = data[:5] == b"%PDF-"
-    with tempfile.TemporaryDirectory(prefix="carbonos-bill-") as tmp:
-        path = os.path.join(tmp, "bill.pdf" if is_pdf else "bill.img")
-        with open(path, "wb") as fh:
-            fh.write(data)
-        try:
-            doc = bx.document_from_image(path) if (ocr or not is_pdf) else bx.document_from_pdf(path)
-        except Exception as e:  # unreadable PDF/image or Tesseract missing: tell the user, keep nothing
-            raise HTTPException(422, f"Could not read the document locally: {type(e).__name__}: {e}")
+    try:
+        doc = (bx.document_from_image(data) if (ocr or not is_pdf)
+               else bx.document_from_pdf(data, max_pages=bill_service.MAX_PAGES))
+    except Exception as e:  # unreadable, too large, or Tesseract missing or timed out: say so, keep nothing
+        raise HTTPException(422, f"Could not read the document locally ({type(e).__name__})")
     name = f"{hashlib.sha256(data).hexdigest()[:12]}_{os.path.basename(file.filename or 'bill')}"[:255]
     bill = run(bill_service.create_bill, db, p, facility_id, doc, name)
     return _bill_out(run(bill_service.bill_detail, db, p, bill.id))
