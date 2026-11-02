@@ -1,0 +1,11 @@
+# SYNTHETIC test fixture: an invented Bengali-language bill from an invented utility. Not a real bill.
+source: pdf_text
+pages:
+  - lines:
+      - "সিনথেটিক রিভার পাওয়ার - পরীক্ষার ফিক্সচার বিল"
+      - "হিসাব নং SRP-77"
+      - "মেয়াদ শুরু ০১-০৮-২০২৫ মেয়াদ শেষ ৩১-০৮-২০২৫"
+      - "মিটার নং RM-9 গুণক ১"
+      - "মোট ইউনিট ৩,২০০ kWh"
+      - "মোট টাকা ২৮,৮০০"
+      - "ডিমান্ড চার্জ ৫০০"

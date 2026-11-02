@@ -1,0 +1,15 @@
+# SYNTHETIC test fixture: invented bill, read with synthetic-grid-ht v2 (new kVA field). Not a real bill.
+source: pdf_text
+pages:
+  - lines:
+      - "SYNTHETIC GRID CO - TEST FIXTURE ELECTRICITY BILL"
+      - "Account No SYN-ACC-1 Bill No SB-2025-07"
+      - "Period From 01-07-2025 Period To 31-07-2025"
+      - "Meter No SGM-001 MF 40"
+      - "Register Previous Present kWh"
+      - "Off-Peak 1,000 1,300 12,000"
+      - "Peak 500 560 2,400"
+      - "Max Demand 85 kW"
+      - "Max kVA 110"
+      - "Total Energy 14,400 kWh"
+      - "Amount Payable 1,25,000 Tk"

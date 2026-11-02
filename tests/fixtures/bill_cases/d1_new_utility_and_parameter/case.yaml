@@ -1,0 +1,64 @@
+# D1: a new utility profile AND a new parameter on an existing profile, as data only. This directory holds
+# YAML files and nothing else; tests/test_esg_bill_cases.py runs it unchanged. All documents are SYNTHETIC.
+case: d1_new_utility_and_parameter
+description: >-
+  demand.kva.max is added to the existing synthetic-grid-ht profile (version 2, with a new rule), and a new
+  utility profile reads a Bengali bill whose consumption flows into the ledger.
+load:
+  - parameters: repository
+  - parameters: synthetic_parameters_d1.yaml          # the new parameter definition
+  - profile: ../_shared/synthetic_grid_profile.yaml   # the existing profile, version 1
+  - profile: synthetic_profiles_d1.yaml               # its version 2 + the new utility
+bills:
+  - document: synthetic_bill_grid_2025_07_kva.yaml
+    expect:
+      status: EXTRACTED
+      profile: {key: synthetic-grid-ht, version: 2}
+      values:
+        - {key: demand.kva.max, group: "meter:1", value: "110", unit: kVA}
+        - {key: demand.kw.max, group: "meter:1", value: "85", unit: kW}
+        - {key: energy.kwh.total, value: "14400", unit: kWh}
+      blocking: []
+    post: true
+  - document: synthetic_bill_river_2025_08.yaml
+    expect:
+      status: EXTRACTED
+      profile: {key: synthetic-river-power-lt, version: 1}
+      values:
+        - {key: account.number, value: SRP-77}
+        - {key: period.start, value: "2025-08-01"}
+        - {key: period.end, value: "2025-08-31"}
+        - {key: meter.serial, group: "meter:1", value: RM-9}
+        - {key: meter.multiplier, group: "meter:1", value: "1"}
+        - {key: energy.kwh.total, value: "3200", unit: kWh}
+        - {key: cost.total, value: "28800", unit: BDT}
+      unmapped: ["500"]
+      blocking: []
+    post: true
+  - document: synthetic_bill_grid_2025_09_bad_kva.yaml
+    expect:
+      status: EXTRACTED
+      profile: {key: synthetic-grid-ht, version: 2}
+      values:
+        - {key: demand.kva.max, group: "meter:1", value: "80", unit: kVA}
+      blocking: [DEMAND_KVA_BELOW_KW]       # the new YAML rule
+    post: false                              # posting is refused while the finding stands
+analysis:
+  - query: {keys: [demand.kva.max], group_by: [meter, period]}
+    rows:
+      - {meter: SGM-001, period: "2025-07", key: demand.kva.max, max: "110", unit: kVA}
+      - {meter: SGM-001, period: "2025-09", key: demand.kva.max, max: "80", unit: kVA}
+  - query: {keys: [energy.kwh.total], group_by: [period]}
+    rows:
+      - {period: "2025-07", key: energy.kwh.total, sum: "14400"}
+      - {period: "2025-08", key: energy.kwh.total, sum: "3200"}
+      - {period: "2025-09", key: energy.kwh.total, sum: "14400"}
+  - query: {keys: [energy.kwh.total], group_by: [meter], grain: fiscal_year}
+    rows:
+      - {meter: SYN-ACC-1, key: energy.kwh.total, sum: "28800", count: 2}
+      - {meter: SRP-77, key: energy.kwh.total, sum: "3200", count: 1}
+ledger:
+  - {activity_type: electricity, quantity: "14400", unit: kWh, meter_ref: SYN-ACC-1, activity_start: "2025-07-01",
+     activity_end: "2025-07-31", status: DRAFT}
+  - {activity_type: electricity, quantity: "3200", unit: kWh, meter_ref: SRP-77, activity_start: "2025-08-01",
+     activity_end: "2025-08-31", status: DRAFT}

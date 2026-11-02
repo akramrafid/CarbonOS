@@ -1,0 +1,13 @@
+# D1, SYNTHETIC test fixture: a new parameter definition, added as data only.
+schema: carbonos.bill_parameters/1
+groups:
+  meter: bill
+parameters:
+  - key: demand.kva.max
+    labels: {en: Maximum apparent demand, bn: সর্বোচ্চ আপাত চাহিদা (কেভিএ)}
+    dtype: decimal
+    dimension: "[power]"
+    canonical_unit: kVA
+    allowed_units: [kVA]
+    role: demand
+    group: meter
