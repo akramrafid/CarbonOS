@@ -1162,7 +1162,7 @@ const SaaSDashboard = () => {
         if (name.includes("diesel")) newEf.diesel = item.factor_value;
         if (name.includes("petrol")) newEf.petrol = item.factor_value;
         if (name.includes("lpg")) newEf.lpg = item.factor_value;
-        if (name.includes("grid")) newEf.electricity = item.factor_value;
+        // Grid rows are never synced: location-based Scope 2 takes only an approved grid-average factor.
         if (name.includes("commute")) newEf.employees = item.factor_value;
         if (name.includes("air")) newEf.airTravel = item.factor_value;
         if (name.includes("truck")) newEf.truckTransport = item.factor_value;
@@ -2305,7 +2305,7 @@ const SaaSDashboard = () => {
                 <div className={`flex justify-between items-center mt-3 text-[10px] ${isLight ? 'text-[#557361]' : 'text-[#7C9A88]'}`}>
                   <span>Purchased Power</span>
                   <span className="font-mono text-[9px] text-[#00C853] font-bold">
-                    Loc: {results.total > 0 ? ((results.scope2 / results.total) * 100).toFixed(0) : 0}% | Mkt: {results.totalMarket > 0 ? ((results.scope2Market / results.totalMarket) * 100).toFixed(0) : 0}%
+                    Loc: {results.scope2Missing ? '—' : `${results.total > 0 ? ((results.scope2 / results.total) * 100).toFixed(0) : 0}%`} | Mkt: {results.totalMarket > 0 ? ((results.scope2Market / results.totalMarket) * 100).toFixed(0) : 0}%
                   </span>
                 </div>
               </div>
@@ -4410,7 +4410,7 @@ const SaaSDashboard = () => {
                     className="text-xs font-mono font-bold px-3.5 py-2 rounded-xl bg-[#00C853] text-white hover:bg-[#00E676] flex items-center space-x-1.5 transition-all shadow-sm cursor-pointer"
                   >
                     <RefreshCw className={`w-3.5 h-3.5 text-white ${isSyncingFactors ? 'animate-spin' : ''}`} />
-                    <span className="text-white font-mono font-bold">Sync with Official DoE / IPCC RAG Registry</span>
+                    <span className="text-white font-mono font-bold">Load legacy factor table (unverified, no grid factor)</span>
                   </button>
                 </div>
                 <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">

@@ -142,6 +142,8 @@ def _check_factor_kind(data):
 def _factor_values(data):
     """A gas-level factor's CO2e per unit is computed here from its gases and GWP basis, never typed in."""
     gases = data.get("gas_components")
+    if not gases and data["activity_type"] in accounting.BIOMASS_TYPES:
+        raise DomainError(422, "Biomass factors must be gas-level so biogenic CO2 stays outside the scopes")
     if not gases:
         if data.get("kgco2e_per_unit") is None:
             raise DomainError(422, "Give kgco2e_per_unit or gas_components")
@@ -589,7 +591,7 @@ def _t(kg):
 def _report_content(db, principal, period, run):
     org = db.get(ESGOrganization, principal.organization_id)
     lines = db.query(CalculationLine).filter(CalculationLine.run_id == run.id).order_by(CalculationLine.id).all()
-    factor_ids = sorted({l.factor_id for l in lines})
+    factor_ids = sorted({l.factor_id for l in lines if l.factor_id})  # refrigerant lines have no factor row
     factors = db.query(EmissionFactor).filter(EmissionFactor.id.in_(factor_ids)).order_by(EmissionFactor.id).all() if factor_ids else []
     facilities = {f.id: f for f in db.query(Facility).filter(Facility.organization_id == principal.organization_id)}
     return {

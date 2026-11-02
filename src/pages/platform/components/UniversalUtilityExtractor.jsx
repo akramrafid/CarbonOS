@@ -117,6 +117,8 @@ export const UniversalUtilityExtractor = ({
   const scope2Total = activeSegments.filter(s => s.scope.includes("Scope 2")).reduce((sum, s) => sum + s.emissions_t, 0);
   const scope3Total = activeSegments.filter(s => s.scope.includes("Scope 3")).reduce((sum, s) => sum + s.emissions_t, 0);
   const grandTotal = scope1Total + scope2Total + scope3Total;
+  // A grid line without an approved factor makes Scope 2 and the total unknown, never zero.
+  const scope2Missing = activeSegments.some(s => s.scope.includes("Scope 2") && s.emissions_t == null);
   const grandCost = activeSegments.reduce((sum, s) => sum + s.cost_bdt, 0);
 
   // Handle client switch template reload
@@ -316,9 +318,9 @@ export const UniversalUtilityExtractor = ({
     const payloadStr = JSON.stringify({
       invoice: activeInvoice.filename,
       client: activeClient.id,
-      total_emissions: grandTotal,
+      total_emissions: scope2Missing ? null : grandTotal,
       scope1: scope1Total,
-      scope2: scope2Total,
+      scope2: scope2Missing ? null : scope2Total,
       scope3: scope3Total,
       segments_count: activeSegments.length,
       audit_events: auditLog.length,
@@ -337,9 +339,9 @@ export const UniversalUtilityExtractor = ({
     setIsCommitted(true);
 
     onApplyToLedger({
-      total_emissions: grandTotal,
+      total_emissions: scope2Missing ? null : grandTotal,
       scope1: scope1Total,
-      scope2: scope2Total,
+      scope2: scope2Missing ? null : scope2Total,
       scope3: scope3Total,
       invoice: activeInvoice.filename,
       audit_seal: seal,
@@ -441,7 +443,7 @@ export const UniversalUtilityExtractor = ({
         <div className={`p-4 rounded-2xl border ${isLight ? 'bg-[#F9FAF9] border-[#E8ECE8]' : 'bg-[#040A06] border-[#152B1D]'}`}>
           <span className="text-[10px] font-mono text-gray-400 block uppercase">Total Invoice Footprint</span>
           <div className="text-2xl font-bold font-sans mt-1 text-[#00E676]">
-            {grandTotal.toFixed(2)} <span className="text-xs font-mono text-gray-400">tCO₂e</span>
+            {scope2Missing ? '—' : grandTotal.toFixed(2)} <span className="text-xs font-mono text-gray-400">tCO₂e</span>
           </div>
           <span className="text-[10px] text-gray-500 font-sans block mt-0.5">{activeSegments.length} Active Segments ({segments.length - activeSegments.length} Rejected)</span>
         </div>
@@ -457,7 +459,7 @@ export const UniversalUtilityExtractor = ({
         <div className={`p-4 rounded-2xl border ${isLight ? 'bg-[#F9FAF9] border-[#E8ECE8]' : 'bg-[#040A06] border-[#152B1D]'}`}>
           <span className="text-[10px] font-mono text-gray-400 block uppercase">Scope 2 Grid & Steam</span>
           <div className="text-2xl font-bold font-sans mt-1 text-cyan-400">
-            {scope2Total.toFixed(2)} <span className="text-xs font-mono text-gray-400">tCO₂e</span>
+            {scope2Missing ? '—' : scope2Total.toFixed(2)} <span className="text-xs font-mono text-gray-400">tCO₂e</span>
           </div>
           <span className="text-[10px] text-gray-500 font-sans block mt-0.5">Off-peak, peak & steam net of solar</span>
         </div>
@@ -689,7 +691,7 @@ export const UniversalUtilityExtractor = ({
           ) : (
             <>
               <CheckCircle2 className="w-4 h-4" />
-              <span>Sign Off & Seal to Ledger ({grandTotal.toFixed(2)} tCO₂e)</span>
+              <span>Sign Off & Seal to Ledger ({scope2Missing ? 'Scope 2 factor pending' : `${grandTotal.toFixed(2)} tCO₂e`})</span>
             </>
           )}
         </button>

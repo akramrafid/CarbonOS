@@ -66,12 +66,14 @@ export const EsgReportGenerator = ({
   }, [activities]);
 
   const scope2LocationTotal = useMemo(() => {
-    return activities.filter(a => a.scopeGroup === 'Scope 2').reduce((s, a) => s + (parseFloat(a.tCO2e) || 0), 0);
+    const scope2 = activities.filter(a => a.scopeGroup === 'Scope 2');
+    if (scope2.some(a => a.tCO2e == null)) return null; // grid line without an approved factor: unknown, never 0
+    return scope2.reduce((s, a) => s + (parseFloat(a.tCO2e) || 0), 0);
   }, [activities]);
 
   // Market-based green power assumption (50% green PPA or solar insets)
   const scope2MarketTotal = useMemo(() => {
-    return parseFloat((scope2LocationTotal * 0.45).toFixed(2));
+    return scope2LocationTotal == null ? null : parseFloat((scope2LocationTotal * 0.45).toFixed(2));
   }, [scope2LocationTotal]);
 
   const scope3Total = useMemo(() => {
@@ -126,7 +128,7 @@ export const EsgReportGenerator = ({
 ## 1. EXECUTIVE SUMMARY
 - **Gross Greenhouse Gas Emissions:** ${fmt(totalGrossEmissions, 2)} tCO₂e
 - **Scope 1 (Direct Emissions):** ${fmt(scope1Total, 2)} tCO₂e (${((scope1Total / totalGrossEmissions) * 100).toFixed(1)}%)
-- **Scope 2 (Purchased Electricity - Location-based):** ${fmt(scope2LocationTotal, 2)} tCO₂e (${((scope2LocationTotal / totalGrossEmissions) * 100).toFixed(1)}%)
+- **Scope 2 (Purchased Electricity - Location-based):** ${scope2LocationTotal == null ? 'not reported: grid-average factor pending approval' : `${fmt(scope2LocationTotal, 2)} tCO₂e (${((scope2LocationTotal / totalGrossEmissions) * 100).toFixed(1)}%)`}
 - **Scope 2 (Purchased Electricity - Market-based):** ${fmt(scope2MarketTotal, 2)} tCO₂e
 - **Scope 3 (Other Indirect Value Chain):** ${fmt(scope3Total, 2)} tCO₂e (${((scope3Total / totalGrossEmissions) * 100).toFixed(1)}%)
 - **Verified Inset Offsets Retired:** ${fmt(insetsTotal, 2)} tCO₂e (${activeClient.creditVintage} vintage)

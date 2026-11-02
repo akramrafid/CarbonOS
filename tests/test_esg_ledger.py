@@ -350,6 +350,20 @@ class Scope1LedgerTest(LedgerTestCase):
         self.assertEqual((report["gwp_basis"], report["lines"][0]["data_quality"]), ("AR6", "billed"))
         self.assertIn("scope1", report["uncertainty"])
 
+    def test_run_mixing_refrigerant_and_factored_lines_locks(self):
+        mb = {"opening_kg": "100", "purchased_kg": "30", "recovered_kg": "5", "closing_kg": "110"}
+        self.approved(activity_type="refrigerant", quantity="0", unit="kg", refrigerant="R-410A", mass_balance=mb,
+                      data_quality="metered", meter_ref="CHILLER-1")
+        self.approved(data_quality="billed")
+        run = self.post("contrib-a", f"/periods/{self.period}/calculate")
+        snap = self.post("user-a", f"/periods/{self.period}/lock", {"calculation_run_id": run["id"]})
+        report = self.call("GET", "viewer-a", f"/snapshots/{snap['id']}/export?format=json", status=200).json()
+        self.assertEqual(len(report["factors_used"]), 1)  # the refrigerant line uses pinned GWPs, not a factor row
+
+    def test_biomass_factor_must_be_gas_level(self):
+        body = {**self.GAS, "activity_type": "wood", "unit": "kg", "gas_components": None, "kgco2e_per_unit": "1.8"}
+        self.call("POST", "user-a", "/factors", body, status=422)
+
     def test_period_gwp_basis_must_match_factors(self):
         p = self.post("user-a", "/periods", {"name": "FY2025-AR5", "start_date": "2025-01-01", "end_date": "2025-12-31",
                                              "boundary_method": "operational_control", "gwp_basis": "AR5"})["id"]

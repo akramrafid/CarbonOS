@@ -195,6 +195,16 @@ class BiomassTest(unittest.TestCase):
         self.assertEqual(r.memo["biogenic_co2_kg"], D("17472.000000"))
         self.assertEqual(r.lines[0].details["gases_kg"]["CO2_biogenic"], D("17472.000000"))
 
+    def test_co2e_only_biomass_factor_is_blocked(self):
+        r = calculate([act("w1", "wood", "10", "kg")], FAC, [factor("w-co2e", "wood", "kg", "1.8")], "operational_control")
+        self.assertEqual((r.scope1_kg, codes(r)), (0, ["BIOMASS_FACTOR_NEEDS_GASES"]))
+
+    def test_legacy_run_reports_the_basis_it_used(self):
+        unused_ar6 = factor("lpg6", "lpg", "kg", "3.0", gwp="AR6")
+        r = calculate([act("d1", "diesel", "10", "L")], FAC, [factor("d5", "diesel", "L", "2.7", gwp="AR5"), unused_ar6],
+                      "operational_control")
+        self.assertEqual(r.gwp_basis, "AR5")
+
     def test_biogenic_share_follows_boundary(self):
         facs = {"f1": Facility("f1", "BD", False, False, D(40))}
         r = calculate([act("w1", "wood", "10000", "kg")], facs, [WOOD], "equity_share")

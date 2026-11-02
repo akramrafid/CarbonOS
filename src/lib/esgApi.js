@@ -189,7 +189,7 @@ function handleOfflineRequest(path, options = {}) {
   }
 
   if (/^\/api\/esg\/snapshots\/([^/]+)\/export$/.test(pathname)) {
-    const csv = `Period,Scope,Source,CO2e_Tonnes,Methodology,Assurance_Level\nFY2024-25,Scope 1,Stationary Combustion - Natural Gas Boiler,8.3160,GHG Protocol Corporate Standard,Not Assured (Demo)\nFY2024-25,Scope 1,Stationary Combustion - Diesel Generator,3.8860,IPCC 2006,Not Assured (Demo)\nFY2024-25,Scope 2,Location-based Grid (DPDC),20.6050,DoE Bangladesh 2023 Grid Baseline,Not Assured (Demo)\nFY2024-25,Scope 3,Upstream Freight Transport,4.1500,Distance-based Logistics,Not Assured (Demo)\nTOTAL,,,36.9570,,\n`;
+    const csv = `Period,Scope,Source,CO2e_Tonnes,Methodology,Assurance_Level\nFY2024-25,Scope 1,Stationary Combustion - Natural Gas Boiler,8.3160,GHG Protocol Corporate Standard,Not Assured (Demo)\nFY2024-25,Scope 1,Stationary Combustion - Diesel Generator,3.8860,IPCC 2006,Not Assured (Demo)\nFY2024-25,Scope 2,Location-based Grid (DPDC),20.6050,Demo placeholder grid factor (not published),Not Assured (Demo)\nFY2024-25,Scope 3,Upstream Freight Transport,4.1500,Distance-based Logistics,Not Assured (Demo)\nTOTAL,,,36.9570,,\n`;
     return mockResponse(csv, 200, { 'X-Content-SHA256': '9f83a45c61234bde77890a1bcdef9823456789abcdef0123456789abcdef0123' });
   }
 
@@ -448,7 +448,7 @@ function handleOfflineRequest(path, options = {}) {
       answer: "Based on Dhaka Apparel Mills' FY2024-25 records, total GHG emissions are 36.957 tCO2e across Scope 1 (12.202 tCO2e), Scope 2 (20.605 tCO2e from DPDC national grid electricity), and Scope 3 (4.150 tCO2e from upstream logistics). Operational control boundary applied in accordance with GHG Protocol and Bangladesh Bank Sustainable Finance Policy.",
       sources: [
         { title: 'FY2024-25 Emissions Calculation Run', ref: 'calc-demo-1' },
-        { title: 'Bangladesh DoE Grid Baseline 2023', ref: 'fac-f-1' },
+        { title: 'Demo placeholder grid factor (not published)', ref: 'fac-f-1' },
       ],
     });
   }

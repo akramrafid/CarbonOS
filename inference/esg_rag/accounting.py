@@ -57,6 +57,8 @@ MEMO_ACTIVITY_TYPES: Dict[str, str] = {
 }
 # Factor units accepted on an energy basis; the activity quantity is converted with a heating value.
 ENERGY_BASIS_UNITS: Dict[str, str] = {"natural_gas": "GJ"}
+# Biomass factors must be gas-level: biogenic CO2 is reported outside the scopes, never in Scope 1.
+BIOMASS_TYPES = ("wood", "solid_biomass")
 BOUNDARY_METHODS = ("operational_control", "financial_control", "equity_share")
 
 FACTOR_KINDS = ("grid_average", "grid_combined_margin", "supplier_specific", "residual_mix")
@@ -490,6 +492,9 @@ def calculate(activities: List[Activity], facilities: Dict[str, Facility], facto
         if err:
             exception(err, a, detail="Gas on an energy basis needs a distributor/Petrobangla heating value")
             return None
+        if a.activity_type in BIOMASS_TYPES and not f.gases:
+            exception("BIOMASS_FACTOR_NEEDS_GASES", a, detail=f"{f.id} is CO2e-only; biogenic CO2 would enter Scope 1")
+            return None
         if any(g.gas != gwp.BIOGENIC and gwp.gas_gwp(g.gas, f.gwp_basis) is None for g in f.gases):
             exception("UNSUPPORTED_GWP_BASIS", a, detail=f"{f.id}: {f.gwp_basis}")
             return None
@@ -624,6 +629,8 @@ def calculate(activities: List[Activity], facilities: Dict[str, Facility], facto
 
     if has_electricity and not market_complete:
         res.scope2_market_kg = None  # partial market-based totals are never reported as complete
+    if len(gwp_bases) == 1:
+        res.gwp_basis = next(iter(gwp_bases))  # report the basis actually used, not one inferred from loaded factors
     if len(gwp_bases) > 1:
         res.exceptions.append({"code": "MIXED_GWP_BASIS", "activity_id": None, "facility_id": None,
                                "activity_type": None, "blocking": True, "detail": ", ".join(sorted(gwp_bases))})

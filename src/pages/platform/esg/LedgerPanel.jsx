@@ -130,9 +130,9 @@ export default function LedgerPanel({ me, can, types, periods, facilities }) {
             <Input label="From" name="activity_start" type="date" required defaultValue={draft.activity_start} min={period?.start_date} max={period?.end_date} />
             <Input label="To" name="activity_end" type="date" required defaultValue={draft.activity_end} min={period?.start_date} max={period?.end_date} />
             <Input label="Meter / account ref" name="meter_ref" defaultValue={draft.meter_ref} maxLength={100} hint="Separate meters avoid false double-count warnings" />
-            <Select label="Data quality" name="data_quality" defaultValue={draft.data_quality || 'billed'}
+            <Select label="Data quality" name="data_quality" defaultValue={draft.data_quality || ''} required
                     hint="Sets the activity uncertainty used in the IPCC Approach 1 total"
-                    options={[['billed', 'Billed (utility invoice)'], ['metered', 'Metered (own calibrated meter)'],
+                    options={[['', 'Choose a grade'], ['billed', 'Billed (utility invoice)'], ['metered', 'Metered (own calibrated meter)'],
                               ['estimated', 'Estimated'], ['default', 'Default / proxy']]} />
             <Input label="Source reference" name="source_ref" defaultValue={draft.source_ref} maxLength={200} hint="Invoice no., page or row" />
             <Input label="Evidence excerpt" name="evidence_snippet" defaultValue={draft.evidence_snippet} maxLength={2000} />
