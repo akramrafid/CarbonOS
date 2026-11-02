@@ -3,10 +3,12 @@ import { Link, useNavigate, useLocation } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { LogIn, Menu, X, Sun, Moon } from 'lucide-react';
 import { useTheme } from '../context/ThemeContext';
+import RequestDemoModal from './RequestDemoModal';
 
 const Navbar = () => {
   const [scrolled, setScrolled] = useState(false);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+  const [isDemoModalOpen, setIsDemoModalOpen] = useState(false);
   const { t, i18n } = useTranslation();
   const { theme, toggleTheme } = useTheme();
   const navigate = useNavigate();
@@ -64,12 +66,10 @@ const Navbar = () => {
   }, [location, scrollToHash]);
 
   const navLinks = [
-    { id: 'Platform', key: 'platform' }, 
     { id: 'Farmers AI', key: 'farmersAi', path: '/farmers-ai' },
     { id: 'Carbon Credit', key: 'carbonCredit', path: '/carbon-monitoring' },
     { id: 'Marketplace', key: 'marketplace', path: '/platform/marketplace' },
     { id: 'Carbon Registry', key: 'carbonRegistry', path: '/platform/carbon-registry' },
-    { id: 'Sectors', key: 'sectors' }, 
     { id: 'ESG', key: 'esg', path: '/platform/saas-dashboard' }
   ];
 
@@ -134,12 +134,13 @@ const Navbar = () => {
           })}
 
           {/* Request Demo Pill Button */}
-          <Link
-            to="/platform/saas-dashboard"
-            className="font-mono text-[11px] font-bold text-white bg-[#0A1F13] hover:bg-[#00C853] hover:text-[#0A1F13] border border-[#00C853]/40 px-3.5 py-1.5 rounded-full transition-all duration-300 shadow-[0_0_12px_rgba(0,200,83,0.15)] ml-2 whitespace-nowrap shrink-0"
+          <button
+            type="button"
+            onClick={() => setIsDemoModalOpen(true)}
+            className="font-mono text-[11px] font-bold text-white bg-[#0A1F13] hover:bg-[#00C853] hover:text-[#0A1F13] border border-[#00C853]/40 px-3.5 py-1.5 rounded-full transition-all duration-300 shadow-[0_0_12px_rgba(0,200,83,0.15)] ml-2 whitespace-nowrap shrink-0 cursor-pointer"
           >
-            [Request Demo]
-          </Link>
+            {t('nav.requestDemo', '[Request Demo]')}
+          </button>
         </div>
 
         {/* Right Side: Language Switcher, Theme Toggle, Login, Mobile Menu Toggle */}
@@ -237,9 +238,16 @@ const Navbar = () => {
             }
           })}
           
-          <Link to="/platform/saas-dashboard" onClick={closeMenu} className="w-full max-w-sm mt-4 bg-emerald text-carbon font-sans font-bold text-lg px-8 py-4 rounded-full transition-colors shadow-lg flex items-center justify-center">
-            {t('nav.requestDemo')}
-          </Link>
+          <button 
+            type="button"
+            onClick={() => {
+              closeMenu();
+              setIsDemoModalOpen(true);
+            }} 
+            className="w-full max-w-sm mt-4 bg-emerald text-carbon font-sans font-bold text-lg px-8 py-4 rounded-full transition-colors shadow-lg flex items-center justify-center cursor-pointer"
+          >
+            {t('nav.requestDemo', '[Request Demo]')}
+          </button>
           
           <Link to="/dashboard/farmer/earnings" onClick={closeMenu} className="w-full max-w-sm mt-2 ghost-btn border border-white/20 text-white font-sans font-bold text-lg px-8 py-4 rounded-full flex items-center justify-center space-x-2 transition-colors">
             <span>Login to Registry</span>
@@ -247,6 +255,12 @@ const Navbar = () => {
           </Link>
         </div>
       </div>
+
+      {/* Enterprise Demo Request Modal */}
+      <RequestDemoModal 
+        isOpen={isDemoModalOpen} 
+        onClose={() => setIsDemoModalOpen(false)} 
+      />
 
     </nav>
   );
