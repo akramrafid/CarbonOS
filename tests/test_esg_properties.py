@@ -103,9 +103,11 @@ def _factor(id, activity_type, unit, value, method, kind=None):
 
 
 FACTORS = [_factor("grid", "electricity", "kWh", "0.5", "location", "grid_average"),
+           _factor("steam", "purchased_steam", "GJ", "60", "location"),
            _factor("diesel", "diesel", "L", "2.7", "direct"), _factor("lpg", "lpg", "kg", "2.98", "direct"),
-           _factor("fo", "furnace_oil", "L", "3.1", "direct")]
-TYPES = ("diesel", "lpg", "furnace_oil", "electricity", "electricity_export", "onsite_renewable_generation")
+           _factor("fo", "furnace_oil", "L", "3.1", "direct"), _factor("gas", "natural_gas", "m3", "2.0", "direct")]
+TYPES = ("diesel", "lpg", "furnace_oil", "natural_gas", "electricity", "purchased_steam", "electricity_export",
+         "onsite_renewable_generation")
 
 
 def _month(month):
@@ -118,7 +120,8 @@ def activities(draw, max_size=12):
     out = []
     for i in range(draw(st.integers(0, max_size))):
         activity_type = draw(st.sampled_from(TYPES))
-        start, end = _month(draw(st.integers(1, 12)))
+        first = draw(st.integers(1, 12))
+        start, end = _month(first)[0], _month(min(12, first + draw(st.integers(0, 2))))[1]  # one to three months
         out.append(Activity(id=f"a{i:02d}", facility_id=draw(st.sampled_from(sorted(FACS))),
                             activity_type=activity_type, quantity=draw(QTY), unit=acc.canonical_unit(activity_type),
                             period_start=start, period_end=end,
@@ -201,6 +204,12 @@ class InventoryProperties(unittest.TestCase):
                 applied[l.details["instrument_id"]] += l.quantity
         for inst in instruments:
             self.assertLessEqual(applied[inst.id], inst.mwh * 1000)
+        by_id, by_instrument = {a.id: a for a in acts}, {i.id: i for i in instruments}
+        for l in r.lines:  # an instrument covers its own facility, inside its own dates
+            if l.details.get("market_level") == "contractual_instrument":
+                inst, rec = by_instrument[l.details["instrument_id"]], by_id[l.activity_id]
+                self.assertEqual(rec.facility_id, inst.facility_id)
+                self.assertTrue(inst.applies_from <= rec.period_start and rec.period_end <= inst.applies_to)
         for a in acts:  # every grid kWh inside the boundary is in the market-based result exactly once
             if a.activity_type == "electricity" and FACS[a.facility_id].operational_control:
                 covered = sum((l.quantity for l in r.lines if l.activity_id == a.id and l.method == "market"), D(0))

@@ -441,14 +441,16 @@ def derive_year(fiscal_year: str, inp: MethodAInputs, plants: List[PlantB], heat
 
 
 def draft_factor_rows(result: dict, grid_region: str, source_document: str, source_table_ref: str) -> List[dict]:
-    """Ledger factor payloads from Method A (created DRAFT; a second person approves). The kind is always
-    grid_average: the Tool 07 margins are never offered as factors. A BLOCKED year gives no rows."""
-    if result["status"] == "BLOCKED":
+    """Ledger factor payload from Method A (created DRAFT; a second person approves), for a DRAFT_REVIEWABLE year only:
+    any other status keeps the factor out of the ledger, so nothing unreviewable can be approved. One row per year, the
+    supply-weighted average (it includes imports, the mix drawn from the grid), so two approved rows can never be
+    ambiguous; the domestic generation-weighted average is reported in the build output, not offered. The kind is
+    always grid_average: the Tool 07 margins are never offered as factors."""
+    if result["status"] != "DRAFT_REVIEWABLE":
         return []
     start = int(result["fiscal_year"][:4])
     rows = []
-    for key, family in (("supply_weighted", "bd-grid-average-supply"),
-                        ("domestic_generation_weighted", "bd-grid-average-domestic")):
+    for key, family in (("supply_weighted", "bd-grid-average-supply"),):
         value = result["kg_co2e_per_kwh"][key]
         mc = result["monte_carlo"]["method_a"][key]
         half = max(value - mc["p2_5"], mc["p97_5"] - value) / value * 100

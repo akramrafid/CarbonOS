@@ -36,8 +36,11 @@ deltas against the IFI dataset and Ember (`references.json`), and a seeded Monte
 | `DRAFT_REFERENCE_GAP` | A derived value is more than 5 % from IFI or Ember without an explanation (blocks approval) |
 | `DRAFT_REVIEWABLE` | Ready for a second person to review and approve |
 
-`draft_factor_rows()` makes ledger payloads from Method A only, kind `grid_average`, valid 1 July–30 June. A record
-spanning two fiscal years takes each month's factor (`accounting.factor_pieces`).
+`draft_factor_rows()` makes one ledger payload per fiscal year from Method A, kind `grid_average`, valid 1 July–30 June,
+and only for a `DRAFT_REVIEWABLE` year: any other status keeps the factor out of the ledger, so it cannot be approved.
+The row is the supply-weighted average (it includes imports, the mix drawn from the grid); the domestic
+generation-weighted average is reported, not offered, so two approved rows can never be ambiguous. A record spanning
+two fiscal years takes each month's factor (`accounting.factor_pieces`).
 
 ## Files
 

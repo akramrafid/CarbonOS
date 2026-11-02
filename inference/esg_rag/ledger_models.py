@@ -10,7 +10,7 @@ import uuid
 
 from sqlalchemy import (
     JSON, Boolean, CheckConstraint, Column, Date, DateTime, ForeignKey, ForeignKeyConstraint,
-    Index, Integer, Numeric, String, Text, UniqueConstraint,
+    Index, Integer, Numeric, String, Text, UniqueConstraint, text,
 )
 
 from .accounting import INSTRUMENT_TYPES
@@ -203,6 +203,9 @@ class ContractualInstrument(EsgBase):
         CheckConstraint("applies_to >= applies_from AND generation_end >= generation_start",
                         name="ck_esg_instrument_dates"),
         CheckConstraint("approved_by IS NULL OR approved_by <> created_by", name="ck_esg_instrument_dual_control"),
+        # The same certificates or contract can be claimed once: references compared in normalised form.
+        Index("uq_esg_instrument_active_ref", "organization_id", "instrument_type", "ref_key", unique=True,
+              sqlite_where=text("status <> 'RETIRED'"), postgresql_where=text("status <> 'RETIRED'")),
     )
 
     id = Column(String(36), primary_key=True, default=_id)
@@ -211,6 +214,7 @@ class ContractualInstrument(EsgBase):
     period_id = Column(String(36), nullable=False)
     instrument_type = Column(String(40), nullable=False)
     instrument_ref = Column(String(200), nullable=False)  # certificate serial range or contract reference
+    ref_key = Column(String(200), nullable=False)  # accounting.instrument_ref_key(instrument_ref)
     registry = Column(String(100))  # tracking system the certificates were retired in
     generation_market = Column(String(50), nullable=False)  # grid region of the generating plant
     generation_technology = Column(String(50))

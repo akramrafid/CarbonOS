@@ -120,6 +120,18 @@ class CaptiveGenerationTest(unittest.TestCase):
         self.assertTrue(out["blocking"])
         self.assertIn("1.0000 L/kWh", out["detail"])
 
+    def test_a_generator_gas_record_split_by_month_counts_all_of_its_energy(self):
+        from dataclasses import replace
+        old = replace(GAS_GJ, id="gas-old", family="gas-old", valid_to=dt.date(2025, 2, 28))
+        new = replace(GAS_GJ, id="gas-new", family="gas-new", valid_from=dt.date(2025, 3, 1))
+        gas = Activity(id="g1", facility_id="f1", activity_type="natural_gas", quantity=D(10000), unit="m3",
+                       period_start=dt.date(2025, 2, 1), period_end=dt.date(2025, 3, 31), data_quality="metered",
+                       generator_ref="G1", heating_value=HV)
+        r = calculate([gas, act("o1", "captive_generation_output", "34200", "kWh", generator_ref="G1")], FAC,
+                      [old, new], "operational_control")
+        self.assertEqual(len([l for l in r.lines if l.activity_id == "g1"]), 2)  # one line per factor's months
+        self.assertNotIn("GENERATOR_EFFICIENCY_OUT_OF_BAND", codes(r))  # 342 000 MJ / 34 200 kWh = 10.0 MJ/kWh
+
     def test_missing_generator_output_is_reported(self):
         r = calculate([act("d1", "diesel", "1000", "L", generator_ref="G1")], FAC, [DIESEL], "operational_control")
         self.assertIn("GENERATOR_OUTPUT_MISSING", codes(r))

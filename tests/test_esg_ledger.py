@@ -331,6 +331,44 @@ class Scope1LedgerTest(LedgerTestCase):
         self.assertEqual((run["scope1_kg"], line["factor_id"], line["factor_ref"]),
                          ("33832.500000", None, "IPCC AR6 GWP-100 R-410A"))
 
+    def test_one_refrigerant_balance_per_gas_and_period(self):
+        mb = {"stored_start_kg": "10", "stored_end_kg": "8", "purchased_kg": "0", "returned_or_sold_kg": "0"}
+        body = dict(activity_type="refrigerant", quantity="0", unit="kg", mass_balance=mb, activity_start="2025-01-01",
+                    activity_end="2025-12-31")
+        self.assertEqual(self.activity(refrigerant="R-410A", meter_ref="AC-1", **body).status_code, 200)
+        clash = self.activity(refrigerant="R-410A", meter_ref="AC-2", **body)  # another meter is not another balance
+        self.assertEqual(clash.status_code, 409)
+        self.assertIn("same facility and gas", clash.json()["detail"])
+        self.assertEqual(self.activity(refrigerant="R-134a", **body).status_code, 200)  # another gas never clashes
+        self.assertEqual(self.activity(refrigerant="HFC-134a", meter_ref="X", **body).status_code, 409)  # same gas
+
+    def test_a_pre_1_2_refrigerant_balance_blocks_instead_of_reading_as_zero(self):
+        mb = {"stored_start_kg": "10", "stored_end_kg": "8", "purchased_kg": "0", "returned_or_sold_kg": "0"}
+        rec = self.approved(activity_type="refrigerant", quantity="0", unit="kg", refrigerant="R-410A", mass_balance=mb,
+                            data_quality="metered")
+        db = self.Session()
+        db.get(ActivityRecord, rec["id"]).mass_balance = {"opening_kg": "100", "purchased_kg": "30",
+                                                          "recovered_kg": "5", "closing_kg": "110"}  # pre-1.2 shape
+        db.commit()
+        db.close()
+        run = self.post("contrib-a", f"/periods/{self.period}/calculate")
+        legacy = next(e for e in run["exceptions"] if e["code"] == "MASS_BALANCE_LEGACY_FORMAT")
+        self.assertEqual((legacy["activity_id"], legacy["blocking"], run["scope1_kg"]), (rec["id"], True, "0.000000"))
+
+    def test_overlapping_gas_certificates_cannot_both_apply(self):
+        body = {"facility_id": self.fac, "distributor": "TEST distributor", "certificate_ref": "TEST-GA-1", "gcv": "38",
+                "ncv_to_gcv": "0.9", "reference_conditions": "15 C, 101.325 kPa", "valid_from": "2025-01-01",
+                "valid_to": "2025-06-30"}
+        first = self.post("contrib-a", "/gas-certificates", body)
+        self.post("user-a", f"/gas-certificates/{first['id']}/approve")
+        second = self.post("contrib-a", "/gas-certificates", {**body, "certificate_ref": "TEST-GA-2", "gcv": "39",
+                                                               "valid_from": "2025-03-01"})
+        refused = self.call("POST", "user-a", f"/gas-certificates/{second['id']}/approve", status=409)
+        self.assertIn("overlaps", refused.json()["detail"])
+        self.call("POST", "contrib-a", f"/gas-certificates/{first['id']}/void", {"reason": "TEST"}, status=403)
+        self.post("user-a", f"/gas-certificates/{first['id']}/void", {"reason": "TEST superseded by GA-2"})
+        self.assertEqual(self.post("user-a", f"/gas-certificates/{second['id']}/approve")["status"], "APPROVED")
+
     def generator(self, ref, facility=None, status=201):
         return self.call("POST", "user-a", "/equipment", {"facility_id": facility or self.fac, "equipment_ref": ref,
                                                           "kind": "generator", "fuel": "diesel"}, status=status)

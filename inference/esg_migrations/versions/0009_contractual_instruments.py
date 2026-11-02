@@ -26,6 +26,7 @@ def upgrade():
         sa.Column('period_id', sa.String(length=36), nullable=False),
         sa.Column('instrument_type', sa.String(length=40), nullable=False),
         sa.Column('instrument_ref', sa.String(length=200), nullable=False),
+        sa.Column('ref_key', sa.String(length=200), nullable=False),
         sa.Column('registry', sa.String(length=100), nullable=True),
         sa.Column('generation_market', sa.String(length=50), nullable=False),
         sa.Column('generation_technology', sa.String(length=50), nullable=True),
@@ -61,8 +62,13 @@ def upgrade():
     )
     op.create_index(op.f('ix_esg_contractual_instrument_organization_id'), 'esg_contractual_instrument',
                     ['organization_id'])
+    # The same certificates or contract can be claimed once (references compared in normalised form).
+    op.create_index('uq_esg_instrument_active_ref', 'esg_contractual_instrument',
+                    ['organization_id', 'instrument_type', 'ref_key'], unique=True,
+                    sqlite_where=sa.text("status <> 'RETIRED'"), postgresql_where=sa.text("status <> 'RETIRED'"))
 
 
 def downgrade():
+    op.drop_index('uq_esg_instrument_active_ref', table_name='esg_contractual_instrument')
     op.drop_index(op.f('ix_esg_contractual_instrument_organization_id'), table_name='esg_contractual_instrument')
     op.drop_table('esg_contractual_instrument')

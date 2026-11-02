@@ -54,7 +54,8 @@ Raw quantity and unit are stored alongside the normalised value.
 
 * Location-based uses `method = location` factors of kind **`grid_average`**: the average emission rate of the
   grid where the electricity is consumed (GHG Protocol Scope 2 Guidance). An undeclared kind blocks
-  (`FACTOR_KIND_UNDECLARED`).
+  (`FACTOR_KIND_UNDECLARED`). A location-based factor selected on a record must be for the facility's grid region
+  (`SELECTED_FACTOR_OTHER_REGION`, blocking); a Scope 1 factor of another region is flagged, not blocked.
 * A **combined margin** (CDM Tool 07 OM/BM/CM) is a project-baseline metric, never a Scope 2 factor. It is
   rejected by the API (422), the library (`MARGIN_FACTOR_NOT_ALLOWED`, blocking) and the database check
   `ck_esg_factor_no_margin_scope2`. The 0.550 kg CO2e/kWh once hard-coded as "location-based" was a combined
@@ -68,7 +69,10 @@ Raw quantity and unit are stored alongside the normalised value.
      `vintage_close_to_consumption`, and for a PPA also `exclusive_transfer`. Same market is checked, not attested:
      the generation market must equal the facility's grid region. A second person approves it. Approved instruments
      are applied first, by kWh, to the facility's records that lie wholly inside their dates, in date order. No kWh
-     is applied twice, and the same reference entered twice fails `unique_claim`. An instrument that misses a
+     is applied twice. References are compared without case, spaces or Unicode variants: the same reference is
+     refused a second time (409; a partial unique index backs it) and fails `unique_claim` if it reaches a
+     calculation. A wrong entry is voided by an admin with a reason (`POST /contractual-instruments/{id}/void`): it is
+     kept as RETIRED and no longer used, and the reference can be entered again. An instrument that misses a
      criterion is not used (`INSTRUMENT_FAILS_QUALITY_CRITERIA`); kWh it cannot apply are reported
      (`INSTRUMENT_KWH_UNUSED`) and never carried into another period.
   2. **Supplier-specific rate**: a `supplier_specific` factor the record selects (`market_factor_id`). The rate
@@ -81,12 +85,19 @@ Raw quantity and unit are stored alongside the normalised value.
      covered by instruments this is the normal case: market-based then equals location-based for that electricity,
      and the grid average may include attributes that others have claimed.
 
+  Levels are chosen per activity month when a better level covers only part of a record: a bill from 15 June to
+  15 July takes a residual mix valid from 1 July for its July kWh and the grid average for its June kWh.
+  **Purchased steam** has no grid: its market-based line uses a supplier-specific rate the record selects, otherwise
+  its location-based rate, flagged `MARKET_FALLBACK_LOCATION_RATE` (non-blocking) and disclosed in GJ. Without any
+  market result for a record, the facility market-based figures are withheld with the total.
+
   A selected factor that ranks below a level that applies is `MARKET_HIERARCHY_VIOLATION`; a selected factor for
   another grid region is `MARKET_FACTOR_OTHER_MARKET`. Both block. The market-based total is `null`
   (`MISSING_MARKET_BASED_INPUT`, report status `MISSING_INPUTS`) only when not even a grid average applies. The
   report (schema `carbonos.esg.report/2`) has `scope2_market_based_disclosure`: kWh by level, every approved
-  instrument with the kWh applied and not applied, and the fallback statement. `scope2_market_based_status` is
-  `COMPLETE`, `GRID_AVERAGE_FALLBACK` or `MISSING_INPUTS`.
+  instrument with the kWh applied and not applied, steam GJ by level, and the fallback statement.
+  `scope2_market_based_status` is `COMPLETE`, `GRID_AVERAGE_FALLBACK`, `LOCATION_RATE_FALLBACK` (steam only) or
+  `MISSING_INPUTS`.
 * `electricity_export` and `onsite_renewable_generation` are memo items: reported, never added to or
   subtracted from Scope 2. Offsets and avoided emissions are not part of the inventory.
 
@@ -98,7 +109,7 @@ distributor's or Petrobangla's heating value: `GJ = billed m3 × volume_correcti
 the reference conditions and the NCV/GCV ratio are stated on the record. No heating value →
 `MISSING_HEATING_VALUE` (blocking). A declared default heating value is allowed but flagged
 `HIGH_UNCERTAINTY`. Volume-basis gas factors (per m3) remain usable.
-At facility level the distributor's gas-analysis certificate is preferred: a certificate stored as evidence with its validity period (`esg_gas_certificate`, approved by a second person) replaces the record's heating value whenever its validity covers the whole record; the line names the certificate, and certificates are part of the calculation input hash.
+At facility level the distributor's gas-analysis certificate is preferred: a certificate stored as evidence with its validity period (`esg_gas_certificate`, approved by a second person) replaces the record's heating value whenever its validity covers the whole record; the line names the certificate, and certificates are part of the calculation input hash. Approved certificates of one facility never overlap (approval is refused until the older one is voided by an admin with a reason), so one heating value applies to each day.
 
 **Captive generation.** Generator fuel is Scope 1. Generator kWh are the memo item
 `captive_generation_output` and are never also Scope 2: an electricity record carrying a `generator_ref`, or a
@@ -111,7 +122,10 @@ checked against configurable plausibility bands (defaults: diesel 0.20–0.45 L/
 `GENERATOR_FUEL_MISSING`, a fuel without a configured band → `GENERATOR_BAND_NOT_CONFIGURED` (both reported, not
 blocking).
 
-**Refrigerants (methodology 1.2).** Per gas and record:
+**Refrigerants (methodology 1.2).** One record per gas, facility and period (meters do not separate refrigerant
+records; aliases such as R-134a and HFC-134a are the same gas), because the register's charge terms are per facility
+and gas. Records stored before 1.2 with opening/closing terms block the run (`MASS_BALANCE_LEGACY_FORMAT`) until
+superseded. Per gas and record:
 
     E = (stored_start − stored_end) + (purchased − returned_or_sold) + (equipment_charge_start − equipment_charge_end)
 

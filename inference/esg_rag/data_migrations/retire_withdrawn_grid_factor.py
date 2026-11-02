@@ -16,11 +16,13 @@ accident.
 """
 import argparse
 import datetime as dt
+import os
 import sys
 from typing import Callable, List
 
 from sqlalchemy import (
-    JSON, Column, DateTime, Integer, MetaData, String, Table, and_, create_engine, func, inspect, or_, select, update,
+    JSON, Column, DateTime, Integer, MetaData, String, Table, and_, create_engine, func, inspect, make_url, or_, select,
+    update,
 )
 
 BRANCH = "esg/bd-scope12-verifier-inventory"
@@ -42,22 +44,27 @@ _audit = Table(  # the columns this migration writes; the table itself is create
     Column("entity_id", String(36)), Column("data", JSON), Column("created_at", DateTime(timezone=True)))
 
 
-def _grid_rows(conn, t):
-    """Every Scope 2 grid-electricity row for Bangladesh, oldest id first."""
-    cond = and_(t.c.category == "Scope 2", func.lower(t.c.fuel_or_activity).like("%grid%"),
-                func.lower(t.c.region).like("%bangladesh%"))
+def _scope2_rows(conn, t):
+    """Every Scope 2 row for Bangladesh, oldest id first (shown, so rows outside the approval are visible too)."""
+    cond = and_(t.c.category == "Scope 2", func.lower(t.c.region).like("%bangladesh%"))
     return conn.execute(select(t).where(cond).order_by(t.c.id)).mappings().all()
 
 
 def _is_target(row) -> bool:
-    """The approval covers the 0.55 row only, and only while it is not already retired."""
-    return row["factor_value"] == WITHDRAWN_VALUE and row.get("status") != "RETIRED"
+    """The approval covers the 0.55 grid row only, and only while it is not already retired."""
+    return (row["factor_value"] == WITHDRAWN_VALUE and "grid" in (row["fuel_or_activity"] or "").lower()
+            and row.get("status") != "RETIRED")
 
 
 def run(database_url: str, apply: bool = False, actor: str = None, out: Callable[[str], None] = print) -> int:
     """0 = done (or nothing to do), 2 = a precondition failed and nothing was written."""
     if apply and not actor:
         out("ERROR: --apply needs --actor (who is making this change). Nothing written.")
+        return 2
+    url = make_url(database_url)
+    if url.get_backend_name() == "sqlite" and url.database not in (None, "", ":memory:") \
+            and not os.path.exists(url.database):  # connecting would create an empty database file
+        out(f"ERROR: SQLite database file not found: {url.database}. Nothing written.")
         return 2
     engine = create_engine(database_url)
     try:
@@ -76,9 +83,9 @@ def _run(engine, apply, actor, out) -> int:
     missing = [c for c in LIFECYCLE if c not in t.c]
     with engine.connect() as conn:
         total = conn.execute(select(func.count()).select_from(t)).scalar_one()
-        grid = [dict(r) for r in _grid_rows(conn, t)]
-    targets = [r for r in grid if _is_target(r)]
-    others = [r for r in grid if not _is_target(r)]
+        scope2 = [dict(r) for r in _scope2_rows(conn, t)]
+    targets = [r for r in scope2 if _is_target(r)]
+    others = [r for r in scope2 if not _is_target(r)]
 
     out(f"Table {TABLE}: {total} rows. Lifecycle columns: "
         + ("present" if not missing else "MISSING (" + ", ".join(missing) + ")"))
@@ -88,7 +95,7 @@ def _run(engine, apply, actor, out) -> int:
     out(f"Rows to retire: {len(targets)}")
     for r in targets:
         out(_describe(r, actor))
-    out(f"Other Scope 2 grid rows (not covered by the approval, left unchanged): {len(others)}")
+    out(f"Other Scope 2 rows (not covered by the approval, left unchanged): {len(others)}")
     for r in others:
         out(f"  {r['id']}  {r['fuel_or_activity']}  {r['factor_value']} {r['unit']}  status={r.get('status') or 'NULL'}")
     if not targets:

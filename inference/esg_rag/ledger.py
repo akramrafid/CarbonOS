@@ -33,7 +33,9 @@ DISCLAIMERS = [
     "Internal calculation prepared with CarbonOS. Not externally assured or verified.",
     "Scope 3 emissions are not included in this report.",
     "Emission factors are those approved by the organization or platform; see each factor's source citation.",
-    "Market-based Scope 2 is reported only when every electricity record has an approved market-based input.",
+    "Market-based Scope 2 follows the GHG Protocol Scope 2 Guidance hierarchy; where no contractual instrument, "
+    "supplier-specific rate or residual mix applies, the location-based rate is used, as "
+    "scope2_market_based_disclosure states.",
 ]
 
 
@@ -271,12 +273,38 @@ def approve_gas_certificate(db, principal, cert_id):
     cert = _get(db, GasCertificate, principal, cert_id)
     if cert.created_by == principal.sub:
         raise DomainError(403, "A certificate must be approved by someone other than the person who entered it")
+    overlapping = db.query(GasCertificate.id).filter(
+        GasCertificate.organization_id == principal.organization_id, GasCertificate.facility_id == cert.facility_id,
+        GasCertificate.status == "APPROVED", GasCertificate.id != cert.id,
+        GasCertificate.valid_from <= cert.valid_to, GasCertificate.valid_to >= cert.valid_from).first()
+    if overlapping:
+        raise DomainError(409, f"Validity overlaps approved certificate {overlapping[0]} for this facility: void it "
+                               "first, so that one heating value applies to each day")
     n = db.execute(update(GasCertificate).where(GasCertificate.id == cert.id, GasCertificate.status == "DRAFT")
                    .values(status="APPROVED", approved_by=principal.sub, approved_at=_now())).rowcount
     if n != 1:
         db.rollback()
         raise DomainError(409, "Only DRAFT certificates can be approved")
     audit(db, principal, "gas_certificate.approve", "gas_certificate", cert.id)
+    db.commit()
+    db.refresh(cert)
+    return cert
+
+
+def void_gas_certificate(db, principal, cert_id, reason):
+    """Withdraw a certificate entered wrongly: RETIRED and kept for audit; the next calculation no longer uses it."""
+    _need(principal, "admin")
+    if not (reason or "").strip():
+        raise DomainError(422, "A void needs a reason")
+    cert = _get(db, GasCertificate, principal, cert_id)
+    previous = cert.status
+    n = db.execute(update(GasCertificate).where(GasCertificate.id == cert.id, GasCertificate.status != "RETIRED")
+                   .values(status="RETIRED")).rowcount
+    if n != 1:
+        db.rollback()
+        raise DomainError(409, "The certificate is already void")
+    audit(db, principal, "gas_certificate.void", "gas_certificate", cert.id,
+          {"reason": reason, "previous_status": previous})
     db.commit()
     db.refresh(cert)
     return cert
@@ -319,17 +347,24 @@ def create_contractual_instrument(db, principal, data):
     unknown = sorted(set(data["quality_criteria"]) - set(allowed))
     if unknown:
         raise DomainError(422, f"Unknown quality criteria {', '.join(unknown)}; allowed: {', '.join(allowed)}")
+    ref_key = accounting.instrument_ref_key(data["instrument_ref"])
+    if not ref_key:
+        raise DomainError(422, "instrument_ref is empty")
     claimed = db.query(ContractualInstrument.id).filter(
         ContractualInstrument.organization_id == principal.organization_id,
         ContractualInstrument.instrument_type == data["instrument_type"],
-        ContractualInstrument.instrument_ref == data["instrument_ref"],
+        ContractualInstrument.ref_key == ref_key,
         ContractualInstrument.status != "RETIRED").first()
     if claimed:
         raise DomainError(409, f"{data['instrument_ref']} is already entered ({claimed[0]}); an instrument is claimed once")
     inst = ContractualInstrument(organization_id=principal.organization_id, status="DRAFT", created_by=principal.sub,
-                                 **data)
+                                 ref_key=ref_key, **data)
     db.add(inst)
-    db.flush()
+    try:
+        db.flush()
+    except IntegrityError:  # entered concurrently: the partial unique index keeps the claim single
+        db.rollback()
+        raise DomainError(409, f"{data['instrument_ref']} is already entered; an instrument is claimed once")
     audit(db, principal, "contractual_instrument.create", "contractual_instrument", inst.id, data)
     db.commit()
     return inst
@@ -348,6 +383,27 @@ def approve_contractual_instrument(db, principal, inst_id):
         db.rollback()
         raise DomainError(409, "Only DRAFT instruments can be approved")
     audit(db, principal, "contractual_instrument.approve", "contractual_instrument", inst.id)
+    db.commit()
+    db.refresh(inst)
+    return inst
+
+
+def void_contractual_instrument(db, principal, inst_id, reason):
+    """Withdraw an instrument entered wrongly: RETIRED and kept for audit; the next calculation no longer uses it."""
+    _need(principal, "admin")
+    if not (reason or "").strip():
+        raise DomainError(422, "A void needs a reason")
+    inst = _get(db, ContractualInstrument, principal, inst_id)
+    _open_period(db, principal, inst.period_id)
+    previous = inst.status
+    n = db.execute(update(ContractualInstrument).where(ContractualInstrument.id == inst.id,
+                                                       ContractualInstrument.status != "RETIRED")
+                   .values(status="RETIRED")).rowcount
+    if n != 1:
+        db.rollback()
+        raise DomainError(409, "The instrument is already void")
+    audit(db, principal, "contractual_instrument.void", "contractual_instrument", inst.id,
+          {"reason": reason, "previous_status": previous})
     db.commit()
     db.refresh(inst)
     return inst
@@ -497,14 +553,26 @@ def _overlap(db, principal, rec_id, data, supersedes_id):
         ActivityRecord.status.notin_(("REJECTED", "SUPERSEDED")),
         ActivityRecord.activity_start <= data["activity_end"],
         ActivityRecord.activity_end >= data["activity_start"],
-        (ActivityRecord.meter_ref == data.get("meter_ref")) if data.get("meter_ref")
-        else ActivityRecord.meter_ref.is_(None),
     )
     if rec_id:
         q = q.filter(ActivityRecord.id != rec_id)
     if supersedes_id:
         q = q.filter(ActivityRecord.id != supersedes_id)
-    return q.first()
+    if data["activity_type"] == "refrigerant":
+        # The register's equipment charge is per facility and gas, so each gas has one balance per period: meters do
+        # not separate refrigerant records, and two different gases never clash.
+        gas = _refrigerant_key(data.get("refrigerant"))
+        return next((r for r in q.order_by(ActivityRecord.id) if _refrigerant_key(r.refrigerant) == gas), None)
+    return q.filter((ActivityRecord.meter_ref == data.get("meter_ref")) if data.get("meter_ref")
+                    else ActivityRecord.meter_ref.is_(None)).first()
+
+
+def _overlap_message(clash, data) -> str:
+    if data["activity_type"] == "refrigerant":
+        return (f"Overlaps existing record {clash.id} for the same facility and gas (possible double counting): one "
+                "mass balance per gas and period. Supersede it or cover another period.")
+    return (f"Overlaps existing record {clash.id} for the same facility, activity and meter (possible double "
+            "counting). Use a different meter reference or supersede it.")
 
 
 # Inventory terms entered on the record; the equipment-charge terms come from the dated register.
@@ -602,8 +670,7 @@ def create_activity(db, principal, data):
             raise DomainError(422, "Only an APPROVED record can be superseded")
     clash = _overlap(db, principal, None, data, supersedes_id)
     if clash:
-        raise DomainError(409, f"Overlaps existing record {clash.id} for the same facility, activity and meter "
-                               "(possible double counting). Use a different meter reference or supersede it.")
+        raise DomainError(409, _overlap_message(clash, data))
     captive = _captive_meter_clash(db, principal, data)
     if captive:
         raise DomainError(409, f"Meter {data['meter_ref']} already carries {captive.activity_type} record {captive.id}: "
@@ -638,11 +705,12 @@ def update_activity(db, principal, rec_id, data):
         raise DomainError(409, f"{rec.status} records cannot be edited; create a superseding record instead")
     _open_period(db, principal, rec.period_id)
     before = row_dict(rec)
-    merged = {**{k: before[k] for k in ("facility_id", "activity_type", "activity_start", "activity_end", "meter_ref")},
+    merged = {**{k: before[k] for k in ("facility_id", "activity_type", "activity_start", "activity_end", "meter_ref",
+                                        "refrigerant")},
               "quantity": before["quantity_raw"], "unit": before["unit_raw"], **data}
     clash = _overlap(db, principal, rec.id, merged, rec.supersedes_id)
     if clash:
-        raise DomainError(409, f"Overlaps existing record {clash.id}")
+        raise DomainError(409, _overlap_message(clash, merged))
     for key in ("factor_id", "market_factor_id"):
         if key in data:
             _check_factor_ref(db, principal, data[key], merged["activity_type"])
@@ -793,10 +861,16 @@ def calculate_period(db, principal, period_id):
     register = _load_register(db, principal)
     certificates = _approved_certificates(db, principal)
     instruments = _approved_instruments(db, principal, period)
-    register_exceptions = []
+    # Refrigerant records entered before methodology 1.2 hold opening/closing terms, not the 1.2 balance: block them.
+    legacy = {a.id for a in acts if a.activity_type == "refrigerant" and a.mass_balance
+              and not all(k in a.mass_balance for k in MASS_BALANCE_KEYS)}
+    register_exceptions = [{"code": "MASS_BALANCE_LEGACY_FORMAT", "activity_id": a.id, "facility_id": a.facility_id,
+                            "activity_type": a.activity_type, "blocking": True,
+                            "detail": "Recorded before methodology 1.2 (opening/closing terms): supersede it with "
+                                      "stored start/end, purchased and returned/sold kg"} for a in acts if a.id in legacy]
     result = accounting.calculate(
         [_with_certificate(_with_register(_accounting_activity(a), a, register, register_exceptions), a, certificates)
-         for a in acts],
+         for a in acts if a.id not in legacy],
         {f.id: accounting.Facility(f.id, f.grid_region, f.operational_control, f.financial_control,
                                    Decimal(f.equity_share_pct), f.legal_entity_id) for f in facs},
         [_accounting_factor(f) for f in factors],
@@ -898,13 +972,17 @@ MARKET_HIERARCHY_TEXT = ("GHG Protocol Scope 2 Guidance (2015), market-based met
 def _market_disclosure(db, principal, period, lines, facilities):
     """What the market-based total rests on, by hierarchy level, and the statement the Scope 2 Guidance asks for when
     the grid average stands in for a residual mix."""
-    kwh = {level: Decimal(0) for level in accounting.MARKET_LEVELS}
+    kwh = {level: Decimal(0) for level in accounting.ELECTRICITY_MARKET_LEVELS}
+    steam = {"supplier_specific": Decimal(0), "location_rate": Decimal(0)}  # GJ of purchased steam
     applied, regions = {}, set()
     for line in lines:
         level = (line.details or {}).get("market_level") if line.method == "market" else None
-        if level not in kwh:
+        if level is None:
             continue
-        kwh[level] += Decimal(line.quantity)
+        bucket = kwh if line.unit == "kWh" else steam
+        bucket[level] = bucket.get(level, Decimal(0)) + Decimal(line.quantity)
+        if line.unit != "kWh":
+            continue
         if level == "contractual_instrument":
             iid = line.details["instrument_id"]
             applied[iid] = applied.get(iid, Decimal(0)) + Decimal(line.quantity)
@@ -920,11 +998,15 @@ def _market_disclosure(db, principal, period, lines, facilities):
         "kwh_by_level": kwh,
         "grid_average_fallback_kwh": fallback,
         "grid_average_fallback_share_pct": share,
-        "statement": (f"{format(fallback.normalize(), 'f')} kWh ({share} % of the electricity in the market-based total) "
-                      "use the grid-average emission rate: no qualifying contractual instrument, supplier-specific rate "
-                      f"or residual mix applies (no residual mix is available for {', '.join(sorted(regions))}). For "
-                      "this electricity the market-based and location-based results are equal, and the grid average "
-                      "may include renewable attributes that others have claimed." if fallback else None),
+        "steam_gj_by_level": steam,
+        "statement": " ".join(s for s in (
+            f"{format(fallback.normalize(), 'f')} kWh ({share} % of the electricity in the market-based total) use the "
+            "grid-average emission rate: no qualifying contractual instrument, supplier-specific rate or residual mix "
+            f"applies (no residual mix is available for {', '.join(sorted(regions))}). For this electricity the "
+            "market-based and location-based results are equal, and the grid average may include renewable attributes "
+            "that others have claimed." if fallback else "",
+            f"{format(steam['location_rate'].normalize(), 'f')} GJ of purchased steam use the location-based rate: no "
+            "supplier-specific rate was selected." if steam["location_rate"] else "") if s) or None,
         "instruments": [{**{k: getattr(i, k) for k in fields}, "kwh_applied": applied.get(i.id, Decimal(0)),
                          "kwh_not_applied": Decimal(i.mwh) * 1000 - applied.get(i.id, Decimal(0))}
                         for i in _approved_instruments(db, principal, period)],
@@ -954,7 +1036,9 @@ def _report_content(db, principal, period, run):
             "scope2_location_based": _t(run.scope2_location_kg),
             "scope2_market_based": _t(run.scope2_market_kg),
             "scope2_market_based_status": ("MISSING_INPUTS" if run.scope2_market_kg is None else
-                                           "GRID_AVERAGE_FALLBACK" if market["grid_average_fallback_kwh"] else "COMPLETE"),
+                                           "GRID_AVERAGE_FALLBACK" if market["grid_average_fallback_kwh"] else
+                                           "LOCATION_RATE_FALLBACK" if market["steam_gj_by_level"]["location_rate"]
+                                           else "COMPLETE"),
             "scope3": None,
             "scope3_status": "NOT_INCLUDED",
         },

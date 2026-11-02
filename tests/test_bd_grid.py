@@ -95,7 +95,7 @@ class MethodsTest(unittest.TestCase):
         r = year(rates={})
         self.assertEqual(r["status"], "DRAFT_NO_CROSS_CHECK")
         self.assertIn("heat-rate", r["method_b"]["blocked_by"])
-        self.assertEqual(len(derive.draft_factor_rows(r, "BD", "S", "S")), 2)  # Method A still gives DRAFT rows
+        self.assertEqual(derive.draft_factor_rows(r, "BD", "S", "S"), [])  # without the cross-check: kept out
         self.assertEqual(build.load_heat_rates(build.HERE / "heat_rates.json"), {})  # repository: nothing cited yet
 
     def test_declared_default_heating_value_is_flagged(self):
@@ -125,11 +125,21 @@ class MethodsTest(unittest.TestCase):
         self.assertAlmostEqual(t["operating_margin"], co2 / 310e6, places=12)
         self.assertAlmostEqual(t["combined_margin_firm"], 0.5 * t["operating_margin"] + 0.5 * t["build_margin"])
         rows = derive.draft_factor_rows(year(), "BD-NATIONAL-GRID", "SYNTHETIC", "SYNTHETIC")
+        # One location-based candidate per year, so two approved rows can never be ambiguous.
         self.assertEqual([(x["family"], x["factor_kind"], x["valid_from"], x["valid_to"]) for x in rows],
-                         [("bd-grid-average-supply", "grid_average", "2022-07-01", "2023-06-30"),
-                          ("bd-grid-average-domestic", "grid_average", "2022-07-01", "2023-06-30")])
+                         [("bd-grid-average-supply", "grid_average", "2022-07-01", "2023-06-30")])
         for row in rows:
             self.assertIn(row["factor_kind"], accounting.allowed_factor_kinds("electricity", "location"))
+
+    def test_only_reviewable_years_reach_the_ledger_and_ranges_need_a_width(self):
+        for status in ("DRAFT_COVERAGE_GAP", "DRAFT_NO_CROSS_CHECK", "DRAFT_METHOD_GAP", "DRAFT_REFERENCE_GAP", "BLOCKED"):
+            self.assertEqual(derive.draft_factor_rows({**year(), "status": status}, "BD", "S", "S"), [], status)
+        with tempfile.TemporaryDirectory() as tmp:
+            path = Path(tmp) / "heat_rates.json"
+            flat = {"status": "CITED", "source": "TEST", "low_kj_per_kwh": 7000, "central_kj_per_kwh": 7000,
+                    "high_kj_per_kwh": 7000}
+            path.write_text(json.dumps({"technologies": {"ccgt": flat}}), encoding="utf-8")
+            self.assertEqual(build.load_heat_rates(path), {})  # a triangular draw needs low < high
 
 
 class UncertaintyAndRebuildTest(unittest.TestCase):

@@ -78,6 +78,31 @@ class RetireWithdrawnGridFactorTest(unittest.TestCase):
         with self.engine.connect() as conn:
             self.assertEqual(conn.execute(text("SELECT COUNT(*) FROM esg_audit_event")).scalar_one(), 1)
 
+    def test_a_dry_run_leaves_every_column_of_every_row_unchanged(self):
+        def rows():
+            with self.engine.connect() as conn:
+                return [dict(r) for r in conn.execute(text("SELECT * FROM esg_emission_factors ORDER BY id")).mappings()]
+        before = rows()
+        self.assertEqual(mig.run(self.url, out=self.lines.append), 0)
+        self.assertEqual(rows(), before)
+
+    def test_a_mistyped_sqlite_path_is_refused_and_no_file_is_created(self):
+        missing = os.path.join(tempfile.mkdtemp(prefix="esg-datamig-"), "typo.sqlite3")
+        self.assertEqual(mig.run("sqlite:///" + missing, out=self.lines.append), 2)
+        self.assertFalse(os.path.exists(missing))
+        self.assertIn("not found", "\n".join(self.lines))
+
+    def test_every_other_scope2_row_is_shown(self):
+        with self.engine.begin() as conn:
+            conn.execute(text("INSERT INTO esg_emission_factors (id, category, fuel_or_activity, region, factor_value, "
+                              "unit, source_citation) VALUES ('ppa-012', 'Scope 2', 'Renewable PPA / Green Tariff', "
+                              "'Bangladesh', 0.12, 'kg CO2e / kWh', 'TEST')"))
+        self.assertEqual(mig.run(self.url, out=self.lines.append), 0)
+        report = "\n".join(self.lines)
+        self.assertIn("Rows to retire: 1", report)
+        self.assertIn("left unchanged): 2", report)
+        self.assertIn("ppa-012", report)
+
     def test_apply_needs_an_actor(self):
         self.assertEqual(mig.run(self.url, apply=True, out=self.lines.append), 2)
         self.assertIsNone(row(self.engine, "grid-055")["status"])

@@ -325,6 +325,12 @@ def approve_gas_certificate(cert_id: str, p: Principal = Depends(require("read")
     return out(run(ledger.approve_gas_certificate, db, p, cert_id))
 
 
+@router.post("/gas-certificates/{cert_id}/void")
+def void_gas_certificate(cert_id: str, body: VoidIn, p: Principal = Depends(require("read")),
+                         db: Session = Depends(get_db)):
+    return out(run(ledger.void_gas_certificate, db, p, cert_id, body.reason))
+
+
 @router.get("/gas-certificates")
 def list_gas_certificates(facility_id: Optional[str] = None, limit: int = Limit, offset: int = Offset,
                           p: Principal = Depends(require("read")), db: Session = Depends(get_db)):
@@ -343,6 +349,12 @@ def create_contractual_instrument(body: ContractualInstrumentIn, p: Principal = 
 def approve_contractual_instrument(instrument_id: str, p: Principal = Depends(require("read")),
                                    db: Session = Depends(get_db)):
     return out(run(ledger.approve_contractual_instrument, db, p, instrument_id))
+
+
+@router.post("/contractual-instruments/{instrument_id}/void")
+def void_contractual_instrument(instrument_id: str, body: VoidIn, p: Principal = Depends(require("read")),
+                                db: Session = Depends(get_db)):
+    return out(run(ledger.void_contractual_instrument, db, p, instrument_id, body.reason))
 
 
 @router.get("/contractual-instruments")

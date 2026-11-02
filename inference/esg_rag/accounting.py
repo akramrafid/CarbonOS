@@ -7,12 +7,15 @@ The same inputs always produce the same lines, totals and exceptions.
 Rules enforced here (see docs/esg/ACCOUNTING_METHODOLOGY.md):
 * Units are normalised to one canonical unit per activity type or rejected (UnitError).
 * A factor is used only if APPROVED by the caller's selection, matches activity type, unit,
-  region and validity dates. No factor → MISSING_FACTOR exception, never a default value.
+  region and validity dates. No factor → MISSING_FACTOR exception, never a default value. An explicitly
+  selected location-based factor of another region blocks (SELECTED_FACTOR_OTHER_REGION); a Scope 1 one is flagged.
 * Scope 2 location-based and market-based totals are separate. Market-based follows the Scope 2
   Guidance hierarchy: (1) contractual instruments that meet the Scope 2 Quality Criteria, applied by
   kWh; (2) a supplier-specific rate the record selects; (3) a residual mix; (4) otherwise the grid
   average, flagged MARKET_FALLBACK_GRID_AVERAGE and disclosed. A selection that skips an available
-  higher level is MARKET_HIERARCHY_VIOLATION. Market-based is None only if not even a grid average applies.
+  higher level is MARKET_HIERARCHY_VIOLATION. Levels are chosen per activity month when a better level covers
+  only part of a record. Purchased steam takes a selected supplier rate, otherwise its location-based rate
+  (MARKET_FALLBACK_LOCATION_RATE). Market-based is None only if not even a grid average applies.
 * Every Scope 2 electricity factor declares its kind. Location-based uses the grid AVERAGE
   emission rate only. Combined-margin factors (CDM Tool 07 project baselines) never produce a
   Scope 2 line: MARGIN_FACTOR_NOT_ALLOWED. The same rule is a database check constraint.
@@ -33,6 +36,7 @@ Rules enforced here (see docs/esg/ACCOUNTING_METHODOLOGY.md):
   equity share applies the equity percentage.
 * Mixed GWP bases across factors used in one run are a blocking exception.
 """
+import unicodedata
 from collections import defaultdict
 from dataclasses import dataclass, field, replace
 from decimal import Decimal, ROUND_HALF_UP
@@ -77,7 +81,11 @@ FACTOR_KIND_ERRORS = ("MARGIN_FACTOR_NOT_ALLOWED", "UNKNOWN_FACTOR_KIND", "FACTO
 # Market-based Scope 2 (GHG Protocol Scope 2 Guidance, ch. 6). Level 1, contractual instruments, is applied first by kWh;
 # the rest of each record takes the best of these factor levels, highest first.
 MARKET_HIERARCHY = ("supplier_specific", "residual_mix", "grid_average")
-MARKET_LEVELS = ("contractual_instrument",) + MARKET_HIERARCHY
+ELECTRICITY_MARKET_LEVELS = ("contractual_instrument",) + MARKET_HIERARCHY
+# Purchased steam has no grid: without a selected supplier rate its market-based line uses the location-based rate.
+MARKET_LEVELS = ELECTRICITY_MARKET_LEVELS + ("location_rate",)
+FALLBACK_LEVELS = ("grid_average", "location_rate")
+_LEVEL_RANK = {level: rank for rank, level in enumerate(MARKET_LEVELS)}
 # Applied by grid region without a selection. A supplier-specific rate belongs to a supply contract, which a grid region
 # does not identify, so the record must select it (market_factor_id).
 AUTO_MARKET_LEVELS = ("residual_mix", "grid_average")
@@ -412,6 +420,8 @@ def select_factor(a: Activity, region: str, method: str, factors: List[Factor],
             return None, "SELECTED_FACTOR_NOT_APPROVED"
         if not _applicable(f, a, method):
             return None, "SELECTED_FACTOR_NOT_APPLICABLE"
+        if method == "location" and f.region != region:  # a location-based rate is that of the grid where it is used
+            return None, "SELECTED_FACTOR_OTHER_REGION"
         kind_error = factor_kind_error(f)
         return (None, kind_error) if kind_error else (f, None)
     candidates = [f for f in factors if _applicable(f, a, method) and f.region == region]
@@ -448,6 +458,10 @@ def month_segments(a: Activity) -> List[Activity]:
     return out
 
 
+def _one_month(a: Activity) -> bool:
+    return (a.period_start.year, a.period_start.month) == (a.period_end.year, a.period_end.month)
+
+
 def factor_pieces(a: Activity, region: str, method: str, factors: List[Factor],
                   explicit_id: Optional[str]) -> Tuple[List[Tuple[Activity, Factor]], Optional[str]]:
     """The factor for the whole record or, when no single factor covers its dates (e.g. a bill spanning the
@@ -455,8 +469,7 @@ def factor_pieces(a: Activity, region: str, method: str, factors: List[Factor],
     f, err = select_factor(a, region, method, factors, explicit_id)
     if not err:
         return [(a, f)], None
-    if err != "MISSING_FACTOR" or explicit_id or (a.period_start.year, a.period_start.month) == (
-            a.period_end.year, a.period_end.month):
+    if err != "MISSING_FACTOR" or explicit_id or _one_month(a):
         return [], err
     pieces = []
     for seg in month_segments(a):
@@ -469,41 +482,66 @@ def factor_pieces(a: Activity, region: str, method: str, factors: List[Factor],
 
 # --- market-based hierarchy ------------------------------------------------------------------
 
-def _auto_market_level(a: Activity, region: str, factors: List[Factor], location_id: Optional[str]):
-    """The best level applied without a selection: (pieces, error, level). Level 4 without a market-method
-    grid-average factor is the record's own location-based rate."""
+def _level_for(a: Activity, region: str, factors: List[Factor], location_id: Optional[str]):
+    """(pieces, error, level) at the best level applied without a selection, for the whole of `a`. The last level is
+    the record's own location-based rate: 'grid_average' for electricity, 'location_rate' for purchased steam."""
     for kind in AUTO_MARKET_LEVELS:
         pieces, err = factor_pieces(a, region, "market", [f for f in factors if f.kind == kind], None)
         if err != "MISSING_FACTOR":
             return pieces, err, kind
     pieces, err = factor_pieces(a, region, "location", factors, location_id)
-    return (pieces, None, "grid_average") if not err else ([], "NO_GRID_AVERAGE_FALLBACK", None)
+    if err:
+        return [], "NO_GRID_AVERAGE_FALLBACK", None
+    return pieces, None, "grid_average" if a.activity_type == "electricity" else "location_rate"
+
+
+def _auto_market(a: Activity, region: str, factors: List[Factor], location_id: Optional[str]):
+    """([(segment, factor, level)], error, best level) without a selection: the best level for the whole record or,
+    when a better level covers only some of its activity months, each month's own best level."""
+    pieces, err, level = _level_for(a, region, factors, location_id)
+    whole = ([(s, f, level) for s, f in pieces], err, level)
+    if err or level not in FALLBACK_LEVELS or _one_month(a):
+        return whole
+    split, best = [], level
+    for seg in month_segments(a):
+        seg_pieces, seg_err, seg_level = _level_for(seg, region, factors, location_id)
+        if seg_err:
+            return [], seg_err, seg_level
+        split += [(s, f, seg_level) for s, f in seg_pieces]
+        best = min(best, seg_level, key=_LEVEL_RANK.__getitem__)
+    return (split, None, best) if best != level else whole
 
 
 def market_pieces(a: Activity, region: str, factors: List[Factor], explicit_id: Optional[str],
                   location_id: Optional[str] = None
-                  ) -> Tuple[List[Tuple[Activity, Factor]], Optional[str], Optional[str]]:
-    """Market-based factor pieces for the kWh no instrument covers: (pieces, error, hierarchy level)."""
+                  ) -> Tuple[List[Tuple[Activity, Factor, str]], Optional[str], Optional[str]]:
+    """Market-based pieces [(segment, factor, level)] for the quantity no instrument covers: (pieces, error, level)."""
     if not explicit_id:
         invalid = sorted((f for f in factors if f.region == region and _applicable(f, a, "market")
                           and factor_kind_error(f)), key=lambda f: f.id)
         if invalid:
             return [], factor_kind_error(invalid[0]), None
-        return _auto_market_level(a, region, factors, location_id)
+        return _auto_market(a, region, factors, location_id)
     pieces, err = factor_pieces(a, region, "market", factors, explicit_id)
     if err:
         return [], err, None
     chosen = pieces[0][1]
     if chosen.region != region:
         return [], "MARKET_FACTOR_OTHER_MARKET", chosen.kind
-    best = _auto_market_level(a, region, factors, location_id)[2]
-    if best is not None and MARKET_HIERARCHY.index(chosen.kind) > MARKET_HIERARCHY.index(best):
+    level = chosen.kind or "supplier_specific"  # purchased steam: its market factor is the supplier's rate
+    best = _auto_market(a, region, factors, location_id)[2]
+    if best is not None and _LEVEL_RANK[level] > _LEVEL_RANK[best]:
         return [], "MARKET_HIERARCHY_VIOLATION", best
-    return pieces, None, chosen.kind
+    return [(s, f, level) for s, f in pieces], None, level
 
 
 def _unselected_supplier_rate(a: Activity, region: str, factors: List[Factor]) -> bool:
     return any(f.kind == "supplier_specific" and f.region == region and _applicable(f, a, "market") for f in factors)
+
+
+def instrument_ref_key(ref: str) -> str:
+    """Comparison form of a certificate or contract reference: NFKC, case-folded, without whitespace."""
+    return "".join(unicodedata.normalize("NFKC", ref).casefold().split())
 
 
 def instrument_failures(inst: Instrument, facility: Optional[Facility]) -> List[str]:
@@ -597,7 +635,7 @@ def calculate(activities: List[Activity], facilities: Dict[str, Facility], facto
     basis = _gwp_basis(factors, gwp_basis)
     res = Result(methodology_version=METHODOLOGY_VERSION, boundary_method=boundary_method, gwp_basis=basis)
     market_complete = True
-    has_electricity = False
+    has_scope2 = False
     gwp_bases = {gwp_basis} if gwp_basis else set()  # an explicit inventory basis must match every factor
     acts = sorted(activities, key=lambda x: x.id)
     captive_meters = {(a.facility_id, a.meter_ref) for a in acts
@@ -610,7 +648,7 @@ def calculate(activities: List[Activity], facilities: Dict[str, Facility], facto
     failures: Dict[str, List[str]] = {}
     claimed: Dict[Tuple[str, str], str] = {}
     for inst in instruments:
-        first = claimed.setdefault((inst.instrument_type, inst.ref), inst.id)
+        first = claimed.setdefault((inst.instrument_type, instrument_ref_key(inst.ref)), inst.id)
         duplicate = [f"unique_claim (same reference as {first})"] if first != inst.id else []
         failures[inst.id] = instrument_failures(inst, facilities.get(inst.facility_id)) + duplicate
     allocation, unused_kwh = allocate_instruments(
@@ -674,15 +712,16 @@ def calculate(activities: List[Activity], facilities: Dict[str, Facility], facto
         line = factor_line(a, fac, scope, method, f, share)
         return None if line is None else record(a, fac, scope, method, line)
 
-    def add_pieces(a, fac, scope, method, pieces, share, extra=None):
+    def add_pieces(a, fac, scope, method, pieces, share, levels=None):
         total = Decimal(0)
-        for seg, f in pieces:
+        for i, (seg, f) in enumerate(pieces):
             line = factor_line(seg, fac, scope, method, f, share)
             if line is None:
                 continue
             if len(pieces) > 1:
                 line.details = {**line.details, "month_segment": f"{seg.period_start}..{seg.period_end}"}
-            line.details = {**line.details, **(extra or {})}
+            if levels:
+                line.details = {**line.details, "market_level": levels[i]}
             total += record(seg, fac, scope, method, line)
         return total
 
@@ -760,6 +799,9 @@ def calculate(activities: List[Activity], facilities: Dict[str, Facility], facto
             pieces, err = factor_pieces(a, fac.region, "direct", factors, a.factor_id)
             if err:
                 exception(err, a)
+            elif a.factor_id and pieces[0][1].region != fac.region:
+                exception("SELECTED_FACTOR_OTHER_REGION", a, blocking=False,
+                          detail=f"{a.factor_id} is for region {pieces[0][1].region}; the facility is in {fac.region}")
             res.scope1_kg += add_pieces(a, fac, "1", "direct", pieces, share)
             continue
 
@@ -774,36 +816,43 @@ def calculate(activities: List[Activity], facilities: Dict[str, Facility], facto
         if err:
             exception(err, a)
         res.scope2_location_kg += add_pieces(a, fac, "2", "location", pieces, share)
-        if a.activity_type == "electricity":
-            has_electricity = True
-            covered = Decimal(0)
-            for inst, kwh in allocation.get(a.id, []):  # level 1: contractual instruments
-                covered += kwh
-                res.scope2_market_kg = (res.scope2_market_kg or Decimal(0)) + instrument_line(a, fac, inst, kwh, share)
-            if covered and covered == a.quantity:
-                continue
-            rest = replace(a, quantity=a.quantity - covered)
-            m_pieces, merr, level = market_pieces(rest, fac.region, factors, a.market_factor_id, a.factor_id)
-            if merr:
-                market_complete = False
-                blocking = merr in MARKET_BLOCKING_ERRORS
-                detail = MARKET_ERROR_DETAILS.get(merr, "" if blocking else "{error}: the selected market factor "
-                                                  "cannot be used").format(level=level, error=merr)
-                exception(merr if blocking else "MISSING_MARKET_BASED_INPUT", a, blocking=blocking, detail=detail)
-                continue
-            res.scope2_market_kg = (res.scope2_market_kg or Decimal(0)) + add_pieces(
-                rest, fac, "2", "market", m_pieces, share, {"market_level": level})
-            if level == "grid_average":
-                exception("MARKET_FALLBACK_GRID_AVERAGE", a, blocking=False,
-                          detail=f"{rest.quantity} kWh: no qualifying contractual instrument, supplier-specific rate or "
-                                 "residual mix applies, so the grid-average rate is used and disclosed")
-            if level in AUTO_MARKET_LEVELS and _unselected_supplier_rate(rest, fac.region, factors):
-                exception("SUPPLIER_RATE_NOT_SELECTED", a, blocking=False,
-                          detail="An approved supplier-specific rate exists for this grid region; select it "
-                                 "(market_factor_id) if this electricity is bought under that contract")
+        # Market-based for every Scope 2 record (Scope 2 Guidance hierarchy); instruments cover grid electricity only.
+        has_scope2 = True
+        covered = Decimal(0)
+        for inst, kwh in allocation.get(a.id, []):  # level 1: contractual instruments
+            covered += kwh
+            res.scope2_market_kg = (res.scope2_market_kg or Decimal(0)) + instrument_line(a, fac, inst, kwh, share)
+        if covered and covered == a.quantity:
+            continue
+        rest = replace(a, quantity=a.quantity - covered)
+        m_pieces, merr, level = market_pieces(rest, fac.region, factors, a.market_factor_id, a.factor_id)
+        if merr:
+            market_complete = False
+            blocking = merr in MARKET_BLOCKING_ERRORS
+            detail = MARKET_ERROR_DETAILS.get(merr, "" if blocking else "{error}: the selected market factor "
+                                              "cannot be used").format(level=level, error=merr)
+            exception(merr if blocking else "MISSING_MARKET_BASED_INPUT", a, blocking=blocking, detail=detail)
+            continue
+        res.scope2_market_kg = (res.scope2_market_kg or Decimal(0)) + add_pieces(
+            rest, fac, "2", "market", [(s, f) for s, f, _ in m_pieces], share, [lv for _, _, lv in m_pieces])
+        fallback = sum((s.quantity for s, _, lv in m_pieces if lv in FALLBACK_LEVELS), Decimal(0))
+        if fallback and a.activity_type == "electricity":
+            exception("MARKET_FALLBACK_GRID_AVERAGE", a, blocking=False,
+                      detail=f"{fallback} kWh: no qualifying contractual instrument, supplier-specific rate or "
+                             "residual mix applies, so the grid-average rate is used and disclosed")
+        elif fallback:
+            exception("MARKET_FALLBACK_LOCATION_RATE", a, blocking=False,
+                      detail=f"{fallback} {a.unit}: no supplier-specific rate is selected, so the location-based "
+                             "rate is used and disclosed")
+        if not a.market_factor_id and _unselected_supplier_rate(rest, fac.region, factors):
+            exception("SUPPLIER_RATE_NOT_SELECTED", a, blocking=False,
+                      detail="An approved supplier-specific rate exists for this grid region; select it "
+                             "(market_factor_id) if this supply is bought under that contract")
 
-    if has_electricity and not market_complete:
+    if has_scope2 and not market_complete:
         res.scope2_market_kg = None  # partial market-based totals are never reported as complete
+        for bucket in res.by_facility.values():
+            bucket["scope2_market_kg"] = None
     if len(gwp_bases) == 1:
         res.gwp_basis = next(iter(gwp_bases))  # report the basis actually used, not one inferred from loaded factors
     if len(gwp_bases) > 1:
@@ -834,7 +883,10 @@ def calculate(activities: List[Activity], facilities: Dict[str, Facility], facto
 def _generator_checks(acts: List[Activity], res: Result, bands: Dict[str, Tuple[Decimal, Decimal, str]]):
     """Specific fuel consumption per captive generator must fall inside the configured band. Generators are keyed
     by (facility, generator_ref), so 'G1' at two facilities is two generators; output without fuel is reported."""
-    lines = {l.activity_id: l for l in res.lines}
+    gas_mj = defaultdict(Decimal)  # natural gas energy per record, over all of its month segments
+    for l in res.lines:
+        if l.scope == "1" and "energy_gj_ncv" in l.details:
+            gas_mj[l.activity_id] += l.details["energy_gj_ncv"] * Decimal(1000)
     fuel = defaultdict(lambda: defaultdict(Decimal))
     fuelled = set()  # generators with any fuel record, converted or not
     output = defaultdict(Decimal)
@@ -848,8 +900,8 @@ def _generator_checks(acts: List[Activity], res: Result, bands: Dict[str, Tuple[
         fuelled.add(gen)
         if a.activity_type == "diesel":
             fuel[gen]["diesel"] += a.quantity
-        elif a.activity_type == "natural_gas" and a.id in lines and "energy_gj_ncv" in lines[a.id].details:
-            fuel[gen]["natural_gas"] += lines[a.id].details["energy_gj_ncv"] * Decimal(1000)  # MJ
+        elif a.activity_type == "natural_gas" and a.id in gas_mj:
+            fuel[gen]["natural_gas"] += gas_mj[a.id]  # MJ
         elif a.activity_type not in bands:
             fuel[gen][a.activity_type] += a.quantity
 

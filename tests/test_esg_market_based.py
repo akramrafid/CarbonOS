@@ -6,14 +6,15 @@ through the ledger. Factors and instruments are TEST fixtures, not real ones.
 """
 import datetime as dt
 import os
+import re
 import sys
 import unittest
 from decimal import Decimal as D
+from pathlib import Path
 
 sys.path.insert(0, os.path.dirname(__file__))
 from test_esg_accounting import FAC, GRID, act, factor  # noqa: E402
 from test_esg_ledger import LedgerTestCase  # noqa: E402
-from esg_rag import ledger_models  # noqa: E402
 from esg_rag.accounting import (  # noqa: E402
     DIRECT_CONTRACT_CRITERIA, INSTRUMENT_TYPES, QUALITY_CRITERIA, Facility, Instrument, calculate,
 )
@@ -152,8 +153,56 @@ class MarketHierarchyTests(unittest.TestCase):
         self.assertEqual(self.codes(r), ["MISSING_FACTOR", "MISSING_MARKET_BASED_INPUT"])
         self.assertFalse(r.exceptions[1]["blocking"])
 
-    def test_instrument_types_match_the_database_check(self):
-        self.assertEqual(ledger_models.INSTRUMENT_TYPES, INSTRUMENT_TYPES)
+    def test_instrument_types_match_the_migration_check(self):
+        source = (Path(__file__).resolve().parents[1] / "inference" / "esg_migrations" / "versions"
+                  / "0009_contractual_instruments.py").read_text(encoding="utf-8")
+        listed = re.search(r"instrument_type IN \(([^)]*)\)", source).group(1)
+        self.assertEqual(tuple(v.strip(" '") for v in listed.split(",")), INSTRUMENT_TYPES)
+
+    def test_purchased_steam_is_in_the_market_based_total(self):
+        steam = factor("steam", "purchased_steam", "GJ", "60", "location", kind=None)
+        r = calculate([act("s1", "f1", "purchased_steam", "100", "GJ")], FAC, [steam], OP)
+        self.assertEqual((r.scope2_market_kg, r.scope2_location_kg), (D("6000"), D("6000")))
+        self.assertEqual(self.levels(r), [("location_rate", D(100))])
+        self.assertIn("MARKET_FALLBACK_LOCATION_RATE", self.codes(r))
+        supplier = factor("steam-sup", "purchased_steam", "GJ", "40", "market", kind=None)
+        r = calculate([act("s1", "f1", "purchased_steam", "100", "GJ", market_factor_id="steam-sup")], FAC,
+                      [steam, supplier], OP)
+        self.assertEqual((r.scope2_market_kg, self.levels(r)), (D("4000"), [("supplier_specific", D(100))]))
+        self.assertNotIn("MARKET_FALLBACK_LOCATION_RATE", self.codes(r))
+
+    def test_a_residual_mix_covering_part_of_a_record_is_used_for_those_months(self):
+        july = factor("rm", "electricity", "kWh", "0.9", "market", kind="residual_mix", valid_from=dt.date(2025, 7, 1))
+        bill = act("b1", "f1", "electricity", "3100", "kWh", start=dt.date(2025, 6, 15), end=dt.date(2025, 7, 15))
+        r = calculate([bill], FAC, [GRID, july], OP)
+        self.assertEqual(self.levels(r), [("grid_average", D(1600)), ("residual_mix", D(1500))])  # 16 + 15 days
+        self.assertEqual(r.scope2_market_kg, D("2150"))  # 1 600 × 0.5 + 1 500 × 0.9
+        self.assertIn("1600", next(e for e in r.exceptions if e["code"] == "MARKET_FALLBACK_GRID_AVERAGE")["detail"])
+
+    def test_an_explicit_factor_of_another_region_is_never_the_location_rate(self):
+        india = factor("grid-in", "electricity", "kWh", "0.9", "location", region="IN")
+        r = calculate([march(factor_id="grid-in")], FAC, [GRID, india], OP)
+        self.assertEqual(r.scope2_location_kg, 0)
+        self.assertIn("SELECTED_FACTOR_OTHER_REGION", self.codes(r))
+        self.assertTrue(r.blocking)
+        diesel_in = factor("diesel-in", "diesel", "L", "2.7", "direct", region="IN")
+        r = calculate([act("d1", "f1", "diesel", "10", "L", factor_id="diesel-in")], FAC, [diesel_in], OP)
+        flag = next(e for e in r.exceptions if e["code"] == "SELECTED_FACTOR_OTHER_REGION")
+        self.assertEqual((flag["blocking"], r.scope1_kg), (False, D("27")))  # Scope 1: flagged, still calculated
+
+    def test_facility_market_figures_are_withheld_with_the_total(self):
+        bad = factor("cm-mkt", "electricity", "kWh", "0.55", "market", kind="grid_combined_margin")
+        facs = {**FAC, "f2": Facility("f2", "BD", True, True, D(100))}
+        r = calculate([march(), act("a2", "f2", "electricity", "1000", "kWh", market_factor_id="cm-mkt")], facs,
+                      [GRID, bad], OP)
+        self.assertIsNone(r.scope2_market_kg)
+        self.assertEqual({fid: b["scope2_market_kg"] for fid, b in r.by_facility.items()}, {"f1": None, "f2": None})
+
+    def test_instrument_references_are_compared_in_normalised_form(self):
+        same = instrument("i2", "5", ref=" test-irec-I1 ")
+        r = calculate([march()], FAC, [GRID], OP, instruments=[instrument("i1", "1"), same])
+        failure = next(e for e in r.exceptions if e["code"] == "INSTRUMENT_FAILS_QUALITY_CRITERIA")
+        self.assertIn("unique_claim", failure["detail"])
 
 
 class MarketHierarchyLedgerTest(LedgerTestCase):
@@ -198,6 +247,15 @@ class MarketHierarchyLedgerTest(LedgerTestCase):
         self.assertIn("TEST-GRID", market["statement"])
         csv = self.call("GET", "viewer-a", f"/snapshots/{snap['id']}/export?format=csv", status=200).text
         self.assertIn("scope2_market_based_disclosure", csv)
+
+    def test_a_reference_is_claimed_once_whatever_its_spelling_and_a_void_frees_it(self):
+        inst = self.instrument(status=201).json()
+        self.instrument(status=409, instrument_ref=" test-irec-0001-0004 ")
+        self.call("POST", "contrib-a", f"/contractual-instruments/{inst['id']}/void", {"reason": "TEST"}, status=403)
+        self.call("POST", "user-a", f"/contractual-instruments/{inst['id']}/void", {"reason": " "}, status=422)
+        voided = self.post("user-a", f"/contractual-instruments/{inst['id']}/void", {"reason": "TEST typo in MWh"})
+        self.assertEqual(voided["status"], "RETIRED")
+        self.instrument(status=201, instrument_ref=" test-irec-0001-0004 ")
 
     def test_instrument_validation(self):
         self.instrument(status=422, quality_criteria={"made_up": "TEST"})

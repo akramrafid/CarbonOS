@@ -53,12 +53,13 @@ def load_plants(path: Path) -> List[derive.PlantB]:
 
 
 def load_heat_rates(path: Path) -> Dict[str, derive.HeatRate]:
-    """Only CITED ranges with low ≤ central ≤ high are usable; anything else stays out (Method B is then BLOCKED)."""
+    """Only CITED ranges with low ≤ central ≤ high and low < high are usable (a triangular draw needs a range);
+    anything else stays out (Method B is then BLOCKED)."""
     out = {}
     for tech, r in json.loads(path.read_text(encoding="utf-8"))["technologies"].items():
         numbers = [r.get(k) for k in ("low_kj_per_kwh", "central_kj_per_kwh", "high_kj_per_kwh")]
         if r.get("status") == "CITED" and r.get("source") and all(n is not None for n in numbers) \
-                and numbers[0] <= numbers[1] <= numbers[2]:
+                and numbers[0] <= numbers[1] <= numbers[2] and numbers[0] < numbers[2]:
             out[tech] = derive.HeatRate(*numbers, source=r["source"])
     return out
 
