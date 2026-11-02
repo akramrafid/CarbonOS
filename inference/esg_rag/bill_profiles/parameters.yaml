@@ -1,0 +1,254 @@
+# Bill parameter definitions (carbonos.bill_parameters/1). One definition per field, keyed by a stable dotted key.
+# Labels are CarbonOS's own wording. ALIASES ARE EMPTY ON PURPOSE: aliases are the words printed on real bills and
+# are added only from a real, consented, redacted bill. Loading this file creates DRAFT versions; a second person
+# approves each version.
+schema: carbonos.bill_parameters/1
+groups:            # child: parent. bill is the root.
+  meter: bill
+  register: meter
+  generator: bill
+parameters:
+  # --- identity and period ---------------------------------------------------------------------
+  - key: account.number
+    labels: {en: Account number, bn: হিসাব নম্বর}
+    dtype: text
+    role: identifier
+  - key: bill.number
+    labels: {en: Bill number, bn: বিল নম্বর}
+    dtype: text
+    role: identifier
+  - key: period.start
+    labels: {en: Billing period start, bn: বিলিং সময়ের শুরু}
+    dtype: date
+    role: period
+  - key: period.end
+    labels: {en: Billing period end, bn: বিলিং সময়ের শেষ}
+    dtype: date
+    role: period
+  - key: tariff.category
+    labels: {en: Tariff category, bn: ট্যারিফ শ্রেণি}
+    dtype: text
+    role: tariff
+  # --- cost ------------------------------------------------------------------------------------
+  - key: cost.total
+    labels: {en: Total amount payable, bn: মোট বিলের পরিমাণ}
+    dtype: decimal
+    dimension: "[currency]"
+    canonical_unit: BDT
+    allowed_units: [BDT, Tk]
+    role: cost
+  - key: cost.energy_charge
+    labels: {en: Energy charge, bn: এনার্জি চার্জ}
+    dtype: decimal
+    dimension: "[currency]"
+    canonical_unit: BDT
+    allowed_units: [BDT, Tk]
+    role: cost
+  - key: cost.fuel_unit_price
+    labels: {en: Fuel unit price, bn: জ্বালানির একক মূল্য}
+    dtype: decimal
+    dimension: "[currency] / [length] ** 3"
+    canonical_unit: BDT / L
+    role: cost
+  # --- electricity: bill and meter -------------------------------------------------------------
+  - key: energy.kwh.total
+    labels: {en: Total billed energy, bn: মোট বিদ্যুৎ ব্যবহার (কিলোওয়াট-ঘণ্টা)}
+    dtype: decimal
+    dimension: "[energy]"
+    canonical_unit: kWh
+    allowed_units: [kWh, MWh]
+    role: consumption
+    ledger: {activity_type: electricity, unit: kWh, meter_ref_from: account.number}
+  - key: meter.serial
+    labels: {en: Meter number, bn: মিটার নম্বর}
+    dtype: text
+    role: identifier
+    group: meter
+  - key: meter.multiplier
+    labels: {en: Meter multiplying factor, bn: মিটার গুণক}
+    dtype: decimal
+    dimension: dimensionless
+    canonical_unit: dimensionless
+    role: multiplier
+    group: meter
+  - key: meter.digits
+    labels: {en: Dial digits, bn: মিটারের ডায়ালের অঙ্ক সংখ্যা}
+    dtype: integer
+    dimension: dimensionless
+    canonical_unit: dimensionless
+    role: meter_read
+    group: meter
+  - key: demand.kw.max
+    labels: {en: Maximum demand, bn: সর্বোচ্চ চাহিদা (কিলোওয়াট)}
+    dtype: decimal
+    dimension: "[power]"
+    canonical_unit: kW
+    allowed_units: [kW, MW]
+    role: demand
+    group: meter
+  - key: demand.kw.sanctioned
+    labels: {en: Sanctioned load, bn: অনুমোদিত লোড (কিলোওয়াট)}
+    dtype: decimal
+    dimension: "[power]"
+    canonical_unit: kW
+    allowed_units: [kW, MW]
+    role: demand
+    group: meter
+  - key: power_quality.kvarh
+    labels: {en: Reactive energy, bn: রিঅ্যাকটিভ এনার্জি (kVArh)}
+    dtype: decimal
+    dimension: "[reactive_power] * [time]"
+    canonical_unit: kvarh
+    allowed_units: [kvarh, kVArh]
+    role: power_quality
+    group: meter
+  - key: power_quality.pf
+    labels: {en: Power factor (printed), bn: পাওয়ার ফ্যাক্টর}
+    dtype: decimal
+    dimension: dimensionless
+    canonical_unit: dimensionless
+    role: power_quality
+    group: meter
+  - key: power_quality.pf_derived
+    labels: {en: Power factor (from kWh and kVArh), bn: পাওয়ার ফ্যাক্টর (হিসাবকৃত)}
+    dtype: decimal
+    dimension: dimensionless
+    canonical_unit: dimensionless
+    role: power_quality
+    group: meter
+    derived: true
+  # --- electricity: time-of-use registers ------------------------------------------------------
+  - key: register.band
+    labels: {en: Time-of-use band, bn: টিওইউ ব্যান্ড}
+    dtype: enum
+    enum: [peak, off_peak, flat, other]
+    role: identifier
+    group: register
+  - key: meter.read.previous
+    labels: {en: Previous reading, bn: পূর্ববর্তী রিডিং}
+    dtype: decimal
+    dimension: dimensionless
+    canonical_unit: dimensionless
+    role: meter_read
+    group: register
+  - key: meter.read.current
+    labels: {en: Present reading, bn: বর্তমান রিডিং}
+    dtype: decimal
+    dimension: dimensionless
+    canonical_unit: dimensionless
+    role: meter_read
+    group: register
+  - key: meter.read.estimated
+    labels: {en: Estimated reading, bn: আনুমানিক রিডিং}
+    dtype: boolean
+    role: quality_flag
+    group: register
+  - key: energy.kwh.register
+    labels: {en: Register energy, bn: রেজিস্টারের বিদ্যুৎ ব্যবহার (কিলোওয়াট-ঘণ্টা)}
+    dtype: decimal
+    dimension: "[energy]"
+    canonical_unit: kWh
+    allowed_units: [kWh, MWh]
+    role: consumption
+    group: register
+  - key: energy.kwh.computed
+    labels: {en: Energy from readings × MF, bn: রিডিং থেকে হিসাবকৃত ব্যবহার}
+    dtype: decimal
+    dimension: "[energy]"
+    canonical_unit: kWh
+    role: consumption
+    group: register
+    derived: true
+  # --- natural gas -------------------------------------------------------------------------------
+  - key: gas.volume.measured
+    labels: {en: Metered gas volume, bn: মাপা গ্যাসের পরিমাণ (ঘনমিটার)}
+    dtype: decimal
+    dimension: "[length] ** 3"
+    canonical_unit: m3
+    allowed_units: [m3, Sm3, ft3]
+    role: meter_read
+    group: meter
+  - key: gas.volume.correction_factor
+    labels: {en: Volume correction factor, bn: সংশোধন গুণক}
+    dtype: decimal
+    dimension: dimensionless
+    canonical_unit: dimensionless
+    role: multiplier
+    group: meter
+  - key: gas.volume.corrected
+    labels: {en: Corrected (billed) gas volume, bn: সংশোধিত গ্যাসের পরিমাণ (ঘনমিটার)}
+    dtype: decimal
+    dimension: "[length] ** 3"
+    canonical_unit: m3
+    allowed_units: [m3, Sm3, ft3]
+    role: consumption
+    group: meter
+    ledger: {activity_type: natural_gas, unit: m3, meter_ref_from: meter.serial}
+  # --- fuel challans and refrigerant invoices -----------------------------------------------------
+  - key: fuel.diesel.litres
+    labels: {en: Diesel delivered, bn: ডিজেল (লিটার)}
+    dtype: decimal
+    dimension: "[length] ** 3"
+    canonical_unit: L
+    allowed_units: [L, kL]
+    role: consumption
+    ledger: {activity_type: diesel, unit: L, meter_ref_from: bill.number}
+  - key: fuel.furnace_oil.litres
+    labels: {en: Furnace oil delivered, bn: ফার্নেস অয়েল (লিটার)}
+    dtype: decimal
+    dimension: "[length] ** 3"
+    canonical_unit: L
+    allowed_units: [L, kL]
+    role: consumption
+    ledger: {activity_type: furnace_oil, unit: L, meter_ref_from: bill.number}
+  - key: refrigerant.name
+    labels: {en: Refrigerant, bn: রেফ্রিজারেন্টের নাম}
+    dtype: text
+    role: identifier
+  - key: refrigerant.purchased.kg
+    labels: {en: Refrigerant purchased, bn: কেনা রেফ্রিজারেন্ট (কেজি)}
+    dtype: decimal
+    dimension: "[mass]"
+    canonical_unit: kg
+    allowed_units: [kg]
+    role: consumption
+    description: Enters the ledger only through a refrigerant mass balance, so it has no direct ledger mapping.
+  # --- captive generator logs ---------------------------------------------------------------------
+  - key: generator.ref
+    labels: {en: Generator, bn: জেনারেটর নম্বর}
+    dtype: text
+    role: identifier
+    group: generator
+  - key: generator.output.kwh
+    labels: {en: Generator output, bn: জেনারেটরের উৎপাদন (কিলোওয়াট-ঘণ্টা)}
+    dtype: decimal
+    dimension: "[energy]"
+    canonical_unit: kWh
+    allowed_units: [kWh, MWh]
+    role: consumption
+    group: generator
+    ledger: {activity_type: captive_generation_output, unit: kWh, generator_ref_from: generator.ref}
+  - key: generator.fuel.diesel.litres
+    labels: {en: Generator diesel, bn: জেনারেটরের ডিজেল (লিটার)}
+    dtype: decimal
+    dimension: "[length] ** 3"
+    canonical_unit: L
+    allowed_units: [L, kL]
+    role: consumption
+    group: generator
+    ledger: {activity_type: diesel, unit: L, generator_ref_from: generator.ref}
+  - key: generator.runtime.hours
+    labels: {en: Running hours, bn: চলার সময় (ঘণ্টা)}
+    dtype: decimal
+    dimension: "[time]"
+    canonical_unit: h
+    role: meter_read
+    group: generator
+  - key: generator.sfc_derived
+    labels: {en: Specific fuel consumption, bn: নির্দিষ্ট জ্বালানি ব্যবহার (লিটার/কিলোওয়াট-ঘণ্টা)}
+    dtype: decimal
+    dimension: "[length] ** 3 / [energy]"
+    canonical_unit: L / kWh
+    role: consumption
+    group: generator
+    derived: true

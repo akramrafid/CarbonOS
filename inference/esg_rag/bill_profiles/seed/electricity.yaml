@@ -1,0 +1,62 @@
+# Seed electricity profiles (carbonos.bill_profile/1). They list WHICH parameters each document type carries and
+# which rules apply. They carry NO detection anchors and NO extraction hints: both are the words printed on a real
+# bill and are added only from a real, consented, redacted bill. Without anchors a seed never matches a bill on
+# its own (UNKNOWN_PROFILE, routed to a person) and it stays DRAFT. effective_from is a placeholder until a real
+# bill sets the layout's validity.
+schema: carbonos.bill_profile/1
+templates:
+  note: &note "SEED, AWAITING A REAL BILL: no anchors, hints or aliases yet; effective dates are placeholders."
+  ht_fields: &ht_fields
+    - {key: account.number, required: true}
+    - {key: bill.number}
+    - {key: period.start, required: true}
+    - {key: period.end, required: true}
+    - {key: tariff.category}
+    - {key: energy.kwh.total, required: true}
+    - {key: cost.total}
+    - {key: cost.energy_charge}
+    - {key: meter.serial, required: true}
+    - {key: meter.multiplier, required: true}
+    - {key: meter.digits}
+    - {key: demand.kw.max}
+    - {key: demand.kw.sanctioned}
+    - {key: power_quality.kvarh}
+    - {key: power_quality.pf}
+  lt_fields: &lt_fields
+    - {key: account.number, required: true}
+    - {key: bill.number}
+    - {key: period.start, required: true}
+    - {key: period.end, required: true}
+    - {key: tariff.category}
+    - {key: energy.kwh.total, required: true}
+    - {key: cost.total}
+    - {key: meter.serial, required: true}
+    - {key: meter.multiplier}
+    - {key: meter.digits}
+  ht_rules: &ht_rules [period, electricity_meter_reads, electricity_power_quality]
+  lt_rules: &lt_rules [period, electricity_meter_reads]
+profiles:
+  - {profile_key: desco-electricity-ht, issuer: DESCO, document_type: electricity_ht, layout_version: seed-1,
+     languages: [en, bn], effective_from: 2000-01-01, fields: *ht_fields, rulesets: *ht_rules, notes: *note}
+  - {profile_key: desco-electricity-lt, issuer: DESCO, document_type: electricity_lt, layout_version: seed-1,
+     languages: [en, bn], effective_from: 2000-01-01, fields: *lt_fields, rulesets: *lt_rules, notes: *note}
+  - {profile_key: dpdc-electricity-ht, issuer: DPDC, document_type: electricity_ht, layout_version: seed-1,
+     languages: [en, bn], effective_from: 2000-01-01, fields: *ht_fields, rulesets: *ht_rules, notes: *note}
+  - {profile_key: dpdc-electricity-lt, issuer: DPDC, document_type: electricity_lt, layout_version: seed-1,
+     languages: [en, bn], effective_from: 2000-01-01, fields: *lt_fields, rulesets: *lt_rules, notes: *note}
+  - {profile_key: breb-pbs-electricity-ht, issuer: PBS/BREB, document_type: electricity_ht, layout_version: seed-1,
+     languages: [en, bn], effective_from: 2000-01-01, fields: *ht_fields, rulesets: *ht_rules, notes: *note}
+  - {profile_key: breb-pbs-electricity-lt, issuer: PBS/BREB, document_type: electricity_lt, layout_version: seed-1,
+     languages: [en, bn], effective_from: 2000-01-01, fields: *lt_fields, rulesets: *lt_rules, notes: *note}
+  - {profile_key: nesco-electricity-ht, issuer: NESCO, document_type: electricity_ht, layout_version: seed-1,
+     languages: [en, bn], effective_from: 2000-01-01, fields: *ht_fields, rulesets: *ht_rules, notes: *note}
+  - {profile_key: nesco-electricity-lt, issuer: NESCO, document_type: electricity_lt, layout_version: seed-1,
+     languages: [en, bn], effective_from: 2000-01-01, fields: *lt_fields, rulesets: *lt_rules, notes: *note}
+  - {profile_key: wzpdcl-electricity-ht, issuer: WZPDCL, document_type: electricity_ht, layout_version: seed-1,
+     languages: [en, bn], effective_from: 2000-01-01, fields: *ht_fields, rulesets: *ht_rules, notes: *note}
+  - {profile_key: wzpdcl-electricity-lt, issuer: WZPDCL, document_type: electricity_lt, layout_version: seed-1,
+     languages: [en, bn], effective_from: 2000-01-01, fields: *lt_fields, rulesets: *lt_rules, notes: *note}
+  - {profile_key: bpdb-electricity-ht, issuer: BPDB, document_type: electricity_ht, layout_version: seed-1,
+     languages: [en, bn], effective_from: 2000-01-01, fields: *ht_fields, rulesets: *ht_rules, notes: *note}
+  - {profile_key: bpdb-electricity-lt, issuer: BPDB, document_type: electricity_lt, layout_version: seed-1,
+     languages: [en, bn], effective_from: 2000-01-01, fields: *lt_fields, rulesets: *lt_rules, notes: *note}

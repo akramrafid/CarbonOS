@@ -1,0 +1,45 @@
+# Bill case (data only): what to load through the API, which SYNTHETIC documents to read, and what must come
+# out at each step. tests/test_esg_bill_cases.py runs every directory with a case.yaml; no code per case.
+case: base_synthetic_grid
+description: One SYNTHETIC HT bill read with an approved profile, reviewed, analysed and posted to the ledger.
+load:
+  - parameters: repository            # inference/esg_rag/bill_profiles/parameters.yaml
+  - profile: ../_shared/synthetic_grid_profile.yaml
+bills:
+  - document: synthetic_bill_grid_2025_07.yaml
+    expect:
+      status: EXTRACTED
+      profile: {key: synthetic-grid-ht, version: 1}
+      values:
+        - {key: account.number, value: SYN-ACC-1}
+        - {key: period.start, value: "2025-07-01"}
+        - {key: period.end, value: "2025-07-31"}
+        - {key: energy.kwh.total, value: "14400", unit: kWh}
+        - {key: cost.total, value: "125000", unit: BDT}
+        - {key: meter.serial, group: "meter:1", value: SGM-001}
+        - {key: meter.multiplier, group: "meter:1", value: "40"}
+        - {key: demand.kw.max, group: "meter:1", value: "85", unit: kW}
+        - {key: register.band, group: "meter:1/register:1", value: off_peak}
+        - {key: energy.kwh.register, group: "meter:1/register:1", value: "12000"}
+        - {key: register.band, group: "meter:1/register:2", value: peak}
+        - {key: meter.read.previous, group: "meter:1/register:2", value: "500"}
+        - {key: meter.read.current, group: "meter:1/register:2", value: "560"}
+        - {key: energy.kwh.register, group: "meter:1/register:2", value: "2400"}
+      derived:
+        - {key: energy.kwh.computed, group: "meter:1/register:1", value: "12000"}
+        - {key: energy.kwh.computed, group: "meter:1/register:2", value: "2400"}
+      unmapped: ["150"]
+      blocking: []
+    post: true
+analysis:
+  - query: {keys: [energy.kwh.register], group_by: [band]}
+    rows:
+      - {band: off_peak, key: energy.kwh.register, sum: "12000", count: 1}
+      - {band: peak, key: energy.kwh.register, sum: "2400", count: 1}
+  - query: {keys: [demand.kw.max, energy.kwh.total], group_by: [meter, period]}
+    rows:
+      - {meter: SGM-001, period: "2025-07", key: demand.kw.max, max: "85"}
+      - {meter: SYN-ACC-1, period: "2025-07", key: energy.kwh.total, sum: "14400"}
+ledger:
+  - {activity_type: electricity, quantity: "14400", unit: kWh, meter_ref: SYN-ACC-1, activity_start: "2025-07-01",
+     activity_end: "2025-07-31", data_quality: billed, status: DRAFT}

@@ -1,0 +1,72 @@
+# Seed gas, fuel, refrigerant and generator-log profiles (carbonos.bill_profile/1). Same rule as the electricity
+# seeds: no anchors, hints or aliases until checked against a real, consented, redacted document; DRAFT until then.
+schema: carbonos.bill_profile/1
+templates:
+  note: &note "SEED, AWAITING A REAL BILL: no anchors, hints or aliases yet; effective dates are placeholders."
+  gas_fields: &gas_fields
+    - {key: account.number, required: true}
+    - {key: bill.number}
+    - {key: period.start, required: true}
+    - {key: period.end, required: true}
+    - {key: tariff.category}
+    - {key: meter.serial, required: true}
+    - {key: gas.volume.measured, required: true}
+    - {key: gas.volume.correction_factor}
+    - {key: gas.volume.corrected, required: true}
+    - {key: cost.total}
+  gas_rules: &gas_rules [period, gas_volume]
+profiles:
+  - {profile_key: titas-gas, issuer: Titas, document_type: gas, layout_version: seed-1, languages: [en, bn],
+     effective_from: 2000-01-01, fields: *gas_fields, rulesets: *gas_rules, notes: *note}
+  - {profile_key: bakhrabad-gas, issuer: Bakhrabad, document_type: gas, layout_version: seed-1, languages: [en, bn],
+     effective_from: 2000-01-01, fields: *gas_fields, rulesets: *gas_rules, notes: *note}
+  - {profile_key: kgdcl-gas, issuer: KGDCL, document_type: gas, layout_version: seed-1, languages: [en, bn],
+     effective_from: 2000-01-01, fields: *gas_fields, rulesets: *gas_rules, notes: *note}
+  - {profile_key: jalalabad-gas, issuer: Jalalabad, document_type: gas, layout_version: seed-1, languages: [en, bn],
+     effective_from: 2000-01-01, fields: *gas_fields, rulesets: *gas_rules, notes: *note}
+  - {profile_key: pashchimanchal-gas, issuer: Pashchimanchal, document_type: gas, layout_version: seed-1,
+     languages: [en, bn], effective_from: 2000-01-01, fields: *gas_fields, rulesets: *gas_rules, notes: *note}
+  - {profile_key: sundarban-gas, issuer: Sundarban, document_type: gas, layout_version: seed-1, languages: [en, bn],
+     effective_from: 2000-01-01, fields: *gas_fields, rulesets: *gas_rules, notes: *note}
+  - profile_key: fuel-supplier-challan
+    issuer: Fuel supplier (each supplier gets its own profile once a real challan is checked)
+    document_type: fuel_challan
+    layout_version: seed-1
+    languages: [en, bn]
+    effective_from: 2000-01-01
+    fields:
+      - {key: bill.number, required: true}
+      - {key: period.end, required: true}
+      - {key: fuel.diesel.litres}
+      - {key: fuel.furnace_oil.litres}
+      - {key: cost.fuel_unit_price}
+      - {key: cost.total}
+    notes: *note
+  - profile_key: refrigerant-vendor-invoice
+    issuer: Refrigerant vendor (each vendor gets its own profile once a real invoice is checked)
+    document_type: refrigerant_invoice
+    layout_version: seed-1
+    languages: [en, bn]
+    effective_from: 2000-01-01
+    fields:
+      - {key: bill.number, required: true}
+      - {key: period.end, required: true}
+      - {key: refrigerant.name, required: true}
+      - {key: refrigerant.purchased.kg, required: true}
+      - {key: cost.total}
+    notes: *note
+  - profile_key: facility-generator-log
+    issuer: Facility (own generator log sheet)
+    document_type: generator_log
+    layout_version: seed-1
+    languages: [en, bn]
+    effective_from: 2000-01-01
+    fields:
+      - {key: period.start, required: true}
+      - {key: period.end, required: true}
+      - {key: generator.ref, required: true}
+      - {key: generator.output.kwh, required: true}
+      - {key: generator.fuel.diesel.litres, required: true}
+      - {key: generator.runtime.hours}
+    rulesets: [period, generator_log]
+    notes: *note

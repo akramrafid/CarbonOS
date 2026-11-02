@@ -1,0 +1,69 @@
+# Rule sets (carbonos.bill_rulesets/1): derived values and validation rules as bill_rules expressions over
+# parameter keys. A profile lists the sets it uses; the stored profile version carries an expanded copy, so a
+# bill keeps the exact rules it was validated with. `when` = the rule applies; `expect` = must hold, else finding.
+schema: carbonos.bill_rulesets/1
+rulesets:
+  period:
+    rules:
+      - code: PERIOD_DATES_REVERSED
+        scope: bill
+        expect: "period.end >= period.start"
+        message: "Billing period ends ({period.end}) before it starts ({period.start})"
+
+  electricity_meter_reads:
+    derived:
+      - key: energy.kwh.computed
+        scope: register
+        expr: >-
+          (meter.read.current - meter.read.previous) * meter.multiplier
+          if meter.read.current >= meter.read.previous
+          else ((10 ** meter.digits - meter.read.previous + meter.read.current) * meter.multiplier
+                if present(meter.digits) else 0)
+    rules:
+      - code: METER_ROLLOVER
+        scope: register
+        when: "meter.read.current < meter.read.previous and present(meter.digits)"
+        message: "Dial rolled over on a {meter.digits}-digit meter: {meter.read.previous} → {meter.read.current}; a person confirms the reading"
+      - code: NEGATIVE_READING
+        scope: register
+        when: "meter.read.current < meter.read.previous and not present(meter.digits)"
+        message: "Present reading {meter.read.current} is below the previous {meter.read.previous}"
+      - code: READING_MISMATCH
+        scope: register
+        expect: "abs(energy.kwh.computed - energy.kwh.register) <= 0.5"
+        message: "(present − previous) × MF = {energy.kwh.computed} kWh, but the register bills {energy.kwh.register} kWh"
+      - code: ESTIMATED_READ
+        scope: register
+        when: "meter.read.estimated"
+        blocking: false
+        message: "Read estimated by the utility: grade the ledger record 'estimated'"
+      - code: TOU_SUM_MISMATCH
+        scope: bill
+        expect: "abs(sum(energy.kwh.register) - energy.kwh.total) <= 0.5"
+        message: "Time-of-use registers do not add up to the billed total of {energy.kwh.total} kWh"
+
+  electricity_power_quality:
+    derived:
+      - key: power_quality.pf_derived
+        scope: meter
+        expr: "round(sum(energy.kwh.register) / sqrt(sum(energy.kwh.register) ** 2 + power_quality.kvarh ** 2), 4)"
+    rules:
+      - code: POWER_FACTOR_MISMATCH
+        scope: meter
+        when: "present(power_quality.pf)"
+        expect: "abs(power_quality.pf - power_quality.pf_derived) <= 0.02"
+        blocking: false
+        message: "Printed power factor {power_quality.pf} differs from {power_quality.pf_derived} computed from kWh and kVArh"
+
+  gas_volume:
+    rules:
+      - code: GAS_CORRECTION_MISMATCH
+        scope: meter
+        expect: "abs(gas.volume.measured * gas.volume.correction_factor - gas.volume.corrected) <= 0.5"
+        message: "{gas.volume.measured} m3 × {gas.volume.correction_factor} does not give the billed {gas.volume.corrected} m3"
+
+  generator_log:
+    derived:
+      - key: generator.sfc_derived
+        scope: generator
+        expr: "generator.fuel.diesel.litres / generator.output.kwh"

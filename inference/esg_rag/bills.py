@@ -2,58 +2,24 @@
 Bangladeshi utility bills (Step 3): numbers and dates in Bengali or English, reading validation and field
 provenance. Pure functions; OCR runs locally only (Tesseract ben+eng) and is optional.
 
+The validators run on the profile system: each bill becomes long-form values (bill_extract.Extracted) and is
+checked by the repository rule sets in bill_profiles/rulesets.yaml, the same rules a stored profile version uses.
+Changing a check is a data change there, not a code change here.
+
 Customer bills never leave the machine: there is deliberately no external AI or OCR call here.
 Every extracted field keeps its page and bounding box, and nothing enters the ledger until a person has
 confirmed every field (ready_for_ledger).
 """
 import datetime as dt
-import re
-import unicodedata
 from dataclasses import dataclass
-from decimal import Decimal, InvalidOperation
+from decimal import Decimal
+from functools import lru_cache
 from typing import List, Optional, Tuple
 
-BENGALI_DIGITS = str.maketrans("০১২৩৪৫৬৭৮৯", "0123456789")
-_MONTHS = {
-    1: ("জানুয়ারি", "জানুয়ারী", "january", "jan"), 2: ("ফেব্রুয়ারি", "ফেব্রুয়ারী", "february", "feb"),
-    3: ("মার্চ", "march", "mar"), 4: ("এপ্রিল", "april", "apr"), 5: ("মে", "may"), 6: ("জুন", "june", "jun"),
-    7: ("জুলাই", "july", "jul"), 8: ("আগস্ট", "আগষ্ট", "august", "aug"), 9: ("সেপ্টেম্বর", "september", "sep", "sept"),
-    10: ("অক্টোবর", "october", "oct"), 11: ("নভেম্বর", "november", "nov"), 12: ("ডিসেম্বর", "december", "dec"),
-}
-# NFC on both sides: য় may arrive precomposed (U+09DF) or as য + nukta.
-MONTHS = {unicodedata.normalize("NFC", name): num for num, names in _MONTHS.items() for name in names}
-READ_TOLERANCE_KWH = Decimal("0.5")  # bills print whole units; (current − previous) × MF may round
+from . import bill_extract as bx
+from .bill_text import BENGALI_DIGITS, MONTHS, BillParseError, parse_date, parse_number, to_ascii_digits  # noqa: F401
 
-
-class BillParseError(ValueError):
-    pass
-
-
-def to_ascii_digits(text: str) -> str:
-    return unicodedata.normalize("NFC", text).translate(BENGALI_DIGITS)
-
-
-def parse_number(text: str) -> Decimal:
-    """'১,২৩,৪৫৬.৫' or '123,456.5' → Decimal('123456.5'). Indian digit grouping is accepted."""
-    s = to_ascii_digits(text).strip().replace(",", "").replace(" ", "")
-    if not re.fullmatch(r"-?\d+(\.\d+)?", s):
-        raise BillParseError(f"Not a number: {text!r}")
-    try:
-        return Decimal(s)
-    except InvalidOperation as e:
-        raise BillParseError(f"Not a number: {text!r}") from e
-
-
-def parse_date(text: str) -> dt.date:
-    """'১৫ জুলাই ২০২৫', '15 July 2025', '15-07-2025' or '15/07/2025' (day first) → date."""
-    s = to_ascii_digits(text).strip()
-    m = re.fullmatch(r"(\d{1,2})[-/.](\d{1,2})[-/.](\d{4})", s)
-    if m:
-        return dt.date(int(m.group(3)), int(m.group(2)), int(m.group(1)))
-    m = re.fullmatch(r"(\d{1,2})\s+([^\d\s,]+),?\s+(\d{4})", s)
-    if m and m.group(2).lower() in MONTHS:
-        return dt.date(int(m.group(3)), MONTHS[m.group(2).lower()], int(m.group(1)))
-    raise BillParseError(f"Unrecognised date: {text!r}")
+READ_TOLERANCE_KWH = Decimal("0.5")  # bills print whole units; the rule sets use the same tolerance
 
 
 @dataclass(frozen=True)
@@ -90,57 +56,53 @@ class GasBill:
     billed_m3: Decimal
 
 
-def _finding(code: str, detail: str, blocking: bool = True) -> dict:
-    return {"code": code, "detail": detail, "blocking": blocking}
+@lru_cache(maxsize=None)
+def _profile(*rulesets: str) -> dict:
+    return bx.rules_profile(rulesets)
+
+
+def _row(key, path, value) -> bx.Extracted:
+    return bx.Extracted(key, path, "", value, None, None, None, "manual")
+
+
+def _register_rows(i: int, r: Register) -> List[bx.Extracted]:
+    meter, reg = f"meter:{i}", f"meter:{i}/register:1"  # one meter per register keeps each register's own MF
+    rows = [_row("meter.multiplier", meter, r.multiplying_factor),
+            _row("meter.read.previous", reg, r.previous), _row("meter.read.current", reg, r.current),
+            _row("meter.read.estimated", reg, r.estimated), _row("energy.kwh.register", reg, r.billed_kwh)]
+    if r.meter_digits:
+        rows.append(_row("meter.digits", meter, Decimal(r.meter_digits)))
+    return rows
+
+
+def _plain(findings) -> List[dict]:
+    return [{"code": f["code"], "detail": f["detail"], "blocking": f["blocking"]} for f in findings]
 
 
 def register_consumption(r: Register) -> Tuple[Decimal, List[dict]]:
     """(current − previous) × MF, with a rollover when the dial wrapped. Rollovers need a person to confirm."""
-    if r.current >= r.previous:
-        return (r.current - r.previous) * r.multiplying_factor, []
-    if r.meter_digits:
-        wrapped = (Decimal(10) ** r.meter_digits - r.previous + r.current) * r.multiplying_factor
-        return wrapped, [_finding("METER_ROLLOVER", f"{r.name}: {r.previous} → {r.current} on a {r.meter_digits}-digit dial")]
-    return Decimal(0), [_finding("NEGATIVE_READING", f"{r.name}: current {r.current} < previous {r.previous}")]
+    derived, findings = bx.evaluate_bill(_register_rows(1, r), _profile("electricity_meter_reads"))
+    kwh = next(d.value for d in derived if d.key == "energy.kwh.computed")
+    return kwh, _plain(f for f in findings if f["code"] in ("METER_ROLLOVER", "NEGATIVE_READING"))
 
 
 def validate_electricity(bill: ElectricityBill) -> List[dict]:
-    findings = []
-    for r in bill.registers:
-        kwh, notes = register_consumption(r)
-        findings += notes
-        if abs(kwh - r.billed_kwh) > READ_TOLERANCE_KWH:
-            findings.append(_finding("READING_MISMATCH", f"{r.name}: ({r.current} − {r.previous}) × {r.multiplying_factor}"
-                                                         f" = {kwh} ≠ billed {r.billed_kwh}"))
-        if r.estimated:
-            findings.append(_finding("ESTIMATED_READ", f"{r.name}: estimated by the utility; grade 'estimated'", False))
-    tou_sum = sum((r.billed_kwh for r in bill.registers), Decimal(0))
-    if abs(tou_sum - bill.billed_total_kwh) > READ_TOLERANCE_KWH:
-        findings.append(_finding("TOU_SUM_MISMATCH", f"registers sum to {tou_sum} ≠ total {bill.billed_total_kwh}"))
-    return findings
+    rows = [_row("energy.kwh.total", "", bill.billed_total_kwh)]
+    for i, r in enumerate(bill.registers, start=1):
+        rows += _register_rows(i, r)
+    return _plain(bx.evaluate_bill(rows, _profile("electricity_meter_reads"))[1])
 
 
-def validate_gas(bill: GasBill, tolerance_m3: Decimal = Decimal("0.5")) -> List[dict]:
-    expected = bill.metered_m3 * bill.correction_factor
-    if abs(expected - bill.billed_m3) > tolerance_m3:
-        return [_finding("GAS_CORRECTION_MISMATCH", f"{bill.metered_m3} × {bill.correction_factor} = {expected} "
-                                                    f"≠ billed {bill.billed_m3}")]
-    return []
+def validate_gas(bill: GasBill) -> List[dict]:
+    rows = [_row("gas.volume.measured", "meter:1", bill.metered_m3),
+            _row("gas.volume.correction_factor", "meter:1", bill.correction_factor),
+            _row("gas.volume.corrected", "meter:1", bill.billed_m3)]
+    return _plain(bx.evaluate_bill(rows, _profile("gas_volume"))[1])
 
 
 def validate_periods(bills: List) -> List[dict]:
     """Bills for one account and meter must not overlap; gaps are reported."""
-    findings = []
-    key = lambda b: (b.utility, b.account, b.meter)
-    for k in sorted({key(b) for b in bills}):
-        series = sorted((b for b in bills if key(b) == k), key=lambda b: b.period_start)
-        for prev, nxt in zip(series, series[1:]):
-            if nxt.period_start <= prev.period_end:
-                findings.append(_finding("PERIOD_OVERLAP", f"{k}: {prev.period_start}..{prev.period_end} overlaps "
-                                                           f"{nxt.period_start}..{nxt.period_end}"))
-            elif (nxt.period_start - prev.period_end).days > 1:
-                findings.append(_finding("PERIOD_GAP", f"{k}: no bill {prev.period_end}..{nxt.period_start}", False))
-    return findings
+    return _plain(bx.period_findings([((b.utility, b.account, b.meter), b.period_start, b.period_end) for b in bills]))
 
 
 @dataclass(frozen=True)
@@ -170,17 +132,5 @@ class OCRUnavailable(RuntimeError):
 
 def ocr_page_words(image_path: str) -> List[ExtractedField]:
     """Local OCR (Tesseract ben+eng) → words with bounding boxes. Never calls an external service."""
-    try:
-        import pytesseract
-        from PIL import Image
-    except ImportError as e:
-        raise OCRUnavailable("Install Tesseract with the 'ben' and 'eng' language data and pytesseract") from e
-    data = pytesseract.image_to_data(Image.open(image_path), lang="ben+eng", output_type=pytesseract.Output.DICT)
-    out = []
-    for i, word in enumerate(data["text"]):
-        if word.strip():
-            x, y, w, h = data["left"][i], data["top"][i], data["width"][i], data["height"][i]
-            conf = float(data["conf"][i])
-            out.append(ExtractedField("word", word, data["page_num"][i], (x, y, x + w, y + h),
-                                      conf / 100 if conf >= 0 else None))
-    return out
+    doc = bx.document_from_image(image_path)
+    return [ExtractedField("word", w.text, page.number, w.bbox, w.confidence) for page in doc.pages for w in page.words]

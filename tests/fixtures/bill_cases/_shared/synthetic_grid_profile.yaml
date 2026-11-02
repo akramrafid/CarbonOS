@@ -1,0 +1,31 @@
+# SYNTHETIC test fixture: an invented utility ("SYNTHETIC GRID CO") with an invented layout and anchors.
+# It is not any real Bangladeshi bill. Real bills replace these fixtures as the reference set when they arrive.
+schema: carbonos.bill_profile/1
+profile_key: synthetic-grid-ht
+issuer: SYNTHETIC GRID CO (test fixture, not a real utility)
+document_type: electricity_ht
+layout_version: synthetic-1
+languages: [en]
+effective_from: 2025-01-01
+detect:
+  all_of: ["SYNTHETIC GRID CO"]
+sections:
+  meter: {repeat_anchor: ["Meter No"]}
+fields:
+  - {key: account.number, required: true, hints: [{anchor: ["Account No"], take: value}]}
+  - {key: bill.number, hints: [{anchor: ["Bill No"], take: value}]}
+  - {key: period.start, required: true, hints: [{anchor: ["Period From"]}]}
+  - {key: period.end, required: true, hints: [{anchor: ["Period To"]}]}
+  - {key: energy.kwh.total, required: true, unit: kWh, hints: [{anchor: ["Total Energy"]}]}
+  - {key: cost.total, unit: BDT, hints: [{anchor: ["Amount Payable"]}]}
+  - {key: meter.serial, required: true, hints: [{anchor: ["Meter No"], take: value}]}
+  - {key: meter.multiplier, required: true, hints: [{anchor: ["MF"]}]}
+  - {key: demand.kw.max, hints: [{anchor: ["Max Demand"]}]}
+tables:
+  - group: register
+    required: true
+    header: ["Register", "Previous", "Present", "kWh"]
+    label: {key: register.band, values: {off_peak: ["Off-Peak"], peak: ["Peak"], flat: ["Flat"]}}
+    columns: [meter.read.previous, meter.read.current, energy.kwh.register]
+    flags: {meter.read.estimated: ["(E)"]}
+rulesets: [period, electricity_meter_reads]

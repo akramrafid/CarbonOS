@@ -42,6 +42,10 @@ SOURCE_TYPES = ("manual", "document", "csv")
 BOUNDARY_METHODS = ("operational_control", "financial_control", "equity_share")
 EQUIPMENT_KINDS = ("generator", "refrigeration")
 EQUIPMENT_EVENT_TYPES = ("install", "retire", "recharge")
+BILL_DEFINITION_STATUSES = ("DRAFT", "APPROVED", "RETIRED")
+BILL_STATUSES = ("UNKNOWN_PROFILE", "AMBIGUOUS_PROFILE", "EXTRACTED", "POSTED")
+BILL_SOURCES = ("pdf_text", "ocr", "manual")
+BILL_VALUE_STATUSES = ("extracted", "confirmed", "corrected", "rejected", "unmapped", "derived", "superseded")
 
 
 def _org_fk():
@@ -455,3 +459,127 @@ class DisclosureResponse(EsgBase):
     updated_at = Column(DateTime(timezone=True), default=_now, nullable=False)
     approved_by = Column(String(255))
     approved_at = Column(DateTime(timezone=True))
+
+
+class BillParameter(EsgBase):
+    """A versioned bill parameter definition (one per field key). Immutable once APPROVED; a change is a new
+    version, approved by someone other than its author. NULL organization = platform-wide."""
+    __tablename__ = "esg_bill_parameter"
+    __table_args__ = (
+        UniqueConstraint("organization_id", "key", "version", name="uq_esg_bill_parameter_version"),
+        CheckConstraint(_in("status", BILL_DEFINITION_STATUSES), name="ck_esg_bill_parameter_status"),
+        CheckConstraint("approved_by IS NULL OR approved_by <> created_by", name="ck_esg_bill_parameter_dual_control"),
+        Index("ix_esg_bill_parameter_key", "key", "version"),
+    )
+
+    id = Column(String(36), primary_key=True, default=_id)
+    organization_id = Column(String(36), ForeignKey("esg_organization.id", ondelete="CASCADE"), index=True)
+    key = Column(String(100), nullable=False)
+    version = Column(Integer, nullable=False)
+    definition = Column(JSON, nullable=False)
+    content_sha256 = Column(String(64), nullable=False)
+    status = Column(String(10), nullable=False, default="DRAFT")
+    created_by = Column(String(255), nullable=False)
+    created_at = Column(DateTime(timezone=True), default=_now, nullable=False)
+    approved_by = Column(String(255))
+    approved_at = Column(DateTime(timezone=True))
+
+
+class BillProfile(EsgBase):
+    """A versioned, self-contained bill profile (issuer, document type, layout). A bill keeps the version it was
+    read with. Two-person approval; NULL organization = platform-wide."""
+    __tablename__ = "esg_bill_profile"
+    __table_args__ = (
+        UniqueConstraint("organization_id", "profile_key", "version", name="uq_esg_bill_profile_version"),
+        CheckConstraint(_in("status", BILL_DEFINITION_STATUSES), name="ck_esg_bill_profile_status"),
+        CheckConstraint("approved_by IS NULL OR approved_by <> created_by", name="ck_esg_bill_profile_dual_control"),
+        CheckConstraint("effective_to IS NULL OR effective_to >= effective_from", name="ck_esg_bill_profile_dates"),
+        Index("ix_esg_bill_profile_key", "profile_key", "version"),
+    )
+
+    id = Column(String(36), primary_key=True, default=_id)
+    organization_id = Column(String(36), ForeignKey("esg_organization.id", ondelete="CASCADE"), index=True)
+    profile_key = Column(String(80), nullable=False)
+    version = Column(Integer, nullable=False)
+    issuer = Column(String(100), nullable=False)
+    document_type = Column(String(30), nullable=False)
+    layout_version = Column(String(100), nullable=False)
+    effective_from = Column(Date, nullable=False)
+    effective_to = Column(Date)
+    definition = Column(JSON, nullable=False)  # expanded rules + parameter snapshot (bill_profiles.validate_profile)
+    content_sha256 = Column(String(64), nullable=False)
+    status = Column(String(10), nullable=False, default="DRAFT")
+    created_by = Column(String(255), nullable=False)
+    created_at = Column(DateTime(timezone=True), default=_now, nullable=False)
+    approved_by = Column(String(255))
+    approved_at = Column(DateTime(timezone=True))
+
+
+class Bill(EsgBase):
+    """An uploaded bill: the document's words (for re-reading), the profile version it was read with and its
+    current validation findings. UNKNOWN_PROFILE / AMBIGUOUS_PROFILE bills wait for a person to route them."""
+    __tablename__ = "esg_bill"
+    __table_args__ = (
+        UniqueConstraint("organization_id", "id", name="uq_esg_bill_org_id"),
+        ForeignKeyConstraint(["organization_id", "facility_id"], ["esg_facility.organization_id", "esg_facility.id"],
+                             name="fk_esg_bill_facility"),
+        CheckConstraint(_in("status", BILL_STATUSES), name="ck_esg_bill_status"),
+        CheckConstraint(_in("source", BILL_SOURCES), name="ck_esg_bill_source"),
+        Index("ix_esg_bill_org_facility", "organization_id", "facility_id"),
+    )
+
+    id = Column(String(36), primary_key=True, default=_id)
+    organization_id = _org_fk()
+    facility_id = Column(String(36), nullable=False)
+    profile_id = Column(String(36), ForeignKey("esg_bill_profile.id"))
+    profile_key = Column(String(80))
+    profile_version = Column(Integer)
+    status = Column(String(20), nullable=False)
+    source = Column(String(10), nullable=False)
+    filename = Column(String(255))
+    document_sha256 = Column(String(64), nullable=False)
+    document = Column(JSON, nullable=False)  # pages of words with boxes, so the bill can be re-read
+    findings = Column(JSON, nullable=False, default=list)
+    created_by = Column(String(255), nullable=False)
+    created_at = Column(DateTime(timezone=True), default=_now, nullable=False)
+    posted_by = Column(String(255))
+    posted_at = Column(DateTime(timezone=True))
+
+
+class BillValue(EsgBase):
+    """One extracted, derived or unmapped value: long-form, with its evidence (page, box, raw text) and its review
+    status. confidence is NULL unless it was measured. Rows are never deleted: re-reading supersedes them."""
+    __tablename__ = "esg_bill_value"
+    __table_args__ = (
+        ForeignKeyConstraint(["organization_id", "bill_id"], ["esg_bill.organization_id", "esg_bill.id"],
+                             name="fk_esg_bill_value_bill"),
+        CheckConstraint(_in("status", BILL_VALUE_STATUSES), name="ck_esg_bill_value_status"),
+        CheckConstraint(_in("source", BILL_SOURCES + ("derived",)), name="ck_esg_bill_value_source"),
+        CheckConstraint("status NOT IN ('confirmed','corrected','rejected') OR confirmed_by IS NOT NULL",
+                        name="ck_esg_bill_value_reviewer"),
+        CheckConstraint("status = 'unmapped' OR status = 'superseded' OR parameter_key IS NOT NULL",
+                        name="ck_esg_bill_value_key"),
+        Index("ix_esg_bill_value_bill", "bill_id"),
+        Index("ix_esg_bill_value_key", "organization_id", "parameter_key", "status"),
+    )
+
+    id = Column(Integer, primary_key=True, autoincrement=True)
+    organization_id = _org_fk()
+    bill_id = Column(String(36), nullable=False)
+    parameter_key = Column(String(100))  # NULL = UNMAPPED candidate
+    profile_version = Column(Integer)
+    group_index = Column(String(200), nullable=False, default="")
+    raw_text = Column(Text)
+    value_text = Column(String(500))  # normalised value in the canonical unit (decimal, ISO date, text, true/false)
+    unit = Column(String(30))
+    page = Column(Integer)
+    bbox = Column(JSON)
+    source = Column(String(10), nullable=False)
+    status = Column(String(12), nullable=False)
+    confidence = Column(Numeric(6, 5))
+    extracted_value_text = Column(String(500))  # what extraction read, kept when a person corrects it
+    review_comment = Column(Text)
+    confirmed_by = Column(String(255))
+    confirmed_at = Column(DateTime(timezone=True))
+    activity_id = Column(String(36), ForeignKey("esg_activity_record.id"))  # ledger record this value created
+    created_at = Column(DateTime(timezone=True), default=_now, nullable=False)
