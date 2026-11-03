@@ -38,7 +38,7 @@ const Footer = () => {
         <div className="w-full px-6 lg:px-12 mx-auto">
           
           {/* Top Line */}
-          <div className="flex items-center justify-between border-b border-white/10 pb-6 mb-12">
+          <div className="flex flex-wrap items-center justify-between gap-3 border-b border-white/10 pb-6 mb-12">
             <span className="font-sans text-xs text-white/70">{t('footer.copyright')}</span>
             <span className="font-sans text-xs text-white/70">{t('footer.rights')}</span>
           </div>

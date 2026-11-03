@@ -36,7 +36,7 @@ export default function SetupPanel({ canAdmin }) {
           ]} />
         </Loading>
         {canAdmin && (
-          <form onSubmit={submit('/api/esg/legal-entities', entities.reload)} className="grid gap-3 sm:grid-cols-4 sm:items-end">
+          <form onSubmit={submit('/api/esg/legal-entities', entities.reload)} className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4 sm:items-end">
             <Input label="Name" name="name" required maxLength={200} />
             <Input label="Country (ISO-2)" name="country" required pattern="[A-Z]{2}" placeholder="BD" />
             <Input label="Registration no." name="registration_number" maxLength={100} />
@@ -59,7 +59,7 @@ export default function SetupPanel({ canAdmin }) {
         {canAdmin && entityOptions.length > 0 && (
           <form onSubmit={submit('/api/esg/facilities', facilities.reload, (v) => ({
             ...v, operational_control: v.operational_control === 'true', financial_control: v.financial_control === 'true',
-          }))} className="grid gap-3 sm:grid-cols-3 sm:items-end">
+          }))} className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3 sm:items-end">
             <Select label="Legal entity" name="legal_entity_id" required options={entityOptions} />
             <Input label="Facility name" name="name" required maxLength={200} />
             <Input label="Country (ISO-2)" name="country" required pattern="[A-Z]{2}" placeholder="BD" />
@@ -82,7 +82,7 @@ export default function SetupPanel({ canAdmin }) {
           ]} />
         </Loading>
         {canAdmin && (
-          <form onSubmit={submit('/api/esg/periods', periods.reload)} className="grid gap-3 sm:grid-cols-5 sm:items-end">
+          <form onSubmit={submit('/api/esg/periods', periods.reload)} className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3 sm:items-end">
             <Input label="Name" name="name" required maxLength={100} placeholder="FY2025" />
             <Input label="Start date" name="start_date" type="date" required />
             <Input label="End date" name="end_date" type="date" required />

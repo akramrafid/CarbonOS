@@ -66,7 +66,8 @@ const FrameworkAlignment = () => {
   const cardsRef = useRef([]);
 
   useEffect(() => {
-    let ctx = gsap.context(() => {
+    const media = gsap.matchMedia();
+    media.add('(min-width: 1024px) and (prefers-reduced-motion: no-preference)', () => {
       const cards = cardsRef.current;
       
       cards.forEach((card, i) => {
@@ -89,7 +90,7 @@ const FrameworkAlignment = () => {
         );
       });
     }, containerRef);
-    return () => ctx.revert();
+    return () => media.revert();
   }, []);
 
   return (
@@ -98,7 +99,7 @@ const FrameworkAlignment = () => {
       {/* Card 1 */}
       <section 
         ref={el => cardsRef.current[0] = el}
-        className="w-full h-screen sticky top-0 flex items-center bg-[#0D2B1A] overflow-hidden"
+        className="w-full min-h-[100dvh] py-24 lg:sticky lg:top-0 flex items-center bg-[#0D2B1A] overflow-hidden"
       >
         <div className="max-w-7xl mx-auto px-6 lg:px-12 w-full grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
           <div className="flex justify-center lg:justify-start">
@@ -110,7 +111,7 @@ const FrameworkAlignment = () => {
             <p className="font-sans text-lg text-mist leading-relaxed mb-8 relative z-10">
               Designed from day one around Bangladesh's 2024 National Carbon Market Framework. PIN submission flows, MRV data standards, registry ID formats, verification accreditation — all pre-built and pre-compliant. Zero custom configuration required.
             </p>
-            <div className="flex space-x-3 relative z-10">
+            <div className="flex flex-wrap gap-3 relative z-10">
               <span className="font-mono text-xs text-registry bg-black/40 border border-emerald/20 px-3 py-1.5 rounded">[DOE Bangladesh]</span>
               <span className="font-mono text-xs text-registry bg-black/40 border border-emerald/20 px-3 py-1.5 rounded">[MoEFCC]</span>
               <span className="font-mono text-xs text-registry bg-black/40 border border-emerald/20 px-3 py-1.5 rounded">[UNFCCC]</span>
@@ -122,7 +123,7 @@ const FrameworkAlignment = () => {
       {/* Card 2 */}
       <section 
         ref={el => cardsRef.current[1] = el}
-        className="w-full h-screen sticky top-0 flex items-center bg-[#080F0B] noise-overlay overflow-hidden shadow-[0_-20px_50px_rgba(0,0,0,0.5)]"
+        className="w-full min-h-[100dvh] py-24 lg:sticky lg:top-0 flex items-center bg-[#080F0B] noise-overlay overflow-hidden shadow-[0_-20px_50px_rgba(0,0,0,0.5)]"
       >
         <div className="max-w-7xl mx-auto px-6 lg:px-12 w-full grid grid-cols-1 lg:grid-cols-2 gap-12 items-center relative z-10">
           <div className="flex justify-center lg:justify-start">
@@ -146,7 +147,7 @@ const FrameworkAlignment = () => {
       {/* Card 3 */}
       <section 
         ref={el => cardsRef.current[2] = el}
-        className="w-full h-screen sticky top-0 flex items-center bg-[#0D2B1A] overflow-hidden shadow-[0_-20px_50px_rgba(0,0,0,0.5)]"
+        className="w-full min-h-[100dvh] py-24 lg:sticky lg:top-0 flex items-center bg-[#0D2B1A] overflow-hidden shadow-[0_-20px_50px_rgba(0,0,0,0.5)]"
       >
         <div className="max-w-7xl mx-auto px-6 lg:px-12 w-full grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
           <div className="flex justify-center lg:justify-start w-full pr-12">

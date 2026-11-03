@@ -127,15 +127,15 @@ export default function EsgWorkspace() {
   };
 
   const shell = (children) => (
-    <main className="mx-auto max-w-6xl space-y-6 px-4 pb-16 pt-28 sm:px-6">
+    <main className="esg-workspace mx-auto min-w-0 max-w-6xl space-y-6 px-4 pb-16 pt-28 sm:px-6">
       <header className="flex flex-wrap items-end justify-between gap-4">
-        <div>
+        <div className="min-w-0">
           <p className="font-mono text-[11px] uppercase tracking-wider text-emerald">CarbonOS ESG</p>
-          <h1 className="font-serif text-4xl text-registry">GHG accounting workspace</h1>
+          <h1 className="font-serif text-3xl text-registry sm:text-4xl">GHG accounting workspace</h1>
         </div>
         {user && (
-          <div className="flex items-center gap-3 text-sm text-mist">
-            <span>{user.name}</span>
+          <div className="flex min-w-0 flex-wrap items-center gap-3 text-sm text-mist">
+            <span className="min-w-0 break-words">{user.name}</span>
             <Button variant="secondary" onClick={signOut}>Sign out</Button>
           </div>
         )}
@@ -153,7 +153,7 @@ export default function EsgWorkspace() {
         <p className="text-sm text-amber-300">
           The backend API service is unreachable. Please verify that the API server is running on {import.meta.env?.VITE_FASTAPI_API_URL || 'http://localhost:8000'}.
         </p>
-        <div className="mt-4 flex gap-3">
+        <div className="mt-4 flex flex-wrap gap-3">
           <Button onClick={() => window.location.reload()}>Retry connection</Button>
           {authConfigured && <Button variant="secondary" onClick={signIn}>Sign in with SSO</Button>}
         </div>
@@ -188,7 +188,7 @@ export default function EsgWorkspace() {
         <aside aria-label="Demo notice" className="rounded-xl border border-amber-500/30 bg-amber-950/20 p-4 text-xs">
           <div className="flex flex-wrap items-center justify-between gap-3">
             <div className="space-y-1">
-              <div className="flex items-center gap-2">
+              <div className="flex flex-wrap items-center gap-2">
                 <span className="inline-block rounded bg-amber-400/20 px-2 py-0.5 font-mono text-[11px] font-semibold uppercase tracking-wider text-amber-300">
                   DEMO WORKSPACE — SAMPLE DATA / NOT ASSURED
                 </span>
@@ -204,7 +204,8 @@ export default function EsgWorkspace() {
                 <button
                   type="button"
                   onClick={() => handlePersonaChange('owner')}
-                  className={`rounded-md px-2.5 py-1 font-mono text-[11px] transition-colors ${
+                  aria-pressed={user?.activePersona !== 'reviewer'}
+                  className={`min-h-[44px] rounded-md px-2.5 py-1 font-mono text-[11px] transition-colors ${
                     user?.activePersona !== 'reviewer' ? 'bg-emerald text-carbon font-semibold' : 'text-mist hover:text-registry'
                   }`}
                 >
@@ -213,7 +214,8 @@ export default function EsgWorkspace() {
                 <button
                   type="button"
                   onClick={() => handlePersonaChange('reviewer')}
-                  className={`rounded-md px-2.5 py-1 font-mono text-[11px] transition-colors ${
+                  aria-pressed={user?.activePersona === 'reviewer'}
+                  className={`min-h-[44px] rounded-md px-2.5 py-1 font-mono text-[11px] transition-colors ${
                     user?.activePersona === 'reviewer' ? 'bg-emerald text-carbon font-semibold' : 'text-mist hover:text-registry'
                   }`}
                 >
@@ -230,18 +232,18 @@ export default function EsgWorkspace() {
 
       <div className="flex flex-wrap items-end gap-4">
         {orgs.length > 1
-          ? <div className="w-72"><Select label="Organization" value={orgId} onChange={(e) => switchOrg(e.target.value)} options={orgs.map((o) => [o.id, o.name])} /></div>
-          : <p className="text-lg text-registry">{org.name}</p>}
+          ? <div className="w-72 max-w-full"><Select label="Organization" value={orgId} onChange={(e) => switchOrg(e.target.value)} options={orgs.map((o) => [o.id, o.name])} /></div>
+          : <p className="min-w-0 break-words text-lg text-registry">{org.name}</p>}
         <span className="rounded bg-mist/15 px-2 py-1 font-mono text-[11px] text-mist">Role: {org.role}</span>
         {org.is_demo && !user?.isDemo && (
           <span className="rounded bg-amber/20 px-2 py-1 font-mono text-[11px] text-amber-300">DEMO WORKSPACE — NOT PRODUCTION DATA</span>
         )}
       </div>
 
-      <nav aria-label="ESG workspace sections" className="flex gap-2 overflow-x-auto pb-1">
+      <nav aria-label="ESG workspace sections" className="flex max-w-full gap-2 overflow-x-auto overscroll-x-contain pb-2">
         {tabs.map(([key, label]) => (
           <button key={key} type="button" onClick={() => setTab(key)} aria-current={tab === key ? 'page' : undefined}
-            className={`whitespace-nowrap rounded-lg px-4 py-2 font-mono text-xs focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald ${tab === key ? 'bg-emerald text-carbon' : 'border border-mist/30 text-registry'}`}>
+            className={`min-h-[44px] shrink-0 whitespace-nowrap rounded-lg px-4 py-2 font-mono text-xs focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald ${tab === key ? 'bg-emerald text-carbon' : 'border border-mist/30 text-registry'}`}>
             {label}
           </button>
         ))}

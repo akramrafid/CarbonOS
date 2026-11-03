@@ -115,6 +115,36 @@ body {
   transition: background-color var(--motion-duration-normal, 0.4s) ease, color var(--motion-duration-normal, 0.4s) ease;
 }
 
+html {
+  scroll-padding-top: 7rem;
+}
+
+:where(a, button, input, select, textarea, summary):focus-visible {
+  outline: 2px solid var(--color-emerald);
+  outline-offset: 3px;
+}
+
+.skip-link {
+  position: fixed;
+  top: 1rem;
+  left: 1rem;
+  z-index: 100;
+  padding: 0.75rem 1rem;
+  border-radius: 0.5rem;
+  background: var(--color-registry);
+  color: var(--color-carbon);
+  transform: translateY(-200%);
+}
+
+.skip-link:focus {
+  transform: translateY(0);
+}
+
+.esg-workspace {
+  overflow-wrap: anywhere;
+  font-variant-numeric: tabular-nums;
+}
+
 /* Light Theme Font Family and Base Typography Override */
 [data-theme="light"],
 [data-theme="light"] body {
@@ -207,14 +237,14 @@ select option {
 }
 
 /* Navigation bar - when scrolled */
-[data-theme="light"] nav {
+[data-theme="light"] .site-navigation > div {
   background-color: rgba(242, 243, 238, 0.94) !important; /* Linen with blur */
   backdrop-filter: blur(20px) saturate(180%) !important;
   border-bottom-color: #dbf0ea !important; /* Mint strong surface */
 }
 
 /* Mobile menu drawer */
-[data-theme="light"] nav > div + div[class*="fixed"] {
+[data-theme="light"] .site-menu {
   background-color: rgba(242, 243, 238, 0.98) !important;
 }
 
@@ -297,20 +327,16 @@ select option {
   color: #b91c1c !important; /* Deep red */
 }
 
-/* Hero & Section Header Dramatic Italic / Heading Gradients in Light Mode */
+/* Keep emphasized headings readable against the light surface. */
 [data-theme="light"] .serif-drama[class*="from-[#00C853]"],
 [data-theme="light"] [class*="serif-drama"][class*="from-[#00C853]"] {
-  background-image: linear-gradient(to right, #15803d, #166534, #047857) !important;
-  -webkit-background-clip: text !important;
-  background-clip: text !important;
-  color: transparent !important;
+  background-image: none !important;
+  color: #15803d !important;
 }
 
 [data-theme="light"] [class*="bg-gradient-to-r"][class*="from-emerald-400"] {
-  background-image: linear-gradient(to right, #15803d, #0d9488, #0369a1) !important;
-  -webkit-background-clip: text !important;
-  background-clip: text !important;
-  color: transparent !important;
+  background-image: none !important;
+  color: #15803d !important;
 }
 
 /* ---- GLASS & SEMI-TRANSPARENT BACKGROUNDS ---- */
@@ -1037,7 +1063,7 @@ select option {
   .btn-magnetic,
   .ghost-btn,
   button,
-  a {
+  a:not(.skip-link) {
     transition-property: opacity, background-color, color, border-color !important;
     transition-duration: 0.15s !important;
     transform: none !important;

@@ -1,5 +1,5 @@
 import React, { useEffect, Suspense } from 'react';
-import { Routes, Route, useLocation } from 'react-router-dom';
+import { Routes, Route, Link, Navigate, useLocation } from 'react-router-dom';
 import Navbar from './components/Navbar';
 import Footer from './components/Footer';
 import Home from './pages/Home';
@@ -8,7 +8,7 @@ import LoadingSpinner from './components/LoadingSpinner';
 function ScrollToTop() {
   const { pathname } = useLocation();
   useEffect(() => {
-    window.scrollTo(0, 0);
+    if (!window.location.hash) window.scrollTo(0, 0);
   }, [pathname]);
   return null;
 }
@@ -62,8 +62,10 @@ const Terms = React.lazy(() => import('./pages/company/Terms'));
 function App() {
   return (
     <div className="bg-carbon min-h-screen text-registry font-sans selection:bg-emerald selection:text-carbon">
+      <a href="#main-content" className="skip-link">Skip to content</a>
       <ScrollToTop />
       <Navbar />
+      <div id="main-content" tabIndex={-1}>
       <Suspense fallback={<LoadingSpinner />}>
         <Routes>
           <Route path="/" element={<Home />} />
@@ -78,6 +80,7 @@ function App() {
           <Route path="/platform/marketplace" element={<MarketplaceBrowse />} />
           <Route path="/platform/ai-detection" element={<AIDetection />} />
           <Route path="/platform/saas-dashboard" element={<SaaSDashboard />} />
+          <Route path="/platform/saas" element={<Navigate to="/platform/esg" replace />} />
           <Route path="/platform/esg" element={<EsgWorkspace />} />
           <Route path="/platform/esg/callback" element={<EsgCallback />} />
           <Route path="/platform/impact" element={<Impact />} />
@@ -114,8 +117,17 @@ function App() {
           <Route path="/company/careers" element={<Careers />} />
           <Route path="/company/privacy" element={<Privacy />} />
           <Route path="/company/terms" element={<Terms />} />
+          <Route path="*" element={
+            <main className="mx-auto max-w-3xl px-6 pb-24 pt-36">
+              <p className="font-mono text-sm text-emerald">404</p>
+              <h1 className="mt-3 text-3xl font-semibold sm:text-5xl">Page not found</h1>
+              <p className="mt-4 text-mist">This address does not match a CarbonZero page.</p>
+              <Link to="/" className="mt-6 inline-flex min-h-[44px] items-center rounded-full bg-emerald px-6 font-semibold text-carbon">Back to home</Link>
+            </main>
+          } />
         </Routes>
       </Suspense>
+      </div>
       <Footer />
     </div>
   );

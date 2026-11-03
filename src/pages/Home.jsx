@@ -13,7 +13,7 @@ import Pricing from '../components/Pricing';
 
 function Home() {
   return (
-    <>
+    <main>
       <section id="hero"><Hero /></section>
       <TrustBar />
       <section id="clients"><ClientShowcase /></section>
@@ -25,7 +25,7 @@ function Home() {
       <section id="philosophy"><Philosophy /></section>
       <section id="framework"><FrameworkAlignment /></section>
       <section id="pricing"><Pricing /></section>
-    </>
+    </main>
   );
 }
 

@@ -37,9 +37,9 @@ export function useAction() {
 
 export function Panel({ title, description, children, actions }) {
   return (
-    <section className="rounded-2xl border border-emerald/15 bg-forest/40 p-4 sm:p-6 space-y-4" aria-label={title}>
+    <section className="min-w-0 rounded-2xl border border-emerald/15 bg-forest/40 p-4 sm:p-6 space-y-4" aria-label={title}>
       <header className="flex flex-wrap items-start justify-between gap-3">
-        <div>
+        <div className="min-w-0 break-words">
           <h2 className="font-serif text-2xl text-registry">{title}</h2>
           {description && <p className="mt-1 max-w-2xl text-sm text-mist">{description}</p>}
         </div>
@@ -67,7 +67,7 @@ export function Loading({ state, empty, children }) {
 export function Field({ label, hint, children }) {
   const id = useId();
   return (
-    <div className="flex flex-col gap-1">
+    <div className="flex min-w-0 flex-col gap-1">
       <label htmlFor={id} className="font-mono text-[11px] uppercase tracking-wider text-mist">{label}</label>
       {children(id)}
       {hint && <span className="text-xs text-mist/80">{hint}</span>}
@@ -75,7 +75,7 @@ export function Field({ label, hint, children }) {
   );
 }
 
-const inputCls = 'w-full rounded-lg border border-mist/30 bg-carbon px-3 py-2 text-sm text-registry focus:outline-none focus-visible:ring-2 focus-visible:ring-emerald';
+const inputCls = 'min-h-[44px] min-w-0 w-full rounded-lg border border-mist/30 bg-carbon px-3 py-2 text-base sm:text-sm text-registry focus:outline-none focus-visible:ring-2 focus-visible:ring-emerald';
 
 export function Input({ label, hint, ...props }) {
   return <Field label={label} hint={hint}>{(id) => <input id={id} className={inputCls} {...props} />}</Field>;
@@ -100,7 +100,7 @@ export function Button({ variant = 'primary', className = '', ...props }) {
   return (
     <button
       type="button"
-      className={`min-h-[40px] rounded-lg px-4 py-2 font-mono text-xs font-bold transition-colors disabled:cursor-not-allowed disabled:opacity-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald ${styles} ${className}`}
+      className={`min-h-[44px] rounded-lg px-4 py-2 font-mono text-xs font-bold transition-colors disabled:cursor-not-allowed disabled:opacity-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald ${styles} ${className}`}
       {...props}
     />
   );
@@ -108,7 +108,7 @@ export function Button({ variant = 'primary', className = '', ...props }) {
 
 export function Table({ caption, columns, rows, rowKey = 'id' }) {
   return (
-    <div className="overflow-x-auto rounded-lg border border-mist/20">
+    <div role="region" aria-label={`${caption} table`} tabIndex={0} className="max-w-full overflow-x-auto overscroll-x-contain rounded-lg border border-mist/20 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald">
       <table className="w-full min-w-[600px] text-left text-sm">
         <caption className="sr-only">{caption}</caption>
         <thead className="bg-carbon/60 font-mono text-[11px] uppercase tracking-wider text-mist">
@@ -134,7 +134,7 @@ export function StatusBadge({ status }) {
     PUBLISHED: 'bg-emerald/15 text-emerald-300', IN_REVIEW: 'bg-amber/15 text-amber-300', MISSING_DATA: 'bg-red-500/15 text-red-300',
     NOT_STARTED: 'bg-mist/15 text-mist', NOT_APPLICABLE: 'bg-mist/10 text-mist',
   }[status] || 'bg-mist/15 text-mist';
-  return <span className={`rounded px-2 py-0.5 font-mono text-[11px] ${tone}`}>{status}</span>;
+  return <span className={`whitespace-nowrap rounded px-2 py-0.5 font-mono text-[11px] ${tone}`}>{status}</span>;
 }
 
 // Read form fields into an object, dropping empty strings so optional API fields stay unset.

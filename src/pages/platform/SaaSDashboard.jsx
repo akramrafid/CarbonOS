@@ -1580,7 +1580,7 @@ const SaaSDashboard = () => {
       </aside>
 
       {/* 2. Main Content Area */}
-      <main className="flex-1 pt-24 lg:pt-28 px-6 lg:px-10 overflow-y-auto max-w-7xl mx-auto space-y-8 pb-20 relative">
+      <main className="min-w-0 w-full flex-1 pt-24 lg:pt-28 px-4 sm:px-6 lg:px-10 overflow-y-auto max-w-7xl mx-auto space-y-8 pb-28 relative">
         
         {/* Auditor Read-only Active Watermark Banner */}
         {isAuditorMode && (
