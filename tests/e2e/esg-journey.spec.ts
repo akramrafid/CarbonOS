@@ -159,7 +159,8 @@ test("organization admin completes the Scope 2 journey to a locked, reproducible
 });
 
 test("signed-out visitor sees no workspace data", async ({ page }) => {
+  test.skip(process.env.ESG_E2E_ACCESS_MODE === 'isolated_demo', 'This check requires the protected test service.');
   await page.goto("/platform/esg");
-  await expect(page.getByRole("heading", { name: "Sign in" })).toBeVisible();
+  await expect(page.getByRole("heading", { name: "Demo access is disabled" })).toBeVisible();
   await expect(page.getByRole("table")).toHaveCount(0);
 });

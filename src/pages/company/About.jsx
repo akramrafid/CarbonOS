@@ -17,20 +17,20 @@ const About = () => {
             Our Mission
           </h2>
           <div className="space-y-6 font-sans text-mist text-base leading-relaxed">
-            <p>Carbon Zero BD is a sovereign initiative aimed at digitizing, scaling, and securing the National Carbon Market. By replacing fragmented spreadsheets with real-time IoT feeds and immutable ledger technology, we ensure every carbon credit generated in Bangladesh meets global integrity standards.</p>
+            <p>CarbonOS is a working prototype for organizing sustainability evidence and carbon inventories in Bangladesh. Its ESG workspace connects source documents, independent human review, Scope 1 and 2 calculations, and reproducible reports. The public demo uses synthetic data; external assurance and production integrations require separate validation.</p>
             
             <div className="mt-8 grid grid-cols-1 md:grid-cols-3 gap-6 text-center">
               <div>
-                <div className="font-mono text-3xl text-registry mb-2">100%</div>
-                <div className="font-sans text-xs text-mist">National Framework Alignment</div>
+                <div className="font-mono text-3xl text-registry mb-2">Scope 1/2</div>
+                <div className="font-sans text-xs text-mist">Inventory calculations</div>
               </div>
               <div>
-                <div className="font-mono text-3xl text-emerald mb-2">~0ms</div>
-                <div className="font-sans text-xs text-mist">Data Reconciliation Delay</div>
+                <div className="font-mono text-3xl text-emerald mb-2">Review</div>
+                <div className="font-sans text-xs text-mist">Separate preparer and approver</div>
               </div>
               <div>
-                <div className="font-mono text-3xl text-registry mb-2">24/7</div>
-                <div className="font-sans text-xs text-mist">Automated MRV Monitoring</div>
+                <div className="font-mono text-3xl text-registry mb-2">CSV / JSON</div>
+                <div className="font-sans text-xs text-mist">Reproducible report snapshots</div>
               </div>
             </div>
           </div>

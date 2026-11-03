@@ -100,6 +100,7 @@ export default function LedgerPanel({ me, can, types, periods, facilities }) {
       {can.write && period?.status === 'OPEN' && (
         <Panel title={draft.supersedes_id ? 'Correct an approved record' : 'Add activity data'}
           description="Enter values from a source document. Extraction only suggests values: you confirm each one.">
+          <p className="text-xs text-mist">Use synthetic documents for the showcase. When AI extraction is enabled, document text is sent to the configured external model provider; rule-based extraction stays local.</p>
           <div className="flex flex-wrap items-center gap-3">
             <label className="cursor-pointer rounded-lg border border-mist/40 px-4 py-2 font-mono text-xs text-registry focus-within:ring-2 focus-within:ring-emerald">
               Extract from a document (PDF, CSV, XLSX, TXT, DOCX)
@@ -108,15 +109,22 @@ export default function LedgerPanel({ me, can, types, periods, facilities }) {
             {draft.supersedes_id && <span className="text-xs text-amber-300">Supersedes record {draft.supersedes_id.slice(0, 8)}…</span>}
           </div>
           {extraction && (
+            <>
+            <p role="status" className="text-sm text-mist">
+              {extraction.extraction_method === 'llm'
+                ? `AI-assisted extraction${extraction.model_used ? ` (${extraction.model_used})` : ''}. Model confidence is not verification; review every source value.`
+                : 'Rule-based extraction. No AI model confidence is assigned; review every source value.'}
+            </p>
             <Table caption="Extracted values" rowKey="param_name" rows={extraction.details} columns={[
               { key: 'param_name', label: 'Value' },
               { key: 'value', label: 'Amount', render: (d) => `${Number(d.value).toLocaleString()} ${d.unit}` },
               { key: 'raw_snippet', label: 'Found in document', render: (d) => <q className="text-xs">{d.raw_snippet}</q> },
-              { key: 'confidence', label: 'Confidence', render: (d) => (d.confidence == null ? 'rule match' : `${Math.round(d.confidence * 100)}% (model)`) },
+              { key: 'confidence', label: 'Confidence', render: (d) => (extraction.extraction_method !== 'llm' ? 'rule match' : d.confidence == null ? 'not supplied by model' : `${Math.round(d.confidence * 100)}% (model)`) },
               { key: 'use', label: '', render: (d) => (EXTRACTED[d.param_name]
                 ? <Button variant="secondary" onClick={() => useExtracted(d)}>Use</Button>
                 : <span className="text-xs text-mist">Scope 3 — not in ledger yet</span>) },
             ]} />
+            </>
           )}
           <form key={JSON.stringify(draft)} onSubmit={create} className="grid gap-3 sm:grid-cols-3 sm:items-end" aria-label="New activity record">
             <Select label="Facility" name="facility_id" defaultValue={draft.facility_id} options={facilities.map((f) => [f.id, f.name])} />

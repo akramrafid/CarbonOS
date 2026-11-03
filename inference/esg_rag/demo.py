@@ -50,6 +50,7 @@ def seed_demo_organization(
     """
     # 1. Organization & Memberships (Submitter + Reviewer persona simulation)
     reviewer_sub = f"{sub}-reviewer"
+    approver_sub = f"{sub}-approver"
     if org_id:
         org = db.query(ESGOrganization).filter(ESGOrganization.id == org_id, ESGOrganization.is_demo.is_(True)).first()
         if not org:
@@ -65,7 +66,8 @@ def seed_demo_organization(
     # Submitter is org_owner; Reviewer persona is auditor for separation-of-duties demo
     m_owner = ESGMembership(organization_id=org.id, user_sub=sub, role="org_owner")
     m_reviewer = ESGMembership(organization_id=org.id, user_sub=reviewer_sub, role="auditor")
-    db.add_all([m_owner, m_reviewer])
+    m_approver = ESGMembership(organization_id=org.id, user_sub=approver_sub, role="esg_admin")
+    db.add_all([m_owner, m_reviewer, m_approver])
     db.flush()
 
     # 2. Legal Entity
@@ -116,19 +118,18 @@ def seed_demo_organization(
         organization_id=org.id,
         family=f"grid-electricity-bd-{org_suffix}",
         version=1,
-        activity_type="electricity_grid",
+        activity_type="electricity",
         unit="kWh",
         kgco2e_per_unit=Decimal("0.6400000000"),
         region="BD-NATIONAL-GRID",
         gwp_basis="AR5",
         method="location",
         valid_from=datetime.date(2024, 1, 1),
-        source_publisher="Department of Environment, Bangladesh / IEA",
-        source_document="Grid Emission Factor of Bangladesh 2023 Study",
-        source_url="http://doe.gov.bd/reports/grid-ef-2023.pdf",
+        source_publisher="CarbonOS synthetic demo fixture",
+        source_document="Illustrative grid factor — not an official emission factor",
         source_year=2023,
         status="APPROVED",
-        is_custom=False,
+        is_custom=True,
         created_by="system_demo_seed",
         approved_by="system_demo_approver",
         approved_at=now_utc,
@@ -139,19 +140,18 @@ def seed_demo_organization(
         organization_id=org.id,
         family=f"diesel-stationary-bd-{org_suffix}",
         version=1,
-        activity_type="diesel_generator",
-        unit="liter",
+        activity_type="diesel",
+        unit="L",
         kgco2e_per_unit=Decimal("2.6800000000"),
         region="GLOBAL",
         gwp_basis="AR5",
         method="direct",
         valid_from=datetime.date(2024, 1, 1),
-        source_publisher="IPCC Guidelines for National GHG Inventories",
-        source_document="2006 IPCC Guidelines for National Greenhouse Gas Inventories, Vol 2 Energy",
-        source_url="https://www.ipcc-nggip.iges.or.jp/public/2006gl/",
+        source_publisher="CarbonOS synthetic demo fixture",
+        source_document="Illustrative diesel factor — not an official emission factor",
         source_year=2006,
         status="APPROVED",
-        is_custom=False,
+        is_custom=True,
         created_by="system_demo_seed",
         approved_by="system_demo_approver",
         approved_at=now_utc,
@@ -162,18 +162,18 @@ def seed_demo_organization(
         organization_id=org.id,
         family=f"natural-gas-boiler-bd-{org_suffix}",
         version=1,
-        activity_type="natural_gas_boiler",
+        activity_type="natural_gas",
         unit="m3",
         kgco2e_per_unit=Decimal("2.0200000000"),
         region="GLOBAL",
         gwp_basis="AR5",
         method="direct",
         valid_from=datetime.date(2024, 1, 1),
-        source_publisher="IPCC Guidelines for National GHG Inventories",
-        source_document="2006 IPCC Guidelines for National Greenhouse Gas Inventories, Vol 2 Energy",
+        source_publisher="CarbonOS synthetic demo fixture",
+        source_document="Illustrative gas factor — not an official emission factor",
         source_year=2006,
         status="APPROVED",
-        is_custom=False,
+        is_custom=True,
         created_by="system_demo_seed",
         approved_by="system_demo_approver",
         approved_at=now_utc,
@@ -187,7 +187,7 @@ def seed_demo_organization(
         organization_id=org.id,
         facility_id=facility.id,
         period_id=period.id,
-        activity_type="electricity_grid",
+        activity_type="electricity",
         quantity_raw=Decimal("125000.0000000000"),
         unit_raw="kWh",
         quantity=Decimal("125000.0000000000"),
@@ -211,11 +211,11 @@ def seed_demo_organization(
         organization_id=org.id,
         facility_id=facility.id,
         period_id=period.id,
-        activity_type="diesel_generator",
+        activity_type="diesel",
         quantity_raw=Decimal("4500.0000000000"),
-        unit_raw="liter",
+        unit_raw="L",
         quantity=Decimal("4500.0000000000"),
-        unit="liter",
+        unit="L",
         activity_start=datetime.date(2024, 7, 1),
         activity_end=datetime.date(2024, 9, 30),
         meter_ref="GENSET-SAVAR-01",
@@ -295,6 +295,7 @@ def seed_demo_organization(
         "period_id": period.id,
         "sub": sub,
         "reviewer_sub": reviewer_sub,
+        "approver_sub": approver_sub,
     }
 
 
@@ -352,6 +353,7 @@ def create_demo_session(request: Request, db: Session = Depends(get_db)):
     # 2-hour short-lived tokens
     token = mint_token(sub=sub, exp_seconds=7200, is_demo=True, email_verified=False)
     reviewer_token = mint_token(sub=reviewer_sub, exp_seconds=7200, is_demo=True, email_verified=False)
+    approver_token = mint_token(sub=seeded['approver_sub'], exp_seconds=7200, is_demo=True, email_verified=False)
 
     expires_at = datetime.datetime.now(datetime.timezone.utc) + datetime.timedelta(seconds=7200)
 
@@ -381,6 +383,7 @@ def create_demo_session(request: Request, db: Session = Depends(get_db)):
                 "role": "auditor",
                 "token": reviewer_token,
             },
+            "approver": {"sub": seeded['approver_sub'], "role": "esg_admin", "token": approver_token},
         },
         "seed_summary": seeded,
         "disclaimer": "DEMO WORKSPACE — SAMPLE DATA / NOT ASSURED. Dual-control approval simulation available via reviewer persona.",
@@ -407,6 +410,7 @@ def reset_demo_session(
     token = mint_token(sub=principal.sub, exp_seconds=7200, is_demo=True)
     reviewer_sub = f"{principal.sub}-reviewer"
     reviewer_token = mint_token(sub=reviewer_sub, exp_seconds=7200, is_demo=True)
+    approver_token = mint_token(sub=seeded['approver_sub'], exp_seconds=7200, is_demo=True)
     expires_at = datetime.datetime.now(datetime.timezone.utc) + datetime.timedelta(seconds=7200)
 
     log.info("Reset demo tenant org=%s sub=%s", principal.organization_id, principal.sub)
@@ -435,6 +439,7 @@ def reset_demo_session(
                 "role": "auditor",
                 "token": reviewer_token,
             },
+            "approver": {"sub": seeded['approver_sub'], "role": "esg_admin", "token": approver_token},
         },
         "seed_summary": seeded,
         "disclaimer": "DEMO WORKSPACE — SAMPLE DATA / NOT ASSURED. Dual-control approval simulation available via reviewer persona.",

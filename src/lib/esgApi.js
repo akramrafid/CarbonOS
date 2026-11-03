@@ -1,7 +1,7 @@
 // ESG API client. Sends the signed-in user's bearer token and never a tenant id:
 // the server derives the tenant from the user's organization membership.
 
-const BASE_URL = import.meta.env.VITE_FASTAPI_API_URL || 'http://localhost:8000';
+const BASE_URL = import.meta.env?.VITE_FASTAPI_API_URL || 'http://localhost:8000';
 
 let session = { token: null, organizationId: null };
 

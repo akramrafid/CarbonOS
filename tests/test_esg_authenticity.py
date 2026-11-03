@@ -66,6 +66,28 @@ class ExtractionAuthenticityTest(ESGApiTestCase):
         self.assertEqual(res["method"], "regex")  # failure falls back to rules, not to invented data
         self.assertEqual(res["parameters"]["electricity"], 10.0)
 
+    def test_invalid_model_quantities_or_missing_sources_fall_back_to_rules(self):
+        detail = {'param_name': 'electricity', 'value': 10, 'unit': 'kWh', 'scope': 'Scope 2',
+                  'source_page': 1, 'raw_snippet': 'electricity 10 kWh', 'confidence': 0.8}
+        cases = [
+            {'parameters': {'electricity': 999}, 'details': []},
+            {'parameters': {'electricity': 10}, 'details': [{**detail, 'raw_snippet': 'invented invoice'}]},
+            {'parameters': {'electricity': float('nan')}, 'details': []},
+            {'parameters': {'electricity': -10}, 'details': []},
+            {'parameters': {'electricity': 10}, 'details': [{**detail, 'confidence': 99}]},
+        ]
+        with mock.patch.dict(os.environ, {'ESG_LLM_EXTRACTION_ENABLED': 'true'}):
+            for result in cases:
+                with self.subTest(result=result), mock.patch('esg_rag.extractor.extract_parameters_with_gemini', return_value=result):
+                    actual = extract_footprint_from_text('electricity 10 kWh')
+                    self.assertEqual(actual['method'], 'regex')
+                    self.assertEqual(actual['parameters']['electricity'], 10)
+            with mock.patch('esg_rag.extractor.extract_parameters_with_gemini', return_value={
+                'parameters': {'electricity': 10}, 'details': [detail], 'model_used': 'test-model'}):
+                actual = extract_footprint_from_text('electricity 10 kWh')
+                self.assertEqual(actual['method'], 'llm')
+                self.assertEqual(actual['model_used'], 'test-model')
+
 
 class RagAuthenticityTest(ESGApiTestCase):
     def test_ai_failure_returns_retrieval_only_and_is_not_verified(self):

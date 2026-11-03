@@ -1,10 +1,9 @@
 // OIDC sign-in & zero-friction ephemeral demo mode for the ESG workspace.
 // Configure OIDC with VITE_OIDC_ISSUER, VITE_OIDC_CLIENT_ID and VITE_OIDC_AUDIENCE.
-// When unauthenticated or unconfigured, an ephemeral demo session is provisioned
-// without login/password prompts via the backend (/api/esg/demo/session), strictly
-// preserving tenant isolation and segregation of duties.
+// Without configured OIDC, the demo deployment can provision an isolated sample session.
+// Configured OIDC deployments require sign-in and never fall through to public demo access.
 import { UserManager, WebStorageStateStore } from 'oidc-client-ts';
-import { clearEsgSession, setEsgSession } from './esgApi';
+import { clearEsgSession, EsgApiError, setEsgSession } from './esgApi.js';
 
 const issuer = typeof import.meta !== 'undefined' ? import.meta.env?.VITE_OIDC_ISSUER : undefined;
 const clientId = typeof import.meta !== 'undefined' ? import.meta.env?.VITE_OIDC_CLIENT_ID : undefined;
@@ -28,7 +27,7 @@ export function getStoredDemoSession() {
   try {
     const s = JSON.parse(raw);
     if (!s || !s.access_token) return null;
-    if (s.expires_at && Math.floor(Date.now() / 1000) > s.expires_at) {
+    if (s.expires_at && Math.floor(Date.now() / 1000) >= s.expires_at) {
       safeStorage(() => sessionStorage.removeItem(DEMO_SESSION_KEY));
       return null;
     }
@@ -46,23 +45,33 @@ export function clearStoredDemoSession() {
   safeStorage(() => sessionStorage.removeItem(DEMO_SESSION_KEY));
 }
 
+let pendingDemoSession = null;
 export async function requestDemoSession() {
-  const res = await fetch(`${API_BASE}/api/esg/demo/session`, {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-  });
-  if (!res.ok) {
-    const detail = await res.text().catch(() => '');
-    throw new Error(`Demo session initialization failed (${res.status}): ${detail}`);
-  }
-  const data = await res.json();
-  const sessionData = {
-    ...data,
-    active_persona: 'owner',
-    expires_at: Math.floor(Date.now() / 1000) + (data.expires_in || 3600),
-  };
-  saveDemoSession(sessionData);
-  return sessionData;
+  // React StrictMode and simultaneous callers must share one isolated tenant bootstrap.
+  if (pendingDemoSession) return pendingDemoSession;
+  pendingDemoSession = (async () => {
+    let res;
+    try {
+      res = await fetch(`${API_BASE}/api/esg/demo/session`, {
+        method: 'POST', headers: { 'Content-Type': 'application/json' }, signal: AbortSignal.timeout(10000),
+      });
+    } catch {
+      throw new EsgApiError(0, 'The demo service did not respond. Check your connection and retry.');
+    }
+    if (!res.ok) throw new EsgApiError(res.status, 'The demo service could not start a workspace. Please retry.');
+    let data;
+    try { data = await res.json(); } catch { throw new EsgApiError(502, 'The demo service returned an invalid response. Please retry.'); }
+    if (typeof data?.access_token !== 'string' || !data.access_token || typeof data.tenant_id !== 'string' || !data.tenant_id || data.is_demo !== true ||
+        typeof data.personas?.owner?.token !== 'string' || !data.personas.owner.token ||
+        typeof data.personas?.reviewer?.token !== 'string' || !data.personas.reviewer.token ||
+        !Number.isFinite(data.expires_in) || data.expires_in <= 0) {
+      throw new EsgApiError(502, 'The demo service returned an incomplete session. Please retry.');
+    }
+    const sessionData = { ...data, active_persona: 'owner', expires_at: Math.floor(Date.now() / 1000) + data.expires_in };
+    saveDemoSession(sessionData);
+    return sessionData;
+  })();
+  try { return await pendingDemoSession; } finally { pendingDemoSession = null; }
 }
 
 export async function resetDemoSession() {
@@ -159,8 +168,9 @@ export async function loadSession() {
         };
       }
     } catch {
-      /* ignore and fall through to demo session */
+      /* An expired OIDC session returns to sign-in without creating a demo tenant. */
     }
+    return null;
   }
 
   // 2. Demo session in sessionStorage
@@ -169,8 +179,8 @@ export async function loadSession() {
     try {
       demo = await requestDemoSession();
     } catch (err) {
-      console.warn('Could not auto-provision ESG demo session:', err);
-      return null;
+      if (err.status === 401 || err.status === 403) return null;
+      throw err;
     }
   }
 
@@ -178,7 +188,7 @@ export async function loadSession() {
     const activePersona = demo.active_persona || 'owner';
     const activeToken = demo.personas?.[activePersona]?.token || demo.access_token;
     setEsgSession({ token: activeToken, organizationId: demo.tenant_id });
-    const personaLabel = activePersona === 'reviewer' ? 'Demo Auditor (Reviewer)' : 'Demo Manager (Owner)';
+    const personaLabel = { owner: 'Demo Manager (Owner)', reviewer: 'Demo Auditor (Reviewer)', approver: 'Demo Approver (Admin)' }[activePersona] || 'Demo participant';
     return {
       name: `${personaLabel}`,
       email: null,

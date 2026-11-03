@@ -74,7 +74,7 @@ const ClientShowcase = () => {
                 <span className="w-1.5 h-1.5 rounded-full bg-[#00E676] animate-pulse shrink-0" />
                 <ShieldCheck className="w-3.5 h-3.5 text-[#00C853] shrink-0" />
                 <span className="text-[11px] sm:text-xs font-mono font-semibold tracking-wide text-[#34D399] whitespace-nowrap">
-                  Verified Client
+                  Sample profile
                 </span>
               </div>
               <a
@@ -125,13 +125,13 @@ const ClientShowcase = () => {
               <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-[#00E676] opacity-75" />
               <span className="relative inline-flex rounded-full h-2.5 w-2.5 bg-[#00C853]" />
             </span>
-            <span className="text-gray-300 font-medium text-xs sm:text-[13px]">{client.facilities.length} Active Sites</span>
+            <span className="text-gray-300 font-medium text-xs sm:text-[13px]">{client.facilities.length} Sample Sites</span>
           </div>
           <div className="text-right">
             <span className="text-[#00E676] font-extrabold font-mono text-base sm:text-lg">
               {client.activeInsets.toLocaleString()} tCO₂e
             </span>
-            <span className="text-gray-400 text-xs ml-1.5 font-sans">Verified Offset</span>
+            <span className="text-gray-400 text-xs ml-1.5 font-sans">Illustrative figure</span>
           </div>
         </div>
       </div>
@@ -152,19 +152,18 @@ const ClientShowcase = () => {
         <div className="text-center max-w-3xl mx-auto mb-16">
           <div className="inline-flex items-center space-x-2 px-4 py-1.5 rounded-full bg-[#00C853]/10 border border-[#00C853]/30 text-[#00E676] font-mono text-xs font-bold uppercase tracking-wider mb-4 shadow-sm">
             <Award className="w-4 h-4 text-[#00C853]" />
-            <span>Trusted Enterprise Client Network</span>
+            <span>Illustrative sector profiles</span>
           </div>
 
           <h2 className="text-3xl sm:text-4xl lg:text-5xl font-extrabold text-white tracking-tight leading-tight mb-4">
-            Powering Bangladesh's <br />
-            <span className="bg-gradient-to-r from-[#00E676] via-[#10B981] to-[#34D399] bg-clip-text text-transparent">
-              Decarbonization Pioneers
+            Explore Bangladesh's <br />
+            <span className="text-emerald">
+              Industrial Workflows
             </span>
           </h2>
 
           <p className="text-sm sm:text-base text-gray-400 leading-relaxed font-sans">
-            From electric mobility and smart student transit to circular jute biopolymers and premier universities, 
-            see how Bangladesh’s industry leaders use <strong className="text-white font-semibold">CarbonZero BD</strong> for verified ESG carbon accounting.
+            Explore synthetic scenarios for mobility, packaging, transit, and education. Company references and sample figures illustrate possible workflows; they do not establish customer relationships, endorsement, or verified offsets.
           </p>
         </div>
 
@@ -230,20 +229,20 @@ const ClientShowcase = () => {
             </div>
             <div>
               <h4 className="font-sans font-bold text-white text-lg">
-                Join Bangladesh's Premier Sustainability Leaders
+                Explore an isolated sample workspace
               </h4>
               <p className="text-xs sm:text-sm text-gray-300 font-sans mt-0.5">
-                Onboard your enterprise in 24 hours with automated PDF utility invoice extraction and DoE gazette compliance.
+                Try evidence review and inventory calculations with clearly labeled synthetic data.
               </p>
             </div>
           </div>
 
           <div className="flex items-center space-x-3 shrink-0">
             <a
-              href="/platform"
+              href="/platform/esg"
               className="bg-[#00C853] hover:bg-[#00E676] text-[#050C07] font-sans font-extrabold text-sm px-7 py-3.5 rounded-full transition-all shadow-lg shadow-[#00C853]/25 flex items-center space-x-2 cursor-pointer"
             >
-              <span>Explore Client Dashboard</span>
+              <span>Try the ESG demo</span>
               <ArrowUpRight className="w-4 h-4" />
             </a>
           </div>

@@ -1,9 +1,11 @@
 import os
 import re
 import json
+import math
 import requests
 from typing import Dict, Any, List
 from .config import GEMINI_API_KEY, GEMINI_MODEL
+from .schemas import ExtractedParameter
 
 EXTRACTION_PROMPT = """You are an expert ESG Carbon Accounting Auditor AI for Bangladesh.
 Analyze the following corporate document text (e.g. utility bill, financial expense report, freight invoice, or ESG disclosure).
@@ -82,7 +84,10 @@ def extract_parameters_with_gemini(document_text: str) -> Dict[str, Any]:
             if res.status_code == 200:
                 result = res.json()
                 content = result['candidates'][0]['content']['parts'][0]['text']
-                return json.loads(content)
+                extracted = json.loads(content)
+                if isinstance(extracted, dict):
+                    extracted['model_used'] = result.get('modelVersion') or m
+                return extracted
             else:
                 last_err = f"Status {res.status_code}: {res.text}"
         except Exception as e:
@@ -110,7 +115,7 @@ def regex_heuristic_extraction(document_text: str) -> Dict[str, Any]:
         "diesel": (r'(?i)(?:diesel|generator fuel)[\s:]*([0-9,]+(?:\.[0-9]+)?)\s*(?:l|liter|litres)?', "Liters", "Scope 1"),
         "petrol": (r'(?i)(?:petrol|gasoline|octane)[\s:]*([0-9,]+(?:\.[0-9]+)?)\s*(?:l|liter|litres)?', "Liters", "Scope 1"),
         "lpg": (r'(?i)(?:lpg|propane|cylinder)[\s:]*([0-9,]+(?:\.[0-9]+)?)\s*(?:kg|kilograms)?', "kg", "Scope 1"),
-        "electricity": (r'(?i)(?:electricity|power|grid|desco|dpdc|reb)[\s:]*([0-9,]+(?:\.[0-9]+)?)\s*(?:kwh|units)?', "kWh", "Scope 2"),
+        "electricity": (r'(?i)(?:electricity|power|grid|desco|dpdc|reb)(?:\s+(?:consumption|usage))?[\s:]*([0-9,]+(?:\.[0-9]+)?)\s*(?:kwh|units)?', "kWh", "Scope 2"),
         "employees": (r'(?i)(?:headcount|employee|workers|staff)[\s:]*([0-9,]+)', "Staff", "Scope 3"),
         "airTravel": (r'(?i)(?:flight|air\s*travel|aviation)[\s:]*([0-9,]+(?:\.[0-9]+)?)\s*(?:km)?', "km", "Scope 3"),
         "truckTransport": (r'(?i)(?:truck|freight|cargo|logistics)[\s:]*([0-9,]+(?:\.[0-9]+)?)\s*(?:t-?km|ton-?km)?', "T-Km", "Scope 3"),
@@ -156,11 +161,34 @@ def llm_extraction_enabled() -> bool:
 def extract_footprint_from_text(document_text: str) -> Dict[str, Any]:
     """
     Rule-based extraction by default. Gemini is used only when explicitly enabled; if it fails
-    the rule-based parser runs. Neither path invents values: unmatched parameters stay 0.
+    the rule-based parser runs. Model results need valid quantities and source excerpts;
+    neither path approves a value or establishes extraction accuracy.
     """
     if llm_extraction_enabled():
         try:
             res = extract_parameters_with_gemini(document_text)
+            params, details = res.get('parameters'), res.get('details')
+            if not isinstance(params, dict) or not isinstance(details, list):
+                raise ValueError('Invalid model extraction structure')
+            if not isinstance(res.get('summary', ''), str):
+                raise ValueError('Invalid model extraction summary')
+            source = ' '.join(document_text.split())
+            known = {'diesel', 'petrol', 'lpg', 'electricity', 'employees', 'airTravel', 'truckTransport', 'rawMaterials'}
+            for key, value in params.items():
+                if key not in known or isinstance(value, bool) or not isinstance(value, (int, float)) or not math.isfinite(value) or value < 0:
+                    raise ValueError('Invalid model activity quantity')
+                if value and not any(isinstance(d, dict) and d.get('param_name') == key and d.get('value') == value for d in details):
+                    raise ValueError('Model quantity has no evidence detail')
+            for detail in details:
+                ExtractedParameter.model_validate(detail)
+                if detail.get('param_name') not in params or detail.get('value') != params[detail['param_name']]:
+                    raise ValueError('Model evidence does not match its quantity')
+                snippet = detail.get('raw_snippet')
+                if not snippet.strip() or ' '.join(snippet.split()) not in source:
+                    raise ValueError('Model source excerpt is absent from the document')
+            for confidence in [res.get('overall_confidence'), *[d.get('confidence') for d in details]]:
+                if confidence is not None and (isinstance(confidence, bool) or not isinstance(confidence, (int, float)) or not math.isfinite(confidence) or not 0 <= confidence <= 1):
+                    raise ValueError('Invalid model confidence')
             res["method"] = "llm"
             return res
         except Exception as e:

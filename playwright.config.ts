@@ -34,6 +34,7 @@ export default defineConfig({
       env: {
         DATABASE_URL: "sqlite:///./e2e.sqlite3",
         ESG_AUTH_JWT_SECRET: E2E_JWT_SECRET,
+        ESG_ACCESS_MODE: process.env.ESG_E2E_ACCESS_MODE || "protected",
         CHROMA_PERSIST_DIR: "./.e2e_store",
         GEMINI_API_KEY: "",
         ALLOWED_ORIGINS: "http://127.0.0.1:3000,http://localhost:3000",

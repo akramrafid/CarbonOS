@@ -39,7 +39,7 @@
 | POST `/organizations` | any authenticated user | `{name, is_demo?}` | 201 `{id, name, is_demo, role:"org_owner"}` |
 | GET `/organizations` | any authenticated user | — | `[{id, name, is_demo, role}]` for the caller |
 | POST `/query` | read | `{query (1–2000 chars), corpus?, top_k? (1–20)}` | `QueryResponse` — `confidence` is retrieval similarity, not verification |
-| POST `/extract-footprint` | write | multipart `file` or `raw_text` | `{filename, tenant_id, parameters, details[{param_name,value,unit,scope,source_page?,raw_snippet,confidence?}], overall_confidence?, extraction_method: regex\|llm, extracted_at, summary, review_status: "REVIEW_REQUIRED"}`; 422 if no input, no readable text, or no quantities found. No footprint is computed here |
+| POST `/extract-footprint` | write | multipart `file` or `raw_text` | `{filename, tenant_id, parameters, details[{param_name,value,unit,scope,source_page?,raw_snippet,confidence?}], overall_confidence?, extraction_method: regex\|llm, model_used?, extracted_at, summary, review_status: "REVIEW_REQUIRED"}`; 422 if no input, no readable text, or no quantities found. No footprint is computed here |
 | POST `/ingest` | write (global corpora: platform operator) | multipart `file`, `corpus` | `IngestResponse` incl. `duplicate` |
 | GET `/emission-factors` | read | `category?`, `region?` | factor rows |
 | GET `/documents` | read | `corpus?` | caller's tenant docs + global corpora |
@@ -63,6 +63,7 @@ corpus returns the existing document with `duplicate: true`.
 * No fabricated fallback anywhere: failures are 422 with a message telling the user to enter values manually.
 * `confidence` is extraction-model confidence only and is `null` for rule-based matches.
 * LLM extraction (Gemini) runs only when `ESG_LLM_EXTRACTION_ENABLED=true`; otherwise documents never leave the server.
+* Model quantities must be finite and nonnegative, match evidence details, and include excerpts present in the document. Invalid structure, missing excerpts, or out-of-range confidence triggers local rule fallback. This is source validation, not an accuracy or assurance guarantee. Model-assisted results identify `model_used` when available.
 * Nothing in the API sets `verified`, `audit_seal` or similar; `verified_by_audit` is reserved for a recorded human review (not built yet).
 
 ## Ledger routes (P1-1)

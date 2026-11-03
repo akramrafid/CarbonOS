@@ -35,6 +35,7 @@ export default function EsgWorkspace() {
   const action = useAction();
 
   const [loadError, setLoadError] = useState(null);
+  const [sessionError, setSessionError] = useState(null);
   const loadOrgs = useCallback(async () => {
     let list;
     try {
@@ -51,8 +52,11 @@ export default function EsgWorkspace() {
   }, []);
 
   const refreshAll = useCallback(async () => {
+    setSessionError(null);
+    setLoadError(null);
+    setUser(undefined);
     let u = null;
-    try { u = await loadSession(); } catch { u = null; }
+    try { u = await loadSession(); } catch (e) { setSessionError(e.message); }
     setUser(u);
     if (!u || !hasEsgToken()) return;
     try {
@@ -68,7 +72,7 @@ export default function EsgWorkspace() {
     if (invite) safeStorage(() => sessionStorage.setItem(INVITE_KEY, invite));
     (async () => {
       let u = null;
-      try { u = await loadSession(); } catch { u = null; }
+      try { u = await loadSession(); } catch (e) { setSessionError(e.message); }
       setUser(u);
       if (!u || !hasEsgToken()) return;
       setMe(await action.run(() => esgGet('/api/esg/me')));
@@ -121,6 +125,8 @@ export default function EsgWorkspace() {
   const handleResetDemo = async () => {
     await action.run(async () => {
       await resetDemoSession();
+      setTab('setup');
+      setRef({ types: null, periods: null, facilities: null });
       await refreshAll();
       await loadRef();
     }, 'Demo workspace successfully reset to initial benchmark state.');
@@ -149,12 +155,12 @@ export default function EsgWorkspace() {
 
   if (!user) {
     return shell(
-      <Panel title="ESG Workspace Offline" description="Unable to connect to the ESG service to provision a workspace session.">
-        <p className="text-sm text-amber-300">
-          The backend API service is unreachable. Please verify that the API server is running on {import.meta.env?.VITE_FASTAPI_API_URL || 'http://localhost:8000'}.
-        </p>
+      <Panel title={sessionError ? 'Demo temporarily unavailable' : authConfigured ? 'Sign in' : 'Demo access is disabled'}
+        description={sessionError || (authConfigured
+          ? 'Use your organization account to open the protected ESG workspace.'
+          : 'This deployment does not offer public demo sessions. Ask the presenter for the showcase deployment.')}>
         <div className="mt-4 flex flex-wrap gap-3">
-          <Button onClick={() => window.location.reload()}>Retry connection</Button>
+          <Button onClick={refreshAll}>Retry connection</Button>
           {authConfigured && <Button variant="secondary" onClick={signIn}>Sign in with SSO</Button>}
         </div>
       </Panel>,
@@ -199,35 +205,48 @@ export default function EsgWorkspace() {
               </p>
             </div>
             <div className="flex flex-wrap items-center gap-2">
-              <span className="text-[11px] text-mist">Dual-control persona:</span>
-              <div className="inline-flex rounded-lg border border-mist/20 p-0.5">
-                <button
-                  type="button"
-                  onClick={() => handlePersonaChange('owner')}
-                  aria-pressed={user?.activePersona !== 'reviewer'}
-                  className={`min-h-[44px] rounded-md px-2.5 py-1 font-mono text-[11px] transition-colors ${
-                    user?.activePersona !== 'reviewer' ? 'bg-emerald text-carbon font-semibold' : 'text-mist hover:text-registry'
-                  }`}
-                >
-                  Submitter (Owner)
-                </button>
-                <button
-                  type="button"
-                  onClick={() => handlePersonaChange('reviewer')}
-                  aria-pressed={user?.activePersona === 'reviewer'}
-                  className={`min-h-[44px] rounded-md px-2.5 py-1 font-mono text-[11px] transition-colors ${
-                    user?.activePersona === 'reviewer' ? 'bg-emerald text-carbon font-semibold' : 'text-mist hover:text-registry'
-                  }`}
-                >
-                  Auditor (Reviewer)
-                </button>
-              </div>
-              <Button variant="secondary" onClick={handleResetDemo} disabled={action.busy}>
-                Reset demo data
-              </Button>
+              {user?.isDemo && <>
+                <span className="text-[11px] text-mist">Demo persona:</span>
+                <div className="inline-flex flex-wrap rounded-lg border border-mist/20 p-0.5" aria-label="Demo personas">
+                  {[['owner', 'Submitter (Owner)'], ['reviewer', 'Auditor (Reviewer)'], ['approver', 'Approver (Admin)']]
+                    .filter(([key]) => user.demoSession?.personas?.[key]).map(([key, label]) => (
+                      <button key={key} type="button" onClick={() => handlePersonaChange(key)} disabled={action.busy}
+                        aria-pressed={user.activePersona === key}
+                        className={`min-h-[44px] rounded-md px-2.5 py-1 font-mono text-[11px] transition-colors ${user.activePersona === key ? 'bg-emerald text-carbon font-semibold' : 'text-mist hover:text-registry'}`}>
+                        {label}
+                      </button>
+                    ))}
+                </div>
+                <Button variant="secondary" onClick={handleResetDemo} disabled={action.busy}>Reset demo data</Button>
+                {!user.demoSession?.personas?.approver && <p className="text-xs text-mist">Reset this older demo session to load the independent approver and updated sample inventory.</p>}
+              </>}
             </div>
           </div>
         </aside>
+      )}
+
+      {user.isDemo && (
+        <details open={tab === 'setup'}>
+          <summary className="mb-3 min-h-[44px] cursor-pointer py-3 text-sm font-semibold text-emerald">Presenter guide</summary>
+        <Panel title="Your three-minute demo" description="Follow a sample factory inventory from evidence to an independently approved report. These are synthetic values, not an AI accuracy benchmark.">
+          <ol className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+            {[
+              ['ledger', '1. Inspect evidence', 'Open Activity ledger to inspect source excerpts or upload the sample bill. Rule matches are labeled separately from model confidence.'],
+              ['ledger', '2. Review the fuel record', 'Switch to Auditor (Reviewer), then approve the submitted diesel activity. The submitter cannot approve their own entry.'],
+              ['reports', '3. Calculate the inventory', 'Switch to Submitter (Owner), open Calculation & reports, then run the calculation. Missing market-based inputs stay explicit.'],
+              ['reports', '4. Lock and export', 'Switch to Approver (Admin), review the calculation, lock the period, then export CSV or JSON. The preparer cannot lock their own run.'],
+            ].map(([section, title, description]) => (
+              <li key={title} className="min-w-0 space-y-2">
+                <h3 className="font-semibold text-registry">{title}</h3>
+                <p className="text-sm text-mist">{description}</p>
+                <Button variant="secondary" onClick={() => setTab(section)}>Open {section === 'ledger' ? 'ledger' : 'reports'}</Button>
+              </li>
+            ))}
+          </ol>
+          <a href="/samples/factory-electricity-demo.txt" download className="inline-flex min-h-[44px] items-center text-sm font-semibold text-emerald underline underline-offset-4">Download sample electricity bill</a>
+          <p className="text-xs text-mist">Preview extraction without saving an extra activity if you want to reproduce the seeded totals. Reset demo data to start another presentation.</p>
+        </Panel>
+        </details>
       )}
 
       <div className="flex flex-wrap items-end gap-4">

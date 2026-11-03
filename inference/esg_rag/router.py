@@ -193,7 +193,7 @@ async def extract_footprint(
         confidence=extracted.get("overall_confidence") or 0.0,
         citations=[{"source": target_filename, "snippet": d.get("raw_snippet", "")} for d in extracted.get("details", [])],
         latency_ms=round((time.time() - started) * 1000, 2),
-        llm_model=extracted.get("method", "regex"),
+        llm_model=extracted.get("model_used") or extracted.get("method", "regex"),
         verified_by_audit=False
     )
     db.add(log)
@@ -208,6 +208,7 @@ async def extract_footprint(
         details=extracted.get("details", []),
         overall_confidence=extracted.get("overall_confidence"),
         extraction_method=extracted.get("method", "regex"),
+        model_used=extracted.get("model_used"),
         extracted_at=datetime.datetime.utcnow().strftime("%Y-%m-%d %H:%M UTC"),
         summary=extracted.get("summary", ""),
     )

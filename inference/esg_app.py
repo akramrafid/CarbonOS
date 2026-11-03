@@ -16,6 +16,7 @@ from fastapi.responses import JSONResponse
 from sqlalchemy import text
 
 from esg_rag.database import SessionLocal, init_db
+from esg_rag.auth import get_access_mode
 from esg_rag.router import router as esg_router
 
 log = logging.getLogger("esg.http")
@@ -29,6 +30,8 @@ def validate_config():
     if ENV != "production":
         return
     problems = []
+    if get_access_mode() in ("isolated_demo", "local_dev"):
+        problems.append("Public demo sessions must be disabled in production")
     if not os.getenv("ESG_AUTH_JWKS_URL"):
         problems.append("ESG_AUTH_JWKS_URL (OIDC) is required in production")
     if not (os.getenv("ESG_AUTH_ISSUER") and os.getenv("ESG_AUTH_AUDIENCE")):

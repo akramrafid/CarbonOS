@@ -56,6 +56,7 @@ class ExtractionResponse(BaseModel):
     details: List[ExtractedParameter]
     overall_confidence: Optional[float] = None
     extraction_method: str
+    model_used: Optional[str] = None
     extracted_at: str
     summary: str
     review_status: str = "REVIEW_REQUIRED"

@@ -1,0 +1,28 @@
+{
+  "date": "2026-11-03",
+  "provider": "Existing Gemini extraction integration",
+  "synthetic_inputs_only": true,
+  "scope": "Two-case live smoke check through the validated extraction path; not an accuracy evaluation or production approval",
+  "results": [
+    {
+      "case": "synthetic_bill",
+      "extraction_method": "llm",
+      "model_used": "gemini-2.5-flash",
+      "expected_electricity_kwh": 125000,
+      "returned_electricity_kwh": 125000.0,
+      "detail_count": 1,
+      "passed": true,
+      "seconds": 4.17
+    },
+    {
+      "case": "no_activity",
+      "extraction_method": "llm",
+      "model_used": "gemini-2.5-flash",
+      "expected_electricity_kwh": 0,
+      "returned_electricity_kwh": 0.0,
+      "detail_count": 0,
+      "passed": true,
+      "seconds": 3.79
+    }
+  ]
+}

@@ -3,12 +3,12 @@ import { ShieldCheck, CheckCircle2, Globe2, Award, FileCheck, Layers } from 'luc
 
 const TrustBar = () => {
   const items = [
-    { label: "MoEFCC S.R.O. 349 Aligned", badge: "STATUTORY", icon: ShieldCheck },
-    { label: "DoE Grid Baseline 0.550 kg CO₂e/kWh", badge: "OFFICIAL", icon: CheckCircle2 },
-    { label: "UNFCCC Article 6.2 ITMO Ready", badge: "GLOBAL", icon: Globe2 },
-    { label: "Verra VCS & Gold Standard Synced", badge: "REGISTRY", icon: Award },
-    { label: "ISO 14064-2 Verified Telemetry", badge: "AUDIT", icon: FileCheck },
-    { label: "97% Instant Settlement Rail", badge: "LIQUIDITY", icon: Layers }
+    { label: "Source-linked activity data", badge: "EVIDENCE", icon: FileCheck },
+    { label: "Scope 1 and 2 accounting", badge: "CALCULATE", icon: Layers },
+    { label: "Independent record review", badge: "CONTROL", icon: ShieldCheck },
+    { label: "Reproducible report exports", badge: "CSV / JSON", icon: CheckCircle2 },
+    { label: "Isolated sample workspaces", badge: "DEMO", icon: Globe2 },
+    { label: "External assurance still required", badge: "LIMITATION", icon: Award }
   ];
 
   // Duplicate the list for seamless continuous looping

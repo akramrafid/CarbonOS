@@ -7,12 +7,49 @@ and rejection under protected access mode.
 import os
 import sys
 import unittest
+from decimal import Decimal
+from pathlib import Path
 
 sys.path.insert(0, os.path.dirname(__file__))
 from esg_harness import ESGApiTestCase
 
 
 class TestEsgDemoMode(ESGApiTestCase):
+    def test_seeded_inventory_calculates_and_exports_with_independent_approval(self):
+        session = self.client.post('/api/esg/demo/session').json()
+        owner = {'Authorization': f"Bearer {session['personas']['owner']['token']}"}
+        sample = Path(__file__).resolve().parents[1] / 'public/samples/factory-electricity-demo.txt'
+        extraction = self.client.post('/api/esg/extract-footprint', headers=owner,
+            files={'file': (sample.name, sample.read_bytes(), 'text/plain')})
+        self.assertEqual(extraction.status_code, 200, extraction.text)
+        self.assertEqual(extraction.json()['parameters']['electricity'], 125000)
+        self.assertIsNone(extraction.json()['details'][0]['confidence'])
+        reviewer = {'Authorization': f"Bearer {session['personas']['reviewer']['token']}"}
+        period = session['seed_summary']['period_id']
+        records = self.client.get('/api/esg/activities', headers=owner).json()['items']
+        pending = next(r for r in records if r['status'] == 'SUBMITTED')
+        review = self.client.post(f"/api/esg/activities/{pending['id']}/approve", json={}, headers=reviewer)
+        self.assertEqual(review.status_code, 200, review.text)
+        response = self.client.post(f'/api/esg/periods/{period}/calculate', headers=owner)
+        self.assertEqual(response.status_code, 201, response.text)
+        run = self.client.get(f"/api/esg/calculations/{response.json()['id']}", headers=owner).json()
+        self.assertFalse(run['blocking'], run['exceptions'])
+        self.assertEqual(Decimal(run['scope1_kg']), Decimal('12060'))
+        self.assertEqual(Decimal(run['scope2_location_kg']), Decimal('80000'))
+        self.assertIsNone(run['scope2_market_kg'])
+        lock_url = f'/api/esg/periods/{period}/lock'
+        body = {'calculation_run_id': run['id']}
+        self.assertEqual(self.client.post(lock_url, json=body, headers=owner).status_code, 403)
+        self.assertEqual(self.client.post(lock_url, json=body, headers=reviewer).status_code, 403)
+        approver = {'Authorization': f"Bearer {session['personas']['approver']['token']}"}
+        locked = self.client.post(lock_url, json=body, headers=approver)
+        self.assertEqual(locked.status_code, 201, locked.text)
+        url = f"/api/esg/snapshots/{locked.json()['id']}/export?format=csv"
+        first = self.client.get(url, headers=approver)
+        self.assertEqual(first.status_code, 200)
+        self.assertEqual(first.content, self.client.get(url, headers=approver).content)
+        self.assertIn('Not externally assured', first.text)
+
     def setUp(self):
         super().setUp()
         self._old_access_mode = os.environ.get("ESG_ACCESS_MODE")
@@ -177,6 +214,7 @@ class TestEsgDemoMode(ESGApiTestCase):
         self.assertEqual(reset_res.status_code, 200)
         reset_data = reset_res.json()
         self.assertEqual(reset_data["tenant_id"], data["tenant_id"])
+        self.assertIn('approver', reset_data['personas'])
 
         # Check facilities: temporary unit is gone, default seed is intact
         fac_after = self.client.get("/api/esg/facilities", headers=headers).json().get("items", [])

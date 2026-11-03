@@ -23,10 +23,10 @@ const Hero = () => {
   const [activeStreamIndex, setActiveStreamIndex] = useState(0);
 
   const tradeStreams = [
-    { time: "14:22 BST", desc: "1,200 tCO₂e AWD Rice Rangpur cleared @ ৳15,000/t", detail: "৳17.46M direct to 410 bKash farmer wallets" },
-    { time: "13:58 BST", desc: "3,500 tCO₂e Sundarbans Blue Carbon verified by SGS", detail: "Sentinel-2 NDVI 0.82 · Verra VCS 2491 synced" },
-    { time: "12:40 BST", desc: "800 tCO₂e Solar Irrigation Khulna retired", detail: "Corporate ESG Scope 1 settlement · Tax credit issued" },
-    { time: "11:15 BST", desc: "2,400 tCO₂e Biogas Waste-to-Energy Dhaka minted", detail: "IoT sensor telemetry consensus verified (99.8%)" }
+    { time: "STEP 01", desc: "Extract values from a source document", detail: "Inspect source snippets before adding an activity" },
+    { time: "STEP 02", desc: "Review with a separate user", detail: "The submitter cannot approve their own record" },
+    { time: "STEP 03", desc: "Calculate Scope 1 and Scope 2", detail: "Missing inputs stay visible instead of being estimated" },
+    { time: "STEP 04", desc: "Lock and export a report", detail: "Keep a reproducible CSV or JSON snapshot" }
   ];
 
   useEffect(() => {
@@ -146,59 +146,59 @@ const Hero = () => {
                 <span className="relative inline-flex rounded-full h-2 w-2 bg-[#00C853]"></span>
               </span>
               <span className="font-mono text-[11px] font-semibold tracking-wider text-emerald uppercase">
-                National Sovereign Protocol v2.4
+                CarbonOS working prototype
               </span>
               <span className="text-white/20">|</span>
               <span className="font-sans text-[11px] text-white/80 hidden sm:inline">
-                MoEFCC S.R.O. 349 Aligned
+                Human review required
               </span>
               <span className="bg-emerald/15 text-emerald border border-emerald/30 font-mono text-[9px] px-1.5 py-0.5 rounded font-bold">
-                97% DIRECT PAYOUT
+                SAMPLE DATA
               </span>
             </div>
 
             {/* Headline with High-Impact Contrast */}
             <h1 className="flex flex-col mb-6 w-full tracking-tight">
               <span className="hero-h1 font-sans font-extrabold text-4xl sm:text-6xl lg:text-[68px] leading-[1.08] text-white">
-                Bangladesh's Sovereign
+                Carbon evidence.
               </span>
               <span className="hero-h1 font-sans font-extrabold text-4xl sm:text-6xl lg:text-[68px] leading-[1.08] text-white">
-                Carbon Infrastructure
+                Ready for review.
               </span>
-              <span className="hero-h1 serif-drama italic text-5xl sm:text-7xl lg:text-[80px] leading-[1.05] bg-gradient-to-r from-[#00C853] via-[#69F0AE] to-[#A7F3D0] bg-clip-text text-transparent mt-1 drop-shadow-sm">
-                & Credit Exchange.
+              <span className="hero-h1 serif-drama italic text-5xl sm:text-7xl lg:text-[80px] leading-[1.05] text-emerald mt-1 drop-shadow-sm">
+                Built for Bangladesh.
               </span>
             </h1>
 
             {/* Precision Subtitle */}
             <p className="hero-body font-sans text-base sm:text-lg lg:text-xl text-white/80 max-w-[620px] leading-relaxed mb-8 font-normal">
-              Digitizing, verifying, and securing Bangladesh's national carbon asset pipeline from 1M+ smallholder rural farmers directly to global ESG institutional registries.
+              Turn utility bills into traceable Scope 1 and 2 inventories. Review extracted values, approve activity independently, and export a reproducible report.
             </p>
 
             {/* Action Buttons & Fast Proof */}
             <div className="hero-cta flex flex-wrap gap-4 items-center mb-10 w-full">
               <Link 
-                to="/platform/marketplace" 
+                to="/platform/esg"
                 className="group relative inline-flex items-center justify-center bg-[#00C853] hover:bg-[#00E676] text-[#040A06] font-sans font-bold text-sm sm:text-base px-7 py-4 rounded-full transition-all duration-300 shadow-[0_0_30px_rgba(0,200,83,0.35)] hover:shadow-[0_0_45px_rgba(0,200,83,0.55)] hover:scale-[1.02] active:scale-[0.98]"
               >
-                <span>Explore Verified Credits</span>
+                <span>Try the ESG demo</span>
                 <ArrowRight size={18} className="ml-2 group-hover:translate-x-1 transition-transform" />
               </Link>
               
               <Link 
-                to="/platform/carbon-registry" 
+                to="/farmers-ai"
                 className="inline-flex items-center justify-center bg-white/[0.06] hover:bg-white/[0.12] text-white border border-white/15 hover:border-emerald/40 font-sans font-medium text-sm sm:text-base px-6 py-4 rounded-full backdrop-blur-md transition-all duration-300 hover:scale-[1.02] active:scale-[0.98]"
               >
                 <Terminal size={16} className="mr-2 text-emerald" />
-                <span>Registry Terminal</span>
+                <span>Explore crop diagnosis</span>
               </Link>
 
               <Link
-                to="/platform/saas-dashboard"
+                to="/platform/esg"
                 className="inline-flex items-center text-xs font-mono text-white/60 hover:text-emerald px-2 py-1 transition-colors"
               >
                 <Lock size={12} className="mr-1.5 text-emerald" />
-                <span>Enterprise ESG Portal →</span>
+                <span>Open the accounting workspace →</span>
               </Link>
             </div>
 
@@ -206,15 +206,15 @@ const Hero = () => {
             <div className="flex flex-wrap gap-6 pt-6 border-t border-white/10 w-full">
               <div className="hero-trust-badge flex items-center space-x-2 text-xs text-white/70">
                 <CheckCircle2 size={16} className="text-emerald" />
-                <span>DoE Baseline: 0.550 kg CO₂e/kWh</span>
+                <span>Source evidence retained</span>
               </div>
               <div className="hero-trust-badge flex items-center space-x-2 text-xs text-white/70">
                 <ShieldCheck size={16} className="text-emerald" />
-                <span>Article 6.2 ITMO Compatible</span>
+                <span>Independent review enforced</span>
               </div>
               <div className="hero-trust-badge flex items-center space-x-2 text-xs text-white/70">
                 <Globe size={16} className="text-emerald" />
-                <span>Verra VCS & Gold Standard Synced</span>
+                <span>Synthetic demo workspaces</span>
               </div>
             </div>
 
@@ -228,16 +228,16 @@ const Hero = () => {
               <div className="absolute top-0 right-0 w-48 h-48 bg-emerald/10 rounded-full blur-3xl pointer-events-none"></div>
               
               {/* Terminal Header */}
-              <div className="flex items-center justify-between border-b border-white/10 pb-4 mb-5">
+              <div className="flex flex-wrap items-center justify-between gap-3 border-b border-white/10 pb-4 mb-5">
                 <div className="flex items-center space-x-2.5">
                   <div className="w-2.5 h-2.5 rounded-full bg-emerald animate-pulse"></div>
                   <span className="font-mono text-[11px] uppercase tracking-widest text-white/80 font-semibold">
-                    Live Clearing Terminal // Dhaka
+                    Evidence-to-report workflow
                   </span>
                 </div>
                 <div className="flex items-center space-x-1.5 font-mono text-[10px] text-emerald bg-emerald/10 border border-emerald/20 px-2 py-0.5 rounded">
                   <Activity size={12} />
-                  <span>42ms Consensus</span>
+                  <span>Prototype</span>
                 </div>
               </div>
 
@@ -247,51 +247,49 @@ const Hero = () => {
                 {/* Metric 1 */}
                 <div className="bg-white/[0.03] border border-white/10 rounded-2xl p-4 flex flex-col justify-between">
                   <div className="flex items-center justify-between text-white/50 text-[11px] font-mono">
-                    <span>TOTAL REDUCTION</span>
+                    <span>ACCOUNTING</span>
                     <TrendingUp size={14} className="text-emerald" />
                   </div>
                   <div className="mt-2">
-                    <span className="font-mono font-bold text-2xl lg:text-3xl text-white">10.42M</span>
-                    <span className="font-mono text-xs text-emerald ml-1 font-semibold">tCO₂e</span>
+                    <span className="font-mono font-bold text-2xl lg:text-2xl text-white">Scope 1/2</span>
                   </div>
-                  <span className="font-sans text-[10px] text-emerald/80 mt-1 font-medium">+18.4% YoY Audited</span>
+                  <span className="font-sans text-[10px] text-emerald/80 mt-1 font-medium">Deterministic calculations</span>
                 </div>
 
                 {/* Metric 2 */}
                 <div className="bg-white/[0.03] border border-white/10 rounded-2xl p-4 flex flex-col justify-between">
                   <div className="flex items-center justify-between text-white/50 text-[11px] font-mono">
-                    <span>FARMER REMITTANCE</span>
-                    <span className="text-[10px] text-emerald font-mono font-bold">97.0%</span>
+                    <span>REVIEW</span>
+                    <span className="text-[10px] text-emerald font-mono font-bold">Roles</span>
                   </div>
                   <div className="mt-2">
-                    <span className="font-mono font-bold text-2xl lg:text-3xl text-emerald">৳412.8M</span>
+                    <span className="font-mono font-bold text-2xl lg:text-3xl text-emerald">3 roles</span>
                   </div>
-                  <span className="font-sans text-[10px] text-white/60 mt-1">bKash / Nagad Direct Wallets</span>
+                  <span className="font-sans text-[10px] text-white/60 mt-1">Submit, review, approve</span>
                 </div>
 
                 {/* Metric 3 */}
                 <div className="bg-white/[0.03] border border-white/10 rounded-2xl p-4 flex flex-col justify-between">
                   <div className="flex items-center justify-between text-white/50 text-[11px] font-mono">
-                    <span>LIVE LIQUIDITY</span>
+                    <span>EVIDENCE</span>
                     <Layers size={14} className="text-cyan-400" />
                   </div>
                   <div className="mt-2">
-                    <span className="font-mono font-bold text-2xl lg:text-3xl text-white">42,850</span>
-                    <span className="font-mono text-xs text-white/50 ml-1">tCO₂e</span>
+                    <span className="font-mono font-bold text-2xl lg:text-3xl text-white">Sources</span>
                   </div>
-                  <span className="font-sans text-[10px] text-cyan-400 mt-1">Available for Settlement</span>
+                  <span className="font-sans text-[10px] text-cyan-400 mt-1">Trace values to source snippets</span>
                 </div>
 
                 {/* Metric 4 */}
                 <div className="bg-white/[0.03] border border-white/10 rounded-2xl p-4 flex flex-col justify-between">
                   <div className="flex items-center justify-between text-white/50 text-[11px] font-mono">
-                    <span>AVG CLEARING</span>
-                    <span className="font-mono text-[10px] text-white/40">BDT / t</span>
+                    <span>EXPORTS</span>
+                    <span className="font-mono text-[10px] text-white/40">FILES</span>
                   </div>
                   <div className="mt-2">
-                    <span className="font-mono font-bold text-2xl lg:text-3xl text-white">৳14,920</span>
+                    <span className="font-mono font-bold text-2xl lg:text-2xl text-white">CSV/JSON</span>
                   </div>
-                  <span className="font-sans text-[10px] text-white/60 mt-1">Sovereign Spot Reference</span>
+                  <span className="font-sans text-[10px] text-white/60 mt-1">Locked report snapshots</span>
                 </div>
 
               </div>
@@ -301,7 +299,7 @@ const Hero = () => {
                 <div className="flex items-center justify-between mb-1.5">
                   <span className="font-mono text-[10px] text-emerald uppercase tracking-wider font-semibold flex items-center gap-1.5">
                     <Radio size={12} className="text-emerald animate-pulse" />
-                    <span>Real-Time Settlement Feed</span>
+                    <span>How the demo works</span>
                   </span>
                   <span className="font-mono text-[10px] text-white/40">
                     {tradeStreams[activeStreamIndex].time}
@@ -318,16 +316,16 @@ const Hero = () => {
               {/* Verified Registry Stamps */}
               <div className="grid grid-cols-3 gap-2 pt-2 border-t border-white/10">
                 <div className="flex flex-col items-center justify-center p-2 rounded-lg bg-white/[0.02] border border-white/5 text-center">
-                  <span className="font-mono text-[10px] text-emerald font-bold">VCS 2024</span>
-                  <span className="font-sans text-[9px] text-white/50">Verra Integrated</span>
+                  <span className="font-mono text-[10px] text-emerald font-bold">EXTRACT</span>
+                  <span className="font-sans text-[9px] text-white/50">Review source values</span>
                 </div>
                 <div className="flex flex-col items-center justify-center p-2 rounded-lg bg-white/[0.02] border border-white/5 text-center">
-                  <span className="font-mono text-[10px] text-amber-400 font-bold">GOLD STD</span>
-                  <span className="font-sans text-[9px] text-white/50">Dual Certified</span>
+                  <span className="font-mono text-[10px] text-amber-400 font-bold">REVIEW</span>
+                  <span className="font-sans text-[9px] text-white/50">Separate identities</span>
                 </div>
                 <div className="flex flex-col items-center justify-center p-2 rounded-lg bg-white/[0.02] border border-white/5 text-center">
-                  <span className="font-mono text-[10px] text-cyan-400 font-bold">ART 6.2</span>
-                  <span className="font-sans text-[9px] text-white/50">ITMO Compliant</span>
+                  <span className="font-mono text-[10px] text-cyan-400 font-bold">EXPORT</span>
+                  <span className="font-sans text-[9px] text-white/50">Reproducible snapshot</span>
                 </div>
               </div>
 
