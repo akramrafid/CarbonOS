@@ -1,46 +1,59 @@
-import React from 'react';
+import { Link } from 'react-router-dom';
+import CompanyPage from '../../components/CompanyPage';
 
-const APIDocs = () => {
-  return (
-    <div className="pt-24 pb-16 min-h-[80vh] flex flex-col items-center noise-overlay">
-      <div className="w-full bg-[#040A06] border-b border-emerald/10 py-16 px-6 lg:px-12 relative overflow-hidden flex flex-col items-center justify-center text-center">
-        <div className="absolute inset-0 bg-[linear-gradient(to_right,#00C85311_1px,transparent_1px),linear-gradient(to_bottom,#00C85311_1px,transparent_1px)] bg-[size:4rem_4rem] [mask-image:radial-gradient(ellipse_60%_50%_at_50%_0%,#000_70%,transparent_100%)] pointer-events-none"></div>
-        <span className="font-mono text-xs text-emerald tracking-widest px-3 py-1 bg-[#0D2B1A]/40 border border-[#00C853]/20 rounded-full mb-6 inline-block z-10">COMPANY</span>
-        <h1 className="serif-drama text-[56px] lg:text-[72px] text-white leading-tight mb-4 z-10">API Documentation</h1>
-        <p className="font-sans text-lg text-mist max-w-2xl z-10">Integrate IoT devices, retrieve registry data, and automate MRV via our RESTful APIs.</p>
-      </div>
+const endpoints = [
+  ['GET', '/api/esg/documents', 'Read', 'List documents visible to the caller.'],
+  ['POST', '/api/esg/query', 'Read', 'Ask an evidence question; optional document_ids restrict the source scope.'],
+  ['POST', '/api/esg/activities', 'Write', 'Create a draft activity record. This does not approve it.'],
+  ['POST', '/api/esg/periods/{id}/calculate', 'Write', 'Calculate from eligible approved records and retain exceptions.'],
+  ['POST', '/api/esg/periods/{id}/lock', 'Admin, separate approver', 'Lock an unchanged, unblocked calculation prepared by another user.'],
+  ['GET', '/api/esg/snapshots/{id}/export?format=json', 'Read', 'Export an authorized stored snapshot; CSV is also supported.'],
+];
 
-      <div className="max-w-4xl w-full mx-auto px-6 lg:px-12 mt-16 relative z-10">
-        <div className="bg-[#080F0B] registry-border p-8 md:p-12 rounded-[2rem] shadow-[0_0_30px_rgba(0,200,83,0.05)]">
-          <h2 className="font-sans font-bold text-2xl text-registry mb-6 flex items-center">
-            <span className="w-2 h-2 rounded-full bg-emerald mr-3"></span>
-            Developer Hub
-          </h2>
-          <div className="space-y-6 font-sans text-mist text-base leading-relaxed">
-            <p>Our endpoints are secured via OAuth2.0. Contact the Carbon Zero BD admin team to provision your client keys.</p>
-            
-            <div className="mt-8 bg-[#040A06] border border-emerald/20 p-6 rounded-xl font-mono text-sm text-mist overflow-x-auto">
-              <div className="text-emerald mb-2"># Post new telemetry data from an IoT node</div>
-              <div className="text-registry mb-4">POST /api/v1/mrv/telemetry</div>
-              <div className="text-mist/50 mb-2">Request Body:</div>
-              <pre className="text-[11px] leading-relaxed">
-{`{
-  "node_id": "BD-NODE-994",
-  "project_id": "BD-PIN-2025-0041",
-  "timestamp": "2026-05-23T12:00:00Z",
-  "metrics": {
-    "kwh_generated": 45.2,
-    "status": "active"
-  },
-  "signature": "0xabc123..."
-}`}
-              </pre>
-            </div>
-          </div>
-        </div>
-      </div>
-    </div>
-  );
-};
+const queryExample = `curl --request POST "$CARBONOS_API_URL/api/esg/query" \\
+  --header "Authorization: Bearer $CARBONOS_ACCESS_TOKEN" \\
+  --header "X-Organization-Id: $CARBONOS_ORGANIZATION_ID" \\
+  --header "Content-Type: application/json" \\
+  --data '{"query":"What does the uploaded policy say about boiler inspections?","corpus":"tenant_docs"}'`;
 
-export default APIDocs;
+export default function APIDocs() {
+  return <CompanyPage
+    label="Developer guide"
+    title="Integrate the working ESG workflow."
+    intro="The ESG API supports authorized document retrieval, reviewed activity records, deterministic calculation and stored report exports. Use the contract for the deployed version when building an integration."
+  >
+    <section aria-labelledby="api-access">
+      <h2 id="api-access" className="text-2xl font-semibold text-registry sm:text-3xl">Access follows your organization roles</h2>
+      <p className="mt-4">Protected ESG routes require a bearer JWT from the configured identity provider and a valid organization membership. Roles are checked on the server. Select an organization you belong to with the X-Organization-Id header when your account has more than one membership.</p>
+      <p className="mt-4">Obtain the API base URL and authorized credentials from your deployment operator. This showcase does not issue production API keys or provision a service account. Keep tokens out of shared examples, URLs and source control.</p>
+      <a href="https://github.com/akramrafid/CarbonOS/blob/Asif/docs/esg/API_CONTRACTS.md" className="mt-4 inline-flex min-h-[44px] items-center font-semibold text-emerald underline underline-offset-4">Read the versioned API contract on GitHub <span aria-hidden="true" className="ml-2 shrink-0">↗</span></a>
+    </section>
+
+    <section aria-labelledby="api-endpoints" className="border-t border-mist/25 pt-9">
+      <h2 id="api-endpoints" className="text-2xl font-semibold text-registry sm:text-3xl">Implemented endpoint examples</h2>
+      <p className="mt-4">This is a selection of the ESG contract. It is not a promise of live IoT ingestion or an official registry API.</p>
+      <ul className="mt-6 divide-y divide-mist/25 rounded-xl border border-[var(--color-card-border)] bg-[var(--color-card-bg)] px-5 sm:px-6">
+        {endpoints.map(([method, path, permission, description]) => <li key={path} className="py-5 [overflow-wrap:anywhere]">
+          <div className="flex flex-wrap items-baseline gap-x-3 gap-y-2"><span className="font-mono text-xs font-semibold text-emerald">{method}</span><code className="text-sm text-registry">{path}</code></div>
+          <p className="mt-2 text-sm text-[var(--color-text-secondary)]">{description}</p>
+          <p className="mt-2 text-xs text-mist">Permission: {permission}</p>
+        </li>)}
+      </ul>
+    </section>
+
+    <section aria-labelledby="api-example" className="border-t border-mist/25 pt-9">
+      <h2 id="api-example" className="text-2xl font-semibold text-registry sm:text-3xl">Try an authorized evidence query</h2>
+      <p className="mt-4">Set the three shell variables below to your deployment URL, access token and organization ID. Upload a readable sample policy first. This example asks a question; it does not approve data, create credits or change the inventory.</p>
+      <pre className="mt-5 whitespace-pre-wrap rounded-xl border border-[var(--color-card-border)] bg-[var(--color-card-bg)] p-4 text-xs leading-relaxed text-[var(--color-text-secondary)] [overflow-wrap:anywhere] sm:p-6"><code>{queryExample}</code></pre>
+      <p className="mt-4">Responses include the actual answer mode, source citations and an insufficient-evidence state. Model-assisted answering is optional and requires operator configuration; a retrieval score is not a probability of correctness.</p>
+      <Link to="/platform/esg?view=evidence" className="mt-4 inline-flex min-h-[44px] items-center font-semibold text-emerald underline underline-offset-4">Explore the evidence workspace <span aria-hidden="true" className="ml-2">→</span></Link>
+    </section>
+
+    <aside aria-label="Integration boundaries" className="rounded-xl border border-[var(--state-neutral-border)] bg-[var(--state-neutral-bg)] p-5 text-[var(--state-neutral-text)]">
+      <h2 className="text-xl font-semibold">Review gates remain part of the API</h2>
+      <p className="mt-3">Contributors cannot approve their own activity records. Report locking requires a separate approver, unchanged inputs and no blocking exceptions. Automation must preserve those controls.</p>
+      <p className="mt-3">Expect explicit authentication, permission, validation and state-conflict errors. Read the contract for request fields, pagination, report schema versions and error handling before connecting real business data.</p>
+      <Link to="/company/trust" className="mt-4 inline-flex min-h-[44px] items-center font-semibold underline underline-offset-4">Review trust & data boundaries <span aria-hidden="true" className="ml-2">→</span></Link>
+    </aside>
+  </CompanyPage>;
+}

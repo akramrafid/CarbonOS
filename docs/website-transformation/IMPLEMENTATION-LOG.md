@@ -276,7 +276,7 @@ I01E diagnosis from hosted failure log: the RAG isolation test searched all seri
 
 ## I01E — Deterministic tenant-isolation assertion and PostgreSQL validation (2026-11-04)
 
-Phase 4/14. State: TESTED; own SHA/remote verification reported after commit.
+Phase 4/14. State: PUSHED. Commit `b2c8965bbc4fd9065f97822742fa12db27d7781f` matched remote Asif.
 
 Files: test_esg_rag_quality.py and tracking docs. Hosted failure 41815266165 was a false substring collision: a permitted random chunk UUID contained the forbidden source-text marker 999. Added a deterministic permitted UUID ending in 999, reproduced the old failure locally, then checked the actual answer text separately from exact authorized document/chunk IDs, exact source excerpt and one authorized candidate. Foreign 999-month policy stays in the fixture. No production retrieval, authorization, accounting, report, CI step or schema changed; no failure suppression/skip added.
 
@@ -285,3 +285,13 @@ Validation: full SQLite **123 run / 122 pass / one PostgreSQL-only skip**; a fre
 I01D facility totals, v2 kg/null exports, v1 byte compatibility and all other ESG tests therefore pass on both local database backends. Fresh hosted checks after this push still need their own result; historical failed hosted run is not relabeled successful.
 
 Next: remaining public API/careers truth and source/theme audits, selective main factor/Scope 1 integration and external production/scientific validation.
+
+## L01C — Developer guide for the implemented ESG contract (2026-11-04)
+
+Phase 1/2/8/12. State: TESTED; own SHA/remote verification reported after commit.
+
+Files: APIDocs.jsx, route metadata/Footer entry, api-guide browser spec/screenshots, traceability and tracking docs. Removed invented /api/v1/mrv/telemetry payload, blanket OAuth/client-key provisioning claims and legacy project branding. Added actual document/query/activity/calculation/lock/export routes, server permissions, token/organization configuration, a displayed authenticated query example, and the Asif versioned contract link. Automation does not bypass existing independent review. No endpoint or production identity integration was added or implied. Page uses CompanyPage/semantic tokens and a discoverable footer entry, not new dependencies.
+
+Validation: TypeScript/Vite build and whitespace pass. **20 browser/API tests pass across all ten viewport projects**. Both themes, mobile code/endpoint wrapping, route metadata/footer/evidence navigation and minimum link sizes verified. The exact JSON/path parsed from the displayed example is executed with a real authenticated test organization and uploaded synthetic boiler policy; query returns the correct cited 12-month passage/query ID, and the same unauthenticated request returns 401. No external provider call or production token used. Mobile dark screenshot inspected; four settled theme captures recorded. Full source gate decreases to **48 legacy color findings**, checker unchanged. No production backend change or duplicate full accounting run for this documentation task.
+
+Next: careers route's unverified vacancies/dead Apply actions, then remaining legacy route/theme and selective main accounting work. New hosted I01E result is still pending; local PostgreSQL evidence remains separate.
