@@ -50,6 +50,7 @@ export default function EvidenceAnswer({ answer }) {
       <h3 className="font-serif text-xl text-registry">{answer.insufficient_data ? 'Insufficient evidence' : answer.answer_mode === 'supported_synthesis' ? 'AI synthesis — review required' : 'Retrieved source excerpt'}</h3>
       <Button variant="secondary" onClick={download}>Download answer record</Button>
     </div>
+    <p className="break-words text-sm text-registry"><strong>Question:</strong> {answer.query}</p>
     <p className="text-xs text-mist">Method: {answer.retrieval_method} · Model: {answer.model_used}. Ranking scores are not accuracy or verification.</p>
     {answer.candidate_limit_reached && <p role="status" className="esg-notice esg-tone-warning rounded-lg p-3 text-sm">The search reached its candidate limit. Narrow the selected corpus; this result may omit older passages.</p>}
     <p className="whitespace-pre-wrap break-words text-sm text-registry">{answer.answer}</p>

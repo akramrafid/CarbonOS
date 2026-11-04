@@ -66,3 +66,7 @@ Five static CSS blocks preserve identical text after removing raw HTML APIs. tsc
 ## R01
 
 16 JS tests, type check/build/whitespace pass. Backend: **106 run / 105 pass / 1 PostgreSQL-only skip** locally. Protected inspection/accounting **6 pass**; final extended inspection **2 pass**; isolated showcase/product **16 pass**. Cross-tenant/role/ID-pair/global-owner source tests pass. Actual synthetic API export examples: [desktop JSON](evidence/answer-record-1440.json), [mobile JSON](evidence/answer-record-320.json); [desktop source inspector](evidence/source-inspector-1440.png), [mobile source inspector](evidence/source-inspector-320.png). Revised-hash path is deliberate fault injection; no live model-quality claim. Full contract remains FAIL on 55 legacy color findings.
+
+## R02A
+
+16 JS tests, tsc/build/whitespace pass. Protected history/inspection browser spec: **4 pass** (desktop/320px), including the eleven-query cap, per-answer matching/stale hashes, active state, local clear and reload. [Mobile history](evidence/answer-history-320.png), [desktop history](evidence/answer-history-1440.png). No context-aware conversation or cross-document comparison is claimed. No backend mutation in this task.

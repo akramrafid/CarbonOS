@@ -132,7 +132,7 @@ Validation: **14 JS tests pass**, tsc/build/whitespace pass. Product + responsiv
 
 ## R01 — Authorized full-passage review and answer records (2026-11-04)
 
-Phase 7. State: TESTED; own SHA/remote verification reported after commit.
+Phase 7. State: PUSHED. Commit `919f1cbbbdd2e6e2b28e6a4f7ba466e258b01f47` matched remote Asif.
 
 Files: ESG router/API contracts, EvidenceAssistantPanel/EvidenceAnswer, evidenceRecord helper, backend/JS/browser tests, four synthetic evidence artifacts and tracking docs. New read-only document/passage endpoint pairs both IDs and enforces SQL tenant or exact operator-owner/corpus visibility. The document list now uses the same strict owner/corpus policy as retrieval. Full indexed text, page/status and passage/file hashes are returned, without original filesystem paths. Cross-tenant/unknown/mismatched pairs return identical 404; missing token and unsupported roles are denied.
 
@@ -141,3 +141,11 @@ Answer UI can explicitly load the complete indexed passage, retry failures and c
 Validation: **16 JS tests pass**, tsc/build/whitespace pass; **106 ESG backend tests run: 105 pass / one PostgreSQL-only local skip**, including three new source API authorization/visibility/hash tests. Protected source inspection + accounting journeys: **6 pass**; extended stale-source/failure/retry/export/text-safety/abstention test: **2 pass**. Existing isolated showcase/product suite: **16 pass**. Hash-change browser case explicitly injects a revised provider response to exercise stale-state handling; ordinary inspection/export uses the real API and synthetic uploaded text. Inspected 320px screenshot. Earlier broad-source fixture named the global factor owner incorrectly; corrected it to the actual config value. A browser assertion initially searched a control inside closed native details; opened the details before asserting and reran. Existing screenshot artifacts overwritten by tests were restored; new evidence is stored separately.
 
 Full frontend contract still fails the **55 recorded legacy color findings**, without new findings or checker changes. Next: remaining design/source migration, conversation/document-review usability and selective main accounting integration, each with its own tests/push.
+
+## R02A — Independent in-memory answer history (2026-11-04)
+
+Phase 7. State: TESTED; own SHA/remote verification reported after commit.
+
+Files: EvidenceAssistantPanel.jsx, EvidenceAnswer.jsx, evidence-inspection.spec.ts, two history screenshots and tracking docs. Keeps the ten most recent results while the evidence view remains mounted. Selecting a result preserves its own original response, receipt time, inspected source and stale-hash state. The selected question and a visible “Viewing” label prevent confusion with draft form text; aria-pressed communicates active selection. Clearing/reload removes local history; it does not delete server audit records. No browser storage or new API/permission was added. Each question still searches independently: this is not an assertion of conversational model memory. Document comparison remains R02B.
+
+Validation: **16 JS tests pass**, type check/build/whitespace pass, **4 real-API browser tests pass** on desktop/320px: retained matching/stale sources across answer switches, one active selection, safe export/abstention, local clearing, eleven queries leaving ten entries, and reload clearing all history. No backend code changed or backend tests repeated for this task. History screenshot reviewed on mobile; prior R01 generated proof snapshots restored. The first commit/push attempt was not executed because automatic approval review reached its usage limit; retry follows the stated reset time and the user's Continue instruction. Next: selected-document comparison, remaining source/design migration and main accounting integration.

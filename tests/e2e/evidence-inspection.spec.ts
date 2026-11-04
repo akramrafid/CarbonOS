@@ -3,7 +3,7 @@ import { createHash, createHmac, randomUUID } from 'node:crypto';
 import { readFile, writeFile } from 'node:fs/promises';
 import { E2E_JWT_SECRET } from '../../playwright.config';
 
-test('authorized full source inspection retries, exports actual provenance, and resets for abstention', async ({ page, request }) => {
+async function openEvidenceWorkspace(page, request) {
   const sub = `source-review-${randomUUID()}`;
   const b64 = (value: object) => Buffer.from(JSON.stringify(value)).toString('base64url');
   const body = `${b64({ alg: 'HS256', typ: 'JWT' })}.${b64({ sub, exp: Math.floor(Date.now() / 1000) + 3600 })}`;
@@ -15,6 +15,11 @@ test('authorized full source inspection retries, exports actual provenance, and 
   await expect(org).toBeOK();
   await page.addInitScript((value) => { (window as any).__ESG_E2E_TOKEN__ = value; }, token);
   await page.goto('/platform/esg?view=evidence');
+  return api;
+}
+
+test('authorized full source inspection retries, exports actual provenance, and resets for abstention', async ({ page, request }) => {
+  const api = await openEvidenceWorkspace(page, request);
   const text = 'SYNTHETIC POLICY. Inspect the boiler every 12 months. ' + 'Retain inspection records. '.repeat(12) + '\nFULL_PASSAGE_REVIEW_MARKER\n<script>untrusted_source_marker</script>';
   await page.getByLabel('Source document', { exact: true }).setInputFiles({ name: 'inspection-synthetic.txt', mimeType: 'text/plain', buffer: Buffer.from(text) });
   await page.getByRole('button', { name: 'Index source document', exact: true }).click();
@@ -74,5 +79,42 @@ test('authorized full source inspection retries, exports actual provenance, and 
   const absent = JSON.parse(await readFile((await (await secondDownload).path())!, 'utf8'));
   expect(absent.inspected_passages).toEqual([]);
   expect(absent.response.citations).toEqual([]);
+  const history = page.getByRole('region', { name: 'Answer history', exact: true });
+  const oldQuestion = history.getByRole('button', { name: /What does the boiler inspection policy require/ });
+  await oldQuestion.last().click();
+  await expect(oldQuestion.last()).toHaveAttribute('aria-pressed', 'true');
+  await expect(answer.getByRole('region', { name: 'Full indexed passage from inspection-synthetic.txt' })).toContainText('FULL_PASSAGE_REVIEW_MARKER');
+  await expect(answer.getByRole('alert')).toHaveCount(0);
+  await oldQuestion.first().click();
+  await expect(oldQuestion.first()).toHaveAttribute('aria-pressed', 'true');
+  await expect(oldQuestion.last()).toHaveAttribute('aria-pressed', 'false');
+  await expect(history.locator('button[aria-pressed="true"]')).toHaveCount(1);
+  await expect(oldQuestion.first()).toContainText('Viewing');
+  await expect(answer.getByRole('alert')).toContainText('differs from the cited hash');
+  await history.scrollIntoViewIfNeeded();
+  await page.screenshot({ path: `docs/website-transformation/evidence/answer-history-${page.viewportSize()!.width}.png`, scale: 'css' });
+  await history.getByRole('button', { name: 'Clear recent answers' }).click();
+  await expect(history).toHaveCount(0);
+  await expect(answer).toHaveCount(0);
+  await expect(page.getByLabel('Question', { exact: true })).toHaveValue('Ocean shipping pension discounts');
   expect(await page.evaluate(() => document.documentElement.scrollWidth)).toBeLessThanOrEqual(page.viewportSize()!.width + 1);
+});
+
+
+test('answer history is bounded and is discarded when this view reloads', async ({ page, request }) => {
+  await openEvidenceWorkspace(page, request);
+  const history = page.getByRole('region', { name: 'Answer history', exact: true });
+  for (let index = 0; index < 11; index++) {
+    const question = `Missing synthetic source topic ${index}`;
+    await page.getByLabel('Question', { exact: true }).fill(question);
+    await page.getByRole('button', { name: 'Ask with sources', exact: true }).click();
+    await expect(page.getByRole('region', { name: 'Evidence answer', exact: true })).toContainText(question);
+  }
+  await expect(history.locator('ol button')).toHaveCount(10);
+  await expect(history.getByRole('button', { name: /^Missing synthetic source topic 0 / })).toHaveCount(0);
+  await expect(history.getByRole('button', { name: /^Missing synthetic source topic 1 / })).toHaveCount(1);
+  await page.reload();
+  await expect(page.getByRole('heading', { name: 'Evidence assistant', exact: true })).toBeVisible();
+  await expect(history).toHaveCount(0);
+  await expect(page.getByRole('region', { name: 'Evidence answer', exact: true })).toHaveCount(0);
 });

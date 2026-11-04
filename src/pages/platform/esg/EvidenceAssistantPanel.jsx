@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useRef, useState } from 'react';
 import { esgFetch, esgSend } from '../../../lib/esgApi';
 import { Button, Input, Loading, Notice, Panel, Select, useAction, useEsgData } from './ui';
 import BenchmarkPanel from './BenchmarkPanel';
@@ -6,17 +6,23 @@ import EvidenceAnswer from './EvidenceAnswer';
 
 export default function EvidenceAssistantPanel({ canWrite }) {
   const documents = useEsgData('/api/esg/documents');
-  const [answer, setAnswer] = useState(null);
+  const [answers, setAnswers] = useState([]);
+  const [selectedId, setSelectedId] = useState(null);
+  const nextId = useRef(0);
   const query = useAction();
   const upload = useAction();
   const ask = async (event) => {
     event.preventDefault();
     const values = new FormData(event.currentTarget);
-    setAnswer(null);
+    setSelectedId(null);
     const result = await query.run(() => esgSend('POST', '/api/esg/query', {
       query: values.get('question'), corpus: values.get('corpus'), top_k: 5,
     }));
-    if (result) setAnswer(result);
+    if (result) {
+      const id = ++nextId.current;
+      setAnswers((current) => [{ id, response: result }, ...current].slice(0, 10));
+      setSelectedId(id);
+    }
   };
   const addDocument = async (event) => {
     event.preventDefault();
@@ -40,7 +46,25 @@ export default function EvidenceAssistantPanel({ canWrite }) {
         </div>
       </form>
       <Notice error={query.error} />
-      {answer && <EvidenceAnswer answer={answer} />}
+      {answers.length > 0 && <section aria-label="Answer history" className="space-y-3 border-t border-mist/20 pt-4">
+        <div className="flex flex-wrap items-center justify-between gap-3">
+          <h3 className="font-serif text-xl text-registry">Recent answers</h3>
+          <Button variant="secondary" disabled={query.busy} onClick={() => { setAnswers([]); setSelectedId(null); }}>Clear recent answers</Button>
+        </div>
+        <p className="text-xs text-mist">Up to 10 answers stay in this view’s memory. Each question searches independently. Clearing this view does not delete server audit records.</p>
+        <ol className="grid max-h-72 gap-2 overflow-y-auto sm:grid-cols-2">
+          {answers.map((entry) => <li key={entry.id} className="min-w-0">
+            <button type="button" aria-pressed={selectedId === entry.id} onClick={() => setSelectedId(entry.id)}
+              className={`min-h-[44px] w-full rounded-lg border p-3 text-left text-sm focus-visible:outline focus-visible:outline-2 focus-visible:outline-emerald ${selectedId === entry.id ? 'border-emerald bg-emerald/10' : 'border-mist/30'}`}>
+              <span className="line-clamp-2 break-words">{entry.response.query}</span>
+              <span className="mt-1 block text-xs text-mist">{selectedId === entry.id ? 'Viewing · ' : ''}{entry.response.insufficient_data ? 'Insufficient evidence' : entry.response.answer_mode === 'supported_synthesis' ? 'AI synthesis · review required' : 'Retrieved excerpt'} · {entry.response.citations.length} source(s)</span>
+            </button>
+          </li>)}
+        </ol>
+      </section>}
+      {answers.map((entry) => <div key={entry.id} hidden={selectedId !== entry.id}>
+        <EvidenceAnswer answer={entry.response} />
+      </div>)}
     </Panel>
     <Panel title="Indexed evidence" description="Uploads stay in your organization's private corpus. Shared references can only be published by platform operators.">
       <a href="/samples/factory-policy-demo.txt" download className="inline-block text-sm text-emerald underline">Download synthetic policy for RAG rehearsal</a>
