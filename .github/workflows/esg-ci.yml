@@ -3,14 +3,14 @@ name: esg-ci
 on:
   pull_request:
   push:
-    branches: [main, master]
+    branches: [main, master, Asif]
 
 permissions:
   contents: read
 
 jobs:
   backend:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     services:
       postgres:
         image: postgres:16
@@ -46,12 +46,12 @@ jobs:
           command.check(alembic_config('postgresql+psycopg2://esg:esg@localhost:5432/esg_test'))"
 
   frontend:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
         with:
-          node-version: 20
+          node-version: 22
           cache: npm
       - run: npm ci
       - run: npm run lint
@@ -64,7 +64,15 @@ jobs:
           cache-dependency-path: inference/requirements-esg.txt
       - run: pip install -r inference/requirements-esg.txt
       - run: npx playwright install --with-deps chromium
-      - name: E2E (SPA + standalone ESG API, 4 viewports)
+      - name: Protected E2E (SPA + ESG API, 10 viewport projects)
         env:
           ESG_PYTHON: python
-        run: npx playwright test
+        run: npx playwright test --workers=2
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: esg-browser-report
+          path: |
+            docs/qa/playwright-report/
+            test-results/
+          retention-days: 7

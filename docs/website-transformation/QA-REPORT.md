@@ -38,3 +38,7 @@ Full required viewport matrix (including 390 and 1920), complete protected + iso
 ## S01B
 
 14 JS tests, type check/build/whitespace pass. Production JS/source credential scans pass. Telemetry browser tests **2 pass** (desktop/320px), using explicitly empty Django fixtures and observing no direct Blynk request. No live sensor or authenticated telemetry proxy was tested or implemented; unsupported state is deliberate. Existing wider MRV/scientific/registry workflows still need their separate audit.
+
+## C01
+
+Both workflow YAML files parse; Asif trigger and supported ubuntu-24.04 configuration validated. Local installed Playwright platform/dependency manifests explicitly support 24.04; actual GitHub run 41472555751 identifies 26.04 as the previous Chromium blocker. Test discovery: 250 cases in nine files across ten projects. Hosted result is pending after push; contract remains red and mutation integration remains separate. No claim that Linux CI executed locally on macOS.

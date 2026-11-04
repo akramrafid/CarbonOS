@@ -66,10 +66,20 @@ Next: S01B remove browser Blynk credential calls and present unsupported live te
 
 ## S01B — Remove browser Blynk credentials and false live metrics (2026-11-04)
 
-Phase 13. State: TESTED; own SHA/remote verification reported after commit.
+Phase 13. State: PUSHED. Commit `08d0b692b9fd0db590a0731b0bf7f56c02985722` matched remote Asif.
 
 Files: LiveMetrics.jsx, MRVDashboard.jsx, browserCredentialPolicy.test.mjs, telemetry-integrity.spec.ts and tracking docs. Deleted both direct Blynk credential/request paths and polling, the unneeded browser ingestion/write path and fabricated mitigation increments. Dashboard live count/satellite/mitigation show unavailable/not calculated. Unsupported gateway is explicit; no false offline sensor alert is generated when connectivity is unknown. Unmounted legacy LiveMetrics retains explicitly labelled synthetic station fixtures, with no invented live fallback, packet count or hardware-signature claim. Existing history/trend reads are retained; they are not authenticated live telemetry proof.
 
 Validation: **14 JS tests pass**, including a frontend credential policy scan; tsc/build/whitespace pass. Production JS scan finds no direct Blynk URL or Vite Blynk token configuration. **2 browser tests pass** on desktop/320px with empty fixture history/trends, explicit unsupported status, no fabricated metrics and no provider requests. First policy test exposed URL-encoded workspace spaces; fixed it with Node fileURLToPath, reran successfully.
 
 An authenticated server gateway and provider rotation remain external/unimplemented dependencies. No live hardware integration is claimed. Next: C01 supported browser CI and Asif workflow execution.
+
+## C01 — Supported, observable Asif CI (2026-11-04)
+
+Phase 14. State: TESTED locally/configuration; hosted run pending after push.
+
+Files: .github/workflows/frontend-quality.yml, esg-ci.yml and tracking docs. Actual main run https://github.com/akramrafid/CarbonOS/actions/runs/41472555751 fails Chromium installation on Ubuntu 26.04. Installed Playwright 1.56.1 maps/supports Ubuntu 24.04 and includes its dependency manifest; pinned runners to ubuntu-24.04. Added Asif push triggers, Node 22 (compatible with Vite's >=22.12 requirement), the missing Python API dependencies in the contract-dependent browser job, two browser workers and failure-report artifacts. Preserved the failing contract dependency and real protected API tests; no gate removed or ignored.
+
+Validation: Ruby YAML parser validates both workflows and explicit Asif/runner settings; Playwright lists **250 tests in 9 files / ten projects**. Recent local focused suites and build/type/unit checks are recorded above. Hosted execution can only be observed after this commit's push; do not claim CI green yet. Latest official Vite/Playwright docs consulted; installed Playwright platform source is the version-specific runner evidence. Main's separate mutmut/pytest failure was confirmed in logs; its source/config is absent on Asif and remains C04/integration work.
+
+Next: C02 resolve frontend contract template artifacts with actual evidence and explicitly unmeasured states.
