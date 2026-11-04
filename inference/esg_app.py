@@ -41,7 +41,7 @@ def validate_config():
     origins = os.getenv("ALLOWED_ORIGINS", "")
     if not origins or "*" in origins or "localhost" in origins:
         problems.append("ALLOWED_ORIGINS must list the production web origins only")
-    if os.getenv("ESG_LLM_EXTRACTION_ENABLED", "").lower() == "true" and not os.getenv("ESG_LLM_PROCESSING_TERMS_REF"):
+    if any(os.getenv(flag, '').lower() in ('1', 'true', 'yes') for flag in ('ESG_LLM_EXTRACTION_ENABLED', 'ESG_LLM_RAG_ENABLED')) and not os.getenv("ESG_LLM_PROCESSING_TERMS_REF"):
         problems.append("ESG_LLM_PROCESSING_TERMS_REF must reference the signed data-processing terms before enabling LLM extraction")
     if problems:
         raise RuntimeError("Insecure ESG configuration: " + "; ".join(problems))

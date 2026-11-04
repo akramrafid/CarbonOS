@@ -81,8 +81,8 @@ def normalize(quantity: Decimal, unit: str, activity_type: str) -> Decimal:
         # Litres of gas are almost always a data-entry error; energy units need a heating value.
         raise UnitError("Natural gas must be entered in m3")
     q = Decimal(quantity)
-    if q < 0:
-        raise UnitError("Quantity must not be negative")
+    if not q.is_finite() or q < 0:
+        raise UnitError("Quantity must be finite and nonnegative")
     return q * UNITS[unit][1] / UNITS[target][1]
 
 
@@ -169,7 +169,7 @@ def inclusion_share(facility: Facility, boundary_method: str) -> Decimal:
         return Decimal(1) if facility.financial_control else Decimal(0)
     if boundary_method == "equity_share":
         pct = Decimal(facility.equity_share_pct)
-        if not Decimal(0) <= pct <= Decimal(100):
+        if not pct.is_finite() or not Decimal(0) <= pct <= Decimal(100):
             raise ValueError(f"Equity share for facility {facility.id} must be 0–100")
         return pct / Decimal(100)
     raise ValueError(f"Unknown boundary method '{boundary_method}'")
@@ -196,7 +196,7 @@ def select_factor(a: Activity, region: str, method: str, factors: List[Factor],
         if not (f.activity_type == a.activity_type and f.method == method and f.unit == a.unit
                 and f.valid_from <= a.period_start and (f.valid_to is None or a.period_end <= f.valid_to)):
             return None, "SELECTED_FACTOR_NOT_APPLICABLE"
-        return f, None
+        return (f, None) if f.kgco2e_per_unit.is_finite() and f.kgco2e_per_unit >= 0 else (None, 'INVALID_FACTOR_VALUE')
     candidates = [f for f in factors if _usable(f, a, region, method)]
     latest: Dict[str, Factor] = {}
     for f in candidates:
@@ -206,7 +206,8 @@ def select_factor(a: Activity, region: str, method: str, factors: List[Factor],
         return None, "MISSING_FACTOR"
     if len(latest) > 1:
         return None, "AMBIGUOUS_FACTOR"
-    return next(iter(latest.values())), None
+    f = next(iter(latest.values()))
+    return (f, None) if f.kgco2e_per_unit.is_finite() and f.kgco2e_per_unit >= 0 else (None, 'INVALID_FACTOR_VALUE')
 
 
 def calculate(activities: List[Activity], facilities: Dict[str, Facility], factors: List[Factor],
@@ -238,12 +239,26 @@ def calculate(activities: List[Activity], facilities: Dict[str, Facility], facto
         bucket[key] += kg
         return kg
 
+    seen = set()
     for a in sorted(activities, key=lambda x: x.id):
+        if a.id in seen:
+            exception('DUPLICATE_ACTIVITY_ID', a)
+            continue
+        seen.add(a.id)
+        if not a.quantity.is_finite() or a.quantity < 0:
+            exception('INVALID_QUANTITY', a)
+            continue
+        if a.period_start > a.period_end:
+            exception('INVALID_ACTIVITY_DATES', a)
+            continue
         fac = facilities.get(a.facility_id)
         if fac is None:
             exception("UNKNOWN_FACILITY", a)
             continue
         if a.activity_type in MEMO_ACTIVITY_TYPES:
+            if a.unit != canonical_unit(a.activity_type):
+                exception('NON_CANONICAL_UNIT', a, detail=a.unit)
+                continue
             res.memo[a.activity_type] = res.memo.get(a.activity_type, Decimal(0)) + a.quantity
             continue
         if a.activity_type not in ACTIVITY_TYPES:

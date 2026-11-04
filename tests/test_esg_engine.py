@@ -5,6 +5,7 @@ Unit Tests for Next-Gen ESG Calculation Engine, Factor Registry & ATLAS Benchmar
 import unittest
 import sys
 import os
+from unittest import mock
 
 # Add inference directory to path
 sys.path.append(os.path.join(os.path.dirname(__file__), '../inference'))
@@ -71,8 +72,15 @@ class TestESGCalculationEngine(unittest.TestCase):
     def test_atlas_benchmark_suite(self):
         eval_res = run_atlas_eval_suite()
         self.assertEqual(eval_res["total_test_cases"], 10)
-        self.assertGreaterEqual(eval_res["metrics"]["parameter_accuracy_pct"], 90.0)
-        self.assertGreaterEqual(eval_res["metrics"]["scope_classification_pct"], 90.0)
+        cases = eval_res['test_results']
+        self.assertEqual(eval_res['data_classification'], 'SYNTHETIC_TEXT_FIXTURES')
+        self.assertEqual(eval_res['metrics']['parameter_accuracy_pct'], 100 * sum(c['value_exact_match'] for c in cases) / 10)
+        self.assertIsNone(eval_res['metrics']['overall_f1_score'])
+        with mock.patch('esg_rag.atlas_benchmark.regex_heuristic_extraction', return_value={
+            'parameters': {}, 'details': [], 'method': 'regex'}):
+            failed = run_atlas_eval_suite()
+        self.assertEqual(failed['metrics']['parameter_accuracy_pct'], 0)
+        self.assertTrue(all(c['extracted']['value'] is None for c in failed['test_results']))
 
     def test_audit_seal_and_factor_provenance(self):
         sample_activities = {

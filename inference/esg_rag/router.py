@@ -17,7 +17,7 @@ from .schemas import (
 )
 from .auth import Identity, Principal, get_identity, require
 from .ratelimit import limited
-from .config import CORPUS_TENANT_DOCS, CORPUS_REGULATORY, CORPUS_EMISSION_FACTORS
+from .config import CORPUS_TENANT_DOCS, CORPUS_REGULATORY, CORPUS_EMISSION_FACTORS, GLOBAL_CORPUS_OWNER
 from .ingest import ingest_document, IngestRejected, MAX_UPLOAD_BYTES
 from .retriever import retrieve
 from .generator import generate_answer
@@ -26,7 +26,6 @@ from .extractor import extract_footprint_from_text, detect_all_utility_segments
 router = APIRouter(prefix="/api/esg", tags=["ESG RAG Intelligence"])
 
 # Global corpora are shared by every tenant, so only platform operators may write them.
-GLOBAL_CORPUS_OWNER = {CORPUS_REGULATORY: "global_regulatory", CORPUS_EMISSION_FACTORS: "global_ef"}
 
 
 async def _read_upload(file: UploadFile) -> bytes:
@@ -111,14 +110,15 @@ def esg_query(
         query=request.query,
         corpus=request.corpus or "all",
         tenant_id=tenant_id,
-        top_k=request.top_k or 5
+        top_k=request.top_k or 5,
+        db=db,
     )
 
     # 2. Generate grounded answer
     gen_res = generate_answer(request.query, retrieval_res)
 
     latency = round((time.time() - start_time) * 1000, 2)
-    citations_data = retrieval_res.get("citations", [])
+    citations_data = gen_res.get("citations", [])
 
     # 3. Log query in audit trail
     log = ESGQueryLog(
@@ -128,6 +128,7 @@ def esg_query(
         answer_text=gen_res["answer"],
         confidence=retrieval_res.get("best_score", 0.0),
         citations=citations_data,
+        retrieved_chunk_ids=[c.chunk_id for c in retrieval_res.get('chunks', [])],
         latency_ms=latency,
         llm_model=gen_res.get("model_used", "unknown"),
         verified_by_audit=False
@@ -143,7 +144,11 @@ def esg_query(
         corpus=request.corpus or "all",
         model_used=gen_res.get("model_used", "gemini"),
         insufficient_data=gen_res.get("insufficient_data", False),
-        latency_ms=latency
+        latency_ms=latency,
+        answer_mode=gen_res['answer_mode'],
+        retrieval_method=retrieval_res.get('retrieval_method', 'vector'),
+        candidate_count=retrieval_res.get('candidate_count', 0),
+        candidate_limit_reached=retrieval_res.get('candidate_limit_reached', False),
     )
 
 @router.post("/extract-footprint", response_model=ExtractionResponse)
@@ -343,12 +348,10 @@ def duckdb_calculate(
     principal: Principal = Depends(require("read")),
 ):
     """
-    In-Process DuckDB-Style OLAP Calculation Endpoint.
-    Executes both Activity-Based (Scope 1, 2, 3) and Spend-Based EEIO (CEDA) calculations
-    in sub-25ms with resource estimation and cryptographic audit hash.
+    Demo-only legacy scenario estimator. Not the approved ledger calculation path.
     """
+    _demo_only(principal)
     from .calculation_engine import calculate_activity_footprint, calculate_spend_eeio_footprint
-    import hashlib
 
     activities = payload.get("activities", {})
     spend_items = payload.get("spend_items", {})
@@ -359,15 +362,15 @@ def duckdb_calculate(
     act_res = calculate_activity_footprint(activities, factors)
     spend_res = calculate_spend_eeio_footprint(spend_items, currency=currency, usd_bdt_exchange_rate=exchange_rate)
 
-    # Cryptographic SHA-256 seal for audit trail
-    ledger_content = f"{act_res['totals']['location_based_tco2e']}:{spend_res['total_emissions_tco2e']}:{datetime.datetime.utcnow().isoformat()}"
-    audit_hash = hashlib.sha256(ledger_content.encode('utf-8')).hexdigest()
+    act_res.pop('audit_seal', None)
+    act_res['engine'] = 'legacy-python-scenario'
 
     return {
-        "engine": "DuckDB-Vectorized-OLAP",
+        "engine": "legacy-python-scenario",
+        "data_classification": "DEMO_SAMPLE",
+        "calculation_status": "UNREVIEWED_ESTIMATE",
         "version": "2026.2.1",
         "calculated_at": datetime.datetime.utcnow().isoformat(),
-        "audit_hash": f"SHA256-{audit_hash[:16].upper()}",
         "activity_accounting": act_res,
         "spend_eeio_accounting": spend_res,
         "consolidated_total_tco2e": round(act_res["totals"]["location_based_tco2e"] + spend_res["total_emissions_tco2e"], 3)
@@ -376,13 +379,14 @@ def duckdb_calculate(
 @router.get("/emission-factors/registry")
 def get_factor_registry(principal: Principal = Depends(require("read"))):
     """
-    Retrieve typed, versioned emission factor catalog with DoE Gazette citations.
+    Demo-only illustrative catalogue. Source references have not been independently verified.
     """
+    _demo_only(principal)
     from .factor_registry import FACTOR_REGISTRY_CATALOG
     return {
         "catalog_version": "v2026.1-NATIONAL",
-        "governing_body": "Department of Environment (DoE) & SREDA Bangladesh",
-        "gazette_reference": "Ref: 22.02.0000.018.99.001.23",
+        "data_classification": "DEMO_SAMPLE",
+        "source_status": "UNVERIFIED_REFERENCE",
         "total_factors": len(FACTOR_REGISTRY_CATALOG),
         "factors": FACTOR_REGISTRY_CATALOG
     }
@@ -396,10 +400,12 @@ def run_factor_regression(
     Watershed-style regression testing:
     Tests proposed emission factor changes against customer baseline portfolios.
     """
+    _demo_only(principal)
     from .factor_registry import run_factor_regression_test
     proposed = payload.get("proposed_factors", {})
     tolerance = float(payload.get("tolerance_pct", 2.0))
-    return run_factor_regression_test(proposed, tolerance_pct=tolerance)
+    return {**run_factor_regression_test(proposed, tolerance_pct=tolerance),
+            'data_classification': 'DEMO_SAMPLE', 'status': 'SCENARIO_CHECK_ONLY', 'approval_granted': False}
 
 @router.get("/atlas-benchmark/run")
 def run_atlas_benchmark(principal: Principal = Depends(require("read"))):

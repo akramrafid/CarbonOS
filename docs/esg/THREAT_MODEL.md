@@ -14,7 +14,7 @@ supplier collaborator, platform operator, compromised LLM output / prompt-inject
 | T3 | Tampering: path traversal — upload filename joined into path (`../../x`) → arbitrary file write as the service user | `ingest.ingest_document` | P0 | Fixed in P0-1 |
 | T4 | Tampering: `corpus` form field joined into `fallback_{corpus}.json` path → arbitrary `.json` write; and any caller can poison global `regulatory`/`emission_factors` corpora read by every tenant | `/ingest` | P0 | Fixed in P0-1 |
 | T5 | DoS: unbounded upload size read fully into memory; no type allow-list | `/ingest`, `/extract-footprint` | P1 | Size + extension limits in P0-1; rate limiting open |
-| T6 | Info disclosure: customer document text sent to Gemini without consent; API key in URL query string | `extractor.extract_parameters_with_gemini`, `generator` | P0 (privacy) | Fixed P0-2: LLM extraction only when `ESG_LLM_EXTRACTION_ENABLED=true`; key-in-URL still open |
+| T6 | Info disclosure: customer document text sent to Gemini without consent; API key in URL query string | `extractor.extract_parameters_with_gemini`, `generator` | P0 (privacy) | Updated AI increment: extraction and RAG each require explicit opt-in; both send keys in headers and avoid logging provider bodies. Historical log review remains outstanding |
 | T7 | Repudiation / integrity: fabricated values labelled `verified`/`audit_seal` | server + client | P0 (trust) | Fixed P0-2 for API + extraction/RAG paths; dashboard overview KPIs still fabricated (register A24) |
 | T8 | Prompt injection via uploaded documents into RAG answers | `generator.build_grounded_prompt` | P1 | Mitigated: tenant filter applied before the model (other tenants' text never reaches the prompt); injected text sits in the data section after untrusted-data rules; nothing the model returns can set verification. Tested in `test_esg_hardening.py`. Residual: a tenant can still mislead *its own* answers |
 | T9 | Info disclosure: stack traces / raw exceptions — `ingest` stores `str(e)` as page text | `ingest.extract_text_from_file` | P2 | Fixed P0-2: parse failures return no pages; error text is never indexed |
@@ -41,5 +41,5 @@ supplier collaborator, platform operator, compromised LLM output / prompt-inject
 
 - [ ] Revoke and reissue the OpenWeatherMap key committed in `src/pages/farmers-ai/HarvestGuardDashboard.jsx`; move it server-side.
 - [ ] Confirm no deployment uses the Django fallback `SECRET_KEY` (`django-insecure-&!^e…`); if any did, rotate and invalidate sessions.
-- [ ] Check Render/Vercel env for `GEMINI_API_KEY` exposure in logs (key is sent as a URL query parameter); rotate if logs are shared.
+- [ ] Review historical Render/Vercel logs for `GEMINI_API_KEY` exposure from older URL-based requests; rotate if exposed. Current extraction/RAG requests use headers.
 - [ ] Run a history secret scan (e.g. `gitleaks detect`) — NOT RUN in this session.

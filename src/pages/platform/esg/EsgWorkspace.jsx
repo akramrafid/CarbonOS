@@ -11,6 +11,7 @@ import LedgerPanel from './LedgerPanel';
 import ReportsPanel from './ReportsPanel';
 import MetricsPanel from './MetricsPanel';
 import DisclosuresPanel from './DisclosuresPanel';
+import EvidenceAssistantPanel from './EvidenceAssistantPanel';
 import { AuditPanel, MembersPanel } from './PeoplePanel';
 
 const PERMS = {
@@ -184,6 +185,7 @@ export default function EsgWorkspace() {
   const perms = PERMS[org.role] || [];
   const can = { write: perms.includes('write'), review: perms.includes('review'), admin: perms.includes('admin') };
   const tabs = [
+    ['evidence', 'Evidence assistant'],
     ['setup', 'Setup'], ['factors', 'Emission factors'], ['ledger', 'Activity ledger'], ['metrics', 'E/S/G metrics'], ['reports', 'Calculation & reports'], ['disclosures', 'Disclosures'],
     ...(can.admin ? [['members', 'Members']] : []), ...(can.review ? [['audit', 'Audit trail']] : []),
   ];
@@ -268,6 +270,7 @@ export default function EsgWorkspace() {
         ))}
       </nav>
       <div key={orgId + tab}>
+        {tab === 'evidence' && <EvidenceAssistantPanel canWrite={can.write} />}
         {tab === 'setup' && <SetupPanel canAdmin={can.admin} />}
         {tab === 'factors' && <FactorsPanel canAdmin={can.admin} me={me?.sub} types={ref.types} />}
         {tab === 'ledger' && <LedgerPanel me={me?.sub} can={can} types={ref.types} periods={ref.periods} facilities={ref.facilities} />}

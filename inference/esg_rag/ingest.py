@@ -19,6 +19,7 @@ from .models import ESGDocument, ESGChunk
 # Vector store client singleton
 _chroma_client = None
 _embedding_model = None
+_embedding_unavailable = False
 
 def get_chroma_client():
     global _chroma_client
@@ -33,7 +34,9 @@ def get_chroma_client():
     return _chroma_client
 
 def get_embedding_model():
-    global _embedding_model
+    global _embedding_model, _embedding_unavailable
+    if _embedding_unavailable:
+        return None
     if _embedding_model is None:
         try:
             from sentence_transformers import SentenceTransformer
@@ -41,6 +44,7 @@ def get_embedding_model():
         except Exception as e:
             print(f"[ESG RAG] SentenceTransformer not loaded ({e}), using fast hash-vector fallback")
             _embedding_model = None
+            _embedding_unavailable = True
     return _embedding_model
 
 def compute_embedding(text: str) -> List[float]:
@@ -51,9 +55,9 @@ def compute_embedding(text: str) -> List[float]:
             emb = model.encode(text, convert_to_numpy=True)
             return emb.tolist()
         except Exception as e:
-            print(f"[ESG RAG] Error encoding with model: {e}")
+            raise ValueError('Configured embedding model failed to encode text') from e
             
-    # Deterministic semantic hash fallback (384-dim normalized)
+    # Feature hashing is lexical, not a learned semantic embedding.
     import numpy as np
     words = re.findall(r'\w+', text.lower())
     vec = np.zeros(384, dtype=np.float32)
@@ -66,6 +70,10 @@ def compute_embedding(text: str) -> List[float]:
     if norm > 1e-6:
         vec = vec / norm
     return vec.tolist()
+
+
+def embedding_space() -> str:
+    return EMBEDDING_MODEL if get_embedding_model() is not None else 'feature-hash-384-v1'
 
 def extract_text_from_file(file_path: str, filename: str) -> List[Dict[str, Any]]:
     """
@@ -145,6 +153,8 @@ def chunk_text(pages: List[Dict[str, Any]], chunk_size: int = CHUNK_SIZE, overla
                 })
                 chunk_idx += 1
 
+            if end == text_len:
+                break
             start = end - overlap if (end - overlap) > start else end
 
     return chunks
@@ -274,6 +284,7 @@ def ingest_document(
         embeddings.append(vec)
         documents.append(c["content"])
         metadatas.append({
+            "embedding_space": embedding_space(),
             "doc_id": doc_rec.id,
             "tenant_id": tenant_id,
             "filename": filename,

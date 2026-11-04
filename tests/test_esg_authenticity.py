@@ -9,13 +9,34 @@ from unittest import mock
 
 sys.path.insert(0, os.path.dirname(__file__))
 from esg_harness import ESGApiTestCase, auth  # noqa: E402
-from esg_rag.extractor import detect_all_utility_segments, extract_footprint_from_text  # noqa: E402
+from esg_rag.extractor import detect_all_utility_segments, extract_footprint_from_text, regex_heuristic_extraction, extract_parameters_with_gemini  # noqa: E402
 from esg_rag.models import ESGDocument, ESGQueryLog  # noqa: E402
 
 CANNED = ("14200", "14,200", "156000", "156,000", "82000", "39000")
 
 
 class ExtractionAuthenticityTest(ESGApiTestCase):
+    def test_provider_credential_is_in_header_not_url(self):
+        response = mock.Mock(status_code=200)
+        response.json.return_value = {'modelVersion': 'test-model', 'candidates': [{'content': {'parts': [{'text': '{}'}]}}]}
+        with mock.patch.dict(os.environ, {'GEMINI_API_KEY': 'synthetic-test-credential'}), \
+             mock.patch('esg_rag.extractor.requests.post', return_value=response) as post:
+            extract_parameters_with_gemini('Synthetic input only')
+        self.assertNotIn('key=', post.call_args.args[0])
+        self.assertEqual(post.call_args.kwargs['headers']['x-goog-api-key'], 'synthetic-test-credential')
+
+    def test_rule_parser_requires_units_and_abstains_on_conflicting_quantities(self):
+        for text in ('Electricity bill 2026, account 19347.', 'Electricity -10 kWh',
+                     'Electricity 100 kWh. Electricity 250 kWh.'):
+            with self.subTest(text=text):
+                self.assertEqual(regex_heuristic_extraction(text)['details'], [])
+        actual = regex_heuristic_extraction('HSD delivered: 1,015.75 litres')
+        self.assertEqual(actual['parameters']['diesel'], 1015.75)
+        bangla = 'বিদ্যুৎ ব্যবহার: ১২৫০০০ কিলোওয়াট ঘণ্টা'
+        actual = regex_heuristic_extraction(bangla)
+        self.assertEqual(actual['parameters']['electricity'], 125000)
+        self.assertEqual(actual['details'][0]['raw_snippet'], bangla)
+
     def extract(self, sub="user-a", **kwargs):
         return self.client.post("/api/esg/extract-footprint", headers=auth(sub), **kwargs)
 
@@ -109,6 +130,18 @@ class RagAuthenticityTest(ESGApiTestCase):
 
 
 class DemoSegregationTest(ESGApiTestCase):
+    def test_legacy_scenario_engines_do_not_enter_protected_accounting(self):
+        for method, path, body in [('POST', '/duckdb-calculate', {}),
+                                   ('GET', '/emission-factors/registry', None),
+                                   ('POST', '/emission-factors/regression-test', {})]:
+            response = self.client.request(method, '/api/esg' + path, headers=auth('user-a'), json=body)
+            self.assertEqual(response.status_code, 404, response.text)
+        demo = self.client.post('/api/esg/organizations', json={'name': 'Scenario demo', 'is_demo': True}, headers=auth('scenario-user')).json()['id']
+        result = self.client.post('/api/esg/duckdb-calculate', json={}, headers=auth('scenario-user', demo)).json()
+        self.assertEqual(result['data_classification'], 'DEMO_SAMPLE')
+        self.assertNotIn('audit_hash', result)
+        self.assertNotIn('audit_seal', result['activity_accounting'])
+
     def test_sample_payloads_only_in_demo_workspaces(self):
         for path in ("/api/esg/entity-tree", "/api/esg/satellite-insets"):
             self.assertEqual(self.client.get(path, headers=auth("user-a")).status_code, 404)

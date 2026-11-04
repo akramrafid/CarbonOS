@@ -32,6 +32,29 @@ DIESEL = factor("diesel", "diesel", "L", "2.7", "direct")
 
 
 class UnitTests(unittest.TestCase):
+    def test_nonfinite_quantities_are_rejected(self):
+        for value in ('NaN', 'Infinity', '-Infinity'):
+            with self.subTest(value=value), self.assertRaises(UnitError):
+                normalize(D(value), 'L', 'diesel')
+
+    def test_invalid_inputs_block_calculation_without_invalid_totals(self):
+        for value in ('NaN', 'Infinity', '-1'):
+            with self.subTest(quantity=value):
+                result = calculate([act('a', 'f1', 'diesel', value, 'L')], FAC, [DIESEL], 'operational_control')
+                self.assertTrue(result.blocking)
+                self.assertEqual(result.scope1_kg, D(0))
+            with self.subTest(factor=value):
+                bad = factor('bad', 'diesel', 'L', value, 'direct')
+                result = calculate([act('a', 'f1', 'diesel', '10', 'L')], FAC, [bad], 'operational_control')
+                self.assertTrue(result.blocking)
+                self.assertEqual(result.scope1_kg, D(0))
+
+    def test_duplicate_activity_ids_do_not_double_count(self):
+        activity = act('a', 'f1', 'diesel', '10', 'L')
+        result = calculate([activity, activity], FAC, [DIESEL], 'operational_control')
+        self.assertTrue(result.blocking)
+        self.assertEqual(result.scope1_kg, D(27))
+
     def test_conversions(self):
         self.assertEqual(normalize(D("1.5"), "MWh", "electricity"), D("1500"))
         self.assertEqual(normalize(D("2"), "kL", "diesel"), D("2000"))

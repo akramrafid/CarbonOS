@@ -25,8 +25,10 @@ ESG API — FastAPI, inference/esg_app.py (torch-free) — also mounted inside i
       │     EsgBase tables via Alembic (inference/esg_migrations, version table esg_alembic_version)
       │     legacy RAG tables on the shared Base (create_all)
       ├── Upload store: CHROMA_PERSIST_DIR/uploads/<organization_id>/<sha256><ext>
-      ├── Vector store: Chroma (optional) or JSON fallback; tenant filter applied before generation
-      └── Gemini (optional): RAG answers; document extraction only when ESG_LLM_EXTRACTION_ENABLED=true
+      ├── Retrieval: authorized SQL chunks → BM25 + compatible optional vectors → reciprocal-rank fusion
+      │     SQL owns source text/visibility; old Chroma/JSON indexes are optional ranking infrastructure
+      └── Gemini (optional): RAG only with ESG_LLM_RAG_ENABLED; extraction only with ESG_LLM_EXTRACTION_ENABLED
+            structured answers → server-owned citation/quote/number checks → human review
 ```
 
 ## Request path and trust boundaries

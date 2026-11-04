@@ -1,0 +1,132 @@
+{
+  "classification": "SYNTHETIC_RETRIEVAL_REGRESSION",
+  "method": "SQL BM25 with no stored dense vectors",
+  "query_count": 12,
+  "recall_at_5": 1.0,
+  "mrr_at_5": 1.0,
+  "negative_abstention_rate": 1.0,
+  "results": [
+    {
+      "tenant": "a",
+      "corpus": "tenant_docs",
+      "query": "boiler inspection policy",
+      "expected": "boiler.txt",
+      "retrieved": [
+        "boiler.txt"
+      ],
+      "rank": 1,
+      "passed": true
+    },
+    {
+      "tenant": "a",
+      "corpus": "tenant_docs",
+      "query": "electricity consumption billing",
+      "expected": "electricity.txt",
+      "retrieved": [
+        "electricity.txt"
+      ],
+      "rank": 1,
+      "passed": true
+    },
+    {
+      "tenant": "a",
+      "corpus": "tenant_docs",
+      "query": "বিদ্যুৎ ব্যবহার",
+      "expected": "bangla.txt",
+      "retrieved": [
+        "bangla.txt"
+      ],
+      "rank": 1,
+      "passed": true
+    },
+    {
+      "tenant": "a",
+      "corpus": "tenant_docs",
+      "query": "freshwater withdrawal meter",
+      "expected": "water.txt",
+      "retrieved": [
+        "water.txt"
+      ],
+      "rank": 1,
+      "passed": true
+    },
+    {
+      "tenant": "a",
+      "corpus": "regulatory",
+      "query": "operational control boundary",
+      "expected": "reference.txt",
+      "retrieved": [
+        "reference.txt"
+      ],
+      "rank": 1,
+      "passed": true
+    },
+    {
+      "tenant": "b",
+      "corpus": "tenant_docs",
+      "query": "boiler inspection interval",
+      "expected": "beta-secret.txt",
+      "retrieved": [
+        "beta-secret.txt"
+      ],
+      "rank": 1,
+      "passed": true
+    },
+    {
+      "tenant": "",
+      "corpus": "tenant_docs",
+      "query": "boiler inspection policy",
+      "expected": null,
+      "retrieved": [],
+      "rank": null,
+      "passed": true
+    },
+    {
+      "tenant": "a",
+      "corpus": "tenant_docs",
+      "query": "ocean shipping pension discounts",
+      "expected": null,
+      "retrieved": [],
+      "rank": null,
+      "passed": true
+    },
+    {
+      "tenant": "a",
+      "corpus": "regulatory",
+      "query": "electricity billing consumption",
+      "expected": null,
+      "retrieved": [],
+      "rank": null,
+      "passed": true
+    },
+    {
+      "tenant": "a",
+      "corpus": "tenant_docs",
+      "query": "999",
+      "expected": null,
+      "retrieved": [],
+      "rank": null,
+      "passed": true
+    },
+    {
+      "tenant": "a",
+      "corpus": "tenant_docs",
+      "query": "12 months maintenance",
+      "expected": "boiler.txt",
+      "retrieved": [
+        "boiler.txt"
+      ],
+      "rank": 1,
+      "passed": true
+    },
+    {
+      "tenant": "a",
+      "corpus": "tenant_docs",
+      "query": "Beta confidential",
+      "expected": null,
+      "retrieved": [],
+      "rank": null,
+      "passed": true
+    }
+  ]
+}

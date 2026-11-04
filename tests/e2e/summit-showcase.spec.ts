@@ -1,5 +1,30 @@
 import { test, expect } from '@playwright/test';
 
+test('evidence assistant indexes, cites, abstains, and runs an actual extraction regression', async ({ page }) => {
+  test.skip(process.env.ESG_E2E_ACCESS_MODE !== 'isolated_demo', 'Requires an isolated synthetic demo session.');
+  await page.goto('/platform/esg');
+  await page.getByRole('navigation', {name: 'ESG workspace sections'}).getByRole('button', {name:'Evidence assistant', exact:true}).click();
+  await page.getByLabel('Source document', {exact:true}).setInputFiles('public/samples/factory-policy-demo.txt');
+  await page.getByRole('button', {name:'Index source document', exact:true}).click();
+  await expect(page.getByRole('status').filter({hasText:'indexed passage'})).toBeVisible();
+  await page.getByLabel('Question', {exact:true}).fill('What does the boiler inspection policy require?');
+  await page.getByRole('button', {name:'Ask with sources', exact:true}).click();
+  const answer = page.getByRole('region', {name:'Evidence answer', exact:true});
+  await expect(answer.getByRole('heading', {name:'Retrieved source excerpt'})).toBeVisible();
+  await expect(answer).toContainText('12 months');
+  await expect(answer).toContainText('factory-policy-demo.txt');
+  await answer.getByText('Source provenance', {exact:true}).click();
+  await expect(answer).toContainText('Content SHA-256:');
+  await page.evaluate(() => document.fonts.ready);
+  await page.screenshot({path:`docs/showcase/evidence-assistant-${page.viewportSize()!.width}.png`, scale:'css'});
+  await page.getByLabel('Question', {exact:true}).fill('Ocean shipping pension discounts');
+  await page.getByRole('button', {name:'Ask with sources', exact:true}).click();
+  await expect(answer.getByRole('heading', {name:'Insufficient evidence'})).toBeVisible();
+  await page.getByRole('button', {name:'Run extraction regression', exact:true}).click();
+  await expect(page.getByRole('table', {name:'Synthetic extraction results', exact:true})).toContainText('Failed');
+  expect(await page.evaluate(() => document.documentElement.scrollWidth)).toBeLessThanOrEqual(page.viewportSize()!.width + 1);
+});
+
 test('homepage presents a working product without unsupported trading or customer claims', async ({ page }) => {
   await page.goto('/');
   await expect(page.getByRole('heading', { level: 1 })).toContainText('Carbon evidence.');

@@ -13,7 +13,7 @@ ESG_ENV=development ESG_ACCESS_MODE=isolated_demo \
 ESG_AUTH_JWT_SECRET="$(python3 -c 'import secrets; print(secrets.token_urlsafe(48))')" \
 DATABASE_URL=sqlite:////private/tmp/carbonos-summit.sqlite3 \
 CHROMA_PERSIST_DIR=/private/tmp/carbonos-summit-store \
-GEMINI_API_KEY='' ESG_LLM_EXTRACTION_ENABLED='' \
+GEMINI_API_KEY='' ESG_LLM_EXTRACTION_ENABLED='' ESG_LLM_RAG_ENABLED='' \
 ALLOWED_ORIGINS=http://127.0.0.1:3000,http://localhost:3000 \
 .venv-esg/bin/python -m uvicorn esg_app:app --app-dir inference --host 127.0.0.1 --port 8100
 ```
@@ -105,3 +105,11 @@ An actual two-case synthetic smoke check succeeded through the configured Gemini
 To rehearse the model inside the app, stop the local API, keep `ESG_ENV=development` and `ESG_ACCESS_MODE=isolated_demo`, remove the `GEMINI_API_KEY=''` override from Terminal 1, and set `ESG_LLM_EXTRACTION_ENABLED=true`. The existing server-side configuration can load the configured credential; never put it in a `VITE_` variable. Use a fresh demo session and upload only the supplied synthetic bill.
 
 The extraction result must visibly say **AI-assisted extraction** and show the model version. If the provider fails or returns invalid evidence, the result should identify **Rule-based extraction** instead. Disclose that fallback during the presentation. Model confidence is self-reported and does not establish correctness. Real customer documents require the applicable processing/consent arrangements before enabling this path.
+
+## Evidence-assistant rehearsal
+
+Open **Evidence assistant** in the ESG workspace. Download the synthetic policy, index it under **Indexed evidence**, and ask “What does the boiler inspection policy require?” Inspect the source excerpt, document/passage IDs, hash, and unreviewed status. Ask “Ocean shipping pension discounts” next; it should show insufficient evidence. These actions do not add any accounting activity.
+
+For optional live RAG synthesis, restart the localhost development API with `ESG_LLM_RAG_ENABLED=true` and the existing server-side model configuration. This is separate from the extraction flag. A validated generated response says **AI synthesis — review required** and names the actual model. Unavailable/rejected generation shows **Retrieved source excerpt**. Demonstrate that distinction honestly. Synthetic policy statements are not regulations.
+
+**Run extraction regression** executes the real ten-case rules suite. It now retains failures, including unsupported CNG. Its synthetic percentages are not measured customer-document or RAG accuracy. The legacy ATLAS screen uses the same endpoint and no longer displays invented hardcoded scores.

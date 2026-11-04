@@ -1,0 +1,25 @@
+{
+  "classification": "SYNTHETIC_RETRIEVAL_REGRESSION",
+  "sources": [
+    {"tenant": "a", "name": "boiler.txt", "corpus": "tenant_docs", "text": "Boiler inspection policy: inspect equipment every 12 months. Retain the maintenance register."},
+    {"tenant": "a", "name": "electricity.txt", "corpus": "tenant_docs", "text": "Savar factory electricity consumption: 125,000 kWh. Billing quarter July to September."},
+    {"tenant": "a", "name": "water.txt", "corpus": "tenant_docs", "text": "Freshwater withdrawal is recorded at the inlet water meter. Record readings monthly."},
+    {"tenant": "a", "name": "bangla.txt", "corpus": "tenant_docs", "text": "বিদ্যুৎ ব্যবহার ১২৫০০০ কিলোওয়াট ঘণ্টা।"},
+    {"tenant": "b", "name": "beta-secret.txt", "corpus": "tenant_docs", "text": "Beta confidential boiler inspection interval is 999 months. Synthetic secret."},
+    {"tenant": "global_regulatory", "name": "reference.txt", "corpus": "regulatory", "text": "Synthetic reference: operational control is a boundary selection. This is not an official regulatory text."}
+  ],
+  "queries": [
+    {"tenant": "a", "corpus": "tenant_docs", "query": "boiler inspection policy", "expected": "boiler.txt"},
+    {"tenant": "a", "corpus": "tenant_docs", "query": "electricity consumption billing", "expected": "electricity.txt"},
+    {"tenant": "a", "corpus": "tenant_docs", "query": "বিদ্যুৎ ব্যবহার", "expected": "bangla.txt"},
+    {"tenant": "a", "corpus": "tenant_docs", "query": "freshwater withdrawal meter", "expected": "water.txt"},
+    {"tenant": "a", "corpus": "regulatory", "query": "operational control boundary", "expected": "reference.txt"},
+    {"tenant": "b", "corpus": "tenant_docs", "query": "boiler inspection interval", "expected": "beta-secret.txt"},
+    {"tenant": "", "corpus": "tenant_docs", "query": "boiler inspection policy", "expected": null},
+    {"tenant": "a", "corpus": "tenant_docs", "query": "ocean shipping pension discounts", "expected": null},
+    {"tenant": "a", "corpus": "regulatory", "query": "electricity billing consumption", "expected": null},
+    {"tenant": "a", "corpus": "tenant_docs", "query": "999", "expected": null},
+    {"tenant": "a", "corpus": "tenant_docs", "query": "12 months maintenance", "expected": "boiler.txt"},
+    {"tenant": "a", "corpus": "tenant_docs", "query": "Beta confidential", "expected": null}
+  ]
+}

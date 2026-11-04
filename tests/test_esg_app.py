@@ -31,6 +31,8 @@ class AppConfigTest(unittest.TestCase):
             for mode in ('isolated_demo', 'local_dev', 'demo'):
                 with mock.patch.dict(os.environ, {**PROD_OK, 'ESG_ACCESS_MODE': mode}), self.assertRaises(RuntimeError):
                     esg_app.validate_config()
+            with mock.patch.dict(os.environ, {**PROD_OK, 'ESG_LLM_RAG_ENABLED': 'true'}), self.assertRaises(RuntimeError):
+                esg_app.validate_config()
 
     def test_errors_hide_internals_and_carry_request_id(self):
         def boom():

@@ -20,6 +20,10 @@
 | `ESG_AUTH_ISSUER`, `ESG_AUTH_AUDIENCE` | Enforced when set (set both in production) |
 | `ESG_PLATFORM_OPERATOR_SUBS` | Comma-separated subjects allowed to write global corpora |
 | `ESG_MAX_UPLOAD_BYTES` | Upload cap, default 20 MB |
+| `ESG_LLM_RAG_ENABLED` | Explicit model-answer opt-in (`true`, `1`, `yes`); defaults off |
+| `ESG_LLM_EXTRACTION_ENABLED` | Explicit model-extraction opt-in (`true`); defaults off |
+| `ESG_LLM_PROCESSING_TERMS_REF` | Required in production before either external-model path is enabled |
+| `ESG_EMBEDDING_MODEL` | Optional SentenceTransformer model; unavailable dependency/model uses explicitly lexical feature hashing |
 
 ## Roles → permissions
 
@@ -38,15 +42,15 @@
 | GET `/health` | public | — | service status (no tenant data) |
 | POST `/organizations` | any authenticated user | `{name, is_demo?}` | 201 `{id, name, is_demo, role:"org_owner"}` |
 | GET `/organizations` | any authenticated user | — | `[{id, name, is_demo, role}]` for the caller |
-| POST `/query` | read | `{query (1–2000 chars), corpus?, top_k? (1–20)}` | `QueryResponse` — `confidence` is retrieval similarity, not verification |
+| POST `/query` | read | `{query (1–2000 chars), corpus?: all\|tenant_docs\|regulatory\|emission_factors, top_k? (1–20)}` | `QueryResponse`; unknown corpora rejected; `confidence` is a ranking score, not probability or verification |
 | POST `/extract-footprint` | write | multipart `file` or `raw_text` | `{filename, tenant_id, parameters, details[{param_name,value,unit,scope,source_page?,raw_snippet,confidence?}], overall_confidence?, extraction_method: regex\|llm, model_used?, extracted_at, summary, review_status: "REVIEW_REQUIRED"}`; 422 if no input, no readable text, or no quantities found. No footprint is computed here |
 | POST `/ingest` | write (global corpora: platform operator) | multipart `file`, `corpus` | `IngestResponse` incl. `duplicate` |
 | GET `/emission-factors` | read | `category?`, `region?` | factor rows |
 | GET `/documents` | read | `corpus?` | caller's tenant docs + global corpora |
 | GET `/audit-trail` | review | `limit` (1–100) | caller's tenant query/extraction log |
-| POST `/duckdb-calculate` | read | activities/spend payload | legacy estimate (see register A9–A11) |
-| GET `/emission-factors/registry` | read | — | static catalogue (unverified, register A12) |
-| POST `/emission-factors/regression-test` | admin | proposed factors | regression report |
+| POST `/duckdb-calculate` | read, demo org only | activities/spend payload | legacy estimate (see register A9–A11) |
+| GET `/emission-factors/registry` | read, demo org only | — | static catalogue (unverified, register A12) |
+| POST `/emission-factors/regression-test` | admin, demo org only | proposed factors | regression report |
 | GET `/atlas-benchmark/run` | read | — | synthetic benchmark (register A13) |
 | GET `/satellite-insets`, GET `/entity-tree` | read, **demo org only** (404 otherwise) | — | sample payloads with `data_classification: "DEMO_SAMPLE"` |
 | POST `/detect-utility-segments` | read | `{raw_text}` | only segments present in the text; `excluded_segments` (solar export, kVA, kVARh) never netted; factors `UNVERIFIED`; `review_status: REVIEW_REQUIRED` |
@@ -62,7 +66,7 @@ corpus returns the existing document with `duplicate: true`.
 
 * No fabricated fallback anywhere: failures are 422 with a message telling the user to enter values manually.
 * `confidence` is extraction-model confidence only and is `null` for rule-based matches.
-* LLM extraction (Gemini) runs only when `ESG_LLM_EXTRACTION_ENABLED=true`; otherwise documents never leave the server.
+* External model extraction requires `ESG_LLM_EXTRACTION_ENABLED=true`; external RAG answering separately requires `ESG_LLM_RAG_ENABLED=true`. Both default off. Production requires a recorded processing-terms reference. The operator remains responsible for consent, retention, and permitted processing. Provider credentials travel in request headers, not URLs.
 * Model quantities must be finite and nonnegative, match evidence details, and include excerpts present in the document. Invalid structure, missing excerpts, or out-of-range confidence triggers local rule fallback. This is source validation, not an accuracy or assurance guarantee. Model-assisted results identify `model_used` when available.
 * Nothing in the API sets `verified`, `audit_seal` or similar; `verified_by_audit` is reserved for a recorded human review (not built yet).
 
@@ -116,3 +120,29 @@ with `limit` (1–200, default 50) and `offset`. Domain rule violations: 403 (ro
 Standalone service: `cd inference && uvicorn esg_app:app` — `/healthz`, `/readyz` (DB check), `X-Request-Id` on
 every response, generic 500 body with request id (no stack traces), `ESG_ENV=production` refuses to start without
 OIDC JWKS + issuer + audience, PostgreSQL, explicit origins, and data-processing terms if LLM extraction is enabled.
+
+## RAG query provenance and failure behavior
+
+`QueryResponse` adds `answer_mode` (`supported_synthesis`, `retrieval_only`, `insufficient_evidence`),
+`retrieval_method`, `candidate_count`, `candidate_limit_reached`, `score_kind: ranking_score_not_probability`,
+and `review_required: true`. Citations include `document_id`, `chunk_id`, `content_sha256` (passage hash),
+`source_status` (default `UNREVIEWED`), filename, page, excerpt, and relevance ranking score.
+
+The HTTP retriever filters authorized SQL rows before ranking, evaluates up to 2,000 recent chunks,
+and discloses when that bound is reached. It combines BM25 ranks with optional compatible vector ranks.
+Missing/corrupt vector files retain SQL lexical search; incompatible or stale vectors are excluded.
+Legacy vectors without an embedding-space tag are ignored for dense ranking. They need reindexing
+under the chosen model; do not mix hash/model spaces or reinterpret a hash as a semantic embedding.
+
+Generation uses one configured model and a 20-second HTTP timeout. JSON output must include supported
+claims with known source IDs and exact source quotes. Numbers absent from the evidence are rejected.
+Returned citations are constructed by the server and limited to sources actually used. Missing model
+access/provider errors/invalid generation return a labeled source excerpt, not fabricated model text.
+No relevant source or an explicit model abstention returns insufficient evidence and no citations.
+These are mechanical evidence checks, not semantic entailment or legal verification.
+
+ATLAS now runs the actual rules parser and returns `data_classification: SYNTHETIC_TEXT_FIXTURES`.
+Missing values remain null and failed; model confidence and F1 are null because this suite does not
+measure them. Its percentages must never be presented as customer-document or RAG accuracy.
+
+Legacy calculation/catalogue/regression endpoints return 404 for non-demo organizations. Scenario output is labeled `DEMO_SAMPLE`; it grants no approval or assurance. Use the ledger factor/activity/period routes for protected accounting.

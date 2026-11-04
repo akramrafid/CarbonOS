@@ -7,7 +7,7 @@ for utility bill extraction, spend line classification, and citation grounding.
 from typing import Dict, Any, List
 import time
 import datetime
-import re
+from .extractor import regex_heuristic_extraction
 
 ATLAS_GROUND_TRUTH_CASES = [
     {
@@ -83,142 +83,37 @@ ATLAS_GROUND_TRUTH_CASES = [
 ]
 
 def run_atlas_eval_suite() -> Dict[str, Any]:
-    """
-    Executes the ATLAS extraction benchmark against all 10 ground-truth test cases.
-    Measures extraction accuracy, unit alignment, citation presence, and latency.
-    """
-    start_time = time.perf_counter()
-    eval_cases = []
-    correct_extractions = 0
-    correct_scopes = 0
-    citation_present_count = 0
-
+    """Evaluate the actual rules parser on synthetic text; never replace a failure with its label."""
+    started = time.perf_counter()
+    cases = []
     for case in ATLAS_GROUND_TRUTH_CASES:
-        gt = case["ground_truth"]
-        text = case["raw_text"]
-
-        # Run extraction pattern
-        extracted_val = None
-        extracted_unit = None
-        extracted_scope = None
-        raw_snippet = ""
-        confidence = 0.95
-
-        # Heuristic extraction
-        if gt["param"] == "electricity":
-            match = re.search(r'(?:consumption|units|electricity)[\s:]*([0-9,]+)\s*kwh', text, re.I)
-            if match:
-                extracted_val = float(match.group(1).replace(',', ''))
-                extracted_unit = "kWh"
-                extracted_scope = "Scope 2"
-                raw_snippet = match.group(0)
-        elif gt["param"] == "diesel":
-            match = re.search(r'(?:diesel|hsd)[\s\w:]*([0-9,]+)\s*(?:liters|l)', text, re.I)
-            if match:
-                extracted_val = float(match.group(1).replace(',', ''))
-                extracted_unit = "Liters"
-                extracted_scope = "Scope 1"
-                raw_snippet = match.group(0)
-        elif gt["param"] == "petrol":
-            match = re.search(r'(?:octane-95|petrol)[\s\w:]*([0-9,]+)\s*liters', text, re.I)
-            if match:
-                extracted_val = float(match.group(1).replace(',', ''))
-                extracted_unit = "Liters"
-                extracted_scope = "Scope 1"
-                raw_snippet = match.group(0)
-        elif gt["param"] == "lpg":
-            match = re.search(r'([0-9,]+)\s*kg\s*lpg', text, re.I)
-            if match:
-                extracted_val = float(match.group(1).replace(',', ''))
-                extracted_unit = "kg"
-                extracted_scope = "Scope 1"
-                raw_snippet = match.group(0)
-        elif gt["param"] == "employees":
-            match = re.search(r'([0-9,]+)\s*employees', text, re.I)
-            if match:
-                extracted_val = float(match.group(1).replace(',', ''))
-                extracted_unit = "Staff"
-                extracted_scope = "Scope 3"
-                raw_snippet = match.group(0)
-        elif gt["param"] == "airTravel":
-            match = re.search(r'([0-9,]+)\s*passenger-kilometers', text, re.I)
-            if match:
-                extracted_val = float(match.group(1).replace(',', ''))
-                extracted_unit = "km"
-                extracted_scope = "Scope 3"
-                raw_snippet = match.group(0)
-        elif gt["param"] == "truckTransport":
-            match = re.search(r'([0-9,]+)\s*ton-kilometers', text, re.I)
-            if match:
-                extracted_val = float(match.group(1).replace(',', ''))
-                extracted_unit = "T-Km"
-                extracted_scope = "Scope 3"
-                raw_snippet = match.group(0)
-        elif gt["param"] == "rawMaterials":
-            match = re.search(r'([0-9,]+)\s*metric\s*tons', text, re.I)
-            if match:
-                extracted_val = float(match.group(1).replace(',', ''))
-                extracted_unit = "Tons"
-                extracted_scope = "Scope 3"
-                raw_snippet = match.group(0)
-        elif gt["param"] == "cng":
-            match = re.search(r'([0-9,]+)\s*kg\s*cng', text, re.I)
-            if match:
-                extracted_val = float(match.group(1).replace(',', ''))
-                extracted_unit = "kg"
-                extracted_scope = "Scope 1"
-                raw_snippet = match.group(0)
-
-        # Fallback if pattern didn't capture exact
-        if extracted_val is None:
-            extracted_val = gt["value"]
-            extracted_unit = gt["unit"]
-            extracted_scope = gt["scope"]
-            raw_snippet = text[:60]
-
-        is_val_match = abs(extracted_val - gt["value"]) < 0.01
-        is_scope_match = extracted_scope.lower() == gt["scope"].lower()
-        has_citation = len(raw_snippet) > 10
-
-        if is_val_match: correct_extractions += 1
-        if is_scope_match: correct_scopes += 1
-        if has_citation: citation_present_count += 1
-
-        eval_cases.append({
-            "case_id": case["case_id"],
-            "document_name": case["document_name"],
-            "category": case["category"],
-            "ground_truth": gt,
-            "extracted": {
-                "param": gt["param"],
-                "value": extracted_val,
-                "unit": extracted_unit,
-                "scope": extracted_scope
-            },
-            "raw_snippet": raw_snippet,
-            "confidence": confidence,
-            "value_exact_match": is_val_match,
-            "scope_match": is_scope_match
+        gt = case['ground_truth']
+        actual = regex_heuristic_extraction(case['raw_text'])
+        detail = next((d for d in actual['details'] if d['param_name'] == gt['param']), None)
+        value = actual['parameters'].get(gt['param']) if detail else None
+        unit, scope = (detail['unit'], detail['scope']) if detail else (None, None)
+        snippet = detail['raw_snippet'] if detail else ''
+        cases.append({
+            'case_id': case['case_id'], 'document_name': case['document_name'], 'category': case['category'],
+            'ground_truth': gt, 'extracted': {'param': gt['param'], 'value': value, 'unit': unit, 'scope': scope},
+            'raw_snippet': snippet, 'confidence': None, 'method': actual['method'],
+            'value_exact_match': value is not None and abs(value - gt['value']) < 0.01,
+            'scope_match': scope == gt['scope'], 'unit_match': unit == gt['unit'],
+            'citation_match': bool(snippet) and snippet in case['raw_text'],
         })
-
-    total_cases = len(ATLAS_GROUND_TRUTH_CASES)
-    precision_pct = round((correct_extractions / total_cases) * 100, 1)
-    scope_acc_pct = round((correct_scopes / total_cases) * 100, 1)
-    citation_fidelity_pct = round((citation_present_count / total_cases) * 100, 1)
-    latency_ms = round((time.perf_counter() - start_time) * 1000, 2)
-
+    total = len(cases)
+    def percentage(key):
+        return round(100 * sum(c[key] for c in cases) / total, 1) if total else 0
     return {
-        "suite_name": "CarbonOS ATLAS Bill Extraction & Classification Benchmark",
-        "benchmark_version": "2026.2.0",
-        "tested_at": datetime.datetime.now(datetime.timezone.utc).strftime("%Y-%m-%d %H:%M:%S UTC"),
-        "total_test_cases": total_cases,
-        "metrics": {
-            "parameter_accuracy_pct": precision_pct,
-            "scope_classification_pct": scope_acc_pct,
-            "citation_fidelity_pct": citation_fidelity_pct,
-            "overall_f1_score": round((precision_pct + scope_acc_pct) / 200.0, 3),
-            "average_confidence": 0.965,
-            "latency_ms": latency_ms
-        },
-        "test_results": eval_cases
+        'suite_name': 'CarbonOS synthetic rules-extraction regression', 'benchmark_version': '2026.3.0',
+        'tested_at': datetime.datetime.now(datetime.timezone.utc).isoformat(), 'total_test_cases': total,
+        'data_classification': 'SYNTHETIC_TEXT_FIXTURES', 'extraction_method': 'regex',
+        'limitations': 'In-file synthetic text, not real invoices, OCR, a RAG evaluation, or an accuracy estimate for customer data.',
+        'metrics': {
+            'parameter_accuracy_pct': percentage('value_exact_match'),
+            'scope_classification_pct': percentage('scope_match'), 'unit_accuracy_pct': percentage('unit_match'),
+            'citation_fidelity_pct': percentage('citation_match'),
+            'overall_f1_score': None, 'average_confidence': None,
+            'latency_ms': round((time.perf_counter() - started) * 1000, 2),
+        }, 'test_results': cases,
     }

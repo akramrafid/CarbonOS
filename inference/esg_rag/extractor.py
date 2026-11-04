@@ -2,6 +2,7 @@ import os
 import re
 import json
 import math
+import unicodedata
 import requests
 from typing import Dict, Any, List
 from .config import GEMINI_API_KEY, GEMINI_MODEL
@@ -52,7 +53,7 @@ Return your response strictly as valid JSON matching this schema:
       "confidence": 0.98
     }}
   ],
-  "summary": "Audited extraction summary of activities found in this statement.",
+  "summary": "Unreviewed extraction of activities present in the document.",
   "overall_confidence": 0.95
 }}
 """
@@ -64,12 +65,12 @@ def extract_parameters_with_gemini(document_text: str) -> Dict[str, Any]:
 
     prompt = EXTRACTION_PROMPT.format(document_text=document_text[:12000])
 
-    models = [GEMINI_MODEL, "gemini-2.5-flash", "gemini-2.0-flash", "gemini-flash-latest"]
+    models = list(dict.fromkeys([GEMINI_MODEL, "gemini-2.5-flash", "gemini-2.0-flash", "gemini-flash-latest"]))
     last_err = None
 
     for m in models:
-        url = f"https://generativelanguage.googleapis.com/v1beta/models/{m}:generateContent?key={api_key}"
-        headers = {"Content-Type": "application/json"}
+        url = f"https://generativelanguage.googleapis.com/v1beta/models/{m}:generateContent"
+        headers = {"Content-Type": "application/json", "x-goog-api-key": api_key}
         payload = {
             "contents": [{
                 "parts": [{"text": prompt}]
@@ -89,9 +90,9 @@ def extract_parameters_with_gemini(document_text: str) -> Dict[str, Any]:
                     extracted['model_used'] = result.get('modelVersion') or m
                 return extracted
             else:
-                last_err = f"Status {res.status_code}: {res.text}"
+                last_err = f"Status {res.status_code}"
         except Exception as e:
-            last_err = str(e)
+            last_err = type(e).__name__
 
     raise RuntimeError(f"Gemini parameter extraction failed. Last error: {last_err}")
 
@@ -111,42 +112,46 @@ def regex_heuristic_extraction(document_text: str) -> Dict[str, Any]:
     }
     details = []
 
+    number = r'(?<![\w.,])([+-]?\d+(?:,\d{3})*(?:\.\d+)?)'
+    gap = r'[ \tA-Za-z():]{0,40}'
+    liters = r'(?:liters?|litres?|ltrs?|L)(?!\w)'
+    mass = r'(?:kg|kilograms?)(?!\w)'
+    energy = r'(?:kwh|units|কিলোওয়াট[ \t]+ঘণ্টা)(?!\w)'
+    # Prefer explicit labels and units; unrelated dates, meter IDs and prices are not quantities.
     patterns = {
-        "diesel": (r'(?i)(?:diesel|generator fuel)[\s:]*([0-9,]+(?:\.[0-9]+)?)\s*(?:l|liter|litres)?', "Liters", "Scope 1"),
-        "petrol": (r'(?i)(?:petrol|gasoline|octane)[\s:]*([0-9,]+(?:\.[0-9]+)?)\s*(?:l|liter|litres)?', "Liters", "Scope 1"),
-        "lpg": (r'(?i)(?:lpg|propane|cylinder)[\s:]*([0-9,]+(?:\.[0-9]+)?)\s*(?:kg|kilograms)?', "kg", "Scope 1"),
-        "electricity": (r'(?i)(?:electricity|power|grid|desco|dpdc|reb)(?:\s+(?:consumption|usage))?[\s:]*([0-9,]+(?:\.[0-9]+)?)\s*(?:kwh|units)?', "kWh", "Scope 2"),
-        "employees": (r'(?i)(?:headcount|employee|workers|staff)[\s:]*([0-9,]+)', "Staff", "Scope 3"),
-        "airTravel": (r'(?i)(?:flight|air\s*travel|aviation)[\s:]*([0-9,]+(?:\.[0-9]+)?)\s*(?:km)?', "km", "Scope 3"),
-        "truckTransport": (r'(?i)(?:truck|freight|cargo|logistics)[\s:]*([0-9,]+(?:\.[0-9]+)?)\s*(?:t-?km|ton-?km)?', "T-Km", "Scope 3"),
-        "rawMaterials": (r'(?i)(?:raw\s*material|yarn|steel|plastic|fabric)[\s:]*([0-9,]+(?:\.[0-9]+)?)\s*(?:ton|tons|mt)?', "Tons", "Scope 3")
+        'diesel': ([rf'(?:diesel|HSD|generator fuel){gap}{number}\s*{liters}'], 'Liters', 'Scope 1'),
+        'petrol': ([rf'(?:petrol|gasoline|octane(?:-95)?){gap}{number}\s*{liters}'], 'Liters', 'Scope 1'),
+        'lpg': ([rf'(?:lpg|propane){gap}{number}\s*{mass}', rf'{number}\s*{mass}\s+(?:lpg|propane)\b'], 'kg', 'Scope 1'),
+        'electricity': ([rf'(?:electricity(?:\s+(?:consumption|usage))?|grid|power|desco|dpdc|reb|active consumption|total billed units|net recorded billing units|বিদ্যুৎ(?:[ \t]+ব্যবহার)?){gap}{number}\s*{energy}'], 'kWh', 'Scope 2'),
+        'employees': ([rf'(?:headcount|employees?|workers|staff)[ \t:]*{number}', rf'{number}\s+(?:employees|workers|staff)\b'], 'Staff', 'Scope 3'),
+        'airTravel': ([rf'(?:flight|air\s*travel|aviation){gap}{number}\s*km\b', rf'{number}\s+passenger[- ]kilometers?\b'], 'km', 'Scope 3'),
+        'truckTransport': ([rf'(?:truck|freight|cargo|logistics){gap}{number}\s*(?:t-?km|ton-?km)\b', rf'{number}\s+ton[- ]kilometers?\b'], 'T-Km', 'Scope 3'),
+        'rawMaterials': ([rf'(?:raw\s*materials?|yarn|steel|plastic|fabric){gap}{number}\s*(?:tons?|mt)\b', rf'{number}\s+(?:metric )?tons?{gap}(?:yarn|steel|plastic|fabric)\b'], 'Tons', 'Scope 3'),
     }
-
-    for key, (pattern, unit, scope) in patterns.items():
-        match = re.search(pattern, document_text)
-        if match:
-            raw_val = match.group(1).replace(',', '')
-            try:
-                val = float(raw_val)
-                params[key] = val
-                snippet_start = max(0, match.start() - 30)
-                snippet_end = min(len(document_text), match.end() + 30)
-                details.append({
-                    "param_name": key,
-                    "value": val,
-                    "unit": unit,
-                    "scope": scope,
-                    "source_page": 1,
-                    "raw_snippet": document_text[snippet_start:snippet_end].replace('\n', ' ').strip(),
-                    "confidence": None  # rule match: no model confidence exists
-                })
-            except ValueError:
-                pass
+    searchable = ''.join(str(unicodedata.decimal(c)) if c.isdecimal() else c for c in document_text)
+    ambiguous = []
+    for key, (rules, unit, scope) in patterns.items():
+        matches = [match for rule in rules for match in re.finditer(rule, searchable, re.I)]
+        values = {float(m.group(1).replace(',', '')) for m in matches}
+        if len(values) > 1:
+            ambiguous.append(key)
+            continue
+        if not values:
+            continue
+        val = next(iter(values))
+        if not math.isfinite(val) or val < 0:
+            continue
+        match = matches[0]
+        params[key] = val
+        details.append({'param_name': key, 'value': val, 'unit': unit, 'scope': scope,
+                        'source_page': 1,
+                        'raw_snippet': document_text[max(0, match.start()-30):min(len(document_text), match.end()+30)].strip(),
+                        'confidence': None})
 
     return {
         "parameters": params,
         "details": details,
-        "summary": f"Rule-based parser matched {len(details)} activity value(s). Values require human review.",
+        "summary": f"Rule-based parser matched {len(details)} activity value(s). Values require human review. Ambiguous fields omitted: {', '.join(ambiguous) or 'none'}.",
         "overall_confidence": None,
         "method": "regex",
         "status": "METRICS_DETECTED" if details else "NO_METRICS_DETECTED",

@@ -1,0 +1,52 @@
+{
+  "date": "2026-11-04",
+  "scope": "Synthetic generation smoke checks, including the initial fallback; not real-world accuracy or reliability evaluation",
+  "synthetic_only": true,
+  "results": [
+    {
+      "case": "supported",
+      "answer_mode": "retrieval_only",
+      "model_used": "retrieval-only",
+      "seconds": 1.84,
+      "passed": false,
+      "answer": "AI answer generation is unavailable or its evidence checks did not pass. Most relevant retrieved passage (not a generated or verified answer):\n\nCARBONOS SYNTHETIC POLICY \u2014 SHOWCASE DATA ONLY\nThis is not a customer policy, regulation, or evidence of legal compliance.\n\nBoiler inspection policy: inspect the boiler every 12 months.\nRetain the inspection record in the factory maintenance register.\nThe maintenance manager reviews the inspection record before the equipment returns to service.\n\n[Source: factory-policy-demo.txt, Page 1 | Corpus: tenant_docs]",
+      "citation_count": 1
+    },
+    {
+      "case": "unsupported",
+      "answer_mode": "insufficient_evidence",
+      "model_used": "carbonos-policy-guard",
+      "seconds": 2.09,
+      "passed": true,
+      "answer": "Insufficient data in the indexed documents to answer this question. Upload relevant source documents or consult a qualified ESG adviser.",
+      "citation_count": 0
+    },
+    {
+      "case": "supported_repeat_1",
+      "answer_mode": "supported_synthesis",
+      "model_used": "gemini-2.5-flash",
+      "seconds": 2.01,
+      "passed": true,
+      "answer": "Boiler inspection is required every 12 months according to the synthetic policy. [Source: factory-policy-demo.txt, Page 1]",
+      "citation_count": 1
+    },
+    {
+      "case": "supported_repeat_2",
+      "answer_mode": "supported_synthesis",
+      "model_used": "gemini-2.5-flash",
+      "seconds": 1.92,
+      "passed": true,
+      "answer": "The synthetic policy states that the inspection record should be retained in the factory maintenance register. [Source: factory-policy-demo.txt, Page 1]",
+      "citation_count": 1
+    },
+    {
+      "case": "unsupported_repeat",
+      "answer_mode": "insufficient_evidence",
+      "model_used": "gemini-2.5-flash",
+      "seconds": 1.99,
+      "passed": true,
+      "answer": "Insufficient data in the indexed documents to answer this question. Upload relevant source documents or consult a qualified ESG adviser.",
+      "citation_count": 0
+    }
+  ]
+}
