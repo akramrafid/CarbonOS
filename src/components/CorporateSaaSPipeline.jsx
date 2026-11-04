@@ -87,7 +87,7 @@ const CorporateSaaSPipeline = () => {
     <div className="w-full bg-[#040A06] py-24 relative overflow-hidden font-sans border-t border-white/5">
       
       {/* Component Styles for Precise Keyframes & Visual Effects */}
-      <style dangerouslySetInnerHTML={{ __html: `
+      <style>{`
         @keyframes floatDoc {
           0%, 100% { transform: translateY(0) rotate(0deg); }
           50% { transform: translateY(-8px) rotate(1deg); }
@@ -181,7 +181,7 @@ const CorporateSaaSPipeline = () => {
           stroke-dasharray: 6, 10;
           animation: flowArrow 2s linear infinite;
         }
-      ` }} />
+      `}</style>
 
       {/* Decorative Blur Backgrounds */}
       <div className="absolute top-1/4 left-1/3 w-[600px] h-[600px] bg-emerald/5 rounded-full blur-[140px] pointer-events-none z-0"></div>

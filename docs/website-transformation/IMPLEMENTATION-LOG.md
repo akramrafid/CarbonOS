@@ -106,8 +106,18 @@ Validation: full contract JSON rerun contains **zero screen-spec errors** and un
 
 ## C03B — Separate generated browser reports from product source (2026-11-04)
 
-Phase 14. State: TESTED; own SHA/remote verification reported after commit.
+Phase 14. State: PUSHED. Commit `5374377d910eb8ac66729a6d732b28067450fbca` matched remote Asif.
 
 Files: Playwright config + scaffold template, both CI artifact paths, .gitignore and tracking docs. HTML reports now go to build/playwright-report; previous generated local report preserved under build/playwright-report-previous. Both CI jobs retain the actual new report and test-results as artifacts. No checker exclusions or rule changes were made; standard build output was already excluded by the checker. Product source stays fully checked.
 
 Validation: both workflow YAML files parse; route recovery **4 browser tests pass**, producing a real HTML report at the new location. Full contract contains zero screen-spec/generated-report errors; **62 application source findings remain** (the two former generated-HTML findings are gone). Whitespace passes. Existing historical machine-readable snapshot is retained as historical evidence. Next: fix unsafe raw-HTML style APIs and primary page token findings in separate tasks.
+
+## C03C — Ordinary React style elements (2026-11-04)
+
+Phase 1/14. State: TESTED; own SHA/remote verification reported after commit.
+
+Files: CorporateSaaSPipeline, CameraCapture, DiagnosisResult, PaymentStatusTracker, FarmerPaidCard and tracking docs. Replaced five unnecessary raw-HTML APIs with React style children; inspected every caller and asserted static CSS text preserved byte-for-byte, with no interpolated values. These were static trusted literals; this is removal of an unnecessary injection API, not a claim that an exploit was demonstrated.
+
+Validation: tsc/build/whitespace pass; **8 responsive/browser tests pass** on desktop/320px (shared/farmer routes and protected ESG panels). Full contract now has **57 remaining color-token findings**, zero raw-HTML API findings. No new test for the trivial syntax substitution; content-preservation assertion and existing route/build checks verify it.
+
+Hosted CI update: https://github.com/akramrafid/CarbonOS/actions/runs/41788765542 at b31e35e completed **SUCCESS**, including frontend E2E and backend SQLite, PostgreSQL and migration/model checks. Separate contract workflow still fails as expected on outstanding source colors. This proves the CI repair, not production Postgres/OIDC/restore/load readiness. Next: C03D migrate primary home/navigation colors to existing semantic theme foundations.

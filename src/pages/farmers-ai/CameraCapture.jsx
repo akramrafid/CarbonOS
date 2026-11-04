@@ -382,7 +382,7 @@ const CameraCapture = ({ isInline = false, onBack = null, onScanComplete = null 
 
   return (
     <div className={`pb-16 px-4 max-w-xl mx-auto flex flex-col ${isInline ? 'pt-4' : 'pt-24 min-h-screen'}`}>
-      <style dangerouslySetInnerHTML={{__html: `
+      <style>{`
         @keyframes scan-line {
           0% { top: 0%; }
           50% { top: 100%; }
@@ -407,7 +407,7 @@ const CameraCapture = ({ isInline = false, onBack = null, onScanComplete = null 
         .mismatch-banner {
           animation: slide-in-down 0.3s ease-out;
         }
-      `}} />
+      `}</style>
 
       {isInline && onBack && (
         <button onClick={onBack} className="self-start flex items-center text-white/50 hover:text-[#CCFF00] mb-6 transition-colors text-sm font-semibold group">

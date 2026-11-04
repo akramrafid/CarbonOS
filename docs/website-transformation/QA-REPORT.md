@@ -54,3 +54,7 @@ C02's named artifact/template checks passed, but its full errors list also had f
 ## C03B
 
 4 browser tests pass; generated HTML exists at build/playwright-report/index.html. Workflow YAML parses. Full contract still FAIL on **62 application source findings**, with no screen-spec or generated-report errors. The checker is unchanged. Reports remain available as CI artifacts and local build output.
+
+## C03C
+
+Five static CSS blocks preserve identical text after removing raw HTML APIs. tsc/build/whitespace pass; eight responsive shell tests pass (desktop/320px). Full gate FAIL: **57 color findings**, no raw HTML findings. Hosted ESG CI b31e35e run [41788765542](https://github.com/akramrafid/CarbonOS/actions/runs/41788765542) completed SUCCESS, including both database modes and migration alignment. Later commits require their own CI results; this is a SHA-scoped success.
