@@ -172,10 +172,18 @@ Next: remaining core workspace UX and legacy source/security audits, followed by
 
 ## E01A — Reliable workspace/period data loading (2026-11-04)
 
-Phase 4/9. State: TESTED; own SHA/remote verification reported after commit.
+Phase 4/9. State: PUSHED. Commit `afde0dd5e3098b4127425a283452cc47d71295b0` matched remote Asif.
 
 Files: shared ui.jsx hook, EsgWorkspace.jsx, ledger-review.spec.ts and tracking docs. Shared GETs abort superseded/unmounted requests, ignore aborted results/errors, and immediately hide data belonging to a different path. Workspace reference reads similarly reject stale requests and tag results by organization. Dependent panels mount only after actual types/periods/facilities arrive, fixing direct-link empty internal period state. Reference failures are explicit with retry instead of being converted to empty lists. Valid same-organization reference data remains mounted during refresh, preserving review/report form state.
 
 Validation: **18 JS tests pass**, tsc/build/whitespace pass. Protected shared-controls + complete accounting + delayed-ledger browser suite **8 pass** on desktop/320px. Extended reference failure/retry and direct ledger/reports/metrics/disclosures checks **4 pass**. First delayed test exposed the pre-existing direct-link initialization bug, fixed at the shared reference-loading boundary for all dependent panels. The disclosure view emits a pre-existing duplicate React key warning for repeated missing-GHG messages; functional checks pass, but E01C records and fixes that warning next. No backend/schema changes or accounting rule changes.
 
 Next: E01C disclosure-list keys, then E01B ledger filters/pagination/evidence metadata.
+
+## E01C — Preserve repeated disclosure gaps without key collisions (2026-11-04)
+
+Phase 4/9. State: TESTED; own SHA/remote verification reported after commit.
+
+Files: DisclosuresPanel.jsx, ledger-review.spec.ts and tracking docs. Repeated identical missing-data messages now use per-list positional keys rather than their duplicate text. These are stateless text entries; every requirement/gap remains displayed. No deduplication, suppressed console warning or disclosure-rule change.
+
+Validation: type check/build/whitespace pass. Existing delayed/reference/direct-view browser checks **4 pass** on desktop/320px, now additionally waiting for actual disclosure gaps, confirming multiple repeated missing-GHG messages remain, and asserting no duplicate-key console errors. No new test for the trivial syntax change; strengthened the existing meaningful view test. Next: E01B ledger filtering/pagination/evidence metadata.

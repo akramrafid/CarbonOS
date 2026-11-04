@@ -55,7 +55,7 @@ export default function DisclosuresPanel({ me, can, periods }) {
             { key: 'ref', label: 'Requirement', render: (q) => <span><span className="font-mono text-xs">{q.ref}</span><span className="block">{q.title}</span></span> },
             { key: 'status', label: 'Status', render: (q) => <StatusBadge status={q.status} /> },
             { key: 'missing', label: 'Gaps / evidence', render: (q) => (q.missing.length
-              ? <ul className="list-disc pl-4 text-xs text-red-300">{q.missing.map((m) => <li key={m}>{m}</li>)}</ul>
+              ? <ul className="list-disc pl-4 text-xs text-red-300">{q.missing.map((m, index) => <li key={index}>{m}</li>)}</ul>
               : <span className="text-xs text-mist">{Object.entries(q.evidence).filter(([k]) => k !== 'ghg_snapshot').map(([k, v]) => (Array.isArray(v) ? `${k}: ${v.length} approved value(s)` : `${k}: ${v}`)).join('; ') || (q.data_status === 'NARRATIVE_ONLY' ? 'Narrative only' : '')}</span>) },
             { key: 'narrative', label: 'Response', render: (q) => (
               <div className="space-y-2 text-xs">

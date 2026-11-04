@@ -57,6 +57,8 @@ test('late period responses cannot overwrite the current ledger or show stale er
 });
 
 test('reference-data failures stay explicit, retry, and initialize direct reporting links correctly', async ({ page, request }) => {
+  const keyWarnings: string[] = [];
+  page.on('console', (message) => { if (message.type() === 'error' && /same key/.test(message.text())) keyWarnings.push(message.text()); });
   const { periods } = await ledgerWorkspace(page, request);
   let unavailable = true;
   await page.route('**/api/esg/periods?**', (route) => unavailable
@@ -75,4 +77,8 @@ test('reference-data failures stay explicit, retry, and initialize direct report
     await page.goto(`/platform/esg?view=${view}`);
     await expect(page.getByLabel('Reporting period', { exact: true }).first()).toHaveValue(periods[1]);
   }
+  const gaps = page.getByRole('table', { name: 'Disclosure requirements', exact: true }).getByText('No locked GHG inventory for this period', { exact: true });
+  await expect(gaps.first()).toBeVisible();
+  expect(await gaps.count()).toBeGreaterThan(1);
+  expect(keyWarnings).toEqual([]);
 });

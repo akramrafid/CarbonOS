@@ -82,3 +82,7 @@ Five static CSS blocks preserve identical text after removing raw HTML APIs. tsc
 ## E01A
 
 18 JS tests, type check/build/whitespace pass. Protected accounting/form/delayed-period suite: **8 browser tests pass**; extended reference outage/retry/direct-link suite: **4 pass** (desktop/320px). Tests hold an actual older-period API response, switch periods, then release it; current rows remain correct and aborted errors stay hidden. Direct period state now initializes correctly. Known pre-existing disclosure duplicate-key warning is recorded as E01C, not silently treated as clean console output. Backend unchanged.
+
+## E01C
+
+Type check/build/whitespace pass. Four existing period/reference browser checks pass with the disclosure regression assertion: repeated missing-GHG entries remain present and no duplicate-key React errors occur. Backend disclosure calculations/status rules unchanged.
