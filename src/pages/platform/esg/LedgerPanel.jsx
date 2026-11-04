@@ -1,5 +1,6 @@
 // Activity-data ledger: enter or extract activity data with evidence, then submit → independent review.
 import { useState } from 'react';
+import { hasEvidenceMetadata } from '../../../lib/ledgerEvidence';
 import { esgFetch, esgSend } from '../../../lib/esgApi';
 import { Button, Input, Loading, Notice, Panel, Select, StatusBadge, Table, formValues, useAction, useEsgData } from './ui';
 
@@ -13,7 +14,17 @@ export default function LedgerPanel({ me, can, types, periods, facilities }) {
   const [draft, setDraft] = useState({});
   const [extraction, setExtraction] = useState(null);
   const [rejecting, setRejecting] = useState(null);
-  const activities = useEsgData(periodId ? `/api/esg/activities?period_id=${periodId}&limit=200` : null);
+  const [filters, setFilters] = useState({ facility: '', activity: '', status: '' });
+  const [offset, setOffset] = useState(0);
+  const params = new URLSearchParams({ period_id: periodId, limit: '25', offset: String(offset) });
+  if (filters.facility) params.set('facility_id', filters.facility);
+  if (filters.activity) params.set('activity_type', filters.activity);
+  if (filters.status) params.set('status', filters.status);
+  const activities = useEsgData(periodId ? `/api/esg/activities?${params}` : null);
+  const rows = activities.data?.items || [];
+  const hasFilters = Boolean(filters.facility || filters.activity || filters.status);
+  const withMetadata = rows.filter(hasEvidenceMetadata).length;
+  const filter = (key) => (event) => { setFilters((current) => ({ ...current, [key]: event.target.value })); setOffset(0); };
   const action = useAction();
   const allTypes = [...(types?.inventory || []), ...(types?.memo || [])];
   const facilityName = Object.fromEntries((facilities || []).map((f) => [f.id, f.name]));
@@ -63,18 +74,48 @@ export default function LedgerPanel({ me, can, types, periods, facilities }) {
     <div className="space-y-6">
       <Notice error={action.error} message={action.message} />
       <Panel title="Activity ledger" description="Approved records feed the calculation. Approved records never change: corrections supersede them, keeping the history."
-        actions={<div className="w-56"><Select label="Reporting period" value={periodId} onChange={(e) => setPeriodId(e.target.value)}
+        actions={<div className="w-56"><Select label="Reporting period" value={periodId} onChange={(e) => { setPeriodId(e.target.value); setOffset(0); }}
           options={periods.map((p) => [p.id, `${p.name} (${p.status})`])} /></div>}>
-        <Loading state={activities} empty="No activity records in this period yet.">
-          <Table caption="Activity records" rows={activities.data?.items || []} columns={[
-            { key: 'facility_id', label: 'Facility', render: (r) => facilityName[r.facility_id] },
+        <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4" role="group" aria-label="Activity filters">
+          <Select label="Filter facility" value={filters.facility} onChange={filter('facility')} options={[
+            ['', 'All facilities'], ...facilities.map((facility) => [facility.id, facility.name]),
+          ]} />
+          <Select label="Filter activity" value={filters.activity} onChange={filter('activity')} options={[
+            ['', 'All activity types'], ...allTypes.map((type) => [type.activity_type, type.activity_type]),
+          ]} />
+          <Select label="Filter status" value={filters.status} onChange={filter('status')} options={[
+            ['', 'All statuses'], ...['DRAFT', 'SUBMITTED', 'APPROVED', 'REJECTED', 'SUPERSEDED'].map((status) => [status, status]),
+          ]} />
+          <div className="flex items-end"><Button variant="secondary" disabled={!hasFilters && offset === 0} onClick={() => { setFilters({ facility: '', activity: '', status: '' }); setOffset(0); }}>Clear filters</Button></div>
+        </div>
+        <p className="text-xs text-mist">Filters change this view only. Calculations still use the period’s eligible approved records. Scroll the table horizontally on narrow screens for evidence and review controls.</p>
+        {activities.data && <section aria-label="Evidence metadata on this page" className="rounded-lg border border-mist/20 p-3 text-sm text-mist">
+          <p>{withMetadata} of {rows.length} records on this page have reference metadata; {rows.length - withMetadata} have none.</p>
+          <p className="mt-1 text-xs">Reference presence does not establish source accuracy, validity or approval. This is not a period-wide coverage score.</p>
+        </section>}
+        {activities.loading && activities.data && <p role="status" className="text-sm text-mist">Refreshing activity records…</p>}
+        <Loading state={activities} empty={hasFilters ? 'No records match these filters. Clear filters to review the period.' : 'No activity records in this period yet.'}>
+          <Table caption="Activity records" rows={rows} minWidth={1100} columns={[
+            { key: 'facility_id', label: 'Facility', render: (r) => facilityName[r.facility_id] || r.facility_id },
             { key: 'activity_type', label: 'Activity' },
             { key: 'quantity', label: 'Quantity', render: (r) => (
-              <span>{Number(r.quantity).toLocaleString()} {r.unit}{r.unit_raw !== r.unit && <span className="block text-xs text-mist">entered {Number(r.quantity_raw).toLocaleString()} {r.unit_raw}</span>}</span>) },
+              <span className="whitespace-nowrap tabular-nums">{Number(r.quantity).toLocaleString()} {r.unit}{r.unit_raw !== r.unit && <span className="block text-xs text-mist">entered {Number(r.quantity_raw).toLocaleString()} {r.unit_raw}</span>}</span>) },
             { key: 'dates', label: 'Dates', render: (r) => `${r.activity_start} → ${r.activity_end}` },
             { key: 'meter_ref', label: 'Meter' },
             { key: 'source', label: 'Evidence', render: (r) => (
-              <span className="text-xs">{r.source_type}{r.source_ref ? ` · ${r.source_ref}` : ''}{r.evidence_snippet && <q className="block text-mist">{r.evidence_snippet}</q>}</span>) },
+              <div className="min-w-[170px] text-xs">
+                <span className={hasEvidenceMetadata(r) ? 'text-mist' : 'esg-status esg-tone-warning rounded px-2 py-1'}>{hasEvidenceMetadata(r) ? 'Reference metadata present' : 'No reference metadata'}</span>
+                <details className="mt-2">
+                  <summary className="min-h-[44px] cursor-pointer py-3">Evidence details</summary>
+                  <dl className="space-y-2 break-words">
+                    <div><dt className="font-semibold">Source type</dt><dd>{r.source_type}</dd></div>
+                    <div><dt className="font-semibold">Reference</dt><dd>{r.source_ref || 'Not recorded'}</dd></div>
+                    <div><dt className="font-semibold">Document ID</dt><dd className="break-all">{r.source_document_id || 'No linked document recorded'}</dd></div>
+                    <div><dt className="font-semibold">Excerpt</dt><dd>{r.evidence_snippet ? <q>{r.evidence_snippet}</q> : 'Not recorded'}</dd></div>
+                    <div><dt className="font-semibold">Record ID</dt><dd className="break-all">{r.id}</dd></div>
+                  </dl>
+                </details>
+              </div>) },
             { key: 'status', label: 'Status', render: (r) => <span><StatusBadge status={r.status} />{r.review_comment && <span className="block text-xs text-mist">{r.review_comment}</span>}</span> },
             { key: 'actions', label: '', render: (r) => (
               <div className="flex flex-wrap gap-2">
@@ -95,6 +136,13 @@ export default function LedgerPanel({ me, can, types, periods, facilities }) {
               </div>) },
           ]} />
         </Loading>
+        {activities.data && <nav aria-label="Activity record pages" className="flex flex-wrap items-center justify-between gap-3">
+          <p role="status" className="text-sm text-mist">{rows.length ? `Showing ${offset + 1}–${offset + rows.length} of ${activities.data.total} matching records` : `${activities.data.total} matching records`} · 25 per page</p>
+          <div className="flex gap-2">
+            <Button variant="secondary" disabled={offset === 0 || activities.loading} onClick={() => setOffset((current) => Math.max(0, current - 25))}>Previous page</Button>
+            <Button variant="secondary" disabled={activities.loading || offset + 25 >= activities.data.total} onClick={() => setOffset((current) => current + 25)}>Next page</Button>
+          </div>
+        </nav>}
       </Panel>
 
       {can.write && period?.status === 'OPEN' && (

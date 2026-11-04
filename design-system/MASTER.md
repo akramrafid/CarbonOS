@@ -30,7 +30,7 @@ Global CSS defines normal theme transitions, animation utilities and a prefers-r
 | ESG Panel/Button/Input/Select | Wrapping layout, 44px controls, native validation, semantic colors/focus | Full inline/server-error mapping across all forms |
 | Field | Stable label/help/error IDs, aria-describedby/invalid; caller ID/help preserved | Broad assistive-technology review |
 | Notice / StatusBadge | Error alert / success status; semantic colors plus exact status text | All backend-state combinations/contrast on legacy surfaces |
-| Table / Loading | Caption/header semantics, named scrolling region; loading/error/empty | Sort/filter/pagination and richer partial/skeleton states |
+| Table / Loading | Caption/header semantics, named scrolling region; loading/error/empty | Ledger filters/paging implemented; other panels and richer partial/skeleton states remain |
 | RouteErrorBoundary | Reload/home fallback; reset on pathname; no raw error in page | Event-handler errors require local action error handling |
 | PilotPlanner | Native form validation, unsupported-needs disclosure, local download | Real contact integration blocked on verified operator details |
 

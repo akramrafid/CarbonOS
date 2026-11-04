@@ -95,7 +95,7 @@ test("organization admin completes the Scope 2 journey to a locked, reproducible
   await expect(contrib.getByText("10,000 kWh")).toBeVisible();
   await expect(contrib.getByText("entered 10 MWh")).toBeVisible();
   await contrib.getByRole("button", { name: "Submit" }).click();
-  await expect(contrib.getByText("SUBMITTED", { exact: true })).toBeVisible();
+  await expect(contrib.getByRole("table", { name: "Activity records", exact: true }).getByText("SUBMITTED", { exact: true })).toBeVisible();
 
   // Owner reviews (not the creator) and approves.
   await owner.getByRole("button", { name: "Activity ledger" }).click();

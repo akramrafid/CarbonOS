@@ -90,3 +90,7 @@ Type check/build/whitespace pass. Four existing period/reference browser checks 
 ## E01B1
 
 112 ESG backend tests: **111 pass / 1 local PostgreSQL-only skip**. New filter/paging tests verify exact combined results, cross-tenant exclusion, unknown filters, equal-date deterministic order, unchanged total across pages and invalid bounds. Whitespace passes. No accounting eligibility/schema or frontend change; concurrent offset-page snapshot consistency remains an operational limitation.
+
+## E01B2
+
+20 JS tests, type check/build/whitespace pass. Protected ledger + full accounting **12 browser tests pass** (desktop/320px). Actual 28-row pagination, combined/empty filters, per-page metadata-only counts, evidence detail text, delayed responses and late-action reload scope verified. [Desktop filters](evidence/ledger-filters-1440.png), [mobile filters](evidence/ledger-filters-320.png). Mobile review required a wider scrollable activity table, fixed before final rerun. Full contract still FAIL on 55 legacy color findings. No inventory math/eligibility changes.

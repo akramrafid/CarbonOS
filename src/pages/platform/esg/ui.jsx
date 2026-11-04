@@ -5,27 +5,32 @@ import { esgFetch } from '../../../lib/esgApi';
 
 export function useEsgData(path) {
   const [state, setState] = useState({ path, data: null, error: null, loading: Boolean(path) });
-  const request = useRef(null);
+  const lifecycle = useRef({ path, active: false, controller: null });
+  lifecycle.current.path = path;
   const reload = useCallback(async () => {
-    request.current?.abort();
+    const current = lifecycle.current;
+    if (!current.active) return;
+    const currentPath = current.path;
+    current.controller?.abort();
     const controller = new AbortController();
-    request.current = controller;
-    if (!path) {
-      setState({ path, data: null, error: null, loading: false });
+    current.controller = controller;
+    if (!currentPath) {
+      setState({ path: currentPath, data: null, error: null, loading: false });
       return;
     }
-    setState((current) => ({ path, data: current.path === path ? current.data : null, loading: true, error: null }));
+    setState((previous) => ({ path: currentPath, data: previous.path === currentPath ? previous.data : null, loading: true, error: null }));
     try {
-      const data = await esgFetch(path, { signal: controller.signal });
-      if (!controller.signal.aborted) setState({ path, data, error: null, loading: false });
+      const data = await esgFetch(currentPath, { signal: controller.signal });
+      if (!controller.signal.aborted) setState({ path: currentPath, data, error: null, loading: false });
     } catch (e) {
-      if (!controller.signal.aborted) setState({ path, data: null, error: e.message, loading: false });
+      if (!controller.signal.aborted) setState({ path: currentPath, data: null, error: e.message, loading: false });
     }
-  }, [path]);
+  }, []);
   useEffect(() => {
+    lifecycle.current.active = true;
     reload();
-    return () => request.current?.abort();
-  }, [reload]);
+    return () => { lifecycle.current.active = false; lifecycle.current.controller?.abort(); };
+  }, [path, reload]);
   const current = state.path === path ? state : { data: null, error: null, loading: Boolean(path) };
   return { data: current.data, error: current.error, loading: current.loading, reload };
 }
@@ -123,10 +128,10 @@ export function Button({ variant = 'primary', className = '', ...props }) {
   );
 }
 
-export function Table({ caption, columns, rows, rowKey = 'id' }) {
+export function Table({ caption, columns, rows, rowKey = 'id', minWidth = 600 }) {
   return (
     <div role="region" aria-label={`${caption} table`} tabIndex={0} className="max-w-full overflow-x-auto overscroll-x-contain rounded-lg border border-mist/20 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald">
-      <table className="w-full min-w-[600px] text-left text-sm">
+      <table className="w-full text-left text-sm" style={{ minWidth }}>
         <caption className="sr-only">{caption}</caption>
         <thead className="bg-carbon/60 font-mono text-[11px] uppercase tracking-wider text-mist">
           <tr>{columns.map((c) => <th key={c.key} scope="col" className="px-3 py-2">{c.label}</th>)}</tr>

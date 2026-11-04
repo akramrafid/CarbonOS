@@ -190,8 +190,20 @@ Validation: type check/build/whitespace pass. Existing delayed/reference/direct-
 
 ## E01B1 — Ledger filters and stable page ordering (2026-11-04)
 
-Phase 4. State: TESTED; own SHA/remote verification reported after commit.
+Phase 4. State: PUSHED. Commit `077203ed5f42f8c28416793be3f3deb8057bbe04` matched remote Asif after retry; GitHub rejected the first push with an Internal Server Error, not an auth/history problem.
 
 Files: ledger_router.py, test_esg_ledger.py, API contracts and tracking docs. Added activity-type filtering alongside period/facility/status. Shared list ordering now breaks equal primary sort values by record ID, preserving deterministic pages for an unchanged dataset. Totals remain counts of all tenant-authorized matching records before paging. Limit/offset bounds remain enforced. Filters do not change calculation or approval inputs; offset pagination is not a concurrent snapshot guarantee.
 
 Validation: **112 ESG backend tests run / 111 pass / one PostgreSQL-only local skip**, including combined type/status/facility/period filters, cross-tenant empty results, unknown filters, stable tied-date pagination, before-page totals and bounds. Whitespace passes. No frontend code changed or duplicate browser/build checks run for this API task. Next: E01B2 ledger controls, per-page evidence metadata and explicit empty/filter states.
+
+## E01B2 — Ledger review controls and honest metadata (2026-11-04)
+
+Phase 4. State: TESTED; own SHA/remote verification reported after commit.
+
+Files: LedgerPanel, shared ui hook/Table, ledgerEvidence helper, JS/browser tests, two filter screenshots and tracking docs. Added combined facility/activity/status controls, clear/reset, 25-row paging and actual matching totals. Evidence summary counts only reference metadata on the loaded page and explicitly disclaims validity/approval/period-wide coverage. Details show recorded type/reference/document ID/excerpt/record ID without pretending an ID verifies a file. Unknown facility names fall back to actual IDs. Calculations still use eligible approved period records, independently of these filters.
+
+Shared reload now reads the latest path and ignores calls after unmount, so an older save finishing after period/filter changes refreshes the current view rather than reviving a prior query. The activity table uses a readable 1100px minimum inside the existing named keyboard-scroll region; other tables retain 600px. A mobile screenshot caught squeezed columns at the older default width; fixed before commit and refreshed evidence.
+
+Validation: **20 JS tests pass**, type check/build/whitespace pass. Ledger + complete protected accounting journey **12 browser tests pass** on desktop/320px, including 28 real API records across two pages, combined/empty/reset filters, metadata/details, page boundaries, delayed GET/reference failures and a delayed submit after period change. The original journey's broad SUBMITTED text selector became ambiguous with the new dropdown; scoped it to the actual record table and reran without weakening the status assertion. Final mobile screenshot inspected. No backend/accounting changes. Full contract remains FAIL on **55 legacy color findings**.
+
+Next: validate document identifiers supplied as activity evidence against actual authorized SQL documents, then remaining workspace/source and main integration work.
