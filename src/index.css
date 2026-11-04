@@ -1135,3 +1135,6 @@ select option {
 .esg-button-secondary { background: var(--control-bg); color: var(--control-text); border: 1px solid var(--control-border); }
 .esg-button-primary:hover:not(:disabled), .esg-button-secondary:hover:not(:disabled) { box-shadow: inset 0 0 0 2px var(--control-focus); }
 .esg-control:focus-visible, .esg-button:focus-visible { outline: 2px solid var(--control-focus); outline-offset: 3px; }
+
+.esg-field-error { color: var(--state-danger-text); }
+.esg-control[aria-invalid="true"] { border-color: var(--state-danger-border); }

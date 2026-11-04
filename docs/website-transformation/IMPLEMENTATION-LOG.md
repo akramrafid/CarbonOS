@@ -14,7 +14,7 @@ Next: D01 semantic state tokens and theme-safe shared ESG components.
 
 ## D01 — Theme-safe shared feedback and controls (2026-11-04)
 
-Phase 1. State: TESTED; own SHA/remote verification reported after commit.
+Phase 1. State: PUSHED. Commit `bc6db2a46b51c99a7934d60f00057506f24447ee` matched remote Asif after push.
 
 Files: src/index.css, src/pages/platform/esg/ui.jsx, tests/js/designTokens.test.mjs, tests/e2e/shared-controls.spec.ts and these tracking documents.
 
@@ -23,3 +23,13 @@ Added semantic success/warning/danger/neutral colors for each theme and control 
 Validation: 11 JS tests pass; tsc and production build pass; real protected API browser test passes on 1440 and 320px (2 tests) for saving a legal entity, theme colors/focus and rejected invalid-period feedback. Initial run hit the old preview's different signing secret (401); stopped only our preview processes and reran with isolated test services. A direct theme-color assertion raced the existing transition; changed it to Playwright's retrying CSS assertion. Final rerun passes. No backend or tenant-control changes.
 
 Next: D02 programmatic form descriptions and date-range validation.
+
+## D02 — Accessible field help and validation (2026-11-04)
+
+Phase 1/9. State: TESTED; own SHA/remote verification reported after commit.
+
+Files: shared ui.jsx, SetupPanel.jsx, index.css, shared-controls.spec.ts and tracking docs. All Input/Select callers now receive stable label and help IDs, with existing caller IDs/descriptions preserved. Visible errors connect through aria-describedby and aria-invalid. Reporting periods reject reversed or equal dates before a request, focus the end-date field and clear the error on correction; required/native validation and backend rules remain in force.
+
+Validation: 11 JS tests, type check and production build pass. Protected browser tests (1440px + 320px) **6 passed**, including accessible input/select descriptions, zero invalid-period requests, correction/save, and complete accounting journeys with independent approvals, locking, export and negative permissions. Whitespace check passes. No backend changes.
+
+Next: Q01 add and exercise 390px and 1920px responsive projects.

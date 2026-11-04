@@ -64,28 +64,33 @@ export function Loading({ state, empty, children }) {
   return children;
 }
 
-export function Field({ label, hint, children }) {
-  const id = useId();
+export function Field({ label, hint, error, id: suppliedId, describedBy, children }) {
+  const generatedId = useId();
+  const id = suppliedId || generatedId;
+  const description = [describedBy, hint && `${id}-hint`, error && `${id}-error`].filter(Boolean).join(' ') || undefined;
   return (
     <div className="flex min-w-0 flex-col gap-1">
       <label htmlFor={id} className="font-mono text-[11px] uppercase tracking-wider text-mist">{label}</label>
-      {children(id)}
-      {hint && <span className="text-xs text-mist/80">{hint}</span>}
+      {children({ id, 'aria-describedby': description, 'aria-invalid': error ? true : undefined })}
+      {hint && <span id={`${id}-hint`} className="text-xs text-mist">{hint}</span>}
+      {error && <span id={`${id}-error`} role="alert" className="esg-field-error text-sm">{error}</span>}
     </div>
   );
 }
 
 const inputCls = 'esg-control min-h-[44px] min-w-0 w-full rounded-lg px-3 py-2 text-base sm:text-sm';
 
-export function Input({ label, hint, ...props }) {
-  return <Field label={label} hint={hint}>{(id) => <input id={id} className={inputCls} {...props} />}</Field>;
+export function Input({ label, hint, error, id, 'aria-describedby': describedBy, ...props }) {
+  return <Field label={label} hint={hint} error={error} id={id} describedBy={describedBy}>
+    {(control) => <input className={inputCls} {...props} {...control} />}
+  </Field>;
 }
 
-export function Select({ label, hint, options, ...props }) {
+export function Select({ label, hint, error, id, 'aria-describedby': describedBy, options, ...props }) {
   return (
-    <Field label={label} hint={hint}>
-      {(id) => (
-        <select id={id} className={inputCls} {...props}>
+    <Field label={label} hint={hint} error={error} id={id} describedBy={describedBy}>
+      {(control) => (
+        <select className={inputCls} {...props} {...control}>
           {options.map(([value, text]) => <option key={value} value={value}>{text}</option>)}
         </select>
       )}

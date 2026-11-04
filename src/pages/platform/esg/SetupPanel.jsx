@@ -1,4 +1,5 @@
 // Organization structure: legal entities, facilities (control / equity for the boundary) and reporting periods.
+import { useState } from 'react';
 import { esgSend } from '../../../lib/esgApi';
 import { Button, Input, Loading, Notice, Panel, Select, StatusBadge, Table, formValues, useAction, useEsgData } from './ui';
 
@@ -13,6 +14,7 @@ export default function SetupPanel({ canAdmin }) {
   const facilities = useEsgData('/api/esg/facilities?limit=200');
   const periods = useEsgData('/api/esg/periods?limit=200');
   const action = useAction();
+  const [periodError, setPeriodError] = useState(null);
 
   const submit = (path, reload, transform = (v) => v) => async (e) => {
     e.preventDefault();
@@ -82,10 +84,20 @@ export default function SetupPanel({ canAdmin }) {
           ]} />
         </Loading>
         {canAdmin && (
-          <form onSubmit={submit('/api/esg/periods', periods.reload)} className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3 sm:items-end">
+          <form onSubmit={(event) => {
+            const values = formValues(event.currentTarget);
+            if (values.end_date <= values.start_date) {
+              event.preventDefault();
+              setPeriodError('End date must be after the start date.');
+              event.currentTarget.elements.namedItem('end_date').focus();
+              return;
+            }
+            setPeriodError(null);
+            submit('/api/esg/periods', periods.reload)(event);
+          }} onChange={() => setPeriodError(null)} className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3 sm:items-end">
             <Input label="Name" name="name" required maxLength={100} placeholder="FY2025" />
             <Input label="Start date" name="start_date" type="date" required />
-            <Input label="End date" name="end_date" type="date" required />
+            <Input label="End date" name="end_date" type="date" required error={periodError} hint="The reporting period must end after its start date." />
             <Select label="Boundary method" name="boundary_method" options={BOUNDARIES} />
             <Button type="submit" disabled={action.busy}>Add period</Button>
           </form>

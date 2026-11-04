@@ -18,3 +18,7 @@ Full required viewport matrix (including 390 and 1920), complete protected + iso
 - `npm run lint` and `npm run build`: pass (existing browser zlib externalization warning remains).
 - Protected `shared-controls.spec.ts`, desktop + 320px: **2 passed** with real API writes and 422 rejection; no synthetic response interception.
 - `git diff --check`: pass. Frontend contract remains the previously recorded failure; no gate suppression.
+
+## D02
+
+11 JS tests, tsc and build pass. Protected shared-controls + esg-journey specs on desktop and small mobile: **6 passed**. Tests assert named field descriptions, aria-invalid, invalid-date focus, no invalid HTTP writes, same-day rejection, correction/save and independent protected accounting controls. Backend remained authoritative and unchanged.
