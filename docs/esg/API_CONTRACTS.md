@@ -46,7 +46,8 @@
 | POST `/extract-footprint` | write | multipart `file` or `raw_text` | `{filename, tenant_id, parameters, details[{param_name,value,unit,scope,source_page?,raw_snippet,confidence?}], overall_confidence?, extraction_method: regex\|llm, model_used?, extracted_at, summary, review_status: "REVIEW_REQUIRED"}`; 422 if no input, no readable text, or no quantities found. No footprint is computed here |
 | POST `/ingest` | write (global corpora: platform operator) | multipart `file`, `corpus` | `IngestResponse` incl. `duplicate` |
 | GET `/emission-factors` | read | `category?`, `region?` | factor rows |
-| GET `/documents` | read | `corpus?` | caller's tenant docs + global corpora |
+| GET `/documents` | read | `corpus?` | caller's tenant docs + matching operator-owned global corpora |
+| GET `/documents/{document_id}/chunks/{chunk_id}` | read | paired document/passage IDs | Full indexed text, page/corpus/source status and passage/file hashes; SQL-authorized tenant/global corpus; 404 for unknown, foreign or mismatched pairs |
 | GET `/audit-trail` | review | `limit` (1–100) | caller's tenant query/extraction log |
 | POST `/duckdb-calculate` | read, demo org only | activities/spend payload | legacy estimate (see register A9–A11) |
 | GET `/emission-factors/registry` | read, demo org only | — | static catalogue (unverified, register A12) |

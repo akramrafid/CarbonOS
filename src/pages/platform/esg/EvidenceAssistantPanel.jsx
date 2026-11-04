@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { esgFetch, esgSend } from '../../../lib/esgApi';
 import { Button, Input, Loading, Notice, Panel, Select, useAction, useEsgData } from './ui';
 import BenchmarkPanel from './BenchmarkPanel';
+import EvidenceAnswer from './EvidenceAnswer';
 
 export default function EvidenceAssistantPanel({ canWrite }) {
   const documents = useEsgData('/api/esg/documents');
@@ -39,23 +40,7 @@ export default function EvidenceAssistantPanel({ canWrite }) {
         </div>
       </form>
       <Notice error={query.error} />
-      {answer && <section aria-label="Evidence answer" className="space-y-4 rounded-xl border border-mist/30 p-4" aria-live="polite">
-        <h3 className="font-serif text-xl text-registry">{answer.insufficient_data ? 'Insufficient evidence' : answer.answer_mode === 'supported_synthesis' ? 'AI synthesis — review required' : 'Retrieved source excerpt'}</h3>
-        <p className="text-xs text-mist">Method: {answer.retrieval_method} · Model: {answer.model_used}. Ranking scores are not accuracy or verification.</p>
-        {answer.candidate_limit_reached && <Notice message="The search reached its candidate limit. Narrow the selected corpus; this result may omit older passages." />}
-        <p className="whitespace-pre-wrap break-words text-sm text-registry">{answer.answer}</p>
-        {answer.citations.length > 0 && <ul className="space-y-3" aria-label="Answer sources">
-          {answer.citations.map((citation, i) => <li key={citation.chunk_id || i} className="min-w-0 rounded-lg bg-carbon/60 p-3">
-            <p className="break-words text-sm text-emerald">{citation.source} · Page {citation.page ?? 'not recorded'} · {citation.source_status}</p>
-            <blockquote className="mt-2 break-words text-sm text-mist">{citation.snippet}</blockquote>
-            <details className="mt-2 text-xs text-mist">
-              <summary className="cursor-pointer">Source provenance</summary>
-              <p className="break-all">Document: {citation.document_id}<br />Passage: {citation.chunk_id}<br />Content SHA-256: {citation.content_sha256}</p>
-            </details>
-          </li>)}
-        </ul>}
-        <p className="text-xs text-mist">Citation and quote checks do not establish that a claim is correct. Review the original source and its applicability before relying on an answer.</p>
-      </section>}
+      {answer && <EvidenceAnswer answer={answer} />}
     </Panel>
     <Panel title="Indexed evidence" description="Uploads stay in your organization's private corpus. Shared references can only be published by platform operators.">
       <a href="/samples/factory-policy-demo.txt" download className="inline-block text-sm text-emerald underline">Download synthetic policy for RAG rehearsal</a>

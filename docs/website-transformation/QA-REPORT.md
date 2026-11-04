@@ -62,3 +62,7 @@ Five static CSS blocks preserve identical text after removing raw HTML APIs. tsc
 ## C03D
 
 14 JS tests, tsc/build/whitespace pass. Protected desktop/320px product + shell checks: **14 pass, 2 intentional demo-only skips**. New [phone light](evidence/semantic-home-light-320.png), [phone dark](evidence/semantic-home-320.png), [desktop dark](evidence/semantic-home-1440.png), [desktop light](evidence/semantic-home-light-1440.png) evidence. Source gate still FAIL on **55 legacy color findings**; primary home/nav findings resolved.
+
+## R01
+
+16 JS tests, type check/build/whitespace pass. Backend: **106 run / 105 pass / 1 PostgreSQL-only skip** locally. Protected inspection/accounting **6 pass**; final extended inspection **2 pass**; isolated showcase/product **16 pass**. Cross-tenant/role/ID-pair/global-owner source tests pass. Actual synthetic API export examples: [desktop JSON](evidence/answer-record-1440.json), [mobile JSON](evidence/answer-record-320.json); [desktop source inspector](evidence/source-inspector-1440.png), [mobile source inspector](evidence/source-inspector-320.png). Revised-hash path is deliberate fault injection; no live model-quality claim. Full contract remains FAIL on 55 legacy color findings.

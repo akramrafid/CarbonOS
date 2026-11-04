@@ -124,8 +124,20 @@ Hosted CI update: https://github.com/akramrafid/CarbonOS/actions/runs/4178876554
 
 ## C03D — Semantic primary website colors (2026-11-04)
 
-Phase 1/14. State: TESTED; own SHA/remote verification reported after commit.
+Phase 1/14. State: PUSHED. Commit `d7ab77b085e6638ef222600cdeb85f911c3a3aa6` matched remote Asif.
 
 Files: Hero.jsx, Navbar.jsx, index.css, product-site.spec.ts, four new theme screenshots and tracking docs. Home/nav use existing semantic canvas/accent/control/nav variables. Centralized hero panel/shade/glow/grid CSS; separate light/dark panel and shade tokens preserve readable composition. Primary CTA now shares the tested theme-specific button text/background. New screenshots preserve earlier showcase evidence.
 
 Validation: **14 JS tests pass**, tsc/build/whitespace pass. Product + responsive browser specs on desktop/320px: **14 pass, 2 intentional isolated-demo-only skips** under protected mode. Visually inspected new 320px light and 1440px dark screenshots; first-screen phone CTA, themes, menu/focus/resize, navigation, forms and local pilot download remain usable. Full contract still FAIL, reduced to **55 legacy color findings**, no primary Hero/Navbar findings. No checker modifications. Next: R01 evidence source inspector/export, retaining current tenant and grounding controls; remaining legacy token migration stays open.
+
+## R01 — Authorized full-passage review and answer records (2026-11-04)
+
+Phase 7. State: TESTED; own SHA/remote verification reported after commit.
+
+Files: ESG router/API contracts, EvidenceAssistantPanel/EvidenceAnswer, evidenceRecord helper, backend/JS/browser tests, four synthetic evidence artifacts and tracking docs. New read-only document/passage endpoint pairs both IDs and enforces SQL tenant or exact operator-owner/corpus visibility. The document list now uses the same strict owner/corpus policy as retrieval. Full indexed text, page/status and passage/file hashes are returned, without original filesystem paths. Cross-tenant/unknown/mismatched pairs return identical 404; missing token and unsupported roles are denied.
+
+Answer UI can explicitly load the complete indexed passage, retry failures and compare its current hash to the citation. A changed hash shows a stale-answer warning. JSON download preserves the actual server response, model/method/mode/citations and inspected passages, marks hash matches explicitly, and states human review is still required. The exported timestamp is client receipt time, not signed evidence. State is scoped to each answer; a new abstention has no old inspected sources. No model, retrieval ranking or accounting permissions were changed. No original-file viewer or semantic correctness guarantee is claimed.
+
+Validation: **16 JS tests pass**, tsc/build/whitespace pass; **106 ESG backend tests run: 105 pass / one PostgreSQL-only local skip**, including three new source API authorization/visibility/hash tests. Protected source inspection + accounting journeys: **6 pass**; extended stale-source/failure/retry/export/text-safety/abstention test: **2 pass**. Existing isolated showcase/product suite: **16 pass**. Hash-change browser case explicitly injects a revised provider response to exercise stale-state handling; ordinary inspection/export uses the real API and synthetic uploaded text. Inspected 320px screenshot. Earlier broad-source fixture named the global factor owner incorrectly; corrected it to the actual config value. A browser assertion initially searched a control inside closed native details; opened the details before asserting and reran. Existing screenshot artifacts overwritten by tests were restored; new evidence is stored separately.
+
+Full frontend contract still fails the **55 recorded legacy color findings**, without new findings or checker changes. Next: remaining design/source migration, conversation/document-review usability and selective main accounting integration, each with its own tests/push.

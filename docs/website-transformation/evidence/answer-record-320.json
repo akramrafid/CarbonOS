@@ -1,0 +1,51 @@
+{
+  "schema_version": 1,
+  "record_type": "carbonos_evidence_answer",
+  "client_received_at": "2026-11-04T07:16:25.139Z",
+  "review_required": true,
+  "score_kind": "ranking_score_not_probability",
+  "response": {
+    "query": "What does the boiler inspection policy require?",
+    "answer": "AI answer generation is unavailable or its evidence checks did not pass. Most relevant retrieved passage (not a generated or verified answer):\n\nSYNTHETIC POLICY. Inspect the boiler every 12 months. Retain inspection records. Retain inspection records. Retain inspection records. Retain inspection records. Retain inspection records. Retain inspection records. Retain inspection records. Retain inspection records. Retain inspection records. Retain inspection records. Retain inspection records. Retain inspection records. \nFULL_PASSAGE_REVIEW_MARKER\n<script>untrusted_source_marker</script>\n\n[Source: inspection-synthetic.txt, Page 1 | Corpus: tenant_docs]",
+    "confidence": 0.5,
+    "citations": [
+      {
+        "source": "inspection-synthetic.txt",
+        "page": 1,
+        "section": "Corpus: tenant_docs",
+        "snippet": "SYNTHETIC POLICY. Inspect the boiler every 12 months. Retain inspection records. Retain inspection records. Retain inspection records. Retain inspection records. Retain inspection records. Retain inspection records. Retain inspection record...",
+        "relevance_score": 0.5,
+        "document_id": "b070721a-1638-4279-87e7-7740341d12f5",
+        "chunk_id": "8b222201-769f-4eb1-97c8-409d78787ff7",
+        "content_sha256": "cb748c36ae29fd10d220a81ed17ed7720c5f46f969bccdbcbab00ccc20b22d20",
+        "source_status": "UNREVIEWED"
+      }
+    ],
+    "corpus": "tenant_docs",
+    "model_used": "retrieval-only",
+    "insufficient_data": false,
+    "latency_ms": 4,
+    "answer_mode": "retrieval_only",
+    "retrieval_method": "bm25_vector_rrf",
+    "candidate_count": 1,
+    "candidate_limit_reached": false,
+    "score_kind": "ranking_score_not_probability",
+    "review_required": true
+  },
+  "inspected_passages": [
+    {
+      "document_id": "b070721a-1638-4279-87e7-7740341d12f5",
+      "chunk_id": "8b222201-769f-4eb1-97c8-409d78787ff7",
+      "source": "inspection-synthetic.txt",
+      "corpus": "tenant_docs",
+      "page": 1,
+      "section": null,
+      "source_status": "UNREVIEWED",
+      "content": "SYNTHETIC POLICY. Inspect the boiler every 12 months. Retain inspection records. Retain inspection records. Retain inspection records. Retain inspection records. Retain inspection records. Retain inspection records. Retain inspection records. Retain inspection records. Retain inspection records. Retain inspection records. Retain inspection records. Retain inspection records. \nFULL_PASSAGE_REVIEW_MARKER\n<script>untrusted_source_marker</script>",
+      "content_sha256": "cb748c36ae29fd10d220a81ed17ed7720c5f46f969bccdbcbab00ccc20b22d20",
+      "document_sha256": "cb748c36ae29fd10d220a81ed17ed7720c5f46f969bccdbcbab00ccc20b22d20",
+      "matches_cited_hash": true
+    }
+  ],
+  "limitations": "Indexed passages are extracted text, not the original file. Hash matching does not verify the claims or source authority. This record is not an approved inventory or assurance report."
+}

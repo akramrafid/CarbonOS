@@ -1,11 +1,13 @@
 import time
+import hashlib
 import datetime
 from fastapi import APIRouter, Depends, HTTPException, UploadFile, File, Form, Body
+from sqlalchemy import and_, or_
 from sqlalchemy.orm import Session
 from typing import List, Optional, Dict, Any
 
 from .database import get_db
-from .models import ESGDocument, ESGQueryLog, EmissionFactorRecord, ESGOrganization, ESGMembership
+from .models import ESGDocument, ESGChunk, ESGQueryLog, EmissionFactorRecord, ESGOrganization, ESGMembership
 from .schemas import (
     QueryRequest,
     QueryResponse,
@@ -284,6 +286,32 @@ def get_emission_factors(
         for f in factors
     ]
 
+def _visible_documents(principal: Principal):
+    return or_(
+        and_(ESGDocument.tenant_id == principal.organization_id, ESGDocument.corpus == CORPUS_TENANT_DOCS),
+        *(and_(ESGDocument.tenant_id == owner, ESGDocument.corpus == corpus)
+          for corpus, owner in GLOBAL_CORPUS_OWNER.items()),
+    )
+
+
+@router.get("/documents/{document_id}/chunks/{chunk_id}")
+def read_source_passage(document_id: str, chunk_id: str,
+                        principal: Principal = Depends(require("read")), db: Session = Depends(get_db)):
+    """Read one SQL-authorized indexed passage; source text is data, never executable HTML."""
+    row = (db.query(ESGChunk, ESGDocument).join(ESGDocument, ESGChunk.document_id == ESGDocument.id)
+           .filter(ESGDocument.id == document_id, ESGChunk.id == chunk_id, _visible_documents(principal)).first())
+    if row is None:
+        raise HTTPException(404, "Source passage not found")
+    chunk, document = row
+    return {
+        "document_id": document.id, "chunk_id": chunk.id, "source": document.filename,
+        "corpus": document.corpus, "page": chunk.page_number, "section": chunk.section_title,
+        "source_status": (document.meta_info or {}).get("source_status", "UNREVIEWED"),
+        "content": chunk.content, "content_sha256": hashlib.sha256(chunk.content.encode()).hexdigest(),
+        "document_sha256": document.checksum,
+    }
+
+
 @router.get("/documents")
 def list_documents(
     corpus: Optional[str] = None,
@@ -291,10 +319,7 @@ def list_documents(
     db: Session = Depends(get_db)
 ):
     """List the caller's tenant documents plus global corpora, with provenance."""
-    q = db.query(ESGDocument).filter(
-        (ESGDocument.tenant_id == principal.organization_id)
-        | (ESGDocument.tenant_id.in_(list(GLOBAL_CORPUS_OWNER.values())))
-    )
+    q = db.query(ESGDocument).filter(_visible_documents(principal))
     if corpus:
         q = q.filter(ESGDocument.corpus == corpus)
 
