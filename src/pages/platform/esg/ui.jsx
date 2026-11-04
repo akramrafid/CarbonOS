@@ -51,8 +51,8 @@ export function Panel({ title, description, children, actions }) {
 }
 
 export function Notice({ error, message }) {
-  if (error) return <p role="alert" className="rounded-lg border border-red-500/40 bg-red-500/10 px-3 py-2 text-sm text-red-300">{error}</p>;
-  if (message) return <p role="status" className="rounded-lg border border-emerald/30 bg-emerald/10 px-3 py-2 text-sm text-emerald-300">{message}</p>;
+  if (error) return <p role="alert" className="esg-notice esg-tone-danger rounded-lg px-3 py-2 text-sm">{error}</p>;
+  if (message) return <p role="status" className="esg-notice esg-tone-success rounded-lg px-3 py-2 text-sm">{message}</p>;
   return null;
 }
 
@@ -75,7 +75,7 @@ export function Field({ label, hint, children }) {
   );
 }
 
-const inputCls = 'min-h-[44px] min-w-0 w-full rounded-lg border border-mist/30 bg-carbon px-3 py-2 text-base sm:text-sm text-registry focus:outline-none focus-visible:ring-2 focus-visible:ring-emerald';
+const inputCls = 'esg-control min-h-[44px] min-w-0 w-full rounded-lg px-3 py-2 text-base sm:text-sm';
 
 export function Input({ label, hint, ...props }) {
   return <Field label={label} hint={hint}>{(id) => <input id={id} className={inputCls} {...props} />}</Field>;
@@ -95,12 +95,12 @@ export function Select({ label, hint, options, ...props }) {
 
 export function Button({ variant = 'primary', className = '', ...props }) {
   const styles = variant === 'primary'
-    ? 'bg-emerald text-carbon hover:bg-emerald-400'
-    : 'border border-mist/40 text-registry hover:border-emerald';
+    ? 'esg-button-primary'
+    : 'esg-button-secondary';
   return (
     <button
       type="button"
-      className={`min-h-[44px] rounded-lg px-4 py-2 font-mono text-xs font-bold transition-colors disabled:cursor-not-allowed disabled:opacity-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald ${styles} ${className}`}
+      className={`esg-button min-h-[44px] rounded-lg px-4 py-2 font-mono text-xs font-bold transition-colors disabled:cursor-not-allowed disabled:opacity-50 ${styles} ${className}`}
       {...props}
     />
   );
@@ -128,13 +128,11 @@ export function Table({ caption, columns, rows, rowKey = 'id' }) {
 
 export function StatusBadge({ status }) {
   const tone = {
-    APPROVED: 'bg-emerald/15 text-emerald-300', LOCKED: 'bg-emerald/15 text-emerald-300',
-    SUBMITTED: 'bg-amber/15 text-amber-300', DRAFT: 'bg-mist/15 text-mist', OPEN: 'bg-mist/15 text-mist',
-    REJECTED: 'bg-red-500/15 text-red-300', SUPERSEDED: 'bg-mist/10 text-mist line-through', RETIRED: 'bg-mist/10 text-mist',
-    PUBLISHED: 'bg-emerald/15 text-emerald-300', IN_REVIEW: 'bg-amber/15 text-amber-300', MISSING_DATA: 'bg-red-500/15 text-red-300',
-    NOT_STARTED: 'bg-mist/15 text-mist', NOT_APPLICABLE: 'bg-mist/10 text-mist',
-  }[status] || 'bg-mist/15 text-mist';
-  return <span className={`whitespace-nowrap rounded px-2 py-0.5 font-mono text-[11px] ${tone}`}>{status}</span>;
+    APPROVED: 'success', LOCKED: 'success', PUBLISHED: 'success',
+    SUBMITTED: 'warning', IN_REVIEW: 'warning',
+    REJECTED: 'danger', MISSING_DATA: 'danger',
+  }[status] || 'neutral';
+  return <span className={`esg-status esg-tone-${tone} whitespace-nowrap rounded px-2 py-0.5 font-mono text-[11px] ${status === 'SUPERSEDED' ? 'line-through' : ''}`}>{status}</span>;
 }
 
 // Read form fields into an object, dropping empty strings so optional API fields stay unset.

@@ -12,6 +12,25 @@
   --color-registry: #F0F4F1;
   --color-mist: #B2C4B8;
 
+  --state-success-bg: #102d20;
+  --state-success-text: #86efac;
+  --state-success-border: #3b8b5c;
+  --state-warning-bg: #342710;
+  --state-warning-text: #fde68a;
+  --state-warning-border: #a17c32;
+  --state-danger-bg: #36191d;
+  --state-danger-text: #fda4af;
+  --state-danger-border: #b65c6c;
+  --state-neutral-bg: #1d2b23;
+  --state-neutral-text: #c6d6cb;
+  --state-neutral-border: #667e6e;
+  --control-bg: #080f0b;
+  --control-text: #f0f4f1;
+  --control-border: #667e6e;
+  --control-primary-bg: #00c853;
+  --control-primary-text: #080f0b;
+  --control-focus: #34d97a;
+
   /* Semantic tokens */
   --color-bg-primary: #080F0B;
   --color-bg-secondary: #0D2B1A;
@@ -79,6 +98,25 @@
   --motion-duration-fast: 280ms;
   --motion-duration-normal: 400ms;
   --motion-duration-slow: 500ms;
+
+  --state-success-bg: #e6f3e9;
+  --state-success-text: #14532d;
+  --state-success-border: #408158;
+  --state-warning-bg: #fff3cf;
+  --state-warning-text: #713f12;
+  --state-warning-border: #96702b;
+  --state-danger-bg: #fff0f1;
+  --state-danger-text: #9f1239;
+  --state-danger-border: #bd506b;
+  --state-neutral-bg: #e7ece7;
+  --state-neutral-text: #37463c;
+  --state-neutral-border: #687b6d;
+  --control-bg: #ffffff;
+  --control-text: #252e28;
+  --control-border: #687b6d;
+  --control-primary-bg: #166534;
+  --control-primary-text: #ffffff;
+  --control-focus: #166534;
 
   /* Semantic Color Tokens */
   --color-forest: #dbf0ea;       /* Soft mint surface container */
@@ -1077,3 +1115,23 @@ select option {
     transform: none !important;
   }
 }
+
+/* Workspace primitives use semantic states in both themes, independent of legacy color overrides. */
+.esg-tone-success { --state-bg: var(--state-success-bg); --state-text: var(--state-success-text); --state-border: var(--state-success-border); }
+.esg-tone-warning { --state-bg: var(--state-warning-bg); --state-text: var(--state-warning-text); --state-border: var(--state-warning-border); }
+.esg-tone-danger { --state-bg: var(--state-danger-bg); --state-text: var(--state-danger-text); --state-border: var(--state-danger-border); }
+.esg-tone-neutral { --state-bg: var(--state-neutral-bg); --state-text: var(--state-neutral-text); --state-border: var(--state-neutral-border); }
+.esg-notice, .esg-status {
+  background: var(--state-bg);
+  color: var(--state-text);
+  border: 1px solid var(--state-border);
+}
+.esg-control {
+  background: var(--control-bg);
+  color: var(--control-text);
+  border: 1px solid var(--control-border);
+}
+.esg-button-primary { background: var(--control-primary-bg); color: var(--control-primary-text); }
+.esg-button-secondary { background: var(--control-bg); color: var(--control-text); border: 1px solid var(--control-border); }
+.esg-button-primary:hover:not(:disabled), .esg-button-secondary:hover:not(:disabled) { box-shadow: inset 0 0 0 2px var(--control-focus); }
+.esg-control:focus-visible, .esg-button:focus-visible { outline: 2px solid var(--control-focus); outline-offset: 3px; }

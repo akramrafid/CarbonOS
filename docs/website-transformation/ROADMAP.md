@@ -38,8 +38,8 @@ Each row names objective, impacted files, acceptance, dependency and priority. S
 
 | ID / phase | Priority / status | Objective and impacted files | Acceptance criteria | Dependencies / SHA |
 |---|---|---|---|---|
-| A00 / audit | P0 / TESTED | Establish this audit + five `docs/website-transformation` artifacts | Clean baseline, route/source/CI/main comparison, truthful limitations; docs checked and first commit pushed | Baseline above; own SHA pending remote verification |
-| D01 / 1 | P0 / NOT STARTED | Theme-safe semantic state tokens; `src/index.css`, shared ESG `ui.jsx` | Notices, fields and status pills use shared dark/light state colors; visible text and keyboard focus; no global theme regression | A00; pending |
+| A00 / audit | P0 / PUSHED | Establish this audit + five `docs/website-transformation` artifacts | Clean baseline, route/source/CI/main comparison, truthful limitations; docs checked and first commit pushed | Baseline above; `7531f4611f2b91099a35aebcd9a7d6ae94d1b06a` verified on origin/Asif |
+| D01 / 1 | P0 / TESTED | Theme-safe semantic state tokens; `src/index.css`, shared ESG `ui.jsx` | Notices, fields and status pills use shared dark/light state colors; visible text and keyboard focus; no global theme regression | A00; pending |
 | D02 / 1,9 | P0 / NOT STARTED | Associate shared field hints and validation; `ui.jsx`, actual form callers/tests | Accessible descriptions resolve to visible text; invalid state and message tied to control; native required/type checks preserved | D01; pending |
 | Q01 / 10,14 | P0 / NOT STARTED | Add 390/1920 viewport projects and execute responsive shell | Requested widths represented; real API form paths, navigation, theme and layout tests pass | Local test services; pending |
 | X01 / 9 | P0 / NOT STARTED | Recover from lazy-route render failures; `App.jsx`, boundary and browser test | Useful retry/home recovery; no raw stack or fake success; other routes still work | A00; pending |

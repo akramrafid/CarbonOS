@@ -11,3 +11,10 @@
 ## Release criteria still outstanding
 
 Full required viewport matrix (including 390 and 1920), complete protected + isolated journeys, main integration regression/migration tests, PostgreSQL, real OIDC, screen reader/zoom/contrast, real device/browser coverage, measured Web Vitals, field scientific validation and operational security/restore/load evidence. No Lighthouse, accuracy, WCAG or production claim is made without measurements.
+
+## D01
+
+- `npm test`: 11/11 pass, including dark/light state/control contrast guards.
+- `npm run lint` and `npm run build`: pass (existing browser zlib externalization warning remains).
+- Protected `shared-controls.spec.ts`, desktop + 320px: **2 passed** with real API writes and 422 rejection; no synthetic response interception.
+- `git diff --check`: pass. Frontend contract remains the previously recorded failure; no gate suppression.
