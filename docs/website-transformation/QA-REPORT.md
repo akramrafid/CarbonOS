@@ -98,3 +98,7 @@ Type check/build/whitespace pass. Four existing period/reference browser checks 
 ## S03
 
 115 ESG backend tests: **114 pass / 1 local PostgreSQL-only skip**. New activity/metric evidence-link negatives/positive shared scopes pass without unauthorized persistence or audit transitions. Direct tenant-isolation suite passes. Protected ledger + source inspection/history + comparison **16 browser tests pass** (desktop/320px); actual extraction-to-draft retains its authorized uploaded document ID. Shared document visibility fails closed when no scope exists. Existing proof snapshots restored. No claim of source accuracy, mandatory evidence completeness or historical-row validation. Full frontend contract remains FAIL on 55 legacy color findings.
+
+## I01A
+
+117 backend tests: **116 pass / 1 local PostgreSQL-only skip**. Numerical + real-API wrong-region selection blocks, no fallback/emission line and lock denial verified. Four protected accounting journey browser tests pass (desktop/320px). Same-region calculations, existing numerical/security controls and stored-snapshot behavior remain. New runs identify methodology 1.0.1; no main branch merge or schema replacement occurred.

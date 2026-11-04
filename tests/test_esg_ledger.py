@@ -9,6 +9,7 @@ import datetime as dt
 import os
 import sys
 import unittest
+from decimal import Decimal as D
 
 sys.path.insert(0, os.path.dirname(__file__))
 from esg_harness import ESGApiTestCase, auth  # noqa: E402
@@ -353,6 +354,20 @@ class LedgerFilteringTest(LedgerTestCase):
         self.call('GET', 'user-a', '/activities?limit=0', status=422)
         self.call('GET', 'user-a', '/activities?offset=-1', status=422)
 
+
+
+
+class ExplicitLocationRegionTest(LedgerTestCase):
+    def test_other_region_selection_blocks_calculation_and_independent_lock(self):
+        other = self.factor('other-grid', 'electricity', 'kWh', '0.1', 'location', region='OTHER-TEST-GRID')
+        self.approved(factor_id=other)
+        result = self.post('user-a', f'/periods/{self.period}/calculate')
+        self.assertTrue(result['blocking'])
+        self.assertEqual(D(result['scope2_location_kg']), D(0))
+        self.assertEqual(result['methodology_version'], 'carbonos-ghg-scope12-1.0.1')
+        self.assertTrue(any(item['code'] == 'SELECTED_FACTOR_OTHER_REGION' for item in result['exceptions']))
+        denied = self.call('POST', 'admin-a', f'/periods/{self.period}/lock', {'calculation_run_id': result['id']}, status=409)
+        self.assertIn('blocking data-quality exceptions', denied.json()['detail'])
 
 if __name__ == "__main__":
     unittest.main()

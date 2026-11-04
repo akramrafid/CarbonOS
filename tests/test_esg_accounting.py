@@ -88,6 +88,21 @@ class CalculationTests(unittest.TestCase):
         r = calculate([act("a1", "f1", "electricity", "10", "kWh")], FAC, [future, other], "operational_control")
         self.assertEqual(r.exceptions[0]["code"], "MISSING_FACTOR")
 
+    def test_explicit_location_factor_cannot_bypass_facility_region_or_fall_back(self):
+        other = factor("other-grid", "electricity", "kWh", "0.7", "location", region="OTHER-GRID")
+        result = calculate([act("a1", "f1", "electricity", "10", "kWh", factor_id=other.id)], FAC,
+                           [GRID, other], "operational_control")
+        self.assertTrue(result.blocking)
+        self.assertEqual(result.scope2_location_kg, 0)
+        self.assertEqual(result.lines, [])
+        error = next(item for item in result.exceptions if item["code"] == "SELECTED_FACTOR_OTHER_REGION")
+        self.assertIn("facility", error["detail"])
+        valid = calculate([act("a2", "f1", "electricity", "10", "kWh", factor_id=GRID.id)], FAC,
+                          [GRID, other], "operational_control")
+        self.assertFalse(valid.blocking)
+        self.assertEqual(valid.scope2_location_kg, D("5.000000"))
+        self.assertIsNone(valid.scope2_market_kg)
+
     def test_latest_version_of_family_and_ambiguity(self):
         v2 = factor("grid-v2", "electricity", "kWh", "0.6", "location", family="grid", version=2)
         r = calculate([act("a1", "f1", "electricity", "10", "kWh")], FAC, [GRID, v2], "operational_control")

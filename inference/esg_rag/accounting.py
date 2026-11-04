@@ -20,7 +20,7 @@ from decimal import Decimal, ROUND_HALF_UP
 import datetime as dt
 from typing import Dict, List, Optional, Tuple
 
-METHODOLOGY_VERSION = "carbonos-ghg-scope12-1.0"
+METHODOLOGY_VERSION = "carbonos-ghg-scope12-1.0.1"
 
 # activity_type -> (scope, canonical unit)
 ACTIVITY_TYPES: Dict[str, Tuple[str, str]] = {
@@ -196,6 +196,8 @@ def select_factor(a: Activity, region: str, method: str, factors: List[Factor],
         if not (f.activity_type == a.activity_type and f.method == method and f.unit == a.unit
                 and f.valid_from <= a.period_start and (f.valid_to is None or a.period_end <= f.valid_to)):
             return None, "SELECTED_FACTOR_NOT_APPLICABLE"
+        if method == "location" and f.region != region:
+            return None, "SELECTED_FACTOR_OTHER_REGION"
         return (f, None) if f.kgco2e_per_unit.is_finite() and f.kgco2e_per_unit >= 0 else (None, 'INVALID_FACTOR_VALUE')
     candidates = [f for f in factors if _usable(f, a, region, method)]
     latest: Dict[str, Factor] = {}
@@ -286,7 +288,8 @@ def calculate(activities: List[Activity], facilities: Dict[str, Facility], facto
         # Scope 2: location-based always required; market-based only from explicit/approved inputs.
         f, err = select_factor(a, fac.region, "location", factors, a.factor_id)
         if err:
-            exception(err, a)
+            detail = "The selected location-based factor must match the facility's factor region." if err == "SELECTED_FACTOR_OTHER_REGION" else ""
+            exception(err, a, detail=detail)
         else:
             res.scope2_location_kg += add_line(a, fac, "2", "location", f, share)
         if a.activity_type == "electricity":

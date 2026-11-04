@@ -210,10 +210,20 @@ Next: validate document identifiers supplied as activity evidence against actual
 
 ## S03 — SQL-authorized evidence identifiers on new records (2026-11-04)
 
-Phase 4/13. State: TESTED; own SHA/remote verification reported after commit.
+Phase 4/13. State: PUSHED. Commit `d4545ac7daa826894ebdb8d869ecd3bdc3b08d58` matched remote Asif.
 
 Files: evidence.py, ledger/metrics services, ESG routers/retriever, API contracts, source-link/backend/browser tests and tracking docs. Centralized the existing exact owner/corpus SQL visibility rule for retrieval, listing, inspection and source references. New activities and metric observations with a supplied document ID require an existing visible source; unknown/foreign/misowned references receive identical 404 before persistence/audit. Identifier length is bounded to the declared 36-character document schema. Empty visibility configuration fails closed. Manual records without a linked ID remain possible; source existence/access is not accuracy or human approval. Existing historical rows are not rewritten or retroactively certified.
 
 Validation: **115 ESG backend tests run / 114 pass / one PostgreSQL-only local skip**; three new source-reference tests cover private/shared validity, wrong-owner/corpus/unknown/length denial, no partial record/audit writes, unchanged DRAFT/UNREVIEWED state, manual paths and empty configuration. Direct legacy tenant isolation passes. Protected ledger + comparison + inspection/history browser suite **16 pass** on desktop/320px, including actual synthetic document upload, rule extraction, Use, draft save and the exact stored source ID. Initial metric fixture used an unsupported dimension and wrong assumed HTTP status; corrected to the actual groundwater metric/200 contract and reran. Prior generated evidence snapshots restored; backend tests exercised the common SQL refactor. No new model/provider, schema migration, verification status or mandatory-evidence policy.
 
 Full frontend contract remains FAIL on 55 legacy color findings. Next: selective main accounting integration and remaining design/security/production work, with honest external-data/operational blockers.
+
+## I01A — Selective main location-factor region safeguard (2026-11-04)
+
+Phase 4. State: TESTED; own SHA/remote verification reported after commit.
+
+Files: accounting.py, numerical/ledger tests, ACCOUNTING_METHODOLOGY.md and tracking docs. Read-only main comparison spans ~1,800 changed lines across engine/models/router/ledger/tests and includes overlapping schema/market changes. Selectively integrated the contained explicit location-based region rejection from main rather than replacing the engine. Wrong-region explicit location input now blocks with SELECTED_FACTOR_OTHER_REGION and an explanatory detail, without falling back to an otherwise available local factor. Same-region math and current strict market-input policy remain intact. New calculation methodology is carbonos-ghg-scope12-1.0.1; historical snapshots are unchanged.
+
+Validation: **117 ESG backend tests run / 116 pass / one local PostgreSQL-only skip**. New numerical/API tests prove the bypass is closed, same-region decimal arithmetic remains correct, invalid location total/lines are not generated, and an independent approver cannot lock the blocked run. Complete protected accounting journey **4 browser tests pass** (desktop/320px). Whitespace passes; no frontend change requiring a duplicate build. Existing finite-number, duplicate-ID, unit/date, GWP, auth/tenant, review and reproducible-export tests pass. Official GHG Protocol Scope 2 Guidance Chapter 6/Table 6.2 and Calculation Tools FAQ reviewed; links and implementation limits recorded in the methodology. Remaining main features/schema and full Scope 2 conformance are not claimed.
+
+Next: I01B explicitly invalid market-based selections, with separate tests/version/push.

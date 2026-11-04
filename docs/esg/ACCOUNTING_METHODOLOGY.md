@@ -39,7 +39,7 @@ Raw quantity and unit are stored alongside the normalised value.
 ## Factor selection
 
 1. An explicitly selected factor on the record is used if APPROVED, visible to the organization and applicable
-   (activity type, method, unit, validity dates).
+   (activity type, method, unit, validity dates). For location-based Scope 2, the explicit factor must also match the facility factor region; a mismatch blocks with `SELECTED_FACTOR_OTHER_REGION` and does not silently use another factor.
 2. Otherwise: APPROVED factors matching activity type, method, unit, the facility's `grid_region` and the
    validity window; the highest version per factor family is used.
 3. No candidate → `MISSING_FACTOR` (blocking). Several families → `AMBIGUOUS_FACTOR` (blocking) — the user
@@ -83,3 +83,9 @@ Limitation: ownership/control is current-state per facility; mid-period changes 
 * The lock writes a `ReportSnapshot` with canonical JSON content and its SHA-256. Exports are rendered from
   that stored content, so repeated exports are byte-identical and later factor versions cannot change them.
 * Restatement re-opens the period with a new revision and a mandatory reason; earlier snapshots remain.
+
+## Asif methodology patch 1.0.1 — explicit location-factor region
+
+New calculations identify `carbonos-ghg-scope12-1.0.1`; stored earlier snapshots retain their recorded versions. This selectively integrates main's explicit location-region rejection while preserving Asif's Decimal, finite-number, duplicate-record, unit/date, tenant and independent-lock safeguards. It does not integrate main's newer market fallback/hierarchy, factor-kind schema, equipment or uncertainty changes. A correct region label alone does not establish factor provenance, current applicability or conformance.
+
+Primary reference reviewed 2026-11-04: [GHG Protocol Scope 2 Guidance](https://ghgprotocol.org/sites/default/files/GHG%20Protocol%20Scope%202%20Guidance.pdf), Chapter 6 / Table 6.2, and [Calculation Tools FAQ](https://ghgprotocol.org/calculation-tools-faq). Location-based accounting uses appropriate grid-average factors; project-baseline marginal factors are not interchangeable with inventory factors. Full factor-kind/governance integration remains open; this patch is not a claim of complete Scope 2 Guidance implementation.
