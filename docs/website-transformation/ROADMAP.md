@@ -1,0 +1,75 @@
+# CarbonOS enterprise transformation roadmap
+
+Audit date: 2026-11-04. Working branch: **Asif**. Baseline: `ffc5ffc92e04de2eecfc4cf33327631e6d74160e`. Remote: `origin` (`akramrafid/CarbonOS`). This is an incremental implementation plan for the supplied Enterprise Upgrade Master Prompt, not a declaration of production readiness.
+
+Statuses: **NOT STARTED → IN PROGRESS → IMPLEMENTED → TESTED → PUSHED**; **BLOCKED** names the missing dependency. PUSHED requires an actual remote SHA check. A task's own SHA is recorded in the next log update, since a commit cannot contain its own hash. Tests and remote verification are reported after every atomic task. No automatic merge from main, no force pushes, no production claims based on synthetic data.
+
+## Repository audit and preserved baseline
+
+- React 19 / Vite 8 / Tailwind 3 / React Router 7. Public and platform routes are lazy loaded in `src/App.jsx`; existing dependencies cover the immediate work. Existing semantic color variables, Instrument Sans / Cormorant / JetBrains typography, 44px ESG controls, keyboard-scrollable tables and native mobile navigation dialog should be reused.
+- Current homepage, How It Works, About/Trust/Privacy/Terms and pilot download are focused on factory ESG and explicitly disclose synthetic data. Navigation and footer keep access to the wider research modules. The pilot brief is local only; no verified public inbox or deployed domain exists in the supplied context.
+- Real ESG setup, factors, activity ledger, metrics, calculation/reports, disclosures, members and audit panels use the standalone ESG API. Decimal accounting, factor matching, period locking, separation of duties, source hashes and tenant checks must survive all changes. Form hints currently have no programmatic association; shared notices/status colors have hardcoded theme-dependent values.
+- Evidence assistant already has SQL-authorized chunks, BM25, optional compatible-vector fusion, source excerpts/hashes, explicit abstention and opt-in provider synthesis. Current synthetic fixture results do not validate learned multilingual semantic quality. Search is capped at 2,000 authorized recent chunks; JSON vector cache concurrency remains unproven.
+- `CarbonMonitoring` calls analysis/history/boundary/provenance/drone/export endpoints. `MRVDashboard` also calls Django MRV and browser-side Blynk. Scientific workflows and settings/signing endpoints need separate authorization, provenance and field-validation review; successful UI rendering does not validate biomass or carbon credits.
+- `CarbonRegistry` calls Django registry-bridge project/rule/submission/adjustment endpoints. It also contains mock/sandbox/timer/random paths. Remote issuance, approval and corresponding adjustments must never be inferred from local success. Registry backend vocabulary must be mapped before redesign.
+- Other reachable modules: ProjectOnboarding, VerificationWorkflow, AIDetection, Impact, SaaSDashboard, marketplace/purchase/farmer earnings, crop camera/results, HarvestGuard weather/batches/map, Technology, six sector pages, Careers/API/Framework documentation. Static source inspection found simulation/mock/timer/random paths in legacy dashboards, Impact, registry, farmer earnings and weather. These need route-by-route behavior checks; none is certified complete by this audit.
+- HarvestGuard weather and MRV telemetry have browser credential exposure patterns. Remove those patterns without copying credentials into reports; historical credentials require operator rotation. Do not put service secrets in Vite variables.
+- Existing browser projects cover 320/375/667 landscape/768/1024/1280/1440/1536. Missing requested 390 and 1920 projects. Shared tests cover EN/BN navigation, but new body copy is not fully translated. No full WCAG 2.2 AA or real-device claim is justified.
+- Last website entry bundle: 338.25kB raw / 106.25kB gzip (historical build evidence). This is not LCP/INP/CLS or total page weight. Landscape image still ~932kB. No measured Lighthouse 90 claim.
+- `frontend-check --area all` rerun on the baseline: **FAIL**: missing funnel contract; unresolved analytics, SEO, accessibility, performance templates; 64 blocking source heuristic findings. These are not waived.
+- CI uses `ubuntu-latest` with the installed Chromium version; frontend browser job waits on the failed contract. Asif has no mutation job; main adds mutmut 3.8 without an explicit compatible pytest pin. CI changes must be validated against actual tool compatibility, not copied blindly. Current workflows trigger pushes to main/master, not Asif.
+
+## Main integration register (read-only comparison)
+
+At audit `origin/main` = `5bd3ba898b5702a54849b173c2f7c0ab844b8ae7`; Asif has 4 unique commits and main 21. No merge performed.
+
+| Main changes | Integration needs / files | Required acceptance before integration |
+|---|---|---|
+| Scope 1 quality/uncertainty, refrigerant mass balance, equipment lifecycle (`33c876d`, `e66f913`, `7132672`, reviews `12962c6`, `6676e42`) | `accounting.py`, ledger/models/router, factor registry, migrations 0003–0006, Scope 1/property tests | Preserve Asif finite-number/duplicate-ID guards, Decimal arithmetic, source review, SoD and tenant isolation. Review schema and migration compatibility on existing data. |
+| Bangladesh grid derivation (`4f20181`, `bd35d1d`, `fc64850`) | `factors/bd_grid`, factor registry/seed/lifecycle, source register, grid tests | Distinguish official published values from derived estimates; validate source provenance, fiscal month mapping and no withdrawal regression. Never relabel synthetic demo factor as official. |
+| Versioned utility bill profiles, parameters and rules (`f677f1a`, `3f5e713`, `9a5266f`, `5bd3ba8`) | bill modules/YAML, migration 0007, frontend BillAnalysisPanel, tests/fixtures | SQL authorization, file bounds, review of extracted values, immutable versions, source offsets and existing EN/BN parser tests must pass. Preserve model opt-in and no fake confidence. |
+| Gas certificates and market Scope 2 instruments (`ad69d1a`, `eefa3f4`) | migrations 0008–0009, accounting/ledger, new tests | Validate temporal/facility matching, instrument hierarchy, no silent market-factor fallback or double counting. |
+| Test isolation, OCR, Hypothesis and mutation (`441df30`, `aef3dec`) | isolated DB helper, requirements-dev, conftest, OCR/property tests, mutation config/CI | Never touch developer DB; Bengali + English OCR smoke fails explicitly when required. Resolve pytest/mutmut compatibility, retain ≥80% threshold and record actual measured score. |
+| UI/demo fallback and revised public claims (`0bda7e3`, `987dea7`, `dda37dd`, `7132672`) | App/Navbar/i18n/api/auth plus legacy modules | Reconcile selective changes against CarbonOS site and working Asif API/RAG; do not substitute a client fallback for real API success or overwrite current navigation. Exclude tracked cache/binary artifacts from integration. |
+
+## Atomic task checklist
+
+Each row names objective, impacted files, acceptance, dependency and priority. Split a row further before implementation if its diff cannot be independently reviewed/tested.
+
+| ID / phase | Priority / status | Objective and impacted files | Acceptance criteria | Dependencies / SHA |
+|---|---|---|---|---|
+| A00 / audit | P0 / TESTED | Establish this audit + five `docs/website-transformation` artifacts | Clean baseline, route/source/CI/main comparison, truthful limitations; docs checked and first commit pushed | Baseline above; own SHA pending remote verification |
+| D01 / 1 | P0 / NOT STARTED | Theme-safe semantic state tokens; `src/index.css`, shared ESG `ui.jsx` | Notices, fields and status pills use shared dark/light state colors; visible text and keyboard focus; no global theme regression | A00; pending |
+| D02 / 1,9 | P0 / NOT STARTED | Associate shared field hints and validation; `ui.jsx`, actual form callers/tests | Accessible descriptions resolve to visible text; invalid state and message tied to control; native required/type checks preserved | D01; pending |
+| Q01 / 10,14 | P0 / NOT STARTED | Add 390/1920 viewport projects and execute responsive shell | Requested widths represented; real API form paths, navigation, theme and layout tests pass | Local test services; pending |
+| X01 / 9 | P0 / NOT STARTED | Recover from lazy-route render failures; `App.jsx`, boundary and browser test | Useful retry/home recovery; no raw stack or fake success; other routes still work | A00; pending |
+| S01 / 13 | P0 / NOT STARTED | Remove browser credential calls in telemetry/weather; affected callers + backend contract/tests | No provider token in frontend bundle/URLs; unavailable state explicit unless authenticated proxy exists | Provider/backend inspection; rotation is external |
+| C01 / 14 | P0 / NOT STARTED | Repair supported browser CI and Asif triggers; workflow + lockfile if necessary | Verify installed Playwright OS support; preserve real E2E; jobs run on Asif | Tool compatibility check; pending |
+| C02 / 14 | P0 / NOT STARTED | Resolve frontend contract artifacts; analytics/funnel/SEO/a11y/perf docs | All templates replaced with actual implementation/evidence and explicit unmeasured states; no fabricated measurements | Actual scoped browser/build evidence; pending |
+| C03 / 1,14 | P1 / NOT STARTED | Fix 64 source heuristics in small route-scoped batches | Actual source fixes; no checker suppression/waivers; all existing routes work | Finding inventory; pending |
+| I01 / 4,14 | P0 / NOT STARTED | Integrate main accounting safeguards selectively | Main register acceptance and old/new accounting/tenant/SoD tests pass, migration reviewed | Read-only comparison complete; pending |
+| I02 / 4 | P0 / NOT STARTED | Integrate main Bangladesh factor derivation and governance | Reproducible derivation/source quality, honest official/derived labels | I01 schema plan; pending |
+| I03 / 4 | P1 / NOT STARTED | Integrate versioned bills/OCR and provenance | Real text/OCR paths, reviewed extraction, bounded uploads, isolation; no canned accuracy | I01, compatible migrations; pending |
+| I04 / 4 | P1 / NOT STARTED | Integrate gas certificates and contractual instruments | Correct scope/facility/date matching, no market fallback or double counting | I01/I02; pending |
+| E01 / 4 | P1 / NOT STARTED | Evidence completeness and ledger filters/source detail | Calculated from actual authorized rows, unknown coverage stays unknown; valid filters and exports | Existing ledger/source model; pending |
+| E02 / 3,4 | P1 / NOT STARTED | Workspace overview/navigation improvements | Real period status, scope totals, permission-aware links, sources and accessible empty/loading states | E01, no invented KPI; pending |
+| R01 / 7 | P1 / NOT STARTED | Evidence source inspector and downloadable answer record | Actual cited passage/hash/page/status/model/mode, stable source links and export; no invented citations | Existing assistant payload; pending |
+| R02 / 7 | P1 / NOT STARTED | Session conversation history and document comparison | Explicitly scoped storage, actual sources per answer, conflicts/abstention preserved | R01; pending |
+| R03 / 7,13 | P1 / BLOCKED | Dense retrieval quality and scalable index | Tenant-authorized indexing; real EN/BN eval, latency/concurrency, compatible vectors | Representative approved corpus + deployed embedding model/DB infrastructure |
+| M01 / 5 | P0 / NOT STARTED | MRV truth/auth boundary audit and clear data provenance UI | Observed/inferred/simulated/untrained/unavailable states distinguishable; settings/signing never publicly trusted | Existing MRV contracts and auth inspection; pending |
+| M02 / 5 | P1 / BLOCKED | Validate satellite/drone models and uncertainty | Reproducible real scene metadata, calibrated field evaluation and scientific review | Field labels, credentials/scene rights, independent scientific validation |
+| G01 / 6 | P0 / NOT STARTED | Registry lifecycle/source audit and honest interface | Exact backend states; sandbox statuses cannot become official issuance/adjustments | Django contracts, auth/evidence review; pending |
+| G02 / 6 | P1 / BLOCKED | Official registry integration | Authenticated receipts, registry IDs and genuine lifecycle responses | External registry access/approval and signed evidence |
+| L01 / 2,8,12 | P1 / NOT STARTED | Legacy/public route truth and dead-control audit, one route per task | All linked pages have honest scope, useful actions; no invented customers/credits/orders/payments | Route inventory above; pending |
+| L02 / 2,10 | P1 / NOT STARTED | Complete EN/BN copy for supported public/workspace routes | Both locales reviewed; no clipping/reflow or untranslated critical validation | Human terminology review for final publication; pending |
+| U01 / 1,9 | P1 / NOT STARTED | Accessible skeletons, contextual help, breadcrumbs/dialog/state gaps | Used by real callers, keyboard/reduced motion and focus restored | Existing patterns; pending |
+| P01 / 11 | P1 / NOT STARTED | Optimize measured large images/chunks and render paths | Before/after page weight and rendering evidence; no quality/layout regression | Baseline measurements; pending |
+| P02 / 10,11 | P1 / NOT STARTED | Browser performance/accessibility measurement | Actual LCP/CLS/Lighthouse lab metrics; INP only with valid measurement; keyboard/zoom/reduced motion evidence | Working browser tooling; pending |
+| B01 / 12 | P1 / BLOCKED | Production crawl/social/contact setup | Verified canonical/sitemap/robots, real contact destination and truthful ownership | Verified domain, operator contact and deployment configuration |
+| S02 / 13 | P0 / BLOCKED | Production OIDC/Postgres/backup/provider retention review | Negative authorization, concurrent workflows, restore/load evidence, deployment headers, secret rotation | Production identity/DB/hosting/operator access |
+| C04 / 14 | P1 / NOT STARTED | Integrate and execute mutation/property tests | Compatible pytest/mutmut, unchanged minimum score, actual killed/surviving report | I01 + Linux mutation environment; pending |
+| Z01 / 15 | P0 / NOT STARTED | Final integration and release evidence | Current README/feature coverage/QA/remaining gaps; real full checks and last verified remote SHA | Feasible tasks complete; external blockers remain explicit |
+
+## Execution boundary
+
+The brief spans several releases. Complete independently testable tasks in sequence and push each immediately. A blocked external integration is not permission to simulate success. This roadmap remains open until every applicable acceptance criterion is met or its external dependency is documented; the current showcase is not a validated production deployment.
