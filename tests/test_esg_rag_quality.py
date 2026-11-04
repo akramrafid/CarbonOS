@@ -73,7 +73,13 @@ class RagQualityTest(ESGApiTestCase):
         db.close()
 
     def test_database_sources_survive_unavailable_vector_store_and_remain_tenant_scoped(self):
-        self.upload('user-a', 'policy.txt', b'Boiler maintenance policy: inspect the boiler every 12 months.')
+        document_id = self.upload('user-a', 'policy.txt', b'Boiler maintenance policy: inspect the boiler every 12 months.').json()['document_id']
+        # A content marker can also occur in an authorized identifier; it is not a source leak.
+        chunk_id = '00000000-0000-4000-8000-000000000999'
+        with self.Session() as db:
+            chunk = db.query(ESGChunk).filter(ESGChunk.document_id == document_id).one()
+            chunk.id = chunk_id
+            db.commit()
         self.upload('user-b', 'secret.txt', b'Boiler maintenance policy: secret interval 999 months.')
         with mock.patch('esg_rag.retriever.get_chroma_client', return_value=None), \
              mock.patch('esg_rag.retriever.retrieve_from_fallback', return_value=[]):
@@ -81,10 +87,11 @@ class RagQualityTest(ESGApiTestCase):
                 'query': 'boiler maintenance inspection interval', 'corpus': 'tenant_docs'}).json()
         self.assertFalse(result['insufficient_data'])
         self.assertIn('12 months', result['answer'])
-        self.assertNotIn('999', json.dumps(result))
+        self.assertNotIn('999', result['answer'])
+        self.assertEqual([(c['document_id'], c['chunk_id']) for c in result['citations']], [(document_id, chunk_id)])
         citation = result['citations'][0]
-        self.assertTrue(citation['document_id'])
-        self.assertTrue(citation['chunk_id'])
+        self.assertEqual(citation['snippet'], 'Boiler maintenance policy: inspect the boiler every 12 months.')
+        self.assertEqual(result['candidate_count'], 1)
         self.assertEqual(len(citation['content_sha256']), 64)
         self.assertEqual(result['retrieval_method'], 'bm25_vector_rrf')
         self.assertEqual(result['answer_mode'], 'retrieval_only')

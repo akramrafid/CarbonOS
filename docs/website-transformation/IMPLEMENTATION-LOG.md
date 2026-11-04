@@ -262,7 +262,7 @@ Next: continue route-specific truth/theme/dead-link fixes; main accounting/facto
 
 ## L01B — Original framework sources and actual scope (2026-11-04)
 
-Phase 1/2/8/12. State: TESTED; own SHA/remote verification reported after commit.
+Phase 1/2/8/12. State: PUSHED. Commit `023da8f2855bd732848743966ee383fdcf428893` matched remote Asif after retry; GitHub rejected the first push with an Internal Server Error.
 
 Files: FrameworkDocs.jsx, metadata/Footer, framework-integrity browser spec/screenshots, component traceability and tracking docs. Replaced three dead PDF anchors and unsupported official national-document claim with publisher links to the GHG Protocol Corporate Standard, Scope 2 Guidance and UNFCCC Paris Agreement overview. Original pages were opened and verified on 2026-11-04; page links do not impersonate hosted PDFs or national authority. Added factual current Scope 1/2 exclusions, absence of Scope 3/assurance and explicit registry/national-document boundaries. Reused CompanyPage and semantic tokens, added route metadata and a discoverable Project & data footer link. No new dependency or legal/approval guarantee.
 
@@ -273,3 +273,15 @@ Hosted follow-up: I01D ESG CI run 41815266165 completed with a PostgreSQL backen
 Primary references: [Corporate Standard](https://ghgprotocol.org/corporate-standard), [Scope 2 Guidance](https://ghgprotocol.org/scope-2-guidance), [Paris Agreement](https://unfccc.int/process-and-meetings/the-paris-agreement). An initially guessed Article 6 page failed and was not shipped; the verified UNFCCC overview is linked instead.
 
 I01E diagnosis from hosted failure log: the RAG isolation test searched all serialized response metadata for the substring `999`; an authorized random chunk UUID happened to contain it. The answer/citation source text was the correct 12-month policy, not the foreign 999-month source. This is a nondeterministic test-boundary error, not evidence of a PostgreSQL accounting defect. Next task will verify text and exact source identifiers separately, with a deterministic collision fixture; authorization behavior must remain tested.
+
+## I01E — Deterministic tenant-isolation assertion and PostgreSQL validation (2026-11-04)
+
+Phase 4/14. State: TESTED; own SHA/remote verification reported after commit.
+
+Files: test_esg_rag_quality.py and tracking docs. Hosted failure 41815266165 was a false substring collision: a permitted random chunk UUID contained the forbidden source-text marker 999. Added a deterministic permitted UUID ending in 999, reproduced the old failure locally, then checked the actual answer text separately from exact authorized document/chunk IDs, exact source excerpt and one authorized candidate. Foreign 999-month policy stays in the fixture. No production retrieval, authorization, accounting, report, CI step or schema changed; no failure suppression/skip added.
+
+Validation: full SQLite **123 run / 122 pass / one PostgreSQL-only skip**; a fresh disposable local **PostgreSQL 16.14 database: all 123 pass**, using the existing Alembic harness. `command.check(alembic_config(...))`: **No new upgrade operations detected**. Controlled tenant-filter bypass fault injection makes the corrected regression test fail as expected; no runtime source file edited. Whitespace passes. Disposable cluster stopped after validation; existing databases were not touched. No duplicate browser/build runs for this test-only task. The current source contract remains FAIL on 49 legacy color findings.
+
+I01D facility totals, v2 kg/null exports, v1 byte compatibility and all other ESG tests therefore pass on both local database backends. Fresh hosted checks after this push still need their own result; historical failed hosted run is not relabeled successful.
+
+Next: remaining public API/careers truth and source/theme audits, selective main factor/Scope 1 integration and external production/scientific validation.

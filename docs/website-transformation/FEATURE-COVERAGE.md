@@ -14,6 +14,6 @@
 | Registry | Django bridge project/rules/submission/adjustment call sites; sandbox code paths | Exact lifecycle mapping, authenticated external receipts; no official issuance claim |
 | Other modules | Reachable crop/weather/marketplace/farmer/sector/legacy dashboards | Mock states, unsupported actions, payment/telemetry integrity and route-by-route behavior audit |
 | Responsive QA | Ten-project shell suite: 40 pass; includes 390/1920 and landscape; primary desktop/320px protected ESG journey | Real devices and complete screen-reader/zoom/locale validation |
-| Delivery | Clean baseline pushed to origin/Asif; existing build/unit/E2E histories | Artifact contract resolved; 49 legacy color findings remain. Supported hosted ESG CI passed at b31e35e; main mutation integration still open |
+| Delivery | Clean baseline pushed to origin/Asif; existing build/unit/E2E histories | Artifact contract resolved; 49 legacy color findings remain. SHA-scoped hosted ESG successes recorded in QA; current local SQLite/PostgreSQL 123-test suite and Alembic comparison pass after deterministic RAG assertion fix; fresh hosted result and main mutation integration still open |
 
 Historical evidence: [competitive QA](../showcase/COMPETITIVE_UPGRADE_QA.md), [AI changes](../showcase/AI_SYSTEM_UPGRADE.md), [competitor comparison](../showcase/COMPETITOR_REVIEW.md). These are scoped snapshots, not evidence that this entire transformation is complete.
