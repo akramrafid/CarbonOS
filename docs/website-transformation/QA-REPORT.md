@@ -46,3 +46,7 @@ Both workflow YAML files parse; Asif trigger and supported ubuntu-24.04 configur
 ## C02
 
 `frontend-check --area all --json`: all required artifacts/sections/template resolution PASS; overall FAIL remains **64 source heuristics**. Machine-readable [result](evidence/frontend-contract-after-artifact-fixes.json). No new runtime behavior in this task; prior test evidence is identified by task above. No Web Vitals/Lighthouse or whole-app accessibility result is invented.
+
+## C03A / correction to C02
+
+C02's named artifact/template checks passed, but its full errors list also had four MRV screen-spec missing-section errors not represented in the checks array. C03A corrects the route/spec and all four errors. Full JSON errors now show only source findings plus their summary (64 findings; full gate remains FAIL). Runtime untouched. This correction does not assert that CarbonMonitoring itself has been validated.

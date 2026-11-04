@@ -86,10 +86,20 @@ Next: C02 resolve frontend contract template artifacts with actual evidence and 
 
 ## C02 — Replace contract templates with factual evidence (2026-11-04)
 
-Phase 14. State: TESTED; own SHA/remote verification reported after commit.
+Phase 14. State: PUSHED. Commit `566d2607effecf0f51bca0b7ca1f8802bd7c2383` matched remote Asif.
 
 Files: docs/growth/funnel.md, analytics/measurement-plan.md, seo/technical-seo.md, design/accessibility-spec.md, design/component-traceability.md, performance/report.md, design-system/MASTER.md, machine-readable contract evidence and tracking docs. Added the missing implemented funnel; replaced four unresolved templates; corrected unsupported design/traceability assertions. Analytics events are proposed/unimplemented, crawl/domain/schema gaps explicit, accessibility scope bounded, Web Vitals/Lighthouse unmeasured. Actual current build bytes recorded with method and artifact hashes, not relabelled as browser timing.
 
 Validation: full frontend contract rerun: **all artifact/section/template checks pass**, full result still **FAIL: 64 source heuristics** (unchanged). No checker modifications, bypasses or waivers. Artifact JSON is preserved in evidence/frontend-contract-after-artifact-fixes.json. Markdown whitespace check passes. Runtime tests not repeated for this documentation-only task.
 
 Next: C03 inventory and fix source findings in independently reviewable route/component batches; preserve dark/light behavior. Remaining main accounting/mutation and scientific integrations remain separately tracked.
+
+## C03A — Correct the MRV screen contract (2026-11-04)
+
+Phase 14. State: TESTED; own SHA/remote verification reported after commit.
+
+Files: design-system/pages/carbon-monitoring.md and tracking docs. Replaced the inaccurate route and unverified fixed scientific/attestation claims with actual research API/state boundaries, required visual/responsive/interaction/accessibility/instrumentation sections and explicit untested acceptance work.
+
+Correction to C02: all named artifact/template checks passed, but the checker also appends screen-spec errors outside its checks array. Inspection of the full errors list found four missing sections in the old MRV spec. The earlier “all section checks pass” report was too broad; those four errors are fixed here. Full JSON errors are now inspected, not just named check results. The full gate still fails 64 source findings, including two in generated Playwright HTML. No checker code was altered.
+
+Validation: full contract JSON rerun contains **zero screen-spec errors** and unchanged source finding count. Whitespace passes. Runtime behavior unchanged; no runtime tests repeated. Next: C03B standard build location for generated browser reports.
