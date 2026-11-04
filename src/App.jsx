@@ -65,8 +65,9 @@ function PageMetadata() {
   const { pathname } = useLocation();
   useEffect(() => {
     const titles = { '/how-it-works': 'How it works', '/company/trust': 'Trust & data', '/company/about': 'About',
-      '/company/privacy': 'Prototype data use', '/company/terms': 'Prototype service status', '/platform/esg': 'ESG workspace' };
+      '/company/privacy': 'Prototype data use', '/company/terms': 'Prototype service status', '/technology': 'Technology & deployment', '/platform/esg': 'ESG workspace' };
     const descriptions = {
+      '/technology': 'Explore the CarbonOS evidence, review, calculation and reporting workflow, research boundaries and requirements for a business pilot.',
       '/company/trust': 'Review the CarbonOS prototype controls, source provenance, AI boundaries, and deployment decisions before a business pilot.',
       '/company/privacy': 'Understand prototype file storage, optional external AI processing, and the privacy decisions required before real-data use.',
       '/company/terms': 'Understand the CarbonOS demonstration scope and the commercial service commitments that have not been established.',
@@ -80,7 +81,7 @@ function PageMetadata() {
       ['meta[property="og:description"]', description], ['meta[property="twitter:title"]', title],
       ['meta[property="twitter:description"]', description],
     ]) document.head.querySelector(selector)?.setAttribute('content', content);
-    const publicPage = pathname === '/' || pathname === '/how-it-works' || pathname.startsWith('/company/') && pathname in titles;
+    const publicPage = pathname === '/' || pathname === '/how-it-works' || pathname === '/technology' || pathname.startsWith('/company/') && pathname in titles;
     document.head.querySelector('meta[name="robots"]')?.setAttribute('content', publicPage ? 'index, follow' : 'noindex, follow');
   }, [pathname]);
   return null;

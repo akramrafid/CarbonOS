@@ -240,10 +240,22 @@ Next: I01D facility-level report integrity. Inspection found that missing/partia
 
 ## I01D — Facility totals and versioned export integrity (2026-11-04)
 
-Phase 4. State: TESTED; own commit SHA/remote verification reported after commit.
+Phase 4. State: PUSHED. Commit `2f7242792c30330a2eae369fbbe09364c52bf07e` matched remote Asif.
 
 Files: accounting/ledger, numerical/API/export-compatibility tests, synthetic v1 JSON/CSV fixtures, methodology/API contracts and tracking docs. Incomplete/no-electricity facility market values are null; complete facilities keep valid values even when the global market total is missing. New reports use schema 2 with actual kilogram facility fields and an explicit unit marker. CSV v2 includes those facilities through the existing formula-safe writer. Global tonne totals are unchanged. Methodology 1.0.3 invalidates old run fingerprints for new locking without rewriting historical snapshots. Schema-v1 exports retain their exact previous bytes; historical facility-unit/completeness defects are disclosed and need reviewed restatement before reliance.
 
 Validation: **123 backend tests run / 122 pass / one local PostgreSQL-only skip**. New cases cover missing/partial/no-electricity market amounts, independently complete facilities, exact 500 kg versus 0.500 t API/export values, null handling, repeated exports, formula-like facility names and byte-identical v1 JSON/CSV fixtures captured from HEAD 0962c6c's actual renderer. Initial API test incorrectly assumed snapshot lists used the generic items wrapper; corrected to the existing array contract and reran. Protected accounting browser journey **4 pass** on desktop/320px. Whitespace passes. No frontend runtime or schema migration changed.
 
 Next: remaining main accounting/factor governance integration and legacy design contract findings, preserving current controls.
+
+## L01A — Technology architecture without invented operations (2026-11-04)
+
+Phase 1/2/8/12. State: TESTED; own SHA/remote verification reported after commit.
+
+Files: Technology.jsx, App metadata/Footer entry, removed four route-exclusive technology components, new technology-integrity browser spec/screenshots, component traceability and tracking docs. Reused CompanyPage and existing semantic surface/state/control tokens. Replaced unsupported deployed hardware, 50,000+ readings/hour, live integrations, issued-credit, official-support, revenue and dated scale-up claims with the implemented evidence/review/calculation/report path, optional AI behavior, research limits and actual pilot requirements. No fabricated replacement milestones or hardware specs. Removed the dead registration button; evidence/trust/pilot links navigate to actual flows, and the research link points to the retained monitoring module. The route has a distinct title/description, public robots metadata and a discoverable footer product link.
+
+All four removed components had Technology.jsx as their sole caller; no research engine or device integration code was removed. No new dependencies or duplicated design framework. The page describes implementation boundaries, not runtime service health or independently validated methodology.
+
+Validation so far: 20 JS tests and TypeScript/Vite build pass; existing zlib browser-externalization warning remains. Initial desktop/320px functional tests 4 pass. Visual review caught intermediate theme-transition capture; strengthened the test to wait for actual resolved canvas/heading colors and disable animations only during screenshots. The first expanded run used an incorrect test assumption about heading CSS precedence (expected a generic heading override instead of the actual registry token); corrected the assertion to the resolved semantic token. Final full ten-viewport matrix **20 pass**; final technology + shared navigation/workspace checks after adding the footer entry **12 pass** on desktop/320px. Settled desktop/mobile light/dark screenshots inspected. Source contract decreases from 55 to **50 legacy color findings**, with no checker changes. No backend behavior changed.
+
+Next: continue route-specific truth/theme/dead-link fixes; main accounting/factor schema integration and external validation remain open.
