@@ -45,3 +45,6 @@ inference/chroma_data/uploads/*/
 docs/qa/playwright-report/
 test-results/
 inference/.e2e_store/
+
+# Generated test reports and local build artifacts
+build/

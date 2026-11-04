@@ -47,6 +47,6 @@ jobs:
         with:
           name: frontend-browser-report
           path: |
-            docs/qa/playwright-report/
+            build/playwright-report/
             test-results/
           retention-days: 7

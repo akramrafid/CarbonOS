@@ -96,10 +96,18 @@ Next: C03 inventory and fix source findings in independently reviewable route/co
 
 ## C03A — Correct the MRV screen contract (2026-11-04)
 
-Phase 14. State: TESTED; own SHA/remote verification reported after commit.
+Phase 14. State: PUSHED. Commit `c7e9e052a40c26e33f5dad5c88b6fbb185cb0f13` matched remote Asif.
 
 Files: design-system/pages/carbon-monitoring.md and tracking docs. Replaced the inaccurate route and unverified fixed scientific/attestation claims with actual research API/state boundaries, required visual/responsive/interaction/accessibility/instrumentation sections and explicit untested acceptance work.
 
 Correction to C02: all named artifact/template checks passed, but the checker also appends screen-spec errors outside its checks array. Inspection of the full errors list found four missing sections in the old MRV spec. The earlier “all section checks pass” report was too broad; those four errors are fixed here. Full JSON errors are now inspected, not just named check results. The full gate still fails 64 source findings, including two in generated Playwright HTML. No checker code was altered.
 
 Validation: full contract JSON rerun contains **zero screen-spec errors** and unchanged source finding count. Whitespace passes. Runtime behavior unchanged; no runtime tests repeated. Next: C03B standard build location for generated browser reports.
+
+## C03B — Separate generated browser reports from product source (2026-11-04)
+
+Phase 14. State: TESTED; own SHA/remote verification reported after commit.
+
+Files: Playwright config + scaffold template, both CI artifact paths, .gitignore and tracking docs. HTML reports now go to build/playwright-report; previous generated local report preserved under build/playwright-report-previous. Both CI jobs retain the actual new report and test-results as artifacts. No checker exclusions or rule changes were made; standard build output was already excluded by the checker. Product source stays fully checked.
+
+Validation: both workflow YAML files parse; route recovery **4 browser tests pass**, producing a real HTML report at the new location. Full contract contains zero screen-spec/generated-report errors; **62 application source findings remain** (the two former generated-HTML findings are gone). Whitespace passes. Existing historical machine-readable snapshot is retained as historical evidence. Next: fix unsafe raw-HTML style APIs and primary page token findings in separate tasks.

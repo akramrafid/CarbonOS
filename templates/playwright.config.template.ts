@@ -5,7 +5,7 @@ export default defineConfig({
   fullyParallel: true,
   forbidOnly: !!process.env.CI,
   retries: process.env.CI ? 2 : 0,
-  reporter: [["html", { outputFolder: "docs/qa/playwright-report", open: "never" }], ["line"]],
+  reporter: [["html", { outputFolder: "build/playwright-report", open: "never" }], ["line"]],
   use: {
     baseURL: process.env.BASE_URL ?? "http://127.0.0.1:3000",
     trace: "retain-on-failure",

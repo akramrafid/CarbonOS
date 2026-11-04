@@ -50,3 +50,7 @@ Both workflow YAML files parse; Asif trigger and supported ubuntu-24.04 configur
 ## C03A / correction to C02
 
 C02's named artifact/template checks passed, but its full errors list also had four MRV screen-spec missing-section errors not represented in the checks array. C03A corrects the route/spec and all four errors. Full JSON errors now show only source findings plus their summary (64 findings; full gate remains FAIL). Runtime untouched. This correction does not assert that CarbonMonitoring itself has been validated.
+
+## C03B
+
+4 browser tests pass; generated HTML exists at build/playwright-report/index.html. Workflow YAML parses. Full contract still FAIL on **62 application source findings**, with no screen-spec or generated-report errors. The checker is unchanged. Reports remain available as CI artifacts and local build output.
