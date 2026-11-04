@@ -326,5 +326,33 @@ class LedgerIsolationTest(LedgerTestCase):
         db.close()
 
 
+
+
+class LedgerFilteringTest(LedgerTestCase):
+    def test_activity_filters_combine_without_exposing_other_tenants(self):
+        approved = self.approved(meter_ref='filter-approved')
+        self.activity(meter_ref='filter-draft')
+        self.activity(activity_type='diesel', unit='L', meter_ref='filter-diesel')
+        query = f'/activities?period_id={self.period}&facility_id={self.fac}&status=APPROVED&activity_type=electricity'
+        result = self.call('GET', 'user-a', query, status=200).json()
+        self.assertEqual(result['total'], 1)
+        self.assertEqual([row['id'] for row in result['items']], [approved['id']])
+        self.assertEqual(self.call('GET', 'user-b', query, status=200).json(), {'total': 0, 'items': []})
+        self.assertEqual(self.call('GET', 'user-a', '/activities?activity_type=unknown', status=200).json(), {'total': 0, 'items': []})
+        self.assertEqual(self.call('GET', 'user-a', '/activities?facility_id=not-a-real-facility', status=200).json()['total'], 0)
+
+    def test_pagination_has_stable_tie_order_and_total_is_not_page_count(self):
+        ids = sorted(self.activity(meter_ref=f'page-{index}').json()['id'] for index in range(3))
+        query = f'/activities?period_id={self.period}&limit=2'
+        first = self.call('GET', 'user-a', query + '&offset=0', status=200).json()
+        second = self.call('GET', 'user-a', query + '&offset=2', status=200).json()
+        self.assertEqual((first['total'], second['total']), (3, 3))
+        self.assertEqual([row['id'] for row in first['items']], ids[:2])
+        self.assertEqual([row['id'] for row in second['items']], ids[2:])
+        self.assertEqual(self.call('GET', 'user-a', query + '&offset=3', status=200).json(), {'total': 3, 'items': []})
+        self.call('GET', 'user-a', '/activities?limit=0', status=422)
+        self.call('GET', 'user-a', '/activities?offset=-1', status=422)
+
+
 if __name__ == "__main__":
     unittest.main()

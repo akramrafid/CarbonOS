@@ -182,8 +182,16 @@ Next: E01C disclosure-list keys, then E01B ledger filters/pagination/evidence me
 
 ## E01C — Preserve repeated disclosure gaps without key collisions (2026-11-04)
 
-Phase 4/9. State: TESTED; own SHA/remote verification reported after commit.
+Phase 4/9. State: PUSHED. Commit `0ae1fecebe687421bfb53145f959bf3efd2ad7bc` matched remote Asif.
 
 Files: DisclosuresPanel.jsx, ledger-review.spec.ts and tracking docs. Repeated identical missing-data messages now use per-list positional keys rather than their duplicate text. These are stateless text entries; every requirement/gap remains displayed. No deduplication, suppressed console warning or disclosure-rule change.
 
 Validation: type check/build/whitespace pass. Existing delayed/reference/direct-view browser checks **4 pass** on desktop/320px, now additionally waiting for actual disclosure gaps, confirming multiple repeated missing-GHG messages remain, and asserting no duplicate-key console errors. No new test for the trivial syntax change; strengthened the existing meaningful view test. Next: E01B ledger filtering/pagination/evidence metadata.
+
+## E01B1 — Ledger filters and stable page ordering (2026-11-04)
+
+Phase 4. State: TESTED; own SHA/remote verification reported after commit.
+
+Files: ledger_router.py, test_esg_ledger.py, API contracts and tracking docs. Added activity-type filtering alongside period/facility/status. Shared list ordering now breaks equal primary sort values by record ID, preserving deterministic pages for an unchanged dataset. Totals remain counts of all tenant-authorized matching records before paging. Limit/offset bounds remain enforced. Filters do not change calculation or approval inputs; offset pagination is not a concurrent snapshot guarantee.
+
+Validation: **112 ESG backend tests run / 111 pass / one PostgreSQL-only local skip**, including combined type/status/facility/period filters, cross-tenant empty results, unknown filters, stable tied-date pagination, before-page totals and bounds. Whitespace passes. No frontend code changed or duplicate browser/build checks run for this API task. Next: E01B2 ledger controls, per-page evidence metadata and explicit empty/filter states.

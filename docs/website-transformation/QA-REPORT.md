@@ -86,3 +86,7 @@ Five static CSS blocks preserve identical text after removing raw HTML APIs. tsc
 ## E01C
 
 Type check/build/whitespace pass. Four existing period/reference browser checks pass with the disclosure regression assertion: repeated missing-GHG entries remain present and no duplicate-key React errors occur. Backend disclosure calculations/status rules unchanged.
+
+## E01B1
+
+112 ESG backend tests: **111 pass / 1 local PostgreSQL-only skip**. New filter/paging tests verify exact combined results, cross-tenant exclusion, unknown filters, equal-date deterministic order, unchanged total across pages and invalid bounds. Whitespace passes. No accounting eligibility/schema or frontend change; concurrent offset-page snapshot consistency remains an operational limitation.

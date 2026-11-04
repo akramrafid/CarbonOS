@@ -127,7 +127,8 @@ def run(fn, *args, **kwargs):
 def _list(db, model, principal, limit, offset, *filters, order=None):
     q = db.query(model).filter(model.organization_id == principal.organization_id, *filters)
     total = q.count()
-    rows = q.order_by(order if order is not None else model.id).limit(limit).offset(offset).all()
+    ordering = (order, model.id) if order is not None else (model.id,)
+    rows = q.order_by(*ordering).limit(limit).offset(offset).all()
     return {"total": total, "items": [out(r) for r in rows]}
 
 
@@ -245,12 +246,13 @@ def reject_activity(rec_id: str, body: ReviewIn, p: Principal = Depends(require(
 
 @router.get("/activities")
 def list_activities(period_id: Optional[str] = None, facility_id: Optional[str] = None, status: Optional[str] = None,
-                    limit: int = Limit, offset: int = Offset, p: Principal = Depends(require("read")),
+                    activity_type: Optional[str] = None, limit: int = Limit, offset: int = Offset, p: Principal = Depends(require("read")),
                     db: Session = Depends(get_db)):
     filters = [c for c in (
         ActivityRecord.period_id == period_id if period_id else None,
         ActivityRecord.facility_id == facility_id if facility_id else None,
         ActivityRecord.status == status if status else None,
+        ActivityRecord.activity_type == activity_type if activity_type else None,
     ) if c is not None]
     return _list(db, ActivityRecord, p, limit, offset, *filters, order=ActivityRecord.activity_start)
 

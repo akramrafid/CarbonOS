@@ -89,7 +89,7 @@ with `limit` (1–200, default 50) and `offset`. Domain rule violations: 403 (ro
 | PATCH `/activities/{id}` | write | DRAFT/REJECTED only; audit keeps before/after |
 | POST `/activities/{id}/submit` | write | DRAFT/REJECTED → SUBMITTED |
 | POST `/activities/{id}/approve` · `/reject` | review, not the creator | reject requires `comment` |
-| GET `/activities?period_id&facility_id&status` | read | |
+| GET `/activities?period_id&facility_id&status&activity_type&limit&offset` | read | Tenant-scoped combined filters; `{total,items}`; total counts all matching rows before paging; stable activity-start then ID ordering; limit 1–200, offset ≥0. Filters do not alter accounting inputs. |
 | POST `/periods/{id}/calculate` | write | stores run + lines; returns totals, exceptions, `blocking` |
 | GET `/calculations/{id}` | read | run + line-level trace (formula, factor version) |
 | POST `/periods/{id}/lock` | admin, not the run's preparer | `{calculation_run_id}` → snapshot (content omitted) |
