@@ -14,3 +14,5 @@ As of A00 (2026-11-04), the enterprise brief is **not complete**. See ROADMAP fo
 10. Production OIDC/Postgres/concurrency, backup restore/load, infrastructure headers, independent security/accounting review and model/field calibration require external environment/data/access.
 
 Do not claim CarbonOS is the sector's best product or production/scientifically validated from synthetic fixtures. Current competitor analysis is source-linked in docs/showcase/COMPETITOR_REVIEW.md.
+
+Historical report caveat (I01D): new schema-v2 facility exports use correct kilograms and null incomplete market amounts. Stored schema-v1 facility JSON fields were mislabeled tonne values under `_kg` names and could contain incomplete market subtotals/zeros. Their bytes remain immutable. Historical facility analysis requires source lines/global totals or a reviewed restatement; no retrospective correction/assurance is claimed.

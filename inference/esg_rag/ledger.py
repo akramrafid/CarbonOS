@@ -27,7 +27,7 @@ from .ledger_models import (
 from .models import ESGOrganization, ESGDocument
 from .evidence import visible_document_filter
 
-REPORT_SCHEMA = "carbonos.esg.report/1"
+REPORT_SCHEMA = "carbonos.esg.report/2"
 DISCLAIMERS = [
     "Internal calculation prepared with CarbonOS. Not externally assured or verified.",
     "Scope 3 emissions are not included in this report.",
@@ -502,8 +502,10 @@ def _report_content(db, principal, period, run):
             "scope3": None,
             "scope3_status": "NOT_INCLUDED",
         },
+        "by_facility_units": "kgCO2e",
         "by_facility": [{"facility_id": fid, "facility_name": facilities[fid].name if fid in facilities else None,
-                         **{k: _t(v) for k, v in vals.items()}} for fid, vals in sorted(run.by_facility.items())],
+                         **{k: None if v is None else Decimal(v) for k, v in vals.items()}}
+                        for fid, vals in sorted(run.by_facility.items())],
         "lines": [{k: getattr(l, k) for k in ("activity_id", "facility_id", "scope", "method", "quantity", "unit",
                                               "inclusion_share", "factor_id", "factor_version", "factor_value",
                                               "emissions_kg", "formula")} for l in lines],
@@ -545,6 +547,8 @@ def export_snapshot(snap: ReportSnapshot, fmt: str) -> str:
     c = json.loads(snap.content)
     out = io.StringIO()
     w = SafeCsvWriter(out)
+    if c.get('schema') == 'carbonos.esg.report/2':
+        w.writerow(['report_schema', c['schema']])
     w.writerow(["organization", c["organization"]["name"]])
     w.writerow(["period", c["period"]["name"], c["period"]["start_date"], c["period"]["end_date"]])
     w.writerow(["boundary_method", c["period"]["boundary_method"], "revision", c["period"]["revision"]])
@@ -553,6 +557,13 @@ def export_snapshot(snap: ReportSnapshot, fmt: str) -> str:
     for k, v in c["totals_tco2e"].items():
         w.writerow(["total_tco2e", k, "" if v is None else v])
     w.writerow([])
+    if c.get('schema') == 'carbonos.esg.report/2':
+        w.writerow(['by_facility_units', c['by_facility_units']])
+        facility_columns = ['facility_id', 'facility_name', 'scope1_kg', 'scope2_location_kg', 'scope2_market_kg']
+        w.writerow(facility_columns)
+        for facility in c['by_facility']:
+            w.writerow(['' if facility.get(key) is None else facility[key] for key in facility_columns])
+        w.writerow([])
     cols = ["activity_id", "facility_id", "scope", "method", "quantity", "unit", "inclusion_share", "factor_id",
             "factor_version", "factor_value", "emissions_kg", "formula"]
     w.writerow(cols)

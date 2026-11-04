@@ -3,6 +3,7 @@ Numerical fixtures for the pure GHG calculation library (no database, no HTTP).
 Factor values here are TEST fixtures, not real published factors.
 """
 import datetime as dt
+from dataclasses import replace
 import os
 import sys
 import unittest
@@ -154,6 +155,29 @@ class CalculationTests(unittest.TestCase):
         self.assertIsNone(r.scope2_market_kg)
         self.assertEqual(r.exceptions[0]["code"], "MISSING_MARKET_BASED_INPUT")
         self.assertFalse(r.blocking)  # location-based inventory is still complete
+
+    def test_facility_market_totals_do_not_present_missing_or_partial_inputs_as_zero(self):
+        missing = calculate([act('missing', 'f1', 'electricity', '1000', 'kWh')], FAC, [GRID], 'operational_control')
+        self.assertIsNone(missing.by_facility['f1']['scope2_market_kg'])
+        march_market = replace(factor('march-market', 'electricity', 'kWh', '0.1', 'market'), valid_to=dt.date(2025, 3, 31))
+        partial = calculate([act('march', 'f1', 'electricity', '1000', 'kWh'),
+                             act('april', 'f1', 'electricity', '1000', 'kWh', start=dt.date(2025, 4, 1), end=dt.date(2025, 4, 30))],
+                            FAC, [GRID, march_market], 'operational_control')
+        self.assertIsNone(partial.scope2_market_kg)
+        self.assertIsNone(partial.by_facility['f1']['scope2_market_kg'])
+        self.assertEqual(sum(line.emissions_kg for line in partial.lines if line.method == 'market'), D('100'))
+        fuel_only = calculate([act('fuel', 'f1', 'diesel', '1', 'L')], FAC, [DIESEL], 'operational_control')
+        self.assertIsNone(fuel_only.by_facility['f1']['scope2_market_kg'])
+
+    def test_complete_facility_retains_valid_market_amount_while_another_is_missing(self):
+        facilities = {**FAC, 'f2': Facility('f2', 'OTHER', True, True, D(100))}
+        other_grid = factor('other-grid', 'electricity', 'kWh', '0.6', 'location', region='OTHER')
+        market = factor('market', 'electricity', 'kWh', '0.1', 'market')
+        result = calculate([act('one', 'f1', 'electricity', '10', 'kWh'), act('two', 'f2', 'electricity', '10', 'kWh')],
+                           facilities, [GRID, other_grid, market], 'operational_control')
+        self.assertIsNone(result.scope2_market_kg)
+        self.assertEqual(result.by_facility['f1']['scope2_market_kg'], D('1.000000'))
+        self.assertIsNone(result.by_facility['f2']['scope2_market_kg'])
 
     def test_memo_items_never_change_totals(self):
         base = calculate([act("a1", "f1", "electricity", "1000", "kWh")], FAC, [GRID], "operational_control")

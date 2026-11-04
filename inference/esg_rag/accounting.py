@@ -20,7 +20,7 @@ from decimal import Decimal, ROUND_HALF_UP
 import datetime as dt
 from typing import Dict, List, Optional, Tuple
 
-METHODOLOGY_VERSION = "carbonos-ghg-scope12-1.0.2"
+METHODOLOGY_VERSION = "carbonos-ghg-scope12-1.0.3"
 
 # activity_type -> (scope, canonical unit)
 ACTIVITY_TYPES: Dict[str, Tuple[str, str]] = {
@@ -155,7 +155,7 @@ class Result:
     scope1_kg: Decimal = Decimal(0)
     scope2_location_kg: Decimal = Decimal(0)
     scope2_market_kg: Optional[Decimal] = None
-    by_facility: Dict[str, Dict[str, Decimal]] = field(default_factory=dict)
+    by_facility: Dict[str, Dict[str, Optional[Decimal]]] = field(default_factory=dict)
 
     @property
     def blocking(self) -> bool:
@@ -222,6 +222,8 @@ def calculate(activities: List[Activity], facilities: Dict[str, Facility], facto
     res = Result(methodology_version=METHODOLOGY_VERSION, boundary_method=boundary_method)
     market_complete = True
     has_electricity = False
+    market_facilities = set()
+    missing_market_facilities = set()
     gwp_bases = set()
 
     def exception(code, activity, blocking=True, detail=""):
@@ -296,9 +298,11 @@ def calculate(activities: List[Activity], facilities: Dict[str, Facility], facto
             res.scope2_location_kg += add_line(a, fac, "2", "location", f, share)
         if a.activity_type == "electricity":
             has_electricity = True
+            market_facilities.add(fac.id)
             mf, merr = select_factor(a, fac.region, "market", factors, a.market_factor_id)
             if merr:
                 market_complete = False
+                missing_market_facilities.add(fac.id)
                 if a.market_factor_id:
                     exception(merr, a, detail="The explicitly selected market-based factor is not applicable. Review its approval, configured region, unit and dates.")
                 else:
@@ -310,6 +314,9 @@ def calculate(activities: List[Activity], facilities: Dict[str, Facility], facto
 
     if has_electricity and not market_complete:
         res.scope2_market_kg = None  # partial market-based totals are never reported as complete
+    for facility_id, totals in res.by_facility.items():
+        if facility_id not in market_facilities or facility_id in missing_market_facilities:
+            totals['scope2_market_kg'] = None
     if len(gwp_bases) > 1:
         res.exceptions.append({"code": "MIXED_GWP_BASIS", "activity_id": None, "facility_id": None,
                                "activity_type": None, "blocking": True, "detail": ", ".join(sorted(gwp_bases))})

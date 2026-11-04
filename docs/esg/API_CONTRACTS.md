@@ -98,6 +98,12 @@ with `limit` (1–200, default 50) and `offset`. Domain rule violations: 403 (ro
 | GET `/snapshots/{id}/export?format=json\|csv` | read | byte-identical on every call; `X-Content-SHA256` header |
 | GET `/audit-events?entity_id` | review | newest first |
 
+## Report format boundary (schema 2)
+
+Newly locked reports declare `schema: carbonos.esg.report/2`. `totals_tco2e` stays in tonnes; `by_facility_units: kgCO2e` explicitly identifies kilograms for facility fields ending in `_kg`. Unknown or partial facility market amounts are null (CSV: blank), not zero. CSV v2 starts with a `report_schema` row and includes a facility section before calculation lines; consumers must recognize the version rather than assume fixed row offsets. Facility names pass through the existing formula-safe writer. The content SHA256 header continues to identify stored canonical JSON, not the rendered CSV bytes.
+
+Existing schema-v1 exports remain byte-identical. Their JSON facility `_kg` fields historically contained tonnes and may show incomplete market subtotals/zeros; do not treat them as corrected kg/complete totals. Source lines/global totals or an explicit reviewed restatement are required for historical facility analysis. No snapshot rewrite or database migration occurs.
+
 ## Members & invitations (P1-2)
 
 | Method & path | Permission | Notes |

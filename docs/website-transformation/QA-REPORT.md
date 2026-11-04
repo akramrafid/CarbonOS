@@ -106,3 +106,7 @@ Type check/build/whitespace pass. Four existing period/reference browser checks 
 ## I01B
 
 119 backend tests: **118 pass / 1 local PostgreSQL-only skip**; four protected accounting browser tests pass. Invalid explicit market inputs cannot become an approved run or silently use another factor; ordinary missing market data remains unreported. Version 1.0.2 distinguishes new behavior. Facility-level incomplete-market/JSON-unit issues discovered during review are tracked in I01D and are not claimed fixed here.
+
+## I01D
+
+123 backend tests: **122 pass / one local PostgreSQL-only skip**. Numerical completeness, real API calculate/independent lock/JSON/CSV, formula-injection-safe facility names and stored v1 byte compatibility pass. New version: methodology 1.0.3 / report schema 2. Historical v1 exports remain unchanged, including their known facility unit/completeness defect; they are not retroactively corrected or certified. Whitespace passes. Protected accounting browser journey **4 pass** on desktop/320px. Full frontend contract remains FAIL on 55 legacy color findings; no frontend runtime changed in this task.

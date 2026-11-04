@@ -230,10 +230,20 @@ Next: I01B explicitly invalid market-based selections, with separate tests/versi
 
 ## I01B — Explicit invalid market inputs are blocking (2026-11-04)
 
-Phase 4. State: TESTED; own SHA/remote verification reported after commit.
+Phase 4. State: PUSHED. Commit `0962c6c3107d13e1acc0237400cf46a9b51f6551` matched remote Asif.
 
 Files: accounting.py, numerical/ledger tests, methodology and tracking docs. Explicit market factors now respect the configured facility factor-region mapping. Wrong-region, unapproved, inapplicable or nonfinite selected factors produce their actual blocking error without substitution. Missing optional market input keeps its existing non-blocking/unreported behavior. Location totals remain separate, but an invalid explicit market selection prevents locking. New methodology version 1.0.2 records this change; existing snapshots remain immutable. This exact configured-region check is not full market geography, certificate quality or contractual-instrument validation.
 
 Validation: **119 backend tests run / 118 pass / one PostgreSQL-only local skip**. New numerical cases cover four invalid selected-factor modes despite an available valid alternative, valid selected market arithmetic and unchanged absent-input behavior. API test verifies wrong-market error, unchanged valid location total, null market total and independent-lock denial. Protected accounting browser journey **4 pass** on desktop/320px. Whitespace passes; no frontend/schema change. Primary Scope 2 source/limits remain in methodology documentation.
 
 Next: I01D facility-level report integrity. Inspection found that missing/partial market facility values could appear as zero/subtotals and JSON facility fields labelled kg were converted to tonnes. Correct both with explicit new output versions while preserving historical snapshots.
+
+## I01D — Facility totals and versioned export integrity (2026-11-04)
+
+Phase 4. State: TESTED; own commit SHA/remote verification reported after commit.
+
+Files: accounting/ledger, numerical/API/export-compatibility tests, synthetic v1 JSON/CSV fixtures, methodology/API contracts and tracking docs. Incomplete/no-electricity facility market values are null; complete facilities keep valid values even when the global market total is missing. New reports use schema 2 with actual kilogram facility fields and an explicit unit marker. CSV v2 includes those facilities through the existing formula-safe writer. Global tonne totals are unchanged. Methodology 1.0.3 invalidates old run fingerprints for new locking without rewriting historical snapshots. Schema-v1 exports retain their exact previous bytes; historical facility-unit/completeness defects are disclosed and need reviewed restatement before reliance.
+
+Validation: **123 backend tests run / 122 pass / one local PostgreSQL-only skip**. New cases cover missing/partial/no-electricity market amounts, independently complete facilities, exact 500 kg versus 0.500 t API/export values, null handling, repeated exports, formula-like facility names and byte-identical v1 JSON/CSV fixtures captured from HEAD 0962c6c's actual renderer. Initial API test incorrectly assumed snapshot lists used the generic items wrapper; corrected to the existing array contract and reran. Protected accounting browser journey **4 pass** on desktop/320px. Whitespace passes. No frontend runtime or schema migration changed.
+
+Next: remaining main accounting/factor governance integration and legacy design contract findings, preserving current controls.

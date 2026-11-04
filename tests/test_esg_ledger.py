@@ -5,7 +5,9 @@ Factor values are TEST fixtures, not published factors.
 
 Run against PostgreSQL + Alembic by setting ESG_TEST_DATABASE_URL (see docs/esg/TEST_EVIDENCE.md).
 """
+import csv
 import datetime as dt
+import io
 import os
 import sys
 import unittest
@@ -364,7 +366,7 @@ class ExplicitLocationRegionTest(LedgerTestCase):
         result = self.post('user-a', f'/periods/{self.period}/calculate')
         self.assertTrue(result['blocking'])
         self.assertEqual(D(result['scope2_location_kg']), D(0))
-        self.assertEqual(result['methodology_version'], 'carbonos-ghg-scope12-1.0.2')
+        self.assertEqual(result['methodology_version'], 'carbonos-ghg-scope12-1.0.3')
         self.assertTrue(any(item['code'] == 'SELECTED_FACTOR_OTHER_REGION' for item in result['exceptions']))
         denied = self.call('POST', 'admin-a', f'/periods/{self.period}/lock', {'calculation_run_id': result['id']}, status=409)
         self.assertIn('blocking data-quality exceptions', denied.json()['detail'])
@@ -381,6 +383,30 @@ class ExplicitMarketRegionTest(LedgerTestCase):
         self.assertIsNone(result['scope2_market_kg'])
         self.assertTrue(any(item['code'] == 'MARKET_FACTOR_OTHER_MARKET' and item['blocking'] for item in result['exceptions']))
         self.call('POST', 'admin-a', f'/periods/{self.period}/lock', {'calculation_run_id': result['id']}, status=409)
+
+class FacilityReportIntegrityTest(LedgerTestCase):
+    def test_new_snapshot_keeps_facility_kilograms_and_missing_market_null(self):
+        self.fac = self.post('user-a', '/facilities', {'legal_entity_id': self.le, 'name': '=2+2', 'country': 'BD', 'grid_region': 'TEST-GRID'})['id']
+        self.approved(quantity='1000')
+        calculation = self.post('user-a', f'/periods/{self.period}/calculate')
+        self.assertIsNone(calculation['by_facility'][self.fac]['scope2_market_kg'])
+        self.post('admin-a', f'/periods/{self.period}/lock', {'calculation_run_id': calculation['id']})
+        snapshots = self.call('GET', 'user-a', f'/periods/{self.period}/snapshots').json()
+        export = self.call('GET', 'user-a', f"/snapshots/{snapshots[0]['id']}/export?format=json", status=200).json()
+        self.assertEqual(export['schema'], 'carbonos.esg.report/2')
+        self.assertEqual(export['by_facility_units'], 'kgCO2e')
+        self.assertEqual(D(export['totals_tco2e']['scope2_location_based']), D('0.500'))
+        self.assertEqual(D(export['by_facility'][0]['scope2_location_kg']), D('500'))
+        self.assertIsNone(export['by_facility'][0]['scope2_market_kg'])
+        csv_text = self.call('GET', 'user-a', f"/snapshots/{snapshots[0]['id']}/export?format=csv", status=200).text
+        self.assertIn('report_schema,carbonos.esg.report/2', csv_text)
+        self.assertIn('by_facility_units,kgCO2e', csv_text)
+        self.assertIn("'=2+2", csv_text)
+        self.assertIn('facility_id,facility_name,scope1_kg,scope2_location_kg,scope2_market_kg', csv_text)
+        facility_row = next(row for row in csv.reader(io.StringIO(csv_text)) if row and row[0] == self.fac)
+        self.assertEqual(D(facility_row[3]), D('500'))
+        self.assertEqual(facility_row[4], '')
+        self.assertEqual(csv_text, self.call('GET', 'user-a', f"/snapshots/{snapshots[0]['id']}/export?format=csv").text)
 
 if __name__ == "__main__":
     unittest.main()

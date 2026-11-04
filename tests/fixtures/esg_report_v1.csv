@@ -1,0 +1,13 @@
+organization,Historical synthetic test
+period,Synthetic FY2025,2025-01-01,2025-12-31
+boundary_method,operational_control,revision,1
+methodology_version,carbonos-ghg-scope12-1.0,snapshot_sha256,a9364445107a405fe75e574bd1dcfc93e4618003fc3046abed0129d7ff46d766
+prepared_by,synthetic-preparer,approved_by,synthetic-approver
+total_tco2e,scope1,0.000
+total_tco2e,scope2_location_based,0.500
+total_tco2e,scope2_market_based,
+total_tco2e,scope2_market_based_status,MISSING_INPUTS
+
+activity_id,facility_id,scope,method,quantity,unit,inclusion_share,factor_id,factor_version,factor_value,emissions_kg,formula
+
+disclaimer,"Synthetic legacy compatibility fixture, not a real inventory."

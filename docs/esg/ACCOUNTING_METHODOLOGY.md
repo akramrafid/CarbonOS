@@ -1,6 +1,6 @@
 # Accounting Methodology — `carbonos-ghg-scope12-1.0`
 
-Current Asif calculation version: `carbonos-ghg-scope12-1.0.2`. Patch history below records earlier changes; stored snapshots retain their recorded version.
+Current Asif calculation version: `carbonos-ghg-scope12-1.0.3`. Patch history below records earlier changes; stored snapshots retain their recorded version.
 Status: **CODE_COMPLETE, not METHODOLOGY_VALIDATED.** A qualified GHG practitioner must review this
 before any customer relies on it. No third-party certification or verification is claimed.
 
@@ -94,3 +94,11 @@ Primary reference reviewed 2026-11-04: [GHG Protocol Scope 2 Guidance](https://g
 ## Asif methodology patch 1.0.2 — explicit market inputs
 
 A selected market factor must match the facility's configured factor-region code. This is the prototype's exact region mapping, not a complete geographic-market/contract-quality validation. A wrong-region, unapproved, inapplicable or nonfinite explicitly selected market factor now creates its exact blocking error and cannot silently substitute another factor. The location-based total may still be calculated, but the invalid run cannot be locked. An absent market input remains explicitly unavailable (`null`) with the existing non-blocking missing-input notice; no automatic grid/residual fallback was added. Full market hierarchy, contractual instruments and factor-kind integration remain separate work.
+
+## Asif methodology patch 1.0.3 — facility completeness and report units
+
+Facility market-based totals are `null` when any included electricity record at that facility lacks a usable market factor, or when the facility has no included electricity. A complete facility retains its valid market amount even when another facility is incomplete; the overall market total remains unavailable in that case. Partial market calculation lines remain visible for traceability and must not be interpreted as complete facility totals.
+
+Newly locked reports use `carbonos.esg.report/2`. Global `totals_tco2e` remain tonnes, while `by_facility` fields ending in `_kg` now contain actual kilograms and declare `by_facility_units: kgCO2e`. Missing market amounts remain JSON null / blank CSV cells. Schema-v2 CSV declares its schema and includes the same facility values, using the existing formula-safe CSV writer.
+
+Historical schema-v1 JSON and CSV bytes are preserved. Their JSON facility fields ending in `_kg` were incorrectly converted to tonnes, and missing/partial market facility fields could be zero/subtotals. Do not rely on those historical facility fields as kilograms or complete market totals. Consult the stored source lines/global totals or prepare an explicit reviewed restatement; this fix does not silently rewrite locked records. The pre-change v1 renderer is captured by synthetic compatibility fixtures in `tests/fixtures/esg_report_v1.*`.
