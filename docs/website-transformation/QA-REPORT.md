@@ -30,3 +30,7 @@ Full required viewport matrix (including 390 and 1920), complete protected + iso
 ## X01
 
 11 JS tests, tsc, production build and whitespace check pass. Route recovery **4/4 browser tests pass** (desktop/320px); failures are deliberately injected into lazy loading/rendering, then actual reload/home recovery is exercised. The application shell remains usable. This boundary covers render/module errors, not arbitrary asynchronous event-handler failures.
+
+## S01A
+
+13 JS tests, tsc/build/whitespace pass. Weather browser tests **4 pass**, explicit synthetic provider fixtures; actual live keyless Open-Meteo response also validated separately. No business or user profile data sent. This does not validate agricultural risk predictions or provider availability over time. Historical weather credential revocation remains external.

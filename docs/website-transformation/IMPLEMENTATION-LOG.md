@@ -46,10 +46,20 @@ Next: X01 recoverable route error boundary.
 
 ## X01 — Page failure recovery (2026-11-04)
 
-Phase 9. State: TESTED; own SHA/remote verification reported after commit.
+Phase 9. State: PUSHED. Commit `4f05dccbcc5225fa201bbd4768bc21ad673d03d0` matched remote Asif.
 
 Files: App.jsx, RouteErrorBoundary.jsx, route-recovery.spec.ts and tracking docs. A pathname-scoped React error boundary surrounds routed content while preserving the main navigation/footer. Failed module loading and render errors show an alert with reload/home recovery and a truthful unsaved-edit notice. The UI does not expose raw exception messages. Path changes reset the boundary; query-only workspace navigation does not remount it.
 
 Validation: 11 JS tests, type check and production build pass; **4 browser tests pass** on desktop/320px for aborted lazy imports, successful reload, deliberately injected render exceptions, no raw error in the page and home recovery. The initial reload assertion used the wrong Trust heading; corrected it to the existing visible heading and reran. Tests deliberately cause expected React console exceptions. No external reporting or extra dependency added.
 
 Next: S01 remove frontend provider credential requests, preserving explicit unavailable telemetry states.
+
+## S01A — Credential-free, honest city weather (2026-11-04)
+
+Phase 13. State: TESTED; own SHA/remote verification reported after commit.
+
+Files: HarvestGuardDashboard.jsx, cityWeather.js, Privacy.jsx, JS/browser weather tests and tracking docs. Removed the embedded weather credential and OpenWeather requests/images. Reused the existing Open-Meteo fallback as the keyless primary path, with bounded supported cities, finite/range/unit/time validation and abort-safe location changes. Weather no longer falls back to invented conditions. UI identifies model estimates, provider and timestamp/timezone; offers unavailable/retry; city selector is labelled and 44px. Weather loads only after the local profile exists and sends city coordinates, without profile/contact fields. Provider contract checked against https://open-meteo.com/en/docs on 2026-11-04.
+
+Validation: **13 JS tests pass**, tsc/build pass, **4 browser tests pass** on desktop/320px using explicit provider fixtures for value/provenance, outage/retry, malformed payload and no credential-bearing requests. Separate real public Dhaka request passed the same response validator (model timestamp 2026-11-04T12:45 Asia/Dhaka); this is one connectivity check, not uptime evidence. Source diff reviewed without reproducing credential values. Operator revocation/rotation remains required for the credential in historical commits; history was not rewritten.
+
+Next: S01B remove browser Blynk credential calls and present unsupported live telemetry honestly.
