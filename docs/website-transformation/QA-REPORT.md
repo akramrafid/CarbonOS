@@ -94,3 +94,7 @@ Type check/build/whitespace pass. Four existing period/reference browser checks 
 ## E01B2
 
 20 JS tests, type check/build/whitespace pass. Protected ledger + full accounting **12 browser tests pass** (desktop/320px). Actual 28-row pagination, combined/empty filters, per-page metadata-only counts, evidence detail text, delayed responses and late-action reload scope verified. [Desktop filters](evidence/ledger-filters-1440.png), [mobile filters](evidence/ledger-filters-320.png). Mobile review required a wider scrollable activity table, fixed before final rerun. Full contract still FAIL on 55 legacy color findings. No inventory math/eligibility changes.
+
+## S03
+
+115 ESG backend tests: **114 pass / 1 local PostgreSQL-only skip**. New activity/metric evidence-link negatives/positive shared scopes pass without unauthorized persistence or audit transitions. Direct tenant-isolation suite passes. Protected ledger + source inspection/history + comparison **16 browser tests pass** (desktop/320px); actual extraction-to-draft retains its authorized uploaded document ID. Shared document visibility fails closed when no scope exists. Existing proof snapshots restored. No claim of source accuracy, mandatory evidence completeness or historical-row validation. Full frontend contract remains FAIL on 55 legacy color findings.

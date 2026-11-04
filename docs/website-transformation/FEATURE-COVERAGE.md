@@ -4,7 +4,7 @@
 
 | Area | Current evidence | Remaining gap |
 |---|---|---|
-| Factory ESG demo | Real isolated demo API; three personas; calculation, review/lock/export browser journey recorded in docs/showcase | Ledger filters/paging and per-page reference metadata implemented; production OIDC/Postgres operations, source binding/governance and main accounting integration remain |
+| Factory ESG demo | Real isolated demo API; three personas; calculation, review/lock/export browser journey recorded in docs/showcase | Ledger filters/paging and per-page reference metadata implemented; production OIDC/Postgres operations, new supplied document links now SQL-authorized; historical source governance and main accounting integration remain |
 | Scope 1/2 | Deterministic Decimal engine, boundaries and factor matching; explicit market-factor absence | Main equipment/refrigerant/certificate/instrument and derived grid work absent |
 | Documents | Text ingestion, rules/provider opt-in, source chunks/hashes, manual review | Main versioned bill profiles and OCR absent; no real invoice accuracy benchmark |
 | RAG | Authorized SQL candidates, BM25, optional compatible vectors, checked source excerpts/numbers, abstention/model/mode; full SQL-authorized passage inspector, local provenance answer export and bounded in-memory answer history and independent two-document scoped comparison with partial failures/combined export | No demonstrated learned multilingual retrieval quality; 2,000 chunk bound, vector cache concurrency |

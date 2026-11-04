@@ -2,7 +2,6 @@ import time
 import hashlib
 import datetime
 from fastapi import APIRouter, Depends, HTTPException, UploadFile, File, Form, Body
-from sqlalchemy import and_, or_
 from sqlalchemy.orm import Session
 from typing import List, Optional, Dict, Any
 
@@ -20,6 +19,7 @@ from .schemas import (
 from .auth import Identity, Principal, get_identity, require
 from .ratelimit import limited
 from .ledger import audit
+from .evidence import visible_document_filter
 from .config import CORPUS_TENANT_DOCS, CORPUS_REGULATORY, CORPUS_EMISSION_FACTORS, GLOBAL_CORPUS_OWNER
 from .ingest import ingest_document, IngestRejected, MAX_UPLOAD_BYTES
 from .retriever import retrieve
@@ -109,7 +109,7 @@ def esg_query(
     tenant_id = principal.organization_id
 
     if request.document_ids is not None:
-        visible = db.query(ESGDocument.id).filter(_visible_documents(principal), ESGDocument.id.in_(request.document_ids)).all()
+        visible = db.query(ESGDocument.id).filter(visible_document_filter(principal.organization_id), ESGDocument.id.in_(request.document_ids)).all()
         if {row[0] for row in visible} != set(request.document_ids):
             raise HTTPException(404, "Selected source documents not found")
 
@@ -301,20 +301,12 @@ def get_emission_factors(
         for f in factors
     ]
 
-def _visible_documents(principal: Principal):
-    return or_(
-        and_(ESGDocument.tenant_id == principal.organization_id, ESGDocument.corpus == CORPUS_TENANT_DOCS),
-        *(and_(ESGDocument.tenant_id == owner, ESGDocument.corpus == corpus)
-          for corpus, owner in GLOBAL_CORPUS_OWNER.items()),
-    )
-
-
 @router.get("/documents/{document_id}/chunks/{chunk_id}")
 def read_source_passage(document_id: str, chunk_id: str,
                         principal: Principal = Depends(require("read")), db: Session = Depends(get_db)):
     """Read one SQL-authorized indexed passage; source text is data, never executable HTML."""
     row = (db.query(ESGChunk, ESGDocument).join(ESGDocument, ESGChunk.document_id == ESGDocument.id)
-           .filter(ESGDocument.id == document_id, ESGChunk.id == chunk_id, _visible_documents(principal)).first())
+           .filter(ESGDocument.id == document_id, ESGChunk.id == chunk_id, visible_document_filter(principal.organization_id)).first())
     if row is None:
         raise HTTPException(404, "Source passage not found")
     chunk, document = row
@@ -334,7 +326,7 @@ def list_documents(
     db: Session = Depends(get_db)
 ):
     """List the caller's tenant documents plus global corpora, with provenance."""
-    q = db.query(ESGDocument).filter(_visible_documents(principal))
+    q = db.query(ESGDocument).filter(visible_document_filter(principal.organization_id))
     if corpus:
         q = q.filter(ESGDocument.corpus == corpus)
 

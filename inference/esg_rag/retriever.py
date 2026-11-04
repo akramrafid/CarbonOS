@@ -18,9 +18,9 @@ from .config import (
     VALID_CORPORA
 )
 from .ingest import get_chroma_client, compute_embedding, embedding_space
-from .config import GLOBAL_CORPUS_OWNER, RAG_CANDIDATE_LIMIT
+from .config import RAG_CANDIDATE_LIMIT
 from .models import ESGDocument, ESGChunk
-from sqlalchemy import or_
+from .evidence import visible_document_filter
 
 class RetrievedChunk:
     def __init__(self, content: str, score: float, metadata: Dict[str, Any]):
@@ -74,18 +74,12 @@ def tokenize(text):
 def _retrieve_sql(query, corpus, tenant_id, top_k, min_confidence, db, document_ids=None):
     """SQL owns visibility and content; vectors are optional, replaceable ranking hints."""
     corpora = sorted(VALID_CORPORA) if corpus == 'all' else [corpus]
-    filters = []
-    for c in corpora:
-        owner = tenant_id if c == CORPUS_TENANT_DOCS else GLOBAL_CORPUS_OWNER[c]
-        if owner:
-            filters.append((ESGDocument.corpus == c) & (ESGDocument.tenant_id == owner))
-    rows = []
-    if filters:
-        candidates = db.query(ESGChunk, ESGDocument).join(ESGDocument, ESGChunk.document_id == ESGDocument.id).filter(or_(*filters))
-        if document_ids is not None:
-            candidates = candidates.filter(ESGDocument.id.in_(document_ids))
-        rows = (candidates.order_by(ESGDocument.created_at.desc(), ESGDocument.id, ESGChunk.chunk_index)
-                .limit(RAG_CANDIDATE_LIMIT + 1).all())
+    candidates = (db.query(ESGChunk, ESGDocument).join(ESGDocument, ESGChunk.document_id == ESGDocument.id)
+                  .filter(visible_document_filter(tenant_id), ESGDocument.corpus.in_(corpora)))
+    if document_ids is not None:
+        candidates = candidates.filter(ESGDocument.id.in_(document_ids))
+    rows = (candidates.order_by(ESGDocument.created_at.desc(), ESGDocument.id, ESGChunk.chunk_index)
+            .limit(RAG_CANDIDATE_LIMIT + 1).all())
     truncated = len(rows) > RAG_CANDIDATE_LIMIT
     rows = rows[:RAG_CANDIDATE_LIMIT]
     query_terms = set(tokenize(query))

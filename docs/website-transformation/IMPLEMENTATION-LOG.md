@@ -198,7 +198,7 @@ Validation: **112 ESG backend tests run / 111 pass / one PostgreSQL-only local s
 
 ## E01B2 — Ledger review controls and honest metadata (2026-11-04)
 
-Phase 4. State: TESTED; own SHA/remote verification reported after commit.
+Phase 4. State: PUSHED. Commit `70de23be18e9b93962e07e887400ad628e74fb09` matched remote Asif.
 
 Files: LedgerPanel, shared ui hook/Table, ledgerEvidence helper, JS/browser tests, two filter screenshots and tracking docs. Added combined facility/activity/status controls, clear/reset, 25-row paging and actual matching totals. Evidence summary counts only reference metadata on the loaded page and explicitly disclaims validity/approval/period-wide coverage. Details show recorded type/reference/document ID/excerpt/record ID without pretending an ID verifies a file. Unknown facility names fall back to actual IDs. Calculations still use eligible approved period records, independently of these filters.
 
@@ -207,3 +207,13 @@ Shared reload now reads the latest path and ignores calls after unmount, so an o
 Validation: **20 JS tests pass**, type check/build/whitespace pass. Ledger + complete protected accounting journey **12 browser tests pass** on desktop/320px, including 28 real API records across two pages, combined/empty/reset filters, metadata/details, page boundaries, delayed GET/reference failures and a delayed submit after period change. The original journey's broad SUBMITTED text selector became ambiguous with the new dropdown; scoped it to the actual record table and reran without weakening the status assertion. Final mobile screenshot inspected. No backend/accounting changes. Full contract remains FAIL on **55 legacy color findings**.
 
 Next: validate document identifiers supplied as activity evidence against actual authorized SQL documents, then remaining workspace/source and main integration work.
+
+## S03 — SQL-authorized evidence identifiers on new records (2026-11-04)
+
+Phase 4/13. State: TESTED; own SHA/remote verification reported after commit.
+
+Files: evidence.py, ledger/metrics services, ESG routers/retriever, API contracts, source-link/backend/browser tests and tracking docs. Centralized the existing exact owner/corpus SQL visibility rule for retrieval, listing, inspection and source references. New activities and metric observations with a supplied document ID require an existing visible source; unknown/foreign/misowned references receive identical 404 before persistence/audit. Identifier length is bounded to the declared 36-character document schema. Empty visibility configuration fails closed. Manual records without a linked ID remain possible; source existence/access is not accuracy or human approval. Existing historical rows are not rewritten or retroactively certified.
+
+Validation: **115 ESG backend tests run / 114 pass / one PostgreSQL-only local skip**; three new source-reference tests cover private/shared validity, wrong-owner/corpus/unknown/length denial, no partial record/audit writes, unchanged DRAFT/UNREVIEWED state, manual paths and empty configuration. Direct legacy tenant isolation passes. Protected ledger + comparison + inspection/history browser suite **16 pass** on desktop/320px, including actual synthetic document upload, rule extraction, Use, draft save and the exact stored source ID. Initial metric fixture used an unsupported dimension and wrong assumed HTTP status; corrected to the actual groundwater metric/200 contract and reran. Prior generated evidence snapshots restored; backend tests exercised the common SQL refactor. No new model/provider, schema migration, verification status or mandatory-evidence policy.
+
+Full frontend contract remains FAIL on 55 legacy color findings. Next: selective main accounting integration and remaining design/security/production work, with honest external-data/operational blockers.

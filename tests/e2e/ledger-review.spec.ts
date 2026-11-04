@@ -160,3 +160,26 @@ test('an earlier action finishing after a period change reloads the currently se
   await expect(ledger.getByRole('cell', { name: 'synthetic-2024', exact: true })).toBeVisible();
   await expect(ledger.getByRole('cell', { name: 'synthetic-2025', exact: true })).toHaveCount(0);
 });
+
+
+test('uploaded extraction evidence stays linked to the authorized source on a saved draft', async ({ page, request }) => {
+  const { ledger } = await ledgerWorkspace(page, request);
+  const extracted = page.waitForResponse((response) => response.url().endsWith('/api/esg/extract-footprint'));
+  await page.getByLabel('Extract from a document').setInputFiles({ name: 'synthetic-february-electricity.txt', mimeType: 'text/plain',
+    buffer: Buffer.from('SYNTHETIC INVOICE. February 2025 electricity consumption: 20 kWh. Not an actual utility bill.') });
+  const sourceId = (await (await extracted).json()).document_id;
+  expect(sourceId).toBeTruthy();
+  await page.getByRole('table', { name: 'Extracted values', exact: true }).getByRole('button', { name: 'Use', exact: true }).click();
+  const form = page.getByRole('form', { name: 'New activity record', exact: true });
+  await expect(form.getByLabel('Quantity', { exact: true })).toHaveValue('20');
+  await form.getByLabel('From', { exact: true }).fill('2025-02-01');
+  await form.getByLabel('To', { exact: true }).fill('2025-02-28');
+  await form.getByLabel('Meter / account ref', { exact: true }).fill('uploaded-february-meter');
+  await form.getByRole('button', { name: 'Save draft', exact: true }).click();
+  const row = ledger.getByRole('row').filter({ has: page.getByRole('cell', { name: 'uploaded-february-meter', exact: true }) });
+  await expect(row.getByText('DRAFT', { exact: true })).toBeVisible();
+  await row.getByText('Evidence details', { exact: true }).click();
+  await expect(row).toContainText(sourceId);
+  await expect(row).toContainText('February 2025 electricity consumption');
+  await expect(row).not.toContainText('APPROVED');
+});

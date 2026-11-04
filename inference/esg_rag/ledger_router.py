@@ -77,7 +77,7 @@ class ActivityIn(BaseModel):
     activity_end: dt.date
     meter_ref: Optional[str] = Field(None, max_length=100)
     source_type: Literal["manual", "document", "csv"] = "manual"
-    source_document_id: Optional[str] = None
+    source_document_id: Optional[str] = Field(None, min_length=1, max_length=36)
     source_ref: Optional[str] = Field(None, max_length=200)
     evidence_snippet: Optional[str] = Field(None, max_length=2000)
     factor_id: Optional[str] = None
@@ -332,7 +332,7 @@ class MetricIn(BaseModel):
     metric_key: str
     value: NonNeg
     dimensions: dict = Field(default_factory=dict)
-    source_document_id: Optional[str] = None
+    source_document_id: Optional[str] = Field(None, min_length=1, max_length=36)
     evidence_ref: Optional[str] = Field(None, max_length=200)
     evidence_snippet: Optional[str] = Field(None, max_length=2000)
     notes: Optional[str] = Field(None, max_length=2000)
