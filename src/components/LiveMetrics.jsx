@@ -3,7 +3,6 @@ import gsap from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
 import { 
   AlertCircle, 
-  RefreshCw, 
   Radio, 
   Cpu, 
   CheckCircle2, 
@@ -66,7 +65,6 @@ const STATIONS = [
 
 const LiveMetrics = () => {
   const containerRef = useRef(null);
-  const BLYNK_TOKEN = import.meta.env.VITE_BLYNK_AUTH_TOKEN || "";
 
   const [activeStation, setActiveStation] = useState(STATIONS[0]);
   const [metrics, setMetrics] = useState({
@@ -75,11 +73,8 @@ const LiveMetrics = () => {
     air: null,
     co2: null
   });
-  const [loading, setLoading] = useState(true);
-  const [isRefreshing, setIsRefreshing] = useState(false);
   const [error, setError] = useState(null);
   const [lastUpdated, setLastUpdated] = useState(null);
-  const [packetCount, setPacketCount] = useState(14820);
 
   const AIR_GOOD_MAX = 250;
   const AIR_WARN_MAX = 450;
@@ -87,81 +82,39 @@ const LiveMetrics = () => {
   const CO2_WARN_MAX = 10000;
 
   const getAirStatus = (raw) => {
-    if (raw === null || isNaN(raw)) return { text: "STANDBY", badge: "bg-mist/10 text-mist border-mist/20", tone: "neutral" };
+    if (raw === null || isNaN(raw)) return { text: "UNAVAILABLE", badge: "bg-mist/10 text-mist border-mist/20", tone: "neutral" };
     if (raw <= AIR_GOOD_MAX) return { text: "PRISTINE (GOOD)", badge: "bg-emerald-500/10 text-emerald-400 border-emerald-500/30", tone: "good" };
     if (raw <= AIR_WARN_MAX) return { text: "MODERATE", badge: "bg-amber-500/10 text-amber-400 border-amber-500/30", tone: "warning" };
     return { text: "ELEVATED CONC.", badge: "bg-rose-500/10 text-rose-400 border-rose-500/30", tone: "danger" };
   };
 
   const getCO2Status = (raw) => {
-    if (raw === null || isNaN(raw)) return { text: "CALIBRATING", badge: "bg-mist/10 text-mist border-mist/20" };
+    if (raw === null || isNaN(raw)) return { text: "UNAVAILABLE", badge: "bg-mist/10 text-mist border-mist/20" };
     if (raw <= CO2_GOOD_MAX) return { text: "AMBIENT OPTIMAL", badge: "bg-emerald-500/10 text-emerald-400 border-emerald-500/30" };
     if (raw <= CO2_WARN_MAX) return { text: "ATTENTION THRESHOLD", badge: "bg-amber-500/10 text-amber-400 border-amber-500/30" };
     return { text: "HIGH DENSITY", badge: "bg-rose-500/10 text-rose-400 border-rose-500/30" };
   };
 
-  const fetchLiveBlynkData = async () => {
-    setIsRefreshing(true);
-    if (!BLYNK_TOKEN) {
-      setMetrics({
-        temp: 29.2,
-        hum: 68.5,
-        air: 114,
-        co2: 424
-      });
-      setError("Hardware telemetry gateway offline. Displaying reference baseline (Simulated).");
-      setLastUpdated(new Date().toLocaleTimeString());
-      setLoading(false);
-      setIsRefreshing(false);
-      return;
-    }
-    try {
-      const res = await fetch(`https://blynk.cloud/external/api/getAll?token=${BLYNK_TOKEN}`);
-      if (!res.ok) throw new Error(`HTTP error! status: ${res.status}`);
-      const data = await res.json();
-
-      setMetrics({
-        temp: parseFloat(data.v0) || 28.6,
-        hum: parseFloat(data.v1) || 68.4,
-        air: parseInt(data.v2) || 112,
-        co2: parseInt(data.v3) || 422
-      });
-      setError(null);
-      setLastUpdated(new Date().toLocaleTimeString());
-      setPacketCount(prev => prev + 1);
-    } catch (err) {
-      console.warn("Blynk feed fallback to calibrated station model:", err);
-      // Fallback with realistic environmental data
-      setMetrics({
-        temp: 29.2,
-        hum: 68.5,
-        air: 114,
-        co2: 424
-      });
-      setError("Direct Blynk gateway ping returned timeout. Displaying reference baseline (Simulated).");
-      setLastUpdated(new Date().toLocaleTimeString());
-    } finally {
-      setLoading(false);
-      setIsRefreshing(false);
-    }
+  const showUnavailableTelemetry = () => {
+    setMetrics({ temp: null, hum: null, air: null, co2: null });
+    setError('Live telemetry unavailable. An authenticated server gateway is required.');
+    setLastUpdated(null);
   };
 
   const handleStationChange = (station) => {
     setActiveStation(station);
     if (station.isLiveFeed) {
-      fetchLiveBlynkData();
+      showUnavailableTelemetry();
     } else {
       setMetrics(station.mockData);
-      setError(null);
-      setLastUpdated(new Date().toLocaleTimeString());
+      setError('Synthetic sample telemetry. This is not a connected sensor.');
+      setLastUpdated(null);
     }
   };
 
   useEffect(() => {
     if (activeStation.isLiveFeed) {
-      fetchLiveBlynkData();
-      const interval = setInterval(fetchLiveBlynkData, 6000);
-      return () => clearInterval(interval);
+      showUnavailableTelemetry();
     }
   }, [activeStation]);
 
@@ -230,15 +183,7 @@ const LiveMetrics = () => {
               <Wifi size={13} className="text-cyan-400" />
               <span>Latency: <strong className="text-white">~18ms</strong></span>
             </div>
-            <button 
-              onClick={activeStation.isLiveFeed ? fetchLiveBlynkData : () => handleStationChange(activeStation)}
-              disabled={isRefreshing}
-              className="flex items-center gap-1.5 px-3.5 py-1.5 rounded-xl bg-emerald-500/20 hover:bg-emerald-500/30 text-emerald-300 border border-emerald-500/30 font-mono text-xs font-semibold transition-all"
-              title="Ping current station telemetry"
-            >
-              <RefreshCw size={12} className={isRefreshing ? "animate-spin" : ""} />
-              <span>{isRefreshing ? 'Syncing...' : 'Sync Feed'}</span>
-            </button>
+            <span className="font-mono text-xs text-mist">{activeStation.isLiveFeed ? 'Live feed unavailable' : 'Synthetic fixture'}</span>
           </div>
         </div>
 
@@ -419,17 +364,17 @@ const LiveMetrics = () => {
             </div>
             <div>
               <div className="font-sans font-bold text-xs text-white tracking-wide">
-                Hardware-Attested Ecological Integrity Ledger
+                Telemetry prototype
               </div>
               <div className="text-[11px] font-mono text-white/50">
-                Data signed via hardware ECDSA keypair • Ingested directly to Carbon Zero BD Sovereign Clearing Protocol
+                No authenticated gateway or hardware signature has been verified.
               </div>
             </div>
           </div>
 
           <div className="flex items-center gap-3 text-xs font-mono text-white/60">
             <span className="px-3 py-1 rounded-lg bg-black/40 border border-white/5 text-white/70">
-              Total Ingested: <strong className="text-emerald-400">{packetCount.toLocaleString()}</strong> frames
+              Live ingestion unavailable
             </span>
             <a 
               href="/platform/mrv-dashboard" 

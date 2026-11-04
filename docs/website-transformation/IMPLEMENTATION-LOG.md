@@ -56,10 +56,20 @@ Next: S01 remove frontend provider credential requests, preserving explicit unav
 
 ## S01A — Credential-free, honest city weather (2026-11-04)
 
-Phase 13. State: TESTED; own SHA/remote verification reported after commit.
+Phase 13. State: PUSHED. Commit `9c79d424c4f3df8dc7440ea4ae75d5181e62cf71` matched remote Asif.
 
 Files: HarvestGuardDashboard.jsx, cityWeather.js, Privacy.jsx, JS/browser weather tests and tracking docs. Removed the embedded weather credential and OpenWeather requests/images. Reused the existing Open-Meteo fallback as the keyless primary path, with bounded supported cities, finite/range/unit/time validation and abort-safe location changes. Weather no longer falls back to invented conditions. UI identifies model estimates, provider and timestamp/timezone; offers unavailable/retry; city selector is labelled and 44px. Weather loads only after the local profile exists and sends city coordinates, without profile/contact fields. Provider contract checked against https://open-meteo.com/en/docs on 2026-11-04.
 
 Validation: **13 JS tests pass**, tsc/build pass, **4 browser tests pass** on desktop/320px using explicit provider fixtures for value/provenance, outage/retry, malformed payload and no credential-bearing requests. Separate real public Dhaka request passed the same response validator (model timestamp 2026-11-04T12:45 Asia/Dhaka); this is one connectivity check, not uptime evidence. Source diff reviewed without reproducing credential values. Operator revocation/rotation remains required for the credential in historical commits; history was not rewritten.
 
 Next: S01B remove browser Blynk credential calls and present unsupported live telemetry honestly.
+
+## S01B — Remove browser Blynk credentials and false live metrics (2026-11-04)
+
+Phase 13. State: TESTED; own SHA/remote verification reported after commit.
+
+Files: LiveMetrics.jsx, MRVDashboard.jsx, browserCredentialPolicy.test.mjs, telemetry-integrity.spec.ts and tracking docs. Deleted both direct Blynk credential/request paths and polling, the unneeded browser ingestion/write path and fabricated mitigation increments. Dashboard live count/satellite/mitigation show unavailable/not calculated. Unsupported gateway is explicit; no false offline sensor alert is generated when connectivity is unknown. Unmounted legacy LiveMetrics retains explicitly labelled synthetic station fixtures, with no invented live fallback, packet count or hardware-signature claim. Existing history/trend reads are retained; they are not authenticated live telemetry proof.
+
+Validation: **14 JS tests pass**, including a frontend credential policy scan; tsc/build/whitespace pass. Production JS scan finds no direct Blynk URL or Vite Blynk token configuration. **2 browser tests pass** on desktop/320px with empty fixture history/trends, explicit unsupported status, no fabricated metrics and no provider requests. First policy test exposed URL-encoded workspace spaces; fixed it with Node fileURLToPath, reran successfully.
+
+An authenticated server gateway and provider rotation remain external/unimplemented dependencies. No live hardware integration is claimed. Next: C01 supported browser CI and Asif workflow execution.

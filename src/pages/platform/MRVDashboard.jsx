@@ -145,13 +145,12 @@ const TelemetryChart = ({ history, metricType }) => {
 };
 
 const MRVDashboard = () => {
-  const BLYNK_TOKEN = import.meta.env.VITE_BLYNK_AUTH_TOKEN || "";
 
   const [trends, setTrends] = useState([]);
   const [trendsLoading, setTrendsLoading] = useState(true);
 
   // Blynk Telemetry State
-  const [metrics, setMetrics] = useState({
+  const [metrics] = useState({
     temp: null,
     hum: null,
     air: null,
@@ -159,10 +158,9 @@ const MRVDashboard = () => {
   });
   const [telemetryHistory, setTelemetryHistory] = useState([]);
   const [telemetryLoading, setTelemetryLoading] = useState(true);
-  const [blynkError, setBlynkError] = useState(null);
-  const [lastSyncTime, setLastSyncTime] = useState(null);
-  const [deviceConnected, setDeviceConnected] = useState(false);
-  const [mitigatedToday, setMitigatedToday] = useState(450.2);
+  const blynkError = "Live telemetry unavailable. An authenticated server gateway is required.";
+
+  const deviceConnected = false;
   
   // Dashboard navigation/tabs
   const [chartMetric, setChartMetric] = useState('co2'); // 'co2' | 'air' | 'temp' | 'hum'
@@ -205,106 +203,6 @@ const MRVDashboard = () => {
     }
   };
 
-  // Save new telemetry to Django API and localStorage
-  const saveTelemetry = async (temp, hum, air, co2) => {
-    const timestampStr = new Date().toISOString();
-    const newReading = {
-      temperature: temp,
-      humidity: hum,
-      air_quality: air,
-      co2: co2,
-      timestamp: timestampStr
-    };
-
-    // Save to localStorage (as backup / fallback)
-    let localHistory = [];
-    const stored = localStorage.getItem('carbonos_telemetry_history');
-    if (stored) {
-      try {
-        localHistory = JSON.parse(stored);
-      } catch (e) {
-        localHistory = [];
-      }
-    }
-    // Keep last 50
-    localHistory = [newReading, ...localHistory].slice(0, 50);
-    localStorage.setItem('carbonos_telemetry_history', JSON.stringify(localHistory));
-
-    // Save to Django Server
-    try {
-      const res = await fetch(`${DJANGO_API_URL}/api/farmers-ai/mrv/telemetry/save/`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json'
-        },
-        body: JSON.stringify({
-          temperature: temp,
-          humidity: hum,
-          air_quality: air,
-          co2: co2
-        })
-      });
-      if (res.ok) {
-        // Refresh history from database
-        fetchTelemetryHistory();
-      } else {
-        setTelemetryHistory(localHistory);
-      }
-    } catch (err) {
-      console.error("Failed to save telemetry to server, using local fallback:", err);
-      setTelemetryHistory(localHistory);
-    }
-  };
-
-  // Fetch live Blynk data (checked with hardware connectivity)
-  const fetchBlynkLive = async () => {
-    if (!BLYNK_TOKEN) {
-      setDeviceConnected(false);
-      setBlynkError("Blynk auth token not configured (Sandbox telemetry mode).");
-      setMetrics({ temp: null, hum: null, air: null, co2: null });
-      setTelemetryLoading(false);
-      return;
-    }
-    try {
-      // 1. Verify if device is connected
-      const connRes = await fetch(`https://blynk.cloud/external/api/isHardwareConnected?token=${BLYNK_TOKEN}`);
-      if (!connRes.ok) throw new Error('Failed to query hardware status');
-      const connText = await connRes.text();
-      const isConnected = connText.trim() === 'true';
-
-      setDeviceConnected(isConnected);
-      setLastSyncTime(new Date().toLocaleTimeString());
-
-      if (!isConnected) {
-        setBlynkError("Blynk device is offline.");
-        // Set metrics to null to denote offline state
-        setMetrics({ temp: null, hum: null, air: null, co2: null });
-        return;
-      }
-
-      // 2. Fetch live metrics if connected
-      const res = await fetch(`https://blynk.cloud/external/api/getAll?token=${BLYNK_TOKEN}`);
-      if (!res.ok) throw new Error(`HTTP error! status: ${res.status}`);
-      const data = await res.json();
-
-      const temp = parseFloat(data.v0);
-      const hum = parseFloat(data.v1);
-      const air = parseInt(data.v2);
-      const co2 = parseInt(data.v3);
-
-      setMetrics({ temp, hum, air, co2 });
-      setBlynkError(null);
-
-      // Save to database only on successful read of connected device
-      if (!isNaN(temp) && !isNaN(hum) && !isNaN(air) && !isNaN(co2)) {
-        await saveTelemetry(temp, hum, air, co2);
-      }
-    } catch (err) {
-      console.error("Error fetching Blynk data:", err);
-      setBlynkError("Failed to sync with Blynk Cloud.");
-    }
-  };
-
   // Export history to CSV for Excel consumption
   const downloadExcel = () => {
     if (telemetryHistory.length === 0) return;
@@ -333,22 +231,7 @@ const MRVDashboard = () => {
   useEffect(() => {
     fetchTrends();
     fetchTelemetryHistory();
-    fetchBlynkLive();
-
-    const interval = setInterval(fetchBlynkLive, 5000);
-    return () => clearInterval(interval);
   }, []);
-
-  // Accumulate tCO2e mitigated in real-time when Blynk node is online
-  useEffect(() => {
-    let timer;
-    if (deviceConnected) {
-      timer = setInterval(() => {
-        setMitigatedToday(prev => prev + 0.00012);
-      }, 1000);
-    }
-    return () => clearInterval(timer);
-  }, [deviceConnected]);
 
   // Status computation for Air Quality
   const getAirStatus = (raw) => {
@@ -367,61 +250,10 @@ const MRVDashboard = () => {
   };
 
   // Compile dynamic alerts based on blynk sensor warnings
-  const getBlynkAlerts = () => {
-    const alerts = [];
-    if (!deviceConnected) {
-      alerts.push({
-        region: "Blynk IoT Node",
-        risk_percentage: 100,
-        total_diagnoses: 1,
-        at_risk_count: 1,
-        risk_type: "offline",
-        message: "Blynk IoT hardware node is offline. Real-time verification stream suspended.",
-        isBlynk: true
-      });
-    } else {
-      if (metrics.co2 !== null && metrics.co2 > 5000) {
-        alerts.push({
-          region: "Blynk IoT Node",
-          risk_percentage: metrics.co2 > 10000 ? 95 : 65,
-          total_diagnoses: 1,
-          at_risk_count: 1,
-          risk_type: "co2",
-          message: `Critical CO2 Level: ${metrics.co2} ppm. Risk of elevated soil carbon respiration.`,
-          isBlynk: true
-        });
-      }
-      if (metrics.air !== null && metrics.air > 250) {
-        alerts.push({
-          region: "Blynk IoT Node",
-          risk_percentage: metrics.air > 450 ? 90 : 50,
-          total_diagnoses: 1,
-          at_risk_count: 1,
-          risk_type: "air",
-          message: `Poor Air Quality: ${metrics.air} raw. Potential forest fire smoke or pollution.`,
-          isBlynk: true
-        });
-      }
-      if (metrics.temp !== null && metrics.temp > 35) {
-        alerts.push({
-          region: "Blynk IoT Node",
-          risk_percentage: metrics.temp > 40 ? 80 : 40,
-          total_diagnoses: 1,
-          at_risk_count: 1,
-          risk_type: "heat",
-          message: `Extreme Heat Stress: ${metrics.temp.toFixed(1)}°C. High risk of perennial crop dehydration.`,
-          isBlynk: true
-        });
-      }
-    }
-    return alerts;
-  };
+  const airStatus = deviceConnected ? getAirStatus(metrics.air) : { text: "UNAVAILABLE", style: "text-rose-400 bg-rose-500/10 border-rose-500/20", color: "text-rose-400" };
+  const co2Status = deviceConnected ? getCO2Status(metrics.co2) : { text: "UNAVAILABLE", style: "text-rose-400 bg-rose-500/10 border-rose-500/20", color: "text-rose-400" };
 
-  const airStatus = deviceConnected ? getAirStatus(metrics.air) : { text: "OFFLINE", style: "text-rose-400 bg-rose-500/10 border-rose-500/20", color: "text-rose-400" };
-  const co2Status = deviceConnected ? getCO2Status(metrics.co2) : { text: "OFFLINE", style: "text-rose-400 bg-rose-500/10 border-rose-500/20", color: "text-rose-400" };
-
-  const blynkAlerts = getBlynkAlerts();
-  const allAlerts = [...blynkAlerts, ...trends];
+  const allAlerts = trends;
   const hasAlerts = allAlerts.length > 0;
 
   return (
@@ -432,7 +264,7 @@ const MRVDashboard = () => {
         <div className="absolute inset-0 bg-[linear-gradient(to_right,#00C85311_1px,transparent_1px),linear-gradient(to_bottom,#00C85311_1px,transparent_1px)] bg-[size:4rem_4rem] [mask-image:radial-gradient(ellipse_60%_50%_at_50%_0%,#000_70%,transparent_100%)] pointer-events-none"></div>
         <span className="font-mono text-xs text-emerald tracking-widest px-3 py-1 bg-[#0D2B1A]/40 border border-[#00C853]/20 rounded-full mb-6 inline-block z-10">PLATFORM</span>
         <h1 className="serif-drama text-[56px] lg:text-[72px] text-white leading-tight mb-4 z-10">MRV Dashboard</h1>
-        <p className="font-sans text-lg text-mist max-w-2xl z-10">Real-time Measurement, Reporting, and Verification data feeds.</p>
+        <p className="font-sans text-lg text-mist max-w-2xl z-10">MRV research dashboard. Live sensor data requires an authenticated server gateway.</p>
       </div>
 
       <div className="max-w-5xl w-full mx-auto px-6 lg:px-12 mt-16 relative z-10 space-y-8">
@@ -444,7 +276,7 @@ const MRVDashboard = () => {
               <span className="pulse-dot mr-3"></span>
               System Telemetry
             </h2>
-            <span className="font-mono text-[10px] text-emerald bg-emerald/10 px-2 py-1 rounded">SYSTEM: NOMINAL</span>
+            <span className="font-mono text-[10px] text-emerald bg-emerald/10 px-2 py-1 rounded">LIVE TELEMETRY UNAVAILABLE</span>
           </div>
           
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
@@ -452,7 +284,7 @@ const MRVDashboard = () => {
               <div>
                 <div className="font-mono text-[10px] text-mist mb-2">ACTIVE IOT NODES</div>
                 <div className="font-mono text-xl text-registry font-bold">
-                  {deviceConnected ? '12,409' : '12,408'}
+                  Unavailable
                 </div>
               </div>
               {deviceConnected && (
@@ -463,13 +295,13 @@ const MRVDashboard = () => {
             </div>
             <div className="p-4 bg-[#040A06] border border-emerald/10 rounded-lg">
               <div className="font-mono text-[10px] text-mist mb-2">LAST SATELLITE PASS</div>
-              <div className="font-mono text-xl text-registry font-bold">14 mins ago</div>
+              <div className="font-mono text-xl text-registry font-bold">Unavailable</div>
             </div>
             <div className="p-4 bg-[#040A06] border border-emerald/10 rounded-lg flex justify-between items-center">
               <div>
                 <div className="font-mono text-[10px] text-mist mb-2">tCO2e MITIGATED TODAY</div>
                 <div className="font-mono text-xl text-emerald font-bold">
-                  {deviceConnected ? mitigatedToday.toFixed(4) : "450.2000"}
+                  Not calculated
                 </div>
               </div>
               {deviceConnected && (
@@ -492,7 +324,7 @@ const MRVDashboard = () => {
                 Carbon Monitor IoT Station
               </h2>
               <p className="text-[11px] text-mist/60 font-mono mt-1">
-                Sensor: ESP8266 Live Feed • Blynk Cloud Sync
+                Hardware telemetry prototype • no authenticated gateway configured
               </p>
             </div>
             <div className="flex items-center space-x-3 self-start md:self-auto">
@@ -515,13 +347,11 @@ const MRVDashboard = () => {
                   CONNECTED
                 </span>
               )}
-              {lastSyncTime && (
-                <span className="text-[10px] font-mono text-mist/40">
-                  Synced: {lastSyncTime}
-                </span>
-              )}
+
             </div>
           </div>
+
+          <p role="status" className="esg-notice esg-tone-warning mb-6 rounded-lg p-3 text-sm">{blynkError}</p>
 
           {/* Metric cards */}
           <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-8">

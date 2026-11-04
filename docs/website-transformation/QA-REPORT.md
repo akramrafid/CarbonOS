@@ -34,3 +34,7 @@ Full required viewport matrix (including 390 and 1920), complete protected + iso
 ## S01A
 
 13 JS tests, tsc/build/whitespace pass. Weather browser tests **4 pass**, explicit synthetic provider fixtures; actual live keyless Open-Meteo response also validated separately. No business or user profile data sent. This does not validate agricultural risk predictions or provider availability over time. Historical weather credential revocation remains external.
+
+## S01B
+
+14 JS tests, type check/build/whitespace pass. Production JS/source credential scans pass. Telemetry browser tests **2 pass** (desktop/320px), using explicitly empty Django fixtures and observing no direct Blynk request. No live sensor or authenticated telemetry proxy was tested or implemented; unsupported state is deliberate. Existing wider MRV/scientific/registry workflows still need their separate audit.
