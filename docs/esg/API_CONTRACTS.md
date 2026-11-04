@@ -42,7 +42,7 @@
 | GET `/health` | public | — | service status (no tenant data) |
 | POST `/organizations` | any authenticated user | `{name, is_demo?}` | 201 `{id, name, is_demo, role:"org_owner"}` |
 | GET `/organizations` | any authenticated user | — | `[{id, name, is_demo, role}]` for the caller |
-| POST `/query` | read | `{query (1–2000 chars), corpus?: all\|tenant_docs\|regulatory\|emission_factors, top_k? (1–20)}` | `QueryResponse`; unknown corpora rejected; `confidence` is a ranking score, not probability or verification |
+| POST `/query` | read | `{query (1–2000 chars), corpus?: all\|tenant_docs\|regulatory\|emission_factors, top_k? (1–20), document_ids?: 1–2 distinct IDs}` | `QueryResponse` includes query_id and selected document_ids; unknown corpora rejected; `confidence` is a ranking score, not probability or verification |
 | POST `/extract-footprint` | write | multipart `file` or `raw_text` | `{filename, tenant_id, parameters, details[{param_name,value,unit,scope,source_page?,raw_snippet,confidence?}], overall_confidence?, extraction_method: regex\|llm, model_used?, extracted_at, summary, review_status: "REVIEW_REQUIRED"}`; 422 if no input, no readable text, or no quantities found. No footprint is computed here |
 | POST `/ingest` | write (global corpora: platform operator) | multipart `file`, `corpus` | `IngestResponse` incl. `duplicate` |
 | GET `/emission-factors` | read | `category?`, `region?` | factor rows |
@@ -147,3 +147,7 @@ Missing values remain null and failed; model confidence and F1 are null because 
 measure them. Its percentages must never be presented as customer-document or RAG accuracy.
 
 Legacy calculation/catalogue/regression endpoints return 404 for non-demo organizations. Scenario output is labeled `DEMO_SAMPLE`; it grants no approval or assurance. Use the ledger factor/activity/period routes for protected accounting.
+
+### Selected-document query boundary
+
+`document_ids` is optional: omitted/null retains ordinary authorized-corpus search. An explicit empty, duplicate, whitespace or oversized list is rejected (422), never broadened to all sources. Every selected ID must be SQL-visible under the caller's tenant or the matching operator-owned global corpus; unknown/foreign/mixed inaccessible selections return the same 404 before retrieval or model invocation. Corpus filtering remains in force. Document filtering occurs before the candidate limit/ranking. No matching passage returns insufficient evidence rather than another document's answer. Scoped queries add an append-only `evidence.query_scoped` audit event linked to `query_id`; metadata records IDs/corpus/model/mode without duplicating source contents. Direct document-scoped retrieval without an authorized SQL session is rejected, not sent to an unfiltered vector fallback.

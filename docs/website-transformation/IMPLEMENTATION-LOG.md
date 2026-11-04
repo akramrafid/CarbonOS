@@ -144,8 +144,18 @@ Full frontend contract still fails the **55 recorded legacy color findings**, wi
 
 ## R02A — Independent in-memory answer history (2026-11-04)
 
-Phase 7. State: TESTED; own SHA/remote verification reported after commit.
+Phase 7. State: PUSHED. Commit `c2d35650368790b66ea059ebc9fa8170c01e7743` matched remote Asif.
 
 Files: EvidenceAssistantPanel.jsx, EvidenceAnswer.jsx, evidence-inspection.spec.ts, two history screenshots and tracking docs. Keeps the ten most recent results while the evidence view remains mounted. Selecting a result preserves its own original response, receipt time, inspected source and stale-hash state. The selected question and a visible “Viewing” label prevent confusion with draft form text; aria-pressed communicates active selection. Clearing/reload removes local history; it does not delete server audit records. No browser storage or new API/permission was added. Each question still searches independently: this is not an assertion of conversational model memory. Document comparison remains R02B.
 
 Validation: **16 JS tests pass**, type check/build/whitespace pass, **4 real-API browser tests pass** on desktop/320px: retained matching/stale sources across answer switches, one active selection, safe export/abstention, local clearing, eleven queries leaving ten entries, and reload clearing all history. No backend code changed or backend tests repeated for this task. History screenshot reviewed on mobile; prior R01 generated proof snapshots restored. The first commit/push attempt was not executed because automatic approval review reached its usage limit; retry follows the stated reset time and the user's Continue instruction. Next: selected-document comparison, remaining source/design migration and main accounting integration.
+
+## R02B1 — Authorized document-scoped retrieval (2026-11-04)
+
+Phase 7. State: TESTED; own SHA/remote verification reported after commit.
+
+Files: ESG query schema/router/retriever, API contracts, test_esg_document_queries.py and tracking docs. Optional one/two-document scope narrows SQL candidates before limit/ranking/model context. Empty, repeated, whitespace and oversized IDs/lists fail validation; foreign/unknown/mixed inaccessible/wrong-owner documents fail uniformly before search/model. Missing matches or excluded corpus returns insufficient evidence, never a broadened search. Direct non-SQL scoped retrieval is rejected. Responses include actual query ID/selected scope; existing append-only audit records scoped IDs/corpus/model/mode linked to that query. No schema migration/new provider required; ordinary queries retain their prior corpus behavior.
+
+Validation: **110 backend tests run / 109 pass / one PostgreSQL-only local skip**; four new scoped-query tests include candidate-limit=1 on an older selected document, context/citation isolation, no generation on unauthorized IDs, validation negatives, shared/corpus scopes and audit linkage. **16 JS tests pass**; direct legacy tenant-isolation suite passes; whitespace passes. Initial no-match fixture shared the generic word “policy” with the question and therefore matched lexical search; the scope test now uses the specific query “boiler inspection” to test truly absent terms. This does not establish semantic relevance quality; the synthetic lexical limits remain explicit.
+
+Hosted update: R01's actual source-inspection commit 919f1cb passed ESG CI (https://github.com/akramrafid/CarbonOS/actions/runs/41791320522), including PostgreSQL and full protected browser suite. Separate design contract remains red on 55 legacy color findings. Next: R02B2 side-by-side document evidence UI using this tested scope boundary.

@@ -71,7 +71,7 @@ def tokenize(text):
     return [t for t in re.findall(r'[\w\u0980-\u09ff]+', text) if t not in STOP_WORDS]
 
 
-def _retrieve_sql(query, corpus, tenant_id, top_k, min_confidence, db):
+def _retrieve_sql(query, corpus, tenant_id, top_k, min_confidence, db, document_ids=None):
     """SQL owns visibility and content; vectors are optional, replaceable ranking hints."""
     corpora = sorted(VALID_CORPORA) if corpus == 'all' else [corpus]
     filters = []
@@ -81,8 +81,10 @@ def _retrieve_sql(query, corpus, tenant_id, top_k, min_confidence, db):
             filters.append((ESGDocument.corpus == c) & (ESGDocument.tenant_id == owner))
     rows = []
     if filters:
-        rows = (db.query(ESGChunk, ESGDocument).join(ESGDocument, ESGChunk.document_id == ESGDocument.id)
-                .filter(or_(*filters)).order_by(ESGDocument.created_at.desc(), ESGDocument.id, ESGChunk.chunk_index)
+        candidates = db.query(ESGChunk, ESGDocument).join(ESGDocument, ESGChunk.document_id == ESGDocument.id).filter(or_(*filters))
+        if document_ids is not None:
+            candidates = candidates.filter(ESGDocument.id.in_(document_ids))
+        rows = (candidates.order_by(ESGDocument.created_at.desc(), ESGDocument.id, ESGChunk.chunk_index)
                 .limit(RAG_CANDIDATE_LIMIT + 1).all())
     truncated = len(rows) > RAG_CANDIDATE_LIMIT
     rows = rows[:RAG_CANDIDATE_LIMIT]
@@ -190,6 +192,7 @@ def retrieve(
     top_k: int = TOP_K,
     min_confidence: float = MIN_CONFIDENCE,
     db: Optional[Session] = None,
+    document_ids: Optional[List[str]] = None,
 ) -> Dict[str, Any]:
     """
     Core retrieval function:
@@ -203,7 +206,9 @@ def retrieve(
     if not 1 <= top_k <= 20:
         raise ValueError('top_k must be between 1 and 20')
     if db is not None:
-        return _retrieve_sql(query, corpus, tenant_id, top_k, min_confidence, db)
+        return _retrieve_sql(query, corpus, tenant_id, top_k, min_confidence, db, document_ids)
+    if document_ids is not None:
+        raise ValueError('Document-scoped retrieval requires the authorized SQL index')
     query_vec = compute_embedding(query)
     target_corpora = [corpus] if corpus in VALID_CORPORA else list(VALID_CORPORA)
 

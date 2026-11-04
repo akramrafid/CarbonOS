@@ -19,6 +19,7 @@ from .schemas import (
 )
 from .auth import Identity, Principal, get_identity, require
 from .ratelimit import limited
+from .ledger import audit
 from .config import CORPUS_TENANT_DOCS, CORPUS_REGULATORY, CORPUS_EMISSION_FACTORS, GLOBAL_CORPUS_OWNER
 from .ingest import ingest_document, IngestRejected, MAX_UPLOAD_BYTES
 from .retriever import retrieve
@@ -107,6 +108,11 @@ def esg_query(
     start_time = time.time()
     tenant_id = principal.organization_id
 
+    if request.document_ids is not None:
+        visible = db.query(ESGDocument.id).filter(_visible_documents(principal), ESGDocument.id.in_(request.document_ids)).all()
+        if {row[0] for row in visible} != set(request.document_ids):
+            raise HTTPException(404, "Selected source documents not found")
+
     # 1. Retrieve relevant chunks
     retrieval_res = retrieve(
         query=request.query,
@@ -114,6 +120,7 @@ def esg_query(
         tenant_id=tenant_id,
         top_k=request.top_k or 5,
         db=db,
+        document_ids=request.document_ids,
     )
 
     # 2. Generate grounded answer
@@ -136,9 +143,17 @@ def esg_query(
         verified_by_audit=False
     )
     db.add(log)
+    db.flush()
+    if request.document_ids is not None:
+        audit(db, principal, 'evidence.query_scoped', 'evidence_query', log.id, {
+            'document_ids': request.document_ids, 'corpus': request.corpus or 'all',
+            'answer_mode': gen_res['answer_mode'], 'model_used': log.llm_model,
+        })
     db.commit()
 
     return QueryResponse(
+        query_id=log.id,
+        document_ids=request.document_ids,
         query=request.query,
         answer=gen_res["answer"],
         confidence=round(retrieval_res.get("best_score", 0.0), 3),

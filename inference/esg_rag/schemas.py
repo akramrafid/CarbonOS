@@ -1,5 +1,5 @@
-from pydantic import BaseModel, Field
-from typing import List, Optional, Dict, Any, Literal
+from pydantic import BaseModel, Field, field_validator
+from typing import Annotated, List, Optional, Dict, Any, Literal
 
 class Citation(BaseModel):
     source: str
@@ -22,8 +22,18 @@ class QueryRequest(BaseModel):
     corpus: Optional[Literal['all', 'regulatory', 'emission_factors', 'tenant_docs']] = "all"
     top_k: Optional[int] = Field(5, ge=1, le=20)
     temperature: Optional[float] = 0.2
+    document_ids: Optional[List[Annotated[str, Field(min_length=1, max_length=36)]]] = Field(None, min_length=1, max_length=2)
+
+    @field_validator('document_ids')
+    @classmethod
+    def distinct_document_ids(cls, value):
+        if value is not None and (len(value) != len(set(value)) or any(item != item.strip() for item in value)):
+            raise ValueError('Choose distinct document identifiers without whitespace')
+        return value
 
 class QueryResponse(BaseModel):
+    query_id: str = ''
+    document_ids: Optional[List[str]] = None
     query: str
     answer: str
     confidence: float
