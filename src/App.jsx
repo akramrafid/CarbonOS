@@ -4,6 +4,7 @@ import Navbar from './components/Navbar';
 import Footer from './components/Footer';
 import Home from './pages/Home';
 import LoadingSpinner from './components/LoadingSpinner';
+import RouteErrorBoundary from './components/RouteErrorBoundary';
 
 function ScrollToTop() {
   const { pathname } = useLocation();
@@ -86,6 +87,7 @@ function PageMetadata() {
 }
 
 function App() {
+  const { pathname } = useLocation();
   return (
     <div className="bg-carbon min-h-screen text-registry font-sans selection:bg-emerald selection:text-carbon">
       <a href="#main-content" className="skip-link">Skip to content</a>
@@ -93,6 +95,7 @@ function App() {
       <PageMetadata />
       <Navbar />
       <div id="main-content" tabIndex={-1}>
+      <RouteErrorBoundary key={pathname}>
       <Suspense fallback={<LoadingSpinner />}>
         <Routes>
           <Route path="/" element={<Home />} />
@@ -155,6 +158,7 @@ function App() {
           } />
         </Routes>
       </Suspense>
+      </RouteErrorBoundary>
       </div>
       <Footer />
     </div>

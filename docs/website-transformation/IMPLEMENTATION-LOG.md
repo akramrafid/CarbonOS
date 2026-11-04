@@ -36,10 +36,20 @@ Next: Q01 add and exercise 390px and 1920px responsive projects.
 
 ## Q01 — Complete requested viewport widths (2026-11-04)
 
-Phase 10/14. State: TESTED; own SHA/remote verification reported after commit.
+Phase 10/14. State: PUSHED. Commit `ec622683e6eccf073afee0b7e8661cb676e5991c` matched remote Asif.
 
 Files: playwright.config.ts, responsive-shell.spec.ts, four new evidence PNGs and tracking docs. Added 390×844 phone and 1920×1080 desktop projects; retained all eight earlier projects including landscape. New screenshots use this directory's evidence folder, preserving historical QA images.
 
 Validation: responsive shell across ten projects **40 passed (35.2s)**. Includes navigation bounds, native mobile focus/Escape/restore, EN/BN navigation, skip links, shared routes, 404 recovery, real protected ESG API forms/all tabs, 44px controls, table keyboard access, theme switching and resize unlock. Type check and whitespace pass. Inspected 390px ESG and 1920px homepage screenshots. Chromium emulation is not real-device or full bilingual/content/assistive-technology certification.
 
 Next: X01 recoverable route error boundary.
+
+## X01 — Page failure recovery (2026-11-04)
+
+Phase 9. State: TESTED; own SHA/remote verification reported after commit.
+
+Files: App.jsx, RouteErrorBoundary.jsx, route-recovery.spec.ts and tracking docs. A pathname-scoped React error boundary surrounds routed content while preserving the main navigation/footer. Failed module loading and render errors show an alert with reload/home recovery and a truthful unsaved-edit notice. The UI does not expose raw exception messages. Path changes reset the boundary; query-only workspace navigation does not remount it.
+
+Validation: 11 JS tests, type check and production build pass; **4 browser tests pass** on desktop/320px for aborted lazy imports, successful reload, deliberately injected render exceptions, no raw error in the page and home recovery. The initial reload assertion used the wrong Trust heading; corrected it to the existing visible heading and reran. Tests deliberately cause expected React console exceptions. No external reporting or extra dependency added.
+
+Next: S01 remove frontend provider credential requests, preserving explicit unavailable telemetry states.

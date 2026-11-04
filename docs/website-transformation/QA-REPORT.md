@@ -26,3 +26,7 @@ Full required viewport matrix (including 390 and 1920), complete protected + iso
 ## Q01
 
 `responsive-shell.spec.ts`: **40 passed**, ten Chromium projects: 320×720, 375×812, 390×844, 667×375 landscape, 768×1024, 1024×900, 1280×800, 1440×900, 1536×960, 1920×1080. Type check and whitespace pass. New [phone ESG](evidence/responsive-esg-390.png), [phone home](evidence/responsive-home-390.png), [desktop ESG](evidence/responsive-esg-1920.png), [desktop home](evidence/responsive-home-1920.png). This scope checks common shell and ESG panels, not every legacy module or every body string in Bengali.
+
+## X01
+
+11 JS tests, tsc, production build and whitespace check pass. Route recovery **4/4 browser tests pass** (desktop/320px); failures are deliberately injected into lazy loading/rendering, then actual reload/home recovery is exercised. The application shell remains usable. This boundary covers render/module errors, not arbitrary asynchronous event-handler failures.
