@@ -364,10 +364,23 @@ class ExplicitLocationRegionTest(LedgerTestCase):
         result = self.post('user-a', f'/periods/{self.period}/calculate')
         self.assertTrue(result['blocking'])
         self.assertEqual(D(result['scope2_location_kg']), D(0))
-        self.assertEqual(result['methodology_version'], 'carbonos-ghg-scope12-1.0.1')
+        self.assertEqual(result['methodology_version'], 'carbonos-ghg-scope12-1.0.2')
         self.assertTrue(any(item['code'] == 'SELECTED_FACTOR_OTHER_REGION' for item in result['exceptions']))
         denied = self.call('POST', 'admin-a', f'/periods/{self.period}/lock', {'calculation_run_id': result['id']}, status=409)
         self.assertIn('blocking data-quality exceptions', denied.json()['detail'])
+
+
+
+class ExplicitMarketRegionTest(LedgerTestCase):
+    def test_invalid_market_selection_is_not_masked_as_optional_missing_input(self):
+        other = self.factor('other-market', 'electricity', 'kWh', '0.1', 'market', region='OTHER-TEST-GRID')
+        self.approved(market_factor_id=other)
+        result = self.post('user-a', f'/periods/{self.period}/calculate')
+        self.assertTrue(result['blocking'])
+        self.assertEqual(D(result['scope2_location_kg']), D('6172.500000'))
+        self.assertIsNone(result['scope2_market_kg'])
+        self.assertTrue(any(item['code'] == 'MARKET_FACTOR_OTHER_MARKET' and item['blocking'] for item in result['exceptions']))
+        self.call('POST', 'admin-a', f'/periods/{self.period}/lock', {'calculation_run_id': result['id']}, status=409)
 
 if __name__ == "__main__":
     unittest.main()

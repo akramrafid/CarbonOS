@@ -103,6 +103,32 @@ class CalculationTests(unittest.TestCase):
         self.assertEqual(valid.scope2_location_kg, D("5.000000"))
         self.assertIsNone(valid.scope2_market_kg)
 
+    def test_invalid_explicit_market_inputs_block_without_substitution(self):
+        local = factor('local-market', 'electricity', 'kWh', '0.2', 'market')
+        other = factor('other-market', 'electricity', 'kWh', '0.1', 'market', region='OTHER-GRID')
+        expired = factor('future-market', 'electricity', 'kWh', '0.1', 'market', valid_from=dt.date(2026, 1, 1))
+        invalid = factor('invalid-market', 'electricity', 'kWh', 'NaN', 'market')
+        for selected, additional, code in [(other.id, [other], 'MARKET_FACTOR_OTHER_MARKET'),
+                (expired.id, [expired], 'SELECTED_FACTOR_NOT_APPLICABLE'),
+                ('unknown-market', [], 'SELECTED_FACTOR_NOT_APPROVED'),
+                (invalid.id, [invalid], 'INVALID_FACTOR_VALUE')]:
+            with self.subTest(error=code):
+                result = calculate([act('a1', 'f1', 'electricity', '10', 'kWh', market_factor_id=selected)],
+                                   FAC, [GRID, local, *additional], 'operational_control')
+                self.assertTrue(result.blocking)
+                self.assertEqual(result.scope2_location_kg, D('5.000000'))
+                self.assertIsNone(result.scope2_market_kg)
+                self.assertTrue(any(item['code'] == code and item['blocking'] for item in result.exceptions))
+                self.assertFalse(any(line.method == 'market' for line in result.lines))
+        valid = calculate([act('a1', 'f1', 'electricity', '10', 'kWh', market_factor_id=local.id)],
+                          FAC, [GRID, local], 'operational_control')
+        self.assertFalse(valid.blocking)
+        self.assertEqual(valid.scope2_market_kg, D('2.000000'))
+        missing = calculate([act('a1', 'f1', 'electricity', '10', 'kWh')], FAC, [GRID], 'operational_control')
+        self.assertFalse(missing.blocking)
+        self.assertIsNone(missing.scope2_market_kg)
+        self.assertTrue(any(item['code'] == 'MISSING_MARKET_BASED_INPUT' and not item['blocking'] for item in missing.exceptions))
+
     def test_latest_version_of_family_and_ambiguity(self):
         v2 = factor("grid-v2", "electricity", "kWh", "0.6", "location", family="grid", version=2)
         r = calculate([act("a1", "f1", "electricity", "10", "kWh")], FAC, [GRID, v2], "operational_control")

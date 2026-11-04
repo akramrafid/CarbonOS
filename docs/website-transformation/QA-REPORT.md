@@ -102,3 +102,7 @@ Type check/build/whitespace pass. Four existing period/reference browser checks 
 ## I01A
 
 117 backend tests: **116 pass / 1 local PostgreSQL-only skip**. Numerical + real-API wrong-region selection blocks, no fallback/emission line and lock denial verified. Four protected accounting journey browser tests pass (desktop/320px). Same-region calculations, existing numerical/security controls and stored-snapshot behavior remain. New runs identify methodology 1.0.1; no main branch merge or schema replacement occurred.
+
+## I01B
+
+119 backend tests: **118 pass / 1 local PostgreSQL-only skip**; four protected accounting browser tests pass. Invalid explicit market inputs cannot become an approved run or silently use another factor; ordinary missing market data remains unreported. Version 1.0.2 distinguishes new behavior. Facility-level incomplete-market/JSON-unit issues discovered during review are tracked in I01D and are not claimed fixed here.

@@ -1,5 +1,6 @@
 # Accounting Methodology — `carbonos-ghg-scope12-1.0`
 
+Current Asif calculation version: `carbonos-ghg-scope12-1.0.2`. Patch history below records earlier changes; stored snapshots retain their recorded version.
 Status: **CODE_COMPLETE, not METHODOLOGY_VALIDATED.** A qualified GHG practitioner must review this
 before any customer relies on it. No third-party certification or verification is claimed.
 
@@ -86,6 +87,10 @@ Limitation: ownership/control is current-state per facility; mid-period changes 
 
 ## Asif methodology patch 1.0.1 — explicit location-factor region
 
-New calculations identify `carbonos-ghg-scope12-1.0.1`; stored earlier snapshots retain their recorded versions. This selectively integrates main's explicit location-region rejection while preserving Asif's Decimal, finite-number, duplicate-record, unit/date, tenant and independent-lock safeguards. It does not integrate main's newer market fallback/hierarchy, factor-kind schema, equipment or uncertainty changes. A correct region label alone does not establish factor provenance, current applicability or conformance.
+Patch 1.0.1 introduced the explicit location-region guard; stored earlier snapshots retain their recorded versions. This selectively integrates main's explicit location-region rejection while preserving Asif's Decimal, finite-number, duplicate-record, unit/date, tenant and independent-lock safeguards. It does not integrate main's newer market fallback/hierarchy, factor-kind schema, equipment or uncertainty changes. A correct region label alone does not establish factor provenance, current applicability or conformance.
 
 Primary reference reviewed 2026-11-04: [GHG Protocol Scope 2 Guidance](https://ghgprotocol.org/sites/default/files/GHG%20Protocol%20Scope%202%20Guidance.pdf), Chapter 6 / Table 6.2, and [Calculation Tools FAQ](https://ghgprotocol.org/calculation-tools-faq). Location-based accounting uses appropriate grid-average factors; project-baseline marginal factors are not interchangeable with inventory factors. Full factor-kind/governance integration remains open; this patch is not a claim of complete Scope 2 Guidance implementation.
+
+## Asif methodology patch 1.0.2 — explicit market inputs
+
+A selected market factor must match the facility's configured factor-region code. This is the prototype's exact region mapping, not a complete geographic-market/contract-quality validation. A wrong-region, unapproved, inapplicable or nonfinite explicitly selected market factor now creates its exact blocking error and cannot silently substitute another factor. The location-based total may still be calculated, but the invalid run cannot be locked. An absent market input remains explicitly unavailable (`null`) with the existing non-blocking missing-input notice; no automatic grid/residual fallback was added. Full market hierarchy, contractual instruments and factor-kind integration remain separate work.

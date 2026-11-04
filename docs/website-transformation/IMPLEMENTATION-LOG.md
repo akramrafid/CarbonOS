@@ -220,10 +220,20 @@ Full frontend contract remains FAIL on 55 legacy color findings. Next: selective
 
 ## I01A — Selective main location-factor region safeguard (2026-11-04)
 
-Phase 4. State: TESTED; own SHA/remote verification reported after commit.
+Phase 4. State: PUSHED. Commit `8778fd900f9f62748d2ff16740670ea36fc102f8` matched remote Asif.
 
 Files: accounting.py, numerical/ledger tests, ACCOUNTING_METHODOLOGY.md and tracking docs. Read-only main comparison spans ~1,800 changed lines across engine/models/router/ledger/tests and includes overlapping schema/market changes. Selectively integrated the contained explicit location-based region rejection from main rather than replacing the engine. Wrong-region explicit location input now blocks with SELECTED_FACTOR_OTHER_REGION and an explanatory detail, without falling back to an otherwise available local factor. Same-region math and current strict market-input policy remain intact. New calculation methodology is carbonos-ghg-scope12-1.0.1; historical snapshots are unchanged.
 
 Validation: **117 ESG backend tests run / 116 pass / one local PostgreSQL-only skip**. New numerical/API tests prove the bypass is closed, same-region decimal arithmetic remains correct, invalid location total/lines are not generated, and an independent approver cannot lock the blocked run. Complete protected accounting journey **4 browser tests pass** (desktop/320px). Whitespace passes; no frontend change requiring a duplicate build. Existing finite-number, duplicate-ID, unit/date, GWP, auth/tenant, review and reproducible-export tests pass. Official GHG Protocol Scope 2 Guidance Chapter 6/Table 6.2 and Calculation Tools FAQ reviewed; links and implementation limits recorded in the methodology. Remaining main features/schema and full Scope 2 conformance are not claimed.
 
 Next: I01B explicitly invalid market-based selections, with separate tests/version/push.
+
+## I01B — Explicit invalid market inputs are blocking (2026-11-04)
+
+Phase 4. State: TESTED; own SHA/remote verification reported after commit.
+
+Files: accounting.py, numerical/ledger tests, methodology and tracking docs. Explicit market factors now respect the configured facility factor-region mapping. Wrong-region, unapproved, inapplicable or nonfinite selected factors produce their actual blocking error without substitution. Missing optional market input keeps its existing non-blocking/unreported behavior. Location totals remain separate, but an invalid explicit market selection prevents locking. New methodology version 1.0.2 records this change; existing snapshots remain immutable. This exact configured-region check is not full market geography, certificate quality or contractual-instrument validation.
+
+Validation: **119 backend tests run / 118 pass / one PostgreSQL-only local skip**. New numerical cases cover four invalid selected-factor modes despite an available valid alternative, valid selected market arithmetic and unchanged absent-input behavior. API test verifies wrong-market error, unchanged valid location total, null market total and independent-lock denial. Protected accounting browser journey **4 pass** on desktop/320px. Whitespace passes; no frontend/schema change. Primary Scope 2 source/limits remain in methodology documentation.
+
+Next: I01D facility-level report integrity. Inspection found that missing/partial market facility values could appear as zero/subtotals and JSON facility fields labelled kg were converted to tonnes. Correct both with explicit new output versions while preserving historical snapshots.

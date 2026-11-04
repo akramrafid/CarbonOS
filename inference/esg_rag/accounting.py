@@ -20,7 +20,7 @@ from decimal import Decimal, ROUND_HALF_UP
 import datetime as dt
 from typing import Dict, List, Optional, Tuple
 
-METHODOLOGY_VERSION = "carbonos-ghg-scope12-1.0.1"
+METHODOLOGY_VERSION = "carbonos-ghg-scope12-1.0.2"
 
 # activity_type -> (scope, canonical unit)
 ACTIVITY_TYPES: Dict[str, Tuple[str, str]] = {
@@ -198,6 +198,8 @@ def select_factor(a: Activity, region: str, method: str, factors: List[Factor],
             return None, "SELECTED_FACTOR_NOT_APPLICABLE"
         if method == "location" and f.region != region:
             return None, "SELECTED_FACTOR_OTHER_REGION"
+        if method == "market" and f.region != region:
+            return None, "MARKET_FACTOR_OTHER_MARKET"
         return (f, None) if f.kgco2e_per_unit.is_finite() and f.kgco2e_per_unit >= 0 else (None, 'INVALID_FACTOR_VALUE')
     candidates = [f for f in factors if _usable(f, a, region, method)]
     latest: Dict[str, Factor] = {}
@@ -297,8 +299,11 @@ def calculate(activities: List[Activity], facilities: Dict[str, Facility], facto
             mf, merr = select_factor(a, fac.region, "market", factors, a.market_factor_id)
             if merr:
                 market_complete = False
-                exception("MISSING_MARKET_BASED_INPUT", a, blocking=False,
-                          detail="No supplier-specific, contractual instrument or residual-mix factor approved")
+                if a.market_factor_id:
+                    exception(merr, a, detail="The explicitly selected market-based factor is not applicable. Review its approval, configured region, unit and dates.")
+                else:
+                    exception("MISSING_MARKET_BASED_INPUT", a, blocking=False,
+                              detail="No supplier-specific, contractual instrument or residual-mix factor approved")
             else:
                 market_total = add_line(a, fac, "2", "market", mf, share)
                 res.scope2_market_kg = (res.scope2_market_kg or Decimal(0)) + market_total
