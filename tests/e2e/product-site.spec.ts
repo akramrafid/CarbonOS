@@ -18,7 +18,7 @@ test('factory product page explains a real workflow without legacy commercial or
     const cta = await page.getByRole('link', {name:'Try the ESG demo', exact:true}).first().boundingBox();
     expect(cta!.y + cta!.height).toBeLessThanOrEqual(page.viewportSize()!.height);
   }
-  await page.screenshot({path:`docs/showcase/product-home-${page.viewportSize()!.width}.png`, scale:'css'});
+  await page.screenshot({path:`docs/website-transformation/evidence/semantic-home-${page.viewportSize()!.width}.png`, scale:'css'});
   const steps = page.getByRole('group', {name:'Workflow preview steps'});
   await steps.getByRole('button', {name:/Calculate from approved inputs/}).click();
   await expect(page.getByRole('region', {name:'Workflow preview', exact:true})).toContainText('80 tCO₂e');
@@ -35,7 +35,7 @@ test('factory product page explains a real workflow without legacy commercial or
     const cta = await page.getByRole('link', {name:'Try the ESG demo', exact:true}).first().boundingBox();
     expect(cta!.y + cta!.height).toBeLessThanOrEqual(page.viewportSize()!.height);
   }
-  await page.screenshot({path:`docs/showcase/product-home-light-${page.viewportSize()!.width}.png`, scale:'css'});
+  await page.screenshot({path:`docs/website-transformation/evidence/semantic-home-light-${page.viewportSize()!.width}.png`, scale:'css'});
   await fits(page);
 });
 

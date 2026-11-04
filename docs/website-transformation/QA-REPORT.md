@@ -58,3 +58,7 @@ C02's named artifact/template checks passed, but its full errors list also had f
 ## C03C
 
 Five static CSS blocks preserve identical text after removing raw HTML APIs. tsc/build/whitespace pass; eight responsive shell tests pass (desktop/320px). Full gate FAIL: **57 color findings**, no raw HTML findings. Hosted ESG CI b31e35e run [41788765542](https://github.com/akramrafid/CarbonOS/actions/runs/41788765542) completed SUCCESS, including both database modes and migration alignment. Later commits require their own CI results; this is a SHA-scoped success.
+
+## C03D
+
+14 JS tests, tsc/build/whitespace pass. Protected desktop/320px product + shell checks: **14 pass, 2 intentional demo-only skips**. New [phone light](evidence/semantic-home-light-320.png), [phone dark](evidence/semantic-home-320.png), [desktop dark](evidence/semantic-home-1440.png), [desktop light](evidence/semantic-home-light-1440.png) evidence. Source gate still FAIL on **55 legacy color findings**; primary home/nav findings resolved.

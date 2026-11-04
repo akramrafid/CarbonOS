@@ -114,10 +114,18 @@ Validation: both workflow YAML files parse; route recovery **4 browser tests pas
 
 ## C03C — Ordinary React style elements (2026-11-04)
 
-Phase 1/14. State: TESTED; own SHA/remote verification reported after commit.
+Phase 1/14. State: PUSHED. Commit `ac2fdab7a509cd525ccc9cb90d5c64c80ec9bd00` matched remote Asif.
 
 Files: CorporateSaaSPipeline, CameraCapture, DiagnosisResult, PaymentStatusTracker, FarmerPaidCard and tracking docs. Replaced five unnecessary raw-HTML APIs with React style children; inspected every caller and asserted static CSS text preserved byte-for-byte, with no interpolated values. These were static trusted literals; this is removal of an unnecessary injection API, not a claim that an exploit was demonstrated.
 
 Validation: tsc/build/whitespace pass; **8 responsive/browser tests pass** on desktop/320px (shared/farmer routes and protected ESG panels). Full contract now has **57 remaining color-token findings**, zero raw-HTML API findings. No new test for the trivial syntax substitution; content-preservation assertion and existing route/build checks verify it.
 
 Hosted CI update: https://github.com/akramrafid/CarbonOS/actions/runs/41788765542 at b31e35e completed **SUCCESS**, including frontend E2E and backend SQLite, PostgreSQL and migration/model checks. Separate contract workflow still fails as expected on outstanding source colors. This proves the CI repair, not production Postgres/OIDC/restore/load readiness. Next: C03D migrate primary home/navigation colors to existing semantic theme foundations.
+
+## C03D — Semantic primary website colors (2026-11-04)
+
+Phase 1/14. State: TESTED; own SHA/remote verification reported after commit.
+
+Files: Hero.jsx, Navbar.jsx, index.css, product-site.spec.ts, four new theme screenshots and tracking docs. Home/nav use existing semantic canvas/accent/control/nav variables. Centralized hero panel/shade/glow/grid CSS; separate light/dark panel and shade tokens preserve readable composition. Primary CTA now shares the tested theme-specific button text/background. New screenshots preserve earlier showcase evidence.
+
+Validation: **14 JS tests pass**, tsc/build/whitespace pass. Product + responsive browser specs on desktop/320px: **14 pass, 2 intentional isolated-demo-only skips** under protected mode. Visually inspected new 320px light and 1440px dark screenshots; first-screen phone CTA, themes, menu/focus/resize, navigation, forms and local pilot download remain usable. Full contract still FAIL, reduced to **55 legacy color findings**, no primary Hero/Navbar findings. No checker modifications. Next: R01 evidence source inspector/export, retaining current tenant and grounding controls; remaining legacy token migration stays open.

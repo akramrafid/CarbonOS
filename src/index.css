@@ -24,6 +24,8 @@
   --state-neutral-bg: #1d2b23;
   --state-neutral-text: #c6d6cb;
   --state-neutral-border: #667e6e;
+  --hero-panel-bg: rgba(8, 15, 11, 0.9);
+  --hero-shade: linear-gradient(to top, #040a06, rgba(4, 10, 6, 0.75), rgba(4, 10, 6, 0.6));
   --control-bg: #080f0b;
   --control-text: #f0f4f1;
   --control-border: #667e6e;
@@ -111,6 +113,8 @@
   --state-neutral-bg: #e7ece7;
   --state-neutral-text: #37463c;
   --state-neutral-border: #687b6d;
+  --hero-panel-bg: #f2f3ee;
+  --hero-shade: linear-gradient(to bottom, rgba(242, 243, 238, 0.88), rgba(242, 243, 238, 0.98));
   --control-bg: #ffffff;
   --control-text: #252e28;
   --control-border: #687b6d;
@@ -157,8 +161,13 @@ html {
   scroll-padding-top: 7rem;
 }
 
-[data-theme="light"] .hero-shade {
-  background: linear-gradient(to bottom, rgba(242, 243, 238, 0.88), rgba(242, 243, 238, 0.98));
+.hero-shade { background: var(--hero-shade); }
+.hero-terminal-card { background: var(--hero-panel-bg); }
+.hero-glow { background: radial-gradient(ellipse 80% 80% at 50% -20%, rgba(0, 200, 83, 0.15), transparent); }
+.hero-grid {
+  background-image: linear-gradient(to right, rgba(0, 200, 83, 0.03) 1px, transparent 1px), linear-gradient(to bottom, rgba(0, 200, 83, 0.03) 1px, transparent 1px);
+  background-size: 4rem 4rem;
+  mask-image: radial-gradient(ellipse 60% 50% at 50% 40%, black 70%, transparent 100%);
 }
 
 [data-theme="light"] .hero-terminal-card {

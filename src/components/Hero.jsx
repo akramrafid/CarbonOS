@@ -36,7 +36,7 @@ const Hero = () => {
 
   return (
     <section 
-      className="relative min-h-[100dvh] w-full flex items-center justify-center overflow-hidden bg-[#040A06]"
+      className="relative min-h-[100dvh] w-full flex items-center justify-center overflow-hidden bg-carbon"
     >
       {/* Background Photography with Modern Composite Layering */}
       <div 
@@ -45,11 +45,11 @@ const Hero = () => {
       ></div>
       
       {/* High-End Dark Gradient & Contrast Overlays */}
-      <div className="hero-shade absolute inset-0 z-0 bg-gradient-to-t from-[#040A06] via-[#040A06]/75 to-[#040A06]/60"></div>
-      <div className="absolute inset-0 z-0 bg-[radial-gradient(ellipse_80%_80%_at_50%_-20%,rgba(0,200,83,0.15),rgba(255,255,255,0))]"></div>
+      <div className="hero-shade absolute inset-0 z-0 "></div>
+      <div className="absolute inset-0 z-0 hero-glow"></div>
       
       {/* Subtle Precision Grid Lines */}
-      <div className="absolute inset-0 z-0 bg-[linear-gradient(to_right,#00c85308_1px,transparent_1px),linear-gradient(to_bottom,#00c85308_1px,transparent_1px)] bg-[size:4rem_4rem] [mask-image:radial-gradient(ellipse_60%_50%_at_50%_40%,#000_70%,transparent_100%)]"></div>
+      <div className="absolute inset-0 z-0 hero-grid"></div>
 
       {/* Brand watermark */}
       <div className="hero-watermark absolute top-[12%] left-0 w-full text-center z-0 pointer-events-none select-none overflow-hidden">
@@ -68,8 +68,8 @@ const Hero = () => {
             {/* Live Protocol Status Pill */}
             <div className="hero-pill inline-flex items-center gap-2.5 bg-black/40 hover:bg-black/60 backdrop-blur-xl border border-emerald/30 hover:border-emerald/60 rounded-full py-1.5 px-4 mb-6 shadow-[0_0_20px_rgba(0,200,83,0.15)] transition-all duration-300">
               <span className="flex h-2 w-2 relative">
-                <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-[#00C853] opacity-75"></span>
-                <span className="relative inline-flex rounded-full h-2 w-2 bg-[#00C853]"></span>
+                <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald opacity-75"></span>
+                <span className="relative inline-flex rounded-full h-2 w-2 bg-emerald"></span>
               </span>
               <span className="font-mono text-[11px] font-semibold tracking-wider text-emerald uppercase">
                 For factory ESG teams
@@ -105,7 +105,7 @@ const Hero = () => {
             <div className="hero-cta flex flex-wrap gap-4 items-center mb-10 w-full">
               <Link 
                 to="/platform/esg"
-                className="group relative inline-flex items-center justify-center bg-[#00C853] hover:bg-[#00E676] text-[#040A06] font-sans font-bold text-sm sm:text-base px-7 py-4 rounded-full transition-all duration-300 shadow-[0_0_30px_rgba(0,200,83,0.35)] hover:shadow-[0_0_45px_rgba(0,200,83,0.55)] hover:scale-[1.02] active:scale-[0.98]"
+                className="group relative inline-flex items-center justify-center esg-button-primary font-sans font-bold text-sm sm:text-base px-7 py-4 rounded-full transition-all duration-300 shadow-[0_0_30px_rgba(0,200,83,0.35)] hover:shadow-[0_0_45px_rgba(0,200,83,0.55)] hover:scale-[1.02] active:scale-[0.98]"
               >
                 <span>Try the ESG demo</span>
                 <ArrowRight size={18} className="ml-2 group-hover:translate-x-1 transition-transform" />
@@ -148,7 +148,7 @@ const Hero = () => {
 
           {/* Right Column: Sovereign Exchange Terminal Card */}
           <div className="lg:col-span-5 w-full">
-            <div className="hero-terminal-card bg-[#080F0B]/90 backdrop-blur-2xl border border-white/15 rounded-[2rem] p-6 lg:p-7 shadow-[0_20px_60px_rgba(0,0,0,0.7)] relative overflow-hidden">
+            <div className="hero-terminal-card  backdrop-blur-2xl border border-white/15 rounded-[2rem] p-6 lg:p-7 shadow-[0_20px_60px_rgba(0,0,0,0.7)] relative overflow-hidden">
               
               {/* Corner Accent Glow */}
               <div className="absolute top-0 right-0 w-48 h-48 bg-emerald/10 rounded-full blur-3xl pointer-events-none"></div>

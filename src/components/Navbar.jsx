@@ -69,7 +69,7 @@ export default function Navbar() {
 
   return (
     <nav aria-label="Main navigation" className="site-navigation fixed inset-x-0 top-3 z-50 px-3 sm:top-5 sm:px-6">
-      <div className="mx-auto flex w-full max-w-[1680px] items-center justify-between gap-2 rounded-full border border-white/15 bg-[#040A06]/90 px-4 py-2 shadow-xl backdrop-blur-xl sm:px-6">
+      <div className="mx-auto flex w-full max-w-[1680px] items-center justify-between gap-2 rounded-full border border-white/15 bg-[var(--color-nav-bg)] px-4 py-2 shadow-xl backdrop-blur-xl sm:px-6">
         <Link to="/#hero" aria-label="CarbonOS home" className="flex min-h-[44px] shrink-0 items-center gap-2">
           <span className="serif-drama text-2xl font-bold tracking-wide text-white">Carbon<span className="text-emerald">OS</span></span>
           <span className="rounded border border-emerald/30 px-1.5 py-0.5 font-mono text-[9px] text-emerald">BD</span>
@@ -102,7 +102,7 @@ export default function Navbar() {
 
       <dialog ref={dialogRef} id="mobile-menu-drawer" aria-labelledby="mobile-menu-title"
         onCancel={closeMenu} onClose={closeMenu}
-        className="site-menu fixed inset-x-0 bottom-auto top-3 m-auto max-h-[calc(100dvh-1.5rem)] w-[calc(100%-1.5rem)] max-w-lg overflow-y-auto overscroll-contain rounded-3xl border border-white/15 bg-[#080F0B] p-4 text-white shadow-2xl backdrop:bg-black/70 sm:top-5 sm:p-6">
+        className="site-menu fixed inset-x-0 bottom-auto top-3 m-auto max-h-[calc(100dvh-1.5rem)] w-[calc(100%-1.5rem)] max-w-lg overflow-y-auto overscroll-contain rounded-3xl border border-white/15 bg-carbon p-4 text-white shadow-2xl backdrop:bg-black/70 sm:top-5 sm:p-6">
         <div className="mb-3 flex items-center justify-between gap-3 border-b border-white/10 pb-3">
           <h2 id="mobile-menu-title" className="text-lg font-semibold">{t('nav.platform', 'Platform')}</h2>
           <button type="button" autoFocus onClick={closeMenu} aria-label="Close navigation menu"
