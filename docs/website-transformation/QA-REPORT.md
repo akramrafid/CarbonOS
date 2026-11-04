@@ -130,3 +130,9 @@ The hosted failure above is reproduced with a deterministic authorized UUID cont
 ## L01C
 
 Build/type check/whitespace pass; **20 browser/API tests pass across ten viewport projects**. Exact displayed authenticated query payload/path executes against a real synthetic uploaded policy and returns its authorized 12-month citation; missing auth is 401. Theme/canvas/heading, code wrapping/no page overflow, metadata, actual evidence/footer navigation and link targets/sizes pass. [Desktop light](evidence/api-guide-light-1440.png), [desktop dark](evidence/api-guide-dark-1440.png), [mobile light](evidence/api-guide-light-320.png), [mobile dark](evidence/api-guide-dark-320.png). Full source gate remains FAIL on **48 legacy color findings**. No invented telemetry endpoint, keys, production OAuth setup or registry service claim; no backend change. No external provider or confidential data used by tests.
+
+## L01D
+
+Build/type check/whitespace pass; **10 browser tests pass across ten viewport projects**, dark/light. Honest vacancy state, no application/POST/form/mailto/JobPosting or unverified role claims, real project/footer navigation, 44px links and no page overflow/runtime errors verified. [Desktop light](evidence/careers-light-1440.png), [desktop dark](evidence/careers-dark-1440.png), [mobile light](evidence/careers-light-320.png), [mobile dark](evidence/careers-dark-320.png). Full source gate remains FAIL on **47 legacy color findings**; no checker change or backend behavior change.
+
+I01E hosted backend [41817200718](https://github.com/akramrafid/CarbonOS/actions/runs/41817200718) is SUCCESS for SQLite, PostgreSQL/Alembic and model comparison. Its frontend job was still running at verification, so no full workflow success is inferred. Later page SHAs require their own hosted result.

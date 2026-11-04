@@ -1,45 +1,25 @@
-import React from 'react';
+import { Link } from 'react-router-dom';
+import CompanyPage from '../../components/CompanyPage';
 
-const Careers = () => {
-  return (
-    <div className="pt-24 pb-16 min-h-[80vh] flex flex-col items-center noise-overlay">
-      <div className="w-full bg-[#040A06] border-b border-emerald/10 py-16 px-6 lg:px-12 relative overflow-hidden flex flex-col items-center justify-center text-center">
-        <div className="absolute inset-0 bg-[linear-gradient(to_right,#00C85311_1px,transparent_1px),linear-gradient(to_bottom,#00C85311_1px,transparent_1px)] bg-[size:4rem_4rem] [mask-image:radial-gradient(ellipse_60%_50%_at_50%_0%,#000_70%,transparent_100%)] pointer-events-none"></div>
-        <span className="font-mono text-xs text-emerald tracking-widest px-3 py-1 bg-[#0D2B1A]/40 border border-[#00C853]/20 rounded-full mb-6 inline-block z-10">COMPANY</span>
-        <h1 className="serif-drama text-[56px] lg:text-[72px] text-white leading-tight mb-4 z-10">Careers</h1>
-        <p className="font-sans text-lg text-mist max-w-2xl z-10">Build the future of climate tech and national infrastructure with us.</p>
-      </div>
+export default function Careers() {
+  return <CompanyPage
+    label="Careers"
+    title="Explore the work behind CarbonOS."
+    intro="CarbonOS is a climate-technology project focused on source-linked ESG records, human review and traceable reporting. Learn about the product and its current engineering and research boundaries."
+  >
+    <section aria-labelledby="careers-status" className="rounded-xl border border-[var(--state-neutral-border)] bg-[var(--state-neutral-bg)] p-5 text-[var(--state-neutral-text)] sm:p-6">
+      <h2 id="careers-status" className="text-2xl font-semibold">No confirmed vacancies published</h2>
+      <p className="mt-3">There are no verified job descriptions or application destinations listed on this site. A role needs confirmed responsibilities, employment terms and a verified application channel before it can be published here.</p>
+      <p className="mt-3">This page does not collect CVs, applications or personal contact information.</p>
+    </section>
 
-      <div className="max-w-4xl w-full mx-auto px-6 lg:px-12 mt-16 relative z-10">
-        <div className="bg-[#080F0B] registry-border p-8 md:p-12 rounded-[2rem] shadow-[0_0_30px_rgba(0,200,83,0.05)]">
-          <h2 className="font-sans font-bold text-2xl text-registry mb-6 flex items-center">
-            <span className="w-2 h-2 rounded-full bg-emerald mr-3"></span>
-            Open Positions
-          </h2>
-          <div className="space-y-6 font-sans text-mist text-base leading-relaxed">
-            <p>We're actively looking for engineers, policy experts, and data scientists passionate about scaling transparent carbon markets.</p>
-            
-            <div className="mt-6 flex flex-col space-y-4">
-              <div className="p-5 bg-[#040A06] border border-emerald/10 rounded-xl flex justify-between items-center">
-                <div>
-                  <div className="font-sans font-bold text-registry text-lg">Senior Data Engineer</div>
-                  <div className="font-mono text-[10px] text-mist mt-1">Remote / Dhaka • Full-time</div>
-                </div>
-                <button className="ghost-btn font-sans font-bold text-sm px-4 py-2 rounded-lg">Apply</button>
-              </div>
-              <div className="p-5 bg-[#040A06] border border-emerald/10 rounded-xl flex justify-between items-center">
-                <div>
-                  <div className="font-sans font-bold text-registry text-lg">Carbon Policy Analyst</div>
-                  <div className="font-mono text-[10px] text-mist mt-1">Dhaka HQ • Full-time</div>
-                </div>
-                <button className="ghost-btn font-sans font-bold text-sm px-4 py-2 rounded-lg">Apply</button>
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
-    </div>
-  );
-};
-
-export default Careers;
+    <section aria-labelledby="careers-project">
+      <h2 id="careers-project" className="text-2xl font-semibold text-registry sm:text-3xl">Get to know the project</h2>
+      <ul className="mt-6 divide-y divide-mist/25 rounded-xl border border-[var(--color-card-border)] bg-[var(--color-card-bg)] px-5 sm:px-6">
+        <li className="py-5"><h3 className="text-lg font-semibold text-registry">Product & engineering</h3><p className="mt-2 text-[var(--color-text-secondary)]">Follow the implemented reporting workflow and see what a real deployment requires.</p><Link to="/technology" className="mt-3 inline-flex min-h-[44px] items-center font-semibold text-emerald underline underline-offset-4">Explore the architecture <span aria-hidden="true" className="ml-2">→</span></Link></li>
+        <li className="py-5"><h3 className="text-lg font-semibold text-registry">Climate accounting</h3><p className="mt-2 text-[var(--color-text-secondary)]">Review original framework sources and the calculation scope supported by the current prototype.</p><Link to="/company/framework-docs" className="mt-3 inline-flex min-h-[44px] items-center font-semibold text-emerald underline underline-offset-4">Review standards & scope <span aria-hidden="true" className="ml-2">→</span></Link></li>
+        <li className="py-5"><h3 className="text-lg font-semibold text-registry">Evidence & integration</h3><p className="mt-2 text-[var(--color-text-secondary)]">Inspect the actual API contract, authorization boundaries and a working evidence-query example.</p><Link to="/company/api-docs" className="mt-3 inline-flex min-h-[44px] items-center font-semibold text-emerald underline underline-offset-4">Read the developer guide <span aria-hidden="true" className="ml-2">→</span></Link></li>
+      </ul>
+    </section>
+  </CompanyPage>;
+}

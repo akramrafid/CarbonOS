@@ -288,10 +288,22 @@ Next: remaining public API/careers truth and source/theme audits, selective main
 
 ## L01C — Developer guide for the implemented ESG contract (2026-11-04)
 
-Phase 1/2/8/12. State: TESTED; own SHA/remote verification reported after commit.
+Phase 1/2/8/12. State: PUSHED. Commit `f895cdd0a2c7a3103ae004121bd68cdba70f423b` matched remote Asif.
 
 Files: APIDocs.jsx, route metadata/Footer entry, api-guide browser spec/screenshots, traceability and tracking docs. Removed invented /api/v1/mrv/telemetry payload, blanket OAuth/client-key provisioning claims and legacy project branding. Added actual document/query/activity/calculation/lock/export routes, server permissions, token/organization configuration, a displayed authenticated query example, and the Asif versioned contract link. Automation does not bypass existing independent review. No endpoint or production identity integration was added or implied. Page uses CompanyPage/semantic tokens and a discoverable footer entry, not new dependencies.
 
 Validation: TypeScript/Vite build and whitespace pass. **20 browser/API tests pass across all ten viewport projects**. Both themes, mobile code/endpoint wrapping, route metadata/footer/evidence navigation and minimum link sizes verified. The exact JSON/path parsed from the displayed example is executed with a real authenticated test organization and uploaded synthetic boiler policy; query returns the correct cited 12-month passage/query ID, and the same unauthenticated request returns 401. No external provider call or production token used. Mobile dark screenshot inspected; four settled theme captures recorded. Full source gate decreases to **48 legacy color findings**, checker unchanged. No production backend change or duplicate full accounting run for this documentation task.
 
 Next: careers route's unverified vacancies/dead Apply actions, then remaining legacy route/theme and selective main accounting work. New hosted I01E result is still pending; local PostgreSQL evidence remains separate.
+
+## L01D — Careers without unverified roles or dead applications (2026-11-04)
+
+Phase 1/2/8/12. State: TESTED; own SHA/remote verification reported after commit.
+
+Files: Careers.jsx, metadata/Footer entry, careers-integrity spec/screenshots, traceability and tracking docs. Replaced unverified Senior Data Engineer/Carbon Policy Analyst roles, HQ/employment claims and dead Apply controls with an explicit no-confirmed-vacancies state. No invented email, application form or personal-data collection. Real architecture/standards/developer-guide links help visitors understand the project. Reused CompanyPage/semantic tokens and retained the route with a discoverable Project & data footer entry. No new job service, hiring claim, dependency or speculative listing.
+
+Validation: TypeScript/Vite build and whitespace pass. **10 browser tests pass across ten viewport projects** in both themes: exact vacancy state, no dead forms/mailto/Apply actions or JobPosting data, zero POST requests from the journey, valid internal/footer links, resolved theme tokens, minimum 44px links, no page overflow and no runtime errors. Desktop light screenshot inspected; four settled theme captures recorded. Full source gate decreases to **47 legacy color findings**; checker unchanged. No backend changed or unrelated numerical tests repeated.
+
+Hosted I01E backend confirmation: [run 41817200718](https://github.com/akramrafid/CarbonOS/actions/runs/41817200718) backend SUCCESS, including SQLite, PostgreSQL + Alembic and model/migration alignment. The frontend job was still in progress at this check; full-run success is not claimed. Current later page commits still need their own hosted result.
+
+Next: remaining sector/research route truth, source/theme, auth and selective main accounting/factor work. No whole-project or production completion is claimed.

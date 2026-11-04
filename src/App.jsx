@@ -65,8 +65,9 @@ function PageMetadata() {
   const { pathname } = useLocation();
   useEffect(() => {
     const titles = { '/how-it-works': 'How it works', '/company/trust': 'Trust & data', '/company/about': 'About',
-      '/company/privacy': 'Prototype data use', '/company/terms': 'Prototype service status', '/technology': 'Technology & deployment', '/company/framework-docs': 'Standards & scope', '/company/api-docs': 'Developer guide', '/platform/esg': 'ESG workspace' };
+      '/company/privacy': 'Prototype data use', '/company/terms': 'Prototype service status', '/technology': 'Technology & deployment', '/company/framework-docs': 'Standards & scope', '/company/api-docs': 'Developer guide', '/company/careers': 'Careers', '/platform/esg': 'ESG workspace' };
     const descriptions = {
+      '/company/careers': 'Explore the CarbonOS project and its current hiring status. No confirmed vacancies or application collection are published on this site.',
       '/company/api-docs': 'Explore the implemented CarbonOS ESG endpoints, organization permissions, evidence query example and integration boundaries.',
       '/company/framework-docs': 'Read original reporting framework sources and the explicit Scope 1, Scope 2, research and regulatory limits of the CarbonOS prototype.',
       '/technology': 'Explore the CarbonOS evidence, review, calculation and reporting workflow, research boundaries and requirements for a business pilot.',
