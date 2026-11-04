@@ -250,7 +250,7 @@ Next: remaining main accounting/factor governance integration and legacy design 
 
 ## L01A — Technology architecture without invented operations (2026-11-04)
 
-Phase 1/2/8/12. State: TESTED; own SHA/remote verification reported after commit.
+Phase 1/2/8/12. State: PUSHED. Commit `bd3699b0bb9c4f3cb2e26480dcba81bfcfc82858` matched remote Asif.
 
 Files: Technology.jsx, App metadata/Footer entry, removed four route-exclusive technology components, new technology-integrity browser spec/screenshots, component traceability and tracking docs. Reused CompanyPage and existing semantic surface/state/control tokens. Replaced unsupported deployed hardware, 50,000+ readings/hour, live integrations, issued-credit, official-support, revenue and dated scale-up claims with the implemented evidence/review/calculation/report path, optional AI behavior, research limits and actual pilot requirements. No fabricated replacement milestones or hardware specs. Removed the dead registration button; evidence/trust/pilot links navigate to actual flows, and the research link points to the retained monitoring module. The route has a distinct title/description, public robots metadata and a discoverable footer product link.
 
@@ -259,3 +259,17 @@ All four removed components had Technology.jsx as their sole caller; no research
 Validation so far: 20 JS tests and TypeScript/Vite build pass; existing zlib browser-externalization warning remains. Initial desktop/320px functional tests 4 pass. Visual review caught intermediate theme-transition capture; strengthened the test to wait for actual resolved canvas/heading colors and disable animations only during screenshots. The first expanded run used an incorrect test assumption about heading CSS precedence (expected a generic heading override instead of the actual registry token); corrected the assertion to the resolved semantic token. Final full ten-viewport matrix **20 pass**; final technology + shared navigation/workspace checks after adding the footer entry **12 pass** on desktop/320px. Settled desktop/mobile light/dark screenshots inspected. Source contract decreases from 55 to **50 legacy color findings**, with no checker changes. No backend behavior changed.
 
 Next: continue route-specific truth/theme/dead-link fixes; main accounting/factor schema integration and external validation remain open.
+
+## L01B — Original framework sources and actual scope (2026-11-04)
+
+Phase 1/2/8/12. State: TESTED; own SHA/remote verification reported after commit.
+
+Files: FrameworkDocs.jsx, metadata/Footer, framework-integrity browser spec/screenshots, component traceability and tracking docs. Replaced three dead PDF anchors and unsupported official national-document claim with publisher links to the GHG Protocol Corporate Standard, Scope 2 Guidance and UNFCCC Paris Agreement overview. Original pages were opened and verified on 2026-11-04; page links do not impersonate hosted PDFs or national authority. Added factual current Scope 1/2 exclusions, absence of Scope 3/assurance and explicit registry/national-document boundaries. Reused CompanyPage and semantic tokens, added route metadata and a discoverable Project & data footer link. No new dependency or legal/approval guarantee.
+
+Validation: TypeScript/Vite build and whitespace pass. **10 browser tests pass across all ten viewport projects**, both themes, actual route navigation, original publisher destinations, no dead/download anchors, coverage/registry wording, no overflow, minimum 44px links and no runtime errors. Mobile light screenshot inspected; four mobile/desktop theme captures recorded. Contract decreases from 50 to **49 legacy color findings**, with no checker changes. Backend unaffected and unrelated numerical tests not rerun for this static route.
+
+Hosted follow-up: I01D ESG CI run 41815266165 completed with a PostgreSQL backend failure; SQLite and the full ten-project protected browser job passed. Earlier successful run evidence is SHA-scoped, not a claim that this new database failure passed. I01E is the next immediate task after this atomic page push; inspect actual hosted failure and fix the cause without suppressing tests.
+
+Primary references: [Corporate Standard](https://ghgprotocol.org/corporate-standard), [Scope 2 Guidance](https://ghgprotocol.org/scope-2-guidance), [Paris Agreement](https://unfccc.int/process-and-meetings/the-paris-agreement). An initially guessed Article 6 page failed and was not shipped; the verified UNFCCC overview is linked instead.
+
+I01E diagnosis from hosted failure log: the RAG isolation test searched all serialized response metadata for the substring `999`; an authorized random chunk UUID happened to contain it. The answer/citation source text was the correct 12-month policy, not the foreign 999-month source. This is a nondeterministic test-boundary error, not evidence of a PostgreSQL accounting defect. Next task will verify text and exact source identifiers separately, with a deterministic collision fixture; authorization behavior must remain tested.
