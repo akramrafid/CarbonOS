@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { esgGet } from '../../../lib/esgApi';
-import { buildEvidenceRecord } from '../../../lib/evidenceRecord';
+import { buildEvidenceRecord, downloadEvidenceRecord } from '../../../lib/evidenceRecord';
 import { Button, Notice, useAction } from './ui';
 
 function SourcePassage({ citation, onInspected }) {
@@ -38,12 +38,7 @@ export default function EvidenceAnswer({ answer }) {
   const [passages, setPassages] = useState({});
   const download = () => {
     const record = buildEvidenceRecord(answer, Object.values(passages), receivedAt);
-    const url = URL.createObjectURL(new Blob([JSON.stringify(record, null, 2)], { type: 'application/json' }));
-    const link = document.createElement('a');
-    link.href = url;
-    link.download = 'CarbonOS-evidence-answer.json';
-    link.click();
-    URL.revokeObjectURL(url);
+    downloadEvidenceRecord(record, 'CarbonOS-evidence-answer.json');
   };
   return <section aria-label="Evidence answer" className="space-y-4 rounded-xl border border-mist/30 p-4" aria-live="polite">
     <div className="flex flex-wrap items-start justify-between gap-3">

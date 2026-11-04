@@ -3,6 +3,7 @@ import { esgFetch, esgSend } from '../../../lib/esgApi';
 import { Button, Input, Loading, Notice, Panel, Select, useAction, useEsgData } from './ui';
 import BenchmarkPanel from './BenchmarkPanel';
 import EvidenceAnswer from './EvidenceAnswer';
+import DocumentComparisonPanel from './DocumentComparisonPanel';
 
 export default function EvidenceAssistantPanel({ canWrite }) {
   const documents = useEsgData('/api/esg/documents');
@@ -66,6 +67,7 @@ export default function EvidenceAssistantPanel({ canWrite }) {
         <EvidenceAnswer answer={entry.response} />
       </div>)}
     </Panel>
+    <DocumentComparisonPanel documents={documents} />
     <Panel title="Indexed evidence" description="Uploads stay in your organization's private corpus. Shared references can only be published by platform operators.">
       <a href="/samples/factory-policy-demo.txt" download className="inline-block text-sm text-emerald underline">Download synthetic policy for RAG rehearsal</a>
       {canWrite && <form onSubmit={addDocument} className="space-y-3" aria-label="Index a source document">
@@ -75,7 +77,7 @@ export default function EvidenceAssistantPanel({ canWrite }) {
       </form>}
       <Notice error={upload.error} message={upload.message} />
       <Loading state={documents} empty="No source documents indexed yet.">
-        <ul className="space-y-2 text-sm text-mist">{(documents.data || []).map((doc) => <li key={doc.id} className="break-words">{doc.filename} · {doc.chunk_count} passage(s) · {doc.corpus} · {doc.meta_info?.source_status || 'UNREVIEWED'}</li>)}</ul>
+        <ul className="space-y-2 text-sm text-mist">{(documents.data || []).map((doc) => <li key={doc.id} className="break-words">{doc.filename} · {doc.chunk_count} passage(s) · {doc.corpus} · {doc.meta_info?.source_status || 'UNREVIEWED'} · ID {doc.id.slice(0, 8)}</li>)}</ul>
       </Loading>
     </Panel>
     <BenchmarkPanel />

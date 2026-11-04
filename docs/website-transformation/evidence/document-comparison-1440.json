@@ -1,0 +1,93 @@
+{
+  "schema_version": 1,
+  "record_type": "carbonos_document_comparison",
+  "client_received_at": "2026-11-04T09:16:28.903Z",
+  "question": "What is the boiler inspection interval?",
+  "review_required": true,
+  "responses_received": 2,
+  "sources": [
+    {
+      "document": {
+        "id": "e6fdf76b-d35c-4420-987b-1466ea181307",
+        "filename": "synthetic-policy-a.txt",
+        "corpus": "tenant_docs",
+        "source_status": "UNREVIEWED"
+      },
+      "response": {
+        "query_id": "ef4233ea-27a5-487b-abf0-b50e99c43f9f",
+        "document_ids": [
+          "e6fdf76b-d35c-4420-987b-1466ea181307"
+        ],
+        "query": "What is the boiler inspection interval?",
+        "answer": "AI answer generation is unavailable or its evidence checks did not pass. Most relevant retrieved passage (not a generated or verified answer):\n\nSYNTHETIC SOURCE A. Boiler inspection interval: every 12 months. Retain a maintenance record.\n\n[Source: synthetic-policy-a.txt, Page 1 | Corpus: tenant_docs]",
+        "confidence": 0.5,
+        "citations": [
+          {
+            "source": "synthetic-policy-a.txt",
+            "page": 1,
+            "section": "Corpus: tenant_docs",
+            "snippet": "SYNTHETIC SOURCE A. Boiler inspection interval: every 12 months. Retain a maintenance record.",
+            "relevance_score": 0.5,
+            "document_id": "e6fdf76b-d35c-4420-987b-1466ea181307",
+            "chunk_id": "5f3e8652-553d-46f6-9cbd-6d868c41d5d6",
+            "content_sha256": "7616adeafb82a1f4bef48f84a3d724751ec7599888dfd5d72a3f53fce9575170",
+            "source_status": "UNREVIEWED"
+          }
+        ],
+        "corpus": "all",
+        "model_used": "retrieval-only",
+        "insufficient_data": false,
+        "latency_ms": 6.59,
+        "answer_mode": "retrieval_only",
+        "retrieval_method": "bm25_vector_rrf",
+        "candidate_count": 1,
+        "candidate_limit_reached": false,
+        "score_kind": "ranking_score_not_probability",
+        "review_required": true
+      },
+      "error": null
+    },
+    {
+      "document": {
+        "id": "001eb244-cae0-423e-9fba-b9007db79c66",
+        "filename": "synthetic-policy-b.txt",
+        "corpus": "tenant_docs",
+        "source_status": "UNREVIEWED"
+      },
+      "response": {
+        "query_id": "d85cfc17-fd1e-4418-a24b-54690b6649dc",
+        "document_ids": [
+          "001eb244-cae0-423e-9fba-b9007db79c66"
+        ],
+        "query": "What is the boiler inspection interval?",
+        "answer": "AI answer generation is unavailable or its evidence checks did not pass. Most relevant retrieved passage (not a generated or verified answer):\n\nSYNTHETIC SOURCE B. Boiler inspection interval: every 24 months. Retain a maintenance record.\n\n[Source: synthetic-policy-b.txt, Page 1 | Corpus: tenant_docs]",
+        "confidence": 0.5,
+        "citations": [
+          {
+            "source": "synthetic-policy-b.txt",
+            "page": 1,
+            "section": "Corpus: tenant_docs",
+            "snippet": "SYNTHETIC SOURCE B. Boiler inspection interval: every 24 months. Retain a maintenance record.",
+            "relevance_score": 0.5,
+            "document_id": "001eb244-cae0-423e-9fba-b9007db79c66",
+            "chunk_id": "0de427d6-e25c-4744-b86b-c2728cc9c74b",
+            "content_sha256": "82569155c0f59775e2d291fd51347037227f5f7e1e2fec943786601b8738e862",
+            "source_status": "UNREVIEWED"
+          }
+        ],
+        "corpus": "all",
+        "model_used": "retrieval-only",
+        "insufficient_data": false,
+        "latency_ms": 5.41,
+        "answer_mode": "retrieval_only",
+        "retrieval_method": "bm25_vector_rrf",
+        "candidate_count": 1,
+        "candidate_limit_reached": false,
+        "score_kind": "ranking_score_not_probability",
+        "review_required": true
+      },
+      "error": null
+    }
+  ],
+  "limitations": "Independent document-scoped answers and citations, not an automated conflict or authority decision. Full inspected passages are available in each answer download; they are not included in this combined record."
+}

@@ -152,10 +152,20 @@ Validation: **16 JS tests pass**, type check/build/whitespace pass, **4 real-API
 
 ## R02B1 — Authorized document-scoped retrieval (2026-11-04)
 
-Phase 7. State: TESTED; own SHA/remote verification reported after commit.
+Phase 7. State: PUSHED. Commit `e37e4dee2afd3c4051eebc74a880c6753d2fa30c` matched remote Asif.
 
 Files: ESG query schema/router/retriever, API contracts, test_esg_document_queries.py and tracking docs. Optional one/two-document scope narrows SQL candidates before limit/ranking/model context. Empty, repeated, whitespace and oversized IDs/lists fail validation; foreign/unknown/mixed inaccessible/wrong-owner documents fail uniformly before search/model. Missing matches or excluded corpus returns insufficient evidence, never a broadened search. Direct non-SQL scoped retrieval is rejected. Responses include actual query ID/selected scope; existing append-only audit records scoped IDs/corpus/model/mode linked to that query. No schema migration/new provider required; ordinary queries retain their prior corpus behavior.
 
 Validation: **110 backend tests run / 109 pass / one PostgreSQL-only local skip**; four new scoped-query tests include candidate-limit=1 on an older selected document, context/citation isolation, no generation on unauthorized IDs, validation negatives, shared/corpus scopes and audit linkage. **16 JS tests pass**; direct legacy tenant-isolation suite passes; whitespace passes. Initial no-match fixture shared the generic word “policy” with the question and therefore matched lexical search; the scope test now uses the specific query “boiler inspection” to test truly absent terms. This does not establish semantic relevance quality; the synthetic lexical limits remain explicit.
 
 Hosted update: R01's actual source-inspection commit 919f1cb passed ESG CI (https://github.com/akramrafid/CarbonOS/actions/runs/41791320522), including PostgreSQL and full protected browser suite. Separate design contract remains red on 55 legacy color findings. Next: R02B2 side-by-side document evidence UI using this tested scope boundary.
+
+## R02B2 — Real two-document evidence comparison (2026-11-04)
+
+Phase 7. State: TESTED; own SHA/remote verification reported after commit.
+
+Files: DocumentComparisonPanel, assistant/answer views, shared evidenceRecord helper, JS/browser tests, four synthetic comparison artifacts and tracking docs. A focused question runs as two independent, authorized document-scoped queries. Results retain exact question/source IDs, query IDs, model/method, excerpts, full source inspector and per-answer export. Combined JSON preserves both actual responses and any source errors; it excludes full inspected passages explicitly. Duplicate source selection focuses/marks the second control without querying. Missing evidence remains source-specific. Failed queries or unconfirmed question/document/citation scope produce explicit unavailable states rather than old/other-source answers; retry reruns the selected scope. The display and export make no automatic conflict/authority decision. Document identifiers distinguish same-name indexed versions; no date/timezone interpretation is invented.
+
+Validation: **18 JS tests pass**, type check/build/whitespace pass; **6 real-API browser tests pass** on desktop/320px (comparison plus inspection/history regressions). Tests cover source A 12-month vs source B 24-month passages, distinct single-source request IDs/citations, no query for duplicates, actual combined download, simulated per-source 503, deliberately wrong scope response rejection, successful retry and source-specific abstention. Core comparison/export uses actual uploaded synthetic sources and the real API; outage/wrong-scope branches are explicit fault injection. Desktop/mobile comparison screenshots inspected. Prior generated history/source proof artifacts restored. Backend unchanged from R02B1; no duplicate backend suite run. Full frontend contract remains FAIL on **55 legacy color findings**.
+
+Next: remaining core workspace UX and legacy source/security audits, followed by selective main accounting integration; scientific/production external blockers remain explicit.

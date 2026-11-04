@@ -74,3 +74,7 @@ Five static CSS blocks preserve identical text after removing raw HTML APIs. tsc
 ## R02B1
 
 110 ESG backend tests run: **109 pass / 1 local PostgreSQL-only skip**. Four new source-scope tests cover authorization before generation, exact candidate context, pre-limit narrowing, selected scope/audit ID, negative validation, no-match/corpus restrictions and no non-SQL broadening. 16 JS tests and direct legacy tenant-isolation suite pass. No frontend runtime changed; browser suite not repeated for this API-only task. R01 hosted ESG CI [41791320522](https://github.com/akramrafid/CarbonOS/actions/runs/41791320522) is SUCCESS; newer commits require their own hosted result. Contract remains FAIL on 55 legacy color findings.
+
+## R02B2
+
+18 JS tests, tsc/build/whitespace pass. Protected comparison + inspection/history **6 browser tests pass** (desktop/320px). Real synthetic 12-month/24-month source comparison, exact request/citation scope, combined download, duplicate validation, partial 503, wrong-scope fault rejection, retry and independent no-evidence behavior pass. [Desktop comparison](evidence/document-comparison-1440.png), [mobile comparison](evidence/document-comparison-320.png); actual synthetic combined records: [desktop JSON](evidence/document-comparison-1440.json), [mobile JSON](evidence/document-comparison-320.json). No automatic conflict-resolution/model-accuracy claim. Full contract remains FAIL on 55 legacy color findings.
