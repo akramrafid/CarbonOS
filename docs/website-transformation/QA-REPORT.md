@@ -78,3 +78,7 @@ Five static CSS blocks preserve identical text after removing raw HTML APIs. tsc
 ## R02B2
 
 18 JS tests, tsc/build/whitespace pass. Protected comparison + inspection/history **6 browser tests pass** (desktop/320px). Real synthetic 12-month/24-month source comparison, exact request/citation scope, combined download, duplicate validation, partial 503, wrong-scope fault rejection, retry and independent no-evidence behavior pass. [Desktop comparison](evidence/document-comparison-1440.png), [mobile comparison](evidence/document-comparison-320.png); actual synthetic combined records: [desktop JSON](evidence/document-comparison-1440.json), [mobile JSON](evidence/document-comparison-320.json). No automatic conflict-resolution/model-accuracy claim. Full contract remains FAIL on 55 legacy color findings.
+
+## E01A
+
+18 JS tests, type check/build/whitespace pass. Protected accounting/form/delayed-period suite: **8 browser tests pass**; extended reference outage/retry/direct-link suite: **4 pass** (desktop/320px). Tests hold an actual older-period API response, switch periods, then release it; current rows remain correct and aborted errors stay hidden. Direct period state now initializes correctly. Known pre-existing disclosure duplicate-key warning is recorded as E01C, not silently treated as clean console output. Backend unchanged.

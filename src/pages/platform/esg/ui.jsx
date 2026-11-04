@@ -1,21 +1,33 @@
 // Small accessible primitives for the ESG workspace. Every value shown comes from an API response;
 // components render explicit loading, empty and error states instead of placeholder numbers.
-import { useCallback, useEffect, useId, useState } from 'react';
-import { esgGet } from '../../../lib/esgApi';
+import { useCallback, useEffect, useId, useRef, useState } from 'react';
+import { esgFetch } from '../../../lib/esgApi';
 
 export function useEsgData(path) {
-  const [state, setState] = useState({ data: null, error: null, loading: Boolean(path) });
+  const [state, setState] = useState({ path, data: null, error: null, loading: Boolean(path) });
+  const request = useRef(null);
   const reload = useCallback(async () => {
-    if (!path) return;
-    setState((s) => ({ ...s, loading: true, error: null }));
+    request.current?.abort();
+    const controller = new AbortController();
+    request.current = controller;
+    if (!path) {
+      setState({ path, data: null, error: null, loading: false });
+      return;
+    }
+    setState((current) => ({ path, data: current.path === path ? current.data : null, loading: true, error: null }));
     try {
-      setState({ data: await esgGet(path), error: null, loading: false });
+      const data = await esgFetch(path, { signal: controller.signal });
+      if (!controller.signal.aborted) setState({ path, data, error: null, loading: false });
     } catch (e) {
-      setState({ data: null, error: e.message, loading: false });
+      if (!controller.signal.aborted) setState({ path, data: null, error: e.message, loading: false });
     }
   }, [path]);
-  useEffect(() => { reload(); }, [reload]);
-  return { ...state, reload };
+  useEffect(() => {
+    reload();
+    return () => request.current?.abort();
+  }, [reload]);
+  const current = state.path === path ? state : { data: null, error: null, loading: Boolean(path) };
+  return { data: current.data, error: current.error, loading: current.loading, reload };
 }
 
 // Runs an async action, exposing busy/error/message for the form that triggered it.

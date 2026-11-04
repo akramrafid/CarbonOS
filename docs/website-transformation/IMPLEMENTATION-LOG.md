@@ -162,10 +162,20 @@ Hosted update: R01's actual source-inspection commit 919f1cb passed ESG CI (http
 
 ## R02B2 — Real two-document evidence comparison (2026-11-04)
 
-Phase 7. State: TESTED; own SHA/remote verification reported after commit.
+Phase 7. State: PUSHED. Commit `8c226b89c8737320cd028f90ae51403e29da7144` matched remote Asif.
 
 Files: DocumentComparisonPanel, assistant/answer views, shared evidenceRecord helper, JS/browser tests, four synthetic comparison artifacts and tracking docs. A focused question runs as two independent, authorized document-scoped queries. Results retain exact question/source IDs, query IDs, model/method, excerpts, full source inspector and per-answer export. Combined JSON preserves both actual responses and any source errors; it excludes full inspected passages explicitly. Duplicate source selection focuses/marks the second control without querying. Missing evidence remains source-specific. Failed queries or unconfirmed question/document/citation scope produce explicit unavailable states rather than old/other-source answers; retry reruns the selected scope. The display and export make no automatic conflict/authority decision. Document identifiers distinguish same-name indexed versions; no date/timezone interpretation is invented.
 
 Validation: **18 JS tests pass**, type check/build/whitespace pass; **6 real-API browser tests pass** on desktop/320px (comparison plus inspection/history regressions). Tests cover source A 12-month vs source B 24-month passages, distinct single-source request IDs/citations, no query for duplicates, actual combined download, simulated per-source 503, deliberately wrong scope response rejection, successful retry and source-specific abstention. Core comparison/export uses actual uploaded synthetic sources and the real API; outage/wrong-scope branches are explicit fault injection. Desktop/mobile comparison screenshots inspected. Prior generated history/source proof artifacts restored. Backend unchanged from R02B1; no duplicate backend suite run. Full frontend contract remains FAIL on **55 legacy color findings**.
 
 Next: remaining core workspace UX and legacy source/security audits, followed by selective main accounting integration; scientific/production external blockers remain explicit.
+
+## E01A — Reliable workspace/period data loading (2026-11-04)
+
+Phase 4/9. State: TESTED; own SHA/remote verification reported after commit.
+
+Files: shared ui.jsx hook, EsgWorkspace.jsx, ledger-review.spec.ts and tracking docs. Shared GETs abort superseded/unmounted requests, ignore aborted results/errors, and immediately hide data belonging to a different path. Workspace reference reads similarly reject stale requests and tag results by organization. Dependent panels mount only after actual types/periods/facilities arrive, fixing direct-link empty internal period state. Reference failures are explicit with retry instead of being converted to empty lists. Valid same-organization reference data remains mounted during refresh, preserving review/report form state.
+
+Validation: **18 JS tests pass**, tsc/build/whitespace pass. Protected shared-controls + complete accounting + delayed-ledger browser suite **8 pass** on desktop/320px. Extended reference failure/retry and direct ledger/reports/metrics/disclosures checks **4 pass**. First delayed test exposed the pre-existing direct-link initialization bug, fixed at the shared reference-loading boundary for all dependent panels. The disclosure view emits a pre-existing duplicate React key warning for repeated missing-GHG messages; functional checks pass, but E01C records and fixes that warning next. No backend/schema changes or accounting rule changes.
+
+Next: E01C disclosure-list keys, then E01B ledger filters/pagination/evidence metadata.

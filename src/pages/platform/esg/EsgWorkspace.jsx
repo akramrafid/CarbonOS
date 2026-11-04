@@ -1,8 +1,8 @@
 // ESG workspace: sign-in, organization selection and the accounting workflow tabs.
 // Role checks here only hide controls; the API enforces every permission.
-import { useCallback, useEffect, useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
-import { esgGet, esgSend, hasEsgToken, setEsgSession } from '../../../lib/esgApi';
+import { esgFetch, esgGet, esgSend, hasEsgToken, setEsgSession } from '../../../lib/esgApi';
 import { authConfigured, completeSignIn, loadSession, resetDemoSession, signIn, signOut, switchDemoPersona } from '../../../lib/esgAuth';
 import { Button, Input, Notice, Panel, Select, useAction } from './ui';
 import SetupPanel from './SetupPanel';
@@ -39,7 +39,8 @@ export default function EsgWorkspace() {
     if (next === 'setup') params.delete('view'); else params.set('view', next);
     return params;
   }, { replace: true });
-  const [ref, setRef] = useState({ types: null, periods: null, facilities: null });
+  const [ref, setRef] = useState({ organizationId: null, types: null, periods: null, facilities: null, error: null });
+  const refRequest = useRef(null);
   const action = useAction();
 
   const [loadError, setLoadError] = useState(null);
@@ -96,14 +97,29 @@ export default function EsgWorkspace() {
   }, [loadOrgs]);
 
   const loadRef = useCallback(async () => {
+    refRequest.current?.abort();
     if (!orgId) return;
-    const [types, periods, facilities] = await Promise.all([
-      esgGet('/api/esg/activity-types'), esgGet('/api/esg/periods?limit=200'), esgGet('/api/esg/facilities?limit=200'),
-    ].map((p) => p.catch(() => null)));
-    setRef({ types, periods: periods?.items || [], facilities: facilities?.items || [] });
+    const controller = new AbortController();
+    refRequest.current = controller;
+    setRef((current) => current.organizationId === orgId ? { ...current, error: null }
+      : { organizationId: orgId, types: null, periods: null, facilities: null, error: null });
+    try {
+      const [types, periods, facilities] = await Promise.all([
+        '/api/esg/activity-types', '/api/esg/periods?limit=200', '/api/esg/facilities?limit=200',
+      ].map((path) => esgFetch(path, { signal: controller.signal })));
+      if (!Array.isArray(types.inventory) || !Array.isArray(periods.items) || !Array.isArray(facilities.items)) {
+        throw new Error('Workspace reference data is incomplete.');
+      }
+      if (!controller.signal.aborted) setRef({ organizationId: orgId, types, periods: periods.items, facilities: facilities.items, error: null });
+    } catch (error) {
+      if (!controller.signal.aborted) setRef((current) => ({ ...current, error: error.message }));
+    }
   }, [orgId]);
-  // Refresh shared reference data on every tab change so new facilities/periods appear everywhere.
-  useEffect(() => { loadRef(); }, [loadRef, tab]);
+  // Keep valid same-organization data during refresh, and reject stale requests on navigation.
+  useEffect(() => {
+    loadRef();
+    return () => refRequest.current?.abort();
+  }, [loadRef, tab]);
 
   const switchOrg = (id) => {
     setEsgSession({ organizationId: id });
@@ -134,7 +150,7 @@ export default function EsgWorkspace() {
     await action.run(async () => {
       await resetDemoSession();
       setTab('setup');
-      setRef({ types: null, periods: null, facilities: null });
+      setRef({ organizationId: null, types: null, periods: null, facilities: null, error: null });
       await refreshAll();
       await loadRef();
     }, 'Demo workspace successfully reset to initial benchmark state.');
@@ -197,6 +213,9 @@ export default function EsgWorkspace() {
     ...(can.admin ? [['members', 'Members']] : []), ...(can.review ? [['audit', 'Audit trail']] : []),
   ];
   const activeTab = tabs.some(([key]) => key === tab) ? tab : 'setup';
+  const needsReference = ['factors', 'ledger', 'metrics', 'reports', 'disclosures'].includes(activeTab);
+  const referenceReady = ref.organizationId === orgId && ref.types && ref.periods && ref.facilities;
+  const referenceError = ref.organizationId === orgId ? ref.error : null;
 
   return shell(
     <>
@@ -277,7 +296,14 @@ export default function EsgWorkspace() {
           </button>
         ))}
       </nav>
+      {referenceError && <div className="space-y-3">
+        <Notice error={`Workspace reference data could not be refreshed: ${referenceError}`} />
+        <Button variant="secondary" onClick={loadRef}>Retry workspace data</Button>
+      </div>}
       <div key={orgId + tab}>
+        {needsReference && !referenceReady
+          ? !referenceError && <p role="status" className="text-sm text-mist">Loading reporting periods and facilities…</p>
+          : <>
         {activeTab === 'evidence' && <EvidenceAssistantPanel canWrite={can.write} />}
         {activeTab === 'setup' && <SetupPanel canAdmin={can.admin} />}
         {activeTab === 'factors' && <FactorsPanel canAdmin={can.admin} me={me?.sub} types={ref.types} />}
@@ -287,6 +313,7 @@ export default function EsgWorkspace() {
         {activeTab === 'disclosures' && <DisclosuresPanel me={me?.sub} can={can} periods={ref.periods} />}
         {activeTab === 'members' && <MembersPanel />}
         {activeTab === 'audit' && <AuditPanel />}
+        </>}
       </div>
     </>,
   );
