@@ -1,7 +1,7 @@
 // ESG workspace: sign-in, organization selection and the accounting workflow tabs.
 // Role checks here only hide controls; the API enforces every permission.
 import { useCallback, useEffect, useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useSearchParams } from 'react-router-dom';
 import { esgGet, esgSend, hasEsgToken, setEsgSession } from '../../../lib/esgApi';
 import { authConfigured, completeSignIn, loadSession, resetDemoSession, signIn, signOut, switchDemoPersona } from '../../../lib/esgAuth';
 import { Button, Input, Notice, Panel, Select, useAction } from './ui';
@@ -31,7 +31,14 @@ export default function EsgWorkspace() {
   const [me, setMe] = useState(null);
   const [orgs, setOrgs] = useState(null);
   const [orgId, setOrgId] = useState(null);
-  const [tab, setTab] = useState('setup');
+  const [searchParams, setSearchParams] = useSearchParams();
+  const tab = searchParams.get('view') || 'setup';
+  const setTab = (next) => setSearchParams((current) => {
+    const params = new URLSearchParams(current);
+    params.delete('invite');
+    if (next === 'setup') params.delete('view'); else params.set('view', next);
+    return params;
+  }, { replace: true });
   const [ref, setRef] = useState({ types: null, periods: null, facilities: null });
   const action = useAction();
 
@@ -189,6 +196,7 @@ export default function EsgWorkspace() {
     ['setup', 'Setup'], ['factors', 'Emission factors'], ['ledger', 'Activity ledger'], ['metrics', 'E/S/G metrics'], ['reports', 'Calculation & reports'], ['disclosures', 'Disclosures'],
     ...(can.admin ? [['members', 'Members']] : []), ...(can.review ? [['audit', 'Audit trail']] : []),
   ];
+  const activeTab = tabs.some(([key]) => key === tab) ? tab : 'setup';
 
   return shell(
     <>
@@ -228,7 +236,7 @@ export default function EsgWorkspace() {
       )}
 
       {user.isDemo && (
-        <details open={tab === 'setup'}>
+        <details open={activeTab === 'setup'}>
           <summary className="mb-3 min-h-[44px] cursor-pointer py-3 text-sm font-semibold text-emerald">Presenter guide</summary>
         <Panel title="Your three-minute demo" description="Follow a sample factory inventory from evidence to an independently approved report. These are synthetic values, not an AI accuracy benchmark.">
           <ol className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
@@ -263,22 +271,22 @@ export default function EsgWorkspace() {
 
       <nav aria-label="ESG workspace sections" className="flex max-w-full gap-2 overflow-x-auto overscroll-x-contain pb-2">
         {tabs.map(([key, label]) => (
-          <button key={key} type="button" onClick={() => setTab(key)} aria-current={tab === key ? 'page' : undefined}
-            className={`min-h-[44px] shrink-0 whitespace-nowrap rounded-lg px-4 py-2 font-mono text-xs focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald ${tab === key ? 'bg-emerald text-carbon' : 'border border-mist/30 text-registry'}`}>
+          <button key={key} type="button" onClick={() => setTab(key)} aria-current={activeTab === key ? 'page' : undefined}
+            className={`min-h-[44px] shrink-0 whitespace-nowrap rounded-lg px-4 py-2 font-mono text-xs focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald ${activeTab === key ? 'bg-emerald text-carbon' : 'border border-mist/30 text-registry'}`}>
             {label}
           </button>
         ))}
       </nav>
       <div key={orgId + tab}>
-        {tab === 'evidence' && <EvidenceAssistantPanel canWrite={can.write} />}
-        {tab === 'setup' && <SetupPanel canAdmin={can.admin} />}
-        {tab === 'factors' && <FactorsPanel canAdmin={can.admin} me={me?.sub} types={ref.types} />}
-        {tab === 'ledger' && <LedgerPanel me={me?.sub} can={can} types={ref.types} periods={ref.periods} facilities={ref.facilities} />}
-        {tab === 'reports' && <ReportsPanel me={me?.sub} can={can} periods={ref.periods} facilities={ref.facilities} onPeriodsChanged={loadRef} />}
-        {tab === 'metrics' && <MetricsPanel me={me?.sub} can={can} periods={ref.periods} facilities={ref.facilities} />}
-        {tab === 'disclosures' && <DisclosuresPanel me={me?.sub} can={can} periods={ref.periods} />}
-        {tab === 'members' && <MembersPanel />}
-        {tab === 'audit' && <AuditPanel />}
+        {activeTab === 'evidence' && <EvidenceAssistantPanel canWrite={can.write} />}
+        {activeTab === 'setup' && <SetupPanel canAdmin={can.admin} />}
+        {activeTab === 'factors' && <FactorsPanel canAdmin={can.admin} me={me?.sub} types={ref.types} />}
+        {activeTab === 'ledger' && <LedgerPanel me={me?.sub} can={can} types={ref.types} periods={ref.periods} facilities={ref.facilities} />}
+        {activeTab === 'reports' && <ReportsPanel me={me?.sub} can={can} periods={ref.periods} facilities={ref.facilities} onPeriodsChanged={loadRef} />}
+        {activeTab === 'metrics' && <MetricsPanel me={me?.sub} can={can} periods={ref.periods} facilities={ref.facilities} />}
+        {activeTab === 'disclosures' && <DisclosuresPanel me={me?.sub} can={can} periods={ref.periods} />}
+        {activeTab === 'members' && <MembersPanel />}
+        {activeTab === 'audit' && <AuditPanel />}
       </div>
     </>,
   );

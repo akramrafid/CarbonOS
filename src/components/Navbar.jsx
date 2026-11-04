@@ -6,12 +6,9 @@ import { useTheme } from '../context/ThemeContext';
 
 const navLinks = [
   { label: 'Platform', key: 'platform', to: '/#platform' },
-  { label: 'Farmers AI', key: 'farmersAi', to: '/farmers-ai' },
-  { label: 'Carbon Credit', key: 'carbonCredit', to: '/carbon-monitoring' },
-  { label: 'Marketplace', key: 'marketplace', to: '/platform/marketplace' },
-  { label: 'Carbon Registry', key: 'carbonRegistry', to: '/platform/carbon-registry' },
-  { label: 'Sectors', key: 'sectors', to: '/#sectors' },
-  { label: 'Pricing', key: 'pricing', to: '/#pricing' },
+  { label: 'Evidence assistant', key: 'evidence', to: '/platform/esg?view=evidence' },
+  { label: 'Trust & data', key: 'trust', to: '/company/trust' },
+  { label: 'Plan a pilot', key: 'pricing', to: '/#pricing' },
 ];
 
 export default function Navbar() {
@@ -40,7 +37,7 @@ export default function Navbar() {
     dialog.showModal();
     const previousOverflow = document.body.style.overflow;
     document.body.style.overflow = 'hidden';
-    const desktop = window.matchMedia('(min-width: 1536px)');
+    const desktop = window.matchMedia('(min-width: 1280px)');
     const onResize = () => { if (desktop.matches) setIsMobileMenuOpen(false); };
     desktop.addEventListener('change', onResize);
     return () => {
@@ -59,7 +56,7 @@ export default function Navbar() {
   );
 
   const renderLink = (item, mobile = false) => {
-    const active = location.pathname + location.hash === item.to;
+    const active = location.pathname + location.search + location.hash === item.to;
     return (
       <Link key={item.key} to={item.to} onClick={closeMenu} aria-current={active ? 'page' : undefined}
         className={mobile
@@ -73,12 +70,12 @@ export default function Navbar() {
   return (
     <nav aria-label="Main navigation" className="site-navigation fixed inset-x-0 top-3 z-50 px-3 sm:top-5 sm:px-6">
       <div className="mx-auto flex w-full max-w-[1680px] items-center justify-between gap-2 rounded-full border border-white/15 bg-[#040A06]/90 px-4 py-2 shadow-xl backdrop-blur-xl sm:px-6">
-        <Link to="/" aria-label="CarbonZero BD home" className="flex min-h-[44px] shrink-0 items-center gap-2">
-          <span className="serif-drama text-2xl font-bold tracking-wide text-white">Carbon<span className="text-emerald">Zero</span></span>
+        <Link to="/#hero" aria-label="CarbonOS home" className="flex min-h-[44px] shrink-0 items-center gap-2">
+          <span className="serif-drama text-2xl font-bold tracking-wide text-white">Carbon<span className="text-emerald">OS</span></span>
           <span className="rounded border border-emerald/30 px-1.5 py-0.5 font-mono text-[9px] text-emerald">BD</span>
         </Link>
 
-        <div className="hidden min-w-0 items-center 2xl:flex">
+        <div className="hidden min-w-0 items-center xl:flex">
           {navLinks.map((item) => renderLink(item))}
           <Link to="/platform/esg" className="ml-2 flex min-h-[44px] shrink-0 items-center rounded-full border border-emerald/40 px-4 font-mono text-xs font-bold text-emerald hover:bg-emerald/10">
             {t('nav.requestDemo', 'Request Demo')}
@@ -92,10 +89,10 @@ export default function Navbar() {
             aria-label={theme === 'dark' ? 'Switch to light mode' : 'Switch to dark mode'}>
             <Sun size={16} className="icon icon-sun text-amber" /><Moon size={16} className="icon icon-moon text-emerald" />
           </button>
-          <Link to="/dashboard/farmer/earnings" className="hidden min-h-[44px] items-center gap-2 px-2 text-sm text-white/80 hover:text-white 2xl:flex">
-            Login <LogIn size={16} aria-hidden="true" />
+          <Link to="/platform/esg" className="hidden min-h-[44px] items-center gap-2 px-2 text-sm text-white/80 hover:text-white xl:flex">
+            Workspace <LogIn size={16} aria-hidden="true" />
           </Link>
-          <button type="button" className="flex min-h-[44px] min-w-[44px] items-center justify-center rounded-full text-white hover:bg-white/10 2xl:hidden"
+          <button type="button" className="flex min-h-[44px] min-w-[44px] items-center justify-center rounded-full text-white hover:bg-white/10 xl:hidden"
             onClick={() => setIsMobileMenuOpen(true)} aria-label="Open navigation menu"
             aria-expanded={isMobileMenuOpen} aria-controls="mobile-menu-drawer">
             <Menu size={22} aria-hidden="true" />
@@ -118,8 +115,8 @@ export default function Navbar() {
           <Link to="/platform/esg" onClick={closeMenu} className="flex min-h-[48px] items-center justify-center rounded-xl bg-emerald px-4 font-semibold text-carbon">
             {t('nav.requestDemo', 'Request Demo')}
           </Link>
-          <Link to="/dashboard/farmer/earnings" onClick={closeMenu} className="flex min-h-[48px] items-center justify-center gap-2 rounded-xl border border-white/20 px-4 text-sm">
-            Login to Registry <LogIn size={16} aria-hidden="true" />
+          <Link to="/#sectors" onClick={closeMenu} className="flex min-h-[48px] items-center justify-center gap-2 rounded-xl border border-white/20 px-4 text-sm">
+            Explore other prototypes <LogIn size={16} aria-hidden="true" />
           </Link>
           <div className="flex justify-center sm:hidden">{languageButton}</div>
         </div>

@@ -1,32 +1,15 @@
-import React from 'react';
 import Hero from '../components/Hero';
-import TrustBar from '../components/TrustBar';
-import ClientShowcase from '../components/ClientShowcase';
-import LiveMetrics from '../components/LiveMetrics';
-import PlatformModules from '../components/PlatformModules';
-import CorporateSaaSPipeline from '../components/CorporateSaaSPipeline';
-import Roadmap from '../components/Roadmap';
-import SectorFocus from '../components/SectorFocus';
-import Philosophy from '../components/Philosophy';
-import FrameworkAlignment from '../components/FrameworkAlignment';
-import Pricing from '../components/Pricing';
+import FactoryWorkflow from '../components/FactoryWorkflow';
+import ProductScope from '../components/ProductScope';
+import PilotPlanner from '../components/PilotPlanner';
+import ProductQuestions from '../components/ProductQuestions';
 
-function Home() {
-  return (
-    <main>
-      <section id="hero"><Hero /></section>
-      <TrustBar />
-      <section id="clients"><ClientShowcase /></section>
-      <LiveMetrics />
-      <section id="platform"><PlatformModules /></section>
-      <section id="saas-pipeline"><CorporateSaaSPipeline /></section>
-      <section id="roadmap"><Roadmap /></section>
-      <section id="sectors"><SectorFocus /></section>
-      <section id="philosophy"><Philosophy /></section>
-      <section id="framework"><FrameworkAlignment /></section>
-      <section id="pricing"><Pricing /></section>
-    </main>
-  );
+export default function Home() {
+  return <main>
+    <section id="hero"><Hero /></section>
+    <FactoryWorkflow />
+    <ProductScope />
+    <PilotPlanner />
+    <ProductQuestions />
+  </main>;
 }
-
-export default Home;

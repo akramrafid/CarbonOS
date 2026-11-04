@@ -58,12 +58,39 @@ const APIDocs = React.lazy(() => import('./pages/company/APIDocs'));
 const Careers = React.lazy(() => import('./pages/company/Careers'));
 const Privacy = React.lazy(() => import('./pages/company/Privacy'));
 const Terms = React.lazy(() => import('./pages/company/Terms'));
+const Trust = React.lazy(() => import('./pages/company/Trust'));
+
+function PageMetadata() {
+  const { pathname } = useLocation();
+  useEffect(() => {
+    const titles = { '/how-it-works': 'How it works', '/company/trust': 'Trust & data', '/company/about': 'About',
+      '/company/privacy': 'Prototype data use', '/company/terms': 'Prototype service status', '/platform/esg': 'ESG workspace' };
+    const descriptions = {
+      '/company/trust': 'Review the CarbonOS prototype controls, source provenance, AI boundaries, and deployment decisions before a business pilot.',
+      '/company/privacy': 'Understand prototype file storage, optional external AI processing, and the privacy decisions required before real-data use.',
+      '/company/terms': 'Understand the CarbonOS demonstration scope and the commercial service commitments that have not been established.',
+      '/how-it-works': 'Follow a synthetic factory bill through human review, Scope 1 and 2 calculation, separate lock approval, and reproducible export.',
+    };
+    const title = titles[pathname] ? `${titles[pathname]} | CarbonOS` : 'CarbonOS | Evidence-led ESG reporting for Bangladesh';
+    const description = descriptions[pathname] || 'A working prototype for source-linked ESG activity data, human review, Scope 1 and 2 calculations, and reproducible reports. Explore with synthetic sample data.';
+    document.title = title;
+    for (const [selector, content] of [
+      ['meta[name="description"]', description], ['meta[property="og:title"]', title],
+      ['meta[property="og:description"]', description], ['meta[property="twitter:title"]', title],
+      ['meta[property="twitter:description"]', description],
+    ]) document.head.querySelector(selector)?.setAttribute('content', content);
+    const publicPage = pathname === '/' || pathname === '/how-it-works' || pathname.startsWith('/company/') && pathname in titles;
+    document.head.querySelector('meta[name="robots"]')?.setAttribute('content', publicPage ? 'index, follow' : 'noindex, follow');
+  }, [pathname]);
+  return null;
+}
 
 function App() {
   return (
     <div className="bg-carbon min-h-screen text-registry font-sans selection:bg-emerald selection:text-carbon">
       <a href="#main-content" className="skip-link">Skip to content</a>
       <ScrollToTop />
+      <PageMetadata />
       <Navbar />
       <div id="main-content" tabIndex={-1}>
       <Suspense fallback={<LoadingSpinner />}>
@@ -117,11 +144,12 @@ function App() {
           <Route path="/company/careers" element={<Careers />} />
           <Route path="/company/privacy" element={<Privacy />} />
           <Route path="/company/terms" element={<Terms />} />
+          <Route path="/company/trust" element={<Trust />} />
           <Route path="*" element={
             <main className="mx-auto max-w-3xl px-6 pb-24 pt-36">
               <p className="font-mono text-sm text-emerald">404</p>
               <h1 className="mt-3 text-3xl font-semibold sm:text-5xl">Page not found</h1>
-              <p className="mt-4 text-mist">This address does not match a CarbonZero page.</p>
+              <p className="mt-4 text-mist">This address does not match a CarbonOS page.</p>
               <Link to="/" className="mt-6 inline-flex min-h-[44px] items-center rounded-full bg-emerald px-6 font-semibold text-carbon">Back to home</Link>
             </main>
           } />

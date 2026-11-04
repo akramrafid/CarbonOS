@@ -13,9 +13,11 @@ const resources = {
         carbonRegistry: "Carbon Registry",
         framework: "Framework",
         registry: "Registry",
-        pricing: "Pricing",
+        pricing: "Plan a pilot",
+        evidence: "Evidence assistant",
+        trust: "Trust & data",
         live: "BD REGISTRY: LIVE",
-        requestDemo: "[Request Demo]"
+        requestDemo: "Try the demo"
       },
       howItWorks: {
         tag: "EDUCATION",
@@ -60,9 +62,9 @@ const resources = {
         award3: "Article 6 Aligned"
       },
       footer: {
-        ctaTitle: "Ready to Scale Bangladesh's Green Infrastructure?",
-        ctaSubtext: "Explore how Carbon Zero BD helps organizations plan, manage, and verify green projects across the country.",
-        ctaButton: "Explore Platform",
+        ctaTitle: "Ready to follow the evidence?",
+        ctaSubtext: "Explore a synthetic factory inventory, review its sources, and export a reproducible report.",
+        ctaButton: "Open the ESG demo",
         copyright: "Copyright 2026 Carbon Zero BD",
         rights: "All Rights Reserved"
       }
@@ -79,9 +81,11 @@ const resources = {
         carbonRegistry: "কার্বন রেজিস্ট্রি",
         framework: "ফ্রেমওয়ার্ক",
         registry: "রেজিস্ট্রি",
-        pricing: "মূল্যতালিকা",
+        pricing: "পাইলট পরিকল্পনা",
+        evidence: "প্রমাণভিত্তিক সহকারী",
+        trust: "আস্থা ও ডেটা",
         live: "বিডি রেজিস্ট্রি: লাইভ",
-        requestDemo: "[ডেমো অনুরোধ করুন]"
+        requestDemo: "ডেমো দেখুন"
       },
       howItWorks: {
         tag: "শিক্ষামূলক",
@@ -126,9 +130,9 @@ const resources = {
         award3: "আর্টিকেল ৬ সামঞ্জস্যপূর্ণ"
       },
       footer: {
-        ctaTitle: "বাংলাদেশের সবুজ অবকাঠামো সম্প্রসারণ করতে প্রস্তুত?",
-        ctaSubtext: "কার্বন জিরো বিডি কীভাবে সংস্থাগুলোকে সারা দেশে সবুজ প্রকল্পগুলির পরিকল্পনা, পরিচালনা এবং যাচাই করতে সহায়তা করে তা জানুন।",
-        ctaButton: "প্ল্যাটফর্ম এক্সপ্লোর করুন",
+        ctaTitle: "প্রমাণের ভিত্তিতে রিপোর্ট তৈরি করতে প্রস্তুত?",
+        ctaSubtext: "নমুনা কারখানার ইনভেন্টরি দেখুন, উৎস পর্যালোচনা করুন এবং পুনরুৎপাদনযোগ্য রিপোর্ট এক্সপোর্ট করুন।",
+        ctaButton: "ইএসজি ডেমো খুলুন",
         copyright: "কপিরাইট ২০২৬ কার্বন জিরো বিডি",
         rights: "সর্বস্বত্ব সংরক্ষিত"
       }

@@ -1,0 +1,18 @@
+{
+  "date": "2026-11-04",
+  "baseline_commit": "655a067",
+  "target": "competitive website increment on Asif",
+  "metric": "Vite main JavaScript entry size; not total page weight, LCP, or real-device speed",
+  "before": {
+    "file": "index-D1wRwBqJ.js",
+    "raw_kb": 555.76,
+    "gzip_kb": 173.24
+  },
+  "after": {
+    "file": "index-BkcrQ9Nz.js",
+    "raw_kb": 338.25,
+    "gzip_kb": 106.25
+  },
+  "gzip_reduction_pct": 38.7,
+  "footer_background_removed_bytes": 1096601
+}

@@ -1,111 +1,22 @@
-import React from 'react';
 import { Link } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
-import { ArrowRight } from 'lucide-react';
+import { ArrowUpRight } from 'lucide-react';
 
-const Footer = () => {
+export default function Footer() {
   const { t } = useTranslation();
-
-  return (
-    <section 
-      className="relative w-full min-h-[100dvh] flex flex-col justify-end bg-cover bg-center overflow-hidden"
-      style={{ backgroundImage: 'url("/footer_landscape.png")' }}
-    >
-      {/* Gradient fade to blend with the dark section above it */}
-      <div className="absolute top-0 left-0 w-full h-64 bg-gradient-to-b from-[#040A06] via-[#040A06]/80 to-transparent z-0 pointer-events-none"></div>
-
-      {/* Light overlay for text readability if needed */}
-      <div className="absolute inset-0 bg-black/10 z-0 pointer-events-none"></div>
-
-      {/* CTA Section (Top part of the landscape) */}
-      <div className="relative z-10 w-full flex-grow flex flex-col items-center justify-center text-center px-6 py-24">
-        <h2 className="font-sans font-bold text-4xl lg:text-6xl text-white max-w-4xl tracking-tight leading-[1.1] mb-6 drop-shadow-lg">
-          {t('footer.ctaTitle')}
-        </h2>
-        <p className="font-sans text-lg text-white/90 max-w-2xl mb-10 drop-shadow-md">
-          {t('footer.ctaSubtext')}
-        </p>
-        <Link to="/platform/saas-dashboard" className="bg-white text-carbon font-sans font-bold text-sm px-8 py-4 rounded-full flex items-center space-x-3 hover:bg-gray-100 transition-colors shadow-2xl">
-          <span>{t('footer.ctaButton')}</span>
-          <div className="bg-carbon text-white rounded-full p-1">
-            <ArrowRight size={14} />
-          </div>
-        </Link>
+  return <footer className="border-t border-mist/20 bg-forest/15">
+    <div className="mx-auto max-w-7xl px-4 py-14 sm:px-6 lg:px-10">
+      <div className="flex flex-wrap items-center justify-between gap-7 border-b border-mist/20 pb-10"><div><h2 className="max-w-2xl font-serif text-3xl text-registry sm:text-4xl">{t('footer.ctaTitle')}</h2><p className="mt-3 max-w-xl text-sm leading-relaxed text-mist">{t('footer.ctaSubtext')}</p></div><Link to="/platform/esg" className="inline-flex min-h-[48px] items-center gap-3 rounded-lg bg-emerald px-5 py-3 font-semibold text-carbon">{t('footer.ctaButton')}<ArrowUpRight size={18} aria-hidden="true" /></Link></div>
+      <div className="grid gap-8 py-10 sm:grid-cols-2 lg:grid-cols-[1.2fr_1fr_1fr]">
+        <div><Link to="/#hero" className="font-serif text-3xl font-semibold text-registry">Carbon<span className="text-emerald">OS</span></Link><p className="mt-3 max-w-xs text-sm leading-relaxed text-mist">Evidence-led factory ESG reporting for Bangladesh. A working prototype, evaluated with synthetic examples.</p></div>
+        <nav aria-label="Product links" className="flex flex-col items-start gap-1 text-sm text-registry [&_a]:inline-flex [&_a]:min-h-[44px] [&_a]:items-center"><span className="font-mono text-xs text-mist">Product</span><Link to="/how-it-works">How it works</Link><Link to="/platform/esg">ESG workspace</Link><Link to="/platform/esg?view=evidence">Evidence assistant</Link><Link to="/#pricing">Plan a pilot</Link></nav>
+        <nav aria-label="Project and data links" className="flex flex-col items-start gap-1 text-sm text-registry [&_a]:inline-flex [&_a]:min-h-[44px] [&_a]:items-center"><span className="font-mono text-xs text-mist">Project & data</span><Link to="/company/about">About CarbonOS</Link><Link to="/company/trust">Trust & data</Link><Link to="/company/privacy">Data-use notice</Link><Link to="/company/terms">Prototype service status</Link></nav>
       </div>
-
-      {/* Glassmorphic Footer (Bottom part) */}
-      <footer className="relative z-10 w-full bg-white/10 backdrop-blur-2xl border-t border-white/20 pt-8 rounded-t-[2.5rem]">
-        <div className="w-full px-6 lg:px-12 mx-auto">
-          
-          {/* Top Line */}
-          <div className="flex flex-wrap items-center justify-between gap-3 border-b border-white/10 pb-6 mb-12">
-            <span className="font-sans text-xs text-white/70">{t('footer.copyright')}</span>
-            <span className="font-sans text-xs text-white/70">{t('footer.rights')}</span>
-          </div>
-
-          {/* Links Grid - 6 Columns */}
-          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-8 mb-16">
-            
-            {/* Col 1 */}
-            <div className="flex flex-col space-y-4">
-              <span className="font-mono text-[10px] text-white/40 tracking-widest uppercase mb-2">Platform</span>
-              <Link to="/platform/project-onboarding" className="font-sans text-sm text-white/90 hover:text-white transition-colors">Project Onboarding</Link>
-              <Link to="/platform/mrv-dashboard" className="font-sans text-sm text-white/90 hover:text-white transition-colors">MRV Dashboard</Link>
-              <Link to="/platform/carbon-registry" className="font-sans text-sm text-white/90 hover:text-white transition-colors">Carbon Registry</Link>
-            </div>
-
-            {/* Col 2 */}
-            <div className="flex flex-col space-y-4">
-              <span className="font-mono text-[10px] text-transparent tracking-widest uppercase mb-2 select-none">-</span>
-              <Link to="/platform/verification-workflow" className="font-sans text-sm text-white/90 hover:text-white transition-colors">Verification Workflow</Link>
-              <Link to="/platform/marketplace" className="font-sans text-sm text-white/90 hover:text-white transition-colors">Marketplace</Link>
-              <Link to="/platform/ai-detection" className="font-sans text-sm text-white/90 hover:text-white transition-colors">AI Detection</Link>
-            </div>
-
-            {/* Col 3 */}
-            <div className="flex flex-col space-y-4">
-              <span className="font-mono text-[10px] text-white/40 tracking-widest uppercase mb-2">Sectors</span>
-              <Link to="/sectors/solar-irrigation" className="font-sans text-sm text-white/90 hover:text-white transition-colors">Solar Irrigation</Link>
-              <Link to="/sectors/rice-methane" className="font-sans text-sm text-white/90 hover:text-white transition-colors">Rice Methane</Link>
-              <Link to="/sectors/clean-cookstoves" className="font-sans text-sm text-white/90 hover:text-white transition-colors">Clean Cookstoves</Link>
-            </div>
-
-            {/* Col 4 */}
-            <div className="flex flex-col space-y-4">
-              <span className="font-mono text-[10px] text-transparent tracking-widest uppercase mb-2 select-none">-</span>
-              <Link to="/sectors/waste-to-energy" className="font-sans text-sm text-white/90 hover:text-white transition-colors">Waste-to-Energy</Link>
-              <Link to="/sectors/mangrove-carbon" className="font-sans text-sm text-white/90 hover:text-white transition-colors">Mangrove Carbon</Link>
-              <Link to="/sectors/brick-kilns" className="font-sans text-sm text-white/90 hover:text-white transition-colors">Brick Kilns</Link>
-            </div>
-
-            {/* Col 5 */}
-            <div className="flex flex-col space-y-4">
-              <span className="font-mono text-[10px] text-white/40 tracking-widest uppercase mb-2">Company</span>
-              <Link to="/company/about" className="font-sans text-sm text-white/90 hover:text-white transition-colors">About</Link>
-              <Link to="/company/framework-docs" className="font-sans text-sm text-white/90 hover:text-white transition-colors">Framework Docs</Link>
-              <Link to="/company/api-docs" className="font-sans text-sm text-white/90 hover:text-white transition-colors">API Docs</Link>
-            </div>
-
-            {/* Col 6 */}
-            <div className="flex flex-col space-y-4">
-              <span className="font-mono text-[10px] text-transparent tracking-widest uppercase mb-2 select-none">-</span>
-              <Link to="/company/careers" className="font-sans text-sm text-white/90 hover:text-white transition-colors">Careers</Link>
-              <Link to="/company/privacy" className="font-sans text-sm text-white/90 hover:text-white transition-colors">Privacy</Link>
-              <Link to="/company/terms" className="font-sans text-sm text-white/90 hover:text-white transition-colors">Terms</Link>
-            </div>
-
-          </div>
-        </div>
-
-        {/* Giant Bottom Text */}
-        <div className="w-full overflow-hidden flex justify-center -mb-2 opacity-85 select-none pointer-events-none">
-          <span className="font-sans font-bold text-[13vw] leading-[0.8] text-white tracking-tighter uppercase whitespace-nowrap">
-            Carbon Zero BD
-          </span>
-        </div>
-      </footer>
-    </section>
-  );
-};
-
-export default Footer;
+      <details className="border-t border-mist/20 py-4 text-sm text-mist"><summary className="min-h-[44px] cursor-pointer py-3 font-semibold text-registry">Additional prototypes and research routes</summary><p className="max-w-3xl pb-4 text-xs leading-relaxed">These routes explore separate concepts. Claims, model accuracy, field performance, integrations, and transactions on legacy interfaces require independent validation.</p><div className="grid grid-cols-1 gap-3 pb-4 sm:grid-cols-3">{[
+        ['Crop diagnosis', '/farmers-ai'], ['Carbon monitoring', '/carbon-monitoring'], ['Illustrative dashboard', '/platform/saas-dashboard'], ['Project onboarding', '/platform/project-onboarding'], ['MRV dashboard', '/platform/mrv-dashboard'], ['Registry concept', '/platform/carbon-registry'], ['Verification workflow', '/platform/verification-workflow'], ['Marketplace concept', '/platform/marketplace'], ['AI detection', '/platform/ai-detection'],
+        ['Solar irrigation', '/sectors/solar-irrigation'], ['Rice methane', '/sectors/rice-methane'], ['Cookstoves', '/sectors/clean-cookstoves'], ['Waste-to-energy', '/sectors/waste-to-energy'], ['Mangroves', '/sectors/mangrove-carbon'], ['Brick kilns', '/sectors/brick-kilns'], ['Framework notes', '/company/framework-docs'], ['API concepts', '/company/api-docs'], ['Careers', '/company/careers'],
+      ].map(([label, url]) => <Link key={url} to={url} className="inline-flex min-h-[44px] items-center">{label}</Link>)}</div></details>
+      <p className="border-t border-mist/20 pt-5 font-mono text-xs text-mist">CarbonOS · Bangladesh · Prototype demonstration</p>
+    </div>
+  </footer>;
+}

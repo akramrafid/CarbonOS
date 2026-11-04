@@ -119,6 +119,14 @@ html {
   scroll-padding-top: 7rem;
 }
 
+[data-theme="light"] .hero-shade {
+  background: linear-gradient(to bottom, rgba(242, 243, 238, 0.88), rgba(242, 243, 238, 0.98));
+}
+
+[data-theme="light"] .hero-terminal-card {
+  box-shadow: var(--shadow-glow);
+}
+
 :where(a, button, input, select, textarea, summary):focus-visible {
   outline: 2px solid var(--color-emerald);
   outline-offset: 3px;
@@ -249,8 +257,8 @@ select option {
 }
 
 /* Glassmorphic navigation pill in Navbar */
-[data-theme="light"] nav .rounded-full.border-white\/10,
-[data-theme="light"] nav [class*="bg-white/5"] {
+[data-theme="light"] .site-navigation .rounded-full.border-white\/10,
+[data-theme="light"] .site-navigation .bg-white\/5 {
   background-color: rgba(255, 255, 255, 0.95) !important;
   border-color: #dbf0ea !important;
   box-shadow: 0 4px 25px rgba(4, 18, 38, 0.06) !important;

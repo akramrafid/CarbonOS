@@ -43,10 +43,10 @@ test('navigation fits, traps modal focus, restores focus, and reaches the real d
     await expect(dialog).not.toBeVisible();
     await expect(menu).toBeFocused();
     await menu.click();
-    await dialog.getByRole('link', { name: /Request Demo/i }).click();
+    await dialog.getByRole('link', { name: /Try the demo/i }).click();
     await expect(dialog).not.toBeVisible();
   } else {
-    await page.getByRole('navigation', { name: 'Main navigation', exact: true }).getByRole('link', { name: /Request Demo/i }).click();
+    await page.getByRole('navigation', { name: 'Main navigation', exact: true }).getByRole('link', { name: /Try the demo/i }).click();
   }
   await expect(page).toHaveURL(/\/platform\/esg$/);
   await expect(page.getByRole('heading', { name: 'GHG accounting workspace' })).toBeVisible();

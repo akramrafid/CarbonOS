@@ -1,5 +1,4 @@
-import React, { useEffect, useRef, useState } from 'react';
-import gsap from 'gsap';
+import React, { useEffect, useState } from 'react';
 import { 
   Zap, 
   ShieldCheck, 
@@ -14,12 +13,9 @@ import {
   Layers,
   Sparkles
 } from 'lucide-react';
-import { useTranslation } from 'react-i18next';
 import { Link } from 'react-router-dom';
 
 const Hero = () => {
-  const containerRef = useRef(null);
-  const { t } = useTranslation();
   const [activeStreamIndex, setActiveStreamIndex] = useState(0);
 
   const tradeStreams = [
@@ -30,86 +26,16 @@ const Hero = () => {
   ];
 
   useEffect(() => {
+    if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
     const streamTimer = setInterval(() => {
       setActiveStreamIndex(prev => (prev + 1) % tradeStreams.length);
     }, 4500);
     return () => clearInterval(streamTimer);
   }, [tradeStreams.length]);
 
-  useEffect(() => {
-    const prefersReducedMotion = typeof window !== 'undefined' && 
-      window.matchMedia('(prefers-reduced-motion: reduce)').matches;
-
-    let ctx = gsap.context(() => {
-      if (prefersReducedMotion) {
-        gsap.set(['.hero-bg', '.hero-watermark', '.hero-pill', '.hero-h1', '.hero-body', '.hero-cta', '.hero-terminal-card', '.hero-trust-badge'], {
-          opacity: 1,
-          scale: 1,
-          x: 0,
-          y: 0
-        });
-        return;
-      }
-
-      const tl = gsap.timeline();
-
-      // Background fade & subtle zoom
-      tl.fromTo('.hero-bg', 
-        { scale: 1.06, opacity: 0 }, 
-        { scale: 1, opacity: 1, duration: 1.6, ease: 'power2.out' }, 
-        0
-      );
-
-      // Watermark
-      tl.fromTo('.hero-watermark',
-        { y: 30, opacity: 0 },
-        { y: 0, opacity: 1, duration: 1.4, ease: 'power3.out' },
-        0.2
-      );
-
-      // Pill
-      tl.fromTo('.hero-pill', 
-        { y: 20, opacity: 0 }, 
-        { y: 0, opacity: 1, duration: 0.8, ease: 'power3.out' }, 
-        0.4
-      );
-
-      // Headline
-      tl.fromTo('.hero-h1', 
-        { y: 35, opacity: 0 }, 
-        { y: 0, opacity: 1, duration: 0.9, ease: 'power3.out', stagger: 0.12 }, 
-        0.5
-      );
-
-      // Body & CTA
-      tl.fromTo(['.hero-body', '.hero-cta'], 
-        { y: 20, opacity: 0 }, 
-        { y: 0, opacity: 1, duration: 0.8, ease: 'power3.out', stagger: 0.1 }, 
-        0.75
-      );
-
-      // Terminal Card
-      tl.fromTo('.hero-terminal-card', 
-        { x: 40, opacity: 0, scale: 0.96 }, 
-        { x: 0, opacity: 1, scale: 1, duration: 1, ease: 'power3.out' }, 
-        0.8
-      );
-
-      // Trust Badges
-      tl.fromTo('.hero-trust-badge', 
-        { y: 15, opacity: 0 }, 
-        { y: 0, opacity: 1, duration: 0.6, ease: 'power3.out', stagger: 0.08 }, 
-        1.0
-      );
-
-    }, containerRef);
-
-    return () => ctx.revert();
-  }, []);
 
   return (
     <section 
-      ref={containerRef}
       className="relative min-h-[100dvh] w-full flex items-center justify-center overflow-hidden bg-[#040A06]"
     >
       {/* Background Photography with Modern Composite Layering */}
@@ -119,16 +45,16 @@ const Hero = () => {
       ></div>
       
       {/* High-End Dark Gradient & Contrast Overlays */}
-      <div className="absolute inset-0 z-0 bg-gradient-to-t from-[#040A06] via-[#040A06]/75 to-[#040A06]/60"></div>
+      <div className="hero-shade absolute inset-0 z-0 bg-gradient-to-t from-[#040A06] via-[#040A06]/75 to-[#040A06]/60"></div>
       <div className="absolute inset-0 z-0 bg-[radial-gradient(ellipse_80%_80%_at_50%_-20%,rgba(0,200,83,0.15),rgba(255,255,255,0))]"></div>
       
       {/* Subtle Precision Grid Lines */}
       <div className="absolute inset-0 z-0 bg-[linear-gradient(to_right,#00c85308_1px,transparent_1px),linear-gradient(to_bottom,#00c85308_1px,transparent_1px)] bg-[size:4rem_4rem] [mask-image:radial-gradient(ellipse_60%_50%_at_50%_40%,#000_70%,transparent_100%)]"></div>
 
-      {/* Elegant Atmospheric Watermark: "CARBON ZERO BD" */}
+      {/* Brand watermark */}
       <div className="hero-watermark absolute top-[12%] left-0 w-full text-center z-0 pointer-events-none select-none overflow-hidden">
         <span className="font-sans font-extrabold text-[12vw] leading-none text-white/[0.04] tracking-[-0.05em] uppercase whitespace-nowrap">
-          CARBON ZERO BD
+          CARBONOS
         </span>
       </div>
 
@@ -146,7 +72,7 @@ const Hero = () => {
                 <span className="relative inline-flex rounded-full h-2 w-2 bg-[#00C853]"></span>
               </span>
               <span className="font-mono text-[11px] font-semibold tracking-wider text-emerald uppercase">
-                CarbonOS working prototype
+                For factory ESG teams
               </span>
               <span className="text-white/20">|</span>
               <span className="font-sans text-[11px] text-white/80 hidden sm:inline">
@@ -159,20 +85,20 @@ const Hero = () => {
 
             {/* Headline with High-Impact Contrast */}
             <h1 className="flex flex-col mb-6 w-full tracking-tight">
-              <span className="hero-h1 font-sans font-extrabold text-4xl sm:text-6xl lg:text-[68px] leading-[1.08] text-white">
+              <span className="hero-h1 font-sans font-extrabold text-3xl sm:text-6xl lg:text-[68px] leading-[1.08] text-white">
                 Carbon evidence.
               </span>
-              <span className="hero-h1 font-sans font-extrabold text-4xl sm:text-6xl lg:text-[68px] leading-[1.08] text-white">
+              <span className="hero-h1 font-sans font-extrabold text-3xl sm:text-6xl lg:text-[68px] leading-[1.08] text-white">
                 Ready for review.
               </span>
-              <span className="hero-h1 serif-drama italic text-5xl sm:text-7xl lg:text-[80px] leading-[1.05] text-emerald mt-1 drop-shadow-sm">
+              <span className="hero-h1 serif-drama italic text-4xl sm:text-7xl lg:text-[80px] leading-[1.05] text-emerald mt-1 drop-shadow-sm">
                 Built for Bangladesh.
               </span>
             </h1>
 
             {/* Precision Subtitle */}
             <p className="hero-body font-sans text-base sm:text-lg lg:text-xl text-white/80 max-w-[620px] leading-relaxed mb-8 font-normal">
-              Turn utility bills into traceable Scope 1 and 2 inventories. Review extracted values, approve activity independently, and export a reproducible report.
+              Turn factory utility bills and fuel records into traceable Scope 1 and 2 inventories. Review extracted values, approve activity independently, and export a reproducible report.
             </p>
 
             {/* Action Buttons & Fast Proof */}
@@ -186,11 +112,11 @@ const Hero = () => {
               </Link>
               
               <Link 
-                to="/farmers-ai"
+                to="/#platform"
                 className="inline-flex items-center justify-center bg-white/[0.06] hover:bg-white/[0.12] text-white border border-white/15 hover:border-emerald/40 font-sans font-medium text-sm sm:text-base px-6 py-4 rounded-full backdrop-blur-md transition-all duration-300 hover:scale-[1.02] active:scale-[0.98]"
               >
                 <Terminal size={16} className="mr-2 text-emerald" />
-                <span>Explore crop diagnosis</span>
+                <span>See the workflow</span>
               </Link>
 
               <Link

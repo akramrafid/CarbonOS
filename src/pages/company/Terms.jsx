@@ -1,29 +1,9 @@
-import React from 'react';
+import CompanyPage from '../../components/CompanyPage';
 
-const Terms = () => {
-  return (
-    <div className="pt-24 pb-16 min-h-[80vh] flex flex-col items-center noise-overlay">
-      <div className="w-full bg-[#040A06] border-b border-emerald/10 py-16 px-6 lg:px-12 relative overflow-hidden flex flex-col items-center justify-center text-center">
-        <div className="absolute inset-0 bg-[linear-gradient(to_right,#00C85311_1px,transparent_1px),linear-gradient(to_bottom,#00C85311_1px,transparent_1px)] bg-[size:4rem_4rem] [mask-image:radial-gradient(ellipse_60%_50%_at_50%_0%,#000_70%,transparent_100%)] pointer-events-none"></div>
-        <span className="font-mono text-xs text-emerald tracking-widest px-3 py-1 bg-[#0D2B1A]/40 border border-[#00C853]/20 rounded-full mb-6 inline-block z-10">COMPANY</span>
-        <h1 className="serif-drama text-[56px] lg:text-[72px] text-white leading-tight mb-4 z-10">Terms of Service</h1>
-        <p className="font-sans text-lg text-mist max-w-2xl z-10">User agreement for accessing the Carbon Zero BD platform and registry.</p>
-      </div>
-
-      <div className="max-w-4xl w-full mx-auto px-6 lg:px-12 mt-16 relative z-10">
-        <div className="bg-[#080F0B] registry-border p-8 md:p-12 rounded-[2rem] shadow-[0_0_30px_rgba(0,200,83,0.05)]">
-          <div className="space-y-6 font-sans text-mist text-base leading-relaxed">
-            <h3 className="text-registry font-bold text-lg mt-6">1. Acceptance of Terms</h3>
-            <p>By accessing Carbon Zero BD, you agree to comply with these terms and all applicable laws of Bangladesh, including the National Carbon Market Framework guidelines.</p>
-            <h3 className="text-registry font-bold text-lg mt-6">2. Registry Integrity</h3>
-            <p>Users must not submit false data. Intentional double-counting or falsification of MRV telemetry is a violation of federal law and will result in immediate account termination and legal action.</p>
-            <h3 className="text-registry font-bold text-lg mt-6">3. Marketplace Trading</h3>
-            <p>Carbon Zero BD provides the technology for peer-to-peer carbon credit trading. We do not act as a financial broker and are not liable for market price fluctuations.</p>
-          </div>
-        </div>
-      </div>
-    </div>
-  );
-};
-
-export default Terms;
+export default function Terms() {
+  return <CompanyPage label="Prototype service status" title="Evaluate the workflow before committing to a service." intro="CarbonOS currently provides a prototype demonstration. This page describes its status; it is not a published commercial service agreement or an assurance statement.">
+    <section><h2 className="font-serif text-3xl text-registry">What the demonstration provides</h2><p className="mt-3">The lead demo covers source evidence, human review, Scope 1 and 2 calculations, separate lock approval, and reproducible report exports using synthetic inputs. Additional modules explore research and illustrative scenarios; they require their own validation.</p></section>
+    <section><h2 className="font-serif text-3xl text-registry">What the demonstration does not establish</h2><p className="mt-3">A demo output does not issue a carbon credit, transfer money, establish regulatory acceptance, certify an emissions inventory, or create external assurance. No production uptime, delivery date, published price, or support response time has been committed through this website.</p></section>
+    <section><h2 className="font-serif text-3xl text-registry">Agree a business pilot separately</h2><p className="mt-3">Before real-data use, confirm the accountable parties, permitted data processing, hosting, retention, methodology and factor sources, acceptance criteria, scope, pricing, and support responsibilities. The local pilot brief is a discussion aid; downloading it does not submit an enquiry or book a service.</p></section>
+  </CompanyPage>;
+}
