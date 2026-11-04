@@ -1,132 +1,41 @@
-# Design System — MASTER
+# CarbonOS design system — implemented foundations
 
-> Generated in Phase 3. Frontend and mobile consume these tokens only.
-> Do not invent colors, type, or spacing in implementation.
+Updated 2026-11-04. Source of truth: `src/index.css`, `tailwind.config.js`, shared ESG `ui.jsx` and the shipped CarbonOS pages. This describes implemented foundations and open migration work. Earlier “sovereign”, verified-serial and universal contrast claims were intentions without evidence; they are not current product guarantees.
 
-## Brand
+## Brand and composition
 
-- **Personality**: Sovereign, executive, empirical, climate-tech precision, authoritative.
-- **Voice**: Institutional, data-grounded, verified, unambiguous, audit-ready.
-- **Anti-patterns**: Generic SaaS purple gradients, vague greenwashing claims, decorative non-functional charts, AI slop templates, ungrounded carbon offset metrics.
-
-## Art Direction
-
-- **Chosen direction**: Dual-Engine Sovereign Infrastructure (Executive Obsidian Dark Mode & Clean, Functional, Implementation-Oriented Light Mode).
-- **Visual thesis**: Sovereign enterprise ESG operating system delivering institutional auditability for Bangladesh's export industries and global carbon markets.
-- **Signature element**: Precision live telemetry gauges, verified Article 6 ledger serials, and dual-layer interactive Catmull-Rom SVG data trendlines.
-- **Composition rule**: Structured high-density modular grid with 8px baseline rhythm, asymmetric split panels, and floating contextual control bars.
-- **Image and illustration treatment**: High-resolution multispectral satellite imagery (Sentinel-2 NDVI bands), authentic smallholder farmer fieldwork, factory IoT nodes, 16:9 responsive aspect ratio.
-- **Surfaces rule**:
-  - *Dark mode*: Matte obsidian surfaces (`#040906`, `#08130C`, `#0D1C13`) with muted emerald stroke (`#152B1D`) and neon emerald focus (`#00C853`).
-  - *Light mode*: Clean warm linen canvas (`#f2f3ee`) with soft mint highlight surfaces (`#dbf0ea`), crisp white cards (`#ffffff`), and deep charcoal text (`#413f3f`, `#181414`).
-
-Do not default to a generic centered hero, interchangeable rounded cards, purple
-gradients, excessive glass, or a dashboard made of equal-weight cards. Those are
-allowed only when the product's audience and content make the choice explicit.
-
-## Design Principles
-
-1. **Hierarchy before decoration**: the primary user action is obvious within five seconds.
-2. **One strong visual idea per surface**: variety comes from composition and content, not random effects.
-3. **Confidence through clarity**: price, state, ownership, and next step are never obscured.
-4. **Restraint is a feature**: motion, shadows, blur, and gradients earn their place.
-5. **Accessible by construction**: contrast, focus, reduced motion, zoom, and content reflow are token-level concerns.
+CarbonOS helps factory teams inspect evidence, review activity and produce reproducible Scope 1/2 reports. Use precise source/state labels, readable tables, quiet forest/charcoal surfaces and restrained emerald emphasis. Never imply official approval, hardware signatures, customers, credit issuance or validated model quality from decoration. Current site uses a landscape hero, explanatory workflow, supported-scope disclosure and local pilot brief. Research modules remain separate from the supported factory demo.
 
 ## Color
 
-| Token | Light Theme UI | Dark Theme (Default) | Contrast vs surface | Usage |
-|---|---|---|---|---|
-| `--color-bg-primary` | `#f2f3ee` (Linen Canvas) | `#040906` (Obsidian Charcoal) | ≥ 7:1 | App main background canvas |
-| `--color-surface-base` | `#ffffff` (Crisp Card) | `#08130C` (Card Base) | ≥ 4.5:1 | Cards, data panels, containers |
-| `--color-surface-strong`| `#dbf0ea` (Mint Strong) | `#0D2B1A` (Forest Elevated) | ≥ 4.5:1 | Active tabs, section highlights |
-| `--color-text-primary` | `#413f3f` (Charcoal Slate) | `#F0F4F1` (Off-white Mist) | ≥ 4.5:1 | Primary body text, labels |
-| `--color-text-inverse` | `#181414` (Deep Black) | `#00C853` (Vibrant Emerald) | ≥ 7:1 | Headings, metrics, counter titles |
-| `--color-text-tertiary`| `#ffffff` (Pure White) | `#FFFFFF` (Pure White) | ≥ 4.5:1 | Text inside buttons and dark badges |
-| `--color-primary` | `#15803d` (Forest Emerald) | `#00C853` (High-Voltage Emerald) | ≥ 4.5:1 on bg | Primary CTA and interactive buttons |
-| `--color-danger` | `#DC2626` (Red 600) | `#EF4444` (Rose Red) | ≥ 4.5:1 | Non-compliance errors and alerts |
-| `--color-border` | `#dbf0ea` (Mint Border) | `#152B1D` (Muted Green Border) | ≥ 3:1 | Dividers and container strokes |
-| `--color-border-subtle`| `rgba(65, 63, 63, 0.12)` | `rgba(255, 255, 255, 0.1)` | ≥ 3:1 | Card borders and table lines |
-
-Never convey state by color alone.
+Theme colors are CSS variables, exposed through Tailwind forest/carbon/emerald/amber/registry/mist. Dark canvas `--color-carbon` #080F0B, forest #0D2B1A, primary text #F0F4F1. Light canvas #f2f3ee, forest #dbf0ea, text #413f3f. Shared controls use `--control-bg/text/border/primary-bg/primary-text/focus` and feedback uses `--state-{success,warning,danger,neutral}-{bg,text,border}`. D01 token tests require opaque text pairs ≥4.5:1 and control border/focus pairs ≥3:1. Other colors, opacity/compositing and decorative borders are not universally verified. Use status text and roles, never color alone.
 
 ## Typography
 
-### Light Theme Foundations
-- **Visual Style**: Clean, functional, implementation-oriented
-- **Primary Font**: `Helvetica`, Stack: `Helvetica, Arial, sans-serif`
-- **Base Typography**: Size: `16px`, Weight: `400`, Line-Height: `22.4px` (1.4 ratio)
+Dark/public typography: Instrument Sans body, Cormorant Garamond display, JetBrains Mono metadata, with system fallbacks. Light theme currently applies Helvetica/Arial globally, including heading overrides. ESG inputs use 16px on phones and 14px from sm; body/captions/headings use existing Tailwind scales. Micro labels are smaller and require a broader readability audit. Full EN/BN font/line-height and critical copy review remains open. Do not invent token names that are absent from source.
 
-### Typography Scale Matrix
+## Spacing and surfaces
 
-| Token | Size / Line-Height / Weight | Font Family Stack | Usage |
-|---|---|---|---|
-| `--text-xs` | `16px` / `22.4px` / `400` | `Helvetica, Arial, sans-serif` | Meta text, timestamps, table cells |
-| `--text-sm` | `20px` / `28px` / `500` | `Helvetica, Arial, sans-serif` | Subheadings, card titles, captions |
-| `--text-md` | `40px` / `48px` / `600` | `Helvetica, Arial, sans-serif` | Section titles, KPI metric numbers |
-| `--text-lg` | `46px` / `54px` / `700` | `Helvetica, Arial, sans-serif` | Page header H2, hero declarations |
-| `--text-xl` | `56px` / `64px` / `800` | `Helvetica, Arial, sans-serif` | Primary page H1 display title |
-| `--font-mono` | `14px` / `20px` / `400` | `JetBrains Mono, monospace` | Serial keys, emission factors, formulas |
-
-One `<h1>` per page. Do not skip heading levels.
-
-## Spacing & Radii
-
-### Spacing Scale (Zero Magic Numbers)
-- `space.1`: `3px` (micro padding, icon gaps)
-- `space.2`: `6px` (tight badge padding)
-- `space.3`: `7px` (button vertical inset)
-- `space.4`: `8px` (standard compact spacing)
-- `space.5`: `12px` (input padding, pill gutter)
-- `space.6`: `24px` (card content padding, column gutter)
-- `space.7`: `28px` (section block spacing)
-- `space.8`: `32px` (container margins)
-
-### Radius Tokens
-- `radius.xs`: `8px` (compact buttons, tooltips, tags)
-- `radius.sm`: `13px` (inputs, card sub-containers)
-- `radius.md`: `16px` (primary cards, modal dialogs)
-- `radius.lg`: `100px` (full pill buttons, badge containers)
-
-### Shadow Tokens
-- `shadow.1`: `rgba(4, 18, 38, 0.24) 0px 10px 26px 0px, rgba(0, 229, 255, 0) 0px 0px 0px 0px, rgba(255, 255, 255, 0.12) 0px 1px 0px 0px inset`
-- `shadow.subtle`: `0 4px 20px rgba(4, 18, 38, 0.06)` (light card elevation)
-- `shadow.dark-glow`: `0 0 20px rgba(0, 200, 83, 0.15)` (dark emerald ambient glow)
-
-## Iconography & Assets
-
-- **Icon family**: Lucide React (`stroke-width: 1.75px`)
-- **Icon sizes**: `--icon-sm` (16px), `--icon-md` (20px), `--icon-lg` (24px)
-- Meaningful icons have accessible names; decorative icons are hidden with `aria-hidden="true"`.
-- No emoji as structural UI icons.
-- **Asset manifest**: Public assets located under `/public/` (logos, national seal, satellite overlays).
+Use existing Tailwind spacing and breakpoint utilities. ESG panels: p-4 / sm:p-6, rounded-2xl, min-w-0; forms wrap to sm/lg grids; workspace max-w-6xl with px-4/sm:px-6. Inputs/buttons retain min-height 44px. Shared semantic tables scroll inside a named, keyboard-focusable region, not the document. Legacy custom grids/radii/colors remain inconsistent and must be migrated route by route with visual review, not suppressed from checks.
 
 ## Motion
 
-- **Motion Durations**:
-  - `motion.duration.instant`: `100ms` (hover states, focus rings)
-  - `motion.duration.fast`: `280ms` (dropdowns, toggle buttons)
-  - `motion.duration.normal`: `400ms` (page transitions, modal popups)
-  - `motion.duration.slow`: `500ms` (drawer expansions, telemetry graphs)
-- **Easing**: `cubic-bezier(0.16, 1, 0.3, 1)` (spring-damped exit/entry)
-- **Reduced Motion**: Full fallback to opacity-only transitions under `prefers-reduced-motion: reduce`.
+Global CSS defines normal theme transitions, animation utilities and a prefers-reduced-motion block. Navigation uses native dialog behavior. Hero step rotation respects reduced motion. Scope-specific browser tests emulate reduce; no claim that every legacy GSAP/Framer animation has been fully audited. Avoid hiding primary copy/actions on initial render.
 
-## Component states (mandatory)
+## Component contract and states
 
-Every interactive component specifies: default, hover, focus-visible, active, disabled, loading, empty, error, success.
+| Component / source | Implemented behavior | Open gap |
+|---|---|---|
+| Navbar | Desktop from 1280px; native mobile dialog, focus/Escape/restore, theme/language | Full locale body copy and real-device review |
+| ESG Panel/Button/Input/Select | Wrapping layout, 44px controls, native validation, semantic colors/focus | Full inline/server-error mapping across all forms |
+| Field | Stable label/help/error IDs, aria-describedby/invalid; caller ID/help preserved | Broad assistive-technology review |
+| Notice / StatusBadge | Error alert / success status; semantic colors plus exact status text | All backend-state combinations/contrast on legacy surfaces |
+| Table / Loading | Caption/header semantics, named scrolling region; loading/error/empty | Sort/filter/pagination and richer partial/skeleton states |
+| RouteErrorBoundary | Reload/home fallback; reset on pathname; no raw error in page | Event-handler errors require local action error handling |
+| PilotPlanner | Native form validation, unsupported-needs disclosure, local download | Real contact integration blocked on verified operator details |
 
-Each component documents: purpose, anatomy, token dependencies, keyboard behavior,
-screen-reader name/state, responsive behavior, content limits, and analytics events.
+No unused component library is added. New primitives must serve a real caller. Shared forms preserve backend validation/auth/tenant/SoD rules; client state is not authoritative.
 
-## Page Composition
+## Breakpoints and evidence
 
-Every page spec identifies: audience, intent, funnel stage, primary action,
-secondary actions, proof/trust elements, responsive composition, and the empty/error
-recovery path. Pages may override the system only through a documented page override.
-
-## Breakpoints
-
-- Mobile: 375–428px
-- Tablet: 768–1024px
-- Desktop: 1280–1920px
-- Touch target ≥ 44×44 CSS px
-- Also verify 320px minimum content width, 200% and 400% zoom, landscape, forced colors, and reduced motion.
+Tested emulation widths: 320, 375, 390, 667 landscape, 768, 1024, 1280, 1440, 1536, 1920. Tailwind sm/md/lg/xl defaults apply; nav uses xl. Forty responsive shell tests pass; see docs/website-transformation/QA-REPORT.md for exact scope and screenshots. Full screen-reader, zoom, forced-colors, all-route localization and real-device conformance remain open. Design contract source findings still block the full gate.

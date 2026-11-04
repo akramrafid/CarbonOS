@@ -1,21 +1,18 @@
-# Component & Token Traceability
+# Component and token traceability
 
-Every P0 route maps to a screen spec, composition, reusable components, and
-the tokens those components consume. This is the bridge between design intent
-and code review.
+Current supported product surface, 2026-11-04. Build success proves compilation; it does not verify scientific methodology, official registry status or accessibility conformance.
 
-| Route / screen | Screen spec | Composition | Components | Tokens / page override | Browser evidence |
-|---|---|---|---|---|---|
-| `/platform/carbon-monitoring` | `design-system/pages/carbon-monitoring.md` | Single-page audit dashboard with 7 Verra VM0047/VM0048 cards | ControlBar, BoundaryCard, CarbonStockCard, AdditionalityCard, ConformalUncertaintyCard, SensorResolutionCard, HashLedgerCard, VVBCertificateCard | `design-system/pages/carbon-monitoring.md` | Verified via Vite production build and UI-UX-Pro-Max reasoning |
-
-## New Pattern Decisions
-
-| Pattern | Why it is needed | Master token/component update | Approval |
+| Route / screen | Composition and components | Tokens / source | Evidence and gaps |
 |---|---|---|---|
-| Verra VM0047 dMRV Audit Inspector | Institutional audit compliance requiring high data density, monospace cryptographic verification, and RME visual gauge | Documented in `design-system/pages/carbon-monitoring.md` without mutating `design-system/MASTER.md` | Approved |
+| `/` | Hero, FactoryWorkflow, ProductScope, PilotPlanner, ProductQuestions | index.css + Tailwind; local pilotBrief helper | product-site spec, prior competitive QA; 390/1920 screenshot evidence; body locale/performance open |
+| `/how-it-works` | FactoryWorkflow explanation and actual ESG entry | Shared brand/type/spacing | Responsive shell/product specs; explanatory steps are not API operations |
+| `/company/about`, `/company/trust`, `/company/privacy`, `/company/terms` | CompanyPage + factual route content | Shared text/surface/type tokens | product metadata tests; no invented contact/domain/assurance |
+| `/platform/esg` | EsgWorkspace, permission-aware panels, shared Field/Input/Select/Button/Notice/StatusBadge/Table | Semantic control/state colors in ui.jsx/index.css | protected esg-journey/shared-controls, 40 shell checks; production identity/Postgres/load still open |
+| All routed content | Suspense + RouteErrorBoundary inside stable Navbar/Footer | Semantic danger state, shared button tokens | Four loading/render failure recovery tests; no raw error text in UI |
+| `/harvestguard/dashboard` | Existing local inventory + modelled city weather | Existing legacy styles, labelled selector/status and keyless cityWeather helper | Weather fixture/retry and one live response check; farm-risk/model validation not established |
+| `/platform/mrv-dashboard` | Research dashboard; live telemetry explicitly unavailable | Legacy style migration open | Two telemetry integrity tests; authenticated gateway and scientific validation absent |
+| `/carbon-monitoring`, registry and remaining research routes | Existing maps/provenance/lifecycle/legacy UIs | Legacy custom colors and patterns | Reachable but not certified; ROADMAP M01/G01/L01 track API/state/auth/source review |
 
-Rules:
+## New pattern decisions
 
-- A page may compose existing components; it may not duplicate their tokens.
-- A new visual pattern requires a Master update or documented page override.
-- Every row has loading, empty, error, success, focus, disabled, and reduced-motion coverage.
+Reuse installed UI libraries, existing tokens/native dialog and shared ESG primitives. D01 state/control palette and D02 described fields serve current callers. No new design approval, carbon methodology approval, scientific verification or independent audit is implied by this traceability table. Legacy satellite page specifications are historical design notes, not evidence of Verra compliance.

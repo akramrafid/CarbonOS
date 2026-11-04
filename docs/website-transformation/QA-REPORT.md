@@ -42,3 +42,7 @@ Full required viewport matrix (including 390 and 1920), complete protected + iso
 ## C01
 
 Both workflow YAML files parse; Asif trigger and supported ubuntu-24.04 configuration validated. Local installed Playwright platform/dependency manifests explicitly support 24.04; actual GitHub run 41472555751 identifies 26.04 as the previous Chromium blocker. Test discovery: 250 cases in nine files across ten projects. Hosted result is pending after push; contract remains red and mutation integration remains separate. No claim that Linux CI executed locally on macOS.
+
+## C02
+
+`frontend-check --area all --json`: all required artifacts/sections/template resolution PASS; overall FAIL remains **64 source heuristics**. Machine-readable [result](evidence/frontend-contract-after-artifact-fixes.json). No new runtime behavior in this task; prior test evidence is identified by task above. No Web Vitals/Lighthouse or whole-app accessibility result is invented.

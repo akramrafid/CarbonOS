@@ -1,0 +1,294 @@
+{
+  "ok": false,
+  "area": "all",
+  "checks": [
+    {
+      "name": "design-system/MASTER.md",
+      "ok": true,
+      "detail": "design-system/MASTER.md",
+      "required": true
+    },
+    {
+      "name": "design-system:Color",
+      "ok": true,
+      "detail": "missing Color section",
+      "required": true
+    },
+    {
+      "name": "design-system:Typography",
+      "ok": true,
+      "detail": "missing Typography section",
+      "required": true
+    },
+    {
+      "name": "design-system:Spacing",
+      "ok": true,
+      "detail": "missing Spacing section",
+      "required": true
+    },
+    {
+      "name": "design-system:Motion",
+      "ok": true,
+      "detail": "missing Motion section",
+      "required": true
+    },
+    {
+      "name": "design-system:component",
+      "ok": true,
+      "detail": "missing component section",
+      "required": true
+    },
+    {
+      "name": "design-system:Breakpoint",
+      "ok": true,
+      "detail": "missing Breakpoint section",
+      "required": true
+    },
+    {
+      "name": "design-system:resolved",
+      "ok": true,
+      "detail": "contains unresolved {{placeholders}}",
+      "required": true
+    },
+    {
+      "name": "screen-specs",
+      "ok": true,
+      "detail": "add at least one screen spec under docs/design/ or design-system/pages/",
+      "required": true
+    },
+    {
+      "name": "component-traceability",
+      "ok": true,
+      "detail": "docs/design/component-traceability.md",
+      "required": true
+    },
+    {
+      "name": "component-traceability:resolved",
+      "ok": true,
+      "detail": "contains unresolved {{placeholders}}",
+      "required": true
+    },
+    {
+      "name": "funnel-contract",
+      "ok": true,
+      "detail": "docs/growth/funnel.md",
+      "required": true
+    },
+    {
+      "name": "measurement-plan",
+      "ok": true,
+      "detail": "docs/analytics/measurement-plan.md",
+      "required": true
+    },
+    {
+      "name": "technical-seo",
+      "ok": true,
+      "detail": "docs/seo/technical-seo.md",
+      "required": true
+    },
+    {
+      "name": "measurement-plan:resolved",
+      "ok": true,
+      "detail": "contains unresolved {{placeholders}}",
+      "required": true
+    },
+    {
+      "name": "technical-seo:resolved",
+      "ok": true,
+      "detail": "contains unresolved {{placeholders}}",
+      "required": true
+    },
+    {
+      "name": "funnel-contract:resolved",
+      "ok": true,
+      "detail": "contains unresolved {{placeholders}}",
+      "required": true
+    },
+    {
+      "name": "measurement-plan:north-star",
+      "ok": true,
+      "detail": "missing north-star section",
+      "required": true
+    },
+    {
+      "name": "measurement-plan:funnel",
+      "ok": true,
+      "detail": "missing funnel section",
+      "required": true
+    },
+    {
+      "name": "measurement-plan:event contract",
+      "ok": true,
+      "detail": "missing event contract section",
+      "required": true
+    },
+    {
+      "name": "measurement-plan:experiment",
+      "ok": true,
+      "detail": "missing experiment section",
+      "required": true
+    },
+    {
+      "name": "technical-seo:public route",
+      "ok": true,
+      "detail": "missing public route section",
+      "required": true
+    },
+    {
+      "name": "technical-seo:metadata",
+      "ok": true,
+      "detail": "missing metadata section",
+      "required": true
+    },
+    {
+      "name": "technical-seo:sitemap",
+      "ok": true,
+      "detail": "missing sitemap section",
+      "required": true
+    },
+    {
+      "name": "technical-seo:json-ld",
+      "ok": true,
+      "detail": "missing json-ld section",
+      "required": true
+    },
+    {
+      "name": "accessibility-evidence",
+      "ok": true,
+      "detail": "docs/design/accessibility-spec.md",
+      "required": true
+    },
+    {
+      "name": "accessibility-evidence:resolved",
+      "ok": true,
+      "detail": "contains unresolved {{placeholders}}",
+      "required": true
+    },
+    {
+      "name": "accessibility-evidence:automated",
+      "ok": true,
+      "detail": "missing automated section",
+      "required": true
+    },
+    {
+      "name": "accessibility-evidence:manual",
+      "ok": true,
+      "detail": "missing manual section",
+      "required": true
+    },
+    {
+      "name": "accessibility-evidence:decision",
+      "ok": true,
+      "detail": "missing decision section",
+      "required": true
+    },
+    {
+      "name": "performance-evidence",
+      "ok": true,
+      "detail": "docs/performance/report.md",
+      "required": true
+    },
+    {
+      "name": "performance-evidence:resolved",
+      "ok": true,
+      "detail": "contains unresolved {{placeholders}}",
+      "required": true
+    },
+    {
+      "name": "performance-evidence:metrics",
+      "ok": true,
+      "detail": "missing metrics section",
+      "required": true
+    },
+    {
+      "name": "performance-evidence:review",
+      "ok": true,
+      "detail": "missing review section",
+      "required": true
+    },
+    {
+      "name": "performance-evidence:decision",
+      "ok": true,
+      "detail": "missing decision section",
+      "required": true
+    },
+    {
+      "name": "source-heuristics",
+      "ok": false,
+      "detail": "64 blocking finding(s)",
+      "required": true
+    }
+  ],
+  "errors": [
+    "screen-specs: design-system/pages/carbon-monitoring.md is missing `Visual Direction`",
+    "screen-specs: design-system/pages/carbon-monitoring.md is missing `Responsive States`",
+    "screen-specs: design-system/pages/carbon-monitoring.md is missing `Interaction States`",
+    "screen-specs: design-system/pages/carbon-monitoring.md is missing `Instrumentation`",
+    "src/components/SectorFocus.jsx: hardcoded hex color in component markup; use semantic design tokens",
+    "src/components/Roadmap.jsx: hardcoded hex color in component markup; use semantic design tokens",
+    "src/components/Philosophy.jsx: hardcoded hex color in component markup; use semantic design tokens",
+    "src/components/LiveMetrics.jsx: hardcoded hex color in component markup; use semantic design tokens",
+    "src/components/Pricing.jsx: hardcoded hex color in component markup; use semantic design tokens",
+    "src/components/PlatformModules.jsx: hardcoded hex color in component markup; use semantic design tokens",
+    "src/components/FrameworkAlignment.jsx: hardcoded hex color in component markup; use semantic design tokens",
+    "src/components/TrustBar.jsx: hardcoded hex color in component markup; use semantic design tokens",
+    "src/components/Hero.jsx: hardcoded hex color in component markup; use semantic design tokens",
+    "src/components/CorporateSaaSPipeline.jsx: hardcoded hex color in component markup; use semantic design tokens",
+    "src/components/CorporateSaaSPipeline.jsx: raw HTML injection API found; prove sanitization and review at G3",
+    "src/components/ClientShowcase.jsx: hardcoded hex color in component markup; use semantic design tokens",
+    "src/components/Navbar.jsx: hardcoded hex color in component markup; use semantic design tokens",
+    "src/pages/Technology.jsx: hardcoded hex color in component markup; use semantic design tokens",
+    "src/pages/sectors/MangroveCarbon.jsx: hardcoded hex color in component markup; use semantic design tokens",
+    "src/pages/sectors/SolarIrrigation.jsx: hardcoded hex color in component markup; use semantic design tokens",
+    "src/pages/sectors/RiceMethane.jsx: hardcoded hex color in component markup; use semantic design tokens",
+    "src/pages/sectors/CleanCookstoves.jsx: hardcoded hex color in component markup; use semantic design tokens",
+    "src/pages/sectors/WasteToEnergy.jsx: hardcoded hex color in component markup; use semantic design tokens",
+    "src/pages/sectors/BrickKilns.jsx: hardcoded hex color in component markup; use semantic design tokens",
+    "src/pages/platform/FarmerEarnings.jsx: hardcoded hex color in component markup; use semantic design tokens",
+    "src/pages/platform/ProjectOnboarding.jsx: hardcoded hex color in component markup; use semantic design tokens",
+    "src/pages/platform/VerificationWorkflow.jsx: hardcoded hex color in component markup; use semantic design tokens",
+    "src/pages/platform/SaaSDashboard.jsx: hardcoded hex color in component markup; use semantic design tokens",
+    "src/pages/platform/Impact.jsx: hardcoded hex color in component markup; use semantic design tokens",
+    "src/pages/platform/MRVDashboard.jsx: hardcoded hex color in component markup; use semantic design tokens",
+    "src/pages/platform/CarbonMonitoring.jsx: hardcoded hex color in component markup; use semantic design tokens",
+    "src/pages/platform/Marketplace.jsx: hardcoded hex color in component markup; use semantic design tokens",
+    "src/pages/platform/CarbonRegistry.jsx: hardcoded hex color in component markup; use semantic design tokens",
+    "src/pages/platform/AIDetection.jsx: hardcoded hex color in component markup; use semantic design tokens",
+    "src/pages/farmers-ai/DiagnosisResult.jsx: hardcoded hex color in component markup; use semantic design tokens",
+    "src/pages/farmers-ai/DiagnosisResult.jsx: raw HTML injection API found; prove sanitization and review at G3",
+    "src/pages/farmers-ai/BatchRegistration.jsx: hardcoded hex color in component markup; use semantic design tokens",
+    "src/pages/farmers-ai/FarmersAILanding.jsx: hardcoded hex color in component markup; use semantic design tokens",
+    "src/pages/farmers-ai/HarvestGuardDashboard.jsx: hardcoded hex color in component markup; use semantic design tokens",
+    "src/pages/farmers-ai/CameraCapture.jsx: hardcoded hex color in component markup; use semantic design tokens",
+    "src/pages/farmers-ai/CameraCapture.jsx: raw HTML injection API found; prove sanitization and review at G3",
+    "src/pages/company/APIDocs.jsx: hardcoded hex color in component markup; use semantic design tokens",
+    "src/pages/company/Careers.jsx: hardcoded hex color in component markup; use semantic design tokens",
+    "src/pages/company/FrameworkDocs.jsx: hardcoded hex color in component markup; use semantic design tokens",
+    "src/pages/platform/components/UniversalUtilityExtractor.jsx: hardcoded hex color in component markup; use semantic design tokens",
+    "src/pages/platform/components/EsgReportGenerator.jsx: hardcoded hex color in component markup; use semantic design tokens",
+    "src/pages/platform/components/FactorRegistryStudio.jsx: hardcoded hex color in component markup; use semantic design tokens",
+    "src/pages/platform/components/ConglomerateTreeStudio.jsx: hardcoded hex color in component markup; use semantic design tokens",
+    "src/pages/platform/components/SatelliteMRVStudio.jsx: hardcoded hex color in component markup; use semantic design tokens",
+    "src/pages/platform/components/VerificationReadinessCenter.jsx: hardcoded hex color in component markup; use semantic design tokens",
+    "src/pages/platform/components/ActivityEvidenceWorkspace.jsx: hardcoded hex color in component markup; use semantic design tokens",
+    "src/pages/platform/components/DuckDBEngineView.jsx: hardcoded hex color in component markup; use semantic design tokens",
+    "src/components/payments/PaymentStatusTracker.jsx: hardcoded hex color in component markup; use semantic design tokens",
+    "src/components/payments/PaymentStatusTracker.jsx: raw HTML injection API found; prove sanitization and review at G3",
+    "src/components/payments/PurchaseConfirmModal.jsx: hardcoded hex color in component markup; use semantic design tokens",
+    "src/components/payments/FarmerPaidCard.jsx: hardcoded hex color in component markup; use semantic design tokens",
+    "src/components/payments/FarmerPaidCard.jsx: raw HTML injection API found; prove sanitization and review at G3",
+    "src/components/technology/DeploymentTimeline.jsx: hardcoded hex color in component markup; use semantic design tokens",
+    "src/components/technology/SatelliteLayer.jsx: hardcoded hex color in component markup; use semantic design tokens",
+    "src/components/technology/DeviceCard.jsx: hardcoded hex color in component markup; use semantic design tokens",
+    "src/components/technology/TechStackDiagram.jsx: hardcoded hex color in component markup; use semantic design tokens",
+    "src/components/marketplace/MarketplaceBrowse.jsx: hardcoded hex color in component markup; use semantic design tokens",
+    "src/components/marketplace/CheckoutModal.jsx: hardcoded hex color in component markup; use semantic design tokens",
+    "src/components/farmers-ai/LocalRiskMap.jsx: hardcoded hex color in component markup; use semantic design tokens",
+    "src/components/farmers-ai/WeatherRiskWidget.jsx: hardcoded hex color in component markup; use semantic design tokens",
+    "src/components/dashboard/FarmerCreditsWidget.jsx: hardcoded hex color in component markup; use semantic design tokens",
+    "docs/qa/playwright-report/index.html: hardcoded hex color in component markup; use semantic design tokens",
+    "docs/qa/playwright-report/index.html: raw HTML injection API found; prove sanitization and review at G3",
+    "source-heuristics: 64 blocking finding(s)"
+  ],
+  "warnings": []
+}

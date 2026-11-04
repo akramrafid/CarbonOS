@@ -3,7 +3,7 @@
 As of A00 (2026-11-04), the enterprise brief is **not complete**. See ROADMAP for task-level acceptance and priorities.
 
 1. Shared theme states, form descriptions/date validation, requested viewport widths and route-failure recovery are implemented and tested. Full design-system and legacy-route work remains.
-2. Frontend contract is red: missing funnel, four unresolved templates and 64 source findings. Fix source/doc causes; do not suppress the gate.
+2. Frontend contract artifacts now pass: funnel added and templates replaced with factual status/evidence. Overall gate remains red on 64 source findings; fix source causes without suppressing the gate.
 3. Main contains overlapping accounting, bill/OCR and factor improvements. Selective integration requires schema and old/new regression review; main was not merged.
 4. Weather and Blynk browser credential requests are removed. Weather uses a validated keyless city-model path; live telemetry is explicitly unavailable until an authenticated server gateway is implemented. Never copy credential values into documentation. The operator must rotate any historically exposed credentials.
 5. MRV, registry, marketplace, crop/weather and legacy dashboard routes need honest state/action audits. Local sandbox or synthetic success cannot establish official approval, payment, calibrated prediction or issued credits.
