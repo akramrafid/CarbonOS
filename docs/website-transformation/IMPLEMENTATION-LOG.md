@@ -26,10 +26,20 @@ Next: D02 programmatic form descriptions and date-range validation.
 
 ## D02 — Accessible field help and validation (2026-11-04)
 
-Phase 1/9. State: TESTED; own SHA/remote verification reported after commit.
+Phase 1/9. State: PUSHED. Commit `e1de8a61d51a74095d06083663def7400e8ee732` matched remote Asif after push.
 
 Files: shared ui.jsx, SetupPanel.jsx, index.css, shared-controls.spec.ts and tracking docs. All Input/Select callers now receive stable label and help IDs, with existing caller IDs/descriptions preserved. Visible errors connect through aria-describedby and aria-invalid. Reporting periods reject reversed or equal dates before a request, focus the end-date field and clear the error on correction; required/native validation and backend rules remain in force.
 
 Validation: 11 JS tests, type check and production build pass. Protected browser tests (1440px + 320px) **6 passed**, including accessible input/select descriptions, zero invalid-period requests, correction/save, and complete accounting journeys with independent approvals, locking, export and negative permissions. Whitespace check passes. No backend changes.
 
 Next: Q01 add and exercise 390px and 1920px responsive projects.
+
+## Q01 — Complete requested viewport widths (2026-11-04)
+
+Phase 10/14. State: TESTED; own SHA/remote verification reported after commit.
+
+Files: playwright.config.ts, responsive-shell.spec.ts, four new evidence PNGs and tracking docs. Added 390×844 phone and 1920×1080 desktop projects; retained all eight earlier projects including landscape. New screenshots use this directory's evidence folder, preserving historical QA images.
+
+Validation: responsive shell across ten projects **40 passed (35.2s)**. Includes navigation bounds, native mobile focus/Escape/restore, EN/BN navigation, skip links, shared routes, 404 recovery, real protected ESG API forms/all tabs, 44px controls, table keyboard access, theme switching and resize unlock. Type check and whitespace pass. Inspected 390px ESG and 1920px homepage screenshots. Chromium emulation is not real-device or full bilingual/content/assistive-technology certification.
+
+Next: X01 recoverable route error boundary.

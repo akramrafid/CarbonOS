@@ -9,11 +9,11 @@
 | Documents | Text ingestion, rules/provider opt-in, source chunks/hashes, manual review | Main versioned bill profiles and OCR absent; no real invoice accuracy benchmark |
 | RAG | Authorized SQL candidates, BM25, optional compatible vectors, checked source excerpts/numbers, abstention/model/mode | No demonstrated learned multilingual retrieval quality; 2,000 chunk bound, vector cache concurrency |
 | Public site | CarbonOS branding, factory workflow, scope disclosures, local pilot download, trust/company policies | Full Bengali content, verified contact/domain, rendered crawl content/performance measurements |
-| Shared UI | Native mobile modal, skip link, reduced motion, labels and 44px ESG controls, scrollable semantic tables | Theme-safe state tokens, hint association, full error/focus coverage, skeletons/breadcrumbs |
+| Shared UI | Native mobile modal, skip link, reduced motion, labels and 44px ESG controls, scrollable semantic tables | Semantic state/control tokens and described fields implemented; full error/focus coverage, skeletons/breadcrumbs remain |
 | MRV | Analysis/boundary/history/uncertainty/provenance/drone/export code and API call sites | Field/model validation, explicit observation types throughout, authorization/credential audit |
 | Registry | Django bridge project/rules/submission/adjustment call sites; sandbox code paths | Exact lifecycle mapping, authenticated external receipts; no official issuance claim |
 | Other modules | Reachable crop/weather/marketplace/farmer/sector/legacy dashboards | Mock states, unsupported actions, payment/telemetry integrity and route-by-route behavior audit |
-| Responsive QA | Prior eight-project shell tests recorded; primary desktop/320px ESG journey | Add 390/1920, real devices and complete screen-reader/zoom/locale validation |
+| Responsive QA | Ten-project shell suite: 40 pass; includes 390/1920 and landscape; primary desktop/320px protected ESG journey | Real devices and complete screen-reader/zoom/locale validation |
 | Delivery | Clean baseline pushed to origin/Asif; existing build/unit/E2E histories | Contract fails, current CI support and mutation dependency compatibility need repair |
 
 Historical evidence: [competitive QA](../showcase/COMPETITIVE_UPGRADE_QA.md), [AI changes](../showcase/AI_SYSTEM_UPGRADE.md), [competitor comparison](../showcase/COMPETITOR_REVIEW.md). These are scoped snapshots, not evidence that this entire transformation is complete.

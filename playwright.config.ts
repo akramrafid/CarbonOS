@@ -46,6 +46,8 @@ export default defineConfig({
     { name: "tablet-chromium", use: { ...devices["Desktop Chrome"], viewport: { width: 1024, height: 900 } } },
     { name: "tablet-portrait-chromium", use: { ...devices["Desktop Chrome"], viewport: { width: 768, height: 1024 } } },
     { name: "laptop-chromium", use: { ...devices["Desktop Chrome"], viewport: { width: 1280, height: 800 } } },
+    { name: "full-hd-chromium", use: { ...devices["Desktop Chrome"], viewport: { width: 1920, height: 1080 } } },
+    { name: "large-mobile-chromium", use: { ...devices["iPhone 13"], browserName: "chromium", viewport: { width: 390, height: 844 } } },
     { name: "wide-desktop-chromium", use: { ...devices["Desktop Chrome"], viewport: { width: 1536, height: 960 } } },
     { name: "landscape-chromium", use: { ...devices["Desktop Chrome"], viewport: { width: 667, height: 375 }, isMobile: true, hasTouch: true } },
     { name: "mobile-chromium", use: { ...devices["iPhone 13"], browserName: "chromium", viewport: { width: 375, height: 812 } } },

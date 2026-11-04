@@ -21,11 +21,11 @@ test('navigation fits, traps modal focus, restores focus, and reaches the real d
   await expect(page.getByRole('heading', { level: 1 })).toBeVisible();
   await fits(page);
   const width = page.viewportSize()?.width;
-  if (width === 375 || width === 1440) {
+  if (width === 390 || width === 1920) {
     await expect(page.locator('.hero-terminal-card')).toHaveCSS('opacity', '1');
     await expect(page.locator('.hero-body')).toHaveCSS('opacity', '1');
     await page.evaluate(() => document.fonts.ready);
-    await page.screenshot({ path: `docs/qa/responsive-home-${width}.png`, scale: 'css' });
+    await page.screenshot({ path: `docs/website-transformation/evidence/responsive-home-${width}.png`, scale: 'css' });
   }
   const menu = page.getByRole('button', { name: 'Open navigation menu' });
   if (await menu.isVisible()) {
@@ -95,10 +95,10 @@ test('ESG forms and every workspace section stay inside the viewport with real A
   await expect(page.getByRole('cell', { name: 'Responsive Textiles Limited', exact: true })).toBeVisible();
   await fits(page);
   const width = page.viewportSize()?.width;
-  if (width === 375 || width === 1440) {
+  if (width === 390 || width === 1920) {
     await page.evaluate(() => document.fonts.ready);
     await page.evaluate(() => window.scrollTo(0, 0));
-    await page.screenshot({ path: `docs/qa/responsive-esg-${width}.png`, scale: 'css' });
+    await page.screenshot({ path: `docs/website-transformation/evidence/responsive-esg-${width}.png`, scale: 'css' });
   }
   const tableRegion = page.getByRole('region', { name: 'Legal entities table', exact: true });
   await tableRegion.focus();

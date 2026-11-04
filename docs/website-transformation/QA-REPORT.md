@@ -22,3 +22,7 @@ Full required viewport matrix (including 390 and 1920), complete protected + iso
 ## D02
 
 11 JS tests, tsc and build pass. Protected shared-controls + esg-journey specs on desktop and small mobile: **6 passed**. Tests assert named field descriptions, aria-invalid, invalid-date focus, no invalid HTTP writes, same-day rejection, correction/save and independent protected accounting controls. Backend remained authoritative and unchanged.
+
+## Q01
+
+`responsive-shell.spec.ts`: **40 passed**, ten Chromium projects: 320×720, 375×812, 390×844, 667×375 landscape, 768×1024, 1024×900, 1280×800, 1440×900, 1536×960, 1920×1080. Type check and whitespace pass. New [phone ESG](evidence/responsive-esg-390.png), [phone home](evidence/responsive-home-390.png), [desktop ESG](evidence/responsive-esg-1920.png), [desktop home](evidence/responsive-home-1920.png). This scope checks common shell and ESG panels, not every legacy module or every body string in Bengali.
