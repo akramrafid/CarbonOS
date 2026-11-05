@@ -307,3 +307,9 @@ Validation: TypeScript/Vite build and whitespace pass. **10 browser tests pass a
 Hosted I01E backend confirmation: [run 41817200718](https://github.com/akramrafid/CarbonOS/actions/runs/41817200718) backend SUCCESS, including SQLite, PostgreSQL + Alembic and model/migration alignment. The frontend job was still in progress at this check; full-run success is not claimed. Current later page commits still need their own hosted result.
 
 Next: remaining sector/research route truth, source/theme, auth and selective main accounting/factor work. No whole-project or production completion is claimed.
+
+## C03E — Shared palette for legacy routes (2026-11-05)
+
+Reproduced the 47 source findings from [the failed GitHub contract job](https://github.com/akramrafid/CarbonOS/actions/runs/41818155064/job/126534157967). The affected components, chart colors and map layers now consume a shared palette. Tailwind and the light-theme rules use the new class names. Reusable grid and mask styles live in the stylesheet.
+
+The full contract passes locally with zero findings. All 388 compared Tailwind utility declarations match after normalizing hex letter case. TypeScript/Vite, 20 JavaScript tests and 34 orchestrator tests pass. Hosted validation is pending. PR #2 also has conflicts with main.

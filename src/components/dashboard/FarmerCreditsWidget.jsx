@@ -24,7 +24,7 @@ const CreditCard = ({ credit }) => {
   const currentIndex = progressSteps.indexOf(liveStatus);
 
   return (
-    <div className="bg-[#0D2B1A]/40 border border-emerald/20 p-5 rounded-2xl mb-4 hover:border-emerald/40 transition-colors">
+    <div className="bg-legacy-surface-raised/40 border border-emerald/20 p-5 rounded-2xl mb-4 hover:border-emerald/40 transition-colors">
       <div className="flex justify-between items-start mb-4">
         <div>
           <h3 className="font-mono text-emerald text-sm mb-1">{credit.id}</h3>
@@ -34,11 +34,11 @@ const CreditCard = ({ credit }) => {
       </div>
 
       <div className="grid grid-cols-2 gap-4 mb-5">
-        <div className="bg-[#080F0B] p-3 rounded-lg border border-white/5">
+        <div className="bg-legacy-canvas-base p-3 rounded-lg border border-white/5">
           <p className="font-sans text-[10px] text-mist mb-1">Volume</p>
           <p className="font-mono text-lg text-white">{credit.tonnage} <span className="text-xs">tCO₂</span></p>
         </div>
-        <div className="bg-[#080F0B] p-3 rounded-lg border border-white/5">
+        <div className="bg-legacy-canvas-base p-3 rounded-lg border border-white/5">
           <p className="font-sans text-[10px] text-mist mb-1">Est. Value (Net)</p>
           <p className="font-mono text-lg text-amber">
             ৳{liveStatus === 'SETTLED' ? credit.netEarned : (credit.estimatedValue * 0.92).toFixed(0)}
@@ -55,11 +55,11 @@ const CreditCard = ({ credit }) => {
             </span>
           ))}
         </div>
-        <div className="h-1.5 w-full bg-[#080F0B] rounded-full overflow-hidden flex">
+        <div className="h-1.5 w-full bg-legacy-canvas-base rounded-full overflow-hidden flex">
           {progressSteps.map((_, idx) => (
             <div
               key={idx}
-              className={`h-full flex-1 border-r border-[#080F0B] transition-all duration-500 ${idx <= currentIndex ? 'bg-emerald shadow-[0_0_10px_rgba(0,200,83,0.5)]' : 'bg-transparent'}`}
+              className={`h-full flex-1 border-r border-legacy-canvas-base transition-all duration-500 ${idx <= currentIndex ? 'bg-emerald shadow-[0_0_10px_rgba(0,200,83,0.5)]' : 'bg-transparent'}`}
             />
           ))}
         </div>
@@ -90,7 +90,7 @@ export const FarmerCreditsWidget = () => {
   ]);
 
   return (
-    <div className="bg-[#080F0B] rounded-[2rem] p-6 lg:p-8 registry-border">
+    <div className="bg-legacy-canvas-base rounded-[2rem] p-6 lg:p-8 registry-border">
       <div className="flex justify-between items-center mb-6">
         <h2 className="font-sans font-bold text-2xl text-registry">My Credits</h2>
         <span className="font-mono text-xs bg-emerald/10 text-emerald px-3 py-1 rounded-full border border-emerald/20">Live Pipeline</span>

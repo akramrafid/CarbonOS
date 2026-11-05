@@ -15,10 +15,10 @@ const TrustBar = () => {
   const duplicatedItems = [...items, ...items, ...items];
 
   return (
-    <div className="w-full bg-[#050C07] border-y border-white/[0.08] relative overflow-hidden py-3.5 z-20">
+    <div className="w-full bg-legacy-forest-80 border-y border-white/[0.08] relative overflow-hidden py-3.5 z-20">
       {/* Edge gradient fade masks */}
-      <div className="absolute left-0 top-0 bottom-0 w-24 bg-gradient-to-r from-[#050C07] to-transparent z-10 pointer-events-none"></div>
-      <div className="absolute right-0 top-0 bottom-0 w-24 bg-gradient-to-l from-[#050C07] to-transparent z-10 pointer-events-none"></div>
+      <div className="absolute left-0 top-0 bottom-0 w-24 bg-gradient-to-r from-legacy-forest-80 to-transparent z-10 pointer-events-none"></div>
+      <div className="absolute right-0 top-0 bottom-0 w-24 bg-gradient-to-l from-legacy-forest-80 to-transparent z-10 pointer-events-none"></div>
 
       <div className="flex whitespace-nowrap marquee-track min-w-max items-center">
         {duplicatedItems.map((item, index) => {

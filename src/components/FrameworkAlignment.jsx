@@ -99,7 +99,7 @@ const FrameworkAlignment = () => {
       {/* Card 1 */}
       <section 
         ref={el => cardsRef.current[0] = el}
-        className="w-full min-h-[100dvh] py-24 lg:sticky lg:top-0 flex items-center bg-[#0D2B1A] overflow-hidden"
+        className="w-full min-h-[100dvh] py-24 lg:sticky lg:top-0 flex items-center bg-legacy-surface-raised overflow-hidden"
       >
         <div className="max-w-7xl mx-auto px-6 lg:px-12 w-full grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
           <div className="flex justify-center lg:justify-start">
@@ -123,7 +123,7 @@ const FrameworkAlignment = () => {
       {/* Card 2 */}
       <section 
         ref={el => cardsRef.current[1] = el}
-        className="w-full min-h-[100dvh] py-24 lg:sticky lg:top-0 flex items-center bg-[#080F0B] noise-overlay overflow-hidden shadow-[0_-20px_50px_rgba(0,0,0,0.5)]"
+        className="w-full min-h-[100dvh] py-24 lg:sticky lg:top-0 flex items-center bg-legacy-canvas-base noise-overlay overflow-hidden shadow-[0_-20px_50px_rgba(0,0,0,0.5)]"
       >
         <div className="max-w-7xl mx-auto px-6 lg:px-12 w-full grid grid-cols-1 lg:grid-cols-2 gap-12 items-center relative z-10">
           <div className="flex justify-center lg:justify-start">
@@ -147,7 +147,7 @@ const FrameworkAlignment = () => {
       {/* Card 3 */}
       <section 
         ref={el => cardsRef.current[2] = el}
-        className="w-full min-h-[100dvh] py-24 lg:sticky lg:top-0 flex items-center bg-[#0D2B1A] overflow-hidden shadow-[0_-20px_50px_rgba(0,0,0,0.5)]"
+        className="w-full min-h-[100dvh] py-24 lg:sticky lg:top-0 flex items-center bg-legacy-surface-raised overflow-hidden shadow-[0_-20px_50px_rgba(0,0,0,0.5)]"
       >
         <div className="max-w-7xl mx-auto px-6 lg:px-12 w-full grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
           <div className="flex justify-center lg:justify-start w-full pr-12">

@@ -349,15 +349,15 @@ export const UniversalUtilityExtractor = ({
 
   return (
     <div className={`space-y-8 rounded-3xl p-6 lg:p-8 border transition-all duration-300 ${
-      isLight ? 'bg-white border-[#E8ECE8] text-[#0F2417]' : 'bg-[#08130C] border-[#152B1D] text-white'
+      isLight ? 'bg-white border-legacy-divider-light text-legacy-forest-43' : 'bg-legacy-surface-base border-legacy-divider-base text-white'
     }`}>
       
       {/* Header Banner */}
       <div className="flex flex-col lg:flex-row justify-between lg:items-center gap-6 pb-6 border-b border-white/10">
         <div>
           <div className="flex items-center space-x-2.5 mb-2">
-            <div className="w-8 h-8 rounded-xl bg-[#00C853]/20 border border-[#00C853]/40 flex items-center justify-center">
-              <FileCheck className="w-4 h-4 text-[#00C853]" />
+            <div className="w-8 h-8 rounded-xl bg-legacy-brand-base/20 border border-legacy-brand-base/40 flex items-center justify-center">
+              <FileCheck className="w-4 h-4 text-legacy-brand-base" />
             </div>
             <h2 className="font-sans font-bold text-xl lg:text-2xl tracking-tight">
               Universal Utility Segment Extractor & Human-in-the-Loop Review
@@ -367,7 +367,7 @@ export const UniversalUtilityExtractor = ({
                 SANDBOX / PREVIEW MODE
               </span>
             ) : (
-              <span className="px-2.5 py-0.5 rounded-full text-[10px] font-mono font-bold bg-[#00C853]/20 text-[#00E676] border border-[#00C853]/40">
+              <span className="px-2.5 py-0.5 rounded-full text-[10px] font-mono font-bold bg-legacy-brand-base/20 text-legacy-brand-bright border border-legacy-brand-base/40">
                 LIVE PARSER ACTIVE
               </span>
             )}
@@ -383,22 +383,22 @@ export const UniversalUtilityExtractor = ({
             onClick={() => setShowAuditDrawer(!showAuditDrawer)}
             className="flex items-center space-x-1.5 px-3 py-2 rounded-xl bg-white/5 hover:bg-white/10 border border-white/10 text-xs font-mono font-bold text-gray-300 transition-colors"
           >
-            <History className="w-3.5 h-3.5 text-[#00C853]" />
+            <History className="w-3.5 h-3.5 text-legacy-brand-base" />
             <span>Audit Trail ({auditLog.length})</span>
           </button>
 
           <div className={`flex items-center space-x-3 px-4 py-2.5 rounded-2xl border ${
-            isLight ? 'bg-[#F4F7F4] border-[#DCE4DE]' : 'bg-[#040A06] border-[#152B1D]'
+            isLight ? 'bg-legacy-mint-07 border-legacy-mint-25' : 'bg-legacy-canvas-night border-legacy-divider-base'
           }`}>
             <div className={`h-9 px-2.5 rounded-xl flex items-center justify-center shrink-0 min-w-[65px] max-w-[85px] ${
               activeClient.logoTheme === 'dark'
-                ? 'bg-[#06140B] border border-[#163D22] ring-1 ring-emerald-500/20'
+                ? 'bg-legacy-forest-73 border border-legacy-forest-25 ring-1 ring-emerald-500/20'
                 : 'bg-white border border-slate-200'
             }`}>
               <img src={activeClient.logo} alt={activeClient.name} className="max-h-full max-w-full object-contain" />
             </div>
             <div>
-              <div className="text-[10px] font-mono text-[#00C853] uppercase font-bold tracking-wider">Active Client Ledger</div>
+              <div className="text-[10px] font-mono text-legacy-brand-base uppercase font-bold tracking-wider">Active Client Ledger</div>
               <div className="font-sans font-bold text-xs">{activeClient.name}</div>
             </div>
           </div>
@@ -407,9 +407,9 @@ export const UniversalUtilityExtractor = ({
 
       {/* Audit Log Drawer if open */}
       {showAuditDrawer && (
-        <div className="p-4 rounded-2xl border border-white/10 bg-[#050D07] space-y-3">
+        <div className="p-4 rounded-2xl border border-white/10 bg-legacy-forest-79 space-y-3">
           <div className="flex justify-between items-center pb-2 border-b border-white/10">
-            <span className="text-xs font-mono font-bold uppercase text-[#00E676] flex items-center gap-1.5">
+            <span className="text-xs font-mono font-bold uppercase text-legacy-brand-bright flex items-center gap-1.5">
               <History className="w-3.5 h-3.5" />
               Human-in-the-Loop Auditor Action Log (Immutable History)
             </span>
@@ -422,7 +422,7 @@ export const UniversalUtilityExtractor = ({
               {auditLog.map((log, idx) => (
                 <div key={idx} className="p-2 rounded-xl bg-white/5 border border-white/5 flex flex-col md:flex-row justify-between gap-1">
                   <div>
-                    <span className="text-[#00E676] font-bold">[{log.segmentName}]</span> {log.reason}
+                    <span className="text-legacy-brand-bright font-bold">[{log.segmentName}]</span> {log.reason}
                     <div className="text-gray-400 text-[10px]">Changed {log.field}: <span className="line-through text-red-400">{log.oldValue}</span> → <span className="text-emerald-300 font-bold">{log.newValue}</span></div>
                   </div>
                   <div className="text-gray-500 text-[9px] shrink-0 text-right">
@@ -438,15 +438,15 @@ export const UniversalUtilityExtractor = ({
 
       {/* Invoice Overview Grid */}
       <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-        <div className={`p-4 rounded-2xl border ${isLight ? 'bg-[#F9FAF9] border-[#E8ECE8]' : 'bg-[#040A06] border-[#152B1D]'}`}>
+        <div className={`p-4 rounded-2xl border ${isLight ? 'bg-legacy-mint-03 border-legacy-divider-light' : 'bg-legacy-canvas-night border-legacy-divider-base'}`}>
           <span className="text-[10px] font-mono text-gray-400 block uppercase">Total Invoice Footprint</span>
-          <div className="text-2xl font-bold font-sans mt-1 text-[#00E676]">
+          <div className="text-2xl font-bold font-sans mt-1 text-legacy-brand-bright">
             {grandTotal.toFixed(2)} <span className="text-xs font-mono text-gray-400">tCO₂e</span>
           </div>
           <span className="text-[10px] text-gray-500 font-sans block mt-0.5">{activeSegments.length} Active Segments ({segments.length - activeSegments.length} Rejected)</span>
         </div>
 
-        <div className={`p-4 rounded-2xl border ${isLight ? 'bg-[#F9FAF9] border-[#E8ECE8]' : 'bg-[#040A06] border-[#152B1D]'}`}>
+        <div className={`p-4 rounded-2xl border ${isLight ? 'bg-legacy-mint-03 border-legacy-divider-light' : 'bg-legacy-canvas-night border-legacy-divider-base'}`}>
           <span className="text-[10px] font-mono text-gray-400 block uppercase">Scope 1 Direct Combustion</span>
           <div className="text-2xl font-bold font-sans mt-1 text-amber-400">
             {scope1Total.toFixed(2)} <span className="text-xs font-mono text-gray-400">tCO₂e</span>
@@ -454,7 +454,7 @@ export const UniversalUtilityExtractor = ({
           <span className="text-[10px] text-gray-500 font-sans block mt-0.5">Captive genset, natural gas & ETP</span>
         </div>
 
-        <div className={`p-4 rounded-2xl border ${isLight ? 'bg-[#F9FAF9] border-[#E8ECE8]' : 'bg-[#040A06] border-[#152B1D]'}`}>
+        <div className={`p-4 rounded-2xl border ${isLight ? 'bg-legacy-mint-03 border-legacy-divider-light' : 'bg-legacy-canvas-night border-legacy-divider-base'}`}>
           <span className="text-[10px] font-mono text-gray-400 block uppercase">Scope 2 Grid & Steam</span>
           <div className="text-2xl font-bold font-sans mt-1 text-cyan-400">
             {scope2Total.toFixed(2)} <span className="text-xs font-mono text-gray-400">tCO₂e</span>
@@ -462,7 +462,7 @@ export const UniversalUtilityExtractor = ({
           <span className="text-[10px] text-gray-500 font-sans block mt-0.5">Off-peak, peak & steam net of solar</span>
         </div>
 
-        <div className={`p-4 rounded-2xl border ${isLight ? 'bg-[#F9FAF9] border-[#E8ECE8]' : 'bg-[#040A06] border-[#152B1D]'}`}>
+        <div className={`p-4 rounded-2xl border ${isLight ? 'bg-legacy-mint-03 border-legacy-divider-light' : 'bg-legacy-canvas-night border-legacy-divider-base'}`}>
           <span className="text-[10px] font-mono text-gray-400 block uppercase">Total Billed Expenditure</span>
           <div className="text-2xl font-bold font-sans mt-1 text-white">
             ৳{(grandCost / 100000).toFixed(2)} <span className="text-xs font-mono text-gray-400">Lakh BDT</span>
@@ -472,7 +472,7 @@ export const UniversalUtilityExtractor = ({
       </div>
 
       {/* Upload Box & Template Quick Selectors */}
-      <div className={`p-6 rounded-3xl border ${isLight ? 'bg-[#F4F7F4] border-[#DCE4DE]' : 'bg-[#040A06] border-[#152B1D]'}`}>
+      <div className={`p-6 rounded-3xl border ${isLight ? 'bg-legacy-mint-07 border-legacy-mint-25' : 'bg-legacy-canvas-night border-legacy-divider-base'}`}>
         <div className="flex flex-col md:flex-row items-center justify-between gap-4 mb-4">
           <div>
             <h3 className="font-sans font-bold text-sm text-white">Upload New Industrial Utility Invoice (PDF / Scanned Bill)</h3>
@@ -489,7 +489,7 @@ export const UniversalUtilityExtractor = ({
             />
             <label 
               htmlFor="utility-pdf-upload"
-              className="px-4 py-2 rounded-xl bg-[#00C853] hover:bg-[#00E676] text-[#040906] font-sans font-bold text-xs flex items-center space-x-2 cursor-pointer transition-all shadow-md shadow-[#00C853]/20"
+              className="px-4 py-2 rounded-xl bg-legacy-brand-base hover:bg-legacy-brand-bright text-legacy-canvas-deep font-sans font-bold text-xs flex items-center space-x-2 cursor-pointer transition-all shadow-md shadow-legacy-brand-base/20"
             >
               {isProcessing ? (
                 <>
@@ -508,7 +508,7 @@ export const UniversalUtilityExtractor = ({
               onClick={() => setShowAddSegmentModal(true)}
               className="px-3 py-2 rounded-xl bg-white/5 hover:bg-white/10 text-white font-sans font-bold text-xs border border-white/10 flex items-center space-x-1.5 cursor-pointer transition-colors"
             >
-              <Plus className="w-3.5 h-3.5 text-[#00C853]" />
+              <Plus className="w-3.5 h-3.5 text-legacy-brand-base" />
               <span>Add Custom Segment</span>
             </button>
           </div>
@@ -525,7 +525,7 @@ export const UniversalUtilityExtractor = ({
                 onClick={() => handleLoadClientTemplate(key)}
                 className={`px-3 py-1 rounded-full text-[11px] font-mono transition-all cursor-pointer border ${
                   activeInvoice.filename === PRELOADED_INVOICE_TEMPLATES[key].filename
-                    ? 'bg-[#00C853]/20 text-[#00E676] border-[#00C853]/50 font-bold'
+                    ? 'bg-legacy-brand-base/20 text-legacy-brand-bright border-legacy-brand-base/50 font-bold'
                     : 'bg-white/5 text-gray-400 border-white/5 hover:border-white/20'
                 }`}
               >
@@ -540,7 +540,7 @@ export const UniversalUtilityExtractor = ({
       <div className="space-y-4">
         <div className="flex justify-between items-center">
           <div className="flex items-center space-x-2">
-            <Sparkles className="w-4 h-4 text-[#00C853]" />
+            <Sparkles className="w-4 h-4 text-legacy-brand-base" />
             <h3 className="font-sans font-bold text-base">
               Detected Utility Segments ({segments.length} Line Items)
             </h3>
@@ -548,7 +548,7 @@ export const UniversalUtilityExtractor = ({
           
           <div className="text-[11px] font-mono text-gray-400 flex items-center space-x-2">
             {auditSeal ? (
-              <span className="px-2 py-0.5 rounded-full bg-emerald-500/20 text-[#00E676] border border-emerald-500/40 flex items-center gap-1 font-bold">
+              <span className="px-2 py-0.5 rounded-full bg-emerald-500/20 text-legacy-brand-bright border border-emerald-500/40 flex items-center gap-1 font-bold">
                 <Lock className="w-3 h-3" />
                 {auditSeal}
               </span>
@@ -563,7 +563,7 @@ export const UniversalUtilityExtractor = ({
 
         <div className="overflow-x-auto rounded-2xl border border-white/10">
           <table className="w-full text-left text-xs font-sans">
-            <thead className={`text-[10px] font-mono uppercase tracking-wider ${isLight ? 'bg-[#F2F5F2] text-gray-600' : 'bg-[#040A06] text-gray-400'}`}>
+            <thead className={`text-[10px] font-mono uppercase tracking-wider ${isLight ? 'bg-legacy-mint-12 text-gray-600' : 'bg-legacy-canvas-night text-gray-400'}`}>
               <tr>
                 <th className="p-3.5">Segment & Utility Type</th>
                 <th className="p-3.5">Scope</th>
@@ -629,7 +629,7 @@ export const UniversalUtilityExtractor = ({
                           ? 'bg-red-500/15 text-red-400 border-red-500/30'
                           : isCorrected
                           ? 'bg-amber-500/15 text-amber-400 border-amber-500/30'
-                          : 'bg-[#00C853]/15 text-[#00E676] border-[#00C853]/30'
+                          : 'bg-legacy-brand-base/15 text-legacy-brand-bright border-legacy-brand-base/30'
                       }`}>
                         {isRejected ? 'REJECTED' : isCorrected ? 'MODIFIED' : 'AI EXTRACTED'}
                       </span>
@@ -668,7 +668,7 @@ export const UniversalUtilityExtractor = ({
       {/* Action Footer: Approve & Commit */}
       <div className="flex flex-col sm:flex-row items-center justify-between gap-4 pt-4 border-t border-white/10">
         <div className="flex items-center space-x-2 text-xs text-gray-400">
-          <ShieldCheck className="w-4 h-4 text-[#00C853]" />
+          <ShieldCheck className="w-4 h-4 text-legacy-brand-base" />
           <span>All approved line-items are bound by GHG Protocol Corporate Standard & Bangladesh DoE S.R.O. 349.</span>
         </div>
 
@@ -678,7 +678,7 @@ export const UniversalUtilityExtractor = ({
           className={`px-6 py-3 rounded-xl font-sans font-bold text-xs flex items-center space-x-2 transition-all cursor-pointer ${
             isCommitted 
               ? 'bg-emerald-600 text-white cursor-default' 
-              : 'bg-[#00C853] hover:bg-[#00E676] text-[#040906] shadow-lg shadow-[#00C853]/25'
+              : 'bg-legacy-brand-base hover:bg-legacy-brand-bright text-legacy-canvas-deep shadow-lg shadow-legacy-brand-base/25'
           }`}
         >
           {isCommitted ? (
@@ -698,7 +698,7 @@ export const UniversalUtilityExtractor = ({
       {/* Human-in-the-Loop Edit Modal */}
       {showEditModal && editingSegment && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 backdrop-blur-sm bg-black/60">
-          <div className="bg-[#0A160F] border border-[#1B4D2E] rounded-3xl max-w-lg w-full p-6 shadow-2xl space-y-5 text-white">
+          <div className="bg-legacy-forest-62 border border-legacy-forest-11 rounded-3xl max-w-lg w-full p-6 shadow-2xl space-y-5 text-white">
             <div className="flex justify-between items-center pb-2 border-b border-white/10">
               <h3 className="font-sans font-bold text-base flex items-center gap-2">
                 <Edit3 className="w-4 h-4 text-amber-400" />
@@ -717,7 +717,7 @@ export const UniversalUtilityExtractor = ({
                   value={editingSegment.name}
                   onChange={(e) => setEditingSegment({...editingSegment, name: e.target.value})}
                   required
-                  className="w-full p-2.5 rounded-xl bg-[#040A06] border border-white/10 text-white focus:outline-none focus:border-amber-400"
+                  className="w-full p-2.5 rounded-xl bg-legacy-canvas-night border border-white/10 text-white focus:outline-none focus:border-amber-400"
                 />
               </div>
 
@@ -730,7 +730,7 @@ export const UniversalUtilityExtractor = ({
                     value={editingSegment.qty}
                     onChange={(e) => setEditingSegment({...editingSegment, qty: e.target.value})}
                     required
-                    className="w-full p-2.5 rounded-xl bg-[#040A06] border border-white/10 text-white focus:outline-none focus:border-amber-400 font-mono"
+                    className="w-full p-2.5 rounded-xl bg-legacy-canvas-night border border-white/10 text-white focus:outline-none focus:border-amber-400 font-mono"
                   />
                 </div>
                 <div>
@@ -740,7 +740,7 @@ export const UniversalUtilityExtractor = ({
                     value={editingSegment.unit}
                     onChange={(e) => setEditingSegment({...editingSegment, unit: e.target.value})}
                     required
-                    className="w-full p-2.5 rounded-xl bg-[#040A06] border border-white/10 text-white focus:outline-none focus:border-amber-400 font-mono"
+                    className="w-full p-2.5 rounded-xl bg-legacy-canvas-night border border-white/10 text-white focus:outline-none focus:border-amber-400 font-mono"
                   />
                 </div>
                 <div>
@@ -751,7 +751,7 @@ export const UniversalUtilityExtractor = ({
                     value={editingSegment.factor}
                     onChange={(e) => setEditingSegment({...editingSegment, factor: e.target.value})}
                     required
-                    className="w-full p-2.5 rounded-xl bg-[#040A06] border border-white/10 text-white focus:outline-none focus:border-amber-400 font-mono text-emerald-400 font-bold"
+                    className="w-full p-2.5 rounded-xl bg-legacy-canvas-night border border-white/10 text-white focus:outline-none focus:border-amber-400 font-mono text-emerald-400 font-bold"
                   />
                 </div>
               </div>
@@ -763,7 +763,7 @@ export const UniversalUtilityExtractor = ({
                   step="any"
                   value={editingSegment.cost_bdt}
                   onChange={(e) => setEditingSegment({...editingSegment, cost_bdt: e.target.value})}
-                  className="w-full p-2.5 rounded-xl bg-[#040A06] border border-white/10 text-white focus:outline-none focus:border-amber-400 font-mono"
+                  className="w-full p-2.5 rounded-xl bg-legacy-canvas-night border border-white/10 text-white focus:outline-none focus:border-amber-400 font-mono"
                 />
               </div>
 
@@ -775,7 +775,7 @@ export const UniversalUtilityExtractor = ({
                   onChange={(e) => setEditingSegment({...editingSegment, reason: e.target.value})}
                   placeholder="e.g., Physical meter verification discrepancy; adjusted peak tariff factor"
                   required
-                  className="w-full p-2.5 rounded-xl bg-[#040A06] border border-amber-500/40 text-white focus:outline-none focus:border-amber-400"
+                  className="w-full p-2.5 rounded-xl bg-legacy-canvas-night border border-amber-500/40 text-white focus:outline-none focus:border-amber-400"
                 />
               </div>
 
@@ -802,10 +802,10 @@ export const UniversalUtilityExtractor = ({
       {/* Add Custom Segment Modal */}
       {showAddSegmentModal && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 backdrop-blur-sm bg-black/60">
-          <div className="bg-[#0A160F] border border-[#1B4D2E] rounded-3xl max-w-md w-full p-6 shadow-2xl space-y-5 text-white">
+          <div className="bg-legacy-forest-62 border border-legacy-forest-11 rounded-3xl max-w-md w-full p-6 shadow-2xl space-y-5 text-white">
             <div className="flex justify-between items-center">
               <h3 className="font-sans font-bold text-base flex items-center gap-2">
-                <Plus className="w-4 h-4 text-[#00C853]" />
+                <Plus className="w-4 h-4 text-legacy-brand-base" />
                 Add Custom Utility Segment
               </h3>
               <button onClick={() => setShowAddSegmentModal(false)} className="text-gray-400 hover:text-white">
@@ -822,7 +822,7 @@ export const UniversalUtilityExtractor = ({
                   onChange={(e) => setNewSegment({...newSegment, name: e.target.value})}
                   placeholder="e.g. Substation SF6 Gas Leakage or ETP COD Sludge"
                   required
-                  className="w-full p-2.5 rounded-xl bg-[#040A06] border border-white/10 text-white focus:outline-none focus:border-[#00C853]"
+                  className="w-full p-2.5 rounded-xl bg-legacy-canvas-night border border-white/10 text-white focus:outline-none focus:border-legacy-brand-base"
                 />
               </div>
 
@@ -832,7 +832,7 @@ export const UniversalUtilityExtractor = ({
                   <select 
                     value={newSegment.type}
                     onChange={(e) => setNewSegment({...newSegment, type: e.target.value})}
-                    className="w-full p-2.5 rounded-xl bg-[#040A06] border border-white/10 text-white focus:outline-none focus:border-[#00C853]"
+                    className="w-full p-2.5 rounded-xl bg-legacy-canvas-night border border-white/10 text-white focus:outline-none focus:border-legacy-brand-base"
                   >
                     <option value="Electricity">Electricity</option>
                     <option value="Fossil Fuel">Fossil Fuel</option>
@@ -849,7 +849,7 @@ export const UniversalUtilityExtractor = ({
                   <select 
                     value={newSegment.scope}
                     onChange={(e) => setNewSegment({...newSegment, scope: e.target.value})}
-                    className="w-full p-2.5 rounded-xl bg-[#040A06] border border-white/10 text-white focus:outline-none focus:border-[#00C853]"
+                    className="w-full p-2.5 rounded-xl bg-legacy-canvas-night border border-white/10 text-white focus:outline-none focus:border-legacy-brand-base"
                   >
                     <option value="Scope 1">Scope 1</option>
                     <option value="Scope 2">Scope 2</option>
@@ -868,7 +868,7 @@ export const UniversalUtilityExtractor = ({
                     onChange={(e) => setNewSegment({...newSegment, qty: e.target.value})}
                     placeholder="e.g. 500"
                     required
-                    className="w-full p-2.5 rounded-xl bg-[#040A06] border border-white/10 text-white focus:outline-none focus:border-[#00C853]"
+                    className="w-full p-2.5 rounded-xl bg-legacy-canvas-night border border-white/10 text-white focus:outline-none focus:border-legacy-brand-base"
                   />
                 </div>
 
@@ -880,7 +880,7 @@ export const UniversalUtilityExtractor = ({
                     onChange={(e) => setNewSegment({...newSegment, unit: e.target.value})}
                     placeholder="kWh / Liters / m3"
                     required
-                    className="w-full p-2.5 rounded-xl bg-[#040A06] border border-white/10 text-white focus:outline-none focus:border-[#00C853]"
+                    className="w-full p-2.5 rounded-xl bg-legacy-canvas-night border border-white/10 text-white focus:outline-none focus:border-legacy-brand-base"
                   />
                 </div>
 
@@ -893,7 +893,7 @@ export const UniversalUtilityExtractor = ({
                     onChange={(e) => setNewSegment({...newSegment, factor: e.target.value})}
                     placeholder="0.550"
                     required
-                    className="w-full p-2.5 rounded-xl bg-[#040A06] border border-white/10 text-white focus:outline-none focus:border-[#00C853]"
+                    className="w-full p-2.5 rounded-xl bg-legacy-canvas-night border border-white/10 text-white focus:outline-none focus:border-legacy-brand-base"
                   />
                 </div>
               </div>
@@ -906,14 +906,14 @@ export const UniversalUtilityExtractor = ({
                   value={newSegment.cost_bdt}
                   onChange={(e) => setNewSegment({...newSegment, cost_bdt: e.target.value})}
                   placeholder="e.g. 45000"
-                  className="w-full p-2.5 rounded-xl bg-[#040A06] border border-white/10 text-white focus:outline-none focus:border-[#00C853]"
+                  className="w-full p-2.5 rounded-xl bg-legacy-canvas-night border border-white/10 text-white focus:outline-none focus:border-legacy-brand-base"
                 />
               </div>
 
               <div className="flex gap-2.5 pt-2">
                 <button 
                   type="submit" 
-                  className="flex-1 bg-[#00C853] hover:bg-[#00E676] text-[#040906] font-bold py-2.5 rounded-xl transition-all"
+                  className="flex-1 bg-legacy-brand-base hover:bg-legacy-brand-bright text-legacy-canvas-deep font-bold py-2.5 rounded-xl transition-all"
                 >
                   Add Segment
                 </button>

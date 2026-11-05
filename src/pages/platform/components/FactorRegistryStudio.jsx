@@ -172,7 +172,7 @@ export const FactorRegistryStudio = ({ isLight, locale }) => {
       <div className={`p-6 rounded-3xl border ${
         isLight 
           ? 'bg-gradient-to-r from-emerald-50 to-teal-50/50 border-emerald-200' 
-          : 'bg-gradient-to-r from-[#06140D] to-[#0A2216] border-[#1B4D2E]'
+          : 'bg-gradient-to-r from-legacy-forest-72 to-legacy-forest-51 border-legacy-forest-11'
       }`}>
         <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
           <div className="space-y-1">
@@ -187,13 +187,13 @@ export const FactorRegistryStudio = ({ isLight, locale }) => {
                 {locale.activeVersion}
               </span>
             </div>
-            <p className={`text-xs ${isLight ? 'text-gray-600' : 'text-[#8FA899]'}`}>
+            <p className={`text-xs ${isLight ? 'text-gray-600' : 'text-legacy-mint-40'}`}>
               {locale.factorSubtitle}
             </p>
           </div>
 
           <div className="flex items-center space-x-3 text-xs font-mono">
-            <span className="px-3 py-1.5 rounded-2xl border bg-[#040A06] border-[#1B4D2E] text-gray-300">
+            <span className="px-3 py-1.5 rounded-2xl border bg-legacy-canvas-night border-legacy-forest-11 text-gray-300">
               {locale.toleranceThreshold}
             </span>
             <button
@@ -211,7 +211,7 @@ export const FactorRegistryStudio = ({ isLight, locale }) => {
       {/* Regression Results Panel (if triggered) */}
       {regressionReport && (
         <div className={`p-5 rounded-3xl border animate-in fade-in duration-300 ${
-          isLight ? 'bg-emerald-50/60 border-emerald-300' : 'bg-[#05170D] border-[#1B4D2E]'
+          isLight ? 'bg-emerald-50/60 border-emerald-300' : 'bg-legacy-forest-70 border-legacy-forest-11'
         }`}>
           <div className="flex items-center justify-between mb-3">
             <div className="flex items-center space-x-2">
@@ -227,7 +227,7 @@ export const FactorRegistryStudio = ({ isLight, locale }) => {
             {regressionReport.cases.map((c, idx) => (
               <div 
                 key={idx} 
-                className={`p-3 rounded-2xl border ${isLight ? 'bg-white border-emerald-200' : 'bg-[#040A06] border-[#1B4D2E]'}`}
+                className={`p-3 rounded-2xl border ${isLight ? 'bg-white border-emerald-200' : 'bg-legacy-canvas-night border-legacy-forest-11'}`}
               >
                 <span className="text-[10px] font-mono text-gray-500 block truncate">{c.customer}</span>
                 <div className="flex items-baseline justify-between mt-1">
@@ -242,13 +242,13 @@ export const FactorRegistryStudio = ({ isLight, locale }) => {
       )}
 
       {/* Factors Catalog Table */}
-      <div className={`p-6 rounded-3xl border overflow-x-auto ${isLight ? 'bg-white border-gray-200' : 'bg-[#0A160F] border-[#1B4D2E]'}`}>
+      <div className={`p-6 rounded-3xl border overflow-x-auto ${isLight ? 'bg-white border-gray-200' : 'bg-legacy-forest-62 border-legacy-forest-11'}`}>
         <h3 className={`text-sm font-bold font-sans mb-4 ${isLight ? 'text-gray-900' : 'text-white'}`}>
           National Emission Factors Catalog (Department of Environment & SREDA Bangladesh)
         </h3>
         <table className="w-full text-xs font-sans">
           <thead>
-            <tr className={`border-b text-left ${isLight ? 'border-gray-200 text-gray-500' : 'border-[#1B4D2E] text-gray-400'}`}>
+            <tr className={`border-b text-left ${isLight ? 'border-gray-200 text-gray-500' : 'border-legacy-forest-11 text-gray-400'}`}>
               <th className="pb-3 font-semibold">Factor ID</th>
               <th className="pb-3 font-semibold">Fuel / Activity</th>
               <th className="pb-3 font-semibold">Category</th>
@@ -290,7 +290,7 @@ export const FactorRegistryStudio = ({ isLight, locale }) => {
                 <td className="py-3 text-right">
                   <button 
                     onClick={() => setSelectedFactor(f)}
-                    className="px-2.5 py-1 rounded-xl bg-gray-100 dark:bg-[#040A06] hover:bg-emerald-500/10 text-gray-700 dark:text-gray-300 hover:text-emerald-500 font-mono text-[10px]"
+                    className="px-2.5 py-1 rounded-xl bg-gray-100 dark:bg-legacy-canvas-night hover:bg-emerald-500/10 text-gray-700 dark:text-gray-300 hover:text-emerald-500 font-mono text-[10px]"
                   >
                     Inspect
                   </button>

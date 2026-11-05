@@ -49,7 +49,7 @@ const HarvestGuardDashboard = ({ isInline = false, onBack = null, onAddBatchClic
   if (!profile) {
     return (
       <div className={`flex items-center justify-center w-full ${isInline ? 'py-4' : 'min-h-screen pt-24 pb-16 px-4'}`}>
-        <div className="bg-white/5 backdrop-blur-md border border-white/10 p-8 rounded-[32px] w-full max-w-md shadow-2xl hover:border-[#CCFF00]/25 transition-all duration-300">
+        <div className="bg-white/5 backdrop-blur-md border border-white/10 p-8 rounded-[32px] w-full max-w-md shadow-2xl hover:border-legacy-lime-signal-base/25 transition-all duration-300">
           {isInline && onBack && (
             <button onClick={onBack} className="flex items-center text-white/50 hover:text-white mb-6 text-sm font-semibold transition-colors">
               <ArrowLeft size={16} className="mr-2" /> Back
@@ -62,24 +62,24 @@ const HarvestGuardDashboard = ({ isInline = false, onBack = null, onAddBatchClic
           <form onSubmit={handleRegister} className="space-y-4">
             <div>
               <label className="block text-white/80 text-sm font-bold mb-1.5">Name / নাম</label>
-              <input type="text" value={name} onChange={e => setName(e.target.value)} required className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-white focus:outline-none focus:border-[#CCFF00] focus:ring-1 focus:ring-[#CCFF00]/50 transition-all" />
+              <input type="text" value={name} onChange={e => setName(e.target.value)} required className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-white focus:outline-none focus:border-legacy-lime-signal-base focus:ring-1 focus:ring-legacy-lime-signal-base/50 transition-all" />
             </div>
             <div>
               <label className="block text-white/80 text-sm font-bold mb-1.5">Phone / মোবাইল</label>
-              <input type="tel" value={phone} onChange={e => setPhone(e.target.value)} required className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-white focus:outline-none focus:border-[#CCFF00] focus:ring-1 focus:ring-[#CCFF00]/50 transition-all" />
+              <input type="tel" value={phone} onChange={e => setPhone(e.target.value)} required className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-white focus:outline-none focus:border-legacy-lime-signal-base focus:ring-1 focus:ring-legacy-lime-signal-base/50 transition-all" />
             </div>
             <div>
               <label className="block text-white/80 text-sm font-bold mb-1.5">Password / পাসওয়ার্ড</label>
-              <input type="password" value={password} onChange={e => setPassword(e.target.value)} required className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-white focus:outline-none focus:border-[#CCFF00] focus:ring-1 focus:ring-[#CCFF00]/50 transition-all" />
+              <input type="password" value={password} onChange={e => setPassword(e.target.value)} required className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-white focus:outline-none focus:border-legacy-lime-signal-base focus:ring-1 focus:ring-legacy-lime-signal-base/50 transition-all" />
             </div>
             <div>
               <label className="block text-white/80 text-sm font-bold mb-1.5">Language / ভাষা</label>
-              <select value={lang} onChange={e => setLang(e.target.value)} className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-white focus:outline-none focus:border-[#CCFF00] transition-all">
+              <select value={lang} onChange={e => setLang(e.target.value)} className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-white focus:outline-none focus:border-legacy-lime-signal-base transition-all">
                 <option value="bn" className="bg-carbon text-white">বাংলা (Bangla)</option>
                 <option value="en" className="bg-carbon text-white">English</option>
               </select>
             </div>
-            <button type="submit" className="w-full bg-[#CCFF00] text-black font-extrabold py-4 rounded-xl mt-6 flex justify-center items-center space-x-2 hover:bg-[#bce500] hover:scale-[1.01] hover:shadow-[0_0_20px_rgba(204,255,0,0.25)] transition-all">
+            <button type="submit" className="w-full bg-legacy-lime-signal-base text-black font-extrabold py-4 rounded-xl mt-6 flex justify-center items-center space-x-2 hover:bg-legacy-lime-signal-hover hover:scale-[1.01] hover:shadow-[0_0_20px_rgba(204,255,0,0.25)] transition-all">
               <LogIn size={20} />
               <span>Create Offline Profile</span>
             </button>
@@ -106,10 +106,10 @@ const HarvestGuardDashboard = ({ isInline = false, onBack = null, onAddBatchClic
 
       {/* Profile Header */}
       <div className="bg-white/5 backdrop-blur-md border border-white/10 p-6 md:p-8 rounded-[28px] mb-8 flex flex-col md:flex-row items-center justify-between shadow-lg relative overflow-hidden group">
-        <div className="absolute top-0 right-0 w-32 h-32 bg-[#CCFF00]/5 blur-2xl rounded-full pointer-events-none" />
+        <div className="absolute top-0 right-0 w-32 h-32 bg-legacy-lime-signal-base/5 blur-2xl rounded-full pointer-events-none" />
         <div className="flex flex-col md:flex-row items-center space-y-4 md:space-y-0 md:space-x-6 relative z-10 w-full md:w-auto text-center md:text-left">
-          <div className="w-20 h-20 bg-white/5 rounded-full flex items-center justify-center border-2 border-[#CCFF00] shrink-0">
-            <Sprout size={40} className="text-[#CCFF00] animate-pulse" />
+          <div className="w-20 h-20 bg-white/5 rounded-full flex items-center justify-center border-2 border-legacy-lime-signal-base shrink-0">
+            <Sprout size={40} className="text-legacy-lime-signal-base animate-pulse" />
           </div>
           <div>
             <h1 className="text-3xl font-extrabold text-white tracking-tight">A Farmer's Inventory</h1>
@@ -121,7 +121,7 @@ const HarvestGuardDashboard = ({ isInline = false, onBack = null, onAddBatchClic
                 <select aria-label="Weather city"
                   value={userLocation} 
                   onChange={(e) => handleLocationChange(e.target.value)}
-                  className="min-h-[44px] bg-white/5 border border-white/10 hover:border-[#CCFF00]/40 rounded-full px-3 py-1 text-xs text-white focus:outline-none focus:border-[#CCFF00] transition-colors font-semibold font-sans"
+                  className="min-h-[44px] bg-white/5 border border-white/10 hover:border-legacy-lime-signal-base/40 rounded-full px-3 py-1 text-xs text-white focus:outline-none focus:border-legacy-lime-signal-base transition-colors font-semibold font-sans"
                 >
                   <option value="Dhaka" className="bg-carbon text-white">Dhaka</option>
                   <option value="Rajshahi" className="bg-carbon text-white">Rajshahi</option>
@@ -136,12 +136,12 @@ const HarvestGuardDashboard = ({ isInline = false, onBack = null, onAddBatchClic
               <div role="region" aria-label="City weather" aria-busy={weatherLoading}>
               {weatherLoading ? (
                 <div className="flex items-center space-x-1.5 text-white/50 text-xs animate-pulse">
-                  <span className="w-1.5 h-1.5 rounded-full bg-[#CCFF00]"></span>
+                  <span className="w-1.5 h-1.5 rounded-full bg-legacy-lime-signal-base"></span>
                   <span>Loading modelled city weather...</span>
                 </div>
               ) : weatherData ? (
                 <div className="flex flex-wrap items-center gap-2 bg-white/5 border border-white/5 px-3 py-2 rounded-xl text-xs text-white/90">
-                  <span className="font-extrabold text-[#CCFF00]">{weatherData.temp}°C</span>
+                  <span className="font-extrabold text-legacy-lime-signal-base">{weatherData.temp}°C</span>
                   <span className="text-white/40">|</span>
                   <span className="capitalize">Model estimate</span>
                   <span className="text-white/40">|</span>
@@ -159,18 +159,18 @@ const HarvestGuardDashboard = ({ isInline = false, onBack = null, onAddBatchClic
           </div>
         </div>
         <div className="flex space-x-4 relative z-10 mt-4 md:mt-0">
-          <button onClick={exportCSV} className="px-4 py-2 rounded-xl flex items-center space-x-2 text-sm font-bold border border-white/15 hover:border-[#CCFF00]/30 hover:bg-white/5 transition-all text-white">
-            <Download size={16} className="text-[#CCFF00]" /> <span>Export CSV</span>
+          <button onClick={exportCSV} className="px-4 py-2 rounded-xl flex items-center space-x-2 text-sm font-bold border border-white/15 hover:border-legacy-lime-signal-base/30 hover:bg-white/5 transition-all text-white">
+            <Download size={16} className="text-legacy-lime-signal-base" /> <span>Export CSV</span>
           </button>
-          <button onClick={exportData} className="px-4 py-2 rounded-xl flex items-center space-x-2 text-sm font-bold border border-white/15 hover:border-[#CCFF00]/30 hover:bg-white/5 transition-all text-white">
-            <Download size={16} className="text-[#CCFF00]" /> <span>Backup JSON</span>
+          <button onClick={exportData} className="px-4 py-2 rounded-xl flex items-center space-x-2 text-sm font-bold border border-white/15 hover:border-legacy-lime-signal-base/30 hover:bg-white/5 transition-all text-white">
+            <Download size={16} className="text-legacy-lime-signal-base" /> <span>Backup JSON</span>
           </button>
         </div>
       </div>
 
       {/* Gamification / Badges */}
       <div className="mb-12">
-        <h2 className="text-xl font-extrabold text-white mb-4 flex items-center tracking-tight"><Award className="mr-2 text-[#CCFF00]" /> Achievements</h2>
+        <h2 className="text-xl font-extrabold text-white mb-4 flex items-center tracking-tight"><Award className="mr-2 text-legacy-lime-signal-base" /> Achievements</h2>
         {badges.length === 0 ? (
           <p className="text-white/50 bg-white/5 border border-white/5 p-4 rounded-2xl text-sm">No badges earned yet. Register your first crop batch!</p>
         ) : (
@@ -188,10 +188,10 @@ const HarvestGuardDashboard = ({ isInline = false, onBack = null, onAddBatchClic
       {/* Crop Batches Inventory */}
       <div>
         <div className="flex items-center justify-between mb-6">
-          <h2 className="text-2xl font-extrabold text-white flex items-center tracking-tight"><List className="mr-2 text-[#CCFF00]" /> Crop Inventory</h2>
+          <h2 className="text-2xl font-extrabold text-white flex items-center tracking-tight"><List className="mr-2 text-legacy-lime-signal-base" /> Crop Inventory</h2>
           <button 
             onClick={isInline && onAddBatchClick ? onAddBatchClick : () => navigate('/harvestguard/register-batch')} 
-            className="bg-[#CCFF00] text-black px-6 py-2.5 rounded-xl font-extrabold flex items-center space-x-2 hover:bg-[#bce500] hover:scale-[1.01] hover:shadow-[0_0_15px_rgba(204,255,0,0.2)] transition-all shadow-md"
+            className="bg-legacy-lime-signal-base text-black px-6 py-2.5 rounded-xl font-extrabold flex items-center space-x-2 hover:bg-legacy-lime-signal-hover hover:scale-[1.01] hover:shadow-[0_0_15px_rgba(204,255,0,0.2)] transition-all shadow-md"
           >
             <Plus size={18} /> <span>Add Batch</span>
           </button>
@@ -205,10 +205,10 @@ const HarvestGuardDashboard = ({ isInline = false, onBack = null, onAddBatchClic
         ) : (
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             {batches.map(batch => (
-              <div key={batch.id} className="bg-white/5 border border-white/10 p-6 rounded-[24px] relative overflow-hidden group hover:border-[#CCFF00]/40 hover:bg-white/10 transition-all duration-300 shadow-md">
-                <div className={`absolute top-0 right-0 w-2.5 h-full ${batch.status === 'active' ? 'bg-[#CCFF00]' : 'bg-white/20'} transition-colors`} />
+              <div key={batch.id} className="bg-white/5 border border-white/10 p-6 rounded-[24px] relative overflow-hidden group hover:border-legacy-lime-signal-base/40 hover:bg-white/10 transition-all duration-300 shadow-md">
+                <div className={`absolute top-0 right-0 w-2.5 h-full ${batch.status === 'active' ? 'bg-legacy-lime-signal-base' : 'bg-white/20'} transition-colors`} />
                 <h3 className="text-xl font-extrabold text-white capitalize mb-1 tracking-tight">{batch.cropType}</h3>
-                <p className="text-[#CCFF00] font-extrabold text-lg mb-4">{batch.weight} kg</p>
+                <p className="text-legacy-lime-signal-base font-extrabold text-lg mb-4">{batch.weight} kg</p>
                 
                 <div className="space-y-2.5 text-sm text-white/70">
                   <p><span className="text-white/40 font-medium">Location:</span> {batch.district}</p>
@@ -218,7 +218,7 @@ const HarvestGuardDashboard = ({ isInline = false, onBack = null, onAddBatchClic
                 
                 <button 
                   onClick={isInline && onViewRiskClick ? () => onViewRiskClick(batch.id) : () => navigate(`/harvestguard/risk-analysis/${batch.id}`)} 
-                  className="mt-6 w-full py-2.5 rounded-xl text-sm font-bold border border-[#CCFF00]/30 text-[#CCFF00] hover:bg-[#CCFF00]/10 hover:border-[#CCFF00] transition-all"
+                  className="mt-6 w-full py-2.5 rounded-xl text-sm font-bold border border-legacy-lime-signal-base/30 text-legacy-lime-signal-base hover:bg-legacy-lime-signal-base/10 hover:border-legacy-lime-signal-base transition-all"
                 >
                   View Weather Risk
                 </button>

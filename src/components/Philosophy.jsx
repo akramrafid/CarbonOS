@@ -54,7 +54,7 @@ const Philosophy = () => {
   }, []);
 
   return (
-    <section ref={containerRef} className="w-full bg-[#080F0B] noise-overlay py-[140px] relative overflow-hidden flex flex-col items-center text-center">
+    <section ref={containerRef} className="w-full bg-legacy-canvas-base noise-overlay py-[140px] relative overflow-hidden flex flex-col items-center text-center">
       
       {/* Parallax Background */}
       <div 

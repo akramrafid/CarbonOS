@@ -2,17 +2,17 @@ import React from 'react';
 
 const FarmerEarnings = () => {
   return (
-    <div className="min-h-screen bg-[#040A06] font-sans relative overflow-hidden">
+    <div className="min-h-screen bg-legacy-canvas-night font-sans relative overflow-hidden">
       
       {/* Background Graphic Effects */}
-      <div className="absolute inset-0 bg-[linear-gradient(to_right,#00C85308_1px,transparent_1px),linear-gradient(to_bottom,#00C85308_1px,transparent_1px)] bg-[size:4rem_4rem] z-0 pointer-events-none"></div>
+      <div className="absolute inset-0 legacy-grid-muted bg-[size:4rem_4rem] z-0 pointer-events-none"></div>
       <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[800px] h-[400px] bg-emerald/5 rounded-full blur-[120px] pointer-events-none z-0"></div>
 
       <div className="pt-32 pb-16 px-4 sm:px-6 lg:px-8 relative z-10">
         <div className="max-w-7xl mx-auto">
           
           <header className="mb-12">
-            <span className="font-mono text-xs text-emerald tracking-widest px-3 py-1 bg-[#0D2B1A]/40 border border-[#00C853]/20 rounded-full mb-4 inline-block">
+            <span className="font-mono text-xs text-emerald tracking-widest px-3 py-1 bg-legacy-surface-raised/40 border border-legacy-brand-base/20 rounded-full mb-4 inline-block">
               FARMER PORTAL
             </span>
             <h1 className="text-4xl md:text-5xl font-bold text-white mb-2 tracking-tight">Earnings Dashboard</h1>
@@ -21,7 +21,7 @@ const FarmerEarnings = () => {
 
           {/* Summary Cards */}
           <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-12">
-            <div className="bg-[#080F0B] p-6 rounded-2xl border border-emerald/20 shadow-lg relative overflow-hidden group hover:border-emerald/40 transition-colors">
+            <div className="bg-legacy-canvas-base p-6 rounded-2xl border border-emerald/20 shadow-lg relative overflow-hidden group hover:border-emerald/40 transition-colors">
               <div className="absolute top-0 right-0 p-4 opacity-10 group-hover:opacity-20 transition-opacity">
                 <span className="text-4xl">💰</span>
               </div>
@@ -29,17 +29,17 @@ const FarmerEarnings = () => {
               <p className="text-3xl font-bold text-emerald">৳ 124,500</p>
             </div>
             
-            <div className="bg-[#080F0B] p-6 rounded-2xl border border-white/10 shadow-lg hover:border-white/20 transition-colors">
+            <div className="bg-legacy-canvas-base p-6 rounded-2xl border border-white/10 shadow-lg hover:border-white/20 transition-colors">
               <p className="text-sm font-medium text-mist mb-2">Credits Sold</p>
               <p className="text-3xl font-bold text-white">8 <span className="text-sm font-normal text-mist">tCO₂e</span></p>
             </div>
             
-            <div className="bg-[#080F0B] p-6 rounded-2xl border border-amber/20 shadow-lg hover:border-amber/40 transition-colors">
+            <div className="bg-legacy-canvas-base p-6 rounded-2xl border border-amber/20 shadow-lg hover:border-amber/40 transition-colors">
               <p className="text-sm font-medium text-mist mb-2">Pending Settlements</p>
               <p className="text-3xl font-bold text-amber">0</p>
             </div>
             
-            <div className="bg-[#0D2B1A]/60 p-6 rounded-2xl border border-emerald/30 shadow-lg relative overflow-hidden">
+            <div className="bg-legacy-surface-raised/60 p-6 rounded-2xl border border-emerald/30 shadow-lg relative overflow-hidden">
               <div className="absolute -right-4 -bottom-4 w-24 h-24 bg-emerald/10 rounded-full blur-xl"></div>
               <p className="text-sm font-medium text-emerald mb-2">Earned This Month</p>
               <p className="text-3xl font-bold text-white">৳ 15,400</p>
@@ -47,7 +47,7 @@ const FarmerEarnings = () => {
           </div>
 
           {/* Transaction History Table */}
-          <div className="bg-[#080F0B]/80 rounded-2xl border border-white/10 shadow-2xl overflow-hidden backdrop-blur-xl">
+          <div className="bg-legacy-canvas-base/80 rounded-2xl border border-white/10 shadow-2xl overflow-hidden backdrop-blur-xl">
             <div className="px-6 py-6 border-b border-white/5 flex justify-between items-center">
               <h3 className="text-xl font-bold text-white">Transaction History</h3>
               <button className="text-xs font-mono text-emerald border border-emerald/20 px-3 py-1.5 rounded hover:bg-emerald/10 transition-colors">

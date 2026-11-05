@@ -127,13 +127,13 @@ const PurchaseConfirmModal = ({ credit, creditId, onClose, onPurchaseComplete })
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/75 backdrop-blur-md animate-fade-in overflow-y-auto">
       <div className={`w-full max-w-2xl rounded-2xl shadow-2xl overflow-hidden relative border my-8 transition-colors ${
         isLight 
-          ? 'bg-white border-[#dbf0ea]' 
-          : 'bg-[#080F0B] border-emerald/30 shadow-[0_0_50px_rgba(0,200,83,0.15)]'
+          ? 'bg-white border-legacy-surface-light-tint'
+          : 'bg-legacy-canvas-base border-emerald/30 shadow-[0_0_50px_rgba(0,200,83,0.15)]'
       }`}>
 
         {/* Modal Header */}
         <div className={`px-6 py-4.5 border-b flex justify-between items-center ${
-          isLight ? 'bg-[#f2f3ee] border-[#dbf0ea]' : 'bg-[#0D2B1A]/40 border-white/10'
+          isLight ? 'bg-legacy-canvas-light border-legacy-surface-light-tint' : 'bg-legacy-surface-raised/40 border-white/10'
         }`}>
           <div className="flex items-center space-x-2.5">
             <span className="w-2.5 h-2.5 rounded-full bg-emerald animate-pulse"></span>
@@ -148,7 +148,7 @@ const PurchaseConfirmModal = ({ credit, creditId, onClose, onPurchaseComplete })
                   INSTITUTIONAL SETTLEMENT
                 </span>
               </div>
-              <h2 className={`text-lg font-bold ${isLight ? 'text-[#181414]' : 'text-white'}`}>
+              <h2 className={`text-lg font-bold ${isLight ? 'text-legacy-ink-light' : 'text-white'}`}>
                 {step === 'configure' && "1. Order & Attribution Setup"}
                 {step === 'payment' && "2. Institutional Payment Gateway"}
                 {step === 'tracking' && "3. Real-Time Settlement Pipeline"}
@@ -176,7 +176,7 @@ const PurchaseConfirmModal = ({ credit, creditId, onClose, onPurchaseComplete })
             <div className="space-y-5">
               {/* Credit Summary Card */}
               <div className={`p-4 rounded-xl border ${
-                isLight ? 'bg-[#f2f3ee]/60 border-[#dbf0ea]' : 'bg-[#040A06] border-emerald/20'
+                isLight ? 'bg-legacy-canvas-light/60 border-legacy-surface-light-tint' : 'bg-legacy-canvas-night border-emerald/20'
               }`}>
                 <div className="flex justify-between items-start mb-2">
                   <div>
@@ -184,7 +184,7 @@ const PurchaseConfirmModal = ({ credit, creditId, onClose, onPurchaseComplete })
                       {activeCredit.verification}
                     </span>
                     <span className="font-mono text-[10px] text-slate-400">ID: {activeCredit.id}</span>
-                    <h3 className={`text-base font-bold mt-1 ${isLight ? 'text-[#181414]' : 'text-white'}`}>
+                    <h3 className={`text-base font-bold mt-1 ${isLight ? 'text-legacy-ink-light' : 'text-white'}`}>
                       {activeCredit.type}
                     </h3>
                   </div>
@@ -197,11 +197,11 @@ const PurchaseConfirmModal = ({ credit, creditId, onClose, onPurchaseComplete })
                 <div className="grid grid-cols-3 gap-2 mt-3 pt-3 border-t border-white/5 text-xs">
                   <div>
                     <span className="text-[10px] text-slate-400 block font-mono">VOLUME</span>
-                    <span className={`font-semibold ${isLight ? 'text-[#181414]' : 'text-white'}`}>{activeCredit.tonnage} tCO₂e</span>
+                    <span className={`font-semibold ${isLight ? 'text-legacy-ink-light' : 'text-white'}`}>{activeCredit.tonnage} tCO₂e</span>
                   </div>
                   <div>
                     <span className="text-[10px] text-slate-400 block font-mono">ORIGIN & PRODUCER</span>
-                    <span className={`font-semibold truncate block ${isLight ? 'text-[#181414]' : 'text-white'}`}>{activeCredit.region}</span>
+                    <span className={`font-semibold truncate block ${isLight ? 'text-legacy-ink-light' : 'text-white'}`}>{activeCredit.region}</span>
                   </div>
                   <div>
                     <span className="text-[10px] text-slate-400 block font-mono">97% FARMER REMITTANCE</span>
@@ -212,7 +212,7 @@ const PurchaseConfirmModal = ({ credit, creditId, onClose, onPurchaseComplete })
 
               {/* Corporate Buyer Form */}
               <div className="space-y-3.5">
-                <h4 className={`text-xs font-mono font-bold tracking-wider uppercase ${isLight ? 'text-[#181414]' : 'text-white/80'}`}>
+                <h4 className={`text-xs font-mono font-bold tracking-wider uppercase ${isLight ? 'text-legacy-ink-light' : 'text-white/80'}`}>
                   Corporate Beneficiary Details
                 </h4>
 
@@ -224,7 +224,7 @@ const PurchaseConfirmModal = ({ credit, creditId, onClose, onPurchaseComplete })
                       value={companyName}
                       onChange={(e) => setCompanyName(e.target.value)}
                       className={`w-full p-2.5 text-xs rounded-lg border font-medium focus:outline-none focus:border-emerald ${
-                        isLight ? 'bg-white border-slate-300 text-[#181414]' : 'bg-[#040A06] border-white/10 text-white'
+                        isLight ? 'bg-white border-slate-300 text-legacy-ink-light' : 'bg-legacy-canvas-night border-white/10 text-white'
                       }`}
                       placeholder="e.g. Beximco Textiles PLC"
                     />
@@ -236,7 +236,7 @@ const PurchaseConfirmModal = ({ credit, creditId, onClose, onPurchaseComplete })
                       value={taxBin}
                       onChange={(e) => setTaxBin(e.target.value)}
                       className={`w-full p-2.5 text-xs rounded-lg border font-mono focus:outline-none focus:border-emerald ${
-                        isLight ? 'bg-white border-slate-300 text-[#181414]' : 'bg-[#040A06] border-white/10 text-white'
+                        isLight ? 'bg-white border-slate-300 text-legacy-ink-light' : 'bg-legacy-canvas-night border-white/10 text-white'
                       }`}
                       placeholder="BIN-000000000-0000"
                     />
@@ -249,7 +249,7 @@ const PurchaseConfirmModal = ({ credit, creditId, onClose, onPurchaseComplete })
                     value={scopeType}
                     onChange={(e) => setScopeType(e.target.value)}
                     className={`w-full p-2.5 text-xs rounded-lg border focus:outline-none focus:border-emerald ${
-                      isLight ? 'bg-white border-slate-300 text-[#181414]' : 'bg-[#040A06] border-white/10 text-white'
+                      isLight ? 'bg-white border-slate-300 text-legacy-ink-light' : 'bg-legacy-canvas-night border-white/10 text-white'
                     }`}
                   >
                     <option value="Scope 1 (Direct Facility Fuel)">Scope 1: Direct Boiler, Generator & Vehicle Fuel</option>
@@ -260,7 +260,7 @@ const PurchaseConfirmModal = ({ credit, creditId, onClose, onPurchaseComplete })
                 </div>
 
                 <div className={`p-3 rounded-lg border flex items-start space-x-3 ${
-                  isLight ? 'bg-[#dbf0ea]/40 border-[#dbf0ea]' : 'bg-[#0D2B1A]/20 border-emerald/20'
+                  isLight ? 'bg-legacy-surface-light-tint/40 border-legacy-surface-light-tint' : 'bg-legacy-surface-raised/20 border-emerald/20'
                 }`}>
                   <input 
                     type="checkbox" 
@@ -270,7 +270,7 @@ const PurchaseConfirmModal = ({ credit, creditId, onClose, onPurchaseComplete })
                     className="mt-0.5 text-emerald focus:ring-emerald rounded"
                   />
                   <label htmlFor="retireImmediately" className="text-xs cursor-pointer">
-                    <span className={`font-semibold block ${isLight ? 'text-[#181414]' : 'text-white'}`}>
+                    <span className={`font-semibold block ${isLight ? 'text-legacy-ink-light' : 'text-white'}`}>
                       Instantly Retire & Mint Official MoEFCC Certificate
                     </span>
                     <span className="text-slate-400 text-[11px]">
@@ -347,7 +347,7 @@ const PurchaseConfirmModal = ({ credit, creditId, onClose, onPurchaseComplete })
               {/* MFS Tab Content */}
               {paymentMethod === 'mfs' && (
                 <div className={`p-4 rounded-xl border space-y-3.5 ${
-                  isLight ? 'bg-[#f2f3ee]/80 border-[#dbf0ea]' : 'bg-[#040A06] border-emerald/20'
+                  isLight ? 'bg-legacy-canvas-light/80 border-legacy-surface-light-tint' : 'bg-legacy-canvas-night border-emerald/20'
                 }`}>
                   <div className="flex justify-between items-center pb-2 border-b border-white/5">
                     <div className="flex space-x-2">
@@ -383,7 +383,7 @@ const PurchaseConfirmModal = ({ credit, creditId, onClose, onPurchaseComplete })
                           value={mfsNumber}
                           onChange={(e) => setMfsNumber(e.target.value.replace(/\D/g, ''))}
                           className={`w-full p-2.5 text-xs font-mono rounded-lg border focus:outline-none focus:border-emerald ${
-                            isLight ? 'bg-white border-slate-300 text-[#181414]' : 'bg-[#080F0B] border-white/10 text-white'
+                            isLight ? 'bg-white border-slate-300 text-legacy-ink-light' : 'bg-legacy-canvas-base border-white/10 text-white'
                           }`}
                           placeholder="017XXXXXXXX"
                         />
@@ -411,7 +411,7 @@ const PurchaseConfirmModal = ({ credit, creditId, onClose, onPurchaseComplete })
                           value={mfsOTP}
                           onChange={(e) => setMfsOTP(e.target.value.replace(/\D/g, ''))}
                           className={`w-full p-2.5 text-sm font-mono tracking-widest text-center rounded-lg border focus:outline-none focus:border-emerald ${
-                            isLight ? 'bg-white border-slate-300 text-[#181414]' : 'bg-[#080F0B] border-white/10 text-white'
+                            isLight ? 'bg-white border-slate-300 text-legacy-ink-light' : 'bg-legacy-canvas-base border-white/10 text-white'
                           }`}
                           placeholder="••••••"
                         />
@@ -434,7 +434,7 @@ const PurchaseConfirmModal = ({ credit, creditId, onClose, onPurchaseComplete })
               {/* Card Tab Content */}
               {paymentMethod === 'card' && (
                 <div className={`p-4 rounded-xl border space-y-3 ${
-                  isLight ? 'bg-[#f2f3ee]/80 border-[#dbf0ea]' : 'bg-[#040A06] border-emerald/20'
+                  isLight ? 'bg-legacy-canvas-light/80 border-legacy-surface-light-tint' : 'bg-legacy-canvas-night border-emerald/20'
                 }`}>
                   <div>
                     <label className="block text-[11px] font-medium text-slate-400 mb-1">Cardholder Name</label>
@@ -443,7 +443,7 @@ const PurchaseConfirmModal = ({ credit, creditId, onClose, onPurchaseComplete })
                       value={cardName}
                       onChange={(e) => setCardName(e.target.value)}
                       className={`w-full p-2 text-xs rounded border ${
-                        isLight ? 'bg-white border-slate-300 text-[#181414]' : 'bg-[#080F0B] border-white/10 text-white'
+                        isLight ? 'bg-white border-slate-300 text-legacy-ink-light' : 'bg-legacy-canvas-base border-white/10 text-white'
                       }`}
                     />
                   </div>
@@ -454,7 +454,7 @@ const PurchaseConfirmModal = ({ credit, creditId, onClose, onPurchaseComplete })
                       value={cardNumber}
                       onChange={(e) => setCardNumber(e.target.value)}
                       className={`w-full p-2 text-xs font-mono rounded border ${
-                        isLight ? 'bg-white border-slate-300 text-[#181414]' : 'bg-[#080F0B] border-white/10 text-white'
+                        isLight ? 'bg-white border-slate-300 text-legacy-ink-light' : 'bg-legacy-canvas-base border-white/10 text-white'
                       }`}
                     />
                   </div>
@@ -466,7 +466,7 @@ const PurchaseConfirmModal = ({ credit, creditId, onClose, onPurchaseComplete })
                         value={cardExpiry}
                         onChange={(e) => setCardExpiry(e.target.value)}
                         className={`w-full p-2 text-xs font-mono rounded border ${
-                          isLight ? 'bg-white border-slate-300 text-[#181414]' : 'bg-[#080F0B] border-white/10 text-white'
+                          isLight ? 'bg-white border-slate-300 text-legacy-ink-light' : 'bg-legacy-canvas-base border-white/10 text-white'
                         }`}
                       />
                     </div>
@@ -478,7 +478,7 @@ const PurchaseConfirmModal = ({ credit, creditId, onClose, onPurchaseComplete })
                         value={cardCvc}
                         onChange={(e) => setCardCvc(e.target.value)}
                         className={`w-full p-2 text-xs font-mono rounded border ${
-                          isLight ? 'bg-white border-slate-300 text-[#181414]' : 'bg-[#080F0B] border-white/10 text-white'
+                          isLight ? 'bg-white border-slate-300 text-legacy-ink-light' : 'bg-legacy-canvas-base border-white/10 text-white'
                         }`}
                       />
                     </div>
@@ -489,7 +489,7 @@ const PurchaseConfirmModal = ({ credit, creditId, onClose, onPurchaseComplete })
               {/* Wire Tab Content */}
               {paymentMethod === 'wire' && (
                 <div className={`p-4 rounded-xl border space-y-2 text-xs ${
-                  isLight ? 'bg-[#f2f3ee]/80 border-[#dbf0ea]' : 'bg-[#040A06] border-emerald/20'
+                  isLight ? 'bg-legacy-canvas-light/80 border-legacy-surface-light-tint' : 'bg-legacy-canvas-night border-emerald/20'
                 }`}>
                   <div className="flex items-center justify-between pb-2 border-b border-white/5">
                     <span className="font-mono font-bold text-emerald">Bangladesh Bank RTGS Escrow Account</span>
@@ -574,7 +574,7 @@ const PurchaseConfirmModal = ({ credit, creditId, onClose, onPurchaseComplete })
                 <span className="font-mono text-xs text-emerald tracking-widest uppercase">
                   SMART CONTRACT EXECUTION PIPELINE
                 </span>
-                <h3 className={`text-xl font-bold mt-1 ${isLight ? 'text-[#181414]' : 'text-white'}`}>
+                <h3 className={`text-xl font-bold mt-1 ${isLight ? 'text-legacy-ink-light' : 'text-white'}`}>
                   Settling 97% to Farmer Wallet
                 </h3>
                 <p className="text-xs text-slate-400 mt-1">
@@ -604,8 +604,8 @@ const PurchaseConfirmModal = ({ credit, creditId, onClose, onPurchaseComplete })
               {/* Certificate Border Box */}
               <div className={`p-6 rounded-2xl border-2 relative overflow-hidden ${
                 isLight 
-                  ? 'bg-gradient-to-b from-white to-[#f2f3ee] border-emerald/40 shadow-xl' 
-                  : 'bg-gradient-to-b from-[#080F0B] to-[#040A06] border-emerald/50 shadow-[0_0_40px_rgba(0,200,83,0.2)]'
+                  ? 'bg-gradient-to-b from-white to-legacy-canvas-light border-emerald/40 shadow-xl'
+                  : 'bg-gradient-to-b from-legacy-canvas-base to-legacy-canvas-night border-emerald/50 shadow-[0_0_40px_rgba(0,200,83,0.2)]'
               }`}>
                 {/* Certificate Watermark / Pattern */}
                 <div className="absolute top-0 right-0 w-32 h-32 bg-emerald/5 rounded-full blur-2xl pointer-events-none"></div>
@@ -639,7 +639,7 @@ const PurchaseConfirmModal = ({ credit, creditId, onClose, onPurchaseComplete })
 
                   {/* Highlight Box */}
                   <div className={`p-3.5 rounded-xl border text-center my-3 ${
-                    isLight ? 'bg-emerald/5 border-emerald/20' : 'bg-[#0D2B1A]/40 border-emerald/30'
+                    isLight ? 'bg-emerald/5 border-emerald/20' : 'bg-legacy-surface-raised/40 border-emerald/30'
                   }`}>
                     <span className="font-mono text-3xl font-bold text-emerald block">
                       {activeCredit.tonnage} <span className="text-lg">tCO₂e</span>

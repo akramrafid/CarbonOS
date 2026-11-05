@@ -1,3 +1,4 @@
+import { legacyColors } from '../../styles/legacyColors.js';
 import React, { useState, useEffect } from 'react';
 import { 
   AlertTriangle, 
@@ -20,7 +21,7 @@ const TelemetryChart = ({ history, metricType }) => {
   
   if (data.length < 2) {
     return (
-      <div className="h-[180px] flex flex-col items-center justify-center border border-dashed border-emerald/10 rounded-xl bg-[#040A06]/80 p-4">
+      <div className="h-[180px] flex flex-col items-center justify-center border border-dashed border-emerald/10 rounded-xl bg-legacy-canvas-night/80 p-4">
         <Activity className="w-8 h-8 text-emerald/30 animate-pulse mb-2" />
         <span className="text-xs text-mist/40 font-mono">Waiting for additional telemetry logs...</span>
       </div>
@@ -63,17 +64,17 @@ const TelemetryChart = ({ history, metricType }) => {
   const linePath = points.map((p, idx) => `${idx === 0 ? 'M' : 'L'} ${p.x} ${p.y}`).join(' ');
   const areaPath = `${linePath} L ${points[points.length - 1].x} ${paddingTop + chartHeight} L ${points[0].x} ${paddingTop + chartHeight} Z`;
 
-  let strokeColor = "#10b981"; // emerald
+  let strokeColor = legacyColors["legacy-emerald-500"]; // emerald
   let fillGradientId = "grad-emerald-mrv";
   
   if (metricType === 'co2') {
-    strokeColor = "#f59e0b"; // amber
+    strokeColor = legacyColors["legacy-amber-500"]; // amber
     fillGradientId = "grad-amber-mrv";
   } else if (metricType === 'temp') {
-    strokeColor = "#06b6d4"; // cyan
+    strokeColor = legacyColors["legacy-cyan-500"]; // cyan
     fillGradientId = "grad-cyan-mrv";
   } else if (metricType === 'hum') {
-    strokeColor = "#3b82f6"; // blue
+    strokeColor = legacyColors["legacy-blue-500"]; // blue
     fillGradientId = "grad-blue-mrv";
   }
 
@@ -89,20 +90,20 @@ const TelemetryChart = ({ history, metricType }) => {
       <svg className="w-full h-auto overflow-visible" viewBox={`0 0 ${width} ${height}`}>
         <defs>
           <linearGradient id="grad-emerald-mrv" x1="0" y1="0" x2="0" y2="1">
-            <stop offset="0%" stopColor="#10b981" stopOpacity="0.25"/>
-            <stop offset="100%" stopColor="#10b981" stopOpacity="0.0"/>
+            <stop offset="0%" stopColor={legacyColors["legacy-emerald-500"]} stopOpacity="0.25"/>
+            <stop offset="100%" stopColor={legacyColors["legacy-emerald-500"]} stopOpacity="0.0"/>
           </linearGradient>
           <linearGradient id="grad-amber-mrv" x1="0" y1="0" x2="0" y2="1">
-            <stop offset="0%" stopColor="#f59e0b" stopOpacity="0.25"/>
-            <stop offset="100%" stopColor="#f59e0b" stopOpacity="0.0"/>
+            <stop offset="0%" stopColor={legacyColors["legacy-amber-500"]} stopOpacity="0.25"/>
+            <stop offset="100%" stopColor={legacyColors["legacy-amber-500"]} stopOpacity="0.0"/>
           </linearGradient>
           <linearGradient id="grad-cyan-mrv" x1="0" y1="0" x2="0" y2="1">
-            <stop offset="0%" stopColor="#06b6d4" stopOpacity="0.25"/>
-            <stop offset="100%" stopColor="#06b6d4" stopOpacity="0.0"/>
+            <stop offset="0%" stopColor={legacyColors["legacy-cyan-500"]} stopOpacity="0.25"/>
+            <stop offset="100%" stopColor={legacyColors["legacy-cyan-500"]} stopOpacity="0.0"/>
           </linearGradient>
           <linearGradient id="grad-blue-mrv" x1="0" y1="0" x2="0" y2="1">
-            <stop offset="0%" stopColor="#3b82f6" stopOpacity="0.25"/>
-            <stop offset="100%" stopColor="#3b82f6" stopOpacity="0.0"/>
+            <stop offset="0%" stopColor={legacyColors["legacy-blue-500"]} stopOpacity="0.25"/>
+            <stop offset="100%" stopColor={legacyColors["legacy-blue-500"]} stopOpacity="0.0"/>
           </linearGradient>
           
           <filter id="glow-mrv" x="-20%" y="-20%" width="140%" height="140%">
@@ -136,7 +137,7 @@ const TelemetryChart = ({ history, metricType }) => {
           const isKeyPoint = idx === 0 || idx === points.length - 1 || idx === Math.floor(points.length / 2);
           if (!isKeyPoint && points.length > 12) return null;
           return (
-            <circle key={idx} cx={p.x} cy={p.y} r="3" fill="#080F0B" stroke={strokeColor} strokeWidth="1.5" />
+            <circle key={idx} cx={p.x} cy={p.y} r="3" fill={legacyColors["legacy-canvas-base"]} stroke={strokeColor} strokeWidth="1.5" />
           );
         })}
       </svg>
@@ -260,9 +261,9 @@ const MRVDashboard = () => {
     <div className="pt-24 pb-16 min-h-[80vh] flex flex-col items-center noise-overlay">
       
       {/* Header section */}
-      <div className="w-full bg-[#040A06] border-b border-emerald/10 py-16 px-6 lg:px-12 relative overflow-hidden flex flex-col items-center justify-center text-center">
-        <div className="absolute inset-0 bg-[linear-gradient(to_right,#00C85311_1px,transparent_1px),linear-gradient(to_bottom,#00C85311_1px,transparent_1px)] bg-[size:4rem_4rem] [mask-image:radial-gradient(ellipse_60%_50%_at_50%_0%,#000_70%,transparent_100%)] pointer-events-none"></div>
-        <span className="font-mono text-xs text-emerald tracking-widest px-3 py-1 bg-[#0D2B1A]/40 border border-[#00C853]/20 rounded-full mb-6 inline-block z-10">PLATFORM</span>
+      <div className="w-full bg-legacy-canvas-night border-b border-emerald/10 py-16 px-6 lg:px-12 relative overflow-hidden flex flex-col items-center justify-center text-center">
+        <div className="absolute inset-0 legacy-grid bg-[size:4rem_4rem] legacy-grid-mask pointer-events-none"></div>
+        <span className="font-mono text-xs text-emerald tracking-widest px-3 py-1 bg-legacy-surface-raised/40 border border-legacy-brand-base/20 rounded-full mb-6 inline-block z-10">PLATFORM</span>
         <h1 className="serif-drama text-[56px] lg:text-[72px] text-white leading-tight mb-4 z-10">MRV Dashboard</h1>
         <p className="font-sans text-lg text-mist max-w-2xl z-10">MRV research dashboard. Live sensor data requires an authenticated server gateway.</p>
       </div>
@@ -270,7 +271,7 @@ const MRVDashboard = () => {
       <div className="max-w-5xl w-full mx-auto px-6 lg:px-12 mt-16 relative z-10 space-y-8">
         
         {/* Core System Telemetry Card */}
-        <div className="bg-[#080F0B] registry-border p-8 rounded-[2rem] shadow-[0_0_30px_rgba(0,200,83,0.05)]">
+        <div className="bg-legacy-canvas-base registry-border p-8 rounded-[2rem] shadow-[0_0_30px_rgba(0,200,83,0.05)]">
           <div className="flex justify-between items-center mb-6">
             <h2 className="font-sans font-bold text-2xl text-registry flex items-center">
               <span className="pulse-dot mr-3"></span>
@@ -280,7 +281,7 @@ const MRVDashboard = () => {
           </div>
           
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-            <div className="p-4 bg-[#040A06] border border-emerald/10 rounded-lg flex justify-between items-center">
+            <div className="p-4 bg-legacy-canvas-night border border-emerald/10 rounded-lg flex justify-between items-center">
               <div>
                 <div className="font-mono text-[10px] text-mist mb-2">ACTIVE IOT NODES</div>
                 <div className="font-mono text-xl text-registry font-bold">
@@ -293,11 +294,11 @@ const MRVDashboard = () => {
                 </span>
               )}
             </div>
-            <div className="p-4 bg-[#040A06] border border-emerald/10 rounded-lg">
+            <div className="p-4 bg-legacy-canvas-night border border-emerald/10 rounded-lg">
               <div className="font-mono text-[10px] text-mist mb-2">LAST SATELLITE PASS</div>
               <div className="font-mono text-xl text-registry font-bold">Unavailable</div>
             </div>
-            <div className="p-4 bg-[#040A06] border border-emerald/10 rounded-lg flex justify-between items-center">
+            <div className="p-4 bg-legacy-canvas-night border border-emerald/10 rounded-lg flex justify-between items-center">
               <div>
                 <div className="font-mono text-[10px] text-mist mb-2">tCO2e MITIGATED TODAY</div>
                 <div className="font-mono text-xl text-emerald font-bold">
@@ -314,7 +315,7 @@ const MRVDashboard = () => {
         </div>
 
         {/* ESP8266 Carbon Monitor live feeds */}
-        <div className="bg-[#080F0B] registry-border p-8 rounded-[2rem] shadow-[0_0_30px_rgba(0,200,83,0.05)]">
+        <div className="bg-legacy-canvas-base registry-border p-8 rounded-[2rem] shadow-[0_0_30px_rgba(0,200,83,0.05)]">
           
           {/* Header */}
           <div className="flex flex-col md:flex-row justify-between md:items-center mb-6 gap-4">
@@ -331,7 +332,7 @@ const MRVDashboard = () => {
               <button 
                 onClick={downloadExcel}
                 disabled={telemetryHistory.length === 0}
-                className="flex items-center gap-1.5 px-3 py-1 font-mono text-[10px] text-emerald bg-[#0D2B1A] border border-emerald/30 rounded hover:bg-emerald/20 transition-all disabled:opacity-40 disabled:cursor-not-allowed"
+                className="flex items-center gap-1.5 px-3 py-1 font-mono text-[10px] text-emerald bg-legacy-surface-raised border border-emerald/30 rounded hover:bg-emerald/20 transition-all disabled:opacity-40 disabled:cursor-not-allowed"
                 title="Download History to Excel"
               >
                 <Download className="w-3.5 h-3.5" />
@@ -356,7 +357,7 @@ const MRVDashboard = () => {
           {/* Metric cards */}
           <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
             {/* Temp */}
-            <div className="p-5 bg-[#040A06] border border-emerald/10 rounded-xl relative group overflow-hidden transition-all duration-300 hover:border-cyan-500/30">
+            <div className="p-5 bg-legacy-canvas-night border border-emerald/10 rounded-xl relative group overflow-hidden transition-all duration-300 hover:border-cyan-500/30">
               <div className="flex justify-between items-center mb-2">
                 <span className="font-mono text-[9px] text-mist/50 uppercase tracking-wider">Temperature</span>
                 <Thermometer className="w-3.5 h-3.5 text-cyan-400" />
@@ -371,7 +372,7 @@ const MRVDashboard = () => {
             </div>
 
             {/* Hum */}
-            <div className="p-5 bg-[#040A06] border border-emerald/10 rounded-xl relative group overflow-hidden transition-all duration-300 hover:border-cyan-500/30">
+            <div className="p-5 bg-legacy-canvas-night border border-emerald/10 rounded-xl relative group overflow-hidden transition-all duration-300 hover:border-cyan-500/30">
               <div className="flex justify-between items-center mb-2">
                 <span className="font-mono text-[9px] text-mist/50 uppercase tracking-wider">Humidity</span>
                 <Droplets className="w-3.5 h-3.5 text-cyan-400" />
@@ -386,7 +387,7 @@ const MRVDashboard = () => {
             </div>
 
             {/* Air Quality */}
-            <div className={`p-5 bg-[#040A06] border rounded-xl relative group overflow-hidden transition-all duration-500 ${metrics.air !== null && deviceConnected ? 'border-emerald/15' : 'border-emerald/10'}`}>
+            <div className={`p-5 bg-legacy-canvas-night border rounded-xl relative group overflow-hidden transition-all duration-500 ${metrics.air !== null && deviceConnected ? 'border-emerald/15' : 'border-emerald/10'}`}>
               <div className="flex justify-between items-center mb-2">
                 <span className="font-mono text-[9px] text-mist/50 uppercase tracking-wider">Air Quality</span>
                 <Wind className={`w-3.5 h-3.5 ${airStatus.color}`} />
@@ -403,7 +404,7 @@ const MRVDashboard = () => {
             </div>
 
             {/* CO2 */}
-            <div className={`p-5 bg-[#040A06] border rounded-xl relative group overflow-hidden transition-all duration-500 ${metrics.co2 !== null && deviceConnected ? 'border-emerald/15' : 'border-emerald/10'}`}>
+            <div className={`p-5 bg-legacy-canvas-night border rounded-xl relative group overflow-hidden transition-all duration-500 ${metrics.co2 !== null && deviceConnected ? 'border-emerald/15' : 'border-emerald/10'}`}>
               <div className="flex justify-between items-center mb-2">
                 <span className="font-mono text-[9px] text-mist/50 uppercase tracking-wider">CO2 Level</span>
                 <Activity className={`w-3.5 h-3.5 ${co2Status.color}`} />
@@ -424,34 +425,34 @@ const MRVDashboard = () => {
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
             
             {/* Chart Area */}
-            <div className="lg:col-span-2 p-6 bg-[#040A06] border border-emerald/10 rounded-2xl flex flex-col justify-between h-[420px]">
+            <div className="lg:col-span-2 p-6 bg-legacy-canvas-night border border-emerald/10 rounded-2xl flex flex-col justify-between h-[420px]">
               <div className="flex flex-col sm:flex-row justify-between sm:items-center gap-3 mb-4">
                 <span className="text-xs font-mono font-bold text-white tracking-wider flex items-center">
                   <Activity className="w-4 h-4 text-emerald mr-1.5 animate-pulse" />
                   HISTORICAL TREND ANALYSES
                 </span>
-                <div className="flex bg-[#080F0B] p-0.5 rounded-lg border border-emerald/10 font-mono text-[8px]">
+                <div className="flex bg-legacy-canvas-base p-0.5 rounded-lg border border-emerald/10 font-mono text-[8px]">
                   <button 
                     onClick={() => setChartMetric('co2')}
-                    className={`px-2 py-1 rounded transition-colors ${chartMetric === 'co2' ? 'bg-[#0D2B1A] text-emerald font-bold' : 'text-mist/60 hover:text-white'}`}
+                    className={`px-2 py-1 rounded transition-colors ${chartMetric === 'co2' ? 'bg-legacy-surface-raised text-emerald font-bold' : 'text-mist/60 hover:text-white'}`}
                   >
                     CO2
                   </button>
                   <button 
                     onClick={() => setChartMetric('air')}
-                    className={`px-2 py-1 rounded transition-colors ${chartMetric === 'air' ? 'bg-[#0D2B1A] text-emerald font-bold' : 'text-mist/60 hover:text-white'}`}
+                    className={`px-2 py-1 rounded transition-colors ${chartMetric === 'air' ? 'bg-legacy-surface-raised text-emerald font-bold' : 'text-mist/60 hover:text-white'}`}
                   >
                     AQI
                   </button>
                   <button 
                     onClick={() => setChartMetric('temp')}
-                    className={`px-2 py-1 rounded transition-colors ${chartMetric === 'temp' ? 'bg-[#0D2B1A] text-emerald font-bold' : 'text-mist/60 hover:text-white'}`}
+                    className={`px-2 py-1 rounded transition-colors ${chartMetric === 'temp' ? 'bg-legacy-surface-raised text-emerald font-bold' : 'text-mist/60 hover:text-white'}`}
                   >
                     TEMP
                   </button>
                   <button 
                     onClick={() => setChartMetric('hum')}
-                    className={`px-2 py-1 rounded transition-colors ${chartMetric === 'hum' ? 'bg-[#0D2B1A] text-emerald font-bold' : 'text-mist/60 hover:text-white'}`}
+                    className={`px-2 py-1 rounded transition-colors ${chartMetric === 'hum' ? 'bg-legacy-surface-raised text-emerald font-bold' : 'text-mist/60 hover:text-white'}`}
                   >
                     HUM
                   </button>
@@ -468,12 +469,12 @@ const MRVDashboard = () => {
             </div>
 
             {/* Log stream / Mock Stream Panel */}
-            <div className="p-6 bg-[#040A06] border border-emerald/10 rounded-2xl flex flex-col justify-between h-[420px]">
+            <div className="p-6 bg-legacy-canvas-night border border-emerald/10 rounded-2xl flex flex-col justify-between h-[420px]">
               <div className="flex justify-between items-center border-b border-emerald/10 pb-3 mb-3">
                 <span className="text-xs font-mono font-bold text-amber tracking-wider">
                   &gt;&gt; LOG STREAM
                 </span>
-                <div className="flex bg-[#080F0B] p-0.5 rounded border border-emerald/10 font-mono text-[8px]">
+                <div className="flex bg-legacy-canvas-base p-0.5 rounded border border-emerald/10 font-mono text-[8px]">
                   <button 
                     onClick={() => setLeftTab('sensor_logs')}
                     className={`px-2 py-0.5 rounded ${leftTab === 'sensor_logs' ? 'bg-amber/10 text-amber font-bold' : 'text-mist/40'}`}
@@ -520,7 +521,7 @@ const MRVDashboard = () => {
         </div>
 
         {/* Farmer's AI Carbon Asset Alerts */}
-        <div className="bg-[#080F0B] registry-border p-8 rounded-[2rem] shadow-[0_0_30px_rgba(0,200,83,0.05)]">
+        <div className="bg-legacy-canvas-base registry-border p-8 rounded-[2rem] shadow-[0_0_30px_rgba(0,200,83,0.05)]">
           <div className="flex items-center justify-between mb-6">
             <div className="flex items-center">
               <span className="w-2.5 h-2.5 rounded-full bg-purple-500 animate-pulse mr-3"></span>
@@ -537,7 +538,7 @@ const MRVDashboard = () => {
                 <Loader2 className="w-6 h-6 animate-spin text-purple-400" />
               </div>
             ) : !hasAlerts ? (
-              <div className="text-xs text-gray-500 font-mono text-center py-12 border border-gray-800/40 rounded-xl bg-[#040A06]/50">
+              <div className="text-xs text-gray-500 font-mono text-center py-12 border border-gray-800/40 rounded-xl bg-legacy-canvas-night/50">
                 NO TIER B DIAGNOSIS DATA YET
               </div>
             ) : (

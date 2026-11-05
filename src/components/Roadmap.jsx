@@ -80,12 +80,12 @@ const Roadmap = () => {
   }, []);
 
   return (
-    <section className="w-full bg-[#040A06] py-24 px-6 lg:px-12 relative overflow-hidden noise-overlay">
+    <section className="w-full bg-legacy-canvas-night py-24 px-6 lg:px-12 relative overflow-hidden noise-overlay">
       <div className="max-w-7xl mx-auto relative z-10" ref={containerRef}>
         
         {/* Header */}
         <div className="text-center mb-20">
-          <span className="font-mono text-xs text-emerald tracking-widest px-3 py-1 bg-[#0D2B1A]/40 border border-[#00C853]/20 rounded-full mb-6 inline-block">
+          <span className="font-mono text-xs text-emerald tracking-widest px-3 py-1 bg-legacy-surface-raised/40 border border-legacy-brand-base/20 rounded-full mb-6 inline-block">
             PROCESS OVERVIEW
           </span>
           <h2 className="serif-drama text-[48px] lg:text-[64px] text-white leading-tight mb-4">
@@ -99,7 +99,7 @@ const Roadmap = () => {
         {/* Roadmap Timeline */}
         <div className="relative max-w-4xl mx-auto">
           {/* Vertical Line */}
-          <div className="absolute left-12 md:left-1/2 top-0 bottom-0 w-[2px] bg-[#00C853]/10 -translate-x-1/2 rounded-full hidden md:block">
+          <div className="absolute left-12 md:left-1/2 top-0 bottom-0 w-[2px] bg-legacy-brand-base/10 -translate-x-1/2 rounded-full hidden md:block">
             <div 
               ref={lineRef} 
               className="absolute top-0 left-0 w-full h-full bg-emerald origin-top"
@@ -114,7 +114,7 @@ const Roadmap = () => {
                 <div key={index} className={`roadmap-step relative flex flex-col md:flex-row items-center ${isEven ? 'md:flex-row-reverse' : ''}`}>
                   
                   {/* Timeline Dot */}
-                  <div className="hidden md:flex absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 w-10 h-10 bg-[#080F0B] border-2 border-emerald rounded-full items-center justify-center z-10 emerald-glow">
+                  <div className="hidden md:flex absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 w-10 h-10 bg-legacy-canvas-base border-2 border-emerald rounded-full items-center justify-center z-10 emerald-glow">
                     <div className="w-3 h-3 bg-emerald rounded-full animate-pulse"></div>
                   </div>
 
@@ -123,7 +123,7 @@ const Roadmap = () => {
 
                   {/* Content Card */}
                   <div className={`w-full md:w-1/2 ${isEven ? 'md:pr-16 text-left md:text-right' : 'md:pl-16 text-left'}`}>
-                    <div className="bg-[#080F0B]/80 backdrop-blur-md registry-border p-8 rounded-[2rem] hover:bg-[#0D2B1A]/60 transition-colors group">
+                    <div className="bg-legacy-canvas-base/80 backdrop-blur-md registry-border p-8 rounded-[2rem] hover:bg-legacy-surface-raised/60 transition-colors group">
                       <div className={`flex items-center space-x-3 mb-4 ${isEven ? 'md:justify-end' : 'justify-start'}`}>
                         <span className="font-mono text-xs text-emerald bg-emerald/10 px-2 py-1 rounded">
                           STEP {step.icon}
@@ -139,7 +139,7 @@ const Roadmap = () => {
                       
                       <div className={`flex flex-wrap gap-2 ${isEven ? 'md:justify-end' : 'justify-start'}`}>
                         {step.metrics.map((metric, mIndex) => (
-                          <span key={mIndex} className="font-mono text-[11px] text-mist/70 bg-[#040A06] border border-emerald/10 px-3 py-1 rounded-full">
+                          <span key={mIndex} className="font-mono text-[11px] text-mist/70 bg-legacy-canvas-night border border-emerald/10 px-3 py-1 rounded-full">
                             {metric}
                           </span>
                         ))}

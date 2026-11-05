@@ -96,7 +96,7 @@ const sectors = [
 
 const SectorFocus = () => {
   return (
-    <section className="w-full bg-[#030805] text-white py-32 px-6 lg:px-12 relative overflow-hidden border-t border-white/10">
+    <section className="w-full bg-legacy-forest-82 text-white py-32 px-6 lg:px-12 relative overflow-hidden border-t border-white/10">
       
       {/* Background Graphic Grid */}
       <div className="absolute inset-0 bg-[linear-gradient(to_right,rgba(16,185,129,0.04)_1px,transparent_1px),linear-gradient(to_bottom,rgba(16,185,129,0.04)_1px,transparent_1px)] bg-[size:4rem_4rem] z-0 pointer-events-none" />

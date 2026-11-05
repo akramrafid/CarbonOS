@@ -1,3 +1,4 @@
+import { legacyColors } from '../../styles/legacyColors.js';
 import React, { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { 
@@ -104,9 +105,9 @@ const SemiCircularGauge = ({
       <svg viewBox="0 0 160 92" className="w-36 sm:w-40 h-auto overflow-visible" role="img" aria-label={`${label} gauge: ${score || percentage}`}>
         <defs>
           <linearGradient id={gradientId} x1="0%" y1="0%" x2="100%" y2="0%">
-            <stop offset="0%" stopColor="#00E676" />
-            <stop offset="50%" stopColor="#00C853" />
-            <stop offset="100%" stopColor="#10B981" />
+            <stop offset="0%" stopColor={legacyColors["legacy-brand-bright"]} />
+            <stop offset="50%" stopColor={legacyColors["legacy-brand-base"]} />
+            <stop offset="100%" stopColor={legacyColors["legacy-emerald-500"]} />
           </linearGradient>
         </defs>
 
@@ -114,7 +115,7 @@ const SemiCircularGauge = ({
         <path
           d="M 16 80 A 64 64 0 0 1 144 80"
           fill="none"
-          stroke={isLight ? '#E8ECE8' : '#152B1D'}
+          stroke={isLight ? legacyColors["legacy-divider-light"] : legacyColors["legacy-divider-base"]}
           strokeWidth={strokeWidth}
           strokeLinecap="round"
         />
@@ -135,18 +136,18 @@ const SemiCircularGauge = ({
       {/* Central content */}
       <div className="absolute top-8 sm:top-9 flex flex-col items-center justify-center text-center select-none">
         {showIcon ? (
-          <div className="w-8 h-8 rounded-full bg-[#00C853]/15 border border-[#00C853]/30 flex items-center justify-center text-[#00C853]">
-            <Leaf className="w-4 h-4 text-[#00C853]" />
+          <div className="w-8 h-8 rounded-full bg-legacy-brand-base/15 border border-legacy-brand-base/30 flex items-center justify-center text-legacy-brand-base">
+            <Leaf className="w-4 h-4 text-legacy-brand-base" />
           </div>
         ) : (
           <>
-            <span className={`text-[9px] font-mono uppercase tracking-wider font-bold ${isLight ? 'text-[#557361]' : 'text-[#7C9A88]'}`}>
+            <span className={`text-[9px] font-mono uppercase tracking-wider font-bold ${isLight ? 'text-legacy-text-quiet' : 'text-legacy-text-muted'}`}>
               {label}
             </span>
-            <span className={`text-2xl sm:text-3xl font-sans font-bold tracking-tight leading-none my-0.5 ${isLight ? 'text-[#0F2417]' : 'text-white'}`}>
+            <span className={`text-2xl sm:text-3xl font-sans font-bold tracking-tight leading-none my-0.5 ${isLight ? 'text-legacy-forest-43' : 'text-white'}`}>
               {score}
             </span>
-            <span className={`text-[9px] font-sans font-medium ${isLight ? 'text-[#557361]' : 'text-[#7C9A88]'}`}>
+            <span className={`text-[9px] font-sans font-medium ${isLight ? 'text-legacy-text-quiet' : 'text-legacy-text-muted'}`}>
               {sublabel}
             </span>
           </>
@@ -155,7 +156,7 @@ const SemiCircularGauge = ({
 
       {badgeText && (
         <div className={`mt-2 px-3 py-1 rounded-full text-[10px] font-sans font-semibold border ${
-          isLight ? 'bg-[#F4F6F4] text-[#0F2417] border-[#E8ECE8]' : 'bg-[#040906] text-[#A7F3D0] border-[#1B4D2E]'
+          isLight ? 'bg-legacy-mint-08 text-legacy-forest-43 border-legacy-divider-light' : 'bg-legacy-canvas-deep text-legacy-emerald-200 border-legacy-forest-11'
         }`}>
           {badgeText}
         </div>
@@ -229,8 +230,8 @@ const EmissionsTrendChart = ({ isLight = false }) => {
         <div 
           className={`absolute -top-3 z-20 px-2.5 py-1 rounded-lg text-[10px] font-mono font-bold shadow-md border pointer-events-none transform -translate-x-1/2 transition-transform duration-150 ${
             isLight 
-              ? 'bg-white text-[#0F2417] border-[#E8ECE8]' 
-              : 'bg-[#0D2B1A] text-[#4ADE80] border-[#1B4D2E]'
+              ? 'bg-white text-legacy-forest-43 border-legacy-divider-light'
+              : 'bg-legacy-surface-raised text-legacy-green-400 border-legacy-forest-11'
           }`}
           style={{ left: `${(hoveredPoint.x / 620) * 100}%` }}
         >
@@ -241,9 +242,9 @@ const EmissionsTrendChart = ({ isLight = false }) => {
       <svg viewBox="0 0 620 170" className="w-full h-auto overflow-visible select-none" preserveAspectRatio="none">
         <defs>
           <linearGradient id="emissionsSplineArea" x1="0%" y1="0%" x2="0%" y2="100%">
-            <stop offset="0%" stopColor="#00C853" stopOpacity={isLight ? 0.35 : 0.45} />
-            <stop offset="50%" stopColor="#00E676" stopOpacity={isLight ? 0.15 : 0.20} />
-            <stop offset="100%" stopColor="#00C853" stopOpacity={0.0} />
+            <stop offset="0%" stopColor={legacyColors["legacy-brand-base"]} stopOpacity={isLight ? 0.35 : 0.45} />
+            <stop offset="50%" stopColor={legacyColors["legacy-brand-bright"]} stopOpacity={isLight ? 0.15 : 0.20} />
+            <stop offset="100%" stopColor={legacyColors["legacy-brand-base"]} stopOpacity={0.0} />
           </linearGradient>
         </defs>
 
@@ -258,7 +259,7 @@ const EmissionsTrendChart = ({ isLight = false }) => {
             <text 
               x="8" 
               y={grid.y + 3} 
-              fill={isLight ? '#8BA192' : '#557361'} 
+              fill={isLight ? legacyColors["legacy-mint-41"] : legacyColors["legacy-text-quiet"]}
               fontSize="8" 
               fontFamily="monospace"
             >
@@ -269,7 +270,7 @@ const EmissionsTrendChart = ({ isLight = false }) => {
               y1={grid.y} 
               x2="600" 
               y2={grid.y} 
-              stroke={isLight ? '#E5ECE5' : '#122418'} 
+              stroke={isLight ? legacyColors["legacy-mint-19"] : legacyColors["legacy-forest-38"]}
               strokeDasharray="3 3" 
               strokeWidth="1" 
             />
@@ -280,7 +281,7 @@ const EmissionsTrendChart = ({ isLight = false }) => {
         <path
           d={targetCurve}
           fill="none"
-          stroke={isLight ? '#7C9A88' : '#385443'}
+          stroke={isLight ? legacyColors["legacy-text-muted"] : legacyColors["legacy-forest-07"]}
           strokeWidth="1.5"
           strokeDasharray="4 4"
           strokeOpacity="0.7"
@@ -296,7 +297,7 @@ const EmissionsTrendChart = ({ isLight = false }) => {
         <path
           d={actualCurve}
           fill="none"
-          stroke="#00C853"
+          stroke={legacyColors["legacy-brand-base"]}
           strokeWidth="2.5"
           strokeLinecap="round"
           strokeLinejoin="round"
@@ -309,7 +310,7 @@ const EmissionsTrendChart = ({ isLight = false }) => {
               x={pt.x}
               y="160"
               textAnchor="middle"
-              fill={isLight ? '#557361' : '#7C9A88'}
+              fill={isLight ? legacyColors["legacy-text-quiet"] : legacyColors["legacy-text-muted"]}
               fontSize="8.5"
               fontFamily="sans-serif"
               fontWeight={hoveredPoint?.month === pt.month ? 'bold' : 'normal'}
@@ -320,8 +321,8 @@ const EmissionsTrendChart = ({ isLight = false }) => {
               cx={pt.x}
               cy={pt.y}
               r={hoveredPoint?.month === pt.month ? 5 : 3}
-              fill={hoveredPoint?.month === pt.month ? '#00E676' : '#00C853'}
-              stroke={isLight ? '#FFFFFF' : '#040906'}
+              fill={hoveredPoint?.month === pt.month ? legacyColors["legacy-brand-bright"] : legacyColors["legacy-brand-base"]}
+              stroke={isLight ? legacyColors["legacy-warm-01"] : legacyColors["legacy-canvas-deep"]}
               strokeWidth="1.5"
               className="transition-all duration-150 cursor-pointer"
               onMouseEnter={() => setHoveredPoint(pt)}
@@ -345,10 +346,10 @@ const SegmentedProgressBar = ({ totalBars = 24, activeBars = 19, isLight = false
             key={index}
             className={`flex-1 h-6 sm:h-7 rounded-full transition-all duration-300 ${
               isActive
-                ? 'bg-[#00C853] shadow-[0_0_6px_rgba(0,200,83,0.3)]'
+                ? 'bg-legacy-brand-base shadow-[0_0_6px_rgba(0,200,83,0.3)]'
                 : isLight
-                  ? 'bg-[#E5ECE5]'
-                  : 'bg-[#152B1D]'
+                  ? 'bg-legacy-mint-19'
+                  : 'bg-legacy-divider-base'
             }`}
             title={`Segment ${index + 1} of ${totalBars} (${isActive ? 'Verified' : 'Pending'})`}
           />
@@ -374,14 +375,14 @@ const MicroBarChart = ({ isLight = false }) => {
           <div
             className={`w-3.5 sm:w-4 rounded-t-md transition-all duration-500 ${
               bar.active
-                ? 'bg-[#00C853] shadow-[0_0_8px_rgba(0,200,83,0.35)]'
+                ? 'bg-legacy-brand-base shadow-[0_0_8px_rgba(0,200,83,0.35)]'
                 : isLight
-                  ? 'bg-[#E2ECE2]'
-                  : 'bg-[#173020]'
+                  ? 'bg-legacy-mint-20'
+                  : 'bg-legacy-forest-32'
             }`}
             style={{ height: bar.height }}
           />
-          <span className={`text-[8.5px] font-mono ${isLight ? 'text-[#7C9A88]' : 'text-[#557361]'}`}>
+          <span className={`text-[8.5px] font-mono ${isLight ? 'text-legacy-text-muted' : 'text-legacy-text-quiet'}`}>
             {bar.label}
           </span>
         </div>
@@ -394,10 +395,10 @@ const MicroBarChart = ({ isLight = false }) => {
 const CarouselIndicator = ({ isLight = false }) => {
   return (
     <div className="flex items-center space-x-1.5 pt-1">
-      <div className="w-8 h-1 rounded-full bg-[#00C853]" />
-      <div className={`w-2.5 h-1 rounded-full ${isLight ? 'bg-[#E2ECE2]' : 'bg-[#173020]'}`} />
-      <div className={`w-2.5 h-1 rounded-full ${isLight ? 'bg-[#E2ECE2]' : 'bg-[#173020]'}`} />
-      <div className={`w-2.5 h-1 rounded-full ${isLight ? 'bg-[#E2ECE2]' : 'bg-[#173020]'}`} />
+      <div className="w-8 h-1 rounded-full bg-legacy-brand-base" />
+      <div className={`w-2.5 h-1 rounded-full ${isLight ? 'bg-legacy-mint-20' : 'bg-legacy-forest-32'}`} />
+      <div className={`w-2.5 h-1 rounded-full ${isLight ? 'bg-legacy-mint-20' : 'bg-legacy-forest-32'}`} />
+      <div className={`w-2.5 h-1 rounded-full ${isLight ? 'bg-legacy-mint-20' : 'bg-legacy-forest-32'}`} />
     </div>
   );
 };
@@ -421,15 +422,15 @@ const BANGLADESH_DISTRICTS = [
 // 9 STANDARD INVOICE FOOTPRINT CATEGORIES & CALCULATOR
 // -------------------------------------------------------------
 const NINE_CATEGORIES_CONFIG = [
-  { id: 'food_groceries', name: 'Food & Groceries', icon: Utensils, color: '#F59E0B', defaultScope: 'Scope 3', defaultUnit: 'Staff Meals', defaultFactor: 2.40 },
-  { id: 'transport', name: 'Transport', icon: Car, color: '#00E5FF', defaultScope: 'Scope 1 & 3', defaultUnit: 'Liters / T-Km', defaultFactor: 2.31 },
-  { id: 'electricity_energy', name: 'Electricity & Energy', icon: Zap, color: '#00C853', defaultScope: 'Scope 2 & 1', defaultUnit: 'kWh & Gen-Liters', defaultFactor: 0.55 },
-  { id: 'clothing_footwear', name: 'Clothing & Footwear', icon: Shirt, color: '#EC4899', defaultScope: 'Scope 3', defaultUnit: 'PPE Garments', defaultFactor: 8.50 },
-  { id: 'shopping_products', name: 'Shopping & Products', icon: ShoppingBag, color: '#A855F7', defaultScope: 'Scope 3', defaultUnit: 'Metric Tons Inputs', defaultFactor: 2500.0 },
-  { id: 'housing_rent', name: 'Housing & Rent', icon: Home, color: '#3B82F6', defaultScope: 'Scope 1 & 2', defaultUnit: 'Facility m²', defaultFactor: 0.35 },
-  { id: 'entertainment', name: 'Entertainment', icon: Film, color: '#F97316', defaultScope: 'Scope 3', defaultUnit: 'Hospitality Events', defaultFactor: 0.11 },
-  { id: 'health_care', name: 'Health & Personal Care', icon: HeartPulse, color: '#10B981', defaultScope: 'Scope 3', defaultUnit: 'Medical Supplies', defaultFactor: 3.80 },
-  { id: 'others', name: 'Others', icon: Package, color: '#94A3B8', defaultScope: 'Scope 3', defaultUnit: 'Ancillary Services', defaultFactor: 0.22 },
+  { id: 'food_groceries', name: 'Food & Groceries', icon: Utensils, color: legacyColors["legacy-amber-500"], defaultScope: 'Scope 3', defaultUnit: 'Staff Meals', defaultFactor: 2.40 },
+  { id: 'transport', name: 'Transport', icon: Car, color: legacyColors["legacy-teal-01"], defaultScope: 'Scope 1 & 3', defaultUnit: 'Liters / T-Km', defaultFactor: 2.31 },
+  { id: 'electricity_energy', name: 'Electricity & Energy', icon: Zap, color: legacyColors["legacy-brand-base"], defaultScope: 'Scope 2 & 1', defaultUnit: 'kWh & Gen-Liters', defaultFactor: 0.55 },
+  { id: 'clothing_footwear', name: 'Clothing & Footwear', icon: Shirt, color: legacyColors["legacy-pink-500"], defaultScope: 'Scope 3', defaultUnit: 'PPE Garments', defaultFactor: 8.50 },
+  { id: 'shopping_products', name: 'Shopping & Products', icon: ShoppingBag, color: legacyColors["legacy-purple-500"], defaultScope: 'Scope 3', defaultUnit: 'Metric Tons Inputs', defaultFactor: 2500.0 },
+  { id: 'housing_rent', name: 'Housing & Rent', icon: Home, color: legacyColors["legacy-blue-500"], defaultScope: 'Scope 1 & 2', defaultUnit: 'Facility m²', defaultFactor: 0.35 },
+  { id: 'entertainment', name: 'Entertainment', icon: Film, color: legacyColors["legacy-orange-500"], defaultScope: 'Scope 3', defaultUnit: 'Hospitality Events', defaultFactor: 0.11 },
+  { id: 'health_care', name: 'Health & Personal Care', icon: HeartPulse, color: legacyColors["legacy-emerald-500"], defaultScope: 'Scope 3', defaultUnit: 'Medical Supplies', defaultFactor: 3.80 },
+  { id: 'others', name: 'Others', icon: Package, color: legacyColors["legacy-slate-400"], defaultScope: 'Scope 3', defaultUnit: 'Ancillary Services', defaultFactor: 0.22 },
 ];
 
 const computeCategoryMatrix = (rawParams = {}, customAddedItems = [], adjustments = {}) => {
@@ -607,7 +608,7 @@ const CarbonDistributionDonut = ({ categories = [], totalKg = 0, totalTonnes = 0
             cy="90"
             r={radius}
             fill="transparent"
-            stroke={isLight ? "#E2E8F0" : "#0D2214"}
+            stroke={isLight ? legacyColors["legacy-slate-200"] : legacyColors["legacy-forest-47"]}
             strokeWidth={strokeWidth}
           />
           {activeSlices.map((slice) => {
@@ -642,16 +643,16 @@ const CarbonDistributionDonut = ({ categories = [], totalKg = 0, totalTonnes = 0
         {/* Center Display */}
         <div className="absolute inset-0 flex flex-col items-center justify-center text-center pointer-events-none px-2">
           <span className={`text-[9px] font-mono uppercase tracking-wider font-bold ${
-            isLight ? 'text-[#41634E]' : 'text-[#9EBFAB]'
+            isLight ? 'text-legacy-forest-03' : 'text-legacy-mint-38'
           }`}>
             Total Footprint
           </span>
           <span className={`font-mono font-black text-lg sm:text-xl leading-tight ${
-            isLight ? 'text-[#00873E]' : 'text-[#00E676]'
+            isLight ? 'text-legacy-brand-strong' : 'text-legacy-brand-bright'
           }`}>
             {unitMode === 'tonnes' ? `${totalTonnes.toLocaleString()} t` : `${totalKg.toLocaleString()} kg`}
           </span>
-          <span className={`text-[9px] font-semibold ${isLight ? 'text-[#64748B]' : 'text-emerald-300/60'}`}>
+          <span className={`text-[9px] font-semibold ${isLight ? 'text-legacy-slate-500' : 'text-emerald-300/60'}`}>
             CO₂e Emissions
           </span>
         </div>
@@ -668,8 +669,8 @@ const CarbonDistributionDonut = ({ categories = [], totalKg = 0, totalTonnes = 0
               onMouseLeave={() => onHover(null)}
               className={`flex items-center space-x-2 p-1.5 rounded-xl cursor-pointer transition-all border ${
                 isHovered 
-                  ? (isLight ? 'bg-emerald-50/80 border-emerald-300 scale-[1.02]' : 'bg-[#0E2616] border-[#00C853]/40 scale-[1.02]') 
-                  : (isLight ? 'bg-[#F8FAFC] border-transparent hover:border-slate-200' : 'bg-[#061009]/60 border-transparent hover:border-[#152B1D]')
+                  ? (isLight ? 'bg-emerald-50/80 border-emerald-300 scale-[1.02]' : 'bg-legacy-forest-42 border-legacy-brand-base/40 scale-[1.02]')
+                  : (isLight ? 'bg-legacy-slate-50 border-transparent hover:border-slate-200' : 'bg-legacy-forest-76/60 border-transparent hover:border-legacy-divider-base')
               }`}
             >
               <div 
@@ -677,10 +678,10 @@ const CarbonDistributionDonut = ({ categories = [], totalKg = 0, totalTonnes = 0
                 style={{ backgroundColor: slice.color }}
               />
               <div className="truncate text-left leading-tight min-w-0">
-                <div className={`text-[11px] font-bold truncate ${isLight ? 'text-[#0F2417]' : 'text-white'}`}>
+                <div className={`text-[11px] font-bold truncate ${isLight ? 'text-legacy-forest-43' : 'text-white'}`}>
                   {slice.name}
                 </div>
-                <div className={`text-[10px] font-mono ${isLight ? 'text-[#41634E]' : 'text-[#9EBFAB]'}`}>
+                <div className={`text-[10px] font-mono ${isLight ? 'text-legacy-forest-03' : 'text-legacy-mint-38'}`}>
                   {slice.percentage}% • {unitMode === 'tonnes' ? `${slice.carbonTonnes} t` : `${slice.carbonKg.toLocaleString()} kg`}
                 </div>
               </div>
@@ -1301,7 +1302,7 @@ const SaaSDashboard = () => {
 
   return (
     <div className={`min-h-screen flex relative platform-saas-dashboard transition-colors duration-300 ${
-      isLight ? 'bg-[#F4F6F4] text-[#0F2417]' : 'bg-[#040906] text-[#E0EFE7]'
+      isLight ? 'bg-legacy-mint-08 text-legacy-forest-43' : 'bg-legacy-canvas-deep text-legacy-text-on-dark-soft'
     }`}>
       {/* This legacy dashboard shows illustrative figures; real accounting lives in /platform/esg (register A24). */}
       <p role="note" className="fixed inset-x-0 bottom-0 z-40 bg-amber-400 px-4 py-2 text-center font-mono text-[11px] font-bold text-black">
@@ -1313,13 +1314,13 @@ const SaaSDashboard = () => {
       {toast.show && (
         <div className={`fixed bottom-6 right-6 z-50 flex items-center space-x-3 px-4.5 py-3.5 rounded-2xl shadow-xl border transition-all transform duration-300 animate-fade-in ${
           toast.type === 'success' 
-            ? (isLight ? 'bg-[#EAF7EE] text-[#0B4D26] border-[#00C853]/40' : 'bg-[#0F291B] text-[#4ADE80] border-[#4ADE80]/30') 
+            ? (isLight ? 'bg-legacy-mint-15 text-legacy-forest-21 border-legacy-brand-base/40' : 'bg-legacy-ink-forest text-legacy-green-400 border-legacy-green-400/30')
             : toast.type === 'error'
               ? (isLight ? 'bg-red-50 text-red-700 border-red-200' : 'bg-red-950/80 text-red-300 border-red-500/30')
-              : (isLight ? 'bg-white text-[#0F2417] border-[#DCE4DE]' : 'bg-[#0B170F] text-[#E0EFE7] border-[#183021]')
+              : (isLight ? 'bg-white text-legacy-forest-43 border-legacy-mint-25' : 'bg-legacy-forest-60 text-legacy-text-on-dark-soft border-legacy-forest-31')
         }`}>
           {toast.type === 'success' ? (
-            <CheckCircle className={`w-5 h-5 ${isLight ? 'text-[#00C853]' : 'text-[#4ADE80]'}`} />
+            <CheckCircle className={`w-5 h-5 ${isLight ? 'text-legacy-brand-base' : 'text-legacy-green-400'}`} />
           ) : toast.type === 'error' ? (
             <AlertCircle className="w-5 h-5 text-red-500" />
           ) : (
@@ -1331,27 +1332,27 @@ const SaaSDashboard = () => {
 
       {/* 1. Left Sidebar Navigation Panel — Executive Enterprise Architecture */}
       <aside className={`w-[272px] min-w-[272px] border-r h-screen sticky top-0 hidden lg:flex flex-col justify-between shrink-0 transition-colors duration-200 z-30 select-none ${
-        isLight ? 'bg-[#FAFCFA] border-[#E3EAE5]' : 'bg-[#060D08] border-[#132318]'
+        isLight ? 'bg-legacy-mint-01 border-legacy-mint-22' : 'bg-legacy-forest-78 border-legacy-forest-37'
       }`}>
         {/* Header / Brand */}
-        <div className={`px-5 pt-6 pb-4 border-b shrink-0 ${isLight ? 'border-[#E3EAE5]' : 'border-[#132318]'}`}>
+        <div className={`px-5 pt-6 pb-4 border-b shrink-0 ${isLight ? 'border-legacy-mint-22' : 'border-legacy-forest-37'}`}>
           <Link to="/" className="flex items-center space-x-3 group">
-            <div className="w-8 h-8 rounded-xl bg-gradient-to-tr from-[#00C853] to-[#00E676] flex items-center justify-center shadow-[0_0_16px_rgba(0,200,83,0.25)] text-[#050C07] shrink-0 transition-transform duration-200 group-hover:scale-105">
-              <Leaf className="w-4 h-4 text-[#050C07] stroke-[2.5]" />
+            <div className="w-8 h-8 rounded-xl bg-gradient-to-tr from-legacy-brand-base to-legacy-brand-bright flex items-center justify-center shadow-[0_0_16px_rgba(0,200,83,0.25)] text-legacy-forest-80 shrink-0 transition-transform duration-200 group-hover:scale-105">
+              <Leaf className="w-4 h-4 text-legacy-forest-80 stroke-[2.5]" />
             </div>
             <div className="flex-1 min-w-0">
               <div className="flex items-center space-x-1.5">
                 <span className={`font-sans font-bold text-sm tracking-tight truncate ${
-                  isLight ? 'text-[#0F2417]' : 'text-white'
+                  isLight ? 'text-legacy-forest-43' : 'text-white'
                 }`}>
                   CarbonZero
                 </span>
-                <span className="text-[9px] font-mono font-bold px-1.5 py-0.5 rounded bg-[#00C853]/15 text-[#00E676] border border-[#00C853]/30 shrink-0 leading-none">
+                <span className="text-[9px] font-mono font-bold px-1.5 py-0.5 rounded bg-legacy-brand-base/15 text-legacy-brand-bright border border-legacy-brand-base/30 shrink-0 leading-none">
                   BD
                 </span>
               </div>
               <span className={`text-[10px] font-sans font-semibold tracking-wider uppercase block truncate mt-0.5 ${
-                isLight ? 'text-[#557361]' : 'text-[#6E8F7A]'
+                isLight ? 'text-legacy-text-quiet' : 'text-legacy-mint-45'
               }`}>
                 Sovereign Registry OS
               </span>
@@ -1364,7 +1365,7 @@ const SaaSDashboard = () => {
           {/* Main Menu */}
           <div>
             <span className={`font-sans text-[10px] uppercase tracking-wider block px-2.5 mb-1.5 font-bold ${
-              isLight ? 'text-[#7C9A88]' : 'text-[#557361]'
+              isLight ? 'text-legacy-text-muted' : 'text-legacy-text-quiet'
             }`}>
               {lang === 'bn' ? 'প্রধান মেনু' : 'Menu'}
             </span>
@@ -1387,23 +1388,23 @@ const SaaSDashboard = () => {
                     className={`w-full flex items-center justify-between px-2.5 py-2 rounded-xl text-xs font-sans transition-all duration-150 cursor-pointer relative group ${
                       isActive 
                         ? (isLight 
-                            ? 'bg-[#EEF7F1] text-[#0A2E19] font-bold border border-[#CCE2D3] shadow-sm' 
-                            : 'bg-[#0B2114] text-white font-bold border border-[#174D2B] shadow-[0_2px_10px_rgba(0,200,83,0.08)]')
+                            ? 'bg-legacy-mint-14 text-legacy-forest-36 font-bold border border-legacy-mint-30 shadow-sm'
+                            : 'bg-legacy-forest-50 text-white font-bold border border-legacy-forest-16 shadow-[0_2px_10px_rgba(0,200,83,0.08)]')
                         : (isLight 
                             ? 'text-slate-600 hover:bg-slate-100/70 hover:text-slate-950 font-medium border border-transparent' 
-                            : 'text-[#8FA899] hover:bg-white/[0.04] hover:text-white font-medium border border-transparent')
+                            : 'text-legacy-mint-40 hover:bg-white/[0.04] hover:text-white font-medium border border-transparent')
                     }`}
                   >
                     {isActive && (
                       <span className={`absolute left-0 top-1.5 bottom-1.5 w-1 rounded-r-full ${
-                        isLight ? 'bg-[#00C853]' : 'bg-[#00E676] shadow-[0_0_8px_rgba(0,230,118,0.5)]'
+                        isLight ? 'bg-legacy-brand-base' : 'bg-legacy-brand-bright shadow-[0_0_8px_rgba(0,230,118,0.5)]'
                       }`} />
                     )}
                     <div className="flex items-center space-x-2.5 min-w-0 pr-1">
                       <div className={`w-6 h-6 rounded-lg flex items-center justify-center shrink-0 transition-colors ${
                         isActive 
-                          ? (isLight ? 'bg-[#00C853]/15 text-[#00A844]' : 'bg-[#00C853]/20 text-[#00E676]') 
-                          : (isLight ? 'text-[#64748B] group-hover:text-slate-900' : 'text-[#6E8F7A] group-hover:text-emerald-300')
+                          ? (isLight ? 'bg-legacy-brand-base/15 text-legacy-forest-02' : 'bg-legacy-brand-base/20 text-legacy-brand-bright')
+                          : (isLight ? 'text-legacy-slate-500 group-hover:text-slate-900' : 'text-legacy-mint-45 group-hover:text-emerald-300')
                       }`}>
                         <Icon className="w-3.5 h-3.5" />
                       </div>
@@ -1423,7 +1424,7 @@ const SaaSDashboard = () => {
           {/* Enterprise Core & Satellite MRV Engines */}
           <div>
             <span className={`font-sans text-[10px] uppercase tracking-wider block px-2.5 mb-1.5 font-bold ${
-              isLight ? 'text-[#7C9A88]' : 'text-[#557361]'
+              isLight ? 'text-legacy-text-muted' : 'text-legacy-text-quiet'
             }`}>
               {lang === 'bn' ? 'কোর ইঞ্জিন ও এমআরভি' : 'Engines & MRV'}
             </span>
@@ -1447,30 +1448,30 @@ const SaaSDashboard = () => {
                     className={`w-full flex items-center justify-between px-2.5 py-2 rounded-xl text-xs font-sans transition-all duration-150 cursor-pointer relative group ${
                       isActive 
                         ? (isLight 
-                            ? 'bg-[#EEF7F1] text-[#0A2E19] font-bold border border-[#CCE2D3] shadow-sm' 
-                            : 'bg-[#0B2114] text-white font-bold border border-[#174D2B] shadow-[0_2px_10px_rgba(0,200,83,0.08)]')
+                            ? 'bg-legacy-mint-14 text-legacy-forest-36 font-bold border border-legacy-mint-30 shadow-sm'
+                            : 'bg-legacy-forest-50 text-white font-bold border border-legacy-forest-16 shadow-[0_2px_10px_rgba(0,200,83,0.08)]')
                         : (isLight 
                             ? 'text-slate-600 hover:bg-slate-100/70 hover:text-slate-950 font-medium border border-transparent' 
-                            : 'text-[#8FA899] hover:bg-white/[0.04] hover:text-white font-medium border border-transparent')
+                            : 'text-legacy-mint-40 hover:bg-white/[0.04] hover:text-white font-medium border border-transparent')
                     }`}
                   >
                     {isActive && (
                       <span className={`absolute left-0 top-1.5 bottom-1.5 w-1 rounded-r-full ${
-                        isLight ? 'bg-[#00C853]' : 'bg-[#00E676] shadow-[0_0_8px_rgba(0,230,118,0.5)]'
+                        isLight ? 'bg-legacy-brand-base' : 'bg-legacy-brand-bright shadow-[0_0_8px_rgba(0,230,118,0.5)]'
                       }`} />
                     )}
                     <div className="flex items-center space-x-2.5 min-w-0 pr-1">
                       <div className={`w-6 h-6 rounded-lg flex items-center justify-center shrink-0 transition-colors ${
                         isActive 
-                          ? (isLight ? 'bg-[#00C853]/15 text-[#00A844]' : 'bg-[#00C853]/20 text-[#00E676]') 
-                          : (isLight ? 'text-[#64748B] group-hover:text-slate-900' : 'text-[#6E8F7A] group-hover:text-emerald-300')
+                          ? (isLight ? 'bg-legacy-brand-base/15 text-legacy-forest-02' : 'bg-legacy-brand-base/20 text-legacy-brand-bright')
+                          : (isLight ? 'text-legacy-slate-500 group-hover:text-slate-900' : 'text-legacy-mint-45 group-hover:text-emerald-300')
                       }`}>
                         <Icon className="w-3.5 h-3.5" />
                       </div>
                       <span className="text-xs tracking-tight truncate">{item.label}</span>
                     </div>
                     {item.badge && (
-                      <span className="bg-[#00C853]/10 text-[#00E676] text-[10px] font-mono font-medium px-2 py-0.5 rounded-md border border-[#00C853]/25 shrink-0 whitespace-nowrap leading-none">
+                      <span className="bg-legacy-brand-base/10 text-legacy-brand-bright text-[10px] font-mono font-medium px-2 py-0.5 rounded-md border border-legacy-brand-base/25 shrink-0 whitespace-nowrap leading-none">
                         {item.badge}
                       </span>
                     )}
@@ -1483,7 +1484,7 @@ const SaaSDashboard = () => {
           {/* General Section */}
           <div>
             <span className={`font-sans text-[10px] uppercase tracking-wider block px-2.5 mb-1.5 font-bold ${
-              isLight ? 'text-[#7C9A88]' : 'text-[#557361]'
+              isLight ? 'text-legacy-text-muted' : 'text-legacy-text-quiet'
             }`}>
               {lang === 'bn' ? 'সাধারণ' : 'General'}
             </span>
@@ -1508,23 +1509,23 @@ const SaaSDashboard = () => {
                     className={`w-full flex items-center justify-between px-2.5 py-2 rounded-xl text-xs font-sans transition-all duration-150 cursor-pointer relative group ${
                       isActive 
                         ? (isLight 
-                            ? 'bg-[#EEF7F1] text-[#0A2E19] font-bold border border-[#CCE2D3] shadow-sm' 
-                            : 'bg-[#0B2114] text-white font-bold border border-[#174D2B] shadow-[0_2px_10px_rgba(0,200,83,0.08)]')
+                            ? 'bg-legacy-mint-14 text-legacy-forest-36 font-bold border border-legacy-mint-30 shadow-sm'
+                            : 'bg-legacy-forest-50 text-white font-bold border border-legacy-forest-16 shadow-[0_2px_10px_rgba(0,200,83,0.08)]')
                         : (isLight 
                             ? 'text-slate-600 hover:bg-slate-100/70 hover:text-slate-950 font-medium border border-transparent' 
-                            : 'text-[#8FA899] hover:bg-white/[0.04] hover:text-white font-medium border border-transparent')
+                            : 'text-legacy-mint-40 hover:bg-white/[0.04] hover:text-white font-medium border border-transparent')
                     }`}
                   >
                     {isActive && (
                       <span className={`absolute left-0 top-1.5 bottom-1.5 w-1 rounded-r-full ${
-                        isLight ? 'bg-[#00C853]' : 'bg-[#00E676] shadow-[0_0_8px_rgba(0,230,118,0.5)]'
+                        isLight ? 'bg-legacy-brand-base' : 'bg-legacy-brand-bright shadow-[0_0_8px_rgba(0,230,118,0.5)]'
                       }`} />
                     )}
                     <div className="flex items-center space-x-2.5 min-w-0 pr-1">
                       <div className={`w-6 h-6 rounded-lg flex items-center justify-center shrink-0 transition-colors ${
                         isActive 
-                          ? (isLight ? 'bg-[#00C853]/15 text-[#00A844]' : 'bg-[#00C853]/20 text-[#00E676]') 
-                          : (isLight ? 'text-[#64748B] group-hover:text-slate-900' : 'text-[#6E8F7A] group-hover:text-emerald-300')
+                          ? (isLight ? 'bg-legacy-brand-base/15 text-legacy-forest-02' : 'bg-legacy-brand-base/20 text-legacy-brand-bright')
+                          : (isLight ? 'text-legacy-slate-500 group-hover:text-slate-900' : 'text-legacy-mint-45 group-hover:text-emerald-300')
                       }`}>
                         <Icon className="w-3.5 h-3.5" />
                       </div>
@@ -1538,33 +1539,33 @@ const SaaSDashboard = () => {
         </div>
 
         {/* Telemetry Status & Mobile App Card */}
-        <div className={`p-3 border-t shrink-0 ${isLight ? 'border-[#E3EAE5]' : 'border-[#132318]'}`}>
+        <div className={`p-3 border-t shrink-0 ${isLight ? 'border-legacy-mint-22' : 'border-legacy-forest-37'}`}>
           <div className={`p-3 rounded-2xl border transition-all ${
             isLight 
-              ? 'bg-[#F2F8F4] border-[#CCE2D3] text-[#0F2417]' 
-              : 'bg-[#07150D] border-[#132A1C] text-white'
+              ? 'bg-legacy-mint-09 border-legacy-mint-30 text-legacy-forest-43'
+              : 'bg-legacy-forest-68 border-legacy-forest-35 text-white'
           }`}>
             <div className="flex items-center justify-between mb-1.5">
               <div className="flex items-center space-x-2">
                 <span className="relative flex h-2 w-2">
-                  <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-[#00C853] opacity-75"></span>
-                  <span className="relative inline-flex rounded-full h-2 w-2 bg-[#00C853]"></span>
+                  <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-legacy-brand-base opacity-75"></span>
+                  <span className="relative inline-flex rounded-full h-2 w-2 bg-legacy-brand-base"></span>
                 </span>
                 <span className="font-sans font-bold text-[11px] tracking-tight">
                   Live MRV Telemetry
                 </span>
               </div>
-              <span className="text-[9px] font-mono font-bold text-emerald-400 bg-[#00C853]/15 border border-[#00C853]/30 px-1.5 py-0.5 rounded leading-none">
+              <span className="text-[9px] font-mono font-bold text-emerald-400 bg-legacy-brand-base/15 border border-legacy-brand-base/30 px-1.5 py-0.5 rounded leading-none">
                 SYNC
               </span>
             </div>
-            <p className={`text-[10px] mb-2.5 leading-tight font-sans ${isLight ? 'text-[#557361]' : 'text-[#7C9A88]'}`}>
+            <p className={`text-[10px] mb-2.5 leading-tight font-sans ${isLight ? 'text-legacy-text-quiet' : 'text-legacy-text-muted'}`}>
               Mobile satellite sync & live emissions stream telemetry.
             </p>
             <button 
               disabled={downloadingApp}
               onClick={handleDownloadApp}
-              className="w-full bg-[#00C853] hover:bg-[#00E676] text-white font-mono font-bold text-xs py-2.5 px-3 rounded-xl transition-all flex items-center justify-center space-x-1.5 shadow-sm cursor-pointer disabled:opacity-50"
+              className="w-full bg-legacy-brand-base hover:bg-legacy-brand-bright text-white font-mono font-bold text-xs py-2.5 px-3 rounded-xl transition-all flex items-center justify-center space-x-1.5 shadow-sm cursor-pointer disabled:opacity-50"
             >
               {downloadingApp ? (
                 <>
@@ -1599,29 +1600,29 @@ const SaaSDashboard = () => {
 
         {/* Top Header — Elegant Search Pill, Action Buttons, Theme Switch & Profile */}
         <header className={`flex flex-col sm:flex-row justify-between sm:items-center gap-4 border-b pb-6 relative z-30 transition-colors ${
-          isLight ? 'border-[#E8ECE8]' : 'border-[#122418]'
+          isLight ? 'border-legacy-divider-light' : 'border-legacy-forest-38'
         }`}>
           
           {/* Rounded-full Search pill */}
           <div className="relative w-full max-w-sm">
             <Search className={`w-4 h-4 absolute left-3.5 top-1/2 transform -translate-y-1/2 ${
-              isLight ? 'text-[#7D9A8A]' : 'text-[#7C9A88]'
+              isLight ? 'text-legacy-mint-43' : 'text-legacy-text-muted'
             }`} />
             <input 
               type="text" 
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
               placeholder="Search reports, team, projects... (Ctrl + F)" 
-              className={`w-full pl-10 pr-9 py-2.5 rounded-full text-xs font-sans transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-[#00C853]/40 ${
+              className={`w-full pl-10 pr-9 py-2.5 rounded-full text-xs font-sans transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-legacy-brand-base/40 ${
                 isLight 
-                  ? 'bg-white border border-[#DCE4DE] text-[#0F2417] placeholder-[#8FA899] shadow-sm' 
-                  : 'bg-[#08130C] border border-[#152B1D] text-white placeholder-[#557361]'
+                  ? 'bg-white border border-legacy-mint-25 text-legacy-forest-43 placeholder-legacy-mint-40 shadow-sm'
+                  : 'bg-legacy-surface-base border border-legacy-divider-base text-white placeholder-legacy-text-quiet'
               }`}
             />
             {searchQuery && (
               <button 
                 onClick={() => setSearchQuery('')}
-                className="absolute right-3 top-1/2 transform -translate-y-1/2 text-xs text-[#7C9A88] hover:text-[#00C853]"
+                className="absolute right-3 top-1/2 transform -translate-y-1/2 text-xs text-legacy-text-muted hover:text-legacy-brand-base"
               >
                 Clear
               </button>
@@ -1636,30 +1637,30 @@ const SaaSDashboard = () => {
               onClick={() => setIsClientModalOpen(true)}
               className={`flex items-center space-x-2 px-3 py-1.5 rounded-full border transition-all cursor-pointer shadow-sm ${
                 isLight 
-                  ? 'bg-white border-[#DCE4DE] hover:border-[#00C853] text-[#0F2417]' 
-                  : 'bg-[#08130C] border-[#152B1D] hover:border-[#00C853] text-white'
+                  ? 'bg-white border-legacy-mint-25 hover:border-legacy-brand-base text-legacy-forest-43'
+                  : 'bg-legacy-surface-base border-legacy-divider-base hover:border-legacy-brand-base text-white'
               }`}
               title="Switch Corporate Client Workspace Profile"
             >
               <div className={`w-7 h-5 px-1 rounded flex items-center justify-center overflow-hidden shrink-0 ${
-                activeClient.logoTheme === 'dark' ? 'bg-[#06140B] border border-[#163D22]' : 'bg-white border border-slate-200'
+                activeClient.logoTheme === 'dark' ? 'bg-legacy-forest-73 border border-legacy-forest-25' : 'bg-white border border-slate-200'
               }`}>
                 <img src={activeClient.logo} alt={activeClient.name} className="max-h-full max-w-full object-contain" />
               </div>
               <div className="text-left leading-none flex items-center gap-1.5">
                 <span className="font-sans font-bold text-xs">{activeClient.name}</span>
-                <span className="text-[9px] px-1.5 py-0.5 rounded bg-[#00C853]/15 text-[#00C853] font-mono font-bold hidden sm:inline-block">
+                <span className="text-[9px] px-1.5 py-0.5 rounded bg-legacy-brand-base/15 text-legacy-brand-base font-mono font-bold hidden sm:inline-block">
                   {activeClient.sector}
                 </span>
               </div>
-              <ChevronDown className="w-3.5 h-3.5 text-[#7C9A88]" />
+              <ChevronDown className="w-3.5 h-3.5 text-legacy-text-muted" />
             </button>
 
             {/* Top Action Pills */}
             <div className="flex items-center space-x-2">
               <button 
                 onClick={() => setIsAddProjectOpen(true)}
-                className="bg-[#00C853] hover:bg-[#00E676] text-white font-mono font-bold text-xs px-4 py-2 rounded-xl transition-all shadow-sm flex items-center space-x-1.5 cursor-pointer"
+                className="bg-legacy-brand-base hover:bg-legacy-brand-bright text-white font-mono font-bold text-xs px-4 py-2 rounded-xl transition-all shadow-sm flex items-center space-x-1.5 cursor-pointer"
               >
                 <Plus className="w-3.5 h-3.5 text-white stroke-[2.5]" />
                 <span className="text-white font-mono font-bold">Add Project</span>
@@ -1669,7 +1670,7 @@ const SaaSDashboard = () => {
                   const inputEl = document.getElementById('drag-file-input');
                   if (inputEl) inputEl.click();
                 }}
-                className="bg-[#00C853] hover:bg-[#00E676] text-white font-mono font-bold text-xs px-4 py-2 rounded-xl transition-all shadow-sm flex items-center space-x-1.5 cursor-pointer"
+                className="bg-legacy-brand-base hover:bg-legacy-brand-bright text-white font-mono font-bold text-xs px-4 py-2 rounded-xl transition-all shadow-sm flex items-center space-x-1.5 cursor-pointer"
               >
                 <Upload className="w-3.5 h-3.5 text-white stroke-[2.5]" />
                 <span className="text-white font-mono font-bold">Import Data</span>
@@ -1678,7 +1679,7 @@ const SaaSDashboard = () => {
 
             {/* Profile, Theme Toggle & Notifications Bell */}
             <div className={`flex items-center space-x-2.5 pl-3 border-l relative ${
-              isLight ? 'border-[#E8ECE8]' : 'border-[#122418]'
+              isLight ? 'border-legacy-divider-light' : 'border-legacy-forest-38'
             }`}>
               
               {/* Language Switcher Button (English / বাংলা) */}
@@ -1690,12 +1691,12 @@ const SaaSDashboard = () => {
                 }}
                 className={`flex items-center space-x-1.5 px-3 py-1.5 rounded-full text-xs font-bold transition-all cursor-pointer border ${
                   isLight 
-                    ? 'bg-white border-[#E8ECE8] text-[#0F2417] hover:bg-[#F2F7F3]' 
-                    : 'bg-[#08130C] border-[#152B1D] text-white hover:bg-[#0D2B1A]'
+                    ? 'bg-white border-legacy-divider-light text-legacy-forest-43 hover:bg-legacy-mint-11'
+                    : 'bg-legacy-surface-base border-legacy-divider-base text-white hover:bg-legacy-surface-raised'
                 }`}
                 title="Toggle English / বাংলা"
               >
-                <Globe className="w-3.5 h-3.5 text-[#00C853]" />
+                <Globe className="w-3.5 h-3.5 text-legacy-brand-base" />
                 <span className="font-mono text-[11px]">{lang === 'en' ? 'বাংলা' : 'English'}</span>
               </button>
 
@@ -1708,8 +1709,8 @@ const SaaSDashboard = () => {
                 }}
                 className={`flex items-center space-x-1 px-2.5 py-1.5 rounded-full text-xs font-mono font-bold transition-all cursor-pointer border ${
                   isLight 
-                    ? 'bg-white border-[#E8ECE8] text-[#0F2417] hover:bg-[#F2F7F3]' 
-                    : 'bg-[#08130C] border-[#152B1D] text-[#00C853] hover:bg-[#0D2B1A]'
+                    ? 'bg-white border-legacy-divider-light text-legacy-forest-43 hover:bg-legacy-mint-11'
+                    : 'bg-legacy-surface-base border-legacy-divider-base text-legacy-brand-base hover:bg-legacy-surface-raised'
                 }`}
                 title="Toggle Currency BDT / USD"
               >
@@ -1725,7 +1726,7 @@ const SaaSDashboard = () => {
                 title={theme === 'dark' ? 'Switch to light mode' : 'Switch to dark mode'}
               >
                 <Sun size={16} className="icon icon-sun text-amber" />
-                <Moon size={16} className="icon icon-moon text-[#00C853]" />
+                <Moon size={16} className="icon icon-moon text-legacy-brand-base" />
               </button>
 
               {/* Notification Bell */}
@@ -1733,12 +1734,12 @@ const SaaSDashboard = () => {
                 onClick={() => setIsNotificationsOpen(!isNotificationsOpen)}
                 className={`relative p-2 rounded-full transition-colors cursor-pointer ${
                   isLight 
-                    ? 'bg-white border border-[#E8ECE8] text-[#557361] hover:text-[#00C853] shadow-sm' 
-                    : 'bg-[#08130C] border border-[#152B1D] text-[#7C9A88] hover:text-[#00C853]'
+                    ? 'bg-white border border-legacy-divider-light text-legacy-text-quiet hover:text-legacy-brand-base shadow-sm'
+                    : 'bg-legacy-surface-base border border-legacy-divider-base text-legacy-text-muted hover:text-legacy-brand-base'
                 }`}
               >
                 {unreadNotificationsCount > 0 && (
-                  <span className="absolute top-1.5 right-1.5 w-2 h-2 rounded-full bg-[#EF4444] animate-pulse"></span>
+                  <span className="absolute top-1.5 right-1.5 w-2 h-2 rounded-full bg-legacy-red-500 animate-pulse"></span>
                 )}
                 <Bell className="w-4 h-4" />
               </button>
@@ -1747,17 +1748,17 @@ const SaaSDashboard = () => {
               {isNotificationsOpen && (
                 <div className={`absolute right-0 top-12 w-80 rounded-2xl shadow-2xl p-4 space-y-3 z-50 text-left border ${
                   isLight 
-                    ? 'bg-white border-[#E2E8E3] text-[#0F2417]' 
-                    : 'bg-[#08130C] border-[#152B1D] text-white'
+                    ? 'bg-white border-legacy-mint-24 text-legacy-forest-43'
+                    : 'bg-legacy-surface-base border-legacy-divider-base text-white'
                 }`}>
                   <div className={`flex justify-between items-center pb-2 border-b ${
-                    isLight ? 'border-[#E8ECE8]' : 'border-[#122418]'
+                    isLight ? 'border-legacy-divider-light' : 'border-legacy-forest-38'
                   }`}>
                     <span className="font-sans font-bold text-sm">Notifications</span>
                     {unreadNotificationsCount > 0 && (
                       <button 
                         onClick={markAllNotificationsRead}
-                        className="text-[10px] font-sans font-semibold text-[#00C853] hover:underline"
+                        className="text-[10px] font-sans font-semibold text-legacy-brand-base hover:underline"
                       >
                         Mark all as read
                       </button>
@@ -1765,18 +1766,18 @@ const SaaSDashboard = () => {
                   </div>
                   <div className="max-h-52 overflow-y-auto space-y-2.5">
                     {notifications.length === 0 ? (
-                      <div className="text-xs text-[#7C9A88] py-4 text-center">No alerts or notifications.</div>
+                      <div className="text-xs text-legacy-text-muted py-4 text-center">No alerts or notifications.</div>
                     ) : (
                       notifications.map(n => (
                         <div key={n.id} className={`p-2.5 rounded-xl text-xs flex items-start gap-2.5 ${
                           n.read 
                             ? 'bg-transparent' 
-                            : (isLight ? 'bg-[#F2F7F3] border border-[#00C853]/20' : 'bg-[#0D2B1A]/40 border border-[#00C853]/30')
+                            : (isLight ? 'bg-legacy-mint-11 border border-legacy-brand-base/20' : 'bg-legacy-surface-raised/40 border border-legacy-brand-base/30')
                         }`}>
-                          <div className={`w-1.5 h-1.5 mt-1.5 rounded-full ${n.read ? 'bg-transparent' : 'bg-[#00C853]'}`}></div>
+                          <div className={`w-1.5 h-1.5 mt-1.5 rounded-full ${n.read ? 'bg-transparent' : 'bg-legacy-brand-base'}`}></div>
                           <div className="flex-1">
                             <p className="font-sans leading-tight">{n.text}</p>
-                            <span className={`text-[9px] font-mono block mt-1 ${isLight ? 'text-[#8FA899]' : 'text-[#7C9A88]'}`}>{n.time}</span>
+                            <span className={`text-[9px] font-mono block mt-1 ${isLight ? 'text-legacy-mint-40' : 'text-legacy-text-muted'}`}>{n.time}</span>
                           </div>
                         </div>
                       ))
@@ -1787,18 +1788,18 @@ const SaaSDashboard = () => {
               
               {/* User Profile Pill (Assigned ESG Auditor / Admin) */}
               <div className={`flex items-center space-x-2.5 px-3 py-1.5 rounded-full border shadow-sm ${
-                isLight ? 'bg-white border-[#E8ECE8]' : 'bg-[#08130C] border-[#152B1D]'
+                isLight ? 'bg-white border-legacy-divider-light' : 'bg-legacy-surface-base border-legacy-divider-base'
               }`}>
-                <div className="w-7 h-7 rounded-full overflow-hidden border border-[#00C853]/40 bg-[#00C853]/15 flex items-center justify-center font-mono font-bold text-[10px] text-[#00C853]">
+                <div className="w-7 h-7 rounded-full overflow-hidden border border-legacy-brand-base/40 bg-legacy-brand-base/15 flex items-center justify-center font-mono font-bold text-[10px] text-legacy-brand-base">
                   {activeClient.assignedAuditor?.name 
                     ? activeClient.assignedAuditor.name.split(' ').filter(p=>!['Dr.', 'Engr.', 'FCA'].includes(p)).map(n=>n[0]).join('').slice(0, 2)
                     : 'MT'}
                 </div>
                 <div className="hidden md:block text-left leading-tight">
-                  <div className={`font-sans font-bold text-xs ${isLight ? 'text-[#0F2417]' : 'text-white'}`}>
+                  <div className={`font-sans font-bold text-xs ${isLight ? 'text-legacy-forest-43' : 'text-white'}`}>
                     {activeClient.assignedAuditor?.name || 'Mohammad Tanveer'}
                   </div>
-                  <div className="text-[9px] text-[#00C853] font-mono font-medium truncate max-w-[130px]">
+                  <div className="text-[9px] text-legacy-brand-base font-mono font-medium truncate max-w-[130px]">
                     {activeClient.assignedAuditor?.title || 'Admin • ESG Lead'}
                   </div>
                 </div>
@@ -1816,27 +1817,27 @@ const SaaSDashboard = () => {
               <div>
                 <div className="flex items-center space-x-2 mb-1">
                   <h1 className={`font-sans font-black text-2xl lg:text-3xl tracking-tight ${
-                    isLight ? 'text-[#0F2417]' : 'text-white'
+                    isLight ? 'text-legacy-forest-43' : 'text-white'
                   }`}>
                     ESG Progress
                   </h1>
                   <span className={`px-2.5 py-0.5 rounded-full text-[10px] font-mono font-bold uppercase ${
-                    isLight ? 'bg-[#E8F7EC] text-[#0B4D26] border border-[#00C853]/30' : 'bg-[#0D2B1A] text-[#4ADE80] border border-[#1B4D2E]'
+                    isLight ? 'bg-legacy-mint-17 text-legacy-forest-21 border border-legacy-brand-base/30' : 'bg-legacy-surface-raised text-legacy-green-400 border border-legacy-forest-11'
                   }`}>
                     Live Active
                   </span>
                 </div>
-                <p className={`text-xs font-sans ${isLight ? 'text-[#557361]' : 'text-[#7C9A88]'}`}>
+                <p className={`text-xs font-sans ${isLight ? 'text-legacy-text-quiet' : 'text-legacy-text-muted'}`}>
                   Plan, prioritize, and verify your corporate emissions with ease.
                 </p>
               </div>
 
               {/* Bangladesh Geolocation Selector Pill */}
               <div className={`flex items-center space-x-2 px-3 py-1.5 rounded-full border self-start md:self-auto shadow-sm ${
-                isLight ? 'bg-white border-[#E8ECE8]' : 'bg-[#08130C] border-[#152B1D]'
+                isLight ? 'bg-white border-legacy-divider-light' : 'bg-legacy-surface-base border-legacy-divider-base'
               }`}>
-                <MapPin className="w-3.5 h-3.5 text-[#00C853]" />
-                <span className={`text-[11px] font-sans ${isLight ? 'text-[#557361]' : 'text-[#7C9A88]'}`}>District:</span>
+                <MapPin className="w-3.5 h-3.5 text-legacy-brand-base" />
+                <span className={`text-[11px] font-sans ${isLight ? 'text-legacy-text-quiet' : 'text-legacy-text-muted'}`}>District:</span>
                 <select 
                   value={selectedDistrict}
                   onChange={(e) => {
@@ -1844,18 +1845,18 @@ const SaaSDashboard = () => {
                     showToast(`District branch updated to ${e.target.value}.`, "info");
                   }}
                   className={`text-xs font-sans font-bold border-none bg-transparent focus:ring-0 cursor-pointer ${
-                    isLight ? 'text-[#0F2417]' : 'text-white'
+                    isLight ? 'text-legacy-forest-43' : 'text-white'
                   }`}
                 >
                   {BANGLADESH_DISTRICTS.map(dist => (
-                    <option key={dist} value={dist} className={isLight ? 'bg-white text-[#0F2417]' : 'bg-[#08130C] text-white'}>
+                    <option key={dist} value={dist} className={isLight ? 'bg-white text-legacy-forest-43' : 'bg-legacy-surface-base text-white'}>
                       {dist}
                     </option>
                   ))}
                 </select>
                 <button 
                   onClick={detectLocation}
-                  className="bg-[#00C853] hover:bg-[#00E676] text-white font-mono font-bold text-[10px] px-3 py-1.5 rounded-lg transition-all shadow-sm cursor-pointer"
+                  className="bg-legacy-brand-base hover:bg-legacy-brand-bright text-white font-mono font-bold text-[10px] px-3 py-1.5 rounded-lg transition-all shadow-sm cursor-pointer"
                 >
                   Auto Select
                 </button>
@@ -1870,20 +1871,20 @@ const SaaSDashboard = () => {
               {/* Card 1: Impact Overview (Pills + Radial Gauge) */}
               <div className={`lg:col-span-5 rounded-3xl p-6 lg:p-7 border flex flex-col justify-between transition-all duration-300 ${
                 isLight 
-                  ? 'bg-white border-[#E8ECE8] shadow-[0_10px_30px_-4px_rgba(0,0,0,0.04),0_2px_8px_rgba(0,0,0,0.02)]' 
-                  : 'bg-[#08130C] border-[#152B1D] shadow-[0_16px_40px_-10px_rgba(0,0,0,0.6)]'
+                  ? 'bg-white border-legacy-divider-light shadow-[0_10px_30px_-4px_rgba(0,0,0,0.04),0_2px_8px_rgba(0,0,0,0.02)]'
+                  : 'bg-legacy-surface-base border-legacy-divider-base shadow-[0_16px_40px_-10px_rgba(0,0,0,0.6)]'
               }`}>
                 {/* Header */}
                 <div className="flex items-center justify-between pb-4">
                   <div className="flex items-center space-x-2.5">
-                    <div className="w-7 h-7 rounded-xl bg-[#00C853]/15 flex items-center justify-center">
-                      <Leaf className="w-4 h-4 text-[#00C853]" />
+                    <div className="w-7 h-7 rounded-xl bg-legacy-brand-base/15 flex items-center justify-center">
+                      <Leaf className="w-4 h-4 text-legacy-brand-base" />
                     </div>
-                    <h3 className={`font-sans font-bold text-base tracking-tight ${isLight ? 'text-[#0F2417]' : 'text-white'}`}>
+                    <h3 className={`font-sans font-bold text-base tracking-tight ${isLight ? 'text-legacy-forest-43' : 'text-white'}`}>
                       Impact Overview
                     </h3>
                   </div>
-                  <button className={`p-1.5 rounded-full hover:opacity-80 transition-opacity ${isLight ? 'text-[#7D9A8A]' : 'text-[#7C9A88]'}`}>
+                  <button className={`p-1.5 rounded-full hover:opacity-80 transition-opacity ${isLight ? 'text-legacy-mint-43' : 'text-legacy-text-muted'}`}>
                     <MoreHorizontal className="w-4 h-4" />
                   </button>
                 </div>
@@ -1896,23 +1897,23 @@ const SaaSDashboard = () => {
                     
                     {/* Metric 1 */}
                     <div className={`p-3 rounded-2xl border transition-all ${
-                      isLight ? 'bg-[#F7FAF7] border-[#E8ECE8]' : 'bg-[#040906] border-[#152B1D]'
+                      isLight ? 'bg-legacy-mint-05 border-legacy-divider-light' : 'bg-legacy-canvas-deep border-legacy-divider-base'
                     }`}>
                       <div className="flex items-center justify-between">
-                        <span className={`text-[10px] font-sans font-medium ${isLight ? 'text-[#557361]' : 'text-[#7C9A88]'}`}>
+                        <span className={`text-[10px] font-sans font-medium ${isLight ? 'text-legacy-text-quiet' : 'text-legacy-text-muted'}`}>
                           Emissions Reduced
                         </span>
                         <span className={`text-[9px] font-mono font-bold px-1.5 py-0.5 rounded-full ${
-                          isLight ? 'bg-[#E8F7EC] text-[#0B4D26]' : 'bg-[#00C853]/15 text-[#4ADE80]'
+                          isLight ? 'bg-legacy-mint-17 text-legacy-forest-21' : 'bg-legacy-brand-base/15 text-legacy-green-400'
                         }`}>
                           +14%
                         </span>
                       </div>
                       <div className="mt-1 flex items-baseline space-x-1.5">
-                        <span className={`font-sans font-extrabold text-lg tracking-tight ${isLight ? 'text-[#0F2417]' : 'text-white'}`}>
+                        <span className={`font-sans font-extrabold text-lg tracking-tight ${isLight ? 'text-legacy-forest-43' : 'text-white'}`}>
                           2,450
                         </span>
-                        <span className={`text-[11px] font-mono ${isLight ? 'text-[#7D9A8A]' : 'text-[#7C9A88]'}`}>
+                        <span className={`text-[11px] font-mono ${isLight ? 'text-legacy-mint-43' : 'text-legacy-text-muted'}`}>
                           tCO2e
                         </span>
                       </div>
@@ -1920,19 +1921,19 @@ const SaaSDashboard = () => {
 
                     {/* Metric 2 */}
                     <div className={`p-3 rounded-2xl border transition-all ${
-                      isLight ? 'bg-[#F7FAF7] border-[#E8ECE8]' : 'bg-[#040906] border-[#152B1D]'
+                      isLight ? 'bg-legacy-mint-05 border-legacy-divider-light' : 'bg-legacy-canvas-deep border-legacy-divider-base'
                     }`}>
                       <div className="flex items-center justify-between">
-                        <span className={`text-[10px] font-sans font-medium ${isLight ? 'text-[#557361]' : 'text-[#7C9A88]'}`}>
+                        <span className={`text-[10px] font-sans font-medium ${isLight ? 'text-legacy-text-quiet' : 'text-legacy-text-muted'}`}>
                           Projects Tracked
                         </span>
-                        <span className="w-2 h-2 rounded-full bg-[#00C853]"></span>
+                        <span className="w-2 h-2 rounded-full bg-legacy-brand-base"></span>
                       </div>
                       <div className="mt-1 flex items-baseline space-x-1.5">
-                        <span className={`font-sans font-extrabold text-lg tracking-tight ${isLight ? 'text-[#0F2417]' : 'text-white'}`}>
+                        <span className={`font-sans font-extrabold text-lg tracking-tight ${isLight ? 'text-legacy-forest-43' : 'text-white'}`}>
                           12 Active
                         </span>
-                        <span className={`text-[11px] font-sans ${isLight ? 'text-[#7D9A8A]' : 'text-[#7C9A88]'}`}>
+                        <span className={`text-[11px] font-sans ${isLight ? 'text-legacy-mint-43' : 'text-legacy-text-muted'}`}>
                           initiatives
                         </span>
                       </div>
@@ -1940,19 +1941,19 @@ const SaaSDashboard = () => {
 
                     {/* Metric 3 */}
                     <div className={`p-3 rounded-2xl border transition-all ${
-                      isLight ? 'bg-[#F7FAF7] border-[#E8ECE8]' : 'bg-[#040906] border-[#152B1D]'
+                      isLight ? 'bg-legacy-mint-05 border-legacy-divider-light' : 'bg-legacy-canvas-deep border-legacy-divider-base'
                     }`}>
                       <div className="flex items-center justify-between">
-                        <span className={`text-[10px] font-sans font-medium ${isLight ? 'text-[#557361]' : 'text-[#7C9A88]'}`}>
+                        <span className={`text-[10px] font-sans font-medium ${isLight ? 'text-legacy-text-quiet' : 'text-legacy-text-muted'}`}>
                           Teams Involved
                         </span>
-                        <Users className={`w-3.5 h-3.5 ${isLight ? 'text-[#7D9A8A]' : 'text-[#557361]'}`} />
+                        <Users className={`w-3.5 h-3.5 ${isLight ? 'text-legacy-mint-43' : 'text-legacy-text-quiet'}`} />
                       </div>
                       <div className="mt-1 flex items-baseline space-x-1.5">
-                        <span className={`font-sans font-extrabold text-lg tracking-tight ${isLight ? 'text-[#0F2417]' : 'text-white'}`}>
+                        <span className={`font-sans font-extrabold text-lg tracking-tight ${isLight ? 'text-legacy-forest-43' : 'text-white'}`}>
                           8 Units
                         </span>
-                        <span className={`text-[11px] font-sans ${isLight ? 'text-[#7D9A8A]' : 'text-[#7C9A88]'}`}>
+                        <span className={`text-[11px] font-sans ${isLight ? 'text-legacy-mint-43' : 'text-legacy-text-muted'}`}>
                           cross-functional
                         </span>
                       </div>
@@ -1967,15 +1968,15 @@ const SaaSDashboard = () => {
                       max={100} 
                       label="Rating" 
                       sublabel="9.3 AI score" 
-                      accentColor="#00C853" 
+                      accentColor={legacyColors["legacy-brand-base"]}
                       isLight={isLight} 
                     />
                     <div className={`mt-3 px-3 py-1 rounded-full text-[10px] font-sans font-bold flex items-center space-x-1 border shadow-xs ${
                       isLight 
-                        ? 'bg-[#EAF7EE] text-[#0B4D26] border-[#00C853]/30' 
-                        : 'bg-[#0D2B1A] text-[#4ADE80] border-[#1B4D2E]'
+                        ? 'bg-legacy-mint-15 text-legacy-forest-21 border-legacy-brand-base/30'
+                        : 'bg-legacy-surface-raised text-legacy-green-400 border-legacy-forest-11'
                     }`}>
-                      <Sparkles className="w-3 h-3 text-[#00C853]" />
+                      <Sparkles className="w-3 h-3 text-legacy-brand-base" />
                       <span>Excellence Tier</span>
                     </div>
                   </div>
@@ -1984,7 +1985,7 @@ const SaaSDashboard = () => {
 
                 {/* Footer Insight */}
                 <div className={`pt-3 border-t text-[11px] font-sans flex items-center justify-between ${
-                  isLight ? 'border-[#E8ECE8] text-[#557361]' : 'border-[#122418] text-[#7C9A88]'
+                  isLight ? 'border-legacy-divider-light text-legacy-text-quiet' : 'border-legacy-forest-38 text-legacy-text-muted'
                 }`}>
                   <span>Illustrative demo figures</span>
                   <span className="font-mono text-amber-500 font-bold">DEMO</span>
@@ -1994,29 +1995,29 @@ const SaaSDashboard = () => {
               {/* Card 2: Emissions Trend (Wide Catmull-Rom Area Chart) */}
               <div className={`lg:col-span-7 rounded-3xl p-6 lg:p-7 border flex flex-col justify-between transition-all duration-300 ${
                 isLight 
-                  ? 'bg-white border-[#E8ECE8] shadow-[0_10px_30px_-4px_rgba(0,0,0,0.04),0_2px_8px_rgba(0,0,0,0.02)]' 
-                  : 'bg-[#08130C] border-[#152B1D] shadow-[0_16px_40px_-10px_rgba(0,0,0,0.6)]'
+                  ? 'bg-white border-legacy-divider-light shadow-[0_10px_30px_-4px_rgba(0,0,0,0.04),0_2px_8px_rgba(0,0,0,0.02)]'
+                  : 'bg-legacy-surface-base border-legacy-divider-base shadow-[0_16px_40px_-10px_rgba(0,0,0,0.6)]'
               }`}>
                 {/* Header with Title & Metric Badges */}
                 <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 pb-2">
                   <div>
-                    <h3 className={`font-sans font-bold text-base tracking-tight ${isLight ? 'text-[#0F2417]' : 'text-white'}`}>
+                    <h3 className={`font-sans font-bold text-base tracking-tight ${isLight ? 'text-legacy-forest-43' : 'text-white'}`}>
                       Emissions Trend
                     </h3>
-                    <p className={`text-[11px] font-sans ${isLight ? 'text-[#557361]' : 'text-[#7C9A88]'}`}>
+                    <p className={`text-[11px] font-sans ${isLight ? 'text-legacy-text-quiet' : 'text-legacy-text-muted'}`}>
                       12-Month Corporate Carbon Trajectory (Jan – Dec 2026)
                     </p>
                   </div>
                   <div className="flex items-center space-x-2">
                     <span className={`px-2.5 py-1 rounded-full text-[10px] font-mono font-medium border ${
-                      isLight ? 'bg-[#F7FAF7] border-[#E8ECE8] text-[#557361]' : 'bg-[#040906] border-[#152B1D] text-[#7C9A88]'
+                      isLight ? 'bg-legacy-mint-05 border-legacy-divider-light text-legacy-text-quiet' : 'bg-legacy-canvas-deep border-legacy-divider-base text-legacy-text-muted'
                     }`}>
                       Scope 1-3 Baseline
                     </span>
                     <span className={`px-2.5 py-1 rounded-full text-[10px] font-mono font-bold flex items-center space-x-1 ${
-                      isLight ? 'bg-[#E8F7EC] text-[#0B4D26] border border-[#00C853]/30' : 'bg-[#00C853]/15 text-[#4ADE80] border border-[#1B4D2E]'
+                      isLight ? 'bg-legacy-mint-17 text-legacy-forest-21 border border-legacy-brand-base/30' : 'bg-legacy-brand-base/15 text-legacy-green-400 border border-legacy-forest-11'
                     }`}>
-                      <TrendingDown className="w-3 h-3 text-[#00C853]" />
+                      <TrendingDown className="w-3 h-3 text-legacy-brand-base" />
                       <span>(+12%) improvement since January</span>
                     </span>
                   </div>
@@ -2029,15 +2030,15 @@ const SaaSDashboard = () => {
 
                 {/* Chart Legend & Telemetry Status */}
                 <div className={`pt-3 border-t text-[11px] font-sans flex flex-wrap items-center justify-between gap-2 ${
-                  isLight ? 'border-[#E8ECE8] text-[#557361]' : 'border-[#122418] text-[#7C9A88]'
+                  isLight ? 'border-legacy-divider-light text-legacy-text-quiet' : 'border-legacy-forest-38 text-legacy-text-muted'
                 }`}>
                   <div className="flex items-center space-x-4">
                     <div className="flex items-center space-x-1.5">
-                      <span className="w-2.5 h-2.5 rounded-full bg-[#00C853]"></span>
+                      <span className="w-2.5 h-2.5 rounded-full bg-legacy-brand-base"></span>
                       <span>Target Path</span>
                     </div>
                     <div className="flex items-center space-x-1.5">
-                      <span className={`w-2.5 h-2.5 rounded-full ${isLight ? 'bg-[#A3B8AC]' : 'bg-[#1D4A2F]'}`}></span>
+                      <span className={`w-2.5 h-2.5 rounded-full ${isLight ? 'bg-legacy-mint-39' : 'bg-legacy-forest-13'}`}></span>
                       <span>Prior Year Actual</span>
                     </div>
                   </div>
@@ -2055,15 +2056,15 @@ const SaaSDashboard = () => {
               {/* Card 1: Carbon Overview */}
               <div className={`rounded-3xl p-6 border flex flex-col justify-between transition-all duration-300 ${
                 isLight 
-                  ? 'bg-white border-[#E8ECE8] shadow-[0_10px_30px_-4px_rgba(0,0,0,0.04),0_2px_8px_rgba(0,0,0,0.02)]' 
-                  : 'bg-[#08130C] border-[#152B1D] shadow-[0_16px_40px_-10px_rgba(0,0,0,0.6)]'
+                  ? 'bg-white border-legacy-divider-light shadow-[0_10px_30px_-4px_rgba(0,0,0,0.04),0_2px_8px_rgba(0,0,0,0.02)]'
+                  : 'bg-legacy-surface-base border-legacy-divider-base shadow-[0_16px_40px_-10px_rgba(0,0,0,0.6)]'
               }`}>
                 {/* Header */}
                 <div className="flex items-center justify-between pb-3">
-                  <h3 className={`font-sans font-bold text-sm tracking-tight ${isLight ? 'text-[#0F2417]' : 'text-white'}`}>
+                  <h3 className={`font-sans font-bold text-sm tracking-tight ${isLight ? 'text-legacy-forest-43' : 'text-white'}`}>
                     Carbon Overview
                   </h3>
-                  <button className={`p-1 rounded-full hover:opacity-80 transition-opacity ${isLight ? 'text-[#7D9A8A]' : 'text-[#7C9A88]'}`}>
+                  <button className={`p-1 rounded-full hover:opacity-80 transition-opacity ${isLight ? 'text-legacy-mint-43' : 'text-legacy-text-muted'}`}>
                     <MoreHorizontal className="w-4 h-4" />
                   </button>
                 </div>
@@ -2075,18 +2076,18 @@ const SaaSDashboard = () => {
                     max={100} 
                     label="78%" 
                     sublabel="real-time insights" 
-                    accentColor="#00C853" 
+                    accentColor={legacyColors["legacy-brand-base"]}
                     isLight={isLight} 
                   />
                   
                   {/* Footprint Readout Underneath Gauge */}
                   <div className="mt-3 text-center">
-                    <div className={`font-sans font-extrabold text-2xl tracking-tight ${isLight ? 'text-[#0F2417]' : 'text-white'}`}>
-                      {results.total} <span className="text-xs font-mono font-normal text-[#00C853]">tCO2e</span>
+                    <div className={`font-sans font-extrabold text-2xl tracking-tight ${isLight ? 'text-legacy-forest-43' : 'text-white'}`}>
+                      {results.total} <span className="text-xs font-mono font-normal text-legacy-brand-base">tCO2e</span>
                     </div>
-                    <div className="flex items-center justify-center space-x-6 text-[10px] font-mono text-[#7C9A88] mt-1">
+                    <div className="flex items-center justify-center space-x-6 text-[10px] font-mono text-legacy-text-muted mt-1">
                       <span>0%</span>
-                      <span className="text-[#00C853] font-bold">Optimal Target</span>
+                      <span className="text-legacy-brand-base font-bold">Optimal Target</span>
                       <span>100%</span>
                     </div>
                   </div>
@@ -2094,9 +2095,9 @@ const SaaSDashboard = () => {
 
                 {/* Eco Trajectory Pill */}
                 <div className={`mt-3 p-2.5 rounded-2xl border text-center text-xs font-sans font-semibold flex items-center justify-center space-x-2 ${
-                  isLight ? 'bg-[#F7FAF7] border-[#E8ECE8] text-[#0F2417]' : 'bg-[#040906] border-[#152B1D] text-white'
+                  isLight ? 'bg-legacy-mint-05 border-legacy-divider-light text-legacy-forest-43' : 'bg-legacy-canvas-deep border-legacy-divider-base text-white'
                 }`}>
-                  <span className="w-2 h-2 rounded-full bg-[#00C853] animate-pulse"></span>
+                  <span className="w-2 h-2 rounded-full bg-legacy-brand-base animate-pulse"></span>
                   <span>Optimal Reduction Trajectory</span>
                 </div>
               </div>
@@ -2104,15 +2105,15 @@ const SaaSDashboard = () => {
               {/* Card 2: New ESG Data */}
               <div className={`rounded-3xl p-6 border flex flex-col justify-between transition-all duration-300 ${
                 isLight 
-                  ? 'bg-white border-[#E8ECE8] shadow-[0_10px_30px_-4px_rgba(0,0,0,0.04),0_2px_8px_rgba(0,0,0,0.02)]' 
-                  : 'bg-[#08130C] border-[#152B1D] shadow-[0_16px_40px_-10px_rgba(0,0,0,0.6)]'
+                  ? 'bg-white border-legacy-divider-light shadow-[0_10px_30px_-4px_rgba(0,0,0,0.04),0_2px_8px_rgba(0,0,0,0.02)]'
+                  : 'bg-legacy-surface-base border-legacy-divider-base shadow-[0_16px_40px_-10px_rgba(0,0,0,0.6)]'
               }`}>
                 {/* Header */}
                 <div className="flex items-center justify-between pb-2">
-                  <h3 className={`font-sans font-bold text-sm tracking-tight ${isLight ? 'text-[#0F2417]' : 'text-white'}`}>
+                  <h3 className={`font-sans font-bold text-sm tracking-tight ${isLight ? 'text-legacy-forest-43' : 'text-white'}`}>
                     New ESG Data
                   </h3>
-                  <button className={`p-1 rounded-full hover:opacity-80 transition-opacity ${isLight ? 'text-[#7D9A8A]' : 'text-[#7C9A88]'}`}>
+                  <button className={`p-1 rounded-full hover:opacity-80 transition-opacity ${isLight ? 'text-legacy-mint-43' : 'text-legacy-text-muted'}`}>
                     <MoreHorizontal className="w-4 h-4" />
                   </button>
                 </div>
@@ -2120,16 +2121,16 @@ const SaaSDashboard = () => {
                 {/* Counter + Growth Pill */}
                 <div>
                   <div className="flex items-baseline space-x-2.5">
-                    <span className={`font-sans font-black text-3xl lg:text-4xl tracking-tight ${isLight ? 'text-[#0F2417]' : 'text-white'}`}>
+                    <span className={`font-sans font-black text-3xl lg:text-4xl tracking-tight ${isLight ? 'text-legacy-forest-43' : 'text-white'}`}>
                       4,826
                     </span>
                     <span className={`text-[10px] font-mono font-bold px-2 py-0.5 rounded-full ${
-                      isLight ? 'bg-[#E8F7EC] text-[#0B4D26]' : 'bg-[#00C853]/15 text-[#4ADE80]'
+                      isLight ? 'bg-legacy-mint-17 text-legacy-forest-21' : 'bg-legacy-brand-base/15 text-legacy-green-400'
                     }`}>
                       +1,852 this month
                     </span>
                   </div>
-                  <p className={`text-[11px] font-sans mt-1 ${isLight ? 'text-[#557361]' : 'text-[#7C9A88]'}`}>
+                  <p className={`text-[11px] font-sans mt-1 ${isLight ? 'text-legacy-text-quiet' : 'text-legacy-text-muted'}`}>
                     Telemetry data points synced from smart meters & utility logs
                   </p>
                 </div>
@@ -2148,17 +2149,17 @@ const SaaSDashboard = () => {
               {/* Card 3: ESG Analyzer */}
               <div className={`rounded-3xl p-6 border flex flex-col justify-between transition-all duration-300 ${
                 isLight 
-                  ? 'bg-white border-[#E8ECE8] shadow-[0_10px_30px_-4px_rgba(0,0,0,0.04),0_2px_8px_rgba(0,0,0,0.02)]' 
-                  : 'bg-[#08130C] border-[#152B1D] shadow-[0_16px_40px_-10px_rgba(0,0,0,0.6)]'
+                  ? 'bg-white border-legacy-divider-light shadow-[0_10px_30px_-4px_rgba(0,0,0,0.04),0_2px_8px_rgba(0,0,0,0.02)]'
+                  : 'bg-legacy-surface-base border-legacy-divider-base shadow-[0_16px_40px_-10px_rgba(0,0,0,0.6)]'
               }`}>
                 {/* Header with Run AI Pill */}
                 <div className="flex items-center justify-between pb-2">
-                  <h3 className={`font-sans font-bold text-sm tracking-tight ${isLight ? 'text-[#0F2417]' : 'text-white'}`}>
+                  <h3 className={`font-sans font-bold text-sm tracking-tight ${isLight ? 'text-legacy-forest-43' : 'text-white'}`}>
                     ESG Analyzer
                   </h3>
                   <button 
                     onClick={() => executeRagQuery("Summarize our ESG score readiness against CSRD and Bangladesh ECR standards.")}
-                    className="bg-[#00C853] hover:bg-[#00E676] text-white font-mono font-bold text-[10px] px-3 py-1.5 rounded-lg transition-all shadow-sm flex items-center space-x-1 cursor-pointer"
+                    className="bg-legacy-brand-base hover:bg-legacy-brand-bright text-white font-mono font-bold text-[10px] px-3 py-1.5 rounded-lg transition-all shadow-sm flex items-center space-x-1 cursor-pointer"
                   >
                     <Sparkles className="w-3 h-3 text-white" />
                     <span className="text-white font-mono font-bold">Run AI</span>
@@ -2168,28 +2169,28 @@ const SaaSDashboard = () => {
                 {/* Statement */}
                 <div>
                   <div className="flex items-center space-x-2">
-                    <span className="w-2.5 h-2.5 rounded-full bg-[#00C853]"></span>
-                    <p className={`text-xs font-sans font-semibold ${isLight ? 'text-[#0F2417]' : 'text-white'}`}>
-                      Your ESG score is <span className="text-[#00C853] font-bold">80%</span>
+                    <span className="w-2.5 h-2.5 rounded-full bg-legacy-brand-base"></span>
+                    <p className={`text-xs font-sans font-semibold ${isLight ? 'text-legacy-forest-43' : 'text-white'}`}>
+                      Your ESG score is <span className="text-legacy-brand-base font-bold">80%</span>
                     </p>
                   </div>
-                  <p className={`text-[11px] font-sans mt-1 leading-relaxed ${isLight ? 'text-[#557361]' : 'text-[#7C9A88]'}`}>
-                    This score is considered to be <strong className={isLight ? 'text-[#0B4D26]' : 'text-[#4ADE80]'}>Strong</strong> across Scope 1-3 direct & value-chain emissions.
+                  <p className={`text-[11px] font-sans mt-1 leading-relaxed ${isLight ? 'text-legacy-text-quiet' : 'text-legacy-text-muted'}`}>
+                    This score is considered to be <strong className={isLight ? 'text-legacy-forest-21' : 'text-legacy-green-400'}>Strong</strong> across Scope 1-3 direct & value-chain emissions.
                   </p>
                 </div>
 
                 {/* 24-Capsule LED Segmented Progress Bar */}
                 <div className="py-2 space-y-1.5">
-                  <div className="flex justify-between text-[10px] font-mono text-[#7C9A88]">
+                  <div className="flex justify-between text-[10px] font-mono text-legacy-text-muted">
                     <span>Score: 80 / 100</span>
-                    <span className="text-[#00C853] font-bold">19 / 24 Capsules Active</span>
+                    <span className="text-legacy-brand-base font-bold">19 / 24 Capsules Active</span>
                   </div>
                   <SegmentedProgressBar activeCount={19} total={24} isLight={isLight} />
                 </div>
 
                 {/* Subtext Footer */}
                 <div className={`pt-3 border-t text-[10px] font-mono flex items-center justify-between ${
-                  isLight ? 'border-[#E8ECE8] text-[#557361]' : 'border-[#122418] text-[#7C9A88]'
+                  isLight ? 'border-legacy-divider-light text-legacy-text-quiet' : 'border-legacy-forest-38 text-legacy-text-muted'
                 }`}>
                   <span>Demo data</span>
                   <span className="text-amber-500 font-semibold">Not assured</span>
@@ -2206,31 +2207,31 @@ const SaaSDashboard = () => {
               {/* Card 1: Total Emissions */}
               <div className={`p-6 rounded-3xl border shadow-md relative overflow-hidden flex flex-col justify-between aspect-[1.5] transition-all ${
                 isLight 
-                  ? 'bg-gradient-to-br from-[#EAF5ED] via-[#DFEFE3] to-[#D4E9DA] border-[#CCE2D3] text-[#0F2417]' 
-                  : 'bg-gradient-to-br from-[#0D2B1A] via-[#0A2215] to-[#07180F] border-[#1B4D2E] text-white'
+                  ? 'bg-gradient-to-br from-legacy-mint-16 via-legacy-mint-21 to-legacy-mint-27 border-legacy-mint-30 text-legacy-forest-43'
+                  : 'bg-gradient-to-br from-legacy-surface-raised via-legacy-forest-52 to-legacy-forest-64 border-legacy-forest-11 text-white'
               }`}>
                 <div>
                   <div className={`font-mono text-[9px] uppercase tracking-wider font-bold mb-2 ${
-                    isLight ? 'text-[#0B4D26]' : 'text-[#A7F3D0]'
+                    isLight ? 'text-legacy-forest-21' : 'text-legacy-emerald-200'
                   }`}>
                     Total Carbon Footprint
                   </div>
                   <div className={`font-sans font-black text-3xl lg:text-4xl tracking-tight ${
-                    isLight ? 'text-[#0F2417]' : 'text-white'
+                    isLight ? 'text-legacy-forest-43' : 'text-white'
                   }`}>
-                    {results.total} <span className={`text-xs font-mono font-normal ${isLight ? 'text-[#0B4D26]' : 'text-[#A7F3D0]'}`}>tCO2e</span>
+                    {results.total} <span className={`text-xs font-mono font-normal ${isLight ? 'text-legacy-forest-21' : 'text-legacy-emerald-200'}`}>tCO2e</span>
                   </div>
                 </div>
                 <div className="flex justify-between items-center mt-4">
                   <span className={`text-[10px] font-mono px-3 py-1 rounded-full flex items-center border ${
                     isLight 
-                      ? 'bg-white/80 text-[#0B4D26] border-[#00C853]/20 shadow-xs' 
-                      : 'bg-white/10 text-[#4ADE80] border-white/10'
+                      ? 'bg-white/80 text-legacy-forest-21 border-legacy-brand-base/20 shadow-xs'
+                      : 'bg-white/10 text-legacy-green-400 border-white/10'
                   }`}>
-                    <TrendingDown className="w-3 h-3 mr-1 text-[#00C853]" />
+                    <TrendingDown className="w-3 h-3 mr-1 text-legacy-brand-base" />
                     {reductionTarget}% reduced
                   </span>
-                  <span className={`text-[9px] font-sans ${isLight ? 'text-[#557361]' : 'text-[#A7F3D0]'}`}>
+                  <span className={`text-[9px] font-sans ${isLight ? 'text-legacy-text-quiet' : 'text-legacy-emerald-200'}`}>
                     vs baseline
                   </span>
                 </div>
@@ -2239,20 +2240,20 @@ const SaaSDashboard = () => {
               {/* Card 2: Scope 1 (Direct) */}
               <div className={`p-6 rounded-3xl border flex flex-col justify-between aspect-[1.5] transition-all ${
                 isLight 
-                  ? 'bg-white border-[#E8ECE8] text-[#0F2417] shadow-sm' 
-                  : 'bg-[#08130C] border-[#152B1D] text-white'
+                  ? 'bg-white border-legacy-divider-light text-legacy-forest-43 shadow-sm'
+                  : 'bg-legacy-surface-base border-legacy-divider-base text-white'
               }`}>
                 <div>
                   <div className={`font-mono text-[9px] uppercase tracking-wider font-bold mb-2 ${
-                    isLight ? 'text-[#557361]' : 'text-[#7C9A88]'
+                    isLight ? 'text-legacy-text-quiet' : 'text-legacy-text-muted'
                   }`}>
                     Scope 1 (Direct)
                   </div>
-                  <div className={`font-sans font-bold text-3xl tracking-tight ${isLight ? 'text-[#0F2417]' : 'text-white'}`}>
-                    {results.scope1} <span className={`text-xs font-mono font-normal ${isLight ? 'text-[#7D9A8A]' : 'text-[#7C9A88]'}`}>tCO2e</span>
+                  <div className={`font-sans font-bold text-3xl tracking-tight ${isLight ? 'text-legacy-forest-43' : 'text-white'}`}>
+                    {results.scope1} <span className={`text-xs font-mono font-normal ${isLight ? 'text-legacy-mint-43' : 'text-legacy-text-muted'}`}>tCO2e</span>
                   </div>
                 </div>
-                <div className={`flex justify-between items-center mt-4 text-[10px] ${isLight ? 'text-[#557361]' : 'text-[#7C9A88]'}`}>
+                <div className={`flex justify-between items-center mt-4 text-[10px] ${isLight ? 'text-legacy-text-quiet' : 'text-legacy-text-muted'}`}>
                   <span>Boilers, Fleet, Fuel</span>
                   <span className="font-mono font-bold text-amber">
                     {results.total > 0 ? ((results.scope1 / results.total) * 100).toFixed(0) : 0}%
@@ -2263,40 +2264,40 @@ const SaaSDashboard = () => {
               {/* Card 3: Scope 2 (Electricity) */}
               <div className={`p-6 rounded-3xl border flex flex-col justify-between aspect-[1.5] transition-all ${
                 isLight 
-                  ? 'bg-white border-[#E8ECE8] text-[#0F2417] shadow-sm' 
-                  : 'bg-[#08130C] border-[#152B1D] text-white'
+                  ? 'bg-white border-legacy-divider-light text-legacy-forest-43 shadow-sm'
+                  : 'bg-legacy-surface-base border-legacy-divider-base text-white'
               }`}>
                 <div>
                   <div className="flex justify-between items-center mb-2">
                     <span className={`font-mono text-[9px] uppercase tracking-wider font-bold ${
-                      isLight ? 'text-[#557361]' : 'text-[#7C9A88]'
+                      isLight ? 'text-legacy-text-quiet' : 'text-legacy-text-muted'
                     }`}>
                       Scope 2 (Electricity)
                     </span>
                     <span className={`text-[8px] font-bold px-1.5 py-0.5 rounded font-sans uppercase ${
-                      isLight ? 'bg-[#E8F7EC] text-[#0B4D26] border border-[#00C853]/20' : 'bg-[#0D2B1A] text-[#4ADE80] border border-[#1B4D2E]'
+                      isLight ? 'bg-legacy-mint-17 text-legacy-forest-21 border border-legacy-brand-base/20' : 'bg-legacy-surface-raised text-legacy-green-400 border border-legacy-forest-11'
                     }`}>
                       Dual Reporting
                     </span>
                   </div>
                   <div className="grid grid-cols-2 gap-2">
                     <div>
-                      <span className={`text-[9px] font-semibold uppercase block ${isLight ? 'text-[#7D9A8A]' : 'text-[#557361]'}`}>Location</span>
-                      <span className={`font-sans font-bold text-xl ${isLight ? 'text-[#0F2417]' : 'text-white'}`}>
-                        {results.scope2} <span className="text-[10px] font-mono font-normal text-[#7C9A88]">t</span>
+                      <span className={`text-[9px] font-semibold uppercase block ${isLight ? 'text-legacy-mint-43' : 'text-legacy-text-quiet'}`}>Location</span>
+                      <span className={`font-sans font-bold text-xl ${isLight ? 'text-legacy-forest-43' : 'text-white'}`}>
+                        {results.scope2} <span className="text-[10px] font-mono font-normal text-legacy-text-muted">t</span>
                       </span>
                     </div>
                     <div>
-                      <span className={`text-[9px] font-semibold uppercase block ${isLight ? 'text-[#7D9A8A]' : 'text-[#557361]'}`}>Market</span>
-                      <span className="font-sans font-bold text-xl text-[#00C853]">
-                        {results.scope2Market} <span className="text-[10px] font-mono font-normal text-[#7C9A88]">t</span>
+                      <span className={`text-[9px] font-semibold uppercase block ${isLight ? 'text-legacy-mint-43' : 'text-legacy-text-quiet'}`}>Market</span>
+                      <span className="font-sans font-bold text-xl text-legacy-brand-base">
+                        {results.scope2Market} <span className="text-[10px] font-mono font-normal text-legacy-text-muted">t</span>
                       </span>
                     </div>
                   </div>
                 </div>
-                <div className={`flex justify-between items-center mt-3 text-[10px] ${isLight ? 'text-[#557361]' : 'text-[#7C9A88]'}`}>
+                <div className={`flex justify-between items-center mt-3 text-[10px] ${isLight ? 'text-legacy-text-quiet' : 'text-legacy-text-muted'}`}>
                   <span>Purchased Power</span>
-                  <span className="font-mono text-[9px] text-[#00C853] font-bold">
+                  <span className="font-mono text-[9px] text-legacy-brand-base font-bold">
                     Loc: {results.total > 0 ? ((results.scope2 / results.total) * 100).toFixed(0) : 0}% | Mkt: {results.totalMarket > 0 ? ((results.scope2Market / results.totalMarket) * 100).toFixed(0) : 0}%
                   </span>
                 </div>
@@ -2305,22 +2306,22 @@ const SaaSDashboard = () => {
               {/* Card 4: Scope 3 (Value Chain) */}
               <div className={`p-6 rounded-3xl border flex flex-col justify-between aspect-[1.5] transition-all ${
                 isLight 
-                  ? 'bg-white border-[#E8ECE8] text-[#0F2417] shadow-sm' 
-                  : 'bg-[#08130C] border-[#152B1D] text-white'
+                  ? 'bg-white border-legacy-divider-light text-legacy-forest-43 shadow-sm'
+                  : 'bg-legacy-surface-base border-legacy-divider-base text-white'
               }`}>
                 <div>
                   <div className={`font-mono text-[9px] uppercase tracking-wider font-bold mb-2 ${
-                    isLight ? 'text-[#557361]' : 'text-[#7C9A88]'
+                    isLight ? 'text-legacy-text-quiet' : 'text-legacy-text-muted'
                   }`}>
                     Scope 3 (Value Chain)
                   </div>
-                  <div className={`font-sans font-bold text-3xl tracking-tight ${isLight ? 'text-[#0F2417]' : 'text-white'}`}>
-                    {results.scope3} <span className={`text-xs font-mono font-normal ${isLight ? 'text-[#7D9A8A]' : 'text-[#7C9A88]'}`}>tCO2e</span>
+                  <div className={`font-sans font-bold text-3xl tracking-tight ${isLight ? 'text-legacy-forest-43' : 'text-white'}`}>
+                    {results.scope3} <span className={`text-xs font-mono font-normal ${isLight ? 'text-legacy-mint-43' : 'text-legacy-text-muted'}`}>tCO2e</span>
                   </div>
                 </div>
-                <div className={`flex justify-between items-center mt-4 text-[10px] ${isLight ? 'text-[#557361]' : 'text-[#7C9A88]'}`}>
+                <div className={`flex justify-between items-center mt-4 text-[10px] ${isLight ? 'text-legacy-text-quiet' : 'text-legacy-text-muted'}`}>
                   <span>Supply Chain & Commutes</span>
-                  <span className="font-mono font-bold text-[#A855F7]">
+                  <span className="font-mono font-bold text-legacy-purple-500">
                     {results.total > 0 ? ((results.scope3 / results.total) * 100).toFixed(0) : 0}%
                   </span>
                 </div>
@@ -2337,20 +2338,20 @@ const SaaSDashboard = () => {
                 {/* Scope Emissions Calculator Module */}
                 <div className={`p-6 lg:p-8 rounded-3xl border shadow-sm space-y-6 transition-all ${
                   isLight 
-                    ? 'bg-white border-[#E8ECE8] text-[#0F2417]' 
-                    : 'bg-[#08130C] border-[#152B1D] text-white'
+                    ? 'bg-white border-legacy-divider-light text-legacy-forest-43'
+                    : 'bg-legacy-surface-base border-legacy-divider-base text-white'
                 }`}>
                   
                   <div className={`flex justify-between items-center border-b pb-4 ${
-                    isLight ? 'border-[#E8ECE8]' : 'border-[#122418]'
+                    isLight ? 'border-legacy-divider-light' : 'border-legacy-forest-38'
                   }`}>
                     <div>
-                      <h3 className={`font-sans font-bold text-lg ${isLight ? 'text-[#0F2417]' : 'text-white'}`}>Protocol Emissions Calculator</h3>
-                      <p className={`text-xs mt-0.5 font-sans ${isLight ? 'text-[#557361]' : 'text-[#7C9A88]'}`}>Input raw values or upload utility invoices to extract footprint.</p>
+                      <h3 className={`font-sans font-bold text-lg ${isLight ? 'text-legacy-forest-43' : 'text-white'}`}>Protocol Emissions Calculator</h3>
+                      <p className={`text-xs mt-0.5 font-sans ${isLight ? 'text-legacy-text-quiet' : 'text-legacy-text-muted'}`}>Input raw values or upload utility invoices to extract footprint.</p>
                     </div>
                     <button 
                       onClick={clearCalculator}
-                      className="font-mono text-[10px] text-[#EF4444] bg-[#EF4444]/10 hover:bg-[#EF4444]/20 border border-[#EF4444]/20 px-3 py-1 rounded transition-colors cursor-pointer"
+                      className="font-mono text-[10px] text-legacy-red-500 bg-legacy-red-500/10 hover:bg-legacy-red-500/20 border border-legacy-red-500/20 px-3 py-1 rounded transition-colors cursor-pointer"
                     >
                       Clear Data
                     </button>
@@ -2362,7 +2363,7 @@ const SaaSDashboard = () => {
                     {/* Scope 1 Column */}
                     <div className="space-y-4">
                       <div className={`font-mono text-[10px] uppercase tracking-wider font-bold pb-2 border-b ${
-                        isLight ? 'text-[#00873E] border-[#E8ECE8]' : 'text-[#A7F3D0] border-[#122418]'
+                        isLight ? 'text-legacy-brand-strong border-legacy-divider-light' : 'text-legacy-emerald-200 border-legacy-forest-38'
                       }`}>
                         Scope 1 (Direct)
                       </div>
@@ -2370,7 +2371,7 @@ const SaaSDashboard = () => {
                       <div className="space-y-3">
                         <div>
                           <label className={`block text-[10px] font-bold font-sans uppercase mb-1 ${
-                            isLight ? 'text-[#557361]' : 'text-[#7C9A88]'
+                            isLight ? 'text-legacy-text-quiet' : 'text-legacy-text-muted'
                           }`}>Diesel (Liters)</label>
                           <input 
                             type="number"
@@ -2379,16 +2380,16 @@ const SaaSDashboard = () => {
                             onChange={handleInputChange}
                             placeholder="e.g. 10000"
                             disabled={isAuditorMode}
-                            className={`w-full text-xs font-mono p-2 border rounded-lg focus:outline-none focus:border-[#00C853] transition-all disabled:opacity-60 disabled:cursor-not-allowed ${
+                            className={`w-full text-xs font-mono p-2 border rounded-lg focus:outline-none focus:border-legacy-brand-base transition-all disabled:opacity-60 disabled:cursor-not-allowed ${
                               isLight 
-                                ? 'bg-[#F7FAF7] border-[#DCE4DE] text-[#0F2417] placeholder-[#8FA899]' 
-                                : 'bg-[#040906] border-[#173020] text-[#4ADE80] placeholder-[#385443]'
+                                ? 'bg-legacy-mint-05 border-legacy-mint-25 text-legacy-forest-43 placeholder-legacy-mint-40'
+                                : 'bg-legacy-canvas-deep border-legacy-forest-32 text-legacy-green-400 placeholder-legacy-forest-07'
                             }`}
                           />
                         </div>
                         <div>
                           <label className={`block text-[10px] font-bold font-sans uppercase mb-1 ${
-                            isLight ? 'text-[#557361]' : 'text-[#7C9A88]'
+                            isLight ? 'text-legacy-text-quiet' : 'text-legacy-text-muted'
                           }`}>Petrol (Liters)</label>
                           <input 
                             type="number"
@@ -2397,16 +2398,16 @@ const SaaSDashboard = () => {
                             onChange={handleInputChange}
                             placeholder="e.g. 5000"
                             disabled={isAuditorMode}
-                            className={`w-full text-xs font-mono p-2 border rounded-lg focus:outline-none focus:border-[#00C853] transition-all disabled:opacity-60 disabled:cursor-not-allowed ${
+                            className={`w-full text-xs font-mono p-2 border rounded-lg focus:outline-none focus:border-legacy-brand-base transition-all disabled:opacity-60 disabled:cursor-not-allowed ${
                               isLight 
-                                ? 'bg-[#F7FAF7] border-[#DCE4DE] text-[#0F2417] placeholder-[#8FA899]' 
-                                : 'bg-[#040906] border-[#173020] text-[#4ADE80] placeholder-[#385443]'
+                                ? 'bg-legacy-mint-05 border-legacy-mint-25 text-legacy-forest-43 placeholder-legacy-mint-40'
+                                : 'bg-legacy-canvas-deep border-legacy-forest-32 text-legacy-green-400 placeholder-legacy-forest-07'
                             }`}
                           />
                         </div>
                         <div>
                           <label className={`block text-[10px] font-bold font-sans uppercase mb-1 ${
-                            isLight ? 'text-[#557361]' : 'text-[#7C9A88]'
+                            isLight ? 'text-legacy-text-quiet' : 'text-legacy-text-muted'
                           }`}>LPG (Kg)</label>
                           <input 
                             type="number"
@@ -2415,10 +2416,10 @@ const SaaSDashboard = () => {
                             onChange={handleInputChange}
                             placeholder="e.g. 1500"
                             disabled={isAuditorMode}
-                            className={`w-full text-xs font-mono p-2 border rounded-lg focus:outline-none focus:border-[#00C853] transition-all disabled:opacity-60 disabled:cursor-not-allowed ${
+                            className={`w-full text-xs font-mono p-2 border rounded-lg focus:outline-none focus:border-legacy-brand-base transition-all disabled:opacity-60 disabled:cursor-not-allowed ${
                               isLight 
-                                ? 'bg-[#F7FAF7] border-[#DCE4DE] text-[#0F2417] placeholder-[#8FA899]' 
-                                : 'bg-[#040906] border-[#173020] text-[#4ADE80] placeholder-[#385443]'
+                                ? 'bg-legacy-mint-05 border-legacy-mint-25 text-legacy-forest-43 placeholder-legacy-mint-40'
+                                : 'bg-legacy-canvas-deep border-legacy-forest-32 text-legacy-green-400 placeholder-legacy-forest-07'
                             }`}
                           />
                         </div>
@@ -2428,7 +2429,7 @@ const SaaSDashboard = () => {
                     {/* Scope 2 Column */}
                     <div className="space-y-4">
                       <div className={`font-mono text-[10px] uppercase tracking-wider font-bold pb-2 border-b ${
-                        isLight ? 'text-[#00873E] border-[#E8ECE8]' : 'text-[#A7F3D0] border-[#122418]'
+                        isLight ? 'text-legacy-brand-strong border-legacy-divider-light' : 'text-legacy-emerald-200 border-legacy-forest-38'
                       }`}>
                         Scope 2 (Indirect)
                       </div>
@@ -2436,7 +2437,7 @@ const SaaSDashboard = () => {
                       <div className="space-y-3">
                         <div>
                           <label className={`block text-[10px] font-bold font-sans uppercase mb-1 ${
-                            isLight ? 'text-[#557361]' : 'text-[#7C9A88]'
+                            isLight ? 'text-legacy-text-quiet' : 'text-legacy-text-muted'
                           }`}>Grid Power (kWh)</label>
                           <input 
                             type="number"
@@ -2445,10 +2446,10 @@ const SaaSDashboard = () => {
                             onChange={handleInputChange}
                             placeholder="e.g. 100000"
                             disabled={isAuditorMode}
-                            className={`w-full text-xs font-mono p-2 border rounded-lg focus:outline-none focus:border-[#00C853] transition-all disabled:opacity-60 disabled:cursor-not-allowed ${
+                            className={`w-full text-xs font-mono p-2 border rounded-lg focus:outline-none focus:border-legacy-brand-base transition-all disabled:opacity-60 disabled:cursor-not-allowed ${
                               isLight 
-                                ? 'bg-[#F7FAF7] border-[#DCE4DE] text-[#0F2417] placeholder-[#8FA899]' 
-                                : 'bg-[#040906] border-[#173020] text-[#4ADE80] placeholder-[#385443]'
+                                ? 'bg-legacy-mint-05 border-legacy-mint-25 text-legacy-forest-43 placeholder-legacy-mint-40'
+                                : 'bg-legacy-canvas-deep border-legacy-forest-32 text-legacy-green-400 placeholder-legacy-forest-07'
                             }`}
                           />
                         </div>
@@ -2458,7 +2459,7 @@ const SaaSDashboard = () => {
                     {/* Scope 3 Column */}
                     <div className="space-y-4">
                       <div className={`font-mono text-[10px] uppercase tracking-wider font-bold pb-2 border-b ${
-                        isLight ? 'text-[#00873E] border-[#E8ECE8]' : 'text-[#A7F3D0] border-[#122418]'
+                        isLight ? 'text-legacy-brand-strong border-legacy-divider-light' : 'text-legacy-emerald-200 border-legacy-forest-38'
                       }`}>
                         Scope 3 (Value Chain)
                       </div>
@@ -2466,7 +2467,7 @@ const SaaSDashboard = () => {
                       <div className="space-y-3">
                         <div>
                           <label className={`block text-[10px] font-bold font-sans uppercase mb-1 ${
-                            isLight ? 'text-[#557361]' : 'text-[#7C9A88]'
+                            isLight ? 'text-legacy-text-quiet' : 'text-legacy-text-muted'
                           }`}>Employees (Commute)</label>
                           <input 
                             type="number"
@@ -2475,16 +2476,16 @@ const SaaSDashboard = () => {
                             onChange={handleInputChange}
                             placeholder="e.g. 150"
                             disabled={isAuditorMode}
-                            className={`w-full text-xs font-mono p-2 border rounded-lg focus:outline-none focus:border-[#00C853] transition-all disabled:opacity-60 disabled:cursor-not-allowed ${
+                            className={`w-full text-xs font-mono p-2 border rounded-lg focus:outline-none focus:border-legacy-brand-base transition-all disabled:opacity-60 disabled:cursor-not-allowed ${
                               isLight 
-                                ? 'bg-[#F7FAF7] border-[#DCE4DE] text-[#0F2417] placeholder-[#8FA899]' 
-                                : 'bg-[#040906] border-[#173020] text-[#4ADE80] placeholder-[#385443]'
+                                ? 'bg-legacy-mint-05 border-legacy-mint-25 text-legacy-forest-43 placeholder-legacy-mint-40'
+                                : 'bg-legacy-canvas-deep border-legacy-forest-32 text-legacy-green-400 placeholder-legacy-forest-07'
                             }`}
                           />
                         </div>
                         <div>
                           <label className={`block text-[10px] font-bold font-sans uppercase mb-1 ${
-                            isLight ? 'text-[#557361]' : 'text-[#7C9A88]'
+                            isLight ? 'text-legacy-text-quiet' : 'text-legacy-text-muted'
                           }`}>Air Travel (Km)</label>
                           <input 
                             type="number"
@@ -2493,16 +2494,16 @@ const SaaSDashboard = () => {
                             onChange={handleInputChange}
                             placeholder="e.g. 50000"
                             disabled={isAuditorMode}
-                            className={`w-full text-xs font-mono p-2 border rounded-lg focus:outline-none focus:border-[#00C853] transition-all disabled:opacity-60 disabled:cursor-not-allowed ${
+                            className={`w-full text-xs font-mono p-2 border rounded-lg focus:outline-none focus:border-legacy-brand-base transition-all disabled:opacity-60 disabled:cursor-not-allowed ${
                               isLight 
-                                ? 'bg-[#F7FAF7] border-[#DCE4DE] text-[#0F2417] placeholder-[#8FA899]' 
-                                : 'bg-[#040906] border-[#173020] text-[#4ADE80] placeholder-[#385443]'
+                                ? 'bg-legacy-mint-05 border-legacy-mint-25 text-legacy-forest-43 placeholder-legacy-mint-40'
+                                : 'bg-legacy-canvas-deep border-legacy-forest-32 text-legacy-green-400 placeholder-legacy-forest-07'
                             }`}
                           />
                         </div>
                         <div>
                           <label className={`block text-[10px] font-bold font-sans uppercase mb-1 ${
-                            isLight ? 'text-[#557361]' : 'text-[#7C9A88]'
+                            isLight ? 'text-legacy-text-quiet' : 'text-legacy-text-muted'
                           }`}>Truck Freight (T-Km)</label>
                           <input 
                             type="number"
@@ -2511,16 +2512,16 @@ const SaaSDashboard = () => {
                             onChange={handleInputChange}
                             placeholder="e.g. 20000"
                             disabled={isAuditorMode}
-                            className={`w-full text-xs font-mono p-2 border rounded-lg focus:outline-none focus:border-[#00C853] transition-all disabled:opacity-60 disabled:cursor-not-allowed ${
+                            className={`w-full text-xs font-mono p-2 border rounded-lg focus:outline-none focus:border-legacy-brand-base transition-all disabled:opacity-60 disabled:cursor-not-allowed ${
                               isLight 
-                                ? 'bg-[#F7FAF7] border-[#DCE4DE] text-[#0F2417] placeholder-[#8FA899]' 
-                                : 'bg-[#040906] border-[#173020] text-[#4ADE80] placeholder-[#385443]'
+                                ? 'bg-legacy-mint-05 border-legacy-mint-25 text-legacy-forest-43 placeholder-legacy-mint-40'
+                                : 'bg-legacy-canvas-deep border-legacy-forest-32 text-legacy-green-400 placeholder-legacy-forest-07'
                             }`}
                           />
                         </div>
                         <div>
                           <label className={`block text-[10px] font-bold font-sans uppercase mb-1 ${
-                            isLight ? 'text-[#557361]' : 'text-[#7C9A88]'
+                            isLight ? 'text-legacy-text-quiet' : 'text-legacy-text-muted'
                           }`}>Raw Materials (Tons)</label>
                           <input 
                             type="number"
@@ -2529,10 +2530,10 @@ const SaaSDashboard = () => {
                             onChange={handleInputChange}
                             placeholder="e.g. 400"
                             disabled={isAuditorMode}
-                            className={`w-full text-xs font-mono p-2 border rounded-lg focus:outline-none focus:border-[#00C853] transition-all disabled:opacity-60 disabled:cursor-not-allowed ${
+                            className={`w-full text-xs font-mono p-2 border rounded-lg focus:outline-none focus:border-legacy-brand-base transition-all disabled:opacity-60 disabled:cursor-not-allowed ${
                               isLight 
-                                ? 'bg-[#F7FAF7] border-[#DCE4DE] text-[#0F2417] placeholder-[#8FA899]' 
-                                : 'bg-[#040906] border-[#173020] text-[#4ADE80] placeholder-[#385443]'
+                                ? 'bg-legacy-mint-05 border-legacy-mint-25 text-legacy-forest-43 placeholder-legacy-mint-40'
+                                : 'bg-legacy-canvas-deep border-legacy-forest-32 text-legacy-green-400 placeholder-legacy-forest-07'
                             }`}
                           />
                         </div>
@@ -2546,35 +2547,35 @@ const SaaSDashboard = () => {
                 {/* AI Document Footprint Extractor — 3-Step Executive Flow */}
                 <div className={`p-6 lg:p-8 rounded-3xl border shadow-sm space-y-6 transition-all ${
                   isLight 
-                    ? 'bg-white border-[#E8ECE8] text-[#0F2417]' 
-                    : 'bg-[#08130C] border-[#152B1D] text-white'
+                    ? 'bg-white border-legacy-divider-light text-legacy-forest-43'
+                    : 'bg-legacy-surface-base border-legacy-divider-base text-white'
                 }`}>
                   
                   {/* Header & Badges */}
                   <div className={`flex flex-col sm:flex-row justify-between items-start sm:items-center gap-2 border-b pb-4 ${
-                    isLight ? 'border-[#E8ECE8]' : 'border-[#122418]'
+                    isLight ? 'border-legacy-divider-light' : 'border-legacy-forest-38'
                   }`}>
                     <div>
                       <div className="flex items-center space-x-2">
-                        <FileText className="w-5 h-5 text-[#00C853]" />
-                        <h3 className={`font-sans font-bold text-lg ${isLight ? 'text-[#0F2417]' : 'text-white'}`}>
+                        <FileText className="w-5 h-5 text-legacy-brand-base" />
+                        <h3 className={`font-sans font-bold text-lg ${isLight ? 'text-legacy-forest-43' : 'text-white'}`}>
                           ESG SaaS
                         </h3>
                       </div>
-                      <p className={`text-xs mt-0.5 font-sans ${isLight ? 'text-[#41634E]' : 'text-[#9EBFAB]'}`}>
+                      <p className={`text-xs mt-0.5 font-sans ${isLight ? 'text-legacy-forest-03' : 'text-legacy-mint-38'}`}>
                         Upload corporate bills, utility statements, or fuel spreadsheets. Carbon Zero BD RAG scans documents, matches national DoE emission factors, and calculates multi-category carbon metrics.
                       </p>
                     </div>
                     
                     <div className="flex items-center space-x-2 shrink-0">
                       <span className={`inline-flex items-center px-2.5 py-1 rounded-full text-[10px] font-mono font-bold ${
-                        isLight ? 'bg-[#E8F8EE] text-[#00873E] border border-[#C2E9CF]' : 'bg-[#0D2B1A] text-[#4ADE80] border border-[#1B4D2E]'
+                        isLight ? 'bg-legacy-positive-surface text-legacy-brand-strong border border-legacy-positive-border' : 'bg-legacy-surface-raised text-legacy-green-400 border border-legacy-forest-11'
                       }`}>
-                        <Sparkles className="w-3 h-3 mr-1 text-[#00C853]" />
+                        <Sparkles className="w-3 h-3 mr-1 text-legacy-brand-base" />
                         Multi-Corpus RAG Active
                       </span>
                       <span className={`inline-flex items-center px-2.5 py-1 rounded-full text-[10px] font-mono font-bold ${
-                        isLight ? 'bg-[#F0F5F1] text-[#345942] border border-[#D5E3D8]' : 'bg-[#0D2214] text-[#A7F3D0] border border-[#1E4D2B]'
+                        isLight ? 'bg-legacy-mint-13 text-legacy-forest-06 border border-legacy-mint-28' : 'bg-legacy-forest-47 text-legacy-emerald-200 border border-legacy-forest-10'
                       }`}>
                         DoE 2023 Factors
                       </span>
@@ -2583,7 +2584,7 @@ const SaaSDashboard = () => {
 
                   {/* 3-Step Interactive Process Navigation Bar */}
                   <div className={`p-1.5 rounded-2xl border grid grid-cols-3 gap-1 ${
-                    isLight ? 'bg-[#F4F6F4] border-[#E8ECE8]' : 'bg-[#040906] border-[#152B1D]'
+                    isLight ? 'bg-legacy-mint-08 border-legacy-divider-light' : 'bg-legacy-canvas-deep border-legacy-divider-base'
                   }`}>
                     {[
                       { step: 1, label: "1. Ingest & Upload", sub: "Raw Bills & Invoices" },
@@ -2598,15 +2599,15 @@ const SaaSDashboard = () => {
                           onClick={() => setExtractionStep(s.step)}
                           className={`py-2.5 px-3 rounded-xl text-center transition-all cursor-pointer ${
                             isActive
-                              ? 'bg-[#00C853] text-white shadow-sm font-bold border border-[#00C853]'
+                              ? 'bg-legacy-brand-base text-white shadow-sm font-bold border border-legacy-brand-base'
                               : (isLight 
-                                  ? 'text-[#557361] hover:text-[#0F2417] hover:bg-white/50' 
-                                  : 'text-[#7C9A88] hover:text-white hover:bg-[#08150D]')
+                                  ? 'text-legacy-text-quiet hover:text-legacy-forest-43 hover:bg-white/50'
+                                  : 'text-legacy-text-muted hover:text-white hover:bg-legacy-forest-66')
                           }`}
                         >
                           <div className={`text-xs font-bold font-mono ${isActive ? 'text-white' : ''}`}>{s.label}</div>
                           <div className={`text-[10px] font-mono hidden sm:block ${
-                            isActive ? 'text-white/90 font-medium' : (isLight ? 'text-[#7D9A8A]' : 'text-[#557361]')
+                            isActive ? 'text-white/90 font-medium' : (isLight ? 'text-legacy-mint-43' : 'text-legacy-text-quiet')
                           }`}>
                             {s.sub}
                           </div>
@@ -2620,25 +2621,25 @@ const SaaSDashboard = () => {
                     {/* Sample Quick Loader Banner */}
                     <div className={`rounded-2xl p-4 flex flex-col sm:flex-row justify-between items-center gap-3 border ${
                       isLight 
-                        ? 'bg-[#F2FBF5] border-[#BCE7CB]' 
-                        : 'bg-[#0A1D12] border-[#1B4D2E]'
+                        ? 'bg-legacy-mint-06 border-legacy-mint-32'
+                        : 'bg-legacy-forest-55 border-legacy-forest-11'
                     }`}>
                       <div className="flex items-center space-x-3">
                         <div className={`w-8 h-8 rounded-lg border flex items-center justify-center shrink-0 ${
-                          isLight ? 'bg-[#E8F8EE] border-[#BCE7CB] text-[#00873E]' : 'bg-[#0D2B1A] border-[#1B4D2E] text-[#4ADE80]'
+                          isLight ? 'bg-legacy-positive-surface border-legacy-mint-32 text-legacy-brand-strong' : 'bg-legacy-surface-raised border-legacy-forest-11 text-legacy-green-400'
                         }`}>
-                          <Database className={`w-4 h-4 ${isLight ? 'text-[#00873E]' : 'text-[#4ADE80]'}`} />
+                          <Database className={`w-4 h-4 ${isLight ? 'text-legacy-brand-strong' : 'text-legacy-green-400'}`} />
                         </div>
                         <div className="text-left">
-                          <div className={`text-xs font-bold ${isLight ? 'text-[#0F2417]' : 'text-white'}`}>Quick Test with Demo Sample</div>
-                          <div className={`text-[11px] ${isLight ? 'text-[#41634E]' : 'text-[#9EBFAB]'}`}>Load Dexterity Textiles Ltd Q2 Audit Statement (DEPZ TX-8491)</div>
+                          <div className={`text-xs font-bold ${isLight ? 'text-legacy-forest-43' : 'text-white'}`}>Quick Test with Demo Sample</div>
+                          <div className={`text-[11px] ${isLight ? 'text-legacy-forest-03' : 'text-legacy-mint-38'}`}>Load Dexterity Textiles Ltd Q2 Audit Statement (DEPZ TX-8491)</div>
                         </div>
                       </div>
                       <button
                         type="button"
                         onClick={() => executeAIExtraction("Dexterity_Textiles_ESG_Statement_Q2_2026.txt")}
                         disabled={isUploading}
-                        className="text-xs font-bold font-mono px-3.5 py-1.5 rounded-xl bg-[#00C853] hover:bg-[#00E676] text-white transition-all shadow-sm flex items-center space-x-1.5 shrink-0 cursor-pointer"
+                        className="text-xs font-bold font-mono px-3.5 py-1.5 rounded-xl bg-legacy-brand-base hover:bg-legacy-brand-bright text-white transition-all shadow-sm flex items-center space-x-1.5 shrink-0 cursor-pointer"
                       >
                         <Sparkles className="w-3.5 h-3.5 text-white" />
                         <span className="text-white font-mono font-bold">Load Demo Sample (fictional)</span>
@@ -2651,8 +2652,8 @@ const SaaSDashboard = () => {
                       onDrop={handleFileDrop}
                       className={`border-2 border-dashed rounded-2xl p-8 text-center transition-colors cursor-pointer relative ${
                         isLight 
-                          ? 'border-[#C2E9CF] bg-[#F7FAF7] hover:bg-[#E8F8EE]' 
-                          : 'border-[#1B3B26] bg-[#040906]/80 hover:bg-[#061009]'
+                          ? 'border-legacy-positive-border bg-legacy-mint-05 hover:bg-legacy-positive-surface'
+                          : 'border-legacy-forest-22 bg-legacy-canvas-deep/80 hover:bg-legacy-forest-76'
                       }`}
                     >
                       <input 
@@ -2663,11 +2664,11 @@ const SaaSDashboard = () => {
                         accept=".csv,.xlsx,.xls,.pdf,.txt"
                       />
                       <div onClick={() => document.getElementById('drag-file-input').click()} className="space-y-3">
-                        <Upload className="w-10 h-10 text-[#00C853] mx-auto animate-none" />
-                        <div className={`text-xs font-bold ${isLight ? 'text-[#0F2417]' : 'text-white'}`}>
+                        <Upload className="w-10 h-10 text-legacy-brand-base mx-auto animate-none" />
+                        <div className={`text-xs font-bold ${isLight ? 'text-legacy-forest-43' : 'text-white'}`}>
                           {uploadedFile ? `Uploaded Document: ${uploadedFile}` : "Drag & Drop Financial spreadsheets, utility bills, or fuel invoices here"}
                         </div>
-                        <div className={`text-[10px] ${isLight ? 'text-[#41634E]' : 'text-[#9EBFAB]'}`}>Supports PDF, XLSX, CSV, TXT (Max 25MB) • Encrypted Per-Tenant Ingestion</div>
+                        <div className={`text-[10px] ${isLight ? 'text-legacy-forest-03' : 'text-legacy-mint-38'}`}>Supports PDF, XLSX, CSV, TXT (Max 25MB) • Encrypted Per-Tenant Ingestion</div>
                       </div>
                     </div>
 
@@ -2677,7 +2678,7 @@ const SaaSDashboard = () => {
                         <button
                           onClick={() => executeAIExtraction(uploadedFileObj || uploadedFile || "ESG_Statement_Q2_2026.xlsx")}
                           disabled={isUploading}
-                          className="bg-[#00C853] hover:bg-[#00E676] disabled:bg-[#0E2014] disabled:text-white/40 disabled:border disabled:border-[#1A3824] disabled:shadow-none disabled:cursor-not-allowed text-white font-mono font-bold text-xs px-6 py-3 rounded-xl transition-all shadow-sm flex items-center justify-center space-x-2 w-full sm:w-auto cursor-pointer"
+                          className="bg-legacy-brand-base hover:bg-legacy-brand-bright disabled:bg-legacy-forest-49 disabled:text-white/40 disabled:border disabled:border-legacy-forest-26 disabled:shadow-none disabled:cursor-not-allowed text-white font-mono font-bold text-xs px-6 py-3 rounded-xl transition-all shadow-sm flex items-center justify-center space-x-2 w-full sm:w-auto cursor-pointer"
                         >
                           {isUploading ? (
                             <>
@@ -2695,7 +2696,7 @@ const SaaSDashboard = () => {
                         <button
                           type="button"
                           onClick={() => setExtractionStep(2)}
-                          className="bg-[#00C853] hover:bg-[#00E676] text-white font-mono font-bold text-xs px-4 py-3 rounded-xl transition-all shadow-sm flex items-center space-x-1.5 cursor-pointer"
+                          className="bg-legacy-brand-base hover:bg-legacy-brand-bright text-white font-mono font-bold text-xs px-4 py-3 rounded-xl transition-all shadow-sm flex items-center space-x-1.5 cursor-pointer"
                         >
                           <span className="text-white font-mono font-bold">View Metrics & Categories</span>
                           <ArrowRight className="w-3.5 h-3.5 text-white" />
@@ -2705,15 +2706,15 @@ const SaaSDashboard = () => {
                       {extractionResult && (
                         <div className={`flex items-center space-x-2.5 px-4 py-2.5 rounded-xl border ${
                           isLight 
-                            ? 'bg-[#E8F8EE] border-[#C2E9CF] text-[#00873E]' 
-                            : 'bg-[#0D2B1A] border-[#1B4D2E] text-[#4ADE80]'
+                            ? 'bg-legacy-positive-surface border-legacy-positive-border text-legacy-brand-strong'
+                            : 'bg-legacy-surface-raised border-legacy-forest-11 text-legacy-green-400'
                         }`}>
-                          <CheckCircle2 className="w-5 h-5 text-[#00C853]" />
+                          <CheckCircle2 className="w-5 h-5 text-legacy-brand-base" />
                           <div className="text-left leading-none">
                             <div className={`font-mono text-[9px] uppercase tracking-wider font-bold ${
-                              isLight ? 'text-[#00873E]' : 'text-[#A7F3D0]'
+                              isLight ? 'text-legacy-brand-strong' : 'text-legacy-emerald-200'
                             }`}>Status</div>
-                            <div className={`font-sans font-bold text-xs ${isLight ? 'text-[#0F2417]' : 'text-white'}`}>{extractionResult.review_status === 'DEMO_SAMPLE' ? 'DEMO SAMPLE — NOT CUSTOMER DATA' : 'UNREVIEWED — REVIEW REQUIRED'}</div>
+                            <div className={`font-sans font-bold text-xs ${isLight ? 'text-legacy-forest-43' : 'text-white'}`}>{extractionResult.review_status === 'DEMO_SAMPLE' ? 'DEMO SAMPLE — NOT CUSTOMER DATA' : 'UNREVIEWED — REVIEW REQUIRED'}</div>
                           </div>
                         </div>
                       )}
@@ -2723,8 +2724,8 @@ const SaaSDashboard = () => {
                   {/* EXECUTIVE HEADLINE METRICS CARD (Always accessible for complete footprint overview) */}
                   <div className={`p-6 rounded-2xl border transition-all ${
                     isLight 
-                      ? 'bg-[#F8FAF8] border-[#DCE4DE]' 
-                      : 'bg-[#040906] border-[#142A1B]'
+                      ? 'bg-legacy-mint-04 border-legacy-mint-25'
+                      : 'bg-legacy-canvas-deep border-legacy-forest-34'
                   }`}>
                     <div className="flex flex-col lg:flex-row justify-between items-start lg:items-center gap-6">
                       
@@ -2732,18 +2733,18 @@ const SaaSDashboard = () => {
                       <div className="space-y-1">
                         <div className="flex items-center space-x-2">
                           <span className={`font-mono text-[10px] uppercase tracking-wider font-bold ${
-                            isLight ? 'text-[#41634E]' : 'text-[#9EBFAB]'
+                            isLight ? 'text-legacy-forest-03' : 'text-legacy-mint-38'
                           }`}>
                             Total Invoiced Carbon Footprint
                           </span>
-                          <span className="inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-bold bg-emerald-500/10 text-[#00C853] border border-emerald-500/20">
-                            <TrendingDown className="w-3 h-3 mr-1 text-[#00C853]" />
+                          <span className="inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-bold bg-emerald-500/10 text-legacy-brand-base border border-emerald-500/20">
+                            <TrendingDown className="w-3 h-3 mr-1 text-legacy-brand-base" />
                             {Math.abs(activeMatrix.trendVsLastMonth)}% vs last month
                           </span>
                         </div>
                         <div className="flex items-baseline space-x-3">
                           <div className={`font-sans font-extrabold text-3xl sm:text-4xl tracking-tight ${
-                            isLight ? 'text-[#0F2417]' : 'text-white'
+                            isLight ? 'text-legacy-forest-43' : 'text-white'
                           }`}>
                             {unitMode === 'tonnes' 
                               ? `${activeMatrix.totalFootprintTonnes.toLocaleString()}` 
@@ -2751,12 +2752,12 @@ const SaaSDashboard = () => {
                             }
                           </div>
                           <div className={`font-mono text-base font-bold ${
-                            isLight ? 'text-[#00873E]' : 'text-[#00E676]'
+                            isLight ? 'text-legacy-brand-strong' : 'text-legacy-brand-bright'
                           }`}>
                             {unitMode === 'tonnes' ? 'tCO₂e' : 'kg CO₂e'}
                           </div>
                         </div>
-                        <div className={`text-xs ${isLight ? 'text-[#64748B]' : 'text-[#7C9A88]'}`}>
+                        <div className={`text-xs ${isLight ? 'text-legacy-slate-500' : 'text-legacy-text-muted'}`}>
                           Calculated from {activeMatrix.categories.filter(c => c.carbonKg > 0).length} active corporate emission categories • estimate, not assured
                         </div>
                       </div>
@@ -2765,24 +2766,24 @@ const SaaSDashboard = () => {
                       <div className="flex flex-wrap items-center gap-4">
                         {/* Spend Box */}
                         <div className={`px-4 py-2.5 rounded-xl border text-left ${
-                          isLight ? 'bg-white border-[#E8ECE8]' : 'bg-[#08130C] border-[#173020]'
+                          isLight ? 'bg-white border-legacy-divider-light' : 'bg-legacy-surface-base border-legacy-forest-32'
                         }`}>
-                          <div className={`text-[10px] uppercase font-mono font-bold ${isLight ? 'text-[#41634E]' : 'text-[#7C9A88]'}`}>
+                          <div className={`text-[10px] uppercase font-mono font-bold ${isLight ? 'text-legacy-forest-03' : 'text-legacy-text-muted'}`}>
                             Invoiced Spend
                           </div>
-                          <div className={`text-sm font-bold font-mono ${isLight ? 'text-[#0F2417]' : 'text-white'}`}>
+                          <div className={`text-sm font-bold font-mono ${isLight ? 'text-legacy-forest-43' : 'text-white'}`}>
                             ৳ {activeMatrix.totalSpendBdt.toLocaleString()} <span className="text-[10px] font-normal text-slate-400">BDT</span>
                           </div>
                         </div>
 
                         {/* Intensity Box */}
                         <div className={`px-4 py-2.5 rounded-xl border text-left ${
-                          isLight ? 'bg-white border-[#E8ECE8]' : 'bg-[#08130C] border-[#173020]'
+                          isLight ? 'bg-white border-legacy-divider-light' : 'bg-legacy-surface-base border-legacy-forest-32'
                         }`}>
-                          <div className={`text-[10px] uppercase font-mono font-bold ${isLight ? 'text-[#41634E]' : 'text-[#7C9A88]'}`}>
+                          <div className={`text-[10px] uppercase font-mono font-bold ${isLight ? 'text-legacy-forest-03' : 'text-legacy-text-muted'}`}>
                             Carbon Intensity
                           </div>
-                          <div className={`text-sm font-bold font-mono ${isLight ? 'text-[#00873E]' : 'text-[#4ADE80]'}`}>
+                          <div className={`text-sm font-bold font-mono ${isLight ? 'text-legacy-brand-strong' : 'text-legacy-green-400'}`}>
                             {activeMatrix.totalSpendBdt > 0 
                               ? ((activeMatrix.totalFootprintKg / activeMatrix.totalSpendBdt) * 1000).toFixed(2) 
                               : "0.00"
@@ -2792,15 +2793,15 @@ const SaaSDashboard = () => {
 
                         {/* Unit Toggle Buttons */}
                         <div className={`flex items-center p-1 rounded-xl border ${
-                          isLight ? 'bg-white border-[#DCE4DE]' : 'bg-[#08130C] border-[#173020]'
+                          isLight ? 'bg-white border-legacy-mint-25' : 'bg-legacy-surface-base border-legacy-forest-32'
                         }`}>
                           <button
                             type="button"
                             onClick={() => setUnitMode('kg')}
                             className={`px-3 py-1.5 rounded-lg text-xs font-mono font-bold transition-all cursor-pointer ${
                               unitMode === 'kg'
-                                ? 'bg-[#00C853] text-white shadow-sm'
-                                : (isLight ? 'text-[#557361] hover:text-[#0F2417]' : 'text-[#7C9A88] hover:text-white')
+                                ? 'bg-legacy-brand-base text-white shadow-sm'
+                                : (isLight ? 'text-legacy-text-quiet hover:text-legacy-forest-43' : 'text-legacy-text-muted hover:text-white')
                             }`}
                           >
                             kg CO₂e
@@ -2810,8 +2811,8 @@ const SaaSDashboard = () => {
                             onClick={() => setUnitMode('tonnes')}
                             className={`px-3 py-1.5 rounded-lg text-xs font-mono font-bold transition-all cursor-pointer ${
                               unitMode === 'tonnes'
-                                ? 'bg-[#00C853] text-white shadow-sm'
-                                : (isLight ? 'text-[#557361] hover:text-[#0F2417]' : 'text-[#7C9A88] hover:text-white')
+                                ? 'bg-legacy-brand-base text-white shadow-sm'
+                                : (isLight ? 'text-legacy-text-quiet hover:text-legacy-forest-43' : 'text-legacy-text-muted hover:text-white')
                             }`}
                           >
                             Tonnes (t)
@@ -2822,7 +2823,7 @@ const SaaSDashboard = () => {
                         <button
                           type="button"
                           onClick={() => setIsAddCustomModalOpen(true)}
-                          className="bg-[#00C853] hover:bg-[#00E676] text-white text-xs font-bold font-mono px-4 py-2.5 rounded-xl transition-all shadow-sm flex items-center space-x-1.5 cursor-pointer"
+                          className="bg-legacy-brand-base hover:bg-legacy-brand-bright text-white text-xs font-bold font-mono px-4 py-2.5 rounded-xl transition-all shadow-sm flex items-center space-x-1.5 cursor-pointer"
                         >
                           <Plus className="w-3.5 h-3.5 text-white stroke-[2.5]" />
                           <span className="text-white font-mono font-bold">Add Custom Item</span>
@@ -2847,18 +2848,18 @@ const SaaSDashboard = () => {
                       
                       {/* Left Column: Interactive Donut Chart */}
                       <div className={`lg:col-span-6 p-5 rounded-2xl border flex flex-col items-center justify-between ${
-                        isLight ? 'bg-white border-[#E8ECE8]' : 'bg-[#040906] border-[#152B1D]'
+                        isLight ? 'bg-white border-legacy-divider-light' : 'bg-legacy-canvas-deep border-legacy-divider-base'
                       }`}>
                         <div className="w-full flex justify-between items-center border-b pb-3 mb-2">
                           <div className="flex items-center space-x-2">
-                            <PieChart className="w-4 h-4 text-[#00C853]" />
+                            <PieChart className="w-4 h-4 text-legacy-brand-base" />
                             <h4 className={`text-xs font-bold uppercase font-mono tracking-wider ${
-                              isLight ? 'text-[#0F2417]' : 'text-white'
+                              isLight ? 'text-legacy-forest-43' : 'text-white'
                             }`}>
                               Emission Distribution by Category
                             </h4>
                           </div>
-                          <span className={`text-[10px] font-mono ${isLight ? 'text-[#557361]' : 'text-[#7C9A88]'}`}>
+                          <span className={`text-[10px] font-mono ${isLight ? 'text-legacy-text-quiet' : 'text-legacy-text-muted'}`}>
                             Hover slices for breakdown
                           </span>
                         </div>
@@ -2879,18 +2880,18 @@ const SaaSDashboard = () => {
                         
                         {/* Top 3 Impact Categories Cards */}
                         <div className={`p-5 rounded-2xl border space-y-3 ${
-                          isLight ? 'bg-white border-[#E8ECE8]' : 'bg-[#040906] border-[#152B1D]'
+                          isLight ? 'bg-white border-legacy-divider-light' : 'bg-legacy-canvas-deep border-legacy-divider-base'
                         }`}>
                           <div className="flex justify-between items-center pb-2 border-b">
                             <div className="flex items-center space-x-2">
-                              <Activity className="w-4 h-4 text-[#00C853]" />
+                              <Activity className="w-4 h-4 text-legacy-brand-base" />
                               <h4 className={`text-xs font-bold uppercase font-mono tracking-wider ${
-                                isLight ? 'text-[#0F2417]' : 'text-white'
+                                isLight ? 'text-legacy-forest-43' : 'text-white'
                               }`}>
                                 Top Impact Drivers
                               </h4>
                             </div>
-                            <span className="text-[10px] font-mono text-[#00C853] font-bold">
+                            <span className="text-[10px] font-mono text-legacy-brand-base font-bold">
                               Prioritized by Footprint Magnitude
                             </span>
                           </div>
@@ -2901,8 +2902,8 @@ const SaaSDashboard = () => {
                                 key={top.id}
                                 className={`p-3 rounded-xl border transition-all ${
                                   isLight 
-                                    ? 'bg-[#F8FAF8] border-[#E8ECE8] hover:border-emerald-300' 
-                                    : 'bg-[#08130C] border-[#173020] hover:border-[#00C853]/40'
+                                    ? 'bg-legacy-mint-04 border-legacy-divider-light hover:border-emerald-300'
+                                    : 'bg-legacy-surface-base border-legacy-forest-32 hover:border-legacy-brand-base/40'
                                 }`}
                               >
                                 <div className="flex justify-between items-center mb-1.5">
@@ -2913,12 +2914,12 @@ const SaaSDashboard = () => {
                                     >
                                       {top.rank}
                                     </span>
-                                    <span className={`text-xs font-bold ${isLight ? 'text-[#0F2417]' : 'text-white'}`}>
+                                    <span className={`text-xs font-bold ${isLight ? 'text-legacy-forest-43' : 'text-white'}`}>
                                       {top.name}
                                     </span>
                                   </div>
                                   <div className="text-right font-mono">
-                                    <span className={`text-xs font-black ${isLight ? 'text-[#00873E]' : 'text-[#4ADE80]'}`}>
+                                    <span className={`text-xs font-black ${isLight ? 'text-legacy-brand-strong' : 'text-legacy-green-400'}`}>
                                       {unitMode === 'tonnes' ? `${top.carbonTonnes} t` : `${top.carbonKg.toLocaleString()} kg`}
                                     </span>
                                     <span className={`ml-2 text-[10px] font-bold ${isLight ? 'text-slate-500' : 'text-slate-400'}`}>
@@ -2945,19 +2946,19 @@ const SaaSDashboard = () => {
                         {/* Dynamic AI Decarbonization Recommendation Card */}
                         <div className={`p-4 rounded-2xl border flex items-start space-x-3 ${
                           isLight 
-                            ? 'bg-[#F0FAF3] border-[#BCE7CB]' 
-                            : 'bg-[#06180E] border-[#184828]'
+                            ? 'bg-legacy-mint-10 border-legacy-mint-32'
+                            : 'bg-legacy-forest-65 border-legacy-forest-17'
                         }`}>
                           <div className={`p-2 rounded-xl shrink-0 ${
-                            isLight ? 'bg-emerald-100 text-[#00873E]' : 'bg-[#0D2B1A] text-[#4ADE80]'
+                            isLight ? 'bg-emerald-100 text-legacy-brand-strong' : 'bg-legacy-surface-raised text-legacy-green-400'
                           }`}>
-                            <Lightbulb className="w-4 h-4 text-[#00C853]" />
+                            <Lightbulb className="w-4 h-4 text-legacy-brand-base" />
                           </div>
                           <div className="space-y-1">
-                            <div className={`text-xs font-bold font-sans ${isLight ? 'text-[#0F2417]' : 'text-white'}`}>
+                            <div className={`text-xs font-bold font-sans ${isLight ? 'text-legacy-forest-43' : 'text-white'}`}>
                               AI Decarbonization Action Plan
                             </div>
-                            <p className={`text-[11px] leading-relaxed ${isLight ? 'text-[#2E543C]' : 'text-[#A7F3D0]'}`}>
+                            <p className={`text-[11px] leading-relaxed ${isLight ? 'text-legacy-forest-08' : 'text-legacy-emerald-200'}`}>
                               {activeMatrix.quickTip}
                             </p>
                           </div>
@@ -2971,17 +2972,17 @@ const SaaSDashboard = () => {
                     <div className="space-y-3">
                       <div className="flex justify-between items-center">
                         <div>
-                          <h4 className={`text-sm font-bold font-sans ${isLight ? 'text-[#0F2417]' : 'text-white'}`}>
+                          <h4 className={`text-sm font-bold font-sans ${isLight ? 'text-legacy-forest-43' : 'text-white'}`}>
                             All 9 Activity & Invoiced Expense Categories
                           </h4>
-                          <p className={`text-[11px] ${isLight ? 'text-[#41634E]' : 'text-[#7C9A88]'}`}>
+                          <p className={`text-[11px] ${isLight ? 'text-legacy-forest-03' : 'text-legacy-text-muted'}`}>
                             Categorized under GHG Protocol Corporate Standard & Bangladesh DoE Emission Factors
                           </p>
                         </div>
                         <button
                           type="button"
                           onClick={() => setIsAddCustomModalOpen(true)}
-                          className="bg-[#00C853] hover:bg-[#00E676] text-white text-xs font-mono font-bold px-3.5 py-1.5 rounded-lg transition-all shadow-sm flex items-center space-x-1.5 cursor-pointer"
+                          className="bg-legacy-brand-base hover:bg-legacy-brand-bright text-white text-xs font-mono font-bold px-3.5 py-1.5 rounded-lg transition-all shadow-sm flex items-center space-x-1.5 cursor-pointer"
                         >
                           <Plus className="w-3.5 h-3.5 text-white stroke-[2.5]" />
                           <span className="text-white font-mono font-bold">Add Custom Line Item</span>
@@ -2996,8 +2997,8 @@ const SaaSDashboard = () => {
                               key={cat.id}
                               className={`p-4 rounded-2xl border transition-all relative flex flex-col justify-between ${
                                 isLight 
-                                  ? 'bg-white border-[#E8ECE8] hover:border-[#00C853]/50 hover:shadow-sm' 
-                                  : 'bg-[#040906] border-[#152B1D] hover:border-[#00C853]/40'
+                                  ? 'bg-white border-legacy-divider-light hover:border-legacy-brand-base/50 hover:shadow-sm'
+                                  : 'bg-legacy-canvas-deep border-legacy-divider-base hover:border-legacy-brand-base/40'
                               }`}
                             >
                               <div className="space-y-3">
@@ -3011,11 +3012,11 @@ const SaaSDashboard = () => {
                                       <IconComp className="w-4 h-4 text-white" />
                                     </div>
                                     <div className="leading-tight">
-                                      <div className={`text-xs font-bold ${isLight ? 'text-[#0F2417]' : 'text-white'}`}>
+                                      <div className={`text-xs font-bold ${isLight ? 'text-legacy-forest-43' : 'text-white'}`}>
                                         {cat.name}
                                       </div>
                                       <span className={`text-[9px] font-mono px-1.5 py-0.5 rounded border inline-block mt-0.5 ${
-                                        isLight ? 'bg-slate-100 text-slate-600 border-slate-200' : 'bg-[#0B1A11] text-emerald-300/80 border-[#1B3B26]'
+                                        isLight ? 'bg-slate-100 text-slate-600 border-slate-200' : 'bg-legacy-forest-56 text-emerald-300/80 border-legacy-forest-22'
                                       }`}>
                                         {cat.scope}
                                       </span>
@@ -3027,8 +3028,8 @@ const SaaSDashboard = () => {
                                     type="button"
                                     onClick={() => setEditingCategory(cat)}
                                     title="Refine category values"
-                                    className={`p-1.5 rounded-lg text-slate-400 hover:text-[#00C853] transition-colors cursor-pointer border ${
-                                      isLight ? 'border-slate-100 hover:bg-slate-50' : 'border-transparent hover:bg-[#0D2214]'
+                                    className={`p-1.5 rounded-lg text-slate-400 hover:text-legacy-brand-base transition-colors cursor-pointer border ${
+                                      isLight ? 'border-slate-100 hover:bg-slate-50' : 'border-transparent hover:bg-legacy-forest-47'
                                     }`}
                                   >
                                     <Sliders className="w-3.5 h-3.5" />
@@ -3038,18 +3039,18 @@ const SaaSDashboard = () => {
                                 {/* Spend & Emissions Figures */}
                                 <div className="grid grid-cols-2 gap-2 pt-1 border-t border-slate-100/10">
                                   <div>
-                                    <span className={`text-[10px] font-mono uppercase ${isLight ? 'text-[#64748B]' : 'text-[#7C9A88]'}`}>
+                                    <span className={`text-[10px] font-mono uppercase ${isLight ? 'text-legacy-slate-500' : 'text-legacy-text-muted'}`}>
                                       Spend (BDT)
                                     </span>
-                                    <div className={`text-xs font-bold font-mono ${isLight ? 'text-[#0F2417]' : 'text-white'}`}>
+                                    <div className={`text-xs font-bold font-mono ${isLight ? 'text-legacy-forest-43' : 'text-white'}`}>
                                       ৳ {cat.spendBdt.toLocaleString()}
                                     </div>
                                   </div>
                                   <div className="text-right">
-                                    <span className={`text-[10px] font-mono uppercase ${isLight ? 'text-[#64748B]' : 'text-[#7C9A88]'}`}>
+                                    <span className={`text-[10px] font-mono uppercase ${isLight ? 'text-legacy-slate-500' : 'text-legacy-text-muted'}`}>
                                       Emissions
                                     </span>
-                                    <div className={`text-xs font-bold font-mono ${isLight ? 'text-[#00873E]' : 'text-[#4ADE80]'}`}>
+                                    <div className={`text-xs font-bold font-mono ${isLight ? 'text-legacy-brand-strong' : 'text-legacy-green-400'}`}>
                                       {unitMode === 'tonnes' ? `${cat.carbonTonnes} t` : `${cat.carbonKg.toLocaleString()} kg`}
                                     </div>
                                   </div>
@@ -3059,7 +3060,7 @@ const SaaSDashboard = () => {
                                 <div className="space-y-1">
                                   <div className="flex justify-between text-[10px] font-mono">
                                     <span className={isLight ? 'text-slate-500' : 'text-slate-400'}>Share</span>
-                                    <span className="font-bold text-[#00C853]">{cat.percentage}%</span>
+                                    <span className="font-bold text-legacy-brand-base">{cat.percentage}%</span>
                                   </div>
                                   <div className="w-full h-1.5 rounded-full bg-slate-200/30 overflow-hidden">
                                     <div 
@@ -3089,13 +3090,13 @@ const SaaSDashboard = () => {
                     {/* Custom Added Line Items Ledger (if any) */}
                     {customItems.length > 0 && (
                       <div className={`p-4 rounded-2xl border space-y-3 ${
-                        isLight ? 'bg-[#F9FBFA] border-[#DCE4DE]' : 'bg-[#040906] border-[#152B1D]'
+                        isLight ? 'bg-legacy-mint-02 border-legacy-mint-25' : 'bg-legacy-canvas-deep border-legacy-divider-base'
                       }`}>
                         <div className="flex justify-between items-center">
                           <div className="flex items-center space-x-2">
-                            <Package className="w-4 h-4 text-[#00C853]" />
+                            <Package className="w-4 h-4 text-legacy-brand-base" />
                             <h4 className={`text-xs font-bold uppercase font-mono tracking-wider ${
-                              isLight ? 'text-[#0F2417]' : 'text-white'
+                              isLight ? 'text-legacy-forest-43' : 'text-white'
                             }`}>
                               Custom Invoiced Additions ({customItems.length})
                             </h4>
@@ -3122,15 +3123,15 @@ const SaaSDashboard = () => {
                             </thead>
                             <tbody className={`divide-y ${isLight ? 'divide-slate-100' : 'divide-slate-800/40'}`}>
                               {customItems.map((item) => (
-                                <tr key={item.id} className={isLight ? 'hover:bg-white' : 'hover:bg-[#08130C]'}>
-                                  <td className={`py-2 font-bold ${isLight ? 'text-[#0F2417]' : 'text-white'}`}>
+                                <tr key={item.id} className={isLight ? 'hover:bg-white' : 'hover:bg-legacy-surface-base'}>
+                                  <td className={`py-2 font-bold ${isLight ? 'text-legacy-forest-43' : 'text-white'}`}>
                                     {item.name}
                                   </td>
                                   <td className="capitalize text-slate-400">
                                     {item.categoryId.replace('_', ' ')}
                                   </td>
                                   <td>
-                                    <span className="px-2 py-0.5 rounded text-[9px] font-mono font-bold bg-emerald-500/10 text-[#00C853] border border-emerald-500/20">
+                                    <span className="px-2 py-0.5 rounded text-[9px] font-mono font-bold bg-emerald-500/10 text-legacy-brand-base border border-emerald-500/20">
                                       {item.scope}
                                     </span>
                                   </td>
@@ -3140,7 +3141,7 @@ const SaaSDashboard = () => {
                                   <td className="font-mono text-slate-400">
                                     {item.quantity} {item.unit}
                                   </td>
-                                  <td className="font-mono font-bold text-[#00C853]">
+                                  <td className="font-mono font-bold text-legacy-brand-base">
                                     +{unitMode === 'tonnes' ? (item.carbonKg / 1000).toFixed(3) : item.carbonKg.toLocaleString()} {unitMode === 'tonnes' ? 't' : 'kg'}
                                   </td>
                                   <td className="text-right">
@@ -3168,19 +3169,19 @@ const SaaSDashboard = () => {
                     {extractionResult ? (
                       <div className={`rounded-2xl p-5 space-y-3 border ${
                         isLight 
-                          ? 'bg-[#F7FAF7] border-[#E8ECE8]' 
-                          : 'bg-[#040906] border-[#152B1D]'
+                          ? 'bg-legacy-mint-05 border-legacy-divider-light'
+                          : 'bg-legacy-canvas-deep border-legacy-divider-base'
                       }`}>
                         <div className={`flex justify-between items-center pb-2 border-b ${
-                          isLight ? 'border-[#E8ECE8]' : 'border-[#122418]'
+                          isLight ? 'border-legacy-divider-light' : 'border-legacy-forest-38'
                         }`}>
                           <div className="flex items-center space-x-2">
-                            <ShieldCheck className="w-4 h-4 text-[#00C853]" />
-                            <span className={`font-sans font-bold text-xs ${isLight ? 'text-[#0F2417]' : 'text-white'}`}>
+                            <ShieldCheck className="w-4 h-4 text-legacy-brand-base" />
+                            <span className={`font-sans font-bold text-xs ${isLight ? 'text-legacy-forest-43' : 'text-white'}`}>
                               Extraction Evidence — {extractionResult.filename}
                             </span>
                           </div>
-                          <span className={`font-mono text-[10px] ${isLight ? 'text-[#41634E]' : 'text-[#9EBFAB]'}`}>
+                          <span className={`font-mono text-[10px] ${isLight ? 'text-legacy-forest-03' : 'text-legacy-mint-38'}`}>
                             {extractionResult.overall_confidence == null ? 'Rule-based match (no model confidence)' : `Extraction-model confidence: ${Math.round(extractionResult.overall_confidence * 100)}%`} • Not verified
                           </span>
                         </div>
@@ -3189,7 +3190,7 @@ const SaaSDashboard = () => {
                           <table className="w-full text-left font-sans text-xs border-collapse">
                             <thead>
                               <tr className={`font-bold border-b text-[10px] uppercase tracking-wider ${
-                                isLight ? 'text-[#41634E] border-[#E8ECE8]' : 'text-[#9EBFAB] border-[#122418]'
+                                isLight ? 'text-legacy-forest-03 border-legacy-divider-light' : 'text-legacy-mint-38 border-legacy-forest-38'
                               }`}>
                                 <th className="py-3 px-3 w-40 min-w-[130px]">Metric</th>
                                 <th className="py-3 px-3 w-36 min-w-[120px]">Scope</th>
@@ -3199,36 +3200,36 @@ const SaaSDashboard = () => {
                                 <th className="py-3 px-3 w-28 min-w-[90px] text-right">Confidence</th>
                               </tr>
                             </thead>
-                            <tbody className={`divide-y ${isLight ? 'divide-[#E8ECE8]' : 'divide-[#122418]'}`}>
+                            <tbody className={`divide-y ${isLight ? 'divide-legacy-divider-light' : 'divide-legacy-forest-38'}`}>
                               {extractionResult.details && extractionResult.details.map((item, idx) => (
-                                <tr key={idx} className={`transition-colors ${isLight ? 'hover:bg-white' : 'hover:bg-[#08130C]'}`}>
-                                  <td className={`py-3 px-3 font-bold capitalize whitespace-nowrap ${isLight ? 'text-[#0F2417]' : 'text-white'}`}>
+                                <tr key={idx} className={`transition-colors ${isLight ? 'hover:bg-white' : 'hover:bg-legacy-surface-base'}`}>
+                                  <td className={`py-3 px-3 font-bold capitalize whitespace-nowrap ${isLight ? 'text-legacy-forest-43' : 'text-white'}`}>
                                     {item.param_name}
                                   </td>
                                   <td className="py-3 px-3 whitespace-nowrap">
                                     <span className={`inline-flex items-center px-3 py-1 rounded-full text-[10px] font-mono font-bold border whitespace-nowrap shadow-xs ${
                                       item.scope?.toLowerCase().includes('scope 1')
-                                        ? isLight ? 'bg-emerald-50 text-emerald-800 border-emerald-300' : 'bg-[#0D2B1A] text-[#4ADE80] border-[#1B4D2E]'
+                                        ? isLight ? 'bg-emerald-50 text-emerald-800 border-emerald-300' : 'bg-legacy-surface-raised text-legacy-green-400 border-legacy-forest-11'
                                         : item.scope?.toLowerCase().includes('scope 2')
-                                        ? isLight ? 'bg-teal-50 text-teal-800 border-teal-300' : 'bg-[#0B2522] text-[#2DD4BF] border-[#134E4A]'
-                                        : isLight ? 'bg-slate-100 text-slate-700 border-slate-300' : 'bg-[#101E17] text-[#86EFAC] border-[#1E3A2B]'
+                                        ? isLight ? 'bg-teal-50 text-teal-800 border-teal-300' : 'bg-legacy-teal-02 text-legacy-teal-400 border-legacy-teal-900'
+                                        : isLight ? 'bg-slate-100 text-slate-700 border-slate-300' : 'bg-legacy-forest-48 text-legacy-green-300 border-legacy-forest-19'
                                     }`}>
                                       <span className="w-1.5 h-1.5 rounded-full bg-current mr-1.5 shrink-0 opacity-80" />
                                       {item.scope}
                                     </span>
                                   </td>
-                                  <td className={`py-3 px-3 font-mono font-bold whitespace-nowrap ${isLight ? 'text-[#00873E]' : 'text-[#4ADE80]'}`}>
+                                  <td className={`py-3 px-3 font-mono font-bold whitespace-nowrap ${isLight ? 'text-legacy-brand-strong' : 'text-legacy-green-400'}`}>
                                     {Number(item.value).toLocaleString()} {item.unit}
                                   </td>
-                                  <td className={`py-3 px-3 font-mono text-[11px] whitespace-nowrap ${isLight ? 'text-[#41634E]' : 'text-[#9EBFAB]'}`}>
+                                  <td className={`py-3 px-3 font-mono text-[11px] whitespace-nowrap ${isLight ? 'text-legacy-forest-03' : 'text-legacy-mint-38'}`}>
                                     Page {item.source_page || 1}
                                   </td>
-                                  <td className={`py-3 px-3 text-[11px] italic max-w-[360px] truncate ${isLight ? 'text-[#41634E]' : 'text-[#B4D2C1]'}`} title={item.raw_snippet}>
+                                  <td className={`py-3 px-3 text-[11px] italic max-w-[360px] truncate ${isLight ? 'text-legacy-forest-03' : 'text-legacy-mint-34'}`} title={item.raw_snippet}>
                                     "{item.raw_snippet}"
                                   </td>
                                   <td className="py-3 px-3 text-right whitespace-nowrap">
                                     <span className={`inline-block px-2.5 py-0.5 rounded-full text-[9px] font-bold border ${
-                                      isLight ? 'bg-[#E8F8EE] text-[#00873E] border-[#C2E9CF]' : 'bg-[#0D2B1A] text-[#4ADE80] border-[#1B4D2E]'
+                                      isLight ? 'bg-legacy-positive-surface text-legacy-brand-strong border-legacy-positive-border' : 'bg-legacy-surface-raised text-legacy-green-400 border-legacy-forest-11'
                                     }`}>
                                       {item.confidence == null ? '—' : `${Math.round(item.confidence * 100)}%`}
                                     </span>
@@ -3241,10 +3242,10 @@ const SaaSDashboard = () => {
                       </div>
                     ) : (
                       <div className={`p-8 rounded-2xl border text-center space-y-2 ${
-                        isLight ? 'bg-[#F9FBFA] border-[#DCE4DE]' : 'bg-[#040906] border-[#152B1D]'
+                        isLight ? 'bg-legacy-mint-02 border-legacy-mint-25' : 'bg-legacy-canvas-deep border-legacy-divider-base'
                       }`}>
-                        <ShieldCheck className="w-8 h-8 text-[#00C853] mx-auto" />
-                        <div className={`text-sm font-bold ${isLight ? 'text-[#0F2417]' : 'text-white'}`}>
+                        <ShieldCheck className="w-8 h-8 text-legacy-brand-base mx-auto" />
+                        <div className={`text-sm font-bold ${isLight ? 'text-legacy-forest-43' : 'text-white'}`}>
                           No Extracted Audit Traces Yet
                         </div>
                         <p className={`text-xs ${isLight ? 'text-slate-500' : 'text-slate-400'}`}>
@@ -3253,7 +3254,7 @@ const SaaSDashboard = () => {
                         <button
                           type="button"
                           onClick={() => executeAIExtraction("Dexterity_Textiles_ESG_Statement_Q2_2026.txt")}
-                          className="mt-2 text-xs font-mono font-bold px-4 py-2 rounded-xl bg-[#00C853] text-white hover:bg-[#00E676] transition-all shadow-sm cursor-pointer inline-flex items-center space-x-1.5"
+                          className="mt-2 text-xs font-mono font-bold px-4 py-2 rounded-xl bg-legacy-brand-base text-white hover:bg-legacy-brand-bright transition-all shadow-sm cursor-pointer inline-flex items-center space-x-1.5"
                         >
                           <Sparkles className="w-3.5 h-3.5 text-white" />
                           <span className="text-white font-mono font-bold">Load Sample Document Now</span>
@@ -3266,11 +3267,11 @@ const SaaSDashboard = () => {
                   {isAddCustomModalOpen && (
                     <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/70 backdrop-blur-sm animate-fade-in">
                       <div className={`w-full max-w-lg rounded-3xl p-6 border shadow-2xl space-y-5 ${
-                        isLight ? 'bg-white border-slate-200 text-[#0F2417]' : 'bg-[#08130C] border-[#1B3B26] text-white'
+                        isLight ? 'bg-white border-slate-200 text-legacy-forest-43' : 'bg-legacy-surface-base border-legacy-forest-22 text-white'
                       }`}>
                         <div className="flex justify-between items-center border-b pb-3">
                           <div className="flex items-center space-x-2">
-                            <Plus className="w-5 h-5 text-[#00C853]" />
+                            <Plus className="w-5 h-5 text-legacy-brand-base" />
                             <h3 className="font-bold text-base font-sans">Add Custom Expense / Invoice Item</h3>
                           </div>
                           <button
@@ -3293,8 +3294,8 @@ const SaaSDashboard = () => {
                               placeholder="e.g. Auxiliary Diesel for Factory Generator B"
                               value={newCustomItem.name}
                               onChange={(e) => setNewCustomItem({ ...newCustomItem, name: e.target.value })}
-                              className={`w-full text-xs p-2.5 rounded-xl border focus:outline-none focus:border-[#00C853] ${
-                                isLight ? 'bg-slate-50 border-slate-200 text-[#0F2417]' : 'bg-[#040906] border-[#152B1D] text-white'
+                              className={`w-full text-xs p-2.5 rounded-xl border focus:outline-none focus:border-legacy-brand-base ${
+                                isLight ? 'bg-slate-50 border-slate-200 text-legacy-forest-43' : 'bg-legacy-canvas-deep border-legacy-divider-base text-white'
                               }`}
                             />
                           </div>
@@ -3307,8 +3308,8 @@ const SaaSDashboard = () => {
                               <select
                                 value={newCustomItem.categoryId}
                                 onChange={(e) => setNewCustomItem({ ...newCustomItem, categoryId: e.target.value })}
-                                className={`w-full text-xs p-2.5 rounded-xl border focus:outline-none focus:border-[#00C853] ${
-                                  isLight ? 'bg-slate-50 border-slate-200 text-[#0F2417]' : 'bg-[#040906] border-[#152B1D] text-white'
+                                className={`w-full text-xs p-2.5 rounded-xl border focus:outline-none focus:border-legacy-brand-base ${
+                                  isLight ? 'bg-slate-50 border-slate-200 text-legacy-forest-43' : 'bg-legacy-canvas-deep border-legacy-divider-base text-white'
                                 }`}
                               >
                                 {NINE_CATEGORIES_CONFIG.map(c => (
@@ -3324,8 +3325,8 @@ const SaaSDashboard = () => {
                               <select
                                 value={newCustomItem.scope}
                                 onChange={(e) => setNewCustomItem({ ...newCustomItem, scope: e.target.value })}
-                                className={`w-full text-xs p-2.5 rounded-xl border focus:outline-none focus:border-[#00C853] ${
-                                  isLight ? 'bg-slate-50 border-slate-200 text-[#0F2417]' : 'bg-[#040906] border-[#152B1D] text-white'
+                                className={`w-full text-xs p-2.5 rounded-xl border focus:outline-none focus:border-legacy-brand-base ${
+                                  isLight ? 'bg-slate-50 border-slate-200 text-legacy-forest-43' : 'bg-legacy-canvas-deep border-legacy-divider-base text-white'
                                 }`}
                               >
                                 <option value="Scope 1">Scope 1 (Direct)</option>
@@ -3345,8 +3346,8 @@ const SaaSDashboard = () => {
                                 placeholder="e.g. 75000"
                                 value={newCustomItem.spendBdt}
                                 onChange={(e) => setNewCustomItem({ ...newCustomItem, spendBdt: e.target.value })}
-                                className={`w-full text-xs p-2.5 rounded-xl border focus:outline-none focus:border-[#00C853] ${
-                                  isLight ? 'bg-slate-50 border-slate-200 text-[#0F2417]' : 'bg-[#040906] border-[#152B1D] text-white'
+                                className={`w-full text-xs p-2.5 rounded-xl border focus:outline-none focus:border-legacy-brand-base ${
+                                  isLight ? 'bg-slate-50 border-slate-200 text-legacy-forest-43' : 'bg-legacy-canvas-deep border-legacy-divider-base text-white'
                                 }`}
                               />
                             </div>
@@ -3361,8 +3362,8 @@ const SaaSDashboard = () => {
                                   placeholder="e.g. 500"
                                   value={newCustomItem.quantity}
                                   onChange={(e) => setNewCustomItem({ ...newCustomItem, quantity: e.target.value })}
-                                  className={`w-2/3 text-xs p-2.5 rounded-xl border focus:outline-none focus:border-[#00C853] ${
-                                    isLight ? 'bg-slate-50 border-slate-200 text-[#0F2417]' : 'bg-[#040906] border-[#152B1D] text-white'
+                                  className={`w-2/3 text-xs p-2.5 rounded-xl border focus:outline-none focus:border-legacy-brand-base ${
+                                    isLight ? 'bg-slate-50 border-slate-200 text-legacy-forest-43' : 'bg-legacy-canvas-deep border-legacy-divider-base text-white'
                                   }`}
                                 />
                                 <input
@@ -3370,8 +3371,8 @@ const SaaSDashboard = () => {
                                   placeholder="Units"
                                   value={newCustomItem.unit}
                                   onChange={(e) => setNewCustomItem({ ...newCustomItem, unit: e.target.value })}
-                                  className={`w-1/3 text-xs p-2.5 rounded-xl border focus:outline-none focus:border-[#00C853] ${
-                                    isLight ? 'bg-slate-50 border-slate-200 text-[#0F2417]' : 'bg-[#040906] border-[#152B1D] text-white'
+                                  className={`w-1/3 text-xs p-2.5 rounded-xl border focus:outline-none focus:border-legacy-brand-base ${
+                                    isLight ? 'bg-slate-50 border-slate-200 text-legacy-forest-43' : 'bg-legacy-canvas-deep border-legacy-divider-base text-white'
                                   }`}
                                 />
                               </div>
@@ -3388,18 +3389,18 @@ const SaaSDashboard = () => {
                               placeholder="e.g. 2.68"
                               value={newCustomItem.factor}
                               onChange={(e) => setNewCustomItem({ ...newCustomItem, factor: e.target.value })}
-                              className={`w-full text-xs p-2.5 rounded-xl border focus:outline-none focus:border-[#00C853] ${
-                                isLight ? 'bg-slate-50 border-slate-200 text-[#0F2417]' : 'bg-[#040906] border-[#152B1D] text-white'
+                              className={`w-full text-xs p-2.5 rounded-xl border focus:outline-none focus:border-legacy-brand-base ${
+                                isLight ? 'bg-slate-50 border-slate-200 text-legacy-forest-43' : 'bg-legacy-canvas-deep border-legacy-divider-base text-white'
                               }`}
                             />
                           </div>
 
                           {/* Preview Calculated CO2 */}
                           <div className={`p-3 rounded-xl border flex justify-between items-center ${
-                            isLight ? 'bg-emerald-50 border-emerald-200' : 'bg-[#0D2616] border-[#00C853]/30'
+                            isLight ? 'bg-emerald-50 border-emerald-200' : 'bg-legacy-forest-44 border-legacy-brand-base/30'
                           }`}>
                             <span className="text-xs font-bold font-sans">Calculated Added Impact:</span>
-                            <span className="text-xs font-mono font-black text-[#00C853]">
+                            <span className="text-xs font-mono font-black text-legacy-brand-base">
                               +{(
                                 (parseFloat(newCustomItem.quantity) || 0) > 0
                                   ? Math.round((parseFloat(newCustomItem.quantity) || 0) * (parseFloat(newCustomItem.factor) || 1))
@@ -3411,7 +3412,7 @@ const SaaSDashboard = () => {
                           <div className="flex space-x-3 pt-2">
                             <button
                               type="submit"
-                              className="flex-1 bg-[#00C853] hover:bg-[#00E676] text-white font-mono font-bold py-2.5 rounded-xl text-xs transition-all shadow-sm cursor-pointer"
+                              className="flex-1 bg-legacy-brand-base hover:bg-legacy-brand-bright text-white font-mono font-bold py-2.5 rounded-xl text-xs transition-all shadow-sm cursor-pointer"
                             >
                               Add to Footprint Matrix
                             </button>
@@ -3434,11 +3435,11 @@ const SaaSDashboard = () => {
                   {editingCategory && (
                     <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/70 backdrop-blur-sm animate-fade-in">
                       <div className={`w-full max-w-md rounded-3xl p-6 border shadow-2xl space-y-5 ${
-                        isLight ? 'bg-white border-slate-200 text-[#0F2417]' : 'bg-[#08130C] border-[#1B3B26] text-white'
+                        isLight ? 'bg-white border-slate-200 text-legacy-forest-43' : 'bg-legacy-surface-base border-legacy-forest-22 text-white'
                       }`}>
                         <div className="flex justify-between items-center border-b pb-3">
                           <div className="flex items-center space-x-2">
-                            <Sliders className="w-5 h-5 text-[#00C853]" />
+                            <Sliders className="w-5 h-5 text-legacy-brand-base" />
                             <h3 className="font-bold text-base font-sans">
                               Refine {editingCategory.name}
                             </h3>
@@ -3461,8 +3462,8 @@ const SaaSDashboard = () => {
                               type="number"
                               defaultValue={editingCategory.spendBdt}
                               id="adjust-spend"
-                              className={`w-full text-xs p-2.5 rounded-xl border focus:outline-none focus:border-[#00C853] ${
-                                isLight ? 'bg-slate-50 border-slate-200 text-[#0F2417]' : 'bg-[#040906] border-[#152B1D] text-white'
+                              className={`w-full text-xs p-2.5 rounded-xl border focus:outline-none focus:border-legacy-brand-base ${
+                                isLight ? 'bg-slate-50 border-slate-200 text-legacy-forest-43' : 'bg-legacy-canvas-deep border-legacy-divider-base text-white'
                               }`}
                             />
                           </div>
@@ -3475,8 +3476,8 @@ const SaaSDashboard = () => {
                               type="number"
                               defaultValue={editingCategory.carbonKg}
                               id="adjust-kg"
-                              className={`w-full text-xs p-2.5 rounded-xl border focus:outline-none focus:border-[#00C853] ${
-                                isLight ? 'bg-slate-50 border-slate-200 text-[#0F2417]' : 'bg-[#040906] border-[#152B1D] text-white'
+                              className={`w-full text-xs p-2.5 rounded-xl border focus:outline-none focus:border-legacy-brand-base ${
+                                isLight ? 'bg-slate-50 border-slate-200 text-legacy-forest-43' : 'bg-legacy-canvas-deep border-legacy-divider-base text-white'
                               }`}
                             />
                           </div>
@@ -3489,8 +3490,8 @@ const SaaSDashboard = () => {
                               type="number"
                               defaultValue={editingCategory.quantity}
                               id="adjust-qty"
-                              className={`w-full text-xs p-2.5 rounded-xl border focus:outline-none focus:border-[#00C853] ${
-                                isLight ? 'bg-slate-50 border-slate-200 text-[#0F2417]' : 'bg-[#040906] border-[#152B1D] text-white'
+                              className={`w-full text-xs p-2.5 rounded-xl border focus:outline-none focus:border-legacy-brand-base ${
+                                isLight ? 'bg-slate-50 border-slate-200 text-legacy-forest-43' : 'bg-legacy-canvas-deep border-legacy-divider-base text-white'
                               }`}
                             />
                           </div>
@@ -3504,7 +3505,7 @@ const SaaSDashboard = () => {
                                 const q = document.getElementById('adjust-qty').value;
                                 handleSaveCategoryAdjustment(editingCategory.id, s, k, q);
                               }}
-                              className="flex-1 bg-[#00C853] hover:bg-[#00E676] text-white font-mono font-bold py-2.5 rounded-xl text-xs transition-all shadow-sm cursor-pointer"
+                              className="flex-1 bg-legacy-brand-base hover:bg-legacy-brand-bright text-white font-mono font-bold py-2.5 rounded-xl text-xs transition-all shadow-sm cursor-pointer"
                             >
                               Save Recalculation
                             </button>
@@ -3526,22 +3527,22 @@ const SaaSDashboard = () => {
                   {/* ------------------------------------------------------------- */}
                   {/* Carbon Zero BD ESG Regulatory & Copilot (RAG Assistant Section)     */}
                   {/* ------------------------------------------------------------- */}
-                  <div className={`border-t pt-6 space-y-4 ${isLight ? 'border-[#E8ECE8]' : 'border-[#122418]'}`}>
+                  <div className={`border-t pt-6 space-y-4 ${isLight ? 'border-legacy-divider-light' : 'border-legacy-forest-38'}`}>
                     <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-2">
                       <div className="flex items-center space-x-2">
                         <div className={`w-6 h-6 rounded-md border flex items-center justify-center ${
-                          isLight ? 'bg-[#E8F8EE] border-[#C2E9CF]' : 'bg-[#0D2B1A] border-[#1B4D2E]'
+                          isLight ? 'bg-legacy-positive-surface border-legacy-positive-border' : 'bg-legacy-surface-raised border-legacy-forest-11'
                         }`}>
-                          <Sparkles className="w-3.5 h-3.5 text-[#00C853]" />
+                          <Sparkles className="w-3.5 h-3.5 text-legacy-brand-base" />
                         </div>
-                        <h4 className={`font-sans font-bold text-sm ${isLight ? 'text-[#0F2417]' : 'text-white'}`}>
+                        <h4 className={`font-sans font-bold text-sm ${isLight ? 'text-legacy-forest-43' : 'text-white'}`}>
                           Carbon Zero BD ESG Regulatory & Auditor Copilot
                         </h4>
                       </div>
                       
                       {/* Corpus Filter Tabs */}
                       <div className={`flex items-center space-x-1 p-1 rounded-xl border ${
-                        isLight ? 'bg-[#F4F6F4] border-[#E8ECE8]' : 'bg-[#040906] border-[#1A3824]'
+                        isLight ? 'bg-legacy-mint-08 border-legacy-divider-light' : 'bg-legacy-canvas-deep border-legacy-forest-26'
                       }`}>
                         {[
                           { id: 'all', label: 'All Corpora' },
@@ -3556,11 +3557,11 @@ const SaaSDashboard = () => {
                             className={`px-2.5 py-1 rounded-lg text-[10px] font-sans font-bold transition-all cursor-pointer ${
                               ragCorpus === c.id
                                 ? isLight 
-                                  ? 'bg-white text-[#00873E] border border-[#C2E9CF] shadow-xs' 
-                                  : 'bg-[#0D2B1A] text-[#4ADE80] border border-[#1B4D2E] shadow-sm'
+                                  ? 'bg-white text-legacy-brand-strong border border-legacy-positive-border shadow-xs'
+                                  : 'bg-legacy-surface-raised text-legacy-green-400 border border-legacy-forest-11 shadow-sm'
                                 : isLight 
-                                  ? 'text-[#41634E] hover:text-[#0F2417] hover:bg-black/[0.03]' 
-                                  : 'text-[#A3C4B0] hover:text-white hover:bg-white/[0.05]'
+                                  ? 'text-legacy-forest-03 hover:text-legacy-forest-43 hover:bg-black/[0.03]'
+                                  : 'text-legacy-mint-37 hover:text-white hover:bg-white/[0.05]'
                             }`}
                           >
                             {c.label}
@@ -3583,11 +3584,11 @@ const SaaSDashboard = () => {
                           onClick={() => executeRagQuery(promptText)}
                           className={`text-[11px] font-sans px-3 py-1.5 rounded-full transition-all flex items-center space-x-1.5 cursor-pointer border ${
                             isLight 
-                              ? 'bg-[#F0F5F1] hover:bg-[#E2F0E6] text-[#0F2417] border-[#CDE0D2]' 
-                              : 'bg-[#0A1A10] hover:bg-[#0E2818] text-[#C2E0CC] hover:text-white border-[#183B24] hover:border-emerald-500/40'
+                              ? 'bg-legacy-mint-13 hover:bg-legacy-mint-18 text-legacy-forest-43 border-legacy-mint-31'
+                              : 'bg-legacy-forest-57 hover:bg-legacy-forest-39 text-legacy-mint-33 hover:text-white border-legacy-forest-24 hover:border-emerald-500/40'
                           }`}
                         >
-                          <Search className={`w-3 h-3 shrink-0 ${isLight ? 'text-[#00873E]' : 'text-emerald-400'}`} />
+                          <Search className={`w-3 h-3 shrink-0 ${isLight ? 'text-legacy-brand-strong' : 'text-emerald-400'}`} />
                           <span>{promptText}</span>
                         </button>
                       ))}
@@ -3602,19 +3603,19 @@ const SaaSDashboard = () => {
                           onChange={(e) => setRagQuery(e.target.value)}
                           onKeyDown={(e) => { if (e.key === 'Enter') { e.preventDefault(); executeRagQuery(); } }}
                           placeholder="Ask anything about Bangladesh ESG laws, DoE emission factors, or audit evidence..."
-                          className={`w-full text-xs font-sans p-3 pl-9 border rounded-xl focus:outline-none focus:border-[#00C853] transition-all ${
+                          className={`w-full text-xs font-sans p-3 pl-9 border rounded-xl focus:outline-none focus:border-legacy-brand-base transition-all ${
                             isLight 
-                              ? 'bg-[#F7FAF7] border-[#DCE4DE] text-[#0F2417] placeholder-[#557361]' 
-                              : 'bg-[#040906] border-[#1B3B26] text-white placeholder-[#7E9F8B] focus:bg-[#07130B]'
+                              ? 'bg-legacy-mint-05 border-legacy-mint-25 text-legacy-forest-43 placeholder-legacy-text-quiet'
+                              : 'bg-legacy-canvas-deep border-legacy-forest-22 text-white placeholder-legacy-mint-42 focus:bg-legacy-forest-71'
                           }`}
                         />
-                        <Search className={`w-4 h-4 absolute left-3 top-3.5 ${isLight ? 'text-[#557361]' : 'text-emerald-400/80'}`} />
+                        <Search className={`w-4 h-4 absolute left-3 top-3.5 ${isLight ? 'text-legacy-text-quiet' : 'text-emerald-400/80'}`} />
                       </div>
                       <button
                         type="button"
                         onClick={() => executeRagQuery()}
                         disabled={isRagLoading || !ragQuery.trim()}
-                        className="bg-[#00C853] hover:bg-[#00E676] disabled:bg-[#0E2014] disabled:text-white/40 disabled:border disabled:border-[#1A3824] disabled:shadow-none disabled:cursor-not-allowed text-white px-5 py-3 rounded-xl font-mono font-bold text-xs transition-all shadow-sm flex items-center space-x-1.5 shrink-0 cursor-pointer"
+                        className="bg-legacy-brand-base hover:bg-legacy-brand-bright disabled:bg-legacy-forest-49 disabled:text-white/40 disabled:border disabled:border-legacy-forest-26 disabled:shadow-none disabled:cursor-not-allowed text-white px-5 py-3 rounded-xl font-mono font-bold text-xs transition-all shadow-sm flex items-center space-x-1.5 shrink-0 cursor-pointer"
                       >
                         {isRagLoading ? (
                           <Loader2 className="w-4 h-4 animate-spin text-white" />
@@ -3631,24 +3632,24 @@ const SaaSDashboard = () => {
                     {ragResponse && (
                       <div className={`rounded-2xl p-5 space-y-4 border ${
                         isLight 
-                          ? 'bg-[#F2FBF5] border-[#BCE7CB]' 
-                          : 'bg-[#050C07] border-[#1B4D2E]'
+                          ? 'bg-legacy-mint-06 border-legacy-mint-32'
+                          : 'bg-legacy-forest-80 border-legacy-forest-11'
                       }`}>
                         <div className={`flex justify-between items-center pb-2 border-b ${
-                          isLight ? 'border-[#C2E9CF]' : 'border-[#122418]'
+                          isLight ? 'border-legacy-positive-border' : 'border-legacy-forest-38'
                         }`}>
                           <div className="flex items-center space-x-2">
                             <span className={`font-mono text-[9px] font-bold px-2 py-0.5 rounded uppercase border ${
-                              isLight ? 'bg-white text-[#00873E] border-[#BCE7CB]' : 'bg-[#0D2B1A] text-[#4ADE80] border-[#1B4D2E]'
+                              isLight ? 'bg-white text-legacy-brand-strong border-legacy-mint-32' : 'bg-legacy-surface-raised text-legacy-green-400 border-legacy-forest-11'
                             }`}>
                               {ragResponse.model_used || "unknown"}
                             </span>
-                            <span className={`font-sans font-bold text-xs ${isLight ? 'text-[#0F2417]' : 'text-white'}`}>
+                            <span className={`font-sans font-bold text-xs ${isLight ? 'text-legacy-forest-43' : 'text-white'}`}>
                               {ragResponse.insufficient_data ? 'No answer available' : 'AI response with sources — not verified'}
                             </span>
                           </div>
                           <div className={`flex items-center space-x-2 font-mono text-[10px] ${
-                            isLight ? 'text-[#41634E]' : 'text-[#9EBFAB]'
+                            isLight ? 'text-legacy-forest-03' : 'text-legacy-mint-38'
                           }`}>
                             <span>Retrieval similarity: {ragResponse.confidence == null ? '—' : `${Math.round(ragResponse.confidence * 100)}%`}</span>
                             <span>•</span>
@@ -3658,18 +3659,18 @@ const SaaSDashboard = () => {
 
                         {/* Answer Text */}
                         <div className={`text-xs leading-relaxed font-sans whitespace-pre-line ${
-                          isLight ? 'text-[#0F2417]' : 'text-[#D8E8DF]'
+                          isLight ? 'text-legacy-forest-43' : 'text-legacy-mint-26'
                         }`}>
                           {ragResponse.answer}
                         </div>
 
                         {/* Citations List */}
                         {ragResponse.citations && ragResponse.citations.length > 0 && (
-                          <div className={`space-y-2 pt-2 border-t ${isLight ? 'border-[#C2E9CF]' : 'border-[#122418]'}`}>
+                          <div className={`space-y-2 pt-2 border-t ${isLight ? 'border-legacy-positive-border' : 'border-legacy-forest-38'}`}>
                             <div className={`text-[10px] font-mono uppercase font-bold flex items-center ${
-                              isLight ? 'text-[#41634E]' : 'text-[#9EBFAB]'
+                              isLight ? 'text-legacy-forest-03' : 'text-legacy-mint-38'
                             }`}>
-                              <Quote className="w-3 h-3 mr-1 text-[#00C853]" />
+                              <Quote className="w-3 h-3 mr-1 text-legacy-brand-base" />
                               Verifiable Document Citations ({ragResponse.citations.length}):
                             </div>
                             <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
@@ -3678,24 +3679,24 @@ const SaaSDashboard = () => {
                                   key={idx}
                                   className={`p-3 rounded-xl space-y-1 border transition-colors ${
                                     isLight 
-                                      ? 'bg-white border-[#DCE4DE] hover:border-[#00C853]' 
-                                      : 'bg-[#08130C] border-[#152B1D] hover:border-[#1B4D2E]'
+                                      ? 'bg-white border-legacy-mint-25 hover:border-legacy-brand-base'
+                                      : 'bg-legacy-surface-base border-legacy-divider-base hover:border-legacy-forest-11'
                                   }`}
                                 >
                                   <div className="flex justify-between items-center text-[10px]">
                                     <span className={`font-mono font-bold truncate max-w-[200px] ${
-                                      isLight ? 'text-[#0F2417]' : 'text-white'
+                                      isLight ? 'text-legacy-forest-43' : 'text-white'
                                     }`} title={c.source}>
                                       📄 {c.source}
                                     </span>
                                     <span className={`font-mono font-semibold ${
-                                      isLight ? 'text-[#00873E]' : 'text-[#4ADE80]'
+                                      isLight ? 'text-legacy-brand-strong' : 'text-legacy-green-400'
                                     }`}>
                                       Page {c.page || 1} • {Math.round((c.relevance_score || 0.9) * 100)}% Match
                                     </span>
                                   </div>
                                   <p className={`text-[11px] line-clamp-2 italic ${
-                                    isLight ? 'text-[#41634E]' : 'text-[#A3C4B0]'
+                                    isLight ? 'text-legacy-forest-03' : 'text-legacy-mint-37'
                                   }`}>
                                     "{c.snippet}"
                                   </p>
@@ -3714,19 +3715,19 @@ const SaaSDashboard = () => {
                 {/* Company Projects List in Dashboard */}
                 <div className={`p-6 lg:p-8 rounded-3xl border shadow-sm transition-all ${
                   isLight 
-                    ? 'bg-white border-[#E8ECE8] text-[#0F2417]' 
-                    : 'bg-[#08130C] border-[#152B1D] text-white'
+                    ? 'bg-white border-legacy-divider-light text-legacy-forest-43'
+                    : 'bg-legacy-surface-base border-legacy-divider-base text-white'
                 }`}>
                   <div className={`flex justify-between items-center pb-4 border-b mb-4 ${
-                    isLight ? 'border-[#E8ECE8]' : 'border-[#122418]'
+                    isLight ? 'border-legacy-divider-light' : 'border-legacy-forest-38'
                   }`}>
                     <div>
-                      <h3 className={`font-sans font-bold text-lg ${isLight ? 'text-[#0F2417]' : 'text-white'}`}>Active Corporate Projects</h3>
-                      <p className={`text-xs mt-0.5 ${isLight ? 'text-[#41634E]' : 'text-[#9EBFAB]'}`}>District specific offsetting initiatives under CarbonZero monitoring.</p>
+                      <h3 className={`font-sans font-bold text-lg ${isLight ? 'text-legacy-forest-43' : 'text-white'}`}>Active Corporate Projects</h3>
+                      <p className={`text-xs mt-0.5 ${isLight ? 'text-legacy-forest-03' : 'text-legacy-mint-38'}`}>District specific offsetting initiatives under CarbonZero monitoring.</p>
                     </div>
                     <button 
                       onClick={() => setIsAddProjectOpen(true)}
-                      className="bg-[#00C853] hover:bg-[#00E676] text-white font-mono font-bold text-[11px] px-3 py-1.5 rounded-lg transition-all shadow-sm flex items-center space-x-1 cursor-pointer"
+                      className="bg-legacy-brand-base hover:bg-legacy-brand-bright text-white font-mono font-bold text-[11px] px-3 py-1.5 rounded-lg transition-all shadow-sm flex items-center space-x-1 cursor-pointer"
                     >
                       <Plus className="w-3 h-3 text-white stroke-[2.5]" />
                       <span className="text-white font-mono font-bold">New Project</span>
@@ -3737,7 +3738,7 @@ const SaaSDashboard = () => {
                     <table className="w-full text-left font-sans text-xs">
                       <thead>
                         <tr className={`font-bold border-b pb-2 text-[10px] uppercase ${
-                          isLight ? 'text-[#557361] border-[#E8ECE8]' : 'text-[#557361] border-[#122418]'
+                          isLight ? 'text-legacy-text-quiet border-legacy-divider-light' : 'text-legacy-text-quiet border-legacy-forest-38'
                         }`}>
                           <th className="py-2.5">Project Name</th>
                           <th>Sector</th>
@@ -3745,19 +3746,19 @@ const SaaSDashboard = () => {
                           <th>Audit Status</th>
                         </tr>
                       </thead>
-                      <tbody className={`divide-y ${isLight ? 'divide-[#E8ECE8]' : 'divide-[#122418]'}`}>
+                      <tbody className={`divide-y ${isLight ? 'divide-legacy-divider-light' : 'divide-legacy-forest-38'}`}>
                         {projects.map(p => (
-                          <tr key={p.id} className={`transition-colors ${isLight ? 'hover:bg-[#F7FAF7]' : 'hover:bg-[#040906]'}`}>
-                            <td className={`py-3 font-bold ${isLight ? 'text-[#0F2417]' : 'text-white'}`}>{p.name}</td>
-                            <td className={isLight ? 'text-[#557361]' : 'text-[#7C9A88]'}>{p.sector}</td>
-                            <td className={`font-mono font-semibold ${isLight ? 'text-[#00873E]' : 'text-[#4ADE80]'}`}>{p.target} tCO2e</td>
+                          <tr key={p.id} className={`transition-colors ${isLight ? 'hover:bg-legacy-mint-05' : 'hover:bg-legacy-canvas-deep'}`}>
+                            <td className={`py-3 font-bold ${isLight ? 'text-legacy-forest-43' : 'text-white'}`}>{p.name}</td>
+                            <td className={isLight ? 'text-legacy-text-quiet' : 'text-legacy-text-muted'}>{p.sector}</td>
+                            <td className={`font-mono font-semibold ${isLight ? 'text-legacy-brand-strong' : 'text-legacy-green-400'}`}>{p.target} tCO2e</td>
                             <td>
                               <span className={`px-2 py-0.5 rounded-full text-[9px] font-bold ${
                                 p.status === 'Verified' 
-                                  ? isLight ? 'bg-[#E8F8EE] text-[#00873E] border border-[#C2E9CF]' : 'bg-[#0D2B1A] text-[#4ADE80] border border-[#1B4D2E]'
+                                  ? isLight ? 'bg-legacy-positive-surface text-legacy-brand-strong border border-legacy-positive-border' : 'bg-legacy-surface-raised text-legacy-green-400 border border-legacy-forest-11'
                                   : p.status === 'In Progress'
                                     ? isLight ? 'bg-amber-50 text-amber-700 border border-amber-200' : 'bg-amber-500/10 text-amber-400 border border-amber-500/20'
-                                    : isLight ? 'bg-gray-100 text-gray-600' : 'bg-[#040906] text-[#7C9A88]'
+                                    : isLight ? 'bg-gray-100 text-gray-600' : 'bg-legacy-canvas-deep text-legacy-text-muted'
                               }`}>
                                 {p.status}
                               </span>
@@ -3777,22 +3778,22 @@ const SaaSDashboard = () => {
                 {/* Offset Options Panel */}
                 <div className={`p-6 rounded-3xl shadow-md flex flex-col justify-between h-[230px] border transition-all ${
                   isLight
-                    ? 'bg-gradient-to-br from-[#E8F8EE] via-[#D8F3E3] to-[#C7EED8] border-[#A3E2B8] text-[#0F2417]'
-                    : 'bg-gradient-to-br from-[#0D2B1A] via-[#0A2215] to-[#07180F] border-[#1B4D2E] text-white'
+                    ? 'bg-gradient-to-br from-legacy-positive-surface via-legacy-mint-23 to-legacy-mint-29 border-legacy-mint-35 text-legacy-forest-43'
+                    : 'bg-gradient-to-br from-legacy-surface-raised via-legacy-forest-52 to-legacy-forest-64 border-legacy-forest-11 text-white'
                 }`}>
                   <div className="space-y-2">
                     <div className={`font-mono text-[9px] uppercase tracking-wider font-bold ${
-                      isLight ? 'text-[#00873E]' : 'text-[#A7F3D0]'
+                      isLight ? 'text-legacy-brand-strong' : 'text-legacy-emerald-200'
                     }`}>EMISSIONS COMPENSATIONS</div>
-                    <h3 className={`font-sans font-bold text-lg leading-tight ${isLight ? 'text-[#0F2417]' : 'text-white'}`}>Offset Your Footprint</h3>
-                    <p className={`text-xs leading-relaxed font-sans ${isLight ? 'text-[#3E5C49]' : 'text-white/70'}`}>
+                    <h3 className={`font-sans font-bold text-lg leading-tight ${isLight ? 'text-legacy-forest-43' : 'text-white'}`}>Offset Your Footprint</h3>
+                    <p className={`text-xs leading-relaxed font-sans ${isLight ? 'text-legacy-forest-04' : 'text-white/70'}`}>
                       Purchase certified Bangladeshi carbon credits directly on our registry to mitigate your calculated corporate emissions debt.
                     </p>
                   </div>
 
                   <button
                     onClick={() => navigate('/platform/marketplace')}
-                    className="bg-[#00C853] hover:bg-[#00E676] text-white font-mono font-bold text-xs py-3 px-4 rounded-xl transition-all shadow-sm flex items-center justify-center space-x-1.5 cursor-pointer"
+                    className="bg-legacy-brand-base hover:bg-legacy-brand-bright text-white font-mono font-bold text-xs py-3 px-4 rounded-xl transition-all shadow-sm flex items-center justify-center space-x-1.5 cursor-pointer"
                   >
                     <span className="text-white font-mono font-bold">Browse Marketplace</span>
                     <ExternalLink className="w-3.5 h-3.5 text-white" />
@@ -3802,15 +3803,15 @@ const SaaSDashboard = () => {
                 {/* Reminders / To-dos */}
                 <div className={`p-6 rounded-3xl border shadow-sm transition-all ${
                   isLight 
-                    ? 'bg-white border-[#E8ECE8] text-[#0F2417]' 
-                    : 'bg-[#08130C] border-[#152B1D] text-white'
+                    ? 'bg-white border-legacy-divider-light text-legacy-forest-43'
+                    : 'bg-legacy-surface-base border-legacy-divider-base text-white'
                 }`}>
                   <div className={`flex justify-between items-center mb-4 pb-2 border-b ${
-                    isLight ? 'border-[#E8ECE8]' : 'border-[#122418]'
+                    isLight ? 'border-legacy-divider-light' : 'border-legacy-forest-38'
                   }`}>
-                    <h3 className={`font-sans font-bold text-sm ${isLight ? 'text-[#0F2417]' : 'text-white'}`}>Verification Tasks</h3>
+                    <h3 className={`font-sans font-bold text-sm ${isLight ? 'text-legacy-forest-43' : 'text-white'}`}>Verification Tasks</h3>
                     <span className={`text-[9px] font-bold px-2 py-0.5 rounded-full font-mono ${
-                      isLight ? 'bg-[#E8F8EE] text-[#00873E] border border-[#C2E9CF]' : 'bg-[#0D2B1A] text-[#4ADE80] border border-[#1B4D2E]'
+                      isLight ? 'bg-legacy-positive-surface text-legacy-brand-strong border border-legacy-positive-border' : 'bg-legacy-surface-raised text-legacy-green-400 border border-legacy-forest-11'
                     }`}>
                       {openTasksCount} left
                     </span>
@@ -3824,19 +3825,19 @@ const SaaSDashboard = () => {
                             type="checkbox" 
                             checked={task.completed} 
                             onChange={() => toggleTask(task.id)}
-                            className={`mt-0.5 rounded text-[#00C853] focus:ring-[#00C853] cursor-pointer ${
-                              isLight ? 'border-[#DCE4DE] bg-white' : 'border-[#173020] bg-[#040906]'
+                            className={`mt-0.5 rounded text-legacy-brand-base focus:ring-legacy-brand-base cursor-pointer ${
+                              isLight ? 'border-legacy-mint-25 bg-white' : 'border-legacy-forest-32 bg-legacy-canvas-deep'
                             }`} 
                           />
                           <span className={task.completed 
-                            ? isLight ? "text-[#8FA899] line-through" : "text-[#557361] line-through" 
-                            : isLight ? "text-[#0F2417]" : "text-[#D8E8DF]"
+                            ? isLight ? "text-legacy-mint-40 line-through" : "text-legacy-text-quiet line-through"
+                            : isLight ? "text-legacy-forest-43" : "text-legacy-mint-26"
                           }>
                             {task.text}
                           </span>
                         </div>
-                        <button onClick={() => deleteTask(task.id)} className={`transition-colors hover:text-[#EF4444] cursor-pointer ${
-                          isLight ? 'text-[#8FA899]' : 'text-[#557361]'
+                        <button onClick={() => deleteTask(task.id)} className={`transition-colors hover:text-legacy-red-500 cursor-pointer ${
+                          isLight ? 'text-legacy-mint-40' : 'text-legacy-text-quiet'
                         }`}>
                           <Trash2 className="w-3.5 h-3.5" />
                         </button>
@@ -3845,7 +3846,7 @@ const SaaSDashboard = () => {
                   </ul>
                   <button 
                     onClick={() => setActiveMenu('Tasks')}
-                    className="w-full bg-[#00C853] hover:bg-[#00E676] text-white font-mono font-bold text-xs py-2 px-3 rounded-xl transition-all shadow-sm flex items-center justify-center space-x-1.5 cursor-pointer mt-3"
+                    className="w-full bg-legacy-brand-base hover:bg-legacy-brand-bright text-white font-mono font-bold text-xs py-2 px-3 rounded-xl transition-all shadow-sm flex items-center justify-center space-x-1.5 cursor-pointer mt-3"
                   >
                     <span className="text-white font-mono font-bold">View All Tasks</span>
                     <ArrowRight className="w-3.5 h-3.5 text-white" />
@@ -3855,16 +3856,16 @@ const SaaSDashboard = () => {
                 {/* Team Members */}
                 <div className={`p-6 rounded-3xl border shadow-sm transition-all ${
                   isLight 
-                    ? 'bg-white border-[#E8ECE8] text-[#0F2417]' 
-                    : 'bg-[#08130C] border-[#152B1D] text-white'
+                    ? 'bg-white border-legacy-divider-light text-legacy-forest-43'
+                    : 'bg-legacy-surface-base border-legacy-divider-base text-white'
                 }`}>
                   <div className={`flex justify-between items-center mb-4 pb-2 border-b ${
-                    isLight ? 'border-[#E8ECE8]' : 'border-[#122418]'
+                    isLight ? 'border-legacy-divider-light' : 'border-legacy-forest-38'
                   }`}>
-                    <h3 className={`font-sans font-bold text-sm ${isLight ? 'text-[#0F2417]' : 'text-white'}`}>ESG Audit Team</h3>
+                    <h3 className={`font-sans font-bold text-sm ${isLight ? 'text-legacy-forest-43' : 'text-white'}`}>ESG Audit Team</h3>
                     <button 
                       onClick={() => setIsAddMemberOpen(true)}
-                      className="bg-[#00C853] hover:bg-[#00E676] text-white font-mono font-bold text-[10px] px-2.5 py-1 rounded-lg transition-all shadow-sm cursor-pointer flex items-center space-x-1"
+                      className="bg-legacy-brand-base hover:bg-legacy-brand-bright text-white font-mono font-bold text-[10px] px-2.5 py-1 rounded-lg transition-all shadow-sm cursor-pointer flex items-center space-x-1"
                     >
                       <Plus className="w-3 h-3 text-white stroke-[2.5]" />
                       <span className="text-white font-mono font-bold">Add Member</span>
@@ -3876,25 +3877,25 @@ const SaaSDashboard = () => {
                       <div key={i} className="flex items-center justify-between">
                         <div className="flex items-center space-x-3.5">
                           <div className={`w-7 h-7 rounded-full overflow-hidden border cursor-pointer ${
-                            isLight ? 'bg-[#F7FAF7] border-[#DCE4DE]' : 'bg-[#040906] border-[#1B4D2E]'
+                            isLight ? 'bg-legacy-mint-05 border-legacy-mint-25' : 'bg-legacy-canvas-deep border-legacy-forest-11'
                           }`} onClick={() => toggleMemberStatus(member.name)}>
                             <img src={member.avatar} alt={member.name} className="w-full h-full object-cover" width="28" height="28" loading="lazy" />
                           </div>
                           <div className="text-left leading-none">
-                            <div className={`font-sans font-bold text-xs ${isLight ? 'text-[#0F2417]' : 'text-white'}`}>{member.name}</div>
-                            <div className={`text-[9px] font-mono mt-0.5 ${isLight ? 'text-[#557361]' : 'text-[#7C9A88]'}`}>{member.role}</div>
+                            <div className={`font-sans font-bold text-xs ${isLight ? 'text-legacy-forest-43' : 'text-white'}`}>{member.name}</div>
+                            <div className={`text-[9px] font-mono mt-0.5 ${isLight ? 'text-legacy-text-quiet' : 'text-legacy-text-muted'}`}>{member.role}</div>
                           </div>
                         </div>
                         <div className="flex items-center space-x-2">
                           <span className={`text-[8px] border px-2 py-0.5 rounded uppercase font-bold ${
                             member.status === 'Active' 
-                              ? isLight ? 'bg-[#E8F8EE] text-[#00873E] border-[#C2E9CF]' : 'bg-[#0D2B1A] text-[#4ADE80] border-[#1B4D2E]'
-                              : isLight ? 'bg-gray-100 text-gray-500 border-gray-200' : 'bg-[#040906] text-[#557361] border-[#122418]'
+                              ? isLight ? 'bg-legacy-positive-surface text-legacy-brand-strong border-legacy-positive-border' : 'bg-legacy-surface-raised text-legacy-green-400 border-legacy-forest-11'
+                              : isLight ? 'bg-gray-100 text-gray-500 border-gray-200' : 'bg-legacy-canvas-deep text-legacy-text-quiet border-legacy-forest-38'
                           }`}>
                             {member.status}
                           </span>
-                          <button onClick={() => removeMember(member.name)} className={`hover:text-[#EF4444] transition-colors cursor-pointer ${
-                            isLight ? 'text-[#8FA899]' : 'text-[#557361]'
+                          <button onClick={() => removeMember(member.name)} className={`hover:text-legacy-red-500 transition-colors cursor-pointer ${
+                            isLight ? 'text-legacy-mint-40' : 'text-legacy-text-quiet'
                           }`}>
                             <X className="w-3 h-3" />
                           </button>
@@ -3912,10 +3913,10 @@ const SaaSDashboard = () => {
 
         {/* -------------------- TAB CONTENT: MATERIALITY -------------------- */}
         {activeMenu === 'Materiality' && (
-          <div className="bg-[#08130C] border border-[#152B1D] rounded-3xl p-6 lg:p-8 shadow-xl space-y-6 text-white">
+          <div className="bg-legacy-surface-base border border-legacy-divider-base rounded-3xl p-6 lg:p-8 shadow-xl space-y-6 text-white">
             <div>
               <h1 className="font-sans font-bold text-3xl text-white">Double Materiality Assessment</h1>
-              <p className="text-sm text-[#7C9A88] mt-1 font-sans">
+              <p className="text-sm text-legacy-text-muted mt-1 font-sans">
                 Identify and prioritize key ESG issues based on their Impact Materiality and Financial Materiality (CSRD/ESRS aligned).
               </p>
             </div>
@@ -3923,17 +3924,17 @@ const SaaSDashboard = () => {
             <div className="grid grid-cols-1 xl:grid-cols-3 gap-8">
               
               {/* Matrix Plot (Visual Grid) */}
-              <div className="xl:col-span-1 bg-[#040906] rounded-2xl p-6 border border-[#152B1D] flex flex-col justify-between">
+              <div className="xl:col-span-1 bg-legacy-canvas-deep rounded-2xl p-6 border border-legacy-divider-base flex flex-col justify-between">
                 <div>
                   <h3 className="font-sans font-bold text-sm text-white mb-4">Double Materiality Matrix</h3>
                   <div className="relative w-full aspect-square bg-carbon border-l border-b border-forest grid grid-cols-5 grid-rows-5">
                     {/* Matrix Labels */}
-                    <div className="absolute left-1/2 -bottom-6 transform -translate-x-1/2 text-[9px] font-mono uppercase text-[#7C9A88] font-bold">Impact Materiality →</div>
-                    <div className="absolute -left-14 top-1/2 transform -translate-y-1/2 rotate-90 text-[9px] font-mono uppercase text-[#7C9A88] font-bold">Financial Materiality →</div>
+                    <div className="absolute left-1/2 -bottom-6 transform -translate-x-1/2 text-[9px] font-mono uppercase text-legacy-text-muted font-bold">Impact Materiality →</div>
+                    <div className="absolute -left-14 top-1/2 transform -translate-y-1/2 rotate-90 text-[9px] font-mono uppercase text-legacy-text-muted font-bold">Financial Materiality →</div>
                     
                     {/* Materiality threshold line (dashed red) */}
                     <div className="absolute inset-0 border-t border-r border-dashed border-red-400 pointer-events-none" style={{ left: '40%', top: '40%' }}>
-                      <span className="absolute right-2 top-2 text-[8px] font-mono text-red-400 font-bold uppercase tracking-wider bg-[#040906]/90 px-1 rounded">Material Threshold</span>
+                      <span className="absolute right-2 top-2 text-[8px] font-mono text-red-400 font-bold uppercase tracking-wider bg-legacy-canvas-deep/90 px-1 rounded">Material Threshold</span>
                     </div>
 
                     {/* Plotted Topics */}
@@ -3948,7 +3949,7 @@ const SaaSDashboard = () => {
                         <div 
                           key={key}
                           className={`absolute w-4 h-4 rounded-full cursor-pointer flex items-center justify-center transform -translate-x-1/2 -translate-y-1/2 shadow-md transition-all hover:scale-125 ${
-                            isMaterial ? 'bg-[#00C853] border-2 border-emerald-400' : 'bg-[#334155] border-2 border-[#1B4D2E]'
+                            isMaterial ? 'bg-legacy-brand-base border-2 border-emerald-400' : 'bg-legacy-slate-700 border-2 border-legacy-forest-11'
                           }`}
                           style={{ left: `${xPercent}%`, top: `${yPercent}%` }}
                           title={`${topic.name} (Impact: ${topic.impact}, Financial: ${topic.financial})`}
@@ -3960,26 +3961,26 @@ const SaaSDashboard = () => {
                     })}
                   </div>
                 </div>
-                <div className="text-[10px] text-[#7C9A88] mt-10 leading-relaxed font-sans">
-                  * Dark green dots with emerald borders represent <span className="text-[#4ADE80] font-semibold">Material Topics</span> which exceed the ESRS threshold (≥ 3.0 on both dimensions) and must be included in your ESG disclosures.
+                <div className="text-[10px] text-legacy-text-muted mt-10 leading-relaxed font-sans">
+                  * Dark green dots with emerald borders represent <span className="text-legacy-green-400 font-semibold">Material Topics</span> which exceed the ESRS threshold (≥ 3.0 on both dimensions) and must be included in your ESG disclosures.
                 </div>
               </div>
 
               {/* Slider Controls */}
               <div className="xl:col-span-2 space-y-6">
-                <h3 className="font-sans font-bold text-sm text-white border-b border-[#152B1D] pb-2">Rate ESG Topics</h3>
+                <h3 className="font-sans font-bold text-sm text-white border-b border-legacy-divider-base pb-2">Rate ESG Topics</h3>
                 <div className="space-y-4 max-h-[500px] overflow-y-auto pr-2 custom-scrollbar">
                   {Object.entries(materialityScores).map(([key, topic]) => (
-                    <div key={key} className="p-4 bg-[#040906] rounded-xl border border-[#152B1D] space-y-3">
+                    <div key={key} className="p-4 bg-legacy-canvas-deep rounded-xl border border-legacy-divider-base space-y-3">
                       <div className="flex justify-between items-start">
                         <div>
                           <h4 className="font-sans font-bold text-xs text-white">{topic.name}</h4>
-                          <p className="text-[10px] text-[#7C9A88] mt-0.5 font-sans leading-relaxed">{topic.description}</p>
+                          <p className="text-[10px] text-legacy-text-muted mt-0.5 font-sans leading-relaxed">{topic.description}</p>
                         </div>
                         <span className={`text-[9px] font-bold px-2 py-0.5 rounded-full ${
                           topic.impact >= 3 && topic.financial >= 3
-                            ? 'bg-[#00C853]/20 text-[#4ADE80] border border-[#00C853]/30'
-                            : 'bg-white/5 text-[#7C9A88]'
+                            ? 'bg-legacy-brand-base/20 text-legacy-green-400 border border-legacy-brand-base/30'
+                            : 'bg-white/5 text-legacy-text-muted'
                         }`}>
                           {topic.impact >= 3 && topic.financial >= 3 ? 'Material' : 'Non-Material'}
                         </span>
@@ -3987,9 +3988,9 @@ const SaaSDashboard = () => {
                       
                       <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 pt-2">
                         <div className="space-y-1">
-                          <div className="flex justify-between text-[10px] text-[#7C9A88] font-mono">
+                          <div className="flex justify-between text-[10px] text-legacy-text-muted font-mono">
                             <span>Impact Materiality</span>
-                            <span className="font-bold text-[#4ADE80]">{topic.impact} / 5</span>
+                            <span className="font-bold text-legacy-green-400">{topic.impact} / 5</span>
                           </div>
                           <input 
                             type="range"
@@ -4003,13 +4004,13 @@ const SaaSDashboard = () => {
                                 [key]: { ...prev[key], impact: val }
                               }));
                             }}
-                            className="w-full h-1 bg-[#152B1D] rounded-lg appearance-none cursor-pointer accent-[#00C853]"
+                            className="w-full h-1 bg-legacy-divider-base rounded-lg appearance-none cursor-pointer accent-legacy-brand-base"
                           />
                         </div>
                         <div className="space-y-1">
-                          <div className="flex justify-between text-[10px] text-[#7C9A88] font-mono">
+                          <div className="flex justify-between text-[10px] text-legacy-text-muted font-mono">
                             <span>Financial Materiality</span>
-                            <span className="font-bold text-[#4ADE80]">{topic.financial} / 5</span>
+                            <span className="font-bold text-legacy-green-400">{topic.financial} / 5</span>
                           </div>
                           <input 
                             type="range"
@@ -4023,7 +4024,7 @@ const SaaSDashboard = () => {
                                 [key]: { ...prev[key], financial: val }
                               }));
                             }}
-                            className="w-full h-1 bg-[#152B1D] rounded-lg appearance-none cursor-pointer accent-[#00C853]"
+                            className="w-full h-1 bg-legacy-divider-base rounded-lg appearance-none cursor-pointer accent-legacy-brand-base"
                           />
                         </div>
                       </div>
@@ -4049,10 +4050,10 @@ const SaaSDashboard = () => {
 
         {/* -------------------- TAB CONTENT: TASKS -------------------- */}
         {activeMenu === 'Tasks' && (
-          <div className="bg-white border border-[#E2E8F0] rounded-3xl p-6 lg:p-8 shadow-sm space-y-6">
+          <div className="bg-white border border-legacy-slate-200 rounded-3xl p-6 lg:p-8 shadow-sm space-y-6">
             <div>
-              <h1 className="font-sans font-bold text-3xl text-[#0F291B]">Verification Tasks</h1>
-              <p className="text-sm text-[#64748B] mt-1 font-sans">Verify, audit, and log compliance steps to confirm climate metrics.</p>
+              <h1 className="font-sans font-bold text-3xl text-legacy-ink-forest">Verification Tasks</h1>
+              <p className="text-sm text-legacy-slate-500 mt-1 font-sans">Verify, audit, and log compliance steps to confirm climate metrics.</p>
             </div>
 
             {/* Task Add Form */}
@@ -4062,11 +4063,11 @@ const SaaSDashboard = () => {
                 value={taskInput}
                 onChange={(e) => setTaskInput(e.target.value)}
                 placeholder="Type a new corporate ESG verification task..." 
-                className="flex-1 px-4 py-3 border border-[#E2E8F0] rounded-xl text-xs font-sans placeholder-[#94A3B8] focus:outline-none focus:border-[#0F291B] bg-[#F8F9FA]"
+                className="flex-1 px-4 py-3 border border-legacy-slate-200 rounded-xl text-xs font-sans placeholder-legacy-slate-400 focus:outline-none focus:border-legacy-ink-forest bg-legacy-surface-light-input"
               />
               <button 
                 type="submit" 
-                className="bg-[#00C853] hover:bg-[#00E676] text-white px-5 py-3 rounded-xl text-xs font-mono font-bold transition-all shadow-sm cursor-pointer"
+                className="bg-legacy-brand-base hover:bg-legacy-brand-bright text-white px-5 py-3 rounded-xl text-xs font-mono font-bold transition-all shadow-sm cursor-pointer"
               >
                 Add Task
               </button>
@@ -4075,24 +4076,24 @@ const SaaSDashboard = () => {
             {/* Tasks list */}
             <div className="space-y-3">
               {tasks.filter(t => t.text.toLowerCase().includes(searchQuery.toLowerCase())).length === 0 ? (
-                <div className="text-center py-8 text-xs text-[#64748B]">No matching verification tasks found.</div>
+                <div className="text-center py-8 text-xs text-legacy-slate-500">No matching verification tasks found.</div>
               ) : (
                 tasks.filter(t => t.text.toLowerCase().includes(searchQuery.toLowerCase())).map(task => (
-                  <div key={task.id} className="flex items-center justify-between p-3.5 border border-[#F1F5F9] rounded-xl hover:bg-[#F8F9FA] transition-all">
+                  <div key={task.id} className="flex items-center justify-between p-3.5 border border-legacy-slate-100 rounded-xl hover:bg-legacy-surface-light-input transition-all">
                     <div className="flex items-center space-x-3.5">
                       <input 
                         type="checkbox" 
                         checked={task.completed} 
                         onChange={() => toggleTask(task.id)}
-                        className="w-4.5 h-4.5 border-[#E2E8F0] rounded text-emerald focus:ring-emerald cursor-pointer"
+                        className="w-4.5 h-4.5 border-legacy-slate-200 rounded text-emerald focus:ring-emerald cursor-pointer"
                       />
-                      <span className={`text-sm font-sans font-medium ${task.completed ? 'text-[#94A3B8] line-through' : 'text-[#1E293B]'}`}>
+                      <span className={`text-sm font-sans font-medium ${task.completed ? 'text-legacy-slate-400 line-through' : 'text-legacy-slate-800'}`}>
                         {task.text}
                       </span>
                     </div>
                     <button 
                       onClick={() => deleteTask(task.id)}
-                      className="text-[#94A3B8] hover:text-[#EF4444] p-1 rounded-lg hover:bg-red-50 transition-colors"
+                      className="text-legacy-slate-400 hover:text-legacy-red-500 p-1 rounded-lg hover:bg-red-50 transition-colors"
                     >
                       <Trash2 className="w-4 h-4" />
                     </button>
@@ -4105,10 +4106,10 @@ const SaaSDashboard = () => {
 
         {/* -------------------- TAB CONTENT: CALENDAR -------------------- */}
         {activeMenu === 'Calendar' && (
-          <div className="bg-white border border-[#E2E8F0] rounded-3xl p-6 lg:p-8 shadow-sm space-y-6">
+          <div className="bg-white border border-legacy-slate-200 rounded-3xl p-6 lg:p-8 shadow-sm space-y-6">
             <div>
-              <h1 className="font-sans font-bold text-3xl text-[#0F291B]">ESG Reporting Calendar</h1>
-              <p className="text-sm text-[#64748B] mt-1 font-sans">Track verification schedules, third party audits, and offset purchases.</p>
+              <h1 className="font-sans font-bold text-3xl text-legacy-ink-forest">ESG Reporting Calendar</h1>
+              <p className="text-sm text-legacy-slate-500 mt-1 font-sans">Track verification schedules, third party audits, and offset purchases.</p>
             </div>
 
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
@@ -4116,8 +4117,8 @@ const SaaSDashboard = () => {
               {/* Calendar Grid */}
               <div className="lg:col-span-2 space-y-4">
                 <div className="flex justify-between items-center">
-                  <h3 className="font-sans font-bold text-sm text-[#0F291B]">June 2026</h3>
-                  <div className="flex items-center space-x-1 text-xs text-[#64748B]">
+                  <h3 className="font-sans font-bold text-sm text-legacy-ink-forest">June 2026</h3>
+                  <div className="flex items-center space-x-1 text-xs text-legacy-slate-500">
                     <span className="w-2.5 h-2.5 rounded-full bg-emerald inline-block"></span>
                     <span>Audit Events</span>
                   </div>
@@ -4126,7 +4127,7 @@ const SaaSDashboard = () => {
                 <div className="grid grid-cols-7 gap-2 text-center text-xs font-mono font-bold">
                   {/* Days of week */}
                   {["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"].map(day => (
-                    <div key={day} className="text-[#94A3B8] py-1">{day}</div>
+                    <div key={day} className="text-legacy-slate-400 py-1">{day}</div>
                   ))}
                   
                   {/* Empty spaces for starting offset of June 2026 (Starts on Monday) */}
@@ -4142,13 +4143,13 @@ const SaaSDashboard = () => {
                         onClick={() => hasEvent && setSelectedCalendarDay(day)}
                         className={`border rounded-xl p-3 relative flex flex-col items-center justify-between font-mono font-bold aspect-square transition-all ${
                           isSelected 
-                            ? 'bg-[#0F291B] border-[#0F291B] text-white shadow-md' 
-                            : 'border-[#F1F5F9] hover:bg-[#F8F9FA] text-[#1E293B]'
+                            ? 'bg-legacy-ink-forest border-legacy-ink-forest text-white shadow-md'
+                            : 'border-legacy-slate-100 hover:bg-legacy-surface-light-input text-legacy-slate-800'
                         } ${hasEvent ? 'cursor-pointer' : 'cursor-default opacity-60'}`}
                       >
                         <span>{day}</span>
                         {hasEvent && (
-                          <span className={`w-1.5 h-1.5 rounded-full ${isSelected ? 'bg-[#4ADE80]' : 'bg-[#10B981]'}`}></span>
+                          <span className={`w-1.5 h-1.5 rounded-full ${isSelected ? 'bg-legacy-green-400' : 'bg-legacy-emerald-500'}`}></span>
                         )}
                       </button>
                     );
@@ -4157,35 +4158,35 @@ const SaaSDashboard = () => {
               </div>
 
               {/* Event details panel */}
-              <div className="bg-[#F8F9FA] rounded-2xl p-6 border border-[#E2E8F0] space-y-4 h-fit">
-                <h3 className="font-sans font-bold text-sm text-[#0F291B] border-b border-[#E2E8F0] pb-2">Event Schedule Details</h3>
+              <div className="bg-legacy-surface-light-input rounded-2xl p-6 border border-legacy-slate-200 space-y-4 h-fit">
+                <h3 className="font-sans font-bold text-sm text-legacy-ink-forest border-b border-legacy-slate-200 pb-2">Event Schedule Details</h3>
                 {selectedCalendarDay && calendarEvents[selectedCalendarDay] ? (
                   <div className="space-y-3 font-sans text-xs">
                     <div>
-                      <span className="text-[10px] text-[#64748B] block font-mono">DATE</span>
-                      <span className="font-bold text-[#0F291B]">June {selectedCalendarDay}, 2026</span>
+                      <span className="text-[10px] text-legacy-slate-500 block font-mono">DATE</span>
+                      <span className="font-bold text-legacy-ink-forest">June {selectedCalendarDay}, 2026</span>
                     </div>
                     <div>
-                      <span className="text-[10px] text-[#64748B] block font-mono">AUDIT MISSION</span>
-                      <span className="font-bold text-sm text-[#0F291B] block mt-0.5">{calendarEvents[selectedCalendarDay].title}</span>
+                      <span className="text-[10px] text-legacy-slate-500 block font-mono">AUDIT MISSION</span>
+                      <span className="font-bold text-sm text-legacy-ink-forest block mt-0.5">{calendarEvents[selectedCalendarDay].title}</span>
                     </div>
                     <div>
-                      <span className="text-[10px] text-[#64748B] block font-mono">ASSIGNED AUDITOR</span>
+                      <span className="text-[10px] text-legacy-slate-500 block font-mono">ASSIGNED AUDITOR</span>
                       <span className="font-semibold text-emerald">{calendarEvents[selectedCalendarDay].auditor}</span>
                     </div>
                     <div>
-                      <span className="text-[10px] text-[#64748B] block font-mono">SCHEDULED TIME</span>
-                      <span className="font-mono font-bold text-[#1E293B]">{calendarEvents[selectedCalendarDay].time}</span>
+                      <span className="text-[10px] text-legacy-slate-500 block font-mono">SCHEDULED TIME</span>
+                      <span className="font-mono font-bold text-legacy-slate-800">{calendarEvents[selectedCalendarDay].time}</span>
                     </div>
                     <button 
                       onClick={() => showToast(`Report for "${calendarEvents[selectedCalendarDay].title}" requested.`, "success")}
-                      className="w-full bg-[#00C853] hover:bg-[#00E676] text-white font-mono font-bold text-xs py-2 px-3 rounded-lg transition-all shadow-sm block text-center cursor-pointer"
+                      className="w-full bg-legacy-brand-base hover:bg-legacy-brand-bright text-white font-mono font-bold text-xs py-2 px-3 rounded-lg transition-all shadow-sm block text-center cursor-pointer"
                     >
                       Request Audit Dossier
                     </button>
                   </div>
                 ) : (
-                  <p className="text-xs text-[#64748B]">Click on any highlighted date in the calendar to view its ESG audit logs.</p>
+                  <p className="text-xs text-legacy-slate-500">Click on any highlighted date in the calendar to view its ESG audit logs.</p>
                 )}
               </div>
 
@@ -4195,42 +4196,42 @@ const SaaSDashboard = () => {
 
         {/* -------------------- TAB CONTENT: ANALYTICS -------------------- */}
         {activeMenu === 'Analytics' && (
-          <div className="bg-white border border-[#E2E8F0] rounded-3xl p-6 lg:p-8 shadow-sm space-y-6">
+          <div className="bg-white border border-legacy-slate-200 rounded-3xl p-6 lg:p-8 shadow-sm space-y-6">
             <div>
-              <h1 className="font-sans font-bold text-3xl text-[#0F291B]">Emissions Analytics</h1>
-              <p className="text-sm text-[#64748B] mt-1 font-sans">Deep dive into corporate footprint breakdown per GHG Protocol Scopes.</p>
+              <h1 className="font-sans font-bold text-3xl text-legacy-ink-forest">Emissions Analytics</h1>
+              <p className="text-sm text-legacy-slate-500 mt-1 font-sans">Deep dive into corporate footprint breakdown per GHG Protocol Scopes.</p>
             </div>
 
             <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-              <div className="border border-[#E2E8F0] rounded-2xl p-5 space-y-3">
-                <span className="text-[10px] font-mono font-bold uppercase tracking-wider text-[#64748B]">Carbon Intensity Score</span>
-                <div className="text-2xl font-sans font-bold text-[#0F291B]">0.18 <span className="text-xs text-[#64748B]">tCO2e/person</span></div>
-                <p className="text-[10px] text-[#64748B]">Average monthly emissions calculated per corporate employee.</p>
+              <div className="border border-legacy-slate-200 rounded-2xl p-5 space-y-3">
+                <span className="text-[10px] font-mono font-bold uppercase tracking-wider text-legacy-slate-500">Carbon Intensity Score</span>
+                <div className="text-2xl font-sans font-bold text-legacy-ink-forest">0.18 <span className="text-xs text-legacy-slate-500">tCO2e/person</span></div>
+                <p className="text-[10px] text-legacy-slate-500">Average monthly emissions calculated per corporate employee.</p>
               </div>
-              <div className="border border-[#E2E8F0] rounded-2xl p-5 space-y-3">
-                <span className="text-[10px] font-mono font-bold uppercase tracking-wider text-[#64748B]">Revenue Intensity</span>
-                <div className="text-2xl font-sans font-bold text-[#0F291B]">1.24 <span className="text-xs text-[#64748B]">kgCO2e/৳</span></div>
-                <p className="text-[10px] text-[#64748B]">Carbon dioxide generated per Taka generated in business activity.</p>
+              <div className="border border-legacy-slate-200 rounded-2xl p-5 space-y-3">
+                <span className="text-[10px] font-mono font-bold uppercase tracking-wider text-legacy-slate-500">Revenue Intensity</span>
+                <div className="text-2xl font-sans font-bold text-legacy-ink-forest">1.24 <span className="text-xs text-legacy-slate-500">kgCO2e/৳</span></div>
+                <p className="text-[10px] text-legacy-slate-500">Carbon dioxide generated per Taka generated in business activity.</p>
               </div>
-              <div className="border border-[#E2E8F0] rounded-2xl p-5 space-y-3">
-                <span className="text-[10px] font-mono font-bold uppercase tracking-wider text-[#64748B]">Energy Efficiency</span>
+              <div className="border border-legacy-slate-200 rounded-2xl p-5 space-y-3">
+                <span className="text-[10px] font-mono font-bold uppercase tracking-wider text-legacy-slate-500">Energy Efficiency</span>
                 <div className="text-2xl font-sans font-bold text-emerald">Grade A+</div>
-                <p className="text-[10px] text-[#64748B]">Optimized power grid usage vs average Bangladeshi manufacturing.</p>
+                <p className="text-[10px] text-legacy-slate-500">Optimized power grid usage vs average Bangladeshi manufacturing.</p>
               </div>
             </div>
 
             {/* Scope Visual Progress Bars */}
-            <div className="space-y-5 border-t border-[#F1F5F9] pt-6">
-              <h3 className="font-sans font-bold text-base text-[#0F291B]">Scope Distribution</h3>
+            <div className="space-y-5 border-t border-legacy-slate-100 pt-6">
+              <h3 className="font-sans font-bold text-base text-legacy-ink-forest">Scope Distribution</h3>
               
               <div className="space-y-4">
                 {/* Scope 1 */}
                 <div className="space-y-1.5">
                   <div className="flex justify-between text-xs font-sans">
-                    <span className="font-bold text-[#0F291B]">Scope 1 (Direct Fuel Burning)</span>
+                    <span className="font-bold text-legacy-ink-forest">Scope 1 (Direct Fuel Burning)</span>
                     <span className="font-mono font-semibold text-amber">{results.scope1} tCO2e ({results.total > 0 ? ((results.scope1 / results.total) * 100).toFixed(0) : 0}%)</span>
                   </div>
-                  <div className="w-full bg-[#F1F5F9] h-2.5 rounded-full overflow-hidden">
+                  <div className="w-full bg-legacy-slate-100 h-2.5 rounded-full overflow-hidden">
                     <div 
                       className="bg-amber h-full transition-all duration-500" 
                       style={{ width: `${results.total > 0 ? (results.scope1 / results.total) * 100 : 0}%` }}
@@ -4241,10 +4242,10 @@ const SaaSDashboard = () => {
                 {/* Scope 2 */}
                 <div className="space-y-1.5">
                   <div className="flex justify-between text-xs font-sans">
-                    <span className="font-bold text-[#0F291B]">Scope 2 (Electricity Consumption)</span>
+                    <span className="font-bold text-legacy-ink-forest">Scope 2 (Electricity Consumption)</span>
                     <span className="font-mono font-semibold text-emerald">{results.scope2} tCO2e ({results.total > 0 ? ((results.scope2 / results.total) * 100).toFixed(0) : 0}%)</span>
                   </div>
-                  <div className="w-full bg-[#F1F5F9] h-2.5 rounded-full overflow-hidden">
+                  <div className="w-full bg-legacy-slate-100 h-2.5 rounded-full overflow-hidden">
                     <div 
                       className="bg-emerald h-full transition-all duration-500" 
                       style={{ width: `${results.total > 0 ? (results.scope2 / results.total) * 100 : 0}%` }}
@@ -4255,10 +4256,10 @@ const SaaSDashboard = () => {
                 {/* Scope 3 */}
                 <div className="space-y-1.5">
                   <div className="flex justify-between text-xs font-sans">
-                    <span className="font-bold text-[#0F291B]">Scope 3 (Supply Chain & Business travel)</span>
+                    <span className="font-bold text-legacy-ink-forest">Scope 3 (Supply Chain & Business travel)</span>
                     <span className="font-mono font-semibold text-purple-600">{results.scope3} tCO2e ({results.total > 0 ? ((results.scope3 / results.total) * 100).toFixed(0) : 0}%)</span>
                   </div>
-                  <div className="w-full bg-[#F1F5F9] h-2.5 rounded-full overflow-hidden">
+                  <div className="w-full bg-legacy-slate-100 h-2.5 rounded-full overflow-hidden">
                     <div 
                       className="bg-purple-600 h-full transition-all duration-500" 
                       style={{ width: `${results.total > 0 ? (results.scope3 / results.total) * 100 : 0}%` }}
@@ -4269,24 +4270,24 @@ const SaaSDashboard = () => {
             </div>
 
             {/* Fuel Breakdown Grid */}
-            <div className="border-t border-[#F1F5F9] pt-6 space-y-4">
-              <h3 className="font-sans font-bold text-base text-[#0F291B]">Activity Emission Logs</h3>
+            <div className="border-t border-legacy-slate-100 pt-6 space-y-4">
+              <h3 className="font-sans font-bold text-base text-legacy-ink-forest">Activity Emission Logs</h3>
               <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 text-xs font-sans">
-                <div className="p-3 bg-[#F8F9FA] rounded-xl">
-                  <span className="text-[#64748B] block mb-1">Diesel</span>
-                  <span className="font-bold font-mono text-[#0F291B]">{((parseFloat(inputs.diesel) || 0) * ef.diesel / 1000).toFixed(2)} tCO2e</span>
+                <div className="p-3 bg-legacy-surface-light-input rounded-xl">
+                  <span className="text-legacy-slate-500 block mb-1">Diesel</span>
+                  <span className="font-bold font-mono text-legacy-ink-forest">{((parseFloat(inputs.diesel) || 0) * ef.diesel / 1000).toFixed(2)} tCO2e</span>
                 </div>
-                <div className="p-3 bg-[#F8F9FA] rounded-xl">
-                  <span className="text-[#64748B] block mb-1">Petrol</span>
-                  <span className="font-bold font-mono text-[#0F291B]">{((parseFloat(inputs.petrol) || 0) * ef.petrol / 1000).toFixed(2)} tCO2e</span>
+                <div className="p-3 bg-legacy-surface-light-input rounded-xl">
+                  <span className="text-legacy-slate-500 block mb-1">Petrol</span>
+                  <span className="font-bold font-mono text-legacy-ink-forest">{((parseFloat(inputs.petrol) || 0) * ef.petrol / 1000).toFixed(2)} tCO2e</span>
                 </div>
-                <div className="p-3 bg-[#F8F9FA] rounded-xl">
-                  <span className="text-[#64748B] block mb-1">LPG Gas</span>
-                  <span className="font-bold font-mono text-[#0F291B]">{((parseFloat(inputs.lpg) || 0) * ef.lpg / 1000).toFixed(2)} tCO2e</span>
+                <div className="p-3 bg-legacy-surface-light-input rounded-xl">
+                  <span className="text-legacy-slate-500 block mb-1">LPG Gas</span>
+                  <span className="font-bold font-mono text-legacy-ink-forest">{((parseFloat(inputs.lpg) || 0) * ef.lpg / 1000).toFixed(2)} tCO2e</span>
                 </div>
-                <div className="p-3 bg-[#F8F9FA] rounded-xl">
-                  <span className="text-[#64748B] block mb-1">Electricity</span>
-                  <span className="font-bold font-mono text-[#0F291B]">{((parseFloat(inputs.electricity) || 0) * ef.electricity / 1000).toFixed(2)} tCO2e</span>
+                <div className="p-3 bg-legacy-surface-light-input rounded-xl">
+                  <span className="text-legacy-slate-500 block mb-1">Electricity</span>
+                  <span className="font-bold font-mono text-legacy-ink-forest">{((parseFloat(inputs.electricity) || 0) * ef.electricity / 1000).toFixed(2)} tCO2e</span>
                 </div>
               </div>
             </div>
@@ -4296,15 +4297,15 @@ const SaaSDashboard = () => {
 
         {/* -------------------- TAB CONTENT: TEAM -------------------- */}
         {activeMenu === 'Team' && (
-          <div className="bg-white border border-[#E2E8F0] rounded-3xl p-6 lg:p-8 shadow-sm space-y-6">
+          <div className="bg-white border border-legacy-slate-200 rounded-3xl p-6 lg:p-8 shadow-sm space-y-6">
             <div className="flex justify-between items-center">
               <div>
-                <h1 className="font-sans font-bold text-3xl text-[#0F291B]">ESG Audit Team</h1>
-                <p className="text-sm text-[#64748B] mt-1 font-sans">Manage corporate accounts, permissions, and verifiers.</p>
+                <h1 className="font-sans font-bold text-3xl text-legacy-ink-forest">ESG Audit Team</h1>
+                <p className="text-sm text-legacy-slate-500 mt-1 font-sans">Manage corporate accounts, permissions, and verifiers.</p>
               </div>
               <button 
                 onClick={() => setIsAddMemberOpen(true)}
-                className="bg-[#00C853] hover:bg-[#00E676] text-white font-mono font-bold text-xs px-4 py-2 rounded-xl transition-all shadow-sm flex items-center space-x-1.5 cursor-pointer"
+                className="bg-legacy-brand-base hover:bg-legacy-brand-bright text-white font-mono font-bold text-xs px-4 py-2 rounded-xl transition-all shadow-sm flex items-center space-x-1.5 cursor-pointer"
               >
                 <Plus className="w-3.5 h-3.5 text-white stroke-[2.5]" />
                 <span className="text-white font-mono font-bold">Add Member</span>
@@ -4313,10 +4314,10 @@ const SaaSDashboard = () => {
 
             <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
               {teamMembers.filter(m => m.name.toLowerCase().includes(searchQuery.toLowerCase()) || m.role.toLowerCase().includes(searchQuery.toLowerCase())).map((member, i) => (
-                <div key={i} className="border border-[#E2E8F0] rounded-2xl p-5 space-y-4 relative flex flex-col justify-between">
+                <div key={i} className="border border-legacy-slate-200 rounded-2xl p-5 space-y-4 relative flex flex-col justify-between">
                   <button 
                     onClick={() => removeMember(member.name)}
-                    className="absolute top-4 right-4 text-[#94A3B8] hover:text-[#EF4444]"
+                    className="absolute top-4 right-4 text-legacy-slate-400 hover:text-legacy-red-500"
                   >
                     <Trash2 className="w-4 h-4" />
                   </button>
@@ -4326,22 +4327,22 @@ const SaaSDashboard = () => {
                       <img src={member.avatar} alt={member.name} className="w-full h-full object-cover" width="48" height="48" loading="lazy" />
                     </div>
                     <div>
-                      <h4 className="font-sans font-bold text-sm text-[#0F291B]">{member.name}</h4>
-                      <p className="text-xs text-[#64748B]">{member.role}</p>
+                      <h4 className="font-sans font-bold text-sm text-legacy-ink-forest">{member.name}</h4>
+                      <p className="text-xs text-legacy-slate-500">{member.role}</p>
                     </div>
                   </div>
 
-                  <div className="space-y-2 border-t border-[#F1F5F9] pt-3 text-xs font-sans">
+                  <div className="space-y-2 border-t border-legacy-slate-100 pt-3 text-xs font-sans">
                     <div className="flex justify-between">
-                      <span className="text-[#64748B]">Email:</span>
-                      <span className="font-mono text-[#0F291B]">{member.email}</span>
+                      <span className="text-legacy-slate-500">Email:</span>
+                      <span className="font-mono text-legacy-ink-forest">{member.email}</span>
                     </div>
                     <div className="flex justify-between">
-                      <span className="text-[#64748B]">Access:</span>
-                      <span className="font-bold text-[#0F291B]">{member.permission}</span>
+                      <span className="text-legacy-slate-500">Access:</span>
+                      <span className="font-bold text-legacy-ink-forest">{member.permission}</span>
                     </div>
                     <div className="flex justify-between items-center">
-                      <span className="text-[#64748B]">Status:</span>
+                      <span className="text-legacy-slate-500">Status:</span>
                       <button 
                         onClick={() => toggleMemberStatus(member.name)}
                         className={`px-2 py-0.5 rounded text-[9px] uppercase font-bold border ${
@@ -4362,38 +4363,38 @@ const SaaSDashboard = () => {
 
         {/* -------------------- TAB CONTENT: SETTINGS -------------------- */}
         {activeMenu === 'Settings' && (
-          <div className="bg-white border border-[#E2E8F0] rounded-3xl p-6 lg:p-8 shadow-sm space-y-6">
+          <div className="bg-white border border-legacy-slate-200 rounded-3xl p-6 lg:p-8 shadow-sm space-y-6">
             <div>
-              <h1 className="font-sans font-bold text-3xl text-[#0F291B]">ESG Parameter Settings</h1>
-              <p className="text-sm text-[#64748B] mt-1 font-sans">Configure GHG Protocol emission factors and reduction targets.</p>
+              <h1 className="font-sans font-bold text-3xl text-legacy-ink-forest">ESG Parameter Settings</h1>
+              <p className="text-sm text-legacy-slate-500 mt-1 font-sans">Configure GHG Protocol emission factors and reduction targets.</p>
             </div>
 
             <form onSubmit={handleSaveSettings} className="space-y-6">
               
               {/* Target configurations */}
               <div className="space-y-4">
-                <h3 className="font-sans font-bold text-base text-[#0F291B] border-b border-[#F1F5F9] pb-2">Target Metrics</h3>
+                <h3 className="font-sans font-bold text-base text-legacy-ink-forest border-b border-legacy-slate-100 pb-2">Target Metrics</h3>
                 <div>
-                  <label className="block text-xs font-bold text-[#64748B] uppercase mb-1">Corporate Reduction Target (%)</label>
+                  <label className="block text-xs font-bold text-legacy-slate-500 uppercase mb-1">Corporate Reduction Target (%)</label>
                   <input 
                     type="number"
                     value={reductionTarget}
                     onChange={(e) => setReductionTarget(e.target.value)}
-                    className="w-full max-w-xs text-xs font-mono p-2 border border-[#E2E8F0] rounded-lg focus:outline-none focus:border-[#0F291B] bg-[#F8F9FA]"
+                    className="w-full max-w-xs text-xs font-mono p-2 border border-legacy-slate-200 rounded-lg focus:outline-none focus:border-legacy-ink-forest bg-legacy-surface-light-input"
                   />
-                  <p className="text-[10px] text-[#64748B] mt-1">This configures the target carbon footprint reduction card on the dashboard.</p>
+                  <p className="text-[10px] text-legacy-slate-500 mt-1">This configures the target carbon footprint reduction card on the dashboard.</p>
                 </div>
               </div>
 
               {/* Emission Factors grid */}
               <div className="space-y-4">
-                <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-2 border-b border-[#F1F5F9] pb-2">
-                  <h3 className="font-sans font-bold text-base text-[#0F291B]">GHG Emission Factors (EF)</h3>
+                <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-2 border-b border-legacy-slate-100 pb-2">
+                  <h3 className="font-sans font-bold text-base text-legacy-ink-forest">GHG Emission Factors (EF)</h3>
                   <button
                     type="button"
                     onClick={syncOfficialFactors}
                     disabled={isSyncingFactors}
-                    className="text-xs font-mono font-bold px-3.5 py-2 rounded-xl bg-[#00C853] text-white hover:bg-[#00E676] flex items-center space-x-1.5 transition-all shadow-sm cursor-pointer"
+                    className="text-xs font-mono font-bold px-3.5 py-2 rounded-xl bg-legacy-brand-base text-white hover:bg-legacy-brand-bright flex items-center space-x-1.5 transition-all shadow-sm cursor-pointer"
                   >
                     <RefreshCw className={`w-3.5 h-3.5 text-white ${isSyncingFactors ? 'animate-spin' : ''}`} />
                     <span className="text-white font-mono font-bold">Sync with Official DoE / IPCC RAG Registry</span>
@@ -4401,63 +4402,63 @@ const SaaSDashboard = () => {
                 </div>
                 <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
                   <div>
-                    <label className="block text-xs font-bold text-[#64748B] uppercase mb-1">Diesel (kg CO₂e/L)</label>
+                    <label className="block text-xs font-bold text-legacy-slate-500 uppercase mb-1">Diesel (kg CO₂e/L)</label>
                     <input 
                       type="number"
                       step="0.01"
                       value={ef.diesel}
                       onChange={(e) => setEf({ ...ef, diesel: parseFloat(e.target.value) || 0 })}
-                      className="w-full text-xs font-mono p-2 border border-[#E2E8F0] rounded-lg focus:outline-none focus:border-[#0F291B] bg-[#F8F9FA]"
+                      className="w-full text-xs font-mono p-2 border border-legacy-slate-200 rounded-lg focus:outline-none focus:border-legacy-ink-forest bg-legacy-surface-light-input"
                     />
                   </div>
                   <div>
-                    <label className="block text-xs font-bold text-[#64748B] uppercase mb-1">Petrol (kg CO₂e/L)</label>
+                    <label className="block text-xs font-bold text-legacy-slate-500 uppercase mb-1">Petrol (kg CO₂e/L)</label>
                     <input 
                       type="number"
                       step="0.01"
                       value={ef.petrol}
                       onChange={(e) => setEf({ ...ef, petrol: parseFloat(e.target.value) || 0 })}
-                      className="w-full text-xs font-mono p-2 border border-[#E2E8F0] rounded-lg focus:outline-none focus:border-[#0F291B] bg-[#F8F9FA]"
+                      className="w-full text-xs font-mono p-2 border border-legacy-slate-200 rounded-lg focus:outline-none focus:border-legacy-ink-forest bg-legacy-surface-light-input"
                     />
                   </div>
                   <div>
-                    <label className="block text-xs font-bold text-[#64748B] uppercase mb-1">LPG Gas (kg CO₂e/kg)</label>
+                    <label className="block text-xs font-bold text-legacy-slate-500 uppercase mb-1">LPG Gas (kg CO₂e/kg)</label>
                     <input 
                       type="number"
                       step="0.01"
                       value={ef.lpg}
                       onChange={(e) => setEf({ ...ef, lpg: parseFloat(e.target.value) || 0 })}
-                      className="w-full text-xs font-mono p-2 border border-[#E2E8F0] rounded-lg focus:outline-none focus:border-[#0F291B] bg-[#F8F9FA]"
+                      className="w-full text-xs font-mono p-2 border border-legacy-slate-200 rounded-lg focus:outline-none focus:border-legacy-ink-forest bg-legacy-surface-light-input"
                     />
                   </div>
                   <div>
-                    <label className="block text-xs font-bold text-[#64748B] uppercase mb-1">Grid Power (kg CO₂e/kWh)</label>
+                    <label className="block text-xs font-bold text-legacy-slate-500 uppercase mb-1">Grid Power (kg CO₂e/kWh)</label>
                     <input 
                       type="number"
                       step="0.01"
                       value={ef.electricity}
                       onChange={(e) => setEf({ ...ef, electricity: parseFloat(e.target.value) || 0 })}
-                      className="w-full text-xs font-mono p-2 border border-[#E2E8F0] rounded-lg focus:outline-none focus:border-[#0F291B] bg-[#F8F9FA]"
+                      className="w-full text-xs font-mono p-2 border border-legacy-slate-200 rounded-lg focus:outline-none focus:border-legacy-ink-forest bg-legacy-surface-light-input"
                     />
                   </div>
                   <div>
-                    <label className="block text-xs font-bold text-[#64748B] uppercase mb-1">Commute (tCO₂e/emp/yr)</label>
+                    <label className="block text-xs font-bold text-legacy-slate-500 uppercase mb-1">Commute (tCO₂e/emp/yr)</label>
                     <input 
                       type="number"
                       step="0.01"
                       value={ef.employees}
                       onChange={(e) => setEf({ ...ef, employees: parseFloat(e.target.value) || 0 })}
-                      className="w-full text-xs font-mono p-2 border border-[#E2E8F0] rounded-lg focus:outline-none focus:border-[#0F291B] bg-[#F8F9FA]"
+                      className="w-full text-xs font-mono p-2 border border-legacy-slate-200 rounded-lg focus:outline-none focus:border-legacy-ink-forest bg-legacy-surface-light-input"
                     />
                   </div>
                   <div>
-                    <label className="block text-xs font-bold text-[#64748B] uppercase mb-1">Air Travel (kg CO₂e/km)</label>
+                    <label className="block text-xs font-bold text-legacy-slate-500 uppercase mb-1">Air Travel (kg CO₂e/km)</label>
                     <input 
                       type="number"
                       step="0.01"
                       value={ef.airTravel}
                       onChange={(e) => setEf({ ...ef, airTravel: parseFloat(e.target.value) || 0 })}
-                      className="w-full text-xs font-mono p-2 border border-[#E2E8F0] rounded-lg focus:outline-none focus:border-[#0F291B] bg-[#F8F9FA]"
+                      className="w-full text-xs font-mono p-2 border border-legacy-slate-200 rounded-lg focus:outline-none focus:border-legacy-ink-forest bg-legacy-surface-light-input"
                     />
                   </div>
                 </div>
@@ -4465,7 +4466,7 @@ const SaaSDashboard = () => {
 
               <button 
                 type="submit"
-                className="bg-[#0F291B] hover:bg-[#1A4B31] text-white font-sans font-bold text-xs px-6 py-3 rounded-xl transition-all shadow-md inline-block"
+                className="bg-legacy-ink-forest hover:bg-legacy-forest-15 text-white font-sans font-bold text-xs px-6 py-3 rounded-xl transition-all shadow-md inline-block"
               >
                 Save Settings
               </button>
@@ -4476,14 +4477,14 @@ const SaaSDashboard = () => {
 
         {/* -------------------- TAB CONTENT: HELP -------------------- */}
         {activeMenu === 'Help' && (
-          <div className="bg-white border border-[#E2E8F0] rounded-3xl p-6 lg:p-8 shadow-sm space-y-6">
+          <div className="bg-white border border-legacy-slate-200 rounded-3xl p-6 lg:p-8 shadow-sm space-y-6">
             <div>
-              <h1 className="font-sans font-bold text-3xl text-[#0F291B]">FAQ & GHG Guidelines</h1>
-              <p className="text-sm text-[#64748B] mt-1 font-sans">Understand Scope definitions and carbon tracking calculations.</p>
+              <h1 className="font-sans font-bold text-3xl text-legacy-ink-forest">FAQ & GHG Guidelines</h1>
+              <p className="text-sm text-legacy-slate-500 mt-1 font-sans">Understand Scope definitions and carbon tracking calculations.</p>
             </div>
 
             {/* Accordion */}
-            <div className="space-y-4 border-t border-[#F1F5F9] pt-4">
+            <div className="space-y-4 border-t border-legacy-slate-100 pt-4">
               {[
                 {
                   q: "What is Scope 1 Direct Emissions?",
@@ -4498,16 +4499,16 @@ const SaaSDashboard = () => {
                   a: "Scope 3 emissions are a consequence of the activities of the company, but occur from sources not owned or controlled by it. Examples include employee business commutes, supplier raw material logistics (plastic, glass), and third party flights."
                 }
               ].map((item, idx) => (
-                <div key={idx} className="border border-[#E2E8F0] rounded-xl overflow-hidden">
+                <div key={idx} className="border border-legacy-slate-200 rounded-xl overflow-hidden">
                   <button
                     onClick={() => toggleFaq(idx)}
-                    className="w-full flex justify-between items-center p-4 bg-[#F8F9FA] text-left text-xs font-sans font-bold text-[#0F291B]"
+                    className="w-full flex justify-between items-center p-4 bg-legacy-surface-light-input text-left text-xs font-sans font-bold text-legacy-ink-forest"
                   >
                     <span>{item.q}</span>
-                    {faqOpen[idx] ? <ChevronUp className="w-4 h-4 text-[#94A3B8]" /> : <ChevronDown className="w-4 h-4 text-[#94A3B8]" />}
+                    {faqOpen[idx] ? <ChevronUp className="w-4 h-4 text-legacy-slate-400" /> : <ChevronDown className="w-4 h-4 text-legacy-slate-400" />}
                   </button>
                   {faqOpen[idx] && (
-                    <div className="p-4 bg-white border-t border-[#E2E8F0] text-xs font-sans text-[#64748B] leading-relaxed">
+                    <div className="p-4 bg-white border-t border-legacy-slate-200 text-xs font-sans text-legacy-slate-500 leading-relaxed">
                       {item.a}
                     </div>
                   )}
@@ -4516,12 +4517,12 @@ const SaaSDashboard = () => {
             </div>
 
             {/* Contact Support */}
-            <div className="border-t border-[#F1F5F9] pt-6 space-y-4">
-              <h3 className="font-sans font-bold text-sm text-[#0F291B]">Need help with auditing?</h3>
-              <p className="text-xs text-[#64748B] font-sans">Our certified ESG specialists are available to review your corporate data streams.</p>
+            <div className="border-t border-legacy-slate-100 pt-6 space-y-4">
+              <h3 className="font-sans font-bold text-sm text-legacy-ink-forest">Need help with auditing?</h3>
+              <p className="text-xs text-legacy-slate-500 font-sans">Our certified ESG specialists are available to review your corporate data streams.</p>
               <button 
                 onClick={() => showToast("A support request has been sent. An ESG auditor will reach out soon.", "success")}
-                className="bg-[#00C853] hover:bg-[#00E676] text-white font-mono font-bold text-xs py-2 px-4 rounded-xl transition-all shadow-sm cursor-pointer"
+                className="bg-legacy-brand-base hover:bg-legacy-brand-bright text-white font-mono font-bold text-xs py-2 px-4 rounded-xl transition-all shadow-sm cursor-pointer"
               >
                 Consult Carbon Zero BD Specialists
               </button>
@@ -4600,7 +4601,7 @@ const SaaSDashboard = () => {
       {isClientModalOpen && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 backdrop-blur-md bg-black/60 overflow-y-auto">
           <div className={`max-w-3xl w-full rounded-3xl p-6 sm:p-8 shadow-2xl space-y-6 relative border transition-all my-8 ${
-            isLight ? 'bg-white border-[#E2E8E3] text-[#0F2417]' : 'bg-[#08130C] border-[#152B1D] text-white'
+            isLight ? 'bg-white border-legacy-mint-24 text-legacy-forest-43' : 'bg-legacy-surface-base border-legacy-divider-base text-white'
           }`}>
             <button 
               onClick={() => setIsClientModalOpen(false)}
@@ -4610,7 +4611,7 @@ const SaaSDashboard = () => {
             </button>
 
             <div>
-              <div className="flex items-center space-x-2 text-[10px] font-mono uppercase tracking-widest text-[#00C853] font-bold">
+              <div className="flex items-center space-x-2 text-[10px] font-mono uppercase tracking-widest text-legacy-brand-base font-bold">
                 <Building className="w-4 h-4" />
                 <span>Multi-Tenant Corporate ESG Registry</span>
               </div>
@@ -4632,17 +4633,17 @@ const SaaSDashboard = () => {
                     onClick={() => handleSelectClient(client.id)}
                     className={`p-4 rounded-2xl border transition-all cursor-pointer text-left flex flex-col justify-between group ${
                       isSelected
-                        ? 'border-[#00C853] bg-[#00C853]/10 shadow-[0_0_20px_rgba(0,200,83,0.15)]'
+                        ? 'border-legacy-brand-base bg-legacy-brand-base/10 shadow-[0_0_20px_rgba(0,200,83,0.15)]'
                         : (isLight 
-                            ? 'bg-[#F9FBFA] border-[#E8ECE8] hover:border-[#00C853]/50 hover:bg-white' 
-                            : 'bg-[#0B1A11] border-[#152B1D] hover:border-[#00C853]/40 hover:bg-[#0D2216]')
+                            ? 'bg-legacy-mint-02 border-legacy-divider-light hover:border-legacy-brand-base/50 hover:bg-white'
+                            : 'bg-legacy-forest-56 border-legacy-divider-base hover:border-legacy-brand-base/40 hover:bg-legacy-forest-46')
                     }`}
                   >
                     <div>
                       <div className="flex items-start justify-between gap-2 mb-3">
                         <div className={`h-12 px-3 py-1 rounded-xl flex items-center justify-center overflow-hidden shadow-sm shrink-0 min-w-[80px] max-w-[100px] ${
                           client.logoTheme === 'dark'
-                            ? 'bg-[#06140B] border border-[#163D22] ring-1 ring-emerald-500/20'
+                            ? 'bg-legacy-forest-73 border border-legacy-forest-25 ring-1 ring-emerald-500/20'
                             : 'bg-white border border-slate-200'
                         }`}>
                           <img 
@@ -4652,18 +4653,18 @@ const SaaSDashboard = () => {
                           />
                         </div>
                         <div className="flex flex-col items-end gap-1">
-                          <span className="text-[10px] font-mono px-2 py-0.5 rounded-full bg-[#00C853]/20 text-[#00C853] font-bold">
+                          <span className="text-[10px] font-mono px-2 py-0.5 rounded-full bg-legacy-brand-base/20 text-legacy-brand-base font-bold">
                             {client.sector}
                           </span>
                           {isSelected && (
-                            <span className="text-[9px] font-mono font-bold text-[#00C853] flex items-center gap-1">
+                            <span className="text-[9px] font-mono font-bold text-legacy-brand-base flex items-center gap-1">
                               <CheckCircle2 className="w-3 h-3" /> Active Workspace
                             </span>
                           )}
                         </div>
                       </div>
 
-                      <h4 className="font-sans font-bold text-sm leading-snug group-hover:text-[#00C853] transition-colors">
+                      <h4 className="font-sans font-bold text-sm leading-snug group-hover:text-legacy-brand-base transition-colors">
                         {client.name}
                       </h4>
                       <div className="text-[11px] text-gray-400 font-mono mt-0.5">
@@ -4684,7 +4685,7 @@ const SaaSDashboard = () => {
                         target="_blank"
                         rel="noopener noreferrer"
                         onClick={(e) => e.stopPropagation()}
-                        className="text-[#00C853] hover:underline flex items-center space-x-1"
+                        className="text-legacy-brand-base hover:underline flex items-center space-x-1"
                       >
                         <span>Visit Site</span>
                         <ExternalLink className="w-2.5 h-2.5" />
@@ -4711,41 +4712,41 @@ const SaaSDashboard = () => {
       {/* -------------------- ADD PROJECT MODAL DIALOG -------------------- */}
       {isAddProjectOpen && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 backdrop-blur-sm bg-black/40">
-          <div className="bg-white rounded-3xl max-w-md w-full p-6 shadow-2xl space-y-6 relative border border-[#E2E8F0]">
+          <div className="bg-white rounded-3xl max-w-md w-full p-6 shadow-2xl space-y-6 relative border border-legacy-slate-200">
             <button 
               onClick={() => setIsAddProjectOpen(false)}
-              className="absolute top-4 right-4 text-[#94A3B8] hover:text-[#0F291B]"
+              className="absolute top-4 right-4 text-legacy-slate-400 hover:text-legacy-ink-forest"
             >
               <X className="w-5 h-5" />
             </button>
 
             <div>
-              <h3 className="font-sans font-bold text-lg text-[#0F291B] flex items-center">
+              <h3 className="font-sans font-bold text-lg text-legacy-ink-forest flex items-center">
                 <Building className="w-5 h-5 text-emerald mr-2" />
                 Add Corporate Project
               </h3>
-              <p className="text-xs text-[#64748B] mt-0.5">Register a regional emission monitoring offset project.</p>
+              <p className="text-xs text-legacy-slate-500 mt-0.5">Register a regional emission monitoring offset project.</p>
             </div>
 
             <form onSubmit={handleAddProject} className="space-y-4 font-sans text-xs">
               <div>
-                <label className="block font-bold text-[#64748B] mb-1">Project Name</label>
+                <label className="block font-bold text-legacy-slate-500 mb-1">Project Name</label>
                 <input 
                   type="text" 
                   value={newProject.name}
                   onChange={(e) => setNewProject({ ...newProject, name: e.target.value })}
                   placeholder="e.g. Chittagong Mangrove Restoration" 
-                  className="w-full p-2 border border-[#E2E8F0] rounded-lg focus:outline-none focus:border-[#0F291B] bg-[#F8F9FA]"
+                  className="w-full p-2 border border-legacy-slate-200 rounded-lg focus:outline-none focus:border-legacy-ink-forest bg-legacy-surface-light-input"
                   required
                 />
               </div>
 
               <div>
-                <label className="block font-bold text-[#64748B] mb-1">Project Sector</label>
+                <label className="block font-bold text-legacy-slate-500 mb-1">Project Sector</label>
                 <select 
                   value={newProject.sector}
                   onChange={(e) => setNewProject({ ...newProject, sector: e.target.value })}
-                  className="w-full p-2 border border-[#E2E8F0] rounded-lg focus:outline-none focus:border-[#0F291B] bg-[#F8F9FA] cursor-pointer"
+                  className="w-full p-2 border border-legacy-slate-200 rounded-lg focus:outline-none focus:border-legacy-ink-forest bg-legacy-surface-light-input cursor-pointer"
                 >
                   <option value="Solar Irrigation">Solar Irrigation</option>
                   <option value="Rice Methane">Rice Methane</option>
@@ -4757,12 +4758,12 @@ const SaaSDashboard = () => {
               </div>
 
               <div>
-                <label className="block font-bold text-[#64748B] mb-1">Annual Emission reduction Target (tCO2e/yr)</label>
+                <label className="block font-bold text-legacy-slate-500 mb-1">Annual Emission reduction Target (tCO2e/yr)</label>
                 <input 
                   type="number" 
                   value={newProject.target}
                   onChange={(e) => setNewProject({ ...newProject, target: e.target.value })}
-                  className="w-full p-2 border border-[#E2E8F0] rounded-lg focus:outline-none focus:border-[#0F291B] bg-[#F8F9FA]"
+                  className="w-full p-2 border border-legacy-slate-200 rounded-lg focus:outline-none focus:border-legacy-ink-forest bg-legacy-surface-light-input"
                   required
                 />
               </div>
@@ -4770,7 +4771,7 @@ const SaaSDashboard = () => {
               <div className="flex gap-2.5 pt-2">
                 <button 
                   type="submit" 
-                  className="flex-1 bg-[#00C853] hover:bg-[#00E676] text-white font-mono font-bold py-2.5 rounded-xl transition-all shadow-sm cursor-pointer"
+                  className="flex-1 bg-legacy-brand-base hover:bg-legacy-brand-bright text-white font-mono font-bold py-2.5 rounded-xl transition-all shadow-sm cursor-pointer"
                 >
                   Add Project
                 </button>
@@ -4790,65 +4791,65 @@ const SaaSDashboard = () => {
       {/* -------------------- ADD MEMBER MODAL DIALOG -------------------- */}
       {isAddMemberOpen && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 backdrop-blur-sm bg-black/40">
-          <div className="bg-white rounded-3xl max-w-md w-full p-6 shadow-2xl space-y-6 relative border border-[#E2E8F0]">
+          <div className="bg-white rounded-3xl max-w-md w-full p-6 shadow-2xl space-y-6 relative border border-legacy-slate-200">
             <button 
               onClick={() => setIsAddMemberOpen(false)}
-              className="absolute top-4 right-4 text-[#94A3B8] hover:text-[#0F291B]"
+              className="absolute top-4 right-4 text-legacy-slate-400 hover:text-legacy-ink-forest"
             >
               <X className="w-5 h-5" />
             </button>
 
             <div>
-              <h3 className="font-sans font-bold text-lg text-[#0F291B] flex items-center">
+              <h3 className="font-sans font-bold text-lg text-legacy-ink-forest flex items-center">
                 <Users className="w-5 h-5 text-emerald mr-2" />
                 Add ESG Team Member
               </h3>
-              <p className="text-xs text-[#64748B] mt-0.5">Invite a member to collaborate on corporate emissions data.</p>
+              <p className="text-xs text-legacy-slate-500 mt-0.5">Invite a member to collaborate on corporate emissions data.</p>
             </div>
 
             <form onSubmit={handleAddMember} className="space-y-4 font-sans text-xs">
               <div>
-                <label className="block font-bold text-[#64748B] mb-1">Full Name</label>
+                <label className="block font-bold text-legacy-slate-500 mb-1">Full Name</label>
                 <input 
                   type="text" 
                   value={newMember.name}
                   onChange={(e) => setNewMember({ ...newMember, name: e.target.value })}
                   placeholder="e.g. Rafiqul Islam" 
-                  className="w-full p-2 border border-[#E2E8F0] rounded-lg focus:outline-none focus:border-[#0F291B] bg-[#F8F9FA]"
+                  className="w-full p-2 border border-legacy-slate-200 rounded-lg focus:outline-none focus:border-legacy-ink-forest bg-legacy-surface-light-input"
                   required
                 />
               </div>
 
               <div>
-                <label className="block font-bold text-[#64748B] mb-1">Email Address</label>
+                <label className="block font-bold text-legacy-slate-500 mb-1">Email Address</label>
                 <input 
                   type="email" 
                   value={newMember.email}
                   onChange={(e) => setNewMember({ ...newMember, email: e.target.value })}
                   placeholder="e.g. rafiqul@carbonzero.io" 
-                  className="w-full p-2 border border-[#E2E8F0] rounded-lg focus:outline-none focus:border-[#0F291B] bg-[#F8F9FA]"
+                  className="w-full p-2 border border-legacy-slate-200 rounded-lg focus:outline-none focus:border-legacy-ink-forest bg-legacy-surface-light-input"
                   required
                 />
               </div>
 
               <div>
-                <label className="block font-bold text-[#64748B] mb-1">Role / Job Title</label>
+                <label className="block font-bold text-legacy-slate-500 mb-1">Role / Job Title</label>
                 <input 
                   type="text" 
                   value={newMember.role}
                   onChange={(e) => setNewMember({ ...newMember, role: e.target.value })}
                   placeholder="e.g. ESG Auditor" 
-                  className="w-full p-2 border border-[#E2E8F0] rounded-lg focus:outline-none focus:border-[#0F291B] bg-[#F8F9FA]"
+                  className="w-full p-2 border border-legacy-slate-200 rounded-lg focus:outline-none focus:border-legacy-ink-forest bg-legacy-surface-light-input"
                   required
                 />
               </div>
 
               <div>
-                <label className="block font-bold text-[#64748B] mb-1">Permission Level</label>
+                <label className="block font-bold text-legacy-slate-500 mb-1">Permission Level</label>
                 <select 
                   value={newMember.permission}
                   onChange={(e) => setNewMember({ ...newMember, permission: e.target.value })}
-                  className="w-full p-2 border border-[#E2E8F0] rounded-lg focus:outline-none focus:border-[#0F291B] bg-[#F8F9FA] cursor-pointer"
+                  className="w-full p-2 border border-legacy-slate-200 rounded-lg focus:outline-none focus:border-legacy-ink-forest bg-legacy-surface-light-input cursor-pointer"
                 >
                   <option value="Admin">Admin (Full Control)</option>
                   <option value="Editor">Editor (Read/Write)</option>
@@ -4859,7 +4860,7 @@ const SaaSDashboard = () => {
               <div className="flex gap-2.5 pt-2">
                 <button 
                   type="submit" 
-                  className="flex-1 bg-[#00C853] hover:bg-[#00E676] text-white font-mono font-bold py-2.5 rounded-xl transition-all shadow-sm cursor-pointer"
+                  className="flex-1 bg-legacy-brand-base hover:bg-legacy-brand-bright text-white font-mono font-bold py-2.5 rounded-xl transition-all shadow-sm cursor-pointer"
                 >
                   Invite Member
                 </button>

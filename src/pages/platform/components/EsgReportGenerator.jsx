@@ -220,23 +220,23 @@ ${activeClient.assignedAuditor}
     <div className="space-y-6 text-left">
       {/* Header Toolbar */}
       <div className={`rounded-3xl p-6 sm:p-8 border shadow-xl transition-all relative overflow-hidden ${
-        isLight ? 'bg-white border-[#E2E8F0]' : 'bg-[#08130C] border-[#152B1D]'
+        isLight ? 'bg-white border-legacy-slate-200' : 'bg-legacy-surface-base border-legacy-divider-base'
       }`}>
         <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-6 relative z-10">
           <div>
-            <div className="flex items-center space-x-2 text-[10px] font-mono uppercase tracking-widest text-[#00C853] font-bold">
+            <div className="flex items-center space-x-2 text-[10px] font-mono uppercase tracking-widest text-legacy-brand-base font-bold">
               <Award className="w-4 h-4" />
               <span>Executive ESG Disclosure Suite</span>
             </div>
             <h1 className={`font-sans font-bold text-2xl sm:text-3xl mt-1 tracking-tight ${
-              isLight ? 'text-[#0F2417]' : 'text-white'
+              isLight ? 'text-legacy-forest-43' : 'text-white'
             }`}>
               ISO 14064-1 GHG Inventory Report
             </h1>
             <p className={`text-xs sm:text-sm mt-1 max-w-2xl leading-relaxed ${
-              isLight ? 'text-slate-500' : 'text-[#7C9A88]'
+              isLight ? 'text-slate-500' : 'text-legacy-text-muted'
             }`}>
-              Formal corporate sustainability disclosure statement for <strong className="text-[#00C853]">{activeClient.legalName}</strong>. Ready for auditor assurance, board governance, and EU CBAM filing.
+              Formal corporate sustainability disclosure statement for <strong className="text-legacy-brand-base">{activeClient.legalName}</strong>. Ready for auditor assurance, board governance, and EU CBAM filing.
             </p>
           </div>
 
@@ -247,10 +247,10 @@ ${activeClient.assignedAuditor}
               className={`font-sans font-bold text-xs py-2.5 px-4 rounded-xl border transition-all flex items-center space-x-2 cursor-pointer ${
                 isLight 
                   ? 'bg-white border-slate-300 text-slate-700 hover:bg-slate-50' 
-                  : 'bg-[#040906] border-[#152B1D] text-white hover:border-[#00C853]/40'
+                  : 'bg-legacy-canvas-deep border-legacy-divider-base text-white hover:border-legacy-brand-base/40'
               }`}
             >
-              {copied ? <Check className="w-4 h-4 text-[#00C853]" /> : <Copy className="w-4 h-4 text-[#00C853]" />}
+              {copied ? <Check className="w-4 h-4 text-legacy-brand-base" /> : <Copy className="w-4 h-4 text-legacy-brand-base" />}
               <span>{copied ? 'Copied Markdown' : 'Copy Markdown'}</span>
             </button>
 
@@ -259,18 +259,18 @@ ${activeClient.assignedAuditor}
               className={`font-sans font-bold text-xs py-2.5 px-4 rounded-xl border transition-all flex items-center space-x-2 cursor-pointer ${
                 isLight 
                   ? 'bg-white border-slate-300 text-slate-700 hover:bg-slate-50' 
-                  : 'bg-[#040906] border-[#152B1D] text-white hover:border-[#00C853]/40'
+                  : 'bg-legacy-canvas-deep border-legacy-divider-base text-white hover:border-legacy-brand-base/40'
               }`}
             >
-              <Printer className="w-4 h-4 text-[#00C853]" />
+              <Printer className="w-4 h-4 text-legacy-brand-base" />
               <span>Print / PDF</span>
             </button>
 
             <button
               onClick={handleExportJSON}
-              className="bg-[#00C853] hover:bg-[#00E676] text-[#05180B] font-sans font-bold text-xs py-2.5 px-4 rounded-xl shadow-[0_2px_12px_rgba(0,200,83,0.3)] transition-all flex items-center space-x-2 cursor-pointer"
+              className="bg-legacy-brand-base hover:bg-legacy-brand-bright text-legacy-forest-67 font-sans font-bold text-xs py-2.5 px-4 rounded-xl shadow-[0_2px_12px_rgba(0,200,83,0.3)] transition-all flex items-center space-x-2 cursor-pointer"
             >
-              <Download className="w-4 h-4 text-[#05180B]" />
+              <Download className="w-4 h-4 text-legacy-forest-67" />
               <span>Export Audit JSON</span>
             </button>
           </div>
@@ -279,13 +279,13 @@ ${activeClient.assignedAuditor}
 
       {/* Main Report Document Sheet */}
       <div className={`rounded-3xl p-6 sm:p-10 border shadow-2xl space-y-10 max-w-5xl mx-auto ${
-        isLight ? 'bg-white border-slate-200 text-slate-900' : 'bg-[#08130C] border-[#152B1D] text-slate-100'
+        isLight ? 'bg-white border-slate-200 text-slate-900' : 'bg-legacy-surface-base border-legacy-divider-base text-slate-100'
       }`}>
         {/* Document Header & Formal Masthead */}
-        <div className="border-b border-[#152B1D]/60 pb-8 flex flex-col md:flex-row justify-between items-start md:items-end gap-6">
+        <div className="border-b border-legacy-divider-base/60 pb-8 flex flex-col md:flex-row justify-between items-start md:items-end gap-6">
           <div>
             <div className="flex items-center space-x-3 mb-3">
-              <span className="text-[10px] font-mono font-bold px-2 py-0.5 rounded bg-[#00C853]/15 text-[#00E676] border border-[#00C853]/30 uppercase">
+              <span className="text-[10px] font-mono font-bold px-2 py-0.5 rounded bg-legacy-brand-base/15 text-legacy-brand-bright border border-legacy-brand-base/30 uppercase">
                 Official Corporate Filing
               </span>
               <span className="text-xs font-mono text-gray-400">
@@ -301,7 +301,7 @@ ${activeClient.assignedAuditor}
           </div>
 
           <div className="text-right md:text-right font-mono text-xs space-y-1 text-gray-400">
-            <div>Reporting Period: <strong className="text-[#00C853]">FY 2026</strong></div>
+            <div>Reporting Period: <strong className="text-legacy-brand-base">FY 2026</strong></div>
             <div>Base Year: <strong className="text-white">2024</strong></div>
             <div>Verification: <strong className="text-emerald-400">ISAE 3410 Ready</strong></div>
           </div>
@@ -309,30 +309,30 @@ ${activeClient.assignedAuditor}
 
         {/* Section 1: Executive Summary */}
         <section className="space-y-4">
-          <div className="flex items-center space-x-2 text-xs font-mono uppercase tracking-wider text-[#00C853] font-bold">
-            <span className="w-2 h-2 rounded-full bg-[#00C853]" />
+          <div className="flex items-center space-x-2 text-xs font-mono uppercase tracking-wider text-legacy-brand-base font-bold">
+            <span className="w-2 h-2 rounded-full bg-legacy-brand-base" />
             <span>Section 1 • Executive Summary</span>
           </div>
 
           <div className={`p-6 rounded-2xl border ${
-            isLight ? 'bg-slate-50 border-slate-200' : 'bg-black/30 border-[#152B1D]'
+            isLight ? 'bg-slate-50 border-slate-200' : 'bg-black/30 border-legacy-divider-base'
           }`}>
             <p className="text-sm sm:text-base leading-relaxed">
-              For reporting fiscal year 2026, <strong>{activeClient.legalName}</strong> recorded a total gross carbon footprint of <strong className="text-[#00C853] font-mono">{fmt(totalGrossEmissions, 2)} tCO₂e</strong> across direct operational combustion (Scope 1), purchased grid electricity (Scope 2), and key value-chain supply stream activities (Scope 3).
+              For reporting fiscal year 2026, <strong>{activeClient.legalName}</strong> recorded a total gross carbon footprint of <strong className="text-legacy-brand-base font-mono">{fmt(totalGrossEmissions, 2)} tCO₂e</strong> across direct operational combustion (Scope 1), purchased grid electricity (Scope 2), and key value-chain supply stream activities (Scope 3).
             </p>
             <p className="text-xs text-gray-400 mt-2 leading-relaxed">
-              With <strong>{insetsTotal} tCO₂e</strong> in verified insetting credits retired from local decarbonization investments ({activeClient.creditVintage} Vintage), the net residual corporate footprint is certified at <strong className="text-[#00C853] font-mono">{fmt(netEmissions, 2)} tCO₂e</strong>.
+              With <strong>{insetsTotal} tCO₂e</strong> in verified insetting credits retired from local decarbonization investments ({activeClient.creditVintage} Vintage), the net residual corporate footprint is certified at <strong className="text-legacy-brand-base font-mono">{fmt(netEmissions, 2)} tCO₂e</strong>.
             </p>
 
-            <div className="mt-4 pt-4 border-t border-[#152B1D]/40 flex items-center space-x-2 text-xs text-emerald-400">
-              <Sparkles className="w-4 h-4 text-[#00C853] shrink-0" />
+            <div className="mt-4 pt-4 border-t border-legacy-divider-base/40 flex items-center space-x-2 text-xs text-emerald-400">
+              <Sparkles className="w-4 h-4 text-legacy-brand-base shrink-0" />
               <span><strong>Sustainability Milestone:</strong> {activeClient.sustainabilityHighlight}</span>
             </div>
           </div>
 
           {/* Executive Stat Cards */}
           <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 pt-2">
-            <div className="p-4 rounded-xl bg-black/40 border border-[#152B1D]">
+            <div className="p-4 rounded-xl bg-black/40 border border-legacy-divider-base">
               <span className="text-[10px] font-mono uppercase text-gray-400 block">Scope 1 (Direct)</span>
               <span className="font-mono font-bold text-xl text-amber-400 mt-1 block">
                 {fmt(scope1Total, 2)} <span className="text-xs">tCO₂e</span>
@@ -342,9 +342,9 @@ ${activeClient.assignedAuditor}
               </span>
             </div>
 
-            <div className="p-4 rounded-xl bg-black/40 border border-[#152B1D]">
+            <div className="p-4 rounded-xl bg-black/40 border border-legacy-divider-base">
               <span className="text-[10px] font-mono uppercase text-gray-400 block">Scope 2 (Grid - Loc)</span>
-              <span className="font-mono font-bold text-xl text-[#00E676] mt-1 block">
+              <span className="font-mono font-bold text-xl text-legacy-brand-bright mt-1 block">
                 {fmt(scope2LocationTotal, 2)} <span className="text-xs">tCO₂e</span>
               </span>
               <span className="text-[10px] text-gray-400 block mt-0.5">
@@ -352,7 +352,7 @@ ${activeClient.assignedAuditor}
               </span>
             </div>
 
-            <div className="p-4 rounded-xl bg-black/40 border border-[#152B1D]">
+            <div className="p-4 rounded-xl bg-black/40 border border-legacy-divider-base">
               <span className="text-[10px] font-mono uppercase text-gray-400 block">Scope 2 (Market-based)</span>
               <span className="font-mono font-bold text-xl text-sky-400 mt-1 block">
                 {fmt(scope2MarketTotal, 2)} <span className="text-xs">tCO₂e</span>
@@ -362,7 +362,7 @@ ${activeClient.assignedAuditor}
               </span>
             </div>
 
-            <div className="p-4 rounded-xl bg-black/40 border border-[#152B1D]">
+            <div className="p-4 rounded-xl bg-black/40 border border-legacy-divider-base">
               <span className="text-[10px] font-mono uppercase text-gray-400 block">Scope 3 (Value Chain)</span>
               <span className="font-mono font-bold text-xl text-purple-400 mt-1 block">
                 {fmt(scope3Total, 2)} <span className="text-xs">tCO₂e</span>
@@ -376,20 +376,20 @@ ${activeClient.assignedAuditor}
 
         {/* Section 2: Organizational & Reporting Boundary */}
         <section className="space-y-4">
-          <div className="flex items-center space-x-2 text-xs font-mono uppercase tracking-wider text-[#00C853] font-bold">
-            <span className="w-2 h-2 rounded-full bg-[#00C853]" />
+          <div className="flex items-center space-x-2 text-xs font-mono uppercase tracking-wider text-legacy-brand-base font-bold">
+            <span className="w-2 h-2 rounded-full bg-legacy-brand-base" />
             <span>Section 2 • Organizational & Operational Boundaries</span>
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <div className="p-5 rounded-2xl bg-black/30 border border-[#152B1D] space-y-2">
+            <div className="p-5 rounded-2xl bg-black/30 border border-legacy-divider-base space-y-2">
               <h4 className="font-sans font-bold text-sm text-white">Consolidation Approach: Operational Control</h4>
               <p className="text-xs text-gray-400 leading-relaxed">
                 The organizational boundary is defined strictly under the <strong>Operational Control approach</strong> in conformity with Chapter 3 of the GHG Protocol Corporate Standard. {activeClient.name} accounts for 100% of emissions originating from assets and operations over which it exerts management authority.
               </p>
             </div>
 
-            <div className="p-5 rounded-2xl bg-black/30 border border-[#152B1D] space-y-2">
+            <div className="p-5 rounded-2xl bg-black/30 border border-legacy-divider-base space-y-2">
               <h4 className="font-sans font-bold text-sm text-white">Base-Year Recalculation Rule</h4>
               <p className="text-xs text-gray-400 leading-relaxed">
                 Base year is set to <strong>FY 2024</strong>. A structural recalculation threshold of <strong>&gt; 5%</strong> is enforced for corporate acquisitions, divestitures, or fundamental structural method shifts as mandated by ISO 14064-1 Clause 6.4.
@@ -398,28 +398,28 @@ ${activeClient.assignedAuditor}
           </div>
 
           {/* Facilities Register Table */}
-          <div className="p-5 rounded-2xl bg-black/30 border border-[#152B1D] space-y-3">
+          <div className="p-5 rounded-2xl bg-black/30 border border-legacy-divider-base space-y-3">
             <h4 className="font-sans font-bold text-sm text-white">Operating Facilities Register (Physical Boundary)</h4>
             <div className="overflow-x-auto">
               <table className="w-full text-left font-sans text-xs">
                 <thead>
-                  <tr className="text-gray-400 border-b border-[#152B1D] pb-2 font-mono uppercase text-[10px]">
+                  <tr className="text-gray-400 border-b border-legacy-divider-base pb-2 font-mono uppercase text-[10px]">
                     <th className="py-2">Facility Name</th>
                     <th>Geographic Location</th>
                     <th>Operational Function</th>
                     <th>Emissions Contributed</th>
                   </tr>
                 </thead>
-                <tbody className="divide-y divide-[#152B1D]/40">
+                <tbody className="divide-y divide-legacy-divider-base/40">
                   {byFacility.map((item, idx) => (
                     <tr key={idx} className="hover:bg-white/[0.02]">
                       <td className="py-2.5 font-bold text-white flex items-center space-x-2">
-                        <Building className="w-3.5 h-3.5 text-[#00C853]" />
+                        <Building className="w-3.5 h-3.5 text-legacy-brand-base" />
                         <span>{item.site}</span>
                       </td>
                       <td className="text-gray-300">Bangladesh</td>
                       <td className="text-gray-400">Primary Enterprise Operations</td>
-                      <td className="font-mono font-bold text-[#00C853]">{fmt(item.tCO2e, 2)} tCO₂e ({item.percentage}%)</td>
+                      <td className="font-mono font-bold text-legacy-brand-base">{fmt(item.tCO2e, 2)} tCO₂e ({item.percentage}%)</td>
                     </tr>
                   ))}
                 </tbody>
@@ -430,24 +430,24 @@ ${activeClient.assignedAuditor}
 
         {/* Section 3: Methodology & Factor Lineage */}
         <section className="space-y-4">
-          <div className="flex items-center space-x-2 text-xs font-mono uppercase tracking-wider text-[#00C853] font-bold">
-            <span className="w-2 h-2 rounded-full bg-[#00C853]" />
+          <div className="flex items-center space-x-2 text-xs font-mono uppercase tracking-wider text-legacy-brand-base font-bold">
+            <span className="w-2 h-2 rounded-full bg-legacy-brand-base" />
             <span>Section 3 • Quantification Methodology & Factor Lineage</span>
           </div>
 
-          <div className="p-5 rounded-2xl bg-black/30 border border-[#152B1D] space-y-3">
+          <div className="p-5 rounded-2xl bg-black/30 border border-legacy-divider-base space-y-3">
             <p className="text-xs text-gray-300 leading-relaxed">
               Emissions quantification utilizes activity data multiplied by verified, source-versioned greenhouse gas emission factors. Original raw activity quantities and physical units are preserved in the permanent audit ledger without lossy conversions.
             </p>
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-3 text-xs pt-2">
-              <div className="p-3 rounded-xl bg-black/40 border border-[#152B1D] font-mono">
+              <div className="p-3 rounded-xl bg-black/40 border border-legacy-divider-base font-mono">
                 <span className="text-[10px] text-gray-400 block uppercase">Scope 2 Location Grid Factor</span>
-                <span className="font-bold text-[#00E676] text-sm block mt-0.5">0.550 kg CO₂e / kWh</span>
+                <span className="font-bold text-legacy-brand-bright text-sm block mt-0.5">0.550 kg CO₂e / kWh</span>
                 <span className="text-[10px] text-gray-400 block mt-1">Source: Bangladesh Department of Environment (DoE) SRO Gazette 2023</span>
               </div>
 
-              <div className="p-3 rounded-xl bg-black/40 border border-[#152B1D] font-mono">
+              <div className="p-3 rounded-xl bg-black/40 border border-legacy-divider-base font-mono">
                 <span className="text-[10px] text-gray-400 block uppercase">Scope 1 Fuel Combustion Factors</span>
                 <span className="font-bold text-amber-400 text-sm block mt-0.5">Diesel: 2.68 kg/L • Petrol: 2.31 kg/L</span>
                 <span className="text-[10px] text-gray-400 block mt-1">Source: UK DEFRA 2024 / IPCC AR6 stationary and fleet standards</span>
@@ -458,21 +458,21 @@ ${activeClient.assignedAuditor}
 
         {/* Section 4: Hotspots & Pareto Analysis */}
         <section className="space-y-4">
-          <div className="flex items-center space-x-2 text-xs font-mono uppercase tracking-wider text-[#00C853] font-bold">
-            <span className="w-2 h-2 rounded-full bg-[#00C853]" />
+          <div className="flex items-center space-x-2 text-xs font-mono uppercase tracking-wider text-legacy-brand-base font-bold">
+            <span className="w-2 h-2 rounded-full bg-legacy-brand-base" />
             <span>Section 4 • Pareto Hotspot Analysis (Significant Sources)</span>
           </div>
 
-          <div className="p-5 rounded-2xl bg-black/30 border border-[#152B1D] space-y-3">
+          <div className="p-5 rounded-2xl bg-black/30 border border-legacy-divider-base space-y-3">
             <p className="text-xs text-gray-400">
               The top 5 emission drivers account for over <strong>85%</strong> of total corporate emissions, presenting prime targets for prioritized decarbonization intervention:
             </p>
 
             <div className="space-y-2 pt-2">
               {hotspots.map((h) => (
-                <div key={h.rank} className="p-3 rounded-xl bg-black/40 border border-[#152B1D] flex items-center justify-between text-xs">
+                <div key={h.rank} className="p-3 rounded-xl bg-black/40 border border-legacy-divider-base flex items-center justify-between text-xs">
                   <div className="flex items-center space-x-3">
-                    <span className="w-6 h-6 rounded-full bg-[#00C853]/15 text-[#00E676] font-mono font-bold flex items-center justify-center text-xs">
+                    <span className="w-6 h-6 rounded-full bg-legacy-brand-base/15 text-legacy-brand-bright font-mono font-bold flex items-center justify-center text-xs">
                       {h.rank}
                     </span>
                     <div>
@@ -483,7 +483,7 @@ ${activeClient.assignedAuditor}
 
                   <div className="text-right font-mono">
                     <span className="font-bold text-white block">{fmt(h.tCO2e, 2)} tCO₂e</span>
-                    <span className="text-[10px] text-[#00C853] block">{h.percentage}% of footprint</span>
+                    <span className="text-[10px] text-legacy-brand-base block">{h.percentage}% of footprint</span>
                   </div>
                 </div>
               ))}
@@ -493,13 +493,13 @@ ${activeClient.assignedAuditor}
 
         {/* Section 5: Decarbonization Targets & Insetting Roadmap */}
         <section className="space-y-4">
-          <div className="flex items-center space-x-2 text-xs font-mono uppercase tracking-wider text-[#00C853] font-bold">
-            <span className="w-2 h-2 rounded-full bg-[#00C853]" />
+          <div className="flex items-center space-x-2 text-xs font-mono uppercase tracking-wider text-legacy-brand-base font-bold">
+            <span className="w-2 h-2 rounded-full bg-legacy-brand-base" />
             <span>Section 5 • Decarbonization Commitments & Insetting</span>
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-            <div className="p-5 rounded-2xl bg-black/30 border border-[#152B1D] space-y-2">
+            <div className="p-5 rounded-2xl bg-black/30 border border-legacy-divider-base space-y-2">
               <div className="flex items-center space-x-2 text-emerald-400 font-bold text-xs">
                 <TrendingDown className="w-4 h-4" />
                 <span>2030 Science-Based Target</span>
@@ -510,7 +510,7 @@ ${activeClient.assignedAuditor}
               </p>
             </div>
 
-            <div className="p-5 rounded-2xl bg-black/30 border border-[#152B1D] space-y-2">
+            <div className="p-5 rounded-2xl bg-black/30 border border-legacy-divider-base space-y-2">
               <div className="flex items-center space-x-2 text-sky-400 font-bold text-xs">
                 <Zap className="w-4 h-4" />
                 <span>On-Site Rooftop Solar</span>
@@ -521,7 +521,7 @@ ${activeClient.assignedAuditor}
               </p>
             </div>
 
-            <div className="p-5 rounded-2xl bg-black/30 border border-[#152B1D] space-y-2">
+            <div className="p-5 rounded-2xl bg-black/30 border border-legacy-divider-base space-y-2">
               <div className="flex items-center space-x-2 text-purple-400 font-bold text-xs">
                 <Truck className="w-4 h-4" />
                 <span>Fleet Electrification</span>
@@ -536,15 +536,15 @@ ${activeClient.assignedAuditor}
 
         {/* Section 6: Verification Readiness & Attestation */}
         <section className="space-y-4">
-          <div className="flex items-center space-x-2 text-xs font-mono uppercase tracking-wider text-[#00C853] font-bold">
-            <span className="w-2 h-2 rounded-full bg-[#00C853]" />
+          <div className="flex items-center space-x-2 text-xs font-mono uppercase tracking-wider text-legacy-brand-base font-bold">
+            <span className="w-2 h-2 rounded-full bg-legacy-brand-base" />
             <span>Section 6 • Assurance Readiness & Attestation Statement</span>
           </div>
 
-          <div className="p-6 rounded-2xl bg-black/40 border border-[#152B1D] space-y-6">
+          <div className="p-6 rounded-2xl bg-black/40 border border-legacy-divider-base space-y-6">
             <div className="flex items-center justify-between flex-wrap gap-4">
               <div className="flex items-center space-x-3">
-                <div className="w-10 h-10 rounded-xl bg-[#00C853]/15 flex items-center justify-center text-[#00E676]">
+                <div className="w-10 h-10 rounded-xl bg-legacy-brand-base/15 flex items-center justify-center text-legacy-brand-bright">
                   <ShieldCheck className="w-6 h-6" />
                 </div>
                 <div>
@@ -559,11 +559,11 @@ ${activeClient.assignedAuditor}
             </div>
 
             {/* Signature Block */}
-            <div className="pt-6 border-t border-[#152B1D]/40 grid grid-cols-1 sm:grid-cols-2 gap-6 text-xs">
+            <div className="pt-6 border-t border-legacy-divider-base/40 grid grid-cols-1 sm:grid-cols-2 gap-6 text-xs">
               <div>
                 <span className="text-gray-400 text-[10px] uppercase font-mono block">ATTESTING LEAD ASSURANCE OFFICER</span>
                 <span className="font-bold text-white text-sm mt-1 block">{activeClient.assignedAuditor}</span>
-                <span className="text-xs text-[#00C853] block mt-0.5">CarbonZero Bangladesh Audit & Assurance Directorate</span>
+                <span className="text-xs text-legacy-brand-base block mt-0.5">CarbonZero Bangladesh Audit & Assurance Directorate</span>
               </div>
 
               <div>
@@ -577,16 +577,16 @@ ${activeClient.assignedAuditor}
 
         {/* Section 7: Appendices (Activity Data & Evidence List) */}
         <section className="space-y-4">
-          <div className="flex items-center space-x-2 text-xs font-mono uppercase tracking-wider text-[#00C853] font-bold">
-            <span className="w-2 h-2 rounded-full bg-[#00C853]" />
+          <div className="flex items-center space-x-2 text-xs font-mono uppercase tracking-wider text-legacy-brand-base font-bold">
+            <span className="w-2 h-2 rounded-full bg-legacy-brand-base" />
             <span>Appendices • Complete Activity & Evidence Ledger</span>
           </div>
 
-          <div className="p-5 rounded-2xl bg-black/30 border border-[#152B1D] space-y-3">
+          <div className="p-5 rounded-2xl bg-black/30 border border-legacy-divider-base space-y-3">
             <div className="overflow-x-auto">
               <table className="w-full text-left font-sans text-xs min-w-[700px]">
                 <thead>
-                  <tr className="text-gray-400 border-b border-[#152B1D] pb-2 font-mono uppercase text-[10px]">
+                  <tr className="text-gray-400 border-b border-legacy-divider-base pb-2 font-mono uppercase text-[10px]">
                     <th className="py-2">Activity Ref</th>
                     <th>Source / Description</th>
                     <th>Scope</th>
@@ -595,7 +595,7 @@ ${activeClient.assignedAuditor}
                     <th className="text-right">tCO₂e</th>
                   </tr>
                 </thead>
-                <tbody className="divide-y divide-[#152B1D]/40">
+                <tbody className="divide-y divide-legacy-divider-base/40">
                   {activities.map((a) => (
                     <tr key={a.id} className="hover:bg-white/[0.02]">
                       <td className="py-2.5 font-mono text-[11px] text-gray-400">{a.id}</td>
@@ -611,7 +611,7 @@ ${activeClient.assignedAuditor}
                       <td className="font-mono text-[11px] text-gray-300 truncate max-w-[200px]">
                         {a.evidenceFileName || <span className="text-amber-400">Missing doc</span>}
                       </td>
-                      <td className="text-right font-mono font-bold text-[#00C853]">{fmt(a.tCO2e, 2)}</td>
+                      <td className="text-right font-mono font-bold text-legacy-brand-base">{fmt(a.tCO2e, 2)}</td>
                     </tr>
                   ))}
                 </tbody>

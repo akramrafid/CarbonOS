@@ -1,3 +1,4 @@
+import { legacyColors } from '../../../styles/legacyColors.js';
 import React, { useState } from 'react';
 import { 
   Building, 
@@ -24,7 +25,7 @@ const CONGLOMERATE_ENTITIES = [
     revenue_crore_bdt: 42.5,
     emissions: { scope1: 54.95, scope2: 85.80, scope3: 1526.84, total: 1667.59 },
     intensity_tco2e_per_crore: 39.24,
-    color: "#10b981"
+    color: legacyColors["legacy-emerald-500"]
   },
   {
     id: "ENT-02",
@@ -36,7 +37,7 @@ const CONGLOMERATE_ENTITIES = [
     revenue_crore_bdt: 68.0,
     emissions: { scope1: 84.10, scope2: 142.50, scope3: 890.40, total: 1117.00 },
     intensity_tco2e_per_crore: 16.42,
-    color: "#06b6d4"
+    color: legacyColors["legacy-cyan-500"]
   },
   {
     id: "ENT-03",
@@ -48,7 +49,7 @@ const CONGLOMERATE_ENTITIES = [
     revenue_crore_bdt: 21.0,
     emissions: { scope1: 112.40, scope2: 14.20, scope3: 340.50, total: 467.10 },
     intensity_tco2e_per_crore: 22.24,
-    color: "#f59e0b"
+    color: legacyColors["legacy-amber-500"]
   },
   {
     id: "ENT-04",
@@ -60,7 +61,7 @@ const CONGLOMERATE_ENTITIES = [
     revenue_crore_bdt: 0.0,
     emissions: { scope1: 8.50, scope2: 24.60, scope3: 95.20, total: 128.30 },
     intensity_tco2e_per_crore: 0.0,
-    color: "#a855f7"
+    color: legacyColors["legacy-purple-500"]
   }
 ];
 
@@ -86,7 +87,7 @@ export const ConglomerateTreeStudio = ({ isLight, locale }) => {
       <div className={`p-6 rounded-3xl border ${
         isLight 
           ? 'bg-gradient-to-r from-purple-50 to-indigo-50/50 border-purple-200' 
-          : 'bg-gradient-to-r from-[#100B1A] to-[#0D1622] border-[#2A1D4E]'
+          : 'bg-gradient-to-r from-legacy-violet-02 to-legacy-blue-01 border-legacy-violet-01'
       }`}>
         <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
           <div className="space-y-1">
@@ -101,13 +102,13 @@ export const ConglomerateTreeStudio = ({ isLight, locale }) => {
                 Sweep Trees Model
               </span>
             </div>
-            <p className={`text-xs ${isLight ? 'text-gray-600' : 'text-[#8FA899]'}`}>
+            <p className={`text-xs ${isLight ? 'text-gray-600' : 'text-legacy-mint-40'}`}>
               {locale.entitySubtitle}
             </p>
           </div>
 
           <div className="flex items-center space-x-3 text-xs font-mono">
-            <span className="px-3 py-1.5 rounded-2xl border bg-[#040A06] border-[#1B4D2E] text-purple-400">
+            <span className="px-3 py-1.5 rounded-2xl border bg-legacy-canvas-night border-legacy-forest-11 text-purple-400">
               Holding Group: Apex Holdings (BD)
             </span>
           </div>
@@ -116,7 +117,7 @@ export const ConglomerateTreeStudio = ({ isLight, locale }) => {
 
       {/* Group Consolidated Overview Cards */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-        <div className={`p-4 rounded-3xl border ${isLight ? 'bg-white border-gray-200' : 'bg-[#0A160F] border-[#1B4D2E]'}`}>
+        <div className={`p-4 rounded-3xl border ${isLight ? 'bg-white border-gray-200' : 'bg-legacy-forest-62 border-legacy-forest-11'}`}>
           <span className="text-[10px] font-mono text-gray-500 uppercase block mb-1">Group Consolidated Gross</span>
           <span className="text-2xl font-bold font-mono text-emerald-500">
             {groupTotals.total.toFixed(1)} tCO₂e
@@ -124,7 +125,7 @@ export const ConglomerateTreeStudio = ({ isLight, locale }) => {
           <span className="text-[10px] text-gray-400 block mt-1">4 reporting legal entities</span>
         </div>
 
-        <div className={`p-4 rounded-3xl border ${isLight ? 'bg-white border-gray-200' : 'bg-[#0A160F] border-[#1B4D2E]'}`}>
+        <div className={`p-4 rounded-3xl border ${isLight ? 'bg-white border-gray-200' : 'bg-legacy-forest-62 border-legacy-forest-11'}`}>
           <span className="text-[10px] font-mono text-gray-500 uppercase block mb-1">Group Carbon Intensity</span>
           <span className="text-2xl font-bold font-mono text-cyan-400">
             {groupIntensity} t / Cr BDT
@@ -132,7 +133,7 @@ export const ConglomerateTreeStudio = ({ isLight, locale }) => {
           <span className="text-[10px] text-gray-400 block mt-1">৳ {groupTotals.revenue} Crore consolidated rev</span>
         </div>
 
-        <div className={`p-4 rounded-3xl border ${isLight ? 'bg-white border-gray-200' : 'bg-[#0A160F] border-[#1B4D2E]'}`}>
+        <div className={`p-4 rounded-3xl border ${isLight ? 'bg-white border-gray-200' : 'bg-legacy-forest-62 border-legacy-forest-11'}`}>
           <span className="text-[10px] font-mono text-gray-500 uppercase block mb-1">Total Group Workforce</span>
           <span className="text-2xl font-bold font-mono text-purple-400">
             {groupTotals.workforce} Staff
@@ -140,7 +141,7 @@ export const ConglomerateTreeStudio = ({ isLight, locale }) => {
           <span className="text-[10px] text-gray-400 block mt-1">Across Savar, Narayanganj & HQ</span>
         </div>
 
-        <div className={`p-4 rounded-3xl border ${isLight ? 'bg-white border-gray-200' : 'bg-[#0A160F] border-[#1B4D2E]'}`}>
+        <div className={`p-4 rounded-3xl border ${isLight ? 'bg-white border-gray-200' : 'bg-legacy-forest-62 border-legacy-forest-11'}`}>
           <span className="text-[10px] font-mono text-gray-500 uppercase block mb-1">GHGP Consolidation</span>
           <span className="text-base font-bold font-sans text-gray-800 dark:text-gray-200 block mt-1">
             Operational Control
@@ -167,7 +168,7 @@ export const ConglomerateTreeStudio = ({ isLight, locale }) => {
                 className={`p-4 rounded-3xl border transition-all cursor-pointer ${
                   isSelected 
                     ? 'border-emerald-500 ring-2 ring-emerald-500/20 bg-emerald-500/5' 
-                    : (isLight ? 'bg-white border-gray-200 hover:border-gray-300' : 'bg-[#0A160F] border-[#1B4D2E] hover:border-[#2A6D42]')
+                    : (isLight ? 'bg-white border-gray-200 hover:border-gray-300' : 'bg-legacy-forest-62 border-legacy-forest-11 hover:border-legacy-forest-05')
                 }`}
               >
                 <div className="flex items-start justify-between">
@@ -190,7 +191,7 @@ export const ConglomerateTreeStudio = ({ isLight, locale }) => {
 
         {/* Right 2/3: Selected Entity Deep Dive */}
         <div className={`lg:col-span-2 p-6 rounded-3xl border space-y-6 ${
-          isLight ? 'bg-white border-gray-200' : 'bg-[#0A160F] border-[#1B4D2E]'
+          isLight ? 'bg-white border-gray-200' : 'bg-legacy-forest-62 border-legacy-forest-11'
         }`}>
           <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 border-b border-gray-100 dark:border-gray-800 pb-4">
             <div>
@@ -214,21 +215,21 @@ export const ConglomerateTreeStudio = ({ isLight, locale }) => {
 
           {/* Scope Breakdown */}
           <div className="grid grid-cols-3 gap-3">
-            <div className={`p-4 rounded-2xl border ${isLight ? 'bg-gray-50 border-gray-200' : 'bg-[#040A06] border-[#1B4D2E]'}`}>
+            <div className={`p-4 rounded-2xl border ${isLight ? 'bg-gray-50 border-gray-200' : 'bg-legacy-canvas-night border-legacy-forest-11'}`}>
               <span className="text-[10px] font-mono text-amber-500 uppercase block">Scope 1 Direct</span>
               <span className="text-lg font-bold font-mono text-amber-500 mt-1 block">
                 {selectedEntity.emissions.scope1.toFixed(2)} t
               </span>
               <span className="text-[10px] text-gray-400 block mt-1">Fuels & generators</span>
             </div>
-            <div className={`p-4 rounded-2xl border ${isLight ? 'bg-gray-50 border-gray-200' : 'bg-[#040A06] border-[#1B4D2E]'}`}>
+            <div className={`p-4 rounded-2xl border ${isLight ? 'bg-gray-50 border-gray-200' : 'bg-legacy-canvas-night border-legacy-forest-11'}`}>
               <span className="text-[10px] font-mono text-cyan-500 uppercase block">Scope 2 Grid</span>
               <span className="text-lg font-bold font-mono text-cyan-500 mt-1 block">
                 {selectedEntity.emissions.scope2.toFixed(2)} t
               </span>
               <span className="text-[10px] text-gray-400 block mt-1">Purchased power</span>
             </div>
-            <div className={`p-4 rounded-2xl border ${isLight ? 'bg-gray-50 border-gray-200' : 'bg-[#040A06] border-[#1B4D2E]'}`}>
+            <div className={`p-4 rounded-2xl border ${isLight ? 'bg-gray-50 border-gray-200' : 'bg-legacy-canvas-night border-legacy-forest-11'}`}>
               <span className="text-[10px] font-mono text-emerald-500 uppercase block">Scope 3 Value Chain</span>
               <span className="text-lg font-bold font-mono text-emerald-500 mt-1 block">
                 {selectedEntity.emissions.scope3.toFixed(2)} t
@@ -239,7 +240,7 @@ export const ConglomerateTreeStudio = ({ isLight, locale }) => {
 
           {/* Intensity Benchmarks */}
           <div className={`p-4 rounded-2xl border space-y-3 ${
-            isLight ? 'bg-gray-50 border-gray-200' : 'bg-[#040A06] border-[#1B4D2E]'
+            isLight ? 'bg-gray-50 border-gray-200' : 'bg-legacy-canvas-night border-legacy-forest-11'
           }`}>
             <h4 className="text-xs font-mono font-bold uppercase tracking-wider text-gray-500">
               Subsidiary Operational Benchmarks

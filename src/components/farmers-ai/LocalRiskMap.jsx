@@ -184,7 +184,7 @@ const LocalRiskMap = ({ isEmbedded = false }) => {
         
         {/* Privacy Disclaimer Overlay */}
         <div className="absolute bottom-6 left-6 z-20 bg-black/80 backdrop-blur-md border border-white/10 px-4 py-2.5 rounded-xl flex items-center text-xs text-white/70 max-w-sm">
-          <ShieldAlert size={16} className="text-[#CCFF00] mr-2 shrink-0 animate-pulse" />
+          <ShieldAlert size={16} className="text-legacy-lime-signal-base mr-2 shrink-0 animate-pulse" />
           <p><strong>Privacy Protected:</strong> All neighbor data is completely anonymous. Personal identifiers are never shared.</p>
         </div>
       </div>

@@ -1,3 +1,4 @@
+import { legacyColors } from '../styles/legacyColors.js';
 import React, { useState, useEffect, useRef } from 'react';
 import { 
   Upload, FileText, Cpu, ShieldCheck, Download, 
@@ -84,7 +85,7 @@ const CorporateSaaSPipeline = () => {
   };
 
   return (
-    <div className="w-full bg-[#040A06] py-24 relative overflow-hidden font-sans border-t border-white/5">
+    <div className="w-full bg-legacy-canvas-night py-24 relative overflow-hidden font-sans border-t border-white/5">
       
       {/* Component Styles for Precise Keyframes & Visual Effects */}
       <style>{`
@@ -204,7 +205,7 @@ const CorporateSaaSPipeline = () => {
         </div>
 
         {/* Outer Visual Panel (Matches Video Layout, using 12-column grid to give text more space) */}
-        <div className="grid grid-cols-1 lg:grid-cols-12 gap-10 bg-[#080F0B] border border-white/5 rounded-[3rem] p-10 lg:p-14 shadow-[0_0_100px_rgba(0,0,0,0.5)] backdrop-blur-md">
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-10 bg-legacy-canvas-base border border-white/5 rounded-[3rem] p-10 lg:p-14 shadow-[0_0_100px_rgba(0,0,0,0.5)] backdrop-blur-md">
           
           {/* Left Column: Controls, Info & Status (Takes 4 columns, wider typography) */}
           <div className="lg:col-span-4 flex flex-col justify-between border-b lg:border-b-0 lg:border-r border-white/10 pb-8 lg:pb-0 lg:pr-10">
@@ -281,7 +282,7 @@ const CorporateSaaSPipeline = () => {
               </div>
 
               {/* Status display */}
-              <div className="bg-[#040A06] rounded-xl p-4 border border-white/5">
+              <div className="bg-legacy-canvas-night rounded-xl p-4 border border-white/5">
                 <p className="text-[10px] font-mono text-mist/40 uppercase tracking-widest font-bold">
                   System Status
                 </p>
@@ -324,10 +325,10 @@ const CorporateSaaSPipeline = () => {
                       onClick={() => handleStepChange(idx)}
                       className={`w-11 h-11 rounded-full border-2 flex items-center justify-center transition-all duration-300 focus:outline-none cursor-pointer z-10 ${
                         isActive 
-                          ? 'bg-[#040A06] border-emerald text-emerald shadow-[0_0_20px_rgba(0,200,83,0.4)] scale-110' 
+                          ? 'bg-legacy-canvas-night border-emerald text-emerald shadow-[0_0_20px_rgba(0,200,83,0.4)] scale-110'
                           : isCompleted 
                           ? 'bg-emerald border-emerald text-carbon font-bold' 
-                          : 'bg-[#040A06] border-white/15 text-white/40 hover:border-white/40 hover:scale-105'
+                          : 'bg-legacy-canvas-night border-white/15 text-white/40 hover:border-white/40 hover:scale-105'
                       }`}
                     >
                       {isCompleted ? (
@@ -361,10 +362,10 @@ const CorporateSaaSPipeline = () => {
             </div>
 
             {/* Main Visual Display Canvas (Scaled height to h-[420px] for massive visual impact) */}
-            <div className="relative bg-[#040A06] rounded-[2rem] border border-white/5 h-[420px] flex items-center justify-center overflow-hidden shadow-inner group">
+            <div className="relative bg-legacy-canvas-night rounded-[2rem] border border-white/5 h-[420px] flex items-center justify-center overflow-hidden shadow-inner group">
               
               {/* Grid Overlay inside the canvas */}
-              <div className="absolute inset-0 bg-[linear-gradient(to_right,#00c85302_1px,transparent_1px),linear-gradient(to_bottom,#00c85302_1px,transparent_1px)] bg-[size:2.5rem_2.5rem] z-0 pointer-events-none"></div>
+              <div className="absolute inset-0 legacy-grid-faint bg-[size:2.5rem_2.5rem] z-0 pointer-events-none"></div>
 
               {/* Stage 1: Uploading Animation (Scaled up elements) */}
               {activeStep === 0 && (
@@ -375,15 +376,15 @@ const CorporateSaaSPipeline = () => {
                   <div className="relative h-36 mx-auto w-64 mb-8 flex justify-center items-end">
                     
                     {/* Document stack background */}
-                    <div className="absolute w-20 h-24 bg-[#080F0B] border border-white/10 rounded-xl flex items-center justify-center text-white/20 transform -rotate-12 translate-x-[-25px] z-10">
+                    <div className="absolute w-20 h-24 bg-legacy-canvas-base border border-white/10 rounded-xl flex items-center justify-center text-white/20 transform -rotate-12 translate-x-[-25px] z-10">
                       <FileText size={24} />
                     </div>
-                    <div className="absolute w-20 h-24 bg-[#080F0B] border border-white/10 rounded-xl flex items-center justify-center text-white/20 transform rotate-12 translate-x-[25px] z-10">
+                    <div className="absolute w-20 h-24 bg-legacy-canvas-base border border-white/10 rounded-xl flex items-center justify-center text-white/20 transform rotate-12 translate-x-[25px] z-10">
                       <FileText size={24} />
                     </div>
                     
                     {/* Visual stack central drop container */}
-                    <div className="relative w-24 h-28 bg-[#080F0B]/90 border-2 border-dashed border-emerald/30 rounded-2xl flex items-center justify-center text-emerald shadow-[0_0_30px_rgba(16,185,129,0.15)] z-20">
+                    <div className="relative w-24 h-28 bg-legacy-canvas-base/90 border-2 border-dashed border-emerald/30 rounded-2xl flex items-center justify-center text-emerald shadow-[0_0_30px_rgba(16,185,129,0.15)] z-20">
                       <Upload size={38} className="animate-pulse text-emerald drop-shadow-[0_0_8px_rgba(16,185,129,0.5)]" />
                     </div>
 
@@ -426,7 +427,7 @@ const CorporateSaaSPipeline = () => {
                       />
                       <path 
                         d="M 225 140 C 275 140, 275 55, 345 55" 
-                        stroke="#10b981" 
+                        stroke={legacyColors["legacy-emerald-500"]}
                         strokeWidth="2.5" 
                         className="flow-path-scope1"
                       />
@@ -439,7 +440,7 @@ const CorporateSaaSPipeline = () => {
                       />
                       <path 
                         d="M 225 140 Q 285 140 345 140" 
-                        stroke="#10b981" 
+                        stroke={legacyColors["legacy-emerald-500"]}
                         strokeWidth="2.5" 
                         className="flow-path-scope2"
                       />
@@ -452,24 +453,24 @@ const CorporateSaaSPipeline = () => {
                       />
                       <path 
                         d="M 225 140 C 275 140, 275 225, 345 225" 
-                        stroke="#10b981" 
+                        stroke={legacyColors["legacy-emerald-500"]}
                         strokeWidth="2.5" 
                         className="flow-path-scope3"
                       />
                     </svg>
 
                     {/* Central Document + Scanline (Scaled up) */}
-                    <div className="absolute left-[175px] top-[80px] w-24 h-28 bg-[#080F0B] border border-emerald/30 rounded-xl flex flex-col items-center justify-center shadow-[0_0_40px_rgba(16,185,129,0.2)] z-20 overflow-hidden animate-float-doc">
+                    <div className="absolute left-[175px] top-[80px] w-24 h-28 bg-legacy-canvas-base border border-emerald/30 rounded-xl flex flex-col items-center justify-center shadow-[0_0_40px_rgba(16,185,129,0.2)] z-20 overflow-hidden animate-float-doc">
                       <Cpu className="text-emerald mb-1 animate-pulse" size={32} />
                       <span className="font-mono text-[10px] text-white/70 font-semibold tracking-wider">EXTRACTING</span>
                       
                       {/* Glowing Laser Scanline */}
-                      <div className="absolute left-0 right-0 h-[3px] bg-emerald shadow-[0_0_10px_#10b981] z-30 animate-laser"></div>
+                      <div className="absolute left-0 right-0 h-[3px] bg-emerald shadow-[0_0_10px] shadow-legacy-emerald-500 z-30 animate-laser"></div>
                     </div>
 
                     {/* Target Scope Nodes (Scaled up card width and paddings) */}
                     {/* Scope 1 */}
-                    <div className="absolute right-[10px] top-[15px] w-32 bg-[#080F0B]/95 border border-white/10 rounded-xl p-3 text-left z-20 hover:border-emerald/40 transition-colors">
+                    <div className="absolute right-[10px] top-[15px] w-32 bg-legacy-canvas-base/95 border border-white/10 rounded-xl p-3 text-left z-20 hover:border-emerald/40 transition-colors">
                       <div className="flex items-center justify-between mb-1.5">
                         <span className="text-[11px] font-mono text-emerald font-bold">SCOPE 1</span>
                         <span className="w-1.5 h-1.5 rounded-full bg-emerald animate-pulse"></span>
@@ -479,7 +480,7 @@ const CorporateSaaSPipeline = () => {
                     </div>
 
                     {/* Scope 2 */}
-                    <div className="absolute right-[10px] top-[100px] w-32 bg-[#080F0B]/95 border border-white/10 rounded-xl p-3 text-left z-20 hover:border-emerald/40 transition-colors">
+                    <div className="absolute right-[10px] top-[100px] w-32 bg-legacy-canvas-base/95 border border-white/10 rounded-xl p-3 text-left z-20 hover:border-emerald/40 transition-colors">
                       <div className="flex items-center justify-between mb-1.5">
                         <span className="text-[11px] font-mono text-emerald font-bold">SCOPE 2</span>
                         <span className="w-1.5 h-1.5 rounded-full bg-emerald animate-pulse"></span>
@@ -489,7 +490,7 @@ const CorporateSaaSPipeline = () => {
                     </div>
 
                     {/* Scope 3 */}
-                    <div className="absolute right-[10px] top-[185px] w-32 bg-[#080F0B]/95 border border-white/10 rounded-xl p-3 text-left z-20 hover:border-emerald/40 transition-colors">
+                    <div className="absolute right-[10px] top-[185px] w-32 bg-legacy-canvas-base/95 border border-white/10 rounded-xl p-3 text-left z-20 hover:border-emerald/40 transition-colors">
                       <div className="flex items-center justify-between mb-1.5">
                         <span className="text-[11px] font-mono text-emerald font-bold">SCOPE 3</span>
                         <span className="w-1.5 h-1.5 rounded-full bg-emerald animate-pulse"></span>
@@ -523,7 +524,7 @@ const CorporateSaaSPipeline = () => {
                     </svg>
 
                     {/* Floating Source Document (Enlarged) */}
-                    <div className="absolute top-[20px] left-[170px] w-[110px] h-auto py-3 bg-[#080F0B] border border-emerald/40 rounded-xl text-center shadow-[0_0_25px_rgba(16,185,129,0.2)] animate-float-doc z-20">
+                    <div className="absolute top-[20px] left-[170px] w-[110px] h-auto py-3 bg-legacy-canvas-base border border-emerald/40 rounded-xl text-center shadow-[0_0_25px_rgba(16,185,129,0.2)] animate-float-doc z-20">
                       <div className="w-7 h-7 rounded-full bg-emerald/20 flex items-center justify-center mx-auto mb-1 text-emerald">
                         <ShieldCheck size={16} />
                       </div>
@@ -536,31 +537,31 @@ const CorporateSaaSPipeline = () => {
                       
                       {/* Bar 1 */}
                       <div className="flex flex-col items-center flex-1 h-[70px] relative">
-                        <div className="w-full bg-[#1A3A28]/80 hover:bg-[#1A3A28] border border-emerald/50 border-b-0 rounded-t-md shadow-[inset_0_1px_0_rgba(16,185,129,0.5)] grow-bar h-full transition-all duration-300 flex items-start justify-center pt-3">
+                        <div className="w-full bg-legacy-forest-23/80 hover:bg-legacy-forest-23 border border-emerald/50 border-b-0 rounded-t-md shadow-[inset_0_1px_0_rgba(16,185,129,0.5)] grow-bar h-full transition-all duration-300 flex items-start justify-center pt-3">
                           <span className="text-xs font-mono text-emerald font-bold">42t</span>
                         </div>
                         {/* Dot Anchor */}
-                        <div className="absolute top-0 w-3 h-3 bg-emerald rounded-full border-2 border-[#040A06] -translate-y-1.5 shadow-[0_0_8px_#10b981]"></div>
+                        <div className="absolute top-0 w-3 h-3 bg-emerald rounded-full border-2 border-legacy-canvas-night -translate-y-1.5 shadow-[0_0_8px] shadow-legacy-emerald-500"></div>
                         <span className="text-xs font-mono text-mist/60 mt-2 font-medium">Scope 1</span>
                       </div>
 
                       {/* Bar 2 */}
                       <div className="flex flex-col items-center flex-1 h-[110px] relative">
-                        <div className="w-full bg-[#1A3A28]/80 hover:bg-[#1A3A28] border border-emerald/50 border-b-0 rounded-t-md shadow-[inset_0_1px_0_rgba(16,185,129,0.5)] grow-bar h-full transition-all duration-300 flex items-start justify-center pt-3">
+                        <div className="w-full bg-legacy-forest-23/80 hover:bg-legacy-forest-23 border border-emerald/50 border-b-0 rounded-t-md shadow-[inset_0_1px_0_rgba(16,185,129,0.5)] grow-bar h-full transition-all duration-300 flex items-start justify-center pt-3">
                           <span className="text-xs font-mono text-emerald font-bold">88t</span>
                         </div>
                         {/* Dot Anchor */}
-                        <div className="absolute top-0 w-3 h-3 bg-emerald rounded-full border-2 border-[#040A06] -translate-y-1.5 shadow-[0_0_8px_#10b981]"></div>
+                        <div className="absolute top-0 w-3 h-3 bg-emerald rounded-full border-2 border-legacy-canvas-night -translate-y-1.5 shadow-[0_0_8px] shadow-legacy-emerald-500"></div>
                         <span className="text-xs font-mono text-mist/60 mt-2 font-medium">Scope 2</span>
                       </div>
 
                       {/* Bar 3 */}
                       <div className="flex flex-col items-center flex-1 h-[45px] relative">
-                        <div className="w-full bg-[#1A3A28]/80 hover:bg-[#1A3A28] border border-emerald/50 border-b-0 rounded-t-md shadow-[inset_0_1px_0_rgba(16,185,129,0.5)] grow-bar h-full transition-all duration-300 flex items-start justify-center pt-3">
+                        <div className="w-full bg-legacy-forest-23/80 hover:bg-legacy-forest-23 border border-emerald/50 border-b-0 rounded-t-md shadow-[inset_0_1px_0_rgba(16,185,129,0.5)] grow-bar h-full transition-all duration-300 flex items-start justify-center pt-3">
                           <span className="text-xs font-mono text-emerald font-bold">23t</span>
                         </div>
                         {/* Dot Anchor */}
-                        <div className="absolute top-0 w-3 h-3 bg-emerald rounded-full border-2 border-[#040A06] -translate-y-1.5 shadow-[0_0_8px_#10b981]"></div>
+                        <div className="absolute top-0 w-3 h-3 bg-emerald rounded-full border-2 border-legacy-canvas-night -translate-y-1.5 shadow-[0_0_8px] shadow-legacy-emerald-500"></div>
                         <span className="text-xs font-mono text-mist/60 mt-2 font-medium">Scope 3</span>
                       </div>
 
@@ -586,19 +587,19 @@ const CorporateSaaSPipeline = () => {
                     <svg className="absolute inset-0 w-full h-full pointer-events-none overflow-visible" viewBox="0 0 460 280" fill="none">
                       {/* Left Pointing (BD Gov MRV) */}
                       <path d="M 180 110 C 150 110, 150 70, 120 70" stroke="rgba(16, 185, 129, 0.2)" strokeWidth="2" />
-                      <path d="M 180 110 C 150 110, 150 70, 120 70" stroke="#10b981" strokeWidth="2.5" className="flow-arrow-path" />
+                      <path d="M 180 110 C 150 110, 150 70, 120 70" stroke={legacyColors["legacy-emerald-500"]} strokeWidth="2.5" className="flow-arrow-path" />
 
                       {/* Right Pointing (EU CBAM) */}
                       <path d="M 280 110 C 310 110, 310 70, 340 70" stroke="rgba(16, 185, 129, 0.2)" strokeWidth="2" />
-                      <path d="M 280 110 C 310 110, 310 70, 340 70" stroke="#10b981" strokeWidth="2.5" className="flow-arrow-path" />
+                      <path d="M 280 110 C 310 110, 310 70, 340 70" stroke={legacyColors["legacy-emerald-500"]} strokeWidth="2.5" className="flow-arrow-path" />
 
                       {/* Down Pointing (ISO 14064) */}
                       <path d="M 230 165 L 230 197" stroke="rgba(16, 185, 129, 0.2)" strokeWidth="2" />
-                      <path d="M 230 165 L 230 197" stroke="#10b981" strokeWidth="2.5" className="flow-arrow-path" />
+                      <path d="M 230 165 L 230 197" stroke={legacyColors["legacy-emerald-500"]} strokeWidth="2.5" className="flow-arrow-path" />
                     </svg>
 
                     {/* Central Report Document */}
-                    <div className="absolute left-[180px] top-[55px] w-[100px] h-[110px] bg-[#080F0B] border border-emerald/40 rounded-xl flex flex-col items-center justify-center shadow-[0_0_40px_rgba(16,185,129,0.25)] animate-float-doc z-20">
+                    <div className="absolute left-[180px] top-[55px] w-[100px] h-[110px] bg-legacy-canvas-base border border-emerald/40 rounded-xl flex flex-col items-center justify-center shadow-[0_0_40px_rgba(16,185,129,0.25)] animate-float-doc z-20">
                       <Download className="text-emerald mb-1 animate-pulse" size={32} />
                       <span className="font-mono text-sm text-white font-bold">REPORT</span>
                       <span className="text-[9px] text-mist/60 font-mono tracking-tighter uppercase mt-0.5">One-Click</span>
@@ -606,24 +607,24 @@ const CorporateSaaSPipeline = () => {
 
                     {/* Output Formats targets (Scaled up width & padding) */}
                     {/* BD Gov MRV */}
-                    <div className="absolute left-[10px] top-[30px] w-[110px] bg-[#080F0B]/95 border border-white/10 rounded-xl p-3 text-center z-20 hover:border-emerald/40 transition-colors">
+                    <div className="absolute left-[10px] top-[30px] w-[110px] bg-legacy-canvas-base/95 border border-white/10 rounded-xl p-3 text-center z-20 hover:border-emerald/40 transition-colors">
                       <span className="text-[9px] font-mono text-emerald font-bold block mb-1">COMPLIANCE</span>
                       <span className="text-xs text-white font-mono font-semibold block">BD Gov MRV</span>
-                      <span className="text-[9px] text-[#10b981] font-mono block mt-1 font-bold">✓ Ready</span>
+                      <span className="text-[9px] text-legacy-emerald-500 font-mono block mt-1 font-bold">✓ Ready</span>
                     </div>
 
                     {/* EU CBAM */}
-                    <div className="absolute right-[10px] top-[30px] w-[110px] bg-[#080F0B]/95 border border-white/10 rounded-xl p-3 text-center z-20 hover:border-emerald/40 transition-colors">
+                    <div className="absolute right-[10px] top-[30px] w-[110px] bg-legacy-canvas-base/95 border border-white/10 rounded-xl p-3 text-center z-20 hover:border-emerald/40 transition-colors">
                       <span className="text-[9px] font-mono text-emerald font-bold block mb-1">REGULATION</span>
                       <span className="text-xs text-white font-mono font-semibold block">EU CBAM</span>
-                      <span className="text-[9px] text-[#10b981] font-mono block mt-1 font-bold">✓ Compliant</span>
+                      <span className="text-[9px] text-legacy-emerald-500 font-mono block mt-1 font-bold">✓ Compliant</span>
                     </div>
 
                     {/* ISO 14064 */}
-                    <div className="absolute left-[175px] bottom-[15px] w-[110px] bg-[#080F0B]/95 border border-white/10 rounded-xl p-3 text-center z-20 hover:border-emerald/40 transition-colors">
+                    <div className="absolute left-[175px] bottom-[15px] w-[110px] bg-legacy-canvas-base/95 border border-white/10 rounded-xl p-3 text-center z-20 hover:border-emerald/40 transition-colors">
                       <span className="text-[9px] font-mono text-emerald font-bold block mb-1">STANDARD</span>
                       <span className="text-xs text-white font-mono font-semibold block">ISO 14064</span>
-                      <span className="text-[9px] text-[#10b981] font-mono block mt-1 font-bold">✓ Certified</span>
+                      <span className="text-[9px] text-legacy-emerald-500 font-mono block mt-1 font-bold">✓ Certified</span>
                     </div>
 
                   </div>

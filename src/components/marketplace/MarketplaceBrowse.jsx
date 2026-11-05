@@ -552,7 +552,7 @@ export const MarketplaceBrowse = () => {
 
   return (
     <div className={`pt-28 pb-20 px-4 sm:px-6 lg:px-12 w-full min-h-screen transition-colors duration-300 ${
-      isLight ? 'bg-[#f2f3ee] text-[#181414]' : 'bg-[#040A06] text-white'
+      isLight ? 'bg-legacy-canvas-light text-legacy-ink-light' : 'bg-legacy-canvas-night text-white'
     }`}>
       
       {/* Toast Notification */}
@@ -588,13 +588,13 @@ export const MarketplaceBrowse = () => {
               </div>
 
               <h1 className={`serif-drama text-4xl sm:text-5xl lg:text-6xl font-bold tracking-tight leading-[1.08] ${
-                isLight ? 'text-[#181414]' : 'text-white'
+                isLight ? 'text-legacy-ink-light' : 'text-white'
               }`}>
                 Institutional Carbon Marketplace
               </h1>
 
               <p className={`font-sans text-base sm:text-lg max-w-2xl leading-relaxed ${
-                isLight ? 'text-[#413f3f]' : 'text-slate-300'
+                isLight ? 'text-legacy-ink-muted-light' : 'text-slate-300'
               }`}>
                 Acquire verified, high-additionality carbon credits directly from Bangladesh's rural climate stewards. 
                 Full on-chain telemetry, zero double-counting, and <strong className="text-emerald">97% direct liquidity</strong> disbursed to farmer mobile wallets.
@@ -603,7 +603,7 @@ export const MarketplaceBrowse = () => {
 
             {/* Quick Guarantees Badge Group */}
             <div className={`p-4 rounded-2xl border flex flex-col space-y-2.5 shrink-0 text-xs ${
-              isLight ? 'bg-white border-[#dbf0ea] shadow-sm' : 'bg-[#080F0B] border-emerald/20 shadow-xl'
+              isLight ? 'bg-white border-legacy-surface-light-tint shadow-sm' : 'bg-legacy-canvas-base border-emerald/20 shadow-xl'
             }`}>
               <div className="flex items-center space-x-2 text-emerald font-semibold">
                 <CheckCircle2 size={16} />
@@ -625,11 +625,11 @@ export const MarketplaceBrowse = () => {
         {/* 2. REAL-TIME SPOT MARKET TICKER & TELEMETRY BAR             */}
         {/* ============================================================ */}
         <div className={`rounded-2xl border overflow-hidden transition-all ${
-          isLight ? 'bg-white border-[#dbf0ea]' : 'bg-[#080F0B] border-white/10'
+          isLight ? 'bg-white border-legacy-surface-light-tint' : 'bg-legacy-canvas-base border-white/10'
         }`}>
           {/* Scrolling Ticker Ribbon */}
           <div className={`px-4 py-2 border-b flex items-center space-x-6 overflow-x-auto text-[11px] font-mono no-scrollbar ${
-            isLight ? 'bg-[#f2f3ee]/80 border-[#dbf0ea]' : 'bg-[#040A06] border-white/5'
+            isLight ? 'bg-legacy-canvas-light/80 border-legacy-surface-light-tint' : 'bg-legacy-canvas-night border-white/5'
           }`}>
             <span className="font-bold text-emerald shrink-0 flex items-center space-x-1.5">
               <span className="w-2 h-2 rounded-full bg-emerald animate-pulse"></span>
@@ -715,8 +715,8 @@ export const MarketplaceBrowse = () => {
                   isSelected 
                     ? 'bg-emerald text-carbon border-emerald shadow-[0_0_15px_rgba(0,200,83,0.3)] font-bold' 
                     : isLight 
-                      ? 'bg-white border-[#dbf0ea] text-[#413f3f] hover:border-emerald/40 hover:bg-slate-50' 
-                      : 'bg-[#080F0B] border-white/10 text-slate-300 hover:border-emerald/30 hover:bg-white/5'
+                      ? 'bg-white border-legacy-surface-light-tint text-legacy-ink-muted-light hover:border-emerald/40 hover:bg-slate-50'
+                      : 'bg-legacy-canvas-base border-white/10 text-slate-300 hover:border-emerald/30 hover:bg-white/5'
                 }`}
               >
                 <span>{sec.label}</span>
@@ -729,7 +729,7 @@ export const MarketplaceBrowse = () => {
         {/* 4. SEARCH, FILTER BAR & VIEW TOGGLE                          */}
         {/* ============================================================ */}
         <div className={`p-4 rounded-2xl border flex flex-col md:flex-row items-stretch md:items-center justify-between gap-3 ${
-          isLight ? 'bg-white border-[#dbf0ea]' : 'bg-[#080F0B] border-white/10'
+          isLight ? 'bg-white border-legacy-surface-light-tint' : 'bg-legacy-canvas-base border-white/10'
         }`}>
           {/* Search Input */}
           <div className="relative flex-1">
@@ -741,8 +741,8 @@ export const MarketplaceBrowse = () => {
               placeholder="Search by project title, farmer name, region, or serial ID (e.g. BD-2026-CR-000142)..."
               className={`w-full pl-10 pr-8 py-2.5 rounded-xl text-xs font-medium border transition-colors focus:outline-none focus:border-emerald ${
                 isLight 
-                  ? 'bg-[#f2f3ee] border-slate-200 text-[#181414] placeholder:text-slate-400' 
-                  : 'bg-[#040A06] border-white/10 text-white placeholder:text-slate-500'
+                  ? 'bg-legacy-canvas-light border-slate-200 text-legacy-ink-light placeholder:text-slate-400'
+                  : 'bg-legacy-canvas-night border-white/10 text-white placeholder:text-slate-500'
               }`}
             />
             {searchQuery && (
@@ -762,7 +762,7 @@ export const MarketplaceBrowse = () => {
               value={selectedStandard}
               onChange={(e) => setSelectedStandard(e.target.value)}
               className={`text-xs px-3 py-2.5 rounded-xl border focus:outline-none focus:border-emerald cursor-pointer ${
-                isLight ? 'bg-[#f2f3ee] border-slate-200 text-[#181414]' : 'bg-[#040A06] border-white/10 text-slate-200'
+                isLight ? 'bg-legacy-canvas-light border-slate-200 text-legacy-ink-light' : 'bg-legacy-canvas-night border-white/10 text-slate-200'
               }`}
             >
               <option value="ALL">All Standards</option>
@@ -775,7 +775,7 @@ export const MarketplaceBrowse = () => {
               value={selectedRegion}
               onChange={(e) => setSelectedRegion(e.target.value)}
               className={`text-xs px-3 py-2.5 rounded-xl border focus:outline-none focus:border-emerald cursor-pointer ${
-                isLight ? 'bg-[#f2f3ee] border-slate-200 text-[#181414]' : 'bg-[#040A06] border-white/10 text-slate-200'
+                isLight ? 'bg-legacy-canvas-light border-slate-200 text-legacy-ink-light' : 'bg-legacy-canvas-night border-white/10 text-slate-200'
               }`}
             >
               <option value="ALL">All Divisions</option>
@@ -794,7 +794,7 @@ export const MarketplaceBrowse = () => {
               value={sortBy}
               onChange={(e) => setSortBy(e.target.value)}
               className={`text-xs px-3 py-2.5 rounded-xl border focus:outline-none focus:border-emerald cursor-pointer ${
-                isLight ? 'bg-[#f2f3ee] border-slate-200 text-[#181414]' : 'bg-[#040A06] border-white/10 text-slate-200'
+                isLight ? 'bg-legacy-canvas-light border-slate-200 text-legacy-ink-light' : 'bg-legacy-canvas-night border-white/10 text-slate-200'
               }`}
             >
               <option value="FEATURED">Featured Offsets</option>
@@ -806,7 +806,7 @@ export const MarketplaceBrowse = () => {
 
             {/* View Mode Toggle */}
             <div className={`flex items-center p-1 rounded-xl border ${
-              isLight ? 'bg-[#f2f3ee] border-slate-200' : 'bg-[#040A06] border-white/10'
+              isLight ? 'bg-legacy-canvas-light border-slate-200' : 'bg-legacy-canvas-night border-white/10'
             }`}>
               <button
                 type="button"
@@ -863,8 +863,8 @@ export const MarketplaceBrowse = () => {
                   key={credit.id}
                   className={`rounded-2xl border p-6 flex flex-col transition-all duration-300 group hover:-translate-y-1 relative overflow-hidden ${
                     isLight 
-                      ? 'bg-white border-[#dbf0ea] shadow-[0_4px_20px_rgba(0,0,0,0.03)] hover:shadow-xl hover:border-emerald/40' 
-                      : 'bg-[#080F0B] border-white/10 hover:border-emerald/50 hover:shadow-[0_0_30px_rgba(0,200,83,0.1)]'
+                      ? 'bg-white border-legacy-surface-light-tint shadow-[0_4px_20px_rgba(0,0,0,0.03)] hover:shadow-xl hover:border-emerald/40'
+                      : 'bg-legacy-canvas-base border-white/10 hover:border-emerald/50 hover:shadow-[0_0_30px_rgba(0,200,83,0.1)]'
                   }`}
                 >
                   {/* Top Ambient Highlight Banner */}
@@ -897,7 +897,7 @@ export const MarketplaceBrowse = () => {
                   {/* Project Title & Serial */}
                   <div className="mb-3">
                     <h3 className={`font-sans font-bold text-xl leading-snug group-hover:text-emerald transition-colors ${
-                      isLight ? 'text-[#181414]' : 'text-white'
+                      isLight ? 'text-legacy-ink-light' : 'text-white'
                     }`}>
                       {credit.type}
                     </h3>
@@ -924,7 +924,7 @@ export const MarketplaceBrowse = () => {
 
                   {/* MRV Telemetry Tag */}
                   <div className={`p-2.5 rounded-lg border text-[11px] font-mono mb-4 flex items-center space-x-2 ${
-                    isLight ? 'bg-slate-50 border-slate-200 text-slate-700' : 'bg-[#040A06] border-white/5 text-slate-300'
+                    isLight ? 'bg-slate-50 border-slate-200 text-slate-700' : 'bg-legacy-canvas-night border-white/5 text-slate-300'
                   }`}>
                     <Satellite size={14} className="text-cyan-400 shrink-0" />
                     <span className="truncate">{credit.mrvTelemetry}</span>
@@ -948,13 +948,13 @@ export const MarketplaceBrowse = () => {
                   {/* Financial Metrics Box */}
                   <div className={`mt-auto p-4 rounded-xl border mb-5 transition-colors ${
                     isLight 
-                      ? 'bg-[#f2f3ee]/80 border-[#dbf0ea]' 
-                      : 'bg-[#0D2B1A]/30 border-white/5'
+                      ? 'bg-legacy-canvas-light/80 border-legacy-surface-light-tint'
+                      : 'bg-legacy-surface-raised/30 border-white/5'
                   }`}>
                     <div className="grid grid-cols-2 gap-3 mb-2.5">
                       <div>
                         <span className="font-mono text-[10px] text-slate-400 block mb-0.5">VOLUME</span>
-                        <span className={`font-mono text-xl font-bold ${isLight ? 'text-[#181414]' : 'text-white'}`}>
+                        <span className={`font-mono text-xl font-bold ${isLight ? 'text-legacy-ink-light' : 'text-white'}`}>
                           {credit.tonnage} <span className="text-xs font-sans text-slate-400">tCO₂e</span>
                         </span>
                       </div>
@@ -1011,13 +1011,13 @@ export const MarketplaceBrowse = () => {
         {/* ============================================================ */}
         {viewMode === 'table' && (
           <div className={`rounded-2xl border overflow-hidden transition-colors ${
-            isLight ? 'bg-white border-[#dbf0ea] shadow-sm' : 'bg-[#080F0B] border-white/10'
+            isLight ? 'bg-white border-legacy-surface-light-tint shadow-sm' : 'bg-legacy-canvas-base border-white/10'
           }`}>
             <div className="overflow-x-auto">
               <table className="w-full text-left border-collapse text-xs">
                 <thead>
                   <tr className={`border-b font-mono text-[10px] text-slate-400 uppercase tracking-wider ${
-                    isLight ? 'bg-[#f2f3ee]' : 'bg-[#040A06]'
+                    isLight ? 'bg-legacy-canvas-light' : 'bg-legacy-canvas-night'
                   }`}>
                     <th className="p-4 w-10">
                       <input 
@@ -1119,7 +1119,7 @@ export const MarketplaceBrowse = () => {
             {/* Bulk Sticky Action Bar (When >= 1 item selected) */}
             {selectedBatchIds.length > 0 && (
               <div className={`p-4 border-t flex flex-col sm:flex-row items-center justify-between gap-4 sticky bottom-0 z-30 ${
-                isLight ? 'bg-white border-[#dbf0ea] shadow-lg' : 'bg-[#0D2B1A] border-emerald/30 shadow-2xl'
+                isLight ? 'bg-white border-legacy-surface-light-tint shadow-lg' : 'bg-legacy-surface-raised border-emerald/30 shadow-2xl'
               }`}>
                 <div className="flex items-center space-x-4">
                   <span className="font-mono text-xs font-bold text-emerald bg-emerald/10 px-2.5 py-1 rounded">
@@ -1171,7 +1171,7 @@ export const MarketplaceBrowse = () => {
       {inspectCredit && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-md animate-fade-in overflow-y-auto">
           <div className={`w-full max-w-2xl rounded-2xl border p-6 my-8 relative shadow-2xl ${
-            isLight ? 'bg-white border-[#dbf0ea]' : 'bg-[#080F0B] border-emerald/30'
+            isLight ? 'bg-white border-legacy-surface-light-tint' : 'bg-legacy-canvas-base border-emerald/30'
           }`}>
             <button 
               onClick={() => setInspectCredit(null)}
@@ -1187,7 +1187,7 @@ export const MarketplaceBrowse = () => {
               <span className="font-mono text-[10px] text-slate-400">Serial ID: {inspectCredit.id}</span>
             </div>
 
-            <h2 className={`text-2xl font-bold mb-1 ${isLight ? 'text-[#181414]' : 'text-white'}`}>
+            <h2 className={`text-2xl font-bold mb-1 ${isLight ? 'text-legacy-ink-light' : 'text-white'}`}>
               {inspectCredit.type}
             </h2>
             <p className="text-xs text-slate-400 mb-6">
@@ -1197,7 +1197,7 @@ export const MarketplaceBrowse = () => {
             <div className="space-y-4 text-xs">
               {/* Telemetry Block */}
               <div className={`p-4 rounded-xl border space-y-2 ${
-                isLight ? 'bg-slate-50 border-slate-200' : 'bg-[#040A06] border-white/10'
+                isLight ? 'bg-slate-50 border-slate-200' : 'bg-legacy-canvas-night border-white/10'
               }`}>
                 <div className="flex items-center justify-between">
                   <span className="font-mono text-[10px] uppercase font-bold text-cyan-400 flex items-center space-x-1.5">
@@ -1235,7 +1235,7 @@ export const MarketplaceBrowse = () => {
 
               {/* Financial Breakdown */}
               <div className={`p-3.5 rounded-xl border flex justify-between items-center ${
-                isLight ? 'bg-emerald/5 border-emerald/20' : 'bg-[#0D2B1A]/40 border-emerald/20'
+                isLight ? 'bg-emerald/5 border-emerald/20' : 'bg-legacy-surface-raised/40 border-emerald/20'
               }`}>
                 <div>
                   <span className="text-[10px] font-mono text-slate-400 block">TOTAL LOT VALUATION</span>

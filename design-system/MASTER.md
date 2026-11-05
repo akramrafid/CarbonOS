@@ -1,6 +1,6 @@
 # CarbonOS design system — implemented foundations
 
-Updated 2026-11-04. Source of truth: `src/index.css`, `tailwind.config.js`, shared ESG `ui.jsx` and the shipped CarbonOS pages. This describes implemented foundations and open migration work. Earlier “sovereign”, verified-serial and universal contrast claims were intentions without evidence; they are not current product guarantees.
+Updated 2026-11-05. Source of truth: `src/index.css`, `tailwind.config.js`, shared ESG `ui.jsx` and the shipped CarbonOS pages. This describes implemented foundations and open migration work. Earlier “sovereign”, verified-serial and universal contrast claims were intentions without evidence; they are not current product guarantees.
 
 ## Brand and composition
 
@@ -8,7 +8,7 @@ CarbonOS helps factory teams inspect evidence, review activity and produce repro
 
 ## Color
 
-Theme colors are CSS variables, exposed through Tailwind forest/carbon/emerald/amber/registry/mist. Dark canvas `--color-carbon` #080F0B, forest #0D2B1A, primary text #F0F4F1. Light canvas #f2f3ee, forest #dbf0ea, text #413f3f. Shared controls use `--control-bg/text/border/primary-bg/primary-text/focus` and feedback uses `--state-{success,warning,danger,neutral}-{bg,text,border}`. D01 token tests require opaque text pairs ≥4.5:1 and control border/focus pairs ≥3:1. Other colors, opacity/compositing and decorative borders are not universally verified. Use status text and roles, never color alone.
+Theme colors are CSS variables, exposed through Tailwind forest/carbon/emerald/amber/registry/mist. Dark canvas `--color-carbon` #080F0B, forest #0D2B1A, primary text #F0F4F1. Light canvas #f2f3ee, forest #dbf0ea, text #413f3f. Shared controls use `--control-bg/text/border/primary-bg/primary-text/focus` and feedback uses `--state-{success,warning,danger,neutral}-{bg,text,border}`. D01 token tests require opaque text pairs ≥4.5:1 and control border/focus pairs ≥3:1. Other colors, opacity/compositing and decorative borders are not universally verified. Use status text and roles alongside color. The shared legacy palette in `src/styles/legacyColors.js` preserves existing color values for Tailwind utilities, charts and map layers. Use semantic theme and state tokens for new controls.
 
 ## Typography
 
@@ -38,4 +38,4 @@ No unused component library is added. New primitives must serve a real caller. S
 
 ## Breakpoints and evidence
 
-Tested emulation widths: 320, 375, 390, 667 landscape, 768, 1024, 1280, 1440, 1536, 1920. Tailwind sm/md/lg/xl defaults apply; nav uses xl. Forty responsive shell tests pass; see docs/website-transformation/QA-REPORT.md for exact scope and screenshots. Full screen-reader, zoom, forced-colors, all-route localization and real-device conformance remain open. Design contract source findings still block the full gate.
+Tested emulation widths: 320, 375, 390, 667 landscape, 768, 1024, 1280, 1440, 1536, 1920. Tailwind sm/md/lg/xl defaults apply; nav uses xl. Forty responsive shell tests pass; see docs/website-transformation/QA-REPORT.md for exact scope and screenshots. Full screen-reader, zoom, forced-colors, all-route localization and real-device conformance remain open. The design contract passes locally.

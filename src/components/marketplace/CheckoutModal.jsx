@@ -21,7 +21,7 @@ export const CheckoutModal = ({ credit, onClose, onSuccess }) => {
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm">
-      <div className="bg-[#0D2B1A] border border-emerald/20 w-full max-w-md rounded-[2rem] p-8 shadow-[0_0_40px_rgba(0,200,83,0.15)] relative overflow-hidden">
+      <div className="bg-legacy-surface-raised border border-emerald/20 w-full max-w-md rounded-[2rem] p-8 shadow-[0_0_40px_rgba(0,200,83,0.15)] relative overflow-hidden">
         
         {step === 'review' && (
           <>
@@ -29,7 +29,7 @@ export const CheckoutModal = ({ credit, onClose, onSuccess }) => {
             <h2 className="font-sans font-bold text-2xl text-white mb-2">Complete Purchase</h2>
             <p className="font-sans text-sm text-mist mb-6">You are securing verified carbon credits directly from the source.</p>
             
-            <div className="bg-[#080F0B] rounded-xl p-4 border border-white/5 mb-6">
+            <div className="bg-legacy-canvas-base rounded-xl p-4 border border-white/5 mb-6">
               <div className="flex justify-between items-center mb-2">
                 <span className="font-mono text-xs text-mist">CREDIT ID</span>
                 <span className="font-mono text-sm text-emerald">{credit.id}</span>

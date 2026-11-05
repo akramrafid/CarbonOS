@@ -270,11 +270,11 @@ export const VerificationReadinessCenter = ({
       
       {/* -------------------- HEADER BANNER & CONTROLS -------------------- */}
       <div className={`rounded-3xl p-6 sm:p-8 border shadow-2xl relative overflow-hidden transition-all ${
-        isLight ? 'bg-white border-[#E2E8E3]' : 'bg-[#08130C] border-[#152B1D]'
+        isLight ? 'bg-white border-legacy-mint-24' : 'bg-legacy-surface-base border-legacy-divider-base'
       }`}>
         <div className="flex flex-col xl:flex-row justify-between items-start xl:items-center gap-6 relative z-10">
           <div>
-            <div className="flex items-center space-x-2 text-[10px] font-mono uppercase tracking-widest text-[#00C853] font-bold">
+            <div className="flex items-center space-x-2 text-[10px] font-mono uppercase tracking-widest text-legacy-brand-base font-bold">
               <ShieldCheck className="w-4 h-4" />
               <span>ISO 14064-1 & GHG Protocol Assurance Portal</span>
             </div>
@@ -297,7 +297,7 @@ export const VerificationReadinessCenter = ({
           <div className="flex flex-wrap items-center gap-3 w-full xl:w-auto">
             {/* Auditor View Lock */}
             <div className={`flex items-center space-x-3 px-4 py-2.5 rounded-2xl border transition-all ${
-              isLight ? 'bg-slate-50 border-slate-200' : 'bg-[#040906] border-[#152B1D]'
+              isLight ? 'bg-slate-50 border-slate-200' : 'bg-legacy-canvas-deep border-legacy-divider-base'
             }`}>
               <div className="flex items-center space-x-1.5 text-xs font-bold">
                 {isAuditorLocked ? <Lock className="w-3.5 h-3.5 text-amber-400" /> : <Unlock className="w-3.5 h-3.5 text-gray-400" />}
@@ -314,7 +314,7 @@ export const VerificationReadinessCenter = ({
                   );
                 }}
                 className={`w-11 h-6 flex items-center rounded-full p-1 transition-all cursor-pointer ${
-                  isAuditorLocked ? 'bg-[#00C853]' : 'bg-gray-700'
+                  isAuditorLocked ? 'bg-legacy-brand-base' : 'bg-gray-700'
                 }`}
               >
                 <div className={`bg-white w-4 h-4 rounded-full shadow-md transform transition-all ${
@@ -326,7 +326,7 @@ export const VerificationReadinessCenter = ({
             {/* Quick Export Statement */}
             <button
               onClick={() => setActiveTab('signoff')}
-              className="bg-[#00C853] hover:bg-[#00E676] text-white font-mono font-bold text-xs py-2.5 px-4 rounded-xl transition-all shadow-md flex items-center space-x-2 cursor-pointer"
+              className="bg-legacy-brand-base hover:bg-legacy-brand-bright text-white font-mono font-bold text-xs py-2.5 px-4 rounded-xl transition-all shadow-md flex items-center space-x-2 cursor-pointer"
             >
               <FileCheck className="w-4 h-4 text-white" />
               <span>Verifier Statement</span>
@@ -381,7 +381,7 @@ export const VerificationReadinessCenter = ({
             onClick={() => setActiveTab(tab.id)}
             className={`px-4 py-2.5 rounded-t-xl transition-all font-semibold flex items-center space-x-2 whitespace-nowrap cursor-pointer ${
               activeTab === tab.id
-                ? (isLight ? 'bg-white border-t-2 border-[#00C853] text-[#0A2E19] shadow-sm font-bold' : 'bg-[#08130C] border-t-2 border-[#00E676] text-white font-bold')
+                ? (isLight ? 'bg-white border-t-2 border-legacy-brand-base text-legacy-forest-36 shadow-sm font-bold' : 'bg-legacy-surface-base border-t-2 border-legacy-brand-bright text-white font-bold')
                 : (isLight ? 'text-slate-500 hover:text-slate-900' : 'text-gray-400 hover:text-white')
             }`}
           >
@@ -398,7 +398,7 @@ export const VerificationReadinessCenter = ({
       {/* -------------------- TAB 1: ISO 14064 CHECKLIST -------------------- */}
       {activeTab === 'checklist' && (
         <div className={`rounded-3xl p-6 sm:p-8 border shadow-xl space-y-6 ${
-          isLight ? 'bg-white border-[#E2E8E3]' : 'bg-[#08130C] border-[#152B1D]'
+          isLight ? 'bg-white border-legacy-mint-24' : 'bg-legacy-surface-base border-legacy-divider-base'
         }`}>
           <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3">
             <div>
@@ -415,7 +415,7 @@ export const VerificationReadinessCenter = ({
               <div key={item.id} className="py-4 flex flex-col md:flex-row justify-between items-start md:items-center gap-4 hover:bg-white/[0.02] px-2 rounded-xl transition-colors">
                 <div className="space-y-1 max-w-3xl">
                   <div className="flex items-center space-x-2">
-                    <span className="text-[10px] font-mono px-2 py-0.5 rounded bg-[#00C853]/15 text-[#00E676] border border-[#00C853]/30 font-bold">
+                    <span className="text-[10px] font-mono px-2 py-0.5 rounded bg-legacy-brand-base/15 text-legacy-brand-bright border border-legacy-brand-base/30 font-bold">
                       {item.code}
                     </span>
                     <h4 className="font-bold text-sm text-white">{item.title}</h4>
@@ -451,7 +451,7 @@ export const VerificationReadinessCenter = ({
       {/* -------------------- TAB 2: DATA GAP ANALYZER -------------------- */}
       {activeTab === 'datagaps' && (
         <div className={`rounded-3xl p-6 sm:p-8 border shadow-xl space-y-6 ${
-          isLight ? 'bg-white border-[#E2E8E3]' : 'bg-[#08130C] border-[#152B1D]'
+          isLight ? 'bg-white border-legacy-mint-24' : 'bg-legacy-surface-base border-legacy-divider-base'
         }`}>
           <div>
             <h3 className="font-bold text-lg flex items-center gap-2">
@@ -554,7 +554,7 @@ export const VerificationReadinessCenter = ({
       {/* -------------------- TAB 3: VERIFIER INQUIRIES (Q&A) -------------------- */}
       {activeTab === 'inquiries' && (
         <div className={`rounded-3xl p-6 sm:p-8 border shadow-xl space-y-6 ${
-          isLight ? 'bg-white border-[#E2E8E3]' : 'bg-[#08130C] border-[#152B1D]'
+          isLight ? 'bg-white border-legacy-mint-24' : 'bg-legacy-surface-base border-legacy-divider-base'
         }`}>
           <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3">
             <div>
@@ -593,7 +593,7 @@ export const VerificationReadinessCenter = ({
                     <span>{inq.question}</span>
                   </h4>
                   <div className="pl-6 text-xs text-gray-300 leading-relaxed font-sans bg-white/[0.02] p-3 rounded-xl border border-white/5 mt-2">
-                    <strong className="text-[#00E676] block mb-1 font-mono text-[10px] uppercase">Corporate Technical Answer:</strong>
+                    <strong className="text-legacy-brand-bright block mb-1 font-mono text-[10px] uppercase">Corporate Technical Answer:</strong>
                     {inq.response}
                   </div>
                 </div>
@@ -610,14 +610,14 @@ export const VerificationReadinessCenter = ({
                 placeholder="Verifier Institution (e.g. SGS, Bureau Veritas)"
                 value={newInquiryVerifier}
                 onChange={(e) => setNewInquiryVerifier(e.target.value)}
-                className="text-xs p-2.5 rounded-xl border border-white/10 bg-black/30 text-white focus:outline-none focus:border-[#00C853]"
+                className="text-xs p-2.5 rounded-xl border border-white/10 bg-black/30 text-white focus:outline-none focus:border-legacy-brand-base"
               />
               <input
                 type="text"
                 placeholder="Technical Question or Data Clarification"
                 value={newInquiryQuestion}
                 onChange={(e) => setNewInquiryQuestion(e.target.value)}
-                className="text-xs p-2.5 rounded-xl border border-white/10 bg-black/30 text-white sm:col-span-2 focus:outline-none focus:border-[#00C853]"
+                className="text-xs p-2.5 rounded-xl border border-white/10 bg-black/30 text-white sm:col-span-2 focus:outline-none focus:border-legacy-brand-base"
               />
             </div>
             <button
@@ -641,7 +641,7 @@ export const VerificationReadinessCenter = ({
                 setNewInquiryVerifier('');
                 showToast('Verifier question registered in audit ledger', 'success');
               }}
-              className="bg-[#00C853] hover:bg-[#00E676] text-white font-mono font-bold text-xs py-2 px-4 rounded-xl transition-all cursor-pointer"
+              className="bg-legacy-brand-base hover:bg-legacy-brand-bright text-white font-mono font-bold text-xs py-2 px-4 rounded-xl transition-all cursor-pointer"
             >
               Add to Inquiry Register
             </button>
@@ -652,10 +652,10 @@ export const VerificationReadinessCenter = ({
       {/* -------------------- TAB 4: BASE YEAR RECALCULATION -------------------- */}
       {activeTab === 'baseyear' && (
         <div className={`rounded-3xl p-6 sm:p-8 border shadow-xl space-y-6 ${
-          isLight ? 'bg-white border-[#E2E8E3]' : 'bg-[#08130C] border-[#152B1D]'
+          isLight ? 'bg-white border-legacy-mint-24' : 'bg-legacy-surface-base border-legacy-divider-base'
         }`}>
           <div>
-            <div className="flex items-center space-x-2 text-[10px] font-mono uppercase tracking-widest text-[#00C853] font-bold">
+            <div className="flex items-center space-x-2 text-[10px] font-mono uppercase tracking-widest text-legacy-brand-base font-bold">
               <span>GHG Protocol Corporate Standard Chapter 5</span>
             </div>
             <h3 className="font-bold text-lg mt-0.5">Base Year Emissions Recalculation Policy</h3>
@@ -675,7 +675,7 @@ export const VerificationReadinessCenter = ({
                     value={baseYear}
                     onChange={(e) => setBaseYear(parseInt(e.target.value) || 2024)}
                     disabled={isAuditorLocked}
-                    className="w-full text-xs font-mono p-2.5 rounded-xl border border-white/10 bg-black/30 text-white focus:outline-none focus:border-[#00C853]"
+                    className="w-full text-xs font-mono p-2.5 rounded-xl border border-white/10 bg-black/30 text-white focus:outline-none focus:border-legacy-brand-base"
                   />
                 </div>
                 <div>
@@ -685,7 +685,7 @@ export const VerificationReadinessCenter = ({
                     value={baseYearEmissions}
                     onChange={(e) => setBaseYearEmissions(parseFloat(e.target.value) || 0)}
                     disabled={isAuditorLocked}
-                    className="w-full text-xs font-mono p-2.5 rounded-xl border border-white/10 bg-black/30 text-white focus:outline-none focus:border-[#00C853]"
+                    className="w-full text-xs font-mono p-2.5 rounded-xl border border-white/10 bg-black/30 text-white focus:outline-none focus:border-legacy-brand-base"
                   />
                 </div>
               </div>
@@ -698,7 +698,7 @@ export const VerificationReadinessCenter = ({
                   value={structuralChangeTco2e || ''}
                   onChange={(e) => setStructuralChangeTco2e(parseFloat(e.target.value) || 0)}
                   disabled={isAuditorLocked}
-                  className="w-full text-xs font-mono p-2.5 rounded-xl border border-white/10 bg-black/30 text-white focus:outline-none focus:border-[#00C853]"
+                  className="w-full text-xs font-mono p-2.5 rounded-xl border border-white/10 bg-black/30 text-white focus:outline-none focus:border-legacy-brand-base"
                 />
               </div>
 
@@ -709,7 +709,7 @@ export const VerificationReadinessCenter = ({
                   value={structuralChangeReason}
                   onChange={(e) => setStructuralChangeReason(e.target.value)}
                   disabled={isAuditorLocked}
-                  className="w-full text-xs font-sans p-2.5 rounded-xl border border-white/10 bg-black/30 text-white focus:outline-none focus:border-[#00C853]"
+                  className="w-full text-xs font-sans p-2.5 rounded-xl border border-white/10 bg-black/30 text-white focus:outline-none focus:border-legacy-brand-base"
                 />
               </div>
 
@@ -718,7 +718,7 @@ export const VerificationReadinessCenter = ({
                   showToast(`Base year ${baseYear} restated to ${baseYearRecalculation.adjustedTotal.toFixed(2)} tCO₂e in audit ledger`, 'success');
                 }}
                 disabled={isAuditorLocked}
-                className="w-full bg-[#00C853] hover:bg-[#00E676] disabled:bg-gray-700 text-white font-mono font-bold text-xs py-2.5 rounded-xl transition-all cursor-pointer"
+                className="w-full bg-legacy-brand-base hover:bg-legacy-brand-bright disabled:bg-gray-700 text-white font-mono font-bold text-xs py-2.5 rounded-xl transition-all cursor-pointer"
               >
                 Apply Baseline Restatement
               </button>
@@ -776,10 +776,10 @@ export const VerificationReadinessCenter = ({
       {/* -------------------- TAB 5: EU CBAM CUSTOMS EXPORT -------------------- */}
       {activeTab === 'cbam' && (
         <div className={`rounded-3xl p-6 sm:p-8 border shadow-xl space-y-6 ${
-          isLight ? 'bg-white border-[#E2E8E3]' : 'bg-[#08130C] border-[#152B1D]'
+          isLight ? 'bg-white border-legacy-mint-24' : 'bg-legacy-surface-base border-legacy-divider-base'
         }`}>
           <div>
-            <div className="flex items-center space-x-2 text-[10px] font-mono uppercase tracking-widest text-[#00C853] font-bold">
+            <div className="flex items-center space-x-2 text-[10px] font-mono uppercase tracking-widest text-legacy-brand-base font-bold">
               <span>EU Regulation 2023/956 Compliance</span>
             </div>
             <h3 className="font-bold text-lg mt-0.5">Carbon Border Adjustment Mechanism (CBAM) Customs Declarator</h3>
@@ -796,7 +796,7 @@ export const VerificationReadinessCenter = ({
                 <select
                   value={cbamSector}
                   onChange={(e) => setCbamSector(e.target.value)}
-                  className="w-full text-xs font-mono p-2.5 rounded-xl border border-white/10 bg-black/30 text-white focus:outline-none focus:border-[#00C853] cursor-pointer"
+                  className="w-full text-xs font-mono p-2.5 rounded-xl border border-white/10 bg-black/30 text-white focus:outline-none focus:border-legacy-brand-base cursor-pointer"
                 >
                   <option value="Jute & Polymer Composites">Jute, Geotextiles & Bio-Polymer Blends (HS 5307)</option>
                   <option value="Steel & Industrial Metals">Steel, Rebar & Fabricated Structural Steel (HS 7208)</option>
@@ -812,7 +812,7 @@ export const VerificationReadinessCenter = ({
                   type="number"
                   value={cbamExportTons}
                   onChange={(e) => setCbamExportTons(parseFloat(e.target.value) || 0)}
-                  className="w-full text-xs font-mono p-2.5 rounded-xl border border-white/10 bg-black/30 text-white focus:outline-none focus:border-[#00C853]"
+                  className="w-full text-xs font-mono p-2.5 rounded-xl border border-white/10 bg-black/30 text-white focus:outline-none focus:border-legacy-brand-base"
                 />
               </div>
 
@@ -830,7 +830,7 @@ export const VerificationReadinessCenter = ({
                 onClick={() => {
                   showToast(`CBAM customs XML/JSON declaration exported for ${cbamExportTons} MT of ${cbamSector}`, 'success');
                 }}
-                className="w-full bg-[#00C853] hover:bg-[#00E676] text-white font-mono font-bold text-xs py-2.5 rounded-xl transition-all shadow-md flex items-center justify-center space-x-2 cursor-pointer"
+                className="w-full bg-legacy-brand-base hover:bg-legacy-brand-bright text-white font-mono font-bold text-xs py-2.5 rounded-xl transition-all shadow-md flex items-center justify-center space-x-2 cursor-pointer"
               >
                 <Download className="w-4 h-4 text-white" />
                 <span>Download CBAM XML Registry Packet</span>
@@ -877,11 +877,11 @@ export const VerificationReadinessCenter = ({
       {/* -------------------- TAB 6: ATTESTATION STATEMENT -------------------- */}
       {activeTab === 'signoff' && (
         <div className={`rounded-3xl p-6 sm:p-8 border shadow-xl space-y-6 ${
-          isLight ? 'bg-white border-[#E2E8E3]' : 'bg-[#08130C] border-[#152B1D]'
+          isLight ? 'bg-white border-legacy-mint-24' : 'bg-legacy-surface-base border-legacy-divider-base'
         }`}>
           <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
             <div>
-              <div className="flex items-center space-x-2 text-[10px] font-mono uppercase tracking-widest text-[#00C853] font-bold">
+              <div className="flex items-center space-x-2 text-[10px] font-mono uppercase tracking-widest text-legacy-brand-base font-bold">
                 <Award className="w-4 h-4" />
                 <span>Third-Party Verification Opinion Document</span>
               </div>
@@ -900,7 +900,7 @@ export const VerificationReadinessCenter = ({
 
               <button
                 onClick={() => showToast('Formal assurance letter printed to PDF with sovereign digital signature', 'success')}
-                className="bg-[#00C853] hover:bg-[#00E676] text-white text-xs px-4 py-2 rounded-xl font-mono font-bold flex items-center space-x-1.5 cursor-pointer"
+                className="bg-legacy-brand-base hover:bg-legacy-brand-bright text-white text-xs px-4 py-2 rounded-xl font-mono font-bold flex items-center space-x-1.5 cursor-pointer"
               >
                 <Download className="w-3.5 h-3.5 text-white" />
                 <span>Export Official PDF</span>

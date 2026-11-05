@@ -234,43 +234,42 @@ select option {
 /* ===== LIGHT THEME GLOBAL OVERRIDES ===== */
 
 /* 
- * Tailwind JIT generates classes like bg-[#080F0B] which renders as 
- * class="bg-[#080F0B]" in the DOM. We use attribute selectors to match these.
+ * Retain light-theme overrides for the shared legacy palette.
  */
 
 /* ---- SECTION / CONTAINER BACKGROUNDS ---- */
-[data-theme="light"] [class*="bg-[#080F0B]"],
-[data-theme="light"] [class*="bg-[#040A06]"],
-[data-theme="light"] [class*="bg-[#040906]"],
-[data-theme="light"] [class*="bg-[#030805]"],
-[data-theme="light"] [class*="bg-[#050C07]"],
+[data-theme="light"] [class*="bg-legacy-canvas-base"],
+[data-theme="light"] [class*="bg-legacy-canvas-night"],
+[data-theme="light"] [class*="bg-legacy-canvas-deep"],
+[data-theme="light"] [class*="bg-legacy-forest-82"],
+[data-theme="light"] [class*="bg-legacy-forest-80"],
 [data-theme="light"] [class*="bg-[#020503]"],
-[data-theme="light"] [class*="bg-[#060D08]"],
-[data-theme="light"] [class*="bg-[#061009]"],
+[data-theme="light"] [class*="bg-legacy-forest-78"],
+[data-theme="light"] [class*="bg-legacy-forest-76"],
 [data-theme="light"] [class*="bg-[#07150C]"] {
   background-color: #f2f3ee !important; /* Linen canvas */
 }
-[data-theme="light"] [class*="bg-[#0D2B1A]"],
-[data-theme="light"] [class*="bg-[#152B1D]"],
-[data-theme="light"] [class*="bg-[#173020]"],
-[data-theme="light"] [class*="bg-[#1A3A28]"],
-[data-theme="light"] [class*="bg-[#1A4B31]"],
+[data-theme="light"] [class*="bg-legacy-surface-raised"],
+[data-theme="light"] [class*="bg-legacy-divider-base"],
+[data-theme="light"] [class*="bg-legacy-forest-32"],
+[data-theme="light"] [class*="bg-legacy-forest-23"],
+[data-theme="light"] [class*="bg-legacy-forest-15"],
 [data-theme="light"] [class*="bg-[#1C4E34]"],
-[data-theme="light"] [class*="bg-[#1D4A2F]"],
+[data-theme="light"] [class*="bg-legacy-forest-13"],
 [data-theme="light"] [class*="bg-[#1F3D29]"] {
   background-color: #dbf0ea !important; /* Mint strong container */
 }
-[data-theme="light"] [class*="bg-[#0A1F13]"],
-[data-theme="light"] [class*="bg-[#0A160F]"],
-[data-theme="light"] [class*="bg-[#0A1D12]"],
+[data-theme="light"] [class*="bg-legacy-forest-54"],
+[data-theme="light"] [class*="bg-legacy-forest-62"],
+[data-theme="light"] [class*="bg-legacy-forest-55"],
 [data-theme="light"] [class*="bg-[#0B1510]"],
 [data-theme="light"] [class*="bg-[#0D1F14]"],
-[data-theme="light"] [class*="bg-[#0D2214]"],
-[data-theme="light"] [class*="bg-[#0F2417]"],
-[data-theme="light"] [class*="bg-[#0F291B]"],
-[data-theme="light"] [class*="bg-[#0d1c13]"],
-[data-theme="light"] [class*="bg-[#08130C]"],
-[data-theme="light"] [class*="bg-[#0B170F]"] {
+[data-theme="light"] [class*="bg-legacy-forest-47"],
+[data-theme="light"] [class*="bg-legacy-forest-43"],
+[data-theme="light"] [class*="bg-legacy-ink-forest"],
+[data-theme="light"] [class*="bg-legacy-forest-53"],
+[data-theme="light"] [class*="bg-legacy-surface-base"],
+[data-theme="light"] [class*="bg-legacy-forest-60"] {
   background-color: #ffffff !important; /* Crisp white card surface */
   border-color: #dbf0ea !important;
 }
@@ -311,7 +310,7 @@ select option {
   box-shadow: 0 4px 25px rgba(4, 18, 38, 0.06) !important;
 }
 
-[data-theme="light"] nav a[class*="bg-[#0A1F13]"] {
+[data-theme="light"] nav a[class*="bg-legacy-forest-54"] {
   background-color: #15803d !important; /* Forest Emerald CTA */
   color: #ffffff !important; /* White tertiary text */
   border-color: #dbf0ea !important;
@@ -319,21 +318,21 @@ select option {
 
 /* ---- TEXT COLORS ---- */
 [data-theme="light"] .text-white,
-[data-theme="light"] [class*="text-[#E0EFE7]"],
-[data-theme="light"] [class*="text-[#F0F4F1]"],
-[data-theme="light"] [class*="text-[#F0F4F1]/"],
-[data-theme="light"] [class*="text-[#E0EFE7]/"] {
+[data-theme="light"] [class*="text-legacy-text-on-dark-soft"],
+[data-theme="light"] [class*="text-legacy-text-on-dark-base"],
+[data-theme="light"] [class*="text-legacy-text-on-dark-base/"],
+[data-theme="light"] [class*="text-legacy-text-on-dark-soft/"] {
   color: #181414 !important; /* Deep crisp inverse black for headings */
 }
 [data-theme="light"] [class*="text-white/9"],
 [data-theme="light"] [class*="text-white/8"],
-[data-theme="light"] [class*="text-[#7C9A88]"] {
+[data-theme="light"] [class*="text-legacy-text-muted"] {
   color: #413f3f !important; /* Charcoal primary text */
 }
 [data-theme="light"] [class*="text-white/7"],
 [data-theme="light"] [class*="text-white/6"],
 [data-theme="light"] [class*="text-white/5"],
-[data-theme="light"] [class*="text-[#557361]"] {
+[data-theme="light"] [class*="text-legacy-text-quiet"] {
   color: rgba(65, 63, 63, 0.75) !important; /* Muted Charcoal */
 }
 [data-theme="light"] [class*="text-white/4"],
@@ -354,8 +353,8 @@ select option {
 [data-theme="light"] .text-carbon { color: #181414 !important; }
 
 /* Accessible Accent Text in Light Mode (WCAG AA Compliant) */
-[data-theme="light"] [class*="text-[#4ADE80]"],
-[data-theme="light"] [class*="text-[#00C853]"],
+[data-theme="light"] [class*="text-legacy-green-400"],
+[data-theme="light"] [class*="text-legacy-brand-base"],
 [data-theme="light"] [class*="text-emerald-400"],
 [data-theme="light"] [class*="text-emerald-300"],
 [data-theme="light"] [class*="text-emerald-500"] {
@@ -364,7 +363,7 @@ select option {
 
 [data-theme="light"] [class*="text-amber-400"],
 [data-theme="light"] [class*="text-amber-300"],
-[data-theme="light"] [class*="text-[#FFB300]"],
+[data-theme="light"] [class*="text-legacy-amber-signal"],
 [data-theme="light"] [class*="text-orange-400"] {
   color: #b45309 !important; /* Deep amber */
 }
@@ -376,15 +375,15 @@ select option {
   color: #0369a1 !important; /* Deep ocean blue */
 }
 
-[data-theme="light"] [class*="text-[#EF4444]"],
+[data-theme="light"] [class*="text-legacy-red-500"],
 [data-theme="light"] [class*="text-rose-400"],
 [data-theme="light"] [class*="text-rose-500"] {
   color: #b91c1c !important; /* Deep red */
 }
 
 /* Keep emphasized headings readable against the light surface. */
-[data-theme="light"] .serif-drama[class*="from-[#00C853]"],
-[data-theme="light"] [class*="serif-drama"][class*="from-[#00C853]"] {
+[data-theme="light"] .serif-drama[class*="from-legacy-brand-base"],
+[data-theme="light"] [class*="serif-drama"][class*="from-legacy-brand-base"] {
   background-image: none !important;
   color: #15803d !important;
 }
@@ -411,48 +410,48 @@ select option {
   border-color: #dbf0ea !important; /* Mint strong surface */
 }
 [data-theme="light"] [class*="border-emerald/"],
-[data-theme="light"] [class*="border-[#00C853]"],
-[data-theme="light"] [class*="border-[#1B4D2E]"] {
+[data-theme="light"] [class*="border-legacy-brand-base"],
+[data-theme="light"] [class*="border-legacy-forest-11"] {
   border-color: #15803d !important; /* Forest Emerald */
 }
-[data-theme="light"] [class*="border-[#122418]"],
-[data-theme="light"] [class*="border-[#152B1D]"],
-[data-theme="light"] [class*="border-[#173020]"],
-[data-theme="light"] [class*="border-[#183021]"] {
+[data-theme="light"] [class*="border-legacy-forest-38"],
+[data-theme="light"] [class*="border-legacy-divider-base"],
+[data-theme="light"] [class*="border-legacy-forest-32"],
+[data-theme="light"] [class*="border-legacy-forest-31"] {
   border-color: #dbf0ea !important; /* Mint strong surface */
 }
 
 /* ---- BUTTONS & ACCENTS ---- */
-[data-theme="light"] button[class*="bg-[#00C853]"],
-[data-theme="light"] a[class*="bg-[#00C853]"],
-[data-theme="light"] [class*="bg-[#00C853]"]:not(span):not(div):not(nav),
+[data-theme="light"] button[class*="bg-legacy-brand-base"],
+[data-theme="light"] a[class*="bg-legacy-brand-base"],
+[data-theme="light"] [class*="bg-legacy-brand-base"]:not(span):not(div):not(nav),
 [data-theme="light"] button[class*="bg-emerald"],
 [data-theme="light"] a[class*="bg-emerald"],
-[data-theme="light"] button[class*="bg-[#15803d]"],
-[data-theme="light"] a[class*="bg-[#15803d]"],
-[data-theme="light"] button[class*="bg-[#0A1F13]"],
-[data-theme="light"] a[class*="bg-[#0A1F13]"],
-[data-theme="light"] button[class*="bg-[#0D2B1A]"]:not(.platform-saas-dashboard aside button),
+[data-theme="light"] button[class*="bg-legacy-green-700"],
+[data-theme="light"] a[class*="bg-legacy-green-700"],
+[data-theme="light"] button[class*="bg-legacy-forest-54"],
+[data-theme="light"] a[class*="bg-legacy-forest-54"],
+[data-theme="light"] button[class*="bg-legacy-surface-raised"]:not(.platform-saas-dashboard aside button),
 [data-theme="light"] button[class*="bg-black"],
 [data-theme="light"] a[class*="bg-black"],
 [data-theme="light"] button[class*="bg-carbon"],
 [data-theme="light"] a[class*="bg-carbon"],
-[data-theme="light"] button[class*="bg-[#EF4444]"],
-[data-theme="light"] a[class*="bg-[#EF4444]"],
+[data-theme="light"] button[class*="bg-legacy-red-500"],
+[data-theme="light"] a[class*="bg-legacy-red-500"],
 [data-theme="light"] .btn-primary,
 [data-theme="light"] .btn-magnetic {
   background-color: #15803d !important; /* Forest Emerald */
   color: #ffffff !important; /* Crisp white button text */
 }
 
-[data-theme="light"] button[class*="bg-[#00C853]"] *,
-[data-theme="light"] a[class*="bg-[#00C853]"] *,
+[data-theme="light"] button[class*="bg-legacy-brand-base"] *,
+[data-theme="light"] a[class*="bg-legacy-brand-base"] *,
 [data-theme="light"] button[class*="bg-emerald"] *,
 [data-theme="light"] a[class*="bg-emerald"] *,
-[data-theme="light"] button[class*="bg-[#15803d]"] *,
-[data-theme="light"] a[class*="bg-[#15803d]"] *,
-[data-theme="light"] button[class*="bg-[#0A1F13]"] *,
-[data-theme="light"] a[class*="bg-[#0A1F13]"] *,
+[data-theme="light"] button[class*="bg-legacy-green-700"] *,
+[data-theme="light"] a[class*="bg-legacy-green-700"] *,
+[data-theme="light"] button[class*="bg-legacy-forest-54"] *,
+[data-theme="light"] a[class*="bg-legacy-forest-54"] *,
 [data-theme="light"] button[class*="bg-black"] *,
 [data-theme="light"] a[class*="bg-black"] *,
 [data-theme="light"] button[class*="bg-carbon"] *,
@@ -462,11 +461,11 @@ select option {
   color: #ffffff !important;
 }
 
-[data-theme="light"] button[class*="bg-[#00C853]"]:hover,
-[data-theme="light"] a[class*="bg-[#00C853]"]:hover,
+[data-theme="light"] button[class*="bg-legacy-brand-base"]:hover,
+[data-theme="light"] a[class*="bg-legacy-brand-base"]:hover,
 [data-theme="light"] button[class*="bg-emerald"]:hover,
 [data-theme="light"] a[class*="bg-emerald"]:hover,
-[data-theme="light"] [class*="hover:bg-[#00E676]"]:hover,
+[data-theme="light"] [class*="hover:bg-legacy-brand-bright"]:hover,
 [data-theme="light"] .btn-primary:hover,
 [data-theme="light"] .btn-magnetic:hover {
   background-color: #166534 !important;
@@ -514,28 +513,28 @@ select option {
 [data-theme="light"] .drop-shadow-sm { filter: drop-shadow(0 1px 2px rgba(4, 18, 38, 0.04)) !important; }
 
 /* ---- GRADIENT OVERRIDES ---- */
-[data-theme="light"] [class*="from-[#040A06]"],
-[data-theme="light"] [class*="from-[#080F0B]"],
-[data-theme="light"] [class*="from-[#040906]"],
-[data-theme="light"] [class*="from-[#030805]"],
-[data-theme="light"] [class*="from-[#050C07]"],
-[data-theme="light"] [class*="from-[#0D2818]"] {
+[data-theme="light"] [class*="from-legacy-canvas-night"],
+[data-theme="light"] [class*="from-legacy-canvas-base"],
+[data-theme="light"] [class*="from-legacy-canvas-deep"],
+[data-theme="light"] [class*="from-legacy-forest-82"],
+[data-theme="light"] [class*="from-legacy-forest-80"],
+[data-theme="light"] [class*="from-legacy-forest-40"] {
   --tw-gradient-from: #f2f3ee !important;
 }
-[data-theme="light"] [class*="via-[#040A06]"],
-[data-theme="light"] [class*="via-[#080F0B]"],
-[data-theme="light"] [class*="via-[#040906]"],
-[data-theme="light"] [class*="via-[#030805]"],
-[data-theme="light"] [class*="via-[#050C07]"] {
+[data-theme="light"] [class*="via-legacy-canvas-night"],
+[data-theme="light"] [class*="via-legacy-canvas-base"],
+[data-theme="light"] [class*="via-legacy-canvas-deep"],
+[data-theme="light"] [class*="via-legacy-forest-82"],
+[data-theme="light"] [class*="via-legacy-forest-80"] {
   --tw-gradient-stops: var(--tw-gradient-from), rgba(242, 243, 238, 0.85), var(--tw-gradient-to) !important;
 }
-[data-theme="light"] [class*="to-[#040A06]"],
-[data-theme="light"] [class*="to-[#080F0B]"],
-[data-theme="light"] [class*="to-[#040906]"],
-[data-theme="light"] [class*="to-[#030805]"],
-[data-theme="light"] [class*="to-[#050C07]"],
-[data-theme="light"] [class*="to-[#08150D]"],
-[data-theme="light"] [class*="to-[#0A1F13]"] {
+[data-theme="light"] [class*="to-legacy-canvas-night"],
+[data-theme="light"] [class*="to-legacy-canvas-base"],
+[data-theme="light"] [class*="to-legacy-canvas-deep"],
+[data-theme="light"] [class*="to-legacy-forest-82"],
+[data-theme="light"] [class*="to-legacy-forest-80"],
+[data-theme="light"] [class*="to-legacy-forest-66"],
+[data-theme="light"] [class*="to-legacy-forest-54"] {
   --tw-gradient-to: rgba(242, 243, 238, 0.98) !important;
 }
 
@@ -551,7 +550,7 @@ select option {
 }
 
 /* ---- HERO OVERLAYS in light mode ---- */
-[data-theme="light"] [class*="bg-gradient-to-b"][class*="from-[#080F0B]"] {
+[data-theme="light"] [class*="bg-gradient-to-b"][class*="from-legacy-canvas-base"] {
   background: linear-gradient(to bottom, rgba(230, 245, 226, 0.4), transparent, rgba(230, 245, 226, 0.95)) !important;
 }
 
@@ -765,8 +764,8 @@ select option {
 [data-theme="dark"] [class*="text-white/40"],
 [data-theme="dark"] [class*="text-white/30"],
 [data-theme="dark"] [class*="text-mist/40"],
-[data-theme="dark"] [class*="text-[#557361]"],
-[data-theme="dark"] [class*="text-[#7C9A88]"] {
+[data-theme="dark"] [class*="text-legacy-text-quiet"],
+[data-theme="dark"] [class*="text-legacy-text-muted"] {
   color: #99B7A5 !important; /* Sage tone with 6.2:1 contrast against #080F0B */
 }
 
@@ -784,7 +783,7 @@ select option {
 }
 
 /* Text Colors */
-[data-theme="dark"] .platform-saas-dashboard .text-\[\#0F291B\],
+[data-theme="dark"] .platform-saas-dashboard .text-legacy-ink-forest,
 [data-theme="dark"] .platform-saas-dashboard h1,
 [data-theme="dark"] .platform-saas-dashboard h2,
 [data-theme="dark"] .platform-saas-dashboard h3,
@@ -793,59 +792,59 @@ select option {
   color: #ffffff !important;
 }
 
-[data-theme="dark"] .platform-saas-dashboard .text-\[\#1E293B\] {
+[data-theme="dark"] .platform-saas-dashboard .text-legacy-slate-800 {
   color: #F0F4F1 !important;
 }
 
-[data-theme="dark"] .platform-saas-dashboard .text-\[\#64748B\],
-[data-theme="dark"] .platform-saas-dashboard .text-\[\#94A3B8\],
+[data-theme="dark"] .platform-saas-dashboard .text-legacy-slate-500,
+[data-theme="dark"] .platform-saas-dashboard .text-legacy-slate-400,
 [data-theme="dark"] .platform-saas-dashboard p:not(button *),
-[data-theme="dark"] .platform-saas-dashboard span:not(.text-emerald):not(.text-\[\#EF4444\]):not(.text-rose-500):not(.text-white):not([class*="text-white"]):not(button *):not([class*="text-[#00C853]"]):not([class*="text-[#00E676]"]) {
+[data-theme="dark"] .platform-saas-dashboard span:not(.text-emerald):not(.text-legacy-red-500):not(.text-rose-500):not(.text-white):not([class*="text-white"]):not(button *):not([class*="text-legacy-brand-base"]):not([class*="text-legacy-brand-bright"]) {
   color: #B2C4B8 !important;
 }
 
 /* High-Contrast Action Buttons matching Reference Image 2: #00C853 background with pure #FFFFFF text */
-.platform-saas-dashboard button[class*="bg-[#00C853]"],
-.platform-saas-dashboard button[class*="bg-[#00c853]"],
-.platform-saas-dashboard a[class*="bg-[#00C853]"],
+.platform-saas-dashboard button[class*="bg-legacy-brand-base"],
+.platform-saas-dashboard button[class*="bg-legacy-brand-base"],
+.platform-saas-dashboard a[class*="bg-legacy-brand-base"],
 .platform-saas-dashboard .btn-action-primary {
   background-color: #00C853 !important;
   color: #ffffff !important;
   font-weight: 700 !important;
 }
 
-.platform-saas-dashboard button[class*="bg-[#00C853]"] *,
-.platform-saas-dashboard button[class*="bg-[#00c853]"] *,
-.platform-saas-dashboard a[class*="bg-[#00C853]"] *,
+.platform-saas-dashboard button[class*="bg-legacy-brand-base"] *,
+.platform-saas-dashboard button[class*="bg-legacy-brand-base"] *,
+.platform-saas-dashboard a[class*="bg-legacy-brand-base"] *,
 .platform-saas-dashboard .btn-action-primary * {
   color: #ffffff !important;
   stroke: #ffffff !important;
 }
 
-.platform-saas-dashboard button[class*="bg-[#00C853]"]:hover,
-.platform-saas-dashboard button[class*="bg-[#00c853]"]:hover,
-.platform-saas-dashboard a[class*="bg-[#00C853]"]:hover,
+.platform-saas-dashboard button[class*="bg-legacy-brand-base"]:hover,
+.platform-saas-dashboard button[class*="bg-legacy-brand-base"]:hover,
+.platform-saas-dashboard a[class*="bg-legacy-brand-base"]:hover,
 .platform-saas-dashboard .btn-action-primary:hover {
   background-color: #00E676 !important;
   color: #ffffff !important;
 }
 
-.platform-saas-dashboard button[class*="bg-[#00C853]"]:hover *,
-.platform-saas-dashboard button[class*="bg-[#00c853]"]:hover *,
-.platform-saas-dashboard a[class*="bg-[#00C853]"]:hover *,
+.platform-saas-dashboard button[class*="bg-legacy-brand-base"]:hover *,
+.platform-saas-dashboard button[class*="bg-legacy-brand-base"]:hover *,
+.platform-saas-dashboard a[class*="bg-legacy-brand-base"]:hover *,
 .platform-saas-dashboard .btn-action-primary:hover * {
   color: #ffffff !important;
   stroke: #ffffff !important;
 }
 
 /* Borders and lines */
-[data-theme="dark"] .platform-saas-dashboard .border-\[\#E2E8F0\],
-[data-theme="dark"] .platform-saas-dashboard .border-\[\#F1F5F9\] {
+[data-theme="dark"] .platform-saas-dashboard .border-legacy-slate-200,
+[data-theme="dark"] .platform-saas-dashboard .border-legacy-slate-100 {
   border-color: rgba(255, 255, 255, 0.08) !important;
 }
 
 /* Active links / badges */
-[data-theme="dark"] .platform-saas-dashboard [class*="bg-\[\#F1F5F9\]"] {
+[data-theme="dark"] .platform-saas-dashboard [class*="bg-legacy-slate-100"] {
   background-color: rgba(0, 200, 83, 0.12) !important;
 }
 
@@ -853,7 +852,7 @@ select option {
 [data-theme="dark"] .platform-saas-dashboard input,
 [data-theme="dark"] .platform-saas-dashboard select,
 [data-theme="dark"] .platform-saas-dashboard textarea,
-[data-theme="dark"] .platform-saas-dashboard [class*="bg-\[\#F8F9FA\]"] {
+[data-theme="dark"] .platform-saas-dashboard [class*="bg-legacy-surface-light-input"] {
   background-color: rgba(13, 43, 26, 0.35) !important;
   color: #ffffff !important;
   border-color: rgba(0, 200, 83, 0.2) !important;
@@ -865,15 +864,15 @@ select option {
 }
 
 /* Specific elements */
-[data-theme="dark"] .platform-saas-dashboard .text-\[\#EF4444\],
+[data-theme="dark"] .platform-saas-dashboard .text-legacy-red-500,
 [data-theme="dark"] .platform-saas-dashboard .text-rose-500 {
   color: #EF4444 !important;
 }
-[data-theme="dark"] .platform-saas-dashboard .text-\[\#EF4444\]\/10 {
+[data-theme="dark"] .platform-saas-dashboard .text-legacy-red-500\/10 {
   background-color: rgba(239, 68, 68, 0.1) !important;
 }
 [data-theme="dark"] .platform-saas-dashboard .text-emerald,
-[data-theme="dark"] .platform-saas-dashboard .text-\[\#4ADE80\] {
+[data-theme="dark"] .platform-saas-dashboard .text-legacy-green-400 {
   color: #00C853 !important;
 }
 
@@ -891,16 +890,16 @@ select option {
   box-shadow: 0 4px 20px rgba(4, 18, 38, 0.04) !important;
 }
 
-[data-theme="light"] .platform-saas-dashboard [class*="bg-[#08130C]"],
-[data-theme="light"] .platform-saas-dashboard [class*="bg-[#060D08]"],
-[data-theme="light"] .platform-saas-dashboard [class*="bg-[#0A1D12]"],
-[data-theme="light"] .platform-saas-dashboard [class*="bg-[#0A160F]"],
-[data-theme="light"] .platform-saas-dashboard [class*="bg-[#0B170F]"],
+[data-theme="light"] .platform-saas-dashboard [class*="bg-legacy-surface-base"],
+[data-theme="light"] .platform-saas-dashboard [class*="bg-legacy-forest-78"],
+[data-theme="light"] .platform-saas-dashboard [class*="bg-legacy-forest-55"],
+[data-theme="light"] .platform-saas-dashboard [class*="bg-legacy-forest-62"],
+[data-theme="light"] .platform-saas-dashboard [class*="bg-legacy-forest-60"],
 [data-theme="light"] .platform-saas-dashboard [class*="bg-[#0D1F14]"],
-[data-theme="light"] .platform-saas-dashboard [class*="bg-[#040906]"],
-[data-theme="light"] .platform-saas-dashboard [class*="bg-[#0F291B]"],
-[data-theme="light"] .platform-saas-dashboard [class*="from-[#0D2B1A]"],
-[data-theme="light"] .platform-saas-dashboard [class*="from-[#080F0B]"],
+[data-theme="light"] .platform-saas-dashboard [class*="bg-legacy-canvas-deep"],
+[data-theme="light"] .platform-saas-dashboard [class*="bg-legacy-ink-forest"],
+[data-theme="light"] .platform-saas-dashboard [class*="from-legacy-surface-raised"],
+[data-theme="light"] .platform-saas-dashboard [class*="from-legacy-canvas-base"],
 [data-theme="light"] .platform-saas-dashboard [class*="bg-gradient-to-br"],
 [data-theme="light"] .platform-saas-dashboard .bg-white {
   background: #ffffff !important;
@@ -915,47 +914,47 @@ select option {
 [data-theme="light"] .platform-saas-dashboard h4,
 [data-theme="light"] .platform-saas-dashboard strong,
 [data-theme="light"] .platform-saas-dashboard .text-white,
-[data-theme="light"] .platform-saas-dashboard .text-\[\#E0EFE7\] {
+[data-theme="light"] .platform-saas-dashboard .text-legacy-text-on-dark-soft {
   color: #181414 !important; /* Deep crisp inverse black for headings */
 }
 
 [data-theme="light"] .platform-saas-dashboard p,
-[data-theme="light"] .platform-saas-dashboard .text-\[\#7C9A88\],
-[data-theme="light"] .platform-saas-dashboard .text-\[\#557361\],
+[data-theme="light"] .platform-saas-dashboard .text-legacy-text-muted,
+[data-theme="light"] .platform-saas-dashboard .text-legacy-text-quiet,
 [data-theme="light"] .platform-saas-dashboard span:not([class*="text-"]):not(.text-white) {
   color: #413f3f !important; /* Charcoal primary text */
 }
 
 /* Active navigation buttons in sidebar */
-[data-theme="light"] .platform-saas-dashboard aside button[class*="bg-[#0D2B1A]"] {
+[data-theme="light"] .platform-saas-dashboard aside button[class*="bg-legacy-surface-raised"] {
   background-color: #dbf0ea !important; /* Mint strong surface */
   color: #181414 !important; /* Deep black text */
   border-color: #15803d !important; /* Forest emerald accent border */
 }
 
-[data-theme="light"] .platform-saas-dashboard aside button:not([class*="bg-[#0D2B1A]"]) {
+[data-theme="light"] .platform-saas-dashboard aside button:not([class*="bg-legacy-surface-raised"]) {
   color: #413f3f !important; /* Charcoal primary text */
 }
 
-[data-theme="light"] .platform-saas-dashboard aside button:not([class*="bg-[#0D2B1A]"]):hover {
+[data-theme="light"] .platform-saas-dashboard aside button:not([class*="bg-legacy-surface-raised"]):hover {
   background-color: #f2f3ee !important; /* Linen canvas hover */
   color: #181414 !important; /* Deep black */
 }
 
 /* Badges, Pills and Small Accent Containers */
-[data-theme="light"] .platform-saas-dashboard [class*="bg-[#0D2B1A]"]:not(aside button) {
+[data-theme="light"] .platform-saas-dashboard [class*="bg-legacy-surface-raised"]:not(aside button) {
   background-color: #dbf0ea !important; /* Mint strong container */
   border-color: #dbf0ea !important;
   color: #181414 !important; /* Deep black */
 }
 
-[data-theme="light"] .platform-saas-dashboard [class*="from-[#0D2B1A]"],
+[data-theme="light"] .platform-saas-dashboard [class*="from-legacy-surface-raised"],
 [data-theme="light"] .platform-saas-dashboard [class*="bg-gradient-to-br"] {
   color: #413f3f;
 }
 
-[data-theme="light"] .platform-saas-dashboard [class*="text-[#A7F3D0]"],
-[data-theme="light"] .platform-saas-dashboard [class*="text-[#4ADE80]"],
+[data-theme="light"] .platform-saas-dashboard [class*="text-legacy-emerald-200"],
+[data-theme="light"] .platform-saas-dashboard [class*="text-legacy-green-400"],
 [data-theme="light"] .platform-saas-dashboard [class*="text-emerald"],
 [data-theme="light"] .platform-saas-dashboard [class*="text-emerald-400"],
 [data-theme="light"] .platform-saas-dashboard [class*="text-emerald-500"] {
@@ -963,7 +962,7 @@ select option {
 }
 
 [data-theme="light"] .platform-saas-dashboard [class*="text-amber-400"],
-[data-theme="light"] .platform-saas-dashboard [class*="text-[#FFB300]"],
+[data-theme="light"] .platform-saas-dashboard [class*="text-legacy-amber-signal"],
 [data-theme="light"] .platform-saas-dashboard [class*="text-orange-400"] {
   color: #b45309 !important; /* Deep amber */
 }
@@ -974,7 +973,7 @@ select option {
   color: #0369a1 !important; /* Deep ocean */
 }
 
-[data-theme="light"] .platform-saas-dashboard [class*="text-[#EF4444]"],
+[data-theme="light"] .platform-saas-dashboard [class*="text-legacy-red-500"],
 [data-theme="light"] .platform-saas-dashboard [class*="text-rose-500"] {
   color: #b91c1c !important; /* Deep red */
 }
@@ -995,15 +994,15 @@ select option {
 }
 
 /* Borders and lines */
-[data-theme="light"] .platform-saas-dashboard [class*="border-[#1"],
-[data-theme="light"] .platform-saas-dashboard .border-\[\#122418\],
-[data-theme="light"] .platform-saas-dashboard .border-\[\#152B1D\],
-[data-theme="light"] .platform-saas-dashboard .border-\[\#173020\],
-[data-theme="light"] .platform-saas-dashboard .border-\[\#183021\],
-[data-theme="light"] .platform-saas-dashboard .border-\[\#1B4D2E\],
-[data-theme="light"] .platform-saas-dashboard .border-\[\#1B3B26\],
-[data-theme="light"] .platform-saas-dashboard .border-\[\#E2E8F0\],
-[data-theme="light"] .platform-saas-dashboard .border-\[\#F1F5F9\] {
+[data-theme="light"] .platform-saas-dashboard :is([class*="border-legacy-divider-base"], [class*="border-legacy-forest-10"], [class*="border-legacy-forest-11"], [class*="border-legacy-forest-12"], [class*="border-legacy-forest-16"], [class*="border-legacy-forest-17"], [class*="border-legacy-forest-18"], [class*="border-legacy-forest-19"], [class*="border-legacy-forest-20"], [class*="border-legacy-forest-22"], [class*="border-legacy-forest-24"], [class*="border-legacy-forest-25"], [class*="border-legacy-forest-26"], [class*="border-legacy-forest-27"], [class*="border-legacy-forest-28"], [class*="border-legacy-forest-29"], [class*="border-legacy-forest-31"], [class*="border-legacy-forest-32"], [class*="border-legacy-forest-33"], [class*="border-legacy-forest-34"], [class*="border-legacy-forest-35"], [class*="border-legacy-forest-37"], [class*="border-legacy-forest-38"], [class*="border-legacy-green-600"], [class*="border-legacy-teal-900"]),
+[data-theme="light"] .platform-saas-dashboard .border-legacy-forest-38,
+[data-theme="light"] .platform-saas-dashboard .border-legacy-divider-base,
+[data-theme="light"] .platform-saas-dashboard .border-legacy-forest-32,
+[data-theme="light"] .platform-saas-dashboard .border-legacy-forest-31,
+[data-theme="light"] .platform-saas-dashboard .border-legacy-forest-11,
+[data-theme="light"] .platform-saas-dashboard .border-legacy-forest-22,
+[data-theme="light"] .platform-saas-dashboard .border-legacy-slate-200,
+[data-theme="light"] .platform-saas-dashboard .border-legacy-slate-100 {
   border-color: #dbf0ea !important; /* Mint strong surface */
 }
 
@@ -1011,7 +1010,7 @@ select option {
 [data-theme="light"] .platform-saas-dashboard input,
 [data-theme="light"] .platform-saas-dashboard select,
 [data-theme="light"] .platform-saas-dashboard textarea,
-[data-theme="light"] .platform-saas-dashboard [class*="bg-[#F8F9FA]"] {
+[data-theme="light"] .platform-saas-dashboard [class*="bg-legacy-surface-light-input"] {
   background-color: #ffffff !important;
   color: #413f3f !important; /* Charcoal primary text */
   border-color: #dbf0ea !important; /* Mint strong surface */
@@ -1025,30 +1024,30 @@ select option {
 }
 
 /* Action Buttons */
-[data-theme="light"] .platform-saas-dashboard button[class*="bg-[#00C853]"],
-[data-theme="light"] .platform-saas-dashboard a[class*="bg-[#00C853]"],
-[data-theme="light"] .platform-saas-dashboard [class*="bg-[#00C853]"]:not(span):not(div),
+[data-theme="light"] .platform-saas-dashboard button[class*="bg-legacy-brand-base"],
+[data-theme="light"] .platform-saas-dashboard a[class*="bg-legacy-brand-base"],
+[data-theme="light"] .platform-saas-dashboard [class*="bg-legacy-brand-base"]:not(span):not(div),
 [data-theme="light"] .platform-saas-dashboard button[class*="bg-emerald"],
 [data-theme="light"] .platform-saas-dashboard a[class*="bg-emerald"],
-[data-theme="light"] .platform-saas-dashboard button[class*="bg-[#15803d]"],
-[data-theme="light"] .platform-saas-dashboard a[class*="bg-[#15803d]"] {
+[data-theme="light"] .platform-saas-dashboard button[class*="bg-legacy-green-700"],
+[data-theme="light"] .platform-saas-dashboard a[class*="bg-legacy-green-700"] {
   background-color: #15803d !important; /* Forest emerald */
   color: #ffffff !important; /* White tertiary text */
 }
 
-[data-theme="light"] .platform-saas-dashboard button[class*="bg-[#00C853]"] *,
-[data-theme="light"] .platform-saas-dashboard a[class*="bg-[#00C853]"] *,
-[data-theme="light"] .platform-saas-dashboard [class*="bg-[#00C853]"] *,
+[data-theme="light"] .platform-saas-dashboard button[class*="bg-legacy-brand-base"] *,
+[data-theme="light"] .platform-saas-dashboard a[class*="bg-legacy-brand-base"] *,
+[data-theme="light"] .platform-saas-dashboard [class*="bg-legacy-brand-base"] *,
 [data-theme="light"] .platform-saas-dashboard button[class*="bg-emerald"] *,
 [data-theme="light"] .platform-saas-dashboard a[class*="bg-emerald"] *,
-[data-theme="light"] .platform-saas-dashboard button[class*="bg-[#15803d]"] *,
-[data-theme="light"] .platform-saas-dashboard a[class*="bg-[#15803d]"] * {
+[data-theme="light"] .platform-saas-dashboard button[class*="bg-legacy-green-700"] *,
+[data-theme="light"] .platform-saas-dashboard a[class*="bg-legacy-green-700"] * {
   color: #ffffff !important;
 }
 
-[data-theme="light"] .platform-saas-dashboard button[class*="bg-[#00C853]"]:hover,
-[data-theme="light"] .platform-saas-dashboard a[class*="bg-[#00C853]"]:hover,
-[data-theme="light"] .platform-saas-dashboard [class*="bg-[#00C853]"]:hover,
+[data-theme="light"] .platform-saas-dashboard button[class*="bg-legacy-brand-base"]:hover,
+[data-theme="light"] .platform-saas-dashboard a[class*="bg-legacy-brand-base"]:hover,
+[data-theme="light"] .platform-saas-dashboard [class*="bg-legacy-brand-base"]:hover,
 [data-theme="light"] .platform-saas-dashboard button[class*="bg-emerald"]:hover,
 [data-theme="light"] .platform-saas-dashboard a[class*="bg-emerald"]:hover {
   background-color: #166534 !important;
@@ -1056,10 +1055,10 @@ select option {
 }
 
 /* Modals & Dialogs */
-[data-theme="light"] .fixed.inset-0 [class*="bg-[#08130C]"],
-[data-theme="light"] .fixed.inset-0 [class*="bg-[#060D08]"],
-[data-theme="light"] .fixed.inset-0 [class*="bg-[#040906]"],
-[data-theme="light"] .fixed.inset-0 [class*="bg-[#040A06]"] {
+[data-theme="light"] .fixed.inset-0 [class*="bg-legacy-surface-base"],
+[data-theme="light"] .fixed.inset-0 [class*="bg-legacy-forest-78"],
+[data-theme="light"] .fixed.inset-0 [class*="bg-legacy-canvas-deep"],
+[data-theme="light"] .fixed.inset-0 [class*="bg-legacy-canvas-night"] {
   background-color: #ffffff !important;
   border-color: #dbf0ea !important;
   color: #413f3f !important;
@@ -1083,8 +1082,8 @@ select option {
 }
 
 [data-theme="light"] .platform-saas-dashboard .text-emerald,
-[data-theme="light"] .platform-saas-dashboard .text-\[\#4ADE80\],
-[data-theme="light"] .platform-saas-dashboard .text-\[\#00C853\] {
+[data-theme="light"] .platform-saas-dashboard .text-legacy-green-400,
+[data-theme="light"] .platform-saas-dashboard .text-legacy-brand-base {
   color: #15803d !important; /* Forest emerald */
 }
 
@@ -1147,3 +1146,18 @@ select option {
 
 .esg-field-error { color: var(--state-danger-text); }
 .esg-control[aria-invalid="true"] { border-color: var(--state-danger-border); }
+
+@layer utilities {
+  .legacy-grid,
+  .legacy-grid-muted,
+  .legacy-grid-faint {
+    background-image: linear-gradient(to right, var(--legacy-grid-line) 1px, transparent 1px),
+      linear-gradient(to bottom, var(--legacy-grid-line) 1px, transparent 1px);
+  }
+
+  .legacy-grid { --legacy-grid-line: #00c85311; }
+  .legacy-grid-muted { --legacy-grid-line: #00c85308; }
+  .legacy-grid-faint { --legacy-grid-line: #00c85302; }
+  .legacy-grid-mask { mask-image: radial-gradient(ellipse 60% 50% at 50% 0%, black 70%, transparent 100%); }
+  .legacy-grid-mask-wide { mask-image: radial-gradient(ellipse 80% 60% at 50% 10%, black 60%, transparent 100%); }
+}

@@ -1,3 +1,4 @@
+import { legacyColors } from '../styles/legacyColors.js';
 import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
 
@@ -101,7 +102,7 @@ const PlatformModules = () => {
   };
 
   return (
-    <section className="w-full bg-[#040A06] py-24 relative overflow-hidden font-sans modules-section">
+    <section className="w-full bg-legacy-canvas-night py-24 relative overflow-hidden font-sans modules-section">
       <style>{`
         @keyframes fadeInHeader {
           from {
@@ -213,62 +214,62 @@ const PlatformModules = () => {
             <defs>
               {/* Standard Silver Metallic Cube Gradients */}
               <linearGradient id="cubeTop" x1="0%" y1="0%" x2="100%" y2="100%">
-                <stop offset="0%" stopColor="#ffffff" />
-                <stop offset="100%" stopColor="#cbd5e1" />
+                <stop offset="0%" stopColor={legacyColors["legacy-warm-01"]} />
+                <stop offset="100%" stopColor={legacyColors["legacy-slate-300"]} />
               </linearGradient>
               <linearGradient id="cubeLeft" x1="0%" y1="0%" x2="0%" y2="100%">
-                <stop offset="0%" stopColor="#94a3b8" />
-                <stop offset="100%" stopColor="#475569" />
+                <stop offset="0%" stopColor={legacyColors["legacy-slate-400"]} />
+                <stop offset="100%" stopColor={legacyColors["legacy-slate-600"]} />
               </linearGradient>
               <linearGradient id="cubeRight" x1="0%" y1="0%" x2="0%" y2="100%">
-                <stop offset="0%" stopColor="#64748b" />
-                <stop offset="100%" stopColor="#1e293b" />
+                <stop offset="0%" stopColor={legacyColors["legacy-slate-500"]} />
+                <stop offset="100%" stopColor={legacyColors["legacy-slate-800"]} />
               </linearGradient>
 
               {/* Glowing Emerald Cube Gradients */}
               <linearGradient id="glowEmeraldTop" x1="0%" y1="0%" x2="100%" y2="100%">
-                <stop offset="0%" stopColor="#a7f3d0" />
-                <stop offset="100%" stopColor="#34d399" />
+                <stop offset="0%" stopColor={legacyColors["legacy-emerald-200"]} />
+                <stop offset="100%" stopColor={legacyColors["legacy-emerald-400"]} />
               </linearGradient>
               <linearGradient id="glowEmeraldLeft" x1="0%" y1="0%" x2="0%" y2="100%">
-                <stop offset="0%" stopColor="#10b981" />
-                <stop offset="100%" stopColor="#047857" />
+                <stop offset="0%" stopColor={legacyColors["legacy-emerald-500"]} />
+                <stop offset="100%" stopColor={legacyColors["legacy-emerald-700"]} />
               </linearGradient>
               <linearGradient id="glowEmeraldRight" x1="0%" y1="0%" x2="0%" y2="100%">
-                <stop offset="0%" stopColor="#059669" />
-                <stop offset="100%" stopColor="#064e3b" />
+                <stop offset="0%" stopColor={legacyColors["legacy-emerald-600"]} />
+                <stop offset="100%" stopColor={legacyColors["legacy-emerald-900"]} />
               </linearGradient>
 
               {/* Glowing Cyan Cube Gradients */}
               <linearGradient id="glowCyanTop" x1="0%" y1="0%" x2="100%" y2="100%">
-                <stop offset="0%" stopColor="#a5f3fc" />
-                <stop offset="100%" stopColor="#22d3ee" />
+                <stop offset="0%" stopColor={legacyColors["legacy-cyan-200"]} />
+                <stop offset="100%" stopColor={legacyColors["legacy-cyan-400"]} />
               </linearGradient>
               <linearGradient id="glowCyanLeft" x1="0%" y1="0%" x2="0%" y2="100%">
-                <stop offset="0%" stopColor="#06b6d4" />
-                <stop offset="100%" stopColor="#0891b2" />
+                <stop offset="0%" stopColor={legacyColors["legacy-cyan-500"]} />
+                <stop offset="100%" stopColor={legacyColors["legacy-cyan-600"]} />
               </linearGradient>
               <linearGradient id="glowCyanRight" x1="0%" y1="0%" x2="0%" y2="100%">
-                <stop offset="0%" stopColor="#0891b2" />
-                <stop offset="100%" stopColor="#164e63" />
+                <stop offset="0%" stopColor={legacyColors["legacy-cyan-600"]} />
+                <stop offset="100%" stopColor={legacyColors["legacy-cyan-900"]} />
               </linearGradient>
 
               {/* Hexagon Neon Gradient */}
               <linearGradient id="hexGrad" x1="0%" y1="0%" x2="100%" y2="100%">
-                <stop offset="0%" stopColor="#10b981" />
-                <stop offset="100%" stopColor="#06b6d4" />
+                <stop offset="0%" stopColor={legacyColors["legacy-emerald-500"]} />
+                <stop offset="100%" stopColor={legacyColors["legacy-cyan-500"]} />
               </linearGradient>
 
               {/* Connection Line Gradients */}
               <linearGradient id="lineGradLeft" x1="0%" y1="0%" x2="100%" y2="0%">
-                <stop offset="0%" stopColor="#10b981" stopOpacity="0.2" />
-                <stop offset="60%" stopColor="#10b981" stopOpacity="0.8" />
-                <stop offset="100%" stopColor="#06b6d4" stopOpacity="1" />
+                <stop offset="0%" stopColor={legacyColors["legacy-emerald-500"]} stopOpacity="0.2" />
+                <stop offset="60%" stopColor={legacyColors["legacy-emerald-500"]} stopOpacity="0.8" />
+                <stop offset="100%" stopColor={legacyColors["legacy-cyan-500"]} stopOpacity="1" />
               </linearGradient>
               <linearGradient id="lineGradRight" x1="0%" y1="0%" x2="100%" y2="0%">
-                <stop offset="0%" stopColor="#06b6d4" stopOpacity="1" />
-                <stop offset="40%" stopColor="#06b6d4" stopOpacity="0.8" />
-                <stop offset="100%" stopColor="#10b981" stopOpacity="0.2" />
+                <stop offset="0%" stopColor={legacyColors["legacy-cyan-500"]} stopOpacity="1" />
+                <stop offset="40%" stopColor={legacyColors["legacy-cyan-500"]} stopOpacity="0.8" />
+                <stop offset="100%" stopColor={legacyColors["legacy-emerald-500"]} stopOpacity="0.2" />
               </linearGradient>
 
               {/* Glow Filter */}
@@ -358,7 +359,7 @@ const PlatformModules = () => {
                 {/* Inner Hexagon Container */}
                 <polygon
                   points="700,280 786.6,330 786.6,430 700,480 613.4,430 613.4,330"
-                  fill="#080F0B"
+                  fill={legacyColors["legacy-canvas-base"]}
                   stroke="url(#hexGrad)"
                   strokeWidth="1.5"
                   opacity="0.9"
@@ -374,7 +375,7 @@ const PlatformModules = () => {
             <Link
               key={node.id}
               to={node.to}
-              className="absolute left-pill-anim flex items-center bg-[#080F0B]/85 hover:bg-[#0d1c13] border border-emerald/25 hover:border-emerald/80 rounded-full px-4 py-3 cursor-pointer transition-all duration-300 z-20 backdrop-blur-sm shadow-[0_3px_12px_rgba(4,10,6,0.6)] group"
+              className="absolute left-pill-anim flex items-center bg-legacy-canvas-base/85 hover:bg-legacy-forest-53 border border-emerald/25 hover:border-emerald/80 rounded-full px-4 py-3 cursor-pointer transition-all duration-300 z-20 backdrop-blur-sm shadow-[0_3px_12px_rgba(4,10,6,0.6)] group"
               style={{
                 left: '6.666%',
                 top: `${(node.y / 800) * 100}%`,
@@ -388,12 +389,12 @@ const PlatformModules = () => {
               onMouseLeave={() => setHoveredNode(null)}
             >
               {/* Pulsing indicator dot */}
-              <div className="w-2 h-2 rounded-full bg-[#10b981] mr-3 relative flex items-center justify-center">
-                <div className="absolute w-2.5 h-2.5 rounded-full bg-[#10b981]/50 animate-ping group-hover:duration-700"></div>
+              <div className="w-2 h-2 rounded-full bg-legacy-emerald-500 mr-3 relative flex items-center justify-center">
+                <div className="absolute w-2.5 h-2.5 rounded-full bg-legacy-emerald-500/50 animate-ping group-hover:duration-700"></div>
               </div>
               <span className="text-registry text-xs font-mono tracking-wide">{node.title}</span>
               {/* Edge connector anchor */}
-              <div className="absolute right-[-4px] top-1/2 -translate-y-1/2 w-2 h-2 rounded-full bg-[#10b981] border border-[#040A06] z-30 shadow-[0_0_8px_rgba(16,185,129,0.8)] group-hover:scale-125 transition-transform duration-300"></div>
+              <div className="absolute right-[-4px] top-1/2 -translate-y-1/2 w-2 h-2 rounded-full bg-legacy-emerald-500 border border-legacy-canvas-night z-30 shadow-[0_0_8px_rgba(16,185,129,0.8)] group-hover:scale-125 transition-transform duration-300"></div>
             </Link>
           ))}
 
@@ -401,7 +402,7 @@ const PlatformModules = () => {
           {rightNodes.map((node, idx) => (
             <div
               key={node.id}
-              className="absolute right-pill-anim flex items-center bg-[#080F0B]/85 border border-cyan/25 hover:border-cyan/80 rounded-full px-4 py-3 transition-all duration-300 z-20 backdrop-blur-sm shadow-[0_3px_12px_rgba(4,10,6,0.6)] group"
+              className="absolute right-pill-anim flex items-center bg-legacy-canvas-base/85 border border-cyan/25 hover:border-cyan/80 rounded-full px-4 py-3 transition-all duration-300 z-20 backdrop-blur-sm shadow-[0_3px_12px_rgba(4,10,6,0.6)] group"
               style={{
                 left: '80%',
                 top: `${(node.y / 800) * 100}%`,
@@ -415,12 +416,12 @@ const PlatformModules = () => {
               onMouseLeave={() => setHoveredNode(null)}
             >
               {/* Pulsing indicator dot */}
-              <div className="w-2 h-2 rounded-full bg-[#06b6d4] mr-3 relative flex items-center justify-center">
-                <div className="absolute w-2.5 h-2.5 rounded-full bg-[#06b6d4]/50 animate-ping group-hover:duration-700"></div>
+              <div className="w-2 h-2 rounded-full bg-legacy-cyan-500 mr-3 relative flex items-center justify-center">
+                <div className="absolute w-2.5 h-2.5 rounded-full bg-legacy-cyan-500/50 animate-ping group-hover:duration-700"></div>
               </div>
               <span className="text-registry text-xs font-mono tracking-wide">{node.title}</span>
               {/* Edge connector anchor */}
-              <div className="absolute left-[-4px] top-1/2 -translate-y-1/2 w-2 h-2 rounded-full bg-[#06b6d4] border border-[#040A06] z-30 shadow-[0_0_8px_rgba(6,182,212,0.8)] group-hover:scale-125 transition-transform duration-300"></div>
+              <div className="absolute left-[-4px] top-1/2 -translate-y-1/2 w-2 h-2 rounded-full bg-legacy-cyan-500 border border-legacy-canvas-night z-30 shadow-[0_0_8px_rgba(6,182,212,0.8)] group-hover:scale-125 transition-transform duration-300"></div>
             </div>
           ))}
 
@@ -492,44 +493,44 @@ const PlatformModules = () => {
             <svg className="w-48 h-56 overflow-visible pointer-events-none" viewBox="0 0 220 220">
               <defs>
                 <linearGradient id="cubeTop" x1="0%" y1="0%" x2="100%" y2="100%">
-                  <stop offset="0%" stopColor="#ffffff" />
-                  <stop offset="100%" stopColor="#cbd5e1" />
+                  <stop offset="0%" stopColor={legacyColors["legacy-warm-01"]} />
+                  <stop offset="100%" stopColor={legacyColors["legacy-slate-300"]} />
                 </linearGradient>
                 <linearGradient id="cubeLeft" x1="0%" y1="0%" x2="0%" y2="100%">
-                  <stop offset="0%" stopColor="#94a3b8" />
-                  <stop offset="100%" stopColor="#475569" />
+                  <stop offset="0%" stopColor={legacyColors["legacy-slate-400"]} />
+                  <stop offset="100%" stopColor={legacyColors["legacy-slate-600"]} />
                 </linearGradient>
                 <linearGradient id="cubeRight" x1="0%" y1="0%" x2="0%" y2="100%">
-                  <stop offset="0%" stopColor="#64748b" />
-                  <stop offset="100%" stopColor="#1e293b" />
+                  <stop offset="0%" stopColor={legacyColors["legacy-slate-500"]} />
+                  <stop offset="100%" stopColor={legacyColors["legacy-slate-800"]} />
                 </linearGradient>
                 <linearGradient id="glowEmeraldTop" x1="0%" y1="0%" x2="100%" y2="100%">
-                  <stop offset="0%" stopColor="#a7f3d0" />
-                  <stop offset="100%" stopColor="#34d399" />
+                  <stop offset="0%" stopColor={legacyColors["legacy-emerald-200"]} />
+                  <stop offset="100%" stopColor={legacyColors["legacy-emerald-400"]} />
                 </linearGradient>
                 <linearGradient id="glowEmeraldLeft" x1="0%" y1="0%" x2="0%" y2="100%">
-                  <stop offset="0%" stopColor="#10b981" />
-                  <stop offset="100%" stopColor="#047857" />
+                  <stop offset="0%" stopColor={legacyColors["legacy-emerald-500"]} />
+                  <stop offset="100%" stopColor={legacyColors["legacy-emerald-700"]} />
                 </linearGradient>
                 <linearGradient id="glowEmeraldRight" x1="0%" y1="0%" x2="0%" y2="100%">
-                  <stop offset="0%" stopColor="#059669" />
-                  <stop offset="100%" stopColor="#064e3b" />
+                  <stop offset="0%" stopColor={legacyColors["legacy-emerald-600"]} />
+                  <stop offset="100%" stopColor={legacyColors["legacy-emerald-900"]} />
                 </linearGradient>
                 <linearGradient id="glowCyanTop" x1="0%" y1="0%" x2="100%" y2="100%">
-                  <stop offset="0%" stopColor="#a5f3fc" />
-                  <stop offset="100%" stopColor="#22d3ee" />
+                  <stop offset="0%" stopColor={legacyColors["legacy-cyan-200"]} />
+                  <stop offset="100%" stopColor={legacyColors["legacy-cyan-400"]} />
                 </linearGradient>
                 <linearGradient id="glowCyanLeft" x1="0%" y1="0%" x2="0%" y2="100%">
-                  <stop offset="0%" stopColor="#06b6d4" />
-                  <stop offset="100%" stopColor="#0891b2" />
+                  <stop offset="0%" stopColor={legacyColors["legacy-cyan-500"]} />
+                  <stop offset="100%" stopColor={legacyColors["legacy-cyan-600"]} />
                 </linearGradient>
                 <linearGradient id="glowCyanRight" x1="0%" y1="0%" x2="0%" y2="100%">
-                  <stop offset="0%" stopColor="#0891b2" />
-                  <stop offset="100%" stopColor="#164e63" />
+                  <stop offset="0%" stopColor={legacyColors["legacy-cyan-600"]} />
+                  <stop offset="100%" stopColor={legacyColors["legacy-cyan-900"]} />
                 </linearGradient>
                 <linearGradient id="hexGrad" x1="0%" y1="0%" x2="100%" y2="100%">
-                  <stop offset="0%" stopColor="#10b981" />
-                  <stop offset="100%" stopColor="#06b6d4" />
+                  <stop offset="0%" stopColor={legacyColors["legacy-emerald-500"]} />
+                  <stop offset="100%" stopColor={legacyColors["legacy-cyan-500"]} />
                 </linearGradient>
                 <filter id="glowFilter" x="-20%" y="-20%" width="140%" height="140%">
                   <feGaussianBlur stdDeviation="3.5" result="blur" />
@@ -550,7 +551,7 @@ const PlatformModules = () => {
                 />
                 <polygon
                   points="110,10 196.6,60 196.6,160 110,210 23.4,160 23.4,60"
-                  fill="#080F0B"
+                  fill={legacyColors["legacy-canvas-base"]}
                   stroke="url(#hexGrad)"
                   strokeWidth="1.5"
                   opacity="0.9"
@@ -570,10 +571,10 @@ const PlatformModules = () => {
                 <Link
                   key={node.id}
                   to={node.to}
-                  className="flex items-center bg-[#080F0B]/80 border border-emerald/20 hover:border-emerald/50 rounded-full px-4 py-3 transition-colors group"
+                  className="flex items-center bg-legacy-canvas-base/80 border border-emerald/20 hover:border-emerald/50 rounded-full px-4 py-3 transition-colors group"
                 >
-                  <div className="w-2 h-2 rounded-full bg-[#10b981] mr-3 relative flex items-center justify-center">
-                    <div className="absolute w-2 h-2 rounded-full bg-[#10b981]/50 animate-ping"></div>
+                  <div className="w-2 h-2 rounded-full bg-legacy-emerald-500 mr-3 relative flex items-center justify-center">
+                    <div className="absolute w-2 h-2 rounded-full bg-legacy-emerald-500/50 animate-ping"></div>
                   </div>
                   <span className="text-registry text-xs font-mono group-hover:text-emerald transition-colors">{node.title}</span>
                 </Link>
@@ -590,10 +591,10 @@ const PlatformModules = () => {
               {rightNodes.map((node) => (
                 <div
                   key={node.id}
-                  className="flex items-center bg-[#080F0B]/80 border border-cyan/20 rounded-full px-4 py-3"
+                  className="flex items-center bg-legacy-canvas-base/80 border border-cyan/20 rounded-full px-4 py-3"
                 >
-                  <div className="w-2 h-2 rounded-full bg-[#06b6d4] mr-3 relative flex items-center justify-center">
-                    <div className="absolute w-2 h-2 rounded-full bg-[#06b6d4]/50 animate-ping"></div>
+                  <div className="w-2 h-2 rounded-full bg-legacy-cyan-500 mr-3 relative flex items-center justify-center">
+                    <div className="absolute w-2 h-2 rounded-full bg-legacy-cyan-500/50 animate-ping"></div>
                   </div>
                   <span className="text-registry text-xs font-mono">{node.title}</span>
                 </div>

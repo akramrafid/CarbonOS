@@ -571,23 +571,23 @@ const CarbonRegistry = () => {
   };
 
   return (
-    <div className="pt-24 pb-20 min-h-screen bg-[#040906] text-white selection:bg-[#00C853] selection:text-[#040906]">
+    <div className="pt-24 pb-20 min-h-screen bg-legacy-canvas-deep text-white selection:bg-legacy-brand-base selection:text-legacy-canvas-deep">
       {/* Background Subtle Technical Grid Overlay */}
-      <div className="fixed inset-0 bg-[linear-gradient(to_right,#00C85308_1px,transparent_1px),linear-gradient(to_bottom,#00C85308_1px,transparent_1px)] bg-[size:3.5rem_3.5rem] [mask-image:radial-gradient(ellipse_80%_60%_at_50%_10%,#000_60%,transparent_100%)] pointer-events-none z-0"></div>
+      <div className="fixed inset-0 legacy-grid-muted bg-[size:3.5rem_3.5rem] legacy-grid-mask-wide pointer-events-none z-0"></div>
 
       <div className="max-w-[1720px] mx-auto px-4 sm:px-8 relative z-10">
         
         {/* ========================================================
             1. SOVEREIGN COMMAND HEADER & STATUS STRIP
            ======================================================== */}
-        <header className="mb-8 border border-[#152B1D] bg-[#08130C]/80 backdrop-blur-xl rounded-[24px] p-6 lg:p-8 shadow-[0_12px_40px_rgba(0,0,0,0.5)] relative overflow-hidden">
-          <div className="absolute top-0 right-0 w-96 h-96 bg-[#00C853]/5 rounded-full blur-3xl pointer-events-none"></div>
+        <header className="mb-8 border border-legacy-divider-base bg-legacy-surface-base/80 backdrop-blur-xl rounded-[24px] p-6 lg:p-8 shadow-[0_12px_40px_rgba(0,0,0,0.5)] relative overflow-hidden">
+          <div className="absolute top-0 right-0 w-96 h-96 bg-legacy-brand-base/5 rounded-full blur-3xl pointer-events-none"></div>
 
-          <div className="flex flex-col lg:flex-row items-start lg:items-center justify-between gap-6 pb-6 border-b border-[#152B1D]">
+          <div className="flex flex-col lg:flex-row items-start lg:items-center justify-between gap-6 pb-6 border-b border-legacy-divider-base">
             <div className="space-y-2">
               <div className="flex items-center space-x-3">
-                <span className="inline-flex items-center space-x-1.5 font-mono text-[11px] font-bold text-[#00C853] bg-[#00C853]/10 border border-[#00C853]/30 px-3 py-1 rounded-full uppercase tracking-widest">
-                  <Landmark size={13} className="text-[#00C853]" />
+                <span className="inline-flex items-center space-x-1.5 font-mono text-[11px] font-bold text-legacy-brand-base bg-legacy-brand-base/10 border border-legacy-brand-base/30 px-3 py-1 rounded-full uppercase tracking-widest">
+                  <Landmark size={13} className="text-legacy-brand-base" />
                   <span>People's Republic of Bangladesh</span>
                 </span>
                 <span className="text-white/30 text-xs">•</span>
@@ -597,7 +597,7 @@ const CarbonRegistry = () => {
               </div>
               <h1 className="serif-drama text-3xl sm:text-4xl lg:text-5xl font-bold tracking-tight text-white flex items-center gap-3">
                 Carbon Registry
-                <span className="font-mono text-xs font-normal px-2.5 py-1 rounded-md bg-[#0D2B1A] border border-[#00C853]/30 text-[#00C853]">
+                <span className="font-mono text-xs font-normal px-2.5 py-1 rounded-md bg-legacy-surface-raised border border-legacy-brand-base/30 text-legacy-brand-base">
                   v2.4.1 (D4C API)
                 </span>
               </h1>
@@ -608,9 +608,9 @@ const CarbonRegistry = () => {
             </div>
 
             {/* Live Registry Engine Telemetry Bar */}
-            <div className="flex flex-col sm:flex-row items-start sm:items-center gap-3 bg-[#040906] border border-[#152B1D] p-3.5 rounded-2xl shrink-0">
+            <div className="flex flex-col sm:flex-row items-start sm:items-center gap-3 bg-legacy-canvas-deep border border-legacy-divider-base p-3.5 rounded-2xl shrink-0">
               <div className="flex items-center space-x-2.5 px-3 py-1.5 rounded-xl bg-white/[0.02]">
-                <div className={`w-2.5 h-2.5 rounded-full ${isLiveConnected ? 'bg-[#00C853] animate-pulse shadow-[0_0_8px_#00C853]' : 'bg-emerald-400'}`}></div>
+                <div className={`w-2.5 h-2.5 rounded-full ${isLiveConnected ? 'bg-legacy-brand-base animate-pulse shadow-[0_0_8px] shadow-legacy-brand-base' : 'bg-emerald-400'}`}></div>
                 <div className="flex flex-col">
                   <span className="font-mono text-[10px] text-white/40 uppercase tracking-wider">Gateway Status</span>
                   <span className="font-mono text-xs font-bold text-white">
@@ -619,13 +619,13 @@ const CarbonRegistry = () => {
                 </div>
               </div>
 
-              <div className="h-8 w-px bg-[#152B1D] hidden sm:block"></div>
+              <div className="h-8 w-px bg-legacy-divider-base hidden sm:block"></div>
 
               <div className="flex items-center space-x-2">
                 <button
                   onClick={fetchRegistryData}
                   disabled={isLoading}
-                  className="font-mono text-xs text-white/80 hover:text-white bg-[#0D2B1A] hover:bg-[#00C853] hover:text-[#040906] border border-[#00C853]/30 px-3.5 py-2 rounded-xl transition-all flex items-center space-x-1.5 focus:outline-none focus:ring-2 focus:ring-[#00C853]/50"
+                  className="font-mono text-xs text-white/80 hover:text-white bg-legacy-surface-raised hover:bg-legacy-brand-base hover:text-legacy-canvas-deep border border-legacy-brand-base/30 px-3.5 py-2 rounded-xl transition-all flex items-center space-x-1.5 focus:outline-none focus:ring-2 focus:ring-legacy-brand-base/50"
                   title="Resync state with National Carbon Registry"
                 >
                   <RefreshCw size={13} className={isLoading ? "animate-spin" : ""} />
@@ -634,7 +634,7 @@ const CarbonRegistry = () => {
 
                 <button
                   onClick={handleDownloadBtrCsv}
-                  className="font-mono text-xs text-[#040906] font-bold bg-[#00C853] hover:bg-[#00E676] px-3.5 py-2 rounded-xl transition-all shadow-[0_0_16px_rgba(0,200,83,0.25)] flex items-center space-x-1.5"
+                  className="font-mono text-xs text-legacy-canvas-deep font-bold bg-legacy-brand-base hover:bg-legacy-brand-bright px-3.5 py-2 rounded-xl transition-all shadow-[0_0_16px_rgba(0,200,83,0.25)] flex items-center space-x-1.5"
                 >
                   <Download size={13} />
                   <span>BTR Summary</span>
@@ -645,25 +645,25 @@ const CarbonRegistry = () => {
 
           {/* Quick Metrics Strip */}
           <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-5 gap-4 pt-6">
-            <div className="bg-[#040906]/60 border border-[#152B1D] rounded-xl p-3.5">
+            <div className="bg-legacy-canvas-deep/60 border border-legacy-divider-base rounded-xl p-3.5">
               <span className="font-mono text-[10px] text-white/50 uppercase tracking-widest block mb-1">Total Serialized Volume</span>
               <div className="flex items-baseline space-x-1.5">
                 <span className="font-mono text-2xl font-bold text-white">10,000.0</span>
-                <span className="font-mono text-xs text-[#00C853]">tCO2e</span>
+                <span className="font-mono text-xs text-legacy-brand-base">tCO2e</span>
               </div>
               <span className="font-sans text-[11px] text-white/40 block mt-1">100% Measured via dMRV</span>
             </div>
 
-            <div className="bg-[#040906]/60 border border-[#152B1D] rounded-xl p-3.5">
+            <div className="bg-legacy-canvas-deep/60 border border-legacy-divider-base rounded-xl p-3.5">
               <span className="font-mono text-[10px] text-white/50 uppercase tracking-widest block mb-1">Article 6.2 ITMO Transfer</span>
               <div className="flex items-baseline space-x-1.5">
-                <span className="font-mono text-2xl font-bold text-[#00C853]">5,000.0</span>
-                <span className="font-mono text-xs text-[#00C853]">tCO2e</span>
+                <span className="font-mono text-2xl font-bold text-legacy-brand-base">5,000.0</span>
+                <span className="font-mono text-xs text-legacy-brand-base">tCO2e</span>
               </div>
               <span className="font-sans text-[11px] text-white/40 block mt-1">Government of Japan (JCM)</span>
             </div>
 
-            <div className="bg-[#040906]/60 border border-[#152B1D] rounded-xl p-3.5">
+            <div className="bg-legacy-canvas-deep/60 border border-legacy-divider-base rounded-xl p-3.5">
               <span className="font-mono text-[10px] text-white/50 uppercase tracking-widest block mb-1">Bangladesh NDC Retention</span>
               <div className="flex items-baseline space-x-1.5">
                 <span className="font-mono text-2xl font-bold text-white">5,000.0</span>
@@ -672,19 +672,19 @@ const CarbonRegistry = () => {
               <span className="font-sans text-[11px] text-white/40 block mt-1">Sovereign Unadjusted Reserve</span>
             </div>
 
-            <div className="bg-[#040906]/60 border border-[#152B1D] rounded-xl p-3.5">
+            <div className="bg-legacy-canvas-deep/60 border border-legacy-divider-base rounded-xl p-3.5">
               <span className="font-mono text-[10px] text-white/50 uppercase tracking-widest block mb-1">DOE Positive List Status</span>
               <div className="flex items-center space-x-2 mt-1">
-                <ShieldCheck size={20} className="text-[#00C853]" />
+                <ShieldCheck size={20} className="text-legacy-brand-base" />
                 <span className="font-mono text-lg font-bold text-white">100% Eligible</span>
               </div>
-              <span className="font-sans text-[11px] text-[#00C853] block mt-1">0 Negative List Infractions</span>
+              <span className="font-sans text-[11px] text-legacy-brand-base block mt-1">0 Negative List Infractions</span>
             </div>
 
-            <div className="bg-[#040906]/60 border border-[#152B1D] rounded-xl p-3.5 col-span-2 sm:col-span-1">
+            <div className="bg-legacy-canvas-deep/60 border border-legacy-divider-base rounded-xl p-3.5 col-span-2 sm:col-span-1">
               <span className="font-mono text-[10px] text-white/50 uppercase tracking-widest block mb-1">Cryptographic Provenance</span>
               <div className="flex items-center space-x-2 mt-1">
-                <Fingerprint size={20} className="text-[#00C853]" />
+                <Fingerprint size={20} className="text-legacy-brand-base" />
                 <span className="font-mono text-lg font-bold text-white">Merkle Chain</span>
               </div>
               <span className="font-sans text-[11px] text-white/40 block mt-1">SHA-256 Root Hash Verified</span>
@@ -695,13 +695,13 @@ const CarbonRegistry = () => {
         {/* ========================================================
             2. INTERACTIVE SUB-NAVIGATION TABS
            ======================================================== */}
-        <div className="flex items-center space-x-2 overflow-x-auto pb-4 mb-6 border-b border-[#152B1D] scrollbar-none">
+        <div className="flex items-center space-x-2 overflow-x-auto pb-4 mb-6 border-b border-legacy-divider-base scrollbar-none">
           <button
             onClick={() => setActiveTab('overview')}
             className={`font-mono text-xs font-medium px-4 py-2.5 rounded-full transition-all flex items-center space-x-2 whitespace-nowrap cursor-pointer ${
               activeTab === 'overview'
-                ? 'bg-[#00C853] text-[#040906] font-bold shadow-[0_0_14px_rgba(0,200,83,0.3)]'
-                : 'bg-[#08130C] text-white/70 hover:text-white hover:bg-[#0D2B1A] border border-[#152B1D]'
+                ? 'bg-legacy-brand-base text-legacy-canvas-deep font-bold shadow-[0_0_14px_rgba(0,200,83,0.3)]'
+                : 'bg-legacy-surface-base text-white/70 hover:text-white hover:bg-legacy-surface-raised border border-legacy-divider-base'
             }`}
           >
             <Activity size={14} />
@@ -712,8 +712,8 @@ const CarbonRegistry = () => {
             onClick={() => setActiveTab('rules')}
             className={`font-mono text-xs font-medium px-4 py-2.5 rounded-full transition-all flex items-center space-x-2 whitespace-nowrap cursor-pointer ${
               activeTab === 'rules'
-                ? 'bg-[#00C853] text-[#040906] font-bold shadow-[0_0_14px_rgba(0,200,83,0.3)]'
-                : 'bg-[#08130C] text-white/70 hover:text-white hover:bg-[#0D2B1A] border border-[#152B1D]'
+                ? 'bg-legacy-brand-base text-legacy-canvas-deep font-bold shadow-[0_0_14px_rgba(0,200,83,0.3)]'
+                : 'bg-legacy-surface-base text-white/70 hover:text-white hover:bg-legacy-surface-raised border border-legacy-divider-base'
             }`}
           >
             <ShieldCheck size={14} />
@@ -724,8 +724,8 @@ const CarbonRegistry = () => {
             onClick={() => setActiveTab('jcm')}
             className={`font-mono text-xs font-medium px-4 py-2.5 rounded-full transition-all flex items-center space-x-2 whitespace-nowrap cursor-pointer ${
               activeTab === 'jcm'
-                ? 'bg-[#00C853] text-[#040906] font-bold shadow-[0_0_14px_rgba(0,200,83,0.3)]'
-                : 'bg-[#08130C] text-white/70 hover:text-white hover:bg-[#0D2B1A] border border-[#152B1D]'
+                ? 'bg-legacy-brand-base text-legacy-canvas-deep font-bold shadow-[0_0_14px_rgba(0,200,83,0.3)]'
+                : 'bg-legacy-surface-base text-white/70 hover:text-white hover:bg-legacy-surface-raised border border-legacy-divider-base'
             }`}
           >
             <Globe size={14} />
@@ -736,8 +736,8 @@ const CarbonRegistry = () => {
             onClick={() => setActiveTab('adjustments')}
             className={`font-mono text-xs font-medium px-4 py-2.5 rounded-full transition-all flex items-center space-x-2 whitespace-nowrap cursor-pointer ${
               activeTab === 'adjustments'
-                ? 'bg-[#00C853] text-[#040906] font-bold shadow-[0_0_14px_rgba(0,200,83,0.3)]'
-                : 'bg-[#08130C] text-white/70 hover:text-white hover:bg-[#0D2B1A] border border-[#152B1D]'
+                ? 'bg-legacy-brand-base text-legacy-canvas-deep font-bold shadow-[0_0_14px_rgba(0,200,83,0.3)]'
+                : 'bg-legacy-surface-base text-white/70 hover:text-white hover:bg-legacy-surface-raised border border-legacy-divider-base'
             }`}
           >
             <FileSpreadsheet size={14} />
@@ -748,8 +748,8 @@ const CarbonRegistry = () => {
             onClick={() => setActiveTab('btr')}
             className={`font-mono text-xs font-medium px-4 py-2.5 rounded-full transition-all flex items-center space-x-2 whitespace-nowrap cursor-pointer ${
               activeTab === 'btr'
-                ? 'bg-[#00C853] text-[#040906] font-bold shadow-[0_0_14px_rgba(0,200,83,0.3)]'
-                : 'bg-[#08130C] text-white/70 hover:text-white hover:bg-[#0D2B1A] border border-[#152B1D]'
+                ? 'bg-legacy-brand-base text-legacy-canvas-deep font-bold shadow-[0_0_14px_rgba(0,200,83,0.3)]'
+                : 'bg-legacy-surface-base text-white/70 hover:text-white hover:bg-legacy-surface-raised border border-legacy-divider-base'
             }`}
           >
             <FileText size={14} />
@@ -772,12 +772,12 @@ const CarbonRegistry = () => {
                     onClick={() => setSelectedProjectId(proj.id)}
                     className={`p-5 rounded-2xl border transition-all cursor-pointer relative overflow-hidden ${
                       isSelected
-                        ? 'bg-[#08130C] border-[#00C853] shadow-[0_0_24px_rgba(0,200,83,0.15)] ring-1 ring-[#00C853]'
-                        : 'bg-[#08130C]/60 border-[#152B1D] hover:border-white/20'
+                        ? 'bg-legacy-surface-base border-legacy-brand-base shadow-[0_0_24px_rgba(0,200,83,0.15)] ring-1 ring-legacy-brand-base'
+                        : 'bg-legacy-surface-base/60 border-legacy-divider-base hover:border-white/20'
                     }`}
                   >
                     <div className="flex items-center justify-between mb-3">
-                      <span className="font-mono text-[10px] uppercase tracking-wider text-[#00C853] bg-[#0D2B1A] border border-[#00C853]/30 px-2 py-0.5 rounded">
+                      <span className="font-mono text-[10px] uppercase tracking-wider text-legacy-brand-base bg-legacy-surface-raised border border-legacy-brand-base/30 px-2 py-0.5 rounded">
                         {proj.sector} • {proj.mitigation_type}
                       </span>
                       <span className="font-mono text-[11px] text-white/50">
@@ -787,9 +787,9 @@ const CarbonRegistry = () => {
                     <h3 className="font-sans font-bold text-base text-white mb-2 line-clamp-1">
                       {proj.project_name}
                     </h3>
-                    <div className="flex items-center justify-between text-xs text-white/60 pt-3 border-t border-[#152B1D]">
+                    <div className="flex items-center justify-between text-xs text-white/60 pt-3 border-t border-legacy-divider-base">
                       <span className="font-mono">{proj.metrics.tonnes_co2e.toLocaleString()} tCO2e</span>
-                      <span className="inline-flex items-center text-[#00C853] font-mono text-[11px]">
+                      <span className="inline-flex items-center text-legacy-brand-base font-mono text-[11px]">
                         <CheckCircle2 size={12} className="mr-1" />
                         Positive List
                       </span>
@@ -806,10 +806,10 @@ const CarbonRegistry = () => {
               <div className="lg:col-span-7 space-y-6">
                 
                 {/* Real-time Ingestion Feed */}
-                <div className="bg-[#08130C] border border-[#152B1D] rounded-2xl p-6 relative overflow-hidden">
-                  <div className="flex items-center justify-between mb-6 pb-4 border-b border-[#152B1D]">
+                <div className="bg-legacy-surface-base border border-legacy-divider-base rounded-2xl p-6 relative overflow-hidden">
+                  <div className="flex items-center justify-between mb-6 pb-4 border-b border-legacy-divider-base">
                     <div className="flex items-center space-x-3">
-                      <div className="w-10 h-10 rounded-xl bg-[#0D2B1A] border border-[#00C853]/30 flex items-center justify-center text-[#00C853]">
+                      <div className="w-10 h-10 rounded-xl bg-legacy-surface-raised border border-legacy-brand-base/30 flex items-center justify-center text-legacy-brand-base">
                         <Cpu size={20} />
                       </div>
                       <div>
@@ -821,23 +821,23 @@ const CarbonRegistry = () => {
                         </span>
                       </div>
                     </div>
-                    <span className="font-mono text-xs bg-[#00C853]/10 text-[#00C853] border border-[#00C853]/20 px-2.5 py-1 rounded-full flex items-center space-x-1">
-                      <span className="w-1.5 h-1.5 rounded-full bg-[#00C853] animate-ping mr-1"></span>
+                    <span className="font-mono text-xs bg-legacy-brand-base/10 text-legacy-brand-base border border-legacy-brand-base/20 px-2.5 py-1 rounded-full flex items-center space-x-1">
+                      <span className="w-1.5 h-1.5 rounded-full bg-legacy-brand-base animate-ping mr-1"></span>
                       Synchronized
                     </span>
                   </div>
 
                   {/* Remote Sensing Indices Grid */}
                   <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 mb-6">
-                    <div className="bg-[#040906] border border-[#152B1D] p-3 rounded-xl">
+                    <div className="bg-legacy-canvas-deep border border-legacy-divider-base p-3 rounded-xl">
                       <span className="font-mono text-[10px] text-white/50 block">Sentinel-2 NDVI</span>
-                      <span className="font-mono text-xl font-bold text-[#00C853] mt-1 block">
+                      <span className="font-mono text-xl font-bold text-legacy-brand-base mt-1 block">
                         {selectedProject.metrics.ndvi.toFixed(2)}
                       </span>
                       <span className="font-sans text-[10px] text-white/40">Healthy Canopy</span>
                     </div>
 
-                    <div className="bg-[#040906] border border-[#152B1D] p-3 rounded-xl">
+                    <div className="bg-legacy-canvas-deep border border-legacy-divider-base p-3 rounded-xl">
                       <span className="font-mono text-[10px] text-white/50 block">Sentinel-1 SAR</span>
                       <span className="font-mono text-xl font-bold text-white mt-1 block">
                         {selectedProject.metrics.s1_ratio.toFixed(2)}
@@ -845,7 +845,7 @@ const CarbonRegistry = () => {
                       <span className="font-sans text-[10px] text-white/40">Cross-Pol Ratio</span>
                     </div>
 
-                    <div className="bg-[#040906] border border-[#152B1D] p-3 rounded-xl">
+                    <div className="bg-legacy-canvas-deep border border-legacy-divider-base p-3 rounded-xl">
                       <span className="font-mono text-[10px] text-white/50 block">GEDI Canopy Height</span>
                       <span className="font-mono text-xl font-bold text-white mt-1 block">
                         {selectedProject.metrics.canopy_height_m}m
@@ -853,9 +853,9 @@ const CarbonRegistry = () => {
                       <span className="font-sans text-[10px] text-white/40">RH98 Waveform</span>
                     </div>
 
-                    <div className="bg-[#040906] border border-[#152B1D] p-3 rounded-xl">
+                    <div className="bg-legacy-canvas-deep border border-legacy-divider-base p-3 rounded-xl">
                       <span className="font-mono text-[10px] text-white/50 block">Conformal Bound</span>
-                      <span className="font-mono text-base font-bold text-[#00C853] mt-1 block">
+                      <span className="font-mono text-base font-bold text-legacy-brand-base mt-1 block">
                         90% CI
                       </span>
                       <span className="font-sans text-[10px] text-white/40">Conservative</span>
@@ -863,36 +863,36 @@ const CarbonRegistry = () => {
                   </div>
 
                   {/* Multi-Pool Carbon Stocks */}
-                  <div className="bg-[#040906] border border-[#152B1D] rounded-xl p-4 mb-6">
+                  <div className="bg-legacy-canvas-deep border border-legacy-divider-base rounded-xl p-4 mb-6">
                     <div className="flex items-center justify-between mb-3">
                       <span className="font-mono text-xs text-white/70 font-bold uppercase tracking-wider">
                         IPCC Multi-Pool Carbon Stock Distribution
                       </span>
-                      <span className="font-mono text-xs text-[#00C853]">
+                      <span className="font-mono text-xs text-legacy-brand-base">
                         Total: {selectedProject.metrics.carbon_tc_ha.toFixed(1)} tC/ha
                       </span>
                     </div>
 
                     {/* Proportional Carbon Stock Bar */}
-                    <div className="w-full h-3 bg-[#0D2B1A] rounded-full overflow-hidden flex mb-3">
-                      <div style={{ width: '52%' }} className="bg-[#00C853] h-full" title="Above-Ground Biomass (AGB)"></div>
-                      <div style={{ width: '18%' }} className="bg-[#00E676] opacity-80 h-full" title="Below-Ground Biomass (BGB)"></div>
-                      <div style={{ width: '30%' }} className="bg-[#15803d] h-full" title="Soil Organic Carbon (SOC)"></div>
+                    <div className="w-full h-3 bg-legacy-surface-raised rounded-full overflow-hidden flex mb-3">
+                      <div style={{ width: '52%' }} className="bg-legacy-brand-base h-full" title="Above-Ground Biomass (AGB)"></div>
+                      <div style={{ width: '18%' }} className="bg-legacy-brand-bright opacity-80 h-full" title="Below-Ground Biomass (BGB)"></div>
+                      <div style={{ width: '30%' }} className="bg-legacy-green-700 h-full" title="Soil Organic Carbon (SOC)"></div>
                     </div>
 
                     <div className="grid grid-cols-3 gap-2 font-mono text-xs">
                       <div className="flex items-center space-x-1.5">
-                        <span className="w-2 h-2 rounded-full bg-[#00C853]"></span>
+                        <span className="w-2 h-2 rounded-full bg-legacy-brand-base"></span>
                         <span className="text-white/60">AGB:</span>
                         <span className="text-white font-bold">{selectedProject.metrics.carbon_agb_tc_ha} tC/ha</span>
                       </div>
                       <div className="flex items-center space-x-1.5">
-                        <span className="w-2 h-2 rounded-full bg-[#00E676] opacity-80"></span>
+                        <span className="w-2 h-2 rounded-full bg-legacy-brand-bright opacity-80"></span>
                         <span className="text-white/60">BGB:</span>
                         <span className="text-white font-bold">{selectedProject.metrics.carbon_bgb_tc_ha} tC/ha</span>
                       </div>
                       <div className="flex items-center space-x-1.5">
-                        <span className="w-2 h-2 rounded-full bg-[#15803d]"></span>
+                        <span className="w-2 h-2 rounded-full bg-legacy-green-700"></span>
                         <span className="text-white/60">SOC:</span>
                         <span className="text-white font-bold">{selectedProject.metrics.carbon_soc_tc_ha} tC/ha</span>
                       </div>
@@ -900,11 +900,11 @@ const CarbonRegistry = () => {
                   </div>
 
                   {/* Cryptographic Provenance Root Seal (Constraint 1) */}
-                  <div className="bg-[#0D2B1A]/40 border border-[#00C853]/20 rounded-xl p-4 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
+                  <div className="bg-legacy-surface-raised/40 border border-legacy-brand-base/20 rounded-xl p-4 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
                     <div className="flex items-center space-x-2.5">
-                      <Lock size={18} className="text-[#00C853] shrink-0" />
+                      <Lock size={18} className="text-legacy-brand-base shrink-0" />
                       <div>
-                        <span className="font-mono text-[10px] text-[#00C853] uppercase tracking-wider block">
+                        <span className="font-mono text-[10px] text-legacy-brand-base uppercase tracking-wider block">
                           Cryptographic Provenance Chain Hash (Constraint 1)
                         </span>
                         <span className="font-mono text-xs text-white/90 break-all select-all">
@@ -914,9 +914,9 @@ const CarbonRegistry = () => {
                     </div>
                     <button
                       onClick={() => handleCopyHash(selectedProject.metrics.provenance_hash)}
-                      className="font-mono text-xs text-white/70 hover:text-white bg-[#040906] border border-[#152B1D] px-3 py-1.5 rounded-lg flex items-center space-x-1 shrink-0"
+                      className="font-mono text-xs text-white/70 hover:text-white bg-legacy-canvas-deep border border-legacy-divider-base px-3 py-1.5 rounded-lg flex items-center space-x-1 shrink-0"
                     >
-                      {copiedHash ? <Check size={12} className="text-[#00C853]" /> : <Copy size={12} />}
+                      {copiedHash ? <Check size={12} className="text-legacy-brand-base" /> : <Copy size={12} />}
                       <span>{copiedHash ? "Copied" : "Copy Hash"}</span>
                     </button>
                   </div>
@@ -926,10 +926,10 @@ const CarbonRegistry = () => {
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                   <button
                     onClick={handleOpenJcmExport}
-                    className="p-4 rounded-xl border border-[#152B1D] bg-[#08130C] hover:bg-[#0D2B1A] transition-all flex items-center justify-between text-left group cursor-pointer"
+                    className="p-4 rounded-xl border border-legacy-divider-base bg-legacy-surface-base hover:bg-legacy-surface-raised transition-all flex items-center justify-between text-left group cursor-pointer"
                   >
                     <div className="flex items-center space-x-3">
-                      <div className="w-9 h-9 rounded-lg bg-white/5 flex items-center justify-center text-[#00C853] group-hover:scale-110 transition-transform">
+                      <div className="w-9 h-9 rounded-lg bg-white/5 flex items-center justify-center text-legacy-brand-base group-hover:scale-110 transition-transform">
                         <Globe size={18} />
                       </div>
                       <div>
@@ -942,10 +942,10 @@ const CarbonRegistry = () => {
 
                   <button
                     onClick={() => setActiveTab('btr')}
-                    className="p-4 rounded-xl border border-[#152B1D] bg-[#08130C] hover:bg-[#0D2B1A] transition-all flex items-center justify-between text-left group cursor-pointer"
+                    className="p-4 rounded-xl border border-legacy-divider-base bg-legacy-surface-base hover:bg-legacy-surface-raised transition-all flex items-center justify-between text-left group cursor-pointer"
                   >
                     <div className="flex items-center space-x-3">
-                      <div className="w-9 h-9 rounded-lg bg-white/5 flex items-center justify-center text-[#00C853] group-hover:scale-110 transition-transform">
+                      <div className="w-9 h-9 rounded-lg bg-white/5 flex items-center justify-center text-legacy-brand-base group-hover:scale-110 transition-transform">
                         <FileSpreadsheet size={18} />
                       </div>
                       <div>
@@ -962,10 +962,10 @@ const CarbonRegistry = () => {
               <div className="lg:col-span-5 space-y-6">
                 
                 {/* Submission Control Panel */}
-                <div className="bg-[#08130C] border border-[#152B1D] rounded-2xl p-6 relative overflow-hidden flex flex-col justify-between">
+                <div className="bg-legacy-surface-base border border-legacy-divider-base rounded-2xl p-6 relative overflow-hidden flex flex-col justify-between">
                   <div className="space-y-4 mb-6">
                     <div className="flex items-center space-x-2">
-                      <Send size={18} className="text-[#00C853]" />
+                      <Send size={18} className="text-legacy-brand-base" />
                       <h3 className="font-sans font-bold text-base text-white">
                         National Registry Transmission Bridge
                       </h3>
@@ -975,21 +975,21 @@ const CarbonRegistry = () => {
                       specifications. Cryptographic signature and SHA-256 state hash are immutably signed.
                     </p>
 
-                    <div className="space-y-2 pt-2 border-t border-[#152B1D]">
+                    <div className="space-y-2 pt-2 border-t border-legacy-divider-base">
                       <div className="flex justify-between text-xs">
                         <span className="text-white/50">Target Endpoint:</span>
                         <span className="font-mono text-white">POST /national-api/v1/monitoring</span>
                       </div>
                       <div className="flex justify-between text-xs">
                         <span className="text-white/50">Attached Provenance:</span>
-                        <span className="font-mono text-[#00C853] flex items-center">
+                        <span className="font-mono text-legacy-brand-base flex items-center">
                           <CheckCircle2 size={12} className="mr-1" />
                           Validated
                         </span>
                       </div>
                       <div className="flex justify-between text-xs">
                         <span className="text-white/50">Positive List Clearance:</span>
-                        <span className="font-mono text-[#00C853] flex items-center">
+                        <span className="font-mono text-legacy-brand-base flex items-center">
                           <CheckCircle2 size={12} className="mr-1" />
                           Approved (DOE Gazette)
                         </span>
@@ -1007,7 +1007,7 @@ const CarbonRegistry = () => {
                   {submissionFeedback && (
                     <div className={`p-3.5 rounded-xl border text-xs mb-4 font-mono ${
                       submissionFeedback.status === 'success'
-                        ? 'bg-[#0D2B1A] border-[#00C853]/40 text-[#00C853]'
+                        ? 'bg-legacy-surface-raised border-legacy-brand-base/40 text-legacy-brand-base'
                         : 'bg-red-950/40 border-red-500/40 text-red-400'
                     }`}>
                       {submissionFeedback.message}
@@ -1017,7 +1017,7 @@ const CarbonRegistry = () => {
                   <button
                     onClick={() => setShowSubmissionModal(true)}
                     disabled={isSubmitting}
-                    className="w-full font-mono text-sm font-bold bg-[#00C853] hover:bg-[#00E676] text-[#040906] py-3.5 px-6 rounded-xl transition-all shadow-[0_0_20px_rgba(0,200,83,0.3)] flex items-center justify-center space-x-2 focus:outline-none focus:ring-2 focus:ring-[#00C853]"
+                    className="w-full font-mono text-sm font-bold bg-legacy-brand-base hover:bg-legacy-brand-bright text-legacy-canvas-deep py-3.5 px-6 rounded-xl transition-all shadow-[0_0_20px_rgba(0,200,83,0.3)] flex items-center justify-center space-x-2 focus:outline-none focus:ring-2 focus:ring-legacy-brand-base"
                   >
                     <Send size={16} />
                     <span>Submit Monitoring Report to Registry</span>
@@ -1025,10 +1025,10 @@ const CarbonRegistry = () => {
                 </div>
 
                 {/* Outbound Submissions Ledger */}
-                <div className="bg-[#08130C] border border-[#152B1D] rounded-2xl p-6">
+                <div className="bg-legacy-surface-base border border-legacy-divider-base rounded-2xl p-6">
                   <div className="flex items-center justify-between mb-4">
                     <h3 className="font-sans font-bold text-sm text-white flex items-center space-x-2">
-                      <Database size={15} className="text-[#00C853]" />
+                      <Database size={15} className="text-legacy-brand-base" />
                       <span>Outbound Audit Ledger</span>
                     </h3>
                     <span className="font-mono text-xs text-white/50">{submissions.length} Recorded</span>
@@ -1036,17 +1036,17 @@ const CarbonRegistry = () => {
 
                   <div className="space-y-3">
                     {submissions.map((sub, index) => (
-                      <div key={sub.id || index} className="bg-[#040906] border border-[#152B1D] p-3 rounded-xl space-y-1.5">
+                      <div key={sub.id || index} className="bg-legacy-canvas-deep border border-legacy-divider-base p-3 rounded-xl space-y-1.5">
                         <div className="flex items-center justify-between text-xs">
-                          <span className="font-mono font-bold text-[#00C853]">{sub.external_id}</span>
-                          <span className="font-mono text-[10px] px-2 py-0.5 rounded bg-[#0D2B1A] text-[#00C853] border border-[#00C853]/30 uppercase">
+                          <span className="font-mono font-bold text-legacy-brand-base">{sub.external_id}</span>
+                          <span className="font-mono text-[10px] px-2 py-0.5 rounded bg-legacy-surface-raised text-legacy-brand-base border border-legacy-brand-base/30 uppercase">
                             HTTP {sub.response_status || 201} OK
                           </span>
                         </div>
                         <div className="font-sans text-xs text-white/80 line-clamp-1">
                           {sub.project_name}
                         </div>
-                        <div className="flex items-center justify-between text-[10px] font-mono text-white/40 pt-1 border-t border-[#152B1D]">
+                        <div className="flex items-center justify-between text-[10px] font-mono text-white/40 pt-1 border-t border-legacy-divider-base">
                           <span>{new Date(sub.submitted_at).toLocaleDateString()}</span>
                           <span className="truncate max-w-[140px] text-white/60">
                             {sub.provenance_hash.substring(0, 16)}...
@@ -1068,12 +1068,12 @@ const CarbonRegistry = () => {
            ======================================================== */}
         {activeTab === 'rules' && (
           <div className="space-y-8 animate-fadeIn">
-            <div className="bg-[#08130C] border border-[#152B1D] rounded-2xl p-6 lg:p-8">
+            <div className="bg-legacy-surface-base border border-legacy-divider-base rounded-2xl p-6 lg:p-8">
               
-              <div className="flex flex-col lg:flex-row items-start lg:items-center justify-between gap-4 pb-6 border-b border-[#152B1D]">
+              <div className="flex flex-col lg:flex-row items-start lg:items-center justify-between gap-4 pb-6 border-b border-legacy-divider-base">
                 <div>
                   <h2 className="font-sans font-bold text-2xl text-white flex items-center gap-2">
-                    <ShieldCheck className="text-[#00C853]" size={24} />
+                    <ShieldCheck className="text-legacy-brand-base" size={24} />
                     DOE Positive / Negative List Rules Engine
                   </h2>
                   <p className="font-sans text-sm text-white/70 max-w-3xl mt-1">
@@ -1084,7 +1084,7 @@ const CarbonRegistry = () => {
 
                 <div className="flex items-center space-x-2">
                   <span className="font-mono text-xs text-white/50">Status:</span>
-                  <span className="font-mono text-xs text-[#00C853] bg-[#00C853]/10 border border-[#00C853]/20 px-3 py-1 rounded-full">
+                  <span className="font-mono text-xs text-legacy-brand-base bg-legacy-brand-base/10 border border-legacy-brand-base/20 px-3 py-1 rounded-full">
                     Active & Synchronized
                   </span>
                 </div>
@@ -1094,7 +1094,7 @@ const CarbonRegistry = () => {
               <div className="overflow-x-auto mt-6">
                 <table className="w-full text-left font-mono text-xs">
                   <thead>
-                    <tr className="border-b border-[#152B1D] text-white/50 uppercase tracking-wider">
+                    <tr className="border-b border-legacy-divider-base text-white/50 uppercase tracking-wider">
                       <th className="pb-3 px-4">Sector</th>
                       <th className="pb-3 px-4">Mitigation Activity</th>
                       <th className="pb-3 px-4">NDC 3.0 Type</th>
@@ -1103,19 +1103,19 @@ const CarbonRegistry = () => {
                       <th className="pb-3 px-4">Active</th>
                     </tr>
                   </thead>
-                  <tbody className="divide-y divide-[#152B1D]/60 text-white/80">
+                  <tbody className="divide-y divide-legacy-divider-base/60 text-white/80">
                     {rules.map((rule) => {
                       const isPositive = rule.status === 'positive_list';
                       const isNegative = rule.status === 'negative_list';
                       return (
-                        <tr key={rule.id} className="hover:bg-[#0D2B1A]/20 transition-colors">
+                        <tr key={rule.id} className="hover:bg-legacy-surface-raised/20 transition-colors">
                           <td className="py-3.5 px-4 font-bold text-white">{rule.sector}</td>
-                          <td className="py-3.5 px-4 text-[#00C853]">{rule.mitigation_type}</td>
+                          <td className="py-3.5 px-4 text-legacy-brand-base">{rule.mitigation_type}</td>
                           <td className="py-3.5 px-4 text-white/70 uppercase">{rule.ndc_commitment_type}</td>
                           <td className="py-3.5 px-4">
                             <span className={`inline-flex items-center px-2.5 py-1 rounded-full text-[11px] font-bold uppercase tracking-wider ${
                               isPositive
-                                ? 'bg-[#00C853]/10 text-[#00C853] border border-[#00C853]/30'
+                                ? 'bg-legacy-brand-base/10 text-legacy-brand-base border border-legacy-brand-base/30'
                                 : isNegative
                                 ? 'bg-red-500/10 text-red-400 border border-red-500/30'
                                 : 'bg-amber-500/10 text-amber-400 border border-amber-500/30'
@@ -1128,7 +1128,7 @@ const CarbonRegistry = () => {
                           <td className="py-3.5 px-4 text-white/60 font-sans text-xs max-w-xs truncate" title={rule.regulatory_reference}>
                             {rule.regulatory_reference || "Official Article 6 Guidance"}
                           </td>
-                          <td className="py-3.5 px-4 text-[#00C853]">
+                          <td className="py-3.5 px-4 text-legacy-brand-base">
                             {rule.is_active ? "TRUE" : "FALSE"}
                           </td>
                         </tr>
@@ -1139,9 +1139,9 @@ const CarbonRegistry = () => {
               </div>
 
               {/* Interactive Eligibility Tester */}
-              <div className="mt-10 p-6 rounded-2xl bg-[#040906] border border-[#152B1D]">
+              <div className="mt-10 p-6 rounded-2xl bg-legacy-canvas-deep border border-legacy-divider-base">
                 <h3 className="font-sans font-bold text-base text-white mb-2 flex items-center space-x-2">
-                  <Filter size={16} className="text-[#00C853]" />
+                  <Filter size={16} className="text-legacy-brand-base" />
                   <span>Interactive DOE Compliance Sandbox Evaluator</span>
                 </h3>
                 <p className="font-sans text-xs text-white/60 mb-4">
@@ -1154,7 +1154,7 @@ const CarbonRegistry = () => {
                     <select
                       value={testSector}
                       onChange={(e) => setTestSector(e.target.value)}
-                      className="w-full bg-[#08130C] border border-[#152B1D] text-white text-xs font-mono p-2.5 rounded-xl focus:border-[#00C853] focus:outline-none"
+                      className="w-full bg-legacy-surface-base border border-legacy-divider-base text-white text-xs font-mono p-2.5 rounded-xl focus:border-legacy-brand-base focus:outline-none"
                     >
                       <option value="Forestry">Forestry</option>
                       <option value="Agriculture">Agriculture</option>
@@ -1169,7 +1169,7 @@ const CarbonRegistry = () => {
                     <select
                       value={testMitigation}
                       onChange={(e) => setTestMitigation(e.target.value)}
-                      className="w-full bg-[#08130C] border border-[#152B1D] text-white text-xs font-mono p-2.5 rounded-xl focus:border-[#00C853] focus:outline-none"
+                      className="w-full bg-legacy-surface-base border border-legacy-divider-base text-white text-xs font-mono p-2.5 rounded-xl focus:border-legacy-brand-base focus:outline-none"
                     >
                       <option value="Afforestation">Afforestation</option>
                       <option value="Reforestation">Reforestation</option>
@@ -1186,7 +1186,7 @@ const CarbonRegistry = () => {
                     <select
                       value={testNdc}
                       onChange={(e) => setTestNdc(e.target.value)}
-                      className="w-full bg-[#08130C] border border-[#152B1D] text-white text-xs font-mono p-2.5 rounded-xl focus:border-[#00C853] focus:outline-none"
+                      className="w-full bg-legacy-surface-base border border-legacy-divider-base text-white text-xs font-mono p-2.5 rounded-xl focus:border-legacy-brand-base focus:outline-none"
                     >
                       <option value="conditional">conditional</option>
                       <option value="unconditional">unconditional</option>
@@ -1196,7 +1196,7 @@ const CarbonRegistry = () => {
 
                   <button
                     onClick={handleTestEligibility}
-                    className="font-mono text-xs font-bold text-[#040906] bg-[#00C853] hover:bg-[#00E676] p-2.5 rounded-xl transition-all shadow-[0_0_12px_rgba(0,200,83,0.2)]"
+                    className="font-mono text-xs font-bold text-legacy-canvas-deep bg-legacy-brand-base hover:bg-legacy-brand-bright p-2.5 rounded-xl transition-all shadow-[0_0_12px_rgba(0,200,83,0.2)]"
                   >
                     Run Compliance Check
                   </button>
@@ -1205,11 +1205,11 @@ const CarbonRegistry = () => {
                 {testResult && (
                   <div className={`mt-5 p-4 rounded-xl border font-mono text-xs flex items-start space-x-3 ${
                     testResult.eligible
-                      ? 'bg-[#0D2B1A] border-[#00C853]/40 text-[#00C853]'
+                      ? 'bg-legacy-surface-raised border-legacy-brand-base/40 text-legacy-brand-base'
                       : 'bg-red-950/40 border-red-500/40 text-red-400'
                   }`}>
                     {testResult.eligible ? (
-                      <CheckCircle2 size={18} className="shrink-0 mt-0.5 text-[#00C853]" />
+                      <CheckCircle2 size={18} className="shrink-0 mt-0.5 text-legacy-brand-base" />
                     ) : (
                       <AlertTriangle size={18} className="shrink-0 mt-0.5 text-red-400" />
                     )}
@@ -1237,12 +1237,12 @@ const CarbonRegistry = () => {
            ======================================================== */}
         {activeTab === 'jcm' && (
           <div className="space-y-8 animate-fadeIn">
-            <div className="bg-[#08130C] border border-[#152B1D] rounded-2xl p-6 lg:p-8">
+            <div className="bg-legacy-surface-base border border-legacy-divider-base rounded-2xl p-6 lg:p-8">
               
-              <div className="flex flex-col lg:flex-row items-start lg:items-center justify-between gap-4 pb-6 border-b border-[#152B1D]">
+              <div className="flex flex-col lg:flex-row items-start lg:items-center justify-between gap-4 pb-6 border-b border-legacy-divider-base">
                 <div>
                   <h2 className="font-sans font-bold text-2xl text-white flex items-center gap-2">
-                    <Globe className="text-[#00C853]" size={24} />
+                    <Globe className="text-legacy-brand-base" size={24} />
                     Japan-Bangladesh Joint Crediting Mechanism (JCM) Bilateral Connector
                   </h2>
                   <p className="font-sans text-sm text-white/70 max-w-3xl mt-1">
@@ -1253,7 +1253,7 @@ const CarbonRegistry = () => {
 
                 <button
                   onClick={handleOpenJcmExport}
-                  className="font-mono text-xs font-bold text-[#040906] bg-[#00C853] hover:bg-[#00E676] px-4 py-2.5 rounded-xl transition-all shadow-[0_0_16px_rgba(0,200,83,0.25)] flex items-center space-x-2"
+                  className="font-mono text-xs font-bold text-legacy-canvas-deep bg-legacy-brand-base hover:bg-legacy-brand-bright px-4 py-2.5 rounded-xl transition-all shadow-[0_0_16px_rgba(0,200,83,0.25)] flex items-center space-x-2"
                 >
                   <FileSpreadsheet size={15} />
                   <span>Inspect JCM Monitoring Form</span>
@@ -1263,22 +1263,22 @@ const CarbonRegistry = () => {
               {/* Methodology & Calculation Engine */}
               <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mt-6">
                 
-                <div className="bg-[#040906] border border-[#152B1D] p-5 rounded-xl space-y-3">
-                  <span className="font-mono text-[10px] text-[#00C853] uppercase tracking-wider block">Methodology Specification</span>
+                <div className="bg-legacy-canvas-deep border border-legacy-divider-base p-5 rounded-xl space-y-3">
+                  <span className="font-mono text-[10px] text-legacy-brand-base uppercase tracking-wider block">Methodology Specification</span>
                   <h3 className="font-sans font-bold text-base text-white">JCM_BD_AM001</h3>
                   <p className="font-sans text-xs text-white/60">
                     Afforestation and Reforestation of Degraded Mangrove and Coastal Ecosystems in Bangladesh.
                   </p>
-                  <div className="pt-2 border-t border-[#152B1D] space-y-1 font-mono text-xs text-white/70">
+                  <div className="pt-2 border-t border-legacy-divider-base space-y-1 font-mono text-xs text-white/70">
                     <div>Host Secretariat: <span className="text-white">MoEFCC DNA</span></div>
                     <div>Partner Secretariat: <span className="text-white">MURC / Japan MoE</span></div>
-                    <div>Bilateral Ratio: <span className="text-[#00C853] font-bold">50% BD / 50% JP</span></div>
+                    <div>Bilateral Ratio: <span className="text-legacy-brand-base font-bold">50% BD / 50% JP</span></div>
                   </div>
                 </div>
 
-                <div className="bg-[#040906] border border-[#152B1D] p-5 rounded-xl space-y-3">
-                  <span className="font-mono text-[10px] text-[#00C853] uppercase tracking-wider block">Net Reduction Equation</span>
-                  <div className="font-mono text-sm bg-[#08130C] border border-[#152B1D] p-3 rounded-lg text-white">
+                <div className="bg-legacy-canvas-deep border border-legacy-divider-base p-5 rounded-xl space-y-3">
+                  <span className="font-mono text-[10px] text-legacy-brand-base uppercase tracking-wider block">Net Reduction Equation</span>
+                  <div className="font-mono text-sm bg-legacy-surface-base border border-legacy-divider-base p-3 rounded-lg text-white">
                     ER_p = RE_p - PE_p
                   </div>
                   <div className="space-y-1.5 font-mono text-xs">
@@ -1290,22 +1290,22 @@ const CarbonRegistry = () => {
                       <span className="text-white/50">Project Emissions (PE_p):</span>
                       <span className="text-white font-bold">965.2 tCO2e</span>
                     </div>
-                    <div className="flex justify-between pt-1 border-t border-[#152B1D]">
-                      <span className="text-[#00C853]">Net Reductions (ER_p):</span>
-                      <span className="text-[#00C853] font-bold">9,274.8 tCO2e</span>
+                    <div className="flex justify-between pt-1 border-t border-legacy-divider-base">
+                      <span className="text-legacy-brand-base">Net Reductions (ER_p):</span>
+                      <span className="text-legacy-brand-base font-bold">9,274.8 tCO2e</span>
                     </div>
                   </div>
                 </div>
 
-                <div className="bg-[#040906] border border-[#152B1D] p-5 rounded-xl space-y-3">
-                  <span className="font-mono text-[10px] text-[#00C853] uppercase tracking-wider block">Bilateral Credit Distribution</span>
+                <div className="bg-legacy-canvas-deep border border-legacy-divider-base p-5 rounded-xl space-y-3">
+                  <span className="font-mono text-[10px] text-legacy-brand-base uppercase tracking-wider block">Bilateral Credit Distribution</span>
                   <div className="space-y-2">
                     <div className="flex justify-between font-mono text-xs">
                       <span className="text-white/70">Bangladesh (50%):</span>
-                      <span className="text-[#00C853] font-bold">4,637.4 tCO2e</span>
+                      <span className="text-legacy-brand-base font-bold">4,637.4 tCO2e</span>
                     </div>
-                    <div className="w-full bg-[#152B1D] h-2.5 rounded-full overflow-hidden">
-                      <div className="bg-[#00C853] h-full w-1/2"></div>
+                    <div className="w-full bg-legacy-divider-base h-2.5 rounded-full overflow-hidden">
+                      <div className="bg-legacy-brand-base h-full w-1/2"></div>
                     </div>
                     <div className="flex justify-between font-mono text-xs pt-1">
                       <span className="text-white/70">Japan ITMO (50%):</span>
@@ -1328,12 +1328,12 @@ const CarbonRegistry = () => {
            ======================================================== */}
         {activeTab === 'adjustments' && (
           <div className="space-y-8 animate-fadeIn">
-            <div className="bg-[#08130C] border border-[#152B1D] rounded-2xl p-6 lg:p-8">
+            <div className="bg-legacy-surface-base border border-legacy-divider-base rounded-2xl p-6 lg:p-8">
               
-              <div className="flex flex-col lg:flex-row items-start lg:items-center justify-between gap-4 pb-6 border-b border-[#152B1D]">
+              <div className="flex flex-col lg:flex-row items-start lg:items-center justify-between gap-4 pb-6 border-b border-legacy-divider-base">
                 <div>
                   <h2 className="font-sans font-bold text-2xl text-white flex items-center gap-2">
-                    <FileSpreadsheet className="text-[#00C853]" size={24} />
+                    <FileSpreadsheet className="text-legacy-brand-base" size={24} />
                     Article 6.2 Corresponding Adjustment (CA) Ledger
                   </h2>
                   <p className="font-sans text-sm text-white/70 max-w-3xl mt-1">
@@ -1344,7 +1344,7 @@ const CarbonRegistry = () => {
 
                 <div className="flex items-center space-x-2">
                   <span className="font-mono text-xs text-white/50">Total Adjusted:</span>
-                  <span className="font-mono text-xs font-bold text-[#00C853] bg-[#00C853]/10 border border-[#00C853]/30 px-3 py-1 rounded-full">
+                  <span className="font-mono text-xs font-bold text-legacy-brand-base bg-legacy-brand-base/10 border border-legacy-brand-base/30 px-3 py-1 rounded-full">
                     5,000.0 tCO2e
                   </span>
                 </div>
@@ -1354,7 +1354,7 @@ const CarbonRegistry = () => {
               <div className="overflow-x-auto mt-6">
                 <table className="w-full text-left font-mono text-xs">
                   <thead>
-                    <tr className="border-b border-[#152B1D] text-white/50 uppercase tracking-wider">
+                    <tr className="border-b border-legacy-divider-base text-white/50 uppercase tracking-wider">
                       <th className="pb-3 px-4">Serial Number Block</th>
                       <th className="pb-3 px-4">Sector</th>
                       <th className="pb-3 px-4">Metric Tonnes</th>
@@ -1365,17 +1365,17 @@ const CarbonRegistry = () => {
                       <th className="pb-3 px-4">Action</th>
                     </tr>
                   </thead>
-                  <tbody className="divide-y divide-[#152B1D]/60 text-white/80">
+                  <tbody className="divide-y divide-legacy-divider-base/60 text-white/80">
                     {adjustments.map((adj) => (
-                      <tr key={adj.id} className="hover:bg-[#0D2B1A]/20 transition-colors">
+                      <tr key={adj.id} className="hover:bg-legacy-surface-raised/20 transition-colors">
                         <td className="py-3.5 px-4 font-bold text-white">{adj.credit_serial_number}</td>
                         <td className="py-3.5 px-4 text-white/70">{adj.sector}</td>
-                        <td className="py-3.5 px-4 font-bold text-[#00C853]">{adj.metric_tonnes_co2e.toLocaleString()} tCO2e</td>
+                        <td className="py-3.5 px-4 font-bold text-legacy-brand-base">{adj.metric_tonnes_co2e.toLocaleString()} tCO2e</td>
                         <td className="py-3.5 px-4 text-white/80 font-sans text-xs">{adj.itmo_transfer_partner}</td>
                         <td className="py-3.5 px-4">
                           <span className={`px-2 py-0.5 rounded text-[10px] uppercase ${
                             adj.authorized_for_itmo
-                              ? 'bg-[#00C853]/10 text-[#00C853] border border-[#00C853]/30'
+                              ? 'bg-legacy-brand-base/10 text-legacy-brand-base border border-legacy-brand-base/30'
                               : 'bg-white/5 text-white/50'
                           }`}>
                             {adj.authorized_for_itmo ? "AUTHORIZED" : "DOMESTIC"}
@@ -1384,11 +1384,11 @@ const CarbonRegistry = () => {
                         <td className="py-3.5 px-4">
                           <span className={`inline-flex items-center px-2 py-0.5 rounded text-[10px] uppercase ${
                             adj.adjustment_applied
-                              ? 'bg-[#00C853]/10 text-[#00C853] border border-[#00C853]/30 font-bold'
+                              ? 'bg-legacy-brand-base/10 text-legacy-brand-base border border-legacy-brand-base/30 font-bold'
                               : 'bg-amber-500/10 text-amber-400 border border-amber-500/30'
                           }`}>
                             {adj.adjustment_applied ? (
-                              <CheckCircle2 size={11} className="mr-1 text-[#00C853]" />
+                              <CheckCircle2 size={11} className="mr-1 text-legacy-brand-base" />
                             ) : (
                               <Clock size={11} className="mr-1 text-amber-400" />
                             )}
@@ -1402,7 +1402,7 @@ const CarbonRegistry = () => {
                           {!adj.adjustment_applied && (
                             <button
                               onClick={() => handleConfirmAdjustment(adj.id)}
-                              className="font-mono text-[10px] text-[#040906] font-bold bg-[#00C853] hover:bg-[#00E676] px-2.5 py-1 rounded-md transition-all shadow-[0_0_8px_rgba(0,200,83,0.2)]"
+                              className="font-mono text-[10px] text-legacy-canvas-deep font-bold bg-legacy-brand-base hover:bg-legacy-brand-bright px-2.5 py-1 rounded-md transition-all shadow-[0_0_8px_rgba(0,200,83,0.2)]"
                             >
                               Confirm
                             </button>
@@ -1423,12 +1423,12 @@ const CarbonRegistry = () => {
            ======================================================== */}
         {activeTab === 'btr' && (
           <div className="space-y-8 animate-fadeIn">
-            <div className="bg-[#08130C] border border-[#152B1D] rounded-2xl p-6 lg:p-8">
+            <div className="bg-legacy-surface-base border border-legacy-divider-base rounded-2xl p-6 lg:p-8">
               
-              <div className="flex flex-col lg:flex-row items-start lg:items-center justify-between gap-4 pb-6 border-b border-[#152B1D]">
+              <div className="flex flex-col lg:flex-row items-start lg:items-center justify-between gap-4 pb-6 border-b border-legacy-divider-base">
                 <div>
                   <h2 className="font-sans font-bold text-2xl text-white flex items-center gap-2">
-                    <FileText className="text-[#00C853]" size={24} />
+                    <FileText className="text-legacy-brand-base" size={24} />
                     UNFCCC Article 13 & 6.2 Biennial Transparency Report (BTR) Export
                   </h2>
                   <p className="font-sans text-sm text-white/70 max-w-3xl mt-1">
@@ -1440,14 +1440,14 @@ const CarbonRegistry = () => {
                 <div className="flex items-center space-x-3">
                   <button
                     onClick={() => setShowBtrJsonModal(true)}
-                    className="font-mono text-xs text-white/80 hover:text-white bg-[#040906] border border-[#152B1D] px-3.5 py-2 rounded-xl transition-all"
+                    className="font-mono text-xs text-white/80 hover:text-white bg-legacy-canvas-deep border border-legacy-divider-base px-3.5 py-2 rounded-xl transition-all"
                   >
                     View JSON Payload
                   </button>
 
                   <button
                     onClick={handleDownloadBtrCsv}
-                    className="font-mono text-xs font-bold text-[#040906] bg-[#00C853] hover:bg-[#00E676] px-4 py-2 rounded-xl transition-all shadow-[0_0_16px_rgba(0,200,83,0.25)] flex items-center space-x-1.5"
+                    className="font-mono text-xs font-bold text-legacy-canvas-deep bg-legacy-brand-base hover:bg-legacy-brand-bright px-4 py-2 rounded-xl transition-all shadow-[0_0_16px_rgba(0,200,83,0.25)] flex items-center space-x-1.5"
                   >
                     <Download size={14} />
                     <span>Download Official BTR (CSV)</span>
@@ -1457,36 +1457,36 @@ const CarbonRegistry = () => {
 
               {/* National Inventory Sector Adjustments breakdown */}
               <div className="mt-8 space-y-4">
-                <h3 className="font-mono text-xs text-[#00C853] uppercase tracking-wider font-bold">
+                <h3 className="font-mono text-xs text-legacy-brand-base uppercase tracking-wider font-bold">
                   National Greenhouse Gas Inventory Sector Adjustments (tCO2e)
                 </h3>
 
                 <div className="grid grid-cols-1 sm:grid-cols-5 gap-3">
-                  <div className="bg-[#040906] border border-[#152B1D] p-4 rounded-xl">
+                  <div className="bg-legacy-canvas-deep border border-legacy-divider-base p-4 rounded-xl">
                     <span className="font-mono text-[10px] text-white/50 block">LULUCF / Forestry</span>
-                    <span className="font-mono text-xl font-bold text-[#00C853] mt-1 block">+10,000.0</span>
+                    <span className="font-mono text-xl font-bold text-legacy-brand-base mt-1 block">+10,000.0</span>
                     <span className="font-sans text-[10px] text-white/40">Sundarbans Afforestation</span>
                   </div>
 
-                  <div className="bg-[#040906] border border-[#152B1D] p-4 rounded-xl">
+                  <div className="bg-legacy-canvas-deep border border-legacy-divider-base p-4 rounded-xl">
                     <span className="font-mono text-[10px] text-white/50 block">Agriculture</span>
                     <span className="font-mono text-xl font-bold text-white mt-1 block">0.0</span>
                     <span className="font-sans text-[10px] text-white/40">AWD Pilot Reserve</span>
                   </div>
 
-                  <div className="bg-[#040906] border border-[#152B1D] p-4 rounded-xl">
+                  <div className="bg-legacy-canvas-deep border border-legacy-divider-base p-4 rounded-xl">
                     <span className="font-mono text-[10px] text-white/50 block">Energy</span>
                     <span className="font-mono text-xl font-bold text-white mt-1 block">0.0</span>
                     <span className="font-sans text-[10px] text-white/40">Clean Cooking</span>
                   </div>
 
-                  <div className="bg-[#040906] border border-[#152B1D] p-4 rounded-xl">
+                  <div className="bg-legacy-canvas-deep border border-legacy-divider-base p-4 rounded-xl">
                     <span className="font-mono text-[10px] text-white/50 block">Waste</span>
                     <span className="font-mono text-xl font-bold text-white mt-1 block">0.0</span>
                     <span className="font-sans text-[10px] text-white/40">Pending Review</span>
                   </div>
 
-                  <div className="bg-[#040906] border border-[#152B1D] p-4 rounded-xl">
+                  <div className="bg-legacy-canvas-deep border border-legacy-divider-base p-4 rounded-xl">
                     <span className="font-mono text-[10px] text-white/50 block">IPPU</span>
                     <span className="font-mono text-xl font-bold text-white mt-1 block">0.0</span>
                     <span className="font-sans text-[10px] text-white/40">Zero Authorized</span>
@@ -1505,10 +1505,10 @@ const CarbonRegistry = () => {
          ======================================================== */}
       {showSubmissionModal && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-md animate-fadeIn">
-          <div className="bg-[#08130C] border border-[#152B1D] rounded-2xl max-w-lg w-full p-6 space-y-6 shadow-[0_20px_60px_rgba(0,0,0,0.8)]">
-            <div className="flex items-center justify-between pb-4 border-b border-[#152B1D]">
+          <div className="bg-legacy-surface-base border border-legacy-divider-base rounded-2xl max-w-lg w-full p-6 space-y-6 shadow-[0_20px_60px_rgba(0,0,0,0.8)]">
+            <div className="flex items-center justify-between pb-4 border-b border-legacy-divider-base">
               <div className="flex items-center space-x-2">
-                <Send size={18} className="text-[#00C853]" />
+                <Send size={18} className="text-legacy-brand-base" />
                 <h3 className="font-sans font-bold text-lg text-white">
                   Confirm Transmission to National Registry
                 </h3>
@@ -1522,14 +1522,14 @@ const CarbonRegistry = () => {
             </div>
 
             <div className="space-y-3 font-mono text-xs">
-              <div className="p-3 bg-[#040906] rounded-xl border border-[#152B1D] space-y-2">
+              <div className="p-3 bg-legacy-canvas-deep rounded-xl border border-legacy-divider-base space-y-2">
                 <div className="flex justify-between">
                   <span className="text-white/50">Target Registry:</span>
                   <span className="text-white">UNDP National Carbon Registry</span>
                 </div>
                 <div className="flex justify-between">
                   <span className="text-white/50">Project ID:</span>
-                  <span className="text-[#00C853]">{selectedProject.external_project_id}</span>
+                  <span className="text-legacy-brand-base">{selectedProject.external_project_id}</span>
                 </div>
                 <div className="flex justify-between">
                   <span className="text-white/50">Reported Volume:</span>
@@ -1537,7 +1537,7 @@ const CarbonRegistry = () => {
                 </div>
                 <div className="flex justify-between">
                   <span className="text-white/50">Provenance Hash:</span>
-                  <span className="text-[#00C853] font-mono text-[11px] truncate max-w-[200px]">
+                  <span className="text-legacy-brand-base font-mono text-[11px] truncate max-w-[200px]">
                     {selectedProject.metrics.provenance_hash}
                   </span>
                 </div>
@@ -1549,10 +1549,10 @@ const CarbonRegistry = () => {
               </p>
             </div>
 
-            <div className="flex items-center justify-end space-x-3 pt-4 border-t border-[#152B1D]">
+            <div className="flex items-center justify-end space-x-3 pt-4 border-t border-legacy-divider-base">
               <button
                 onClick={() => setShowSubmissionModal(false)}
-                className="font-mono text-xs text-white/70 hover:text-white px-4 py-2.5 rounded-xl border border-[#152B1D]"
+                className="font-mono text-xs text-white/70 hover:text-white px-4 py-2.5 rounded-xl border border-legacy-divider-base"
               >
                 Cancel
               </button>
@@ -1562,7 +1562,7 @@ const CarbonRegistry = () => {
                   handleSubmitMonitoringReport();
                 }}
                 disabled={isSubmitting}
-                className="font-mono text-xs font-bold text-[#040906] bg-[#00C853] hover:bg-[#00E676] px-5 py-2.5 rounded-xl shadow-[0_0_16px_rgba(0,200,83,0.3)]"
+                className="font-mono text-xs font-bold text-legacy-canvas-deep bg-legacy-brand-base hover:bg-legacy-brand-bright px-5 py-2.5 rounded-xl shadow-[0_0_16px_rgba(0,200,83,0.3)]"
               >
                 {isSubmitting ? "Transmitting..." : "Confirm & Send"}
               </button>
@@ -1576,10 +1576,10 @@ const CarbonRegistry = () => {
          ======================================================== */}
       {showJcmModal && jcmData && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-md animate-fadeIn">
-          <div className="bg-[#08130C] border border-[#152B1D] rounded-2xl max-w-2xl w-full p-6 space-y-6 shadow-[0_20px_60px_rgba(0,0,0,0.8)] max-h-[85vh] flex flex-col">
-            <div className="flex items-center justify-between pb-4 border-b border-[#152B1D]">
+          <div className="bg-legacy-surface-base border border-legacy-divider-base rounded-2xl max-w-2xl w-full p-6 space-y-6 shadow-[0_20px_60px_rgba(0,0,0,0.8)] max-h-[85vh] flex flex-col">
+            <div className="flex items-center justify-between pb-4 border-b border-legacy-divider-base">
               <div className="flex items-center space-x-2">
-                <Globe size={18} className="text-[#00C853]" />
+                <Globe size={18} className="text-legacy-brand-base" />
                 <h3 className="font-sans font-bold text-lg text-white">
                   Japan-Bangladesh JCM Monitoring Form Formatted Output
                 </h3>
@@ -1593,36 +1593,36 @@ const CarbonRegistry = () => {
             </div>
 
             <div className="overflow-y-auto flex-1 font-mono text-xs space-y-4 pr-2">
-              <div className="p-3 bg-[#040906] rounded-xl border border-[#152B1D] space-y-1.5">
-                <div className="text-[#00C853] font-bold">DOCUMENT METADATA</div>
+              <div className="p-3 bg-legacy-canvas-deep rounded-xl border border-legacy-divider-base space-y-1.5">
+                <div className="text-legacy-brand-base font-bold">DOCUMENT METADATA</div>
                 <div className="text-white/70">Type: {jcmData.document_metadata?.document_type}</div>
                 <div className="text-white/70">Secretariat: {jcmData.document_metadata?.secretariat}</div>
               </div>
 
-              <div className="p-3 bg-[#040906] rounded-xl border border-[#152B1D] space-y-1.5">
-                <div className="text-[#00C853] font-bold">EMISSION REDUCTIONS (ER_p = RE_p - PE_p)</div>
+              <div className="p-3 bg-legacy-canvas-deep rounded-xl border border-legacy-divider-base space-y-1.5">
+                <div className="text-legacy-brand-base font-bold">EMISSION REDUCTIONS (ER_p = RE_p - PE_p)</div>
                 <div className="text-white/70">Formula: {jcmData.emission_reduction_calculation?.formula}</div>
                 <div className="text-white/70">Reference Emissions: {jcmData.emission_reduction_calculation?.reference_emissions_re_p_tco2e} tCO2e</div>
                 <div className="text-white/70">Project Emissions: {jcmData.emission_reduction_calculation?.project_emissions_pe_p_tco2e} tCO2e</div>
-                <div className="text-[#00C853] font-bold">Net Emission Reductions: {jcmData.emission_reduction_calculation?.net_emission_reductions_er_p_tco2e} tCO2e</div>
+                <div className="text-legacy-brand-base font-bold">Net Emission Reductions: {jcmData.emission_reduction_calculation?.net_emission_reductions_er_p_tco2e} tCO2e</div>
               </div>
 
-              <div className="p-3 bg-[#040906] rounded-xl border border-[#152B1D] space-y-1.5">
-                <div className="text-[#00C853] font-bold">BILATERAL ALLOCATION SPLIT</div>
+              <div className="p-3 bg-legacy-canvas-deep rounded-xl border border-legacy-divider-base space-y-1.5">
+                <div className="text-legacy-brand-base font-bold">BILATERAL ALLOCATION SPLIT</div>
                 <div className="text-white/70">Bangladesh NDC Retention (50%): {jcmData.emission_reduction_calculation?.bilateral_allocation_split?.bangladesh_retained_credits_tco2e} tCO2e</div>
                 <div className="text-white/70">Japan ITMO Transfer (50%): {jcmData.emission_reduction_calculation?.bilateral_allocation_split?.japan_transferred_credits_tco2e} tCO2e</div>
               </div>
 
-              <div className="p-3 bg-[#040906] rounded-xl border border-[#152B1D] space-y-1.5">
-                <div className="text-[#00C853] font-bold">PROVENANCE SEAL</div>
+              <div className="p-3 bg-legacy-canvas-deep rounded-xl border border-legacy-divider-base space-y-1.5">
+                <div className="text-legacy-brand-base font-bold">PROVENANCE SEAL</div>
                 <div className="text-white/70 break-all">{jcmData.cryptographic_verification?.provenance_hash_attached}</div>
               </div>
             </div>
 
-            <div className="flex items-center justify-end space-x-3 pt-4 border-t border-[#152B1D]">
+            <div className="flex items-center justify-end space-x-3 pt-4 border-t border-legacy-divider-base">
               <button
                 onClick={() => setShowJcmModal(false)}
-                className="font-mono text-xs text-white/70 hover:text-white px-4 py-2 rounded-xl border border-[#152B1D]"
+                className="font-mono text-xs text-white/70 hover:text-white px-4 py-2 rounded-xl border border-legacy-divider-base"
               >
                 Close
               </button>
@@ -1636,10 +1636,10 @@ const CarbonRegistry = () => {
          ======================================================== */}
       {showBtrJsonModal && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-md animate-fadeIn">
-          <div className="bg-[#08130C] border border-[#152B1D] rounded-2xl max-w-2xl w-full p-6 space-y-6 shadow-[0_20px_60px_rgba(0,0,0,0.8)] max-h-[85vh] flex flex-col">
-            <div className="flex items-center justify-between pb-4 border-b border-[#152B1D]">
+          <div className="bg-legacy-surface-base border border-legacy-divider-base rounded-2xl max-w-2xl w-full p-6 space-y-6 shadow-[0_20px_60px_rgba(0,0,0,0.8)] max-h-[85vh] flex flex-col">
+            <div className="flex items-center justify-between pb-4 border-b border-legacy-divider-base">
               <div className="flex items-center space-x-2">
-                <FileText size={18} className="text-[#00C853]" />
+                <FileText size={18} className="text-legacy-brand-base" />
                 <h3 className="font-sans font-bold text-lg text-white">
                   UNFCCC Article 13 & 6.2 Structured Summary (JSON)
                 </h3>
@@ -1652,7 +1652,7 @@ const CarbonRegistry = () => {
               </button>
             </div>
 
-            <div className="overflow-y-auto flex-1 font-mono text-xs bg-[#040906] p-4 rounded-xl border border-[#152B1D] text-[#00C853]">
+            <div className="overflow-y-auto flex-1 font-mono text-xs bg-legacy-canvas-deep p-4 rounded-xl border border-legacy-divider-base text-legacy-brand-base">
               <pre className="whitespace-pre-wrap">
 {JSON.stringify({
   reporting_party: "People's Republic of Bangladesh",
@@ -1677,10 +1677,10 @@ const CarbonRegistry = () => {
               </pre>
             </div>
 
-            <div className="flex items-center justify-end space-x-3 pt-4 border-t border-[#152B1D]">
+            <div className="flex items-center justify-end space-x-3 pt-4 border-t border-legacy-divider-base">
               <button
                 onClick={() => setShowBtrJsonModal(false)}
-                className="font-mono text-xs text-white/70 hover:text-white px-4 py-2 rounded-xl border border-[#152B1D]"
+                className="font-mono text-xs text-white/70 hover:text-white px-4 py-2 rounded-xl border border-legacy-divider-base"
               >
                 Close
               </button>

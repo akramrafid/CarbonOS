@@ -1,4 +1,5 @@
 import colors from 'tailwindcss/colors.js';
+import { legacyColors } from './src/styles/legacyColors.js';
 
 /** @type {import('tailwindcss').Config} */
 export default {
@@ -9,6 +10,7 @@ export default {
   theme: {
     extend: {
       colors: {
+        ...legacyColors,
         forest: 'var(--color-forest)',
         carbon: 'var(--color-carbon)',
         emerald: {

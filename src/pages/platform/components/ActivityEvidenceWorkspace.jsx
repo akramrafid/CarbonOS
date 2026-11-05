@@ -550,46 +550,46 @@ export const ActivityEvidenceWorkspace = ({
     <div className="space-y-6 text-left">
       {/* Top Banner / Workspace Selector */}
       <div className={`rounded-3xl p-6 sm:p-8 border shadow-xl transition-all relative overflow-hidden ${
-        isLight ? 'bg-white border-[#E2E8F0]' : 'bg-[#08130C] border-[#152B1D]'
+        isLight ? 'bg-white border-legacy-slate-200' : 'bg-legacy-surface-base border-legacy-divider-base'
       }`}>
-        <div className="absolute top-0 right-0 w-96 h-96 bg-[#00C853]/5 rounded-full blur-3xl pointer-events-none" />
+        <div className="absolute top-0 right-0 w-96 h-96 bg-legacy-brand-base/5 rounded-full blur-3xl pointer-events-none" />
 
         <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-6 relative z-10">
           <div>
-            <div className="flex items-center space-x-2 text-[10px] font-mono uppercase tracking-widest text-[#00C853] font-bold">
+            <div className="flex items-center space-x-2 text-[10px] font-mono uppercase tracking-widest text-legacy-brand-base font-bold">
               <ShieldCheck className="w-4 h-4" />
               <span>ISO 14064-1 & GHG Protocol Activity Data Center</span>
             </div>
             <h1 className={`font-sans font-bold text-2xl sm:text-3xl mt-1 tracking-tight ${
-              isLight ? 'text-[#0F2417]' : 'text-white'
+              isLight ? 'text-legacy-forest-43' : 'text-white'
             }`}>
               Activity Data & Evidence Register
             </h1>
             <p className={`text-xs sm:text-sm mt-1 max-w-2xl leading-relaxed ${
-              isLight ? 'text-slate-500' : 'text-[#7C9A88]'
+              isLight ? 'text-slate-500' : 'text-legacy-text-muted'
             }`}>
-              Maintain tamper-evident activity records, emission factor version lineage, and cross-referenced primary evidence documents for <span className="font-bold text-[#00C853]">{activeClient.legalName}</span>.
+              Maintain tamper-evident activity records, emission factor version lineage, and cross-referenced primary evidence documents for <span className="font-bold text-legacy-brand-base">{activeClient.legalName}</span>.
             </p>
 
             <div className="flex flex-wrap items-center gap-3 mt-4 text-[11px] font-mono">
               <span className={`px-2.5 py-1 rounded-lg border flex items-center space-x-1.5 ${
-                isLight ? 'bg-slate-50 border-slate-200 text-slate-700' : 'bg-[#0B2114] border-[#174D2B] text-emerald-300'
+                isLight ? 'bg-slate-50 border-slate-200 text-slate-700' : 'bg-legacy-forest-50 border-legacy-forest-16 text-emerald-300'
               }`}>
-                <Building className="w-3.5 h-3.5 text-[#00C853]" />
+                <Building className="w-3.5 h-3.5 text-legacy-brand-base" />
                 <span>Sector: <strong>{activeClient.sector}</strong></span>
               </span>
 
               <span className={`px-2.5 py-1 rounded-lg border flex items-center space-x-1.5 ${
-                isLight ? 'bg-slate-50 border-slate-200 text-slate-700' : 'bg-[#0B2114] border-[#174D2B] text-emerald-300'
+                isLight ? 'bg-slate-50 border-slate-200 text-slate-700' : 'bg-legacy-forest-50 border-legacy-forest-16 text-emerald-300'
               }`}>
-                <UserCheck className="w-3.5 h-3.5 text-[#00C853]" />
+                <UserCheck className="w-3.5 h-3.5 text-legacy-brand-base" />
                 <span>Assigned Lead: <strong>{activeClient.assignedAuditor}</strong></span>
               </span>
 
               <span className={`px-2.5 py-1 rounded-lg border flex items-center space-x-1.5 ${
-                isLight ? 'bg-slate-50 border-slate-200 text-slate-700' : 'bg-[#0B2114] border-[#174D2B] text-emerald-300'
+                isLight ? 'bg-slate-50 border-slate-200 text-slate-700' : 'bg-legacy-forest-50 border-legacy-forest-16 text-emerald-300'
               }`}>
-                <MapPin className="w-3.5 h-3.5 text-[#00C853]" />
+                <MapPin className="w-3.5 h-3.5 text-legacy-brand-base" />
                 <span>{activeClient.facilities?.length || 1} Registered Sites</span>
               </span>
             </div>
@@ -599,9 +599,9 @@ export const ActivityEvidenceWorkspace = ({
           <div className="flex flex-wrap items-center gap-3">
             <button
               onClick={() => setIsAddModalOpen(true)}
-              className="bg-[#00C853] hover:bg-[#00E676] text-[#05180B] font-sans font-bold text-xs py-2.5 px-4 rounded-xl shadow-[0_2px_12px_rgba(0,200,83,0.3)] transition-all flex items-center space-x-2 cursor-pointer"
+              className="bg-legacy-brand-base hover:bg-legacy-brand-bright text-legacy-forest-67 font-sans font-bold text-xs py-2.5 px-4 rounded-xl shadow-[0_2px_12px_rgba(0,200,83,0.3)] transition-all flex items-center space-x-2 cursor-pointer"
             >
-              <Plus className="w-4 h-4 text-[#05180B]" />
+              <Plus className="w-4 h-4 text-legacy-forest-67" />
               <span>Record Activity Data</span>
             </button>
 
@@ -610,34 +610,34 @@ export const ActivityEvidenceWorkspace = ({
               className={`font-sans font-bold text-xs py-2.5 px-4 rounded-xl border transition-all flex items-center space-x-2 cursor-pointer ${
                 isLight 
                   ? 'bg-white border-slate-300 text-slate-700 hover:bg-slate-50' 
-                  : 'bg-[#040906] border-[#152B1D] text-white hover:border-[#00C853]/40'
+                  : 'bg-legacy-canvas-deep border-legacy-divider-base text-white hover:border-legacy-brand-base/40'
               }`}
             >
-              <Download className="w-4 h-4 text-[#00C853]" />
+              <Download className="w-4 h-4 text-legacy-brand-base" />
               <span>Export CSV</span>
             </button>
           </div>
         </div>
 
         {/* Metric Summary Cards */}
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mt-8 pt-6 border-t border-[#152B1D]/40">
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mt-8 pt-6 border-t border-legacy-divider-base/40">
           <div className={`p-4 rounded-2xl border ${
-            isLight ? 'bg-slate-50/70 border-slate-200' : 'bg-[#040906] border-[#152B1D]'
+            isLight ? 'bg-slate-50/70 border-slate-200' : 'bg-legacy-canvas-deep border-legacy-divider-base'
           }`}>
-            <span className="text-[10px] font-mono uppercase text-[#7C9A88] block">Total Carbon Inventory</span>
+            <span className="text-[10px] font-mono uppercase text-legacy-text-muted block">Total Carbon Inventory</span>
             <div className="flex items-baseline space-x-1.5 mt-1">
-              <span className={`text-2xl font-mono font-bold ${isLight ? 'text-[#0F2417]' : 'text-white'}`}>
+              <span className={`text-2xl font-mono font-bold ${isLight ? 'text-legacy-forest-43' : 'text-white'}`}>
                 {fmt(totalEmissions, 2)}
               </span>
-              <span className="text-xs font-mono text-[#00C853]">tCO₂e</span>
+              <span className="text-xs font-mono text-legacy-brand-base">tCO₂e</span>
             </div>
-            <span className="text-[10px] text-[#7C9A88] mt-1 block">8 Traceable Activities</span>
+            <span className="text-[10px] text-legacy-text-muted mt-1 block">8 Traceable Activities</span>
           </div>
 
           <div className={`p-4 rounded-2xl border ${
-            isLight ? 'bg-slate-50/70 border-slate-200' : 'bg-[#040906] border-[#152B1D]'
+            isLight ? 'bg-slate-50/70 border-slate-200' : 'bg-legacy-canvas-deep border-legacy-divider-base'
           }`}>
-            <span className="text-[10px] font-mono uppercase text-[#7C9A88] block">Scope Breakdown</span>
+            <span className="text-[10px] font-mono uppercase text-legacy-text-muted block">Scope Breakdown</span>
             <div className="text-xs font-mono space-y-0.5 mt-1">
               <div className="flex justify-between">
                 <span className="text-amber-400">Scope 1:</span>
@@ -655,46 +655,46 @@ export const ActivityEvidenceWorkspace = ({
           </div>
 
           <div className={`p-4 rounded-2xl border ${
-            isLight ? 'bg-slate-50/70 border-slate-200' : 'bg-[#040906] border-[#152B1D]'
+            isLight ? 'bg-slate-50/70 border-slate-200' : 'bg-legacy-canvas-deep border-legacy-divider-base'
           }`}>
-            <span className="text-[10px] font-mono uppercase text-[#7C9A88] block">Evidence Ratio</span>
+            <span className="text-[10px] font-mono uppercase text-legacy-text-muted block">Evidence Ratio</span>
             <div className="flex items-baseline space-x-1.5 mt-1">
-              <span className="text-2xl font-mono font-bold text-[#00C853]">
+              <span className="text-2xl font-mono font-bold text-legacy-brand-base">
                 {evidenceCoverage}%
               </span>
               <span className="text-xs font-mono text-emerald-400">verified</span>
             </div>
-            <span className="text-[10px] text-[#7C9A88] mt-1 block">DESCO/DPDC, fuel & freight invoices</span>
+            <span className="text-[10px] text-legacy-text-muted mt-1 block">DESCO/DPDC, fuel & freight invoices</span>
           </div>
 
           <div className={`p-4 rounded-2xl border ${
-            isLight ? 'bg-slate-50/70 border-slate-200' : 'bg-[#040906] border-[#152B1D]'
+            isLight ? 'bg-slate-50/70 border-slate-200' : 'bg-legacy-canvas-deep border-legacy-divider-base'
           }`}>
-            <span className="text-[10px] font-mono uppercase text-[#7C9A88] block">Assurance Level</span>
+            <span className="text-[10px] font-mono uppercase text-legacy-text-muted block">Assurance Level</span>
             <div className="flex items-center space-x-1.5 mt-1">
-              <ShieldCheck className="w-5 h-5 text-[#00C853]" />
-              <span className={`text-base font-sans font-bold ${isLight ? 'text-[#0F2417]' : 'text-white'}`}>
+              <ShieldCheck className="w-5 h-5 text-legacy-brand-base" />
+              <span className={`text-base font-sans font-bold ${isLight ? 'text-legacy-forest-43' : 'text-white'}`}>
                 ISAE 3410
               </span>
             </div>
-            <span className="text-[10px] text-[#00C853] mt-1 block">ISO 14064-1 Pre-Audit Ready</span>
+            <span className="text-[10px] text-legacy-brand-base mt-1 block">ISO 14064-1 Pre-Audit Ready</span>
           </div>
         </div>
       </div>
 
       {/* Main Tabs & Search Toolbar */}
       <div className={`rounded-3xl p-5 border shadow-xl ${
-        isLight ? 'bg-white border-[#E2E8F0]' : 'bg-[#08130C] border-[#152B1D]'
+        isLight ? 'bg-white border-legacy-slate-200' : 'bg-legacy-surface-base border-legacy-divider-base'
       }`}>
-        <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 pb-4 border-b border-[#152B1D]/40">
+        <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 pb-4 border-b border-legacy-divider-base/40">
           {/* Tab Switcher */}
-          <div className="flex items-center space-x-2 bg-black/20 p-1 rounded-2xl border border-[#152B1D]">
+          <div className="flex items-center space-x-2 bg-black/20 p-1 rounded-2xl border border-legacy-divider-base">
             <button
               onClick={() => setActiveTab('activities')}
               className={`px-4 py-2 rounded-xl text-xs font-sans font-bold transition-all cursor-pointer flex items-center space-x-2 ${
                 activeTab === 'activities'
-                  ? 'bg-[#00C853] text-[#05180B] shadow-sm'
-                  : 'text-[#7C9A88] hover:text-white'
+                  ? 'bg-legacy-brand-base text-legacy-forest-67 shadow-sm'
+                  : 'text-legacy-text-muted hover:text-white'
               }`}
             >
               <Layers className="w-3.5 h-3.5" />
@@ -705,8 +705,8 @@ export const ActivityEvidenceWorkspace = ({
               onClick={() => setActiveTab('evidence')}
               className={`px-4 py-2 rounded-xl text-xs font-sans font-bold transition-all cursor-pointer flex items-center space-x-2 ${
                 activeTab === 'evidence'
-                  ? 'bg-[#00C853] text-[#05180B] shadow-sm'
-                  : 'text-[#7C9A88] hover:text-white'
+                  ? 'bg-legacy-brand-base text-legacy-forest-67 shadow-sm'
+                  : 'text-legacy-text-muted hover:text-white'
               }`}
             >
               <FileCheck className="w-3.5 h-3.5" />
@@ -722,8 +722,8 @@ export const ActivityEvidenceWorkspace = ({
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
               placeholder={activeTab === 'activities' ? "Search activity, department, or owner..." : "Search document name, issuer, hash..."}
-              className={`w-full pl-10 pr-4 py-2 rounded-xl text-xs font-sans border focus:outline-none focus:border-[#00C853] ${
-                isLight ? 'bg-slate-50 border-slate-300 text-slate-800' : 'bg-[#040906] border-[#152B1D] text-white'
+              className={`w-full pl-10 pr-4 py-2 rounded-xl text-xs font-sans border focus:outline-none focus:border-legacy-brand-base ${
+                isLight ? 'bg-slate-50 border-slate-300 text-slate-800' : 'bg-legacy-canvas-deep border-legacy-divider-base text-white'
               }`}
             />
             {searchQuery && (
@@ -741,12 +741,12 @@ export const ActivityEvidenceWorkspace = ({
         {activeTab === 'activities' && (
           <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 pt-4">
             <div>
-              <label className="block text-[10px] font-mono uppercase text-[#7C9A88] mb-1 font-bold">Scope</label>
+              <label className="block text-[10px] font-mono uppercase text-legacy-text-muted mb-1 font-bold">Scope</label>
               <select
                 value={scopeFilter}
                 onChange={(e) => setScopeFilter(e.target.value)}
-                className={`w-full text-xs font-sans p-2 rounded-xl border focus:outline-none focus:border-[#00C853] cursor-pointer ${
-                  isLight ? 'bg-slate-50 border-slate-200 text-slate-800' : 'bg-[#040906] border-[#152B1D] text-white'
+                className={`w-full text-xs font-sans p-2 rounded-xl border focus:outline-none focus:border-legacy-brand-base cursor-pointer ${
+                  isLight ? 'bg-slate-50 border-slate-200 text-slate-800' : 'bg-legacy-canvas-deep border-legacy-divider-base text-white'
                 }`}
               >
                 <option value="all">All Scopes (1, 2, 3)</option>
@@ -757,12 +757,12 @@ export const ActivityEvidenceWorkspace = ({
             </div>
 
             <div>
-              <label className="block text-[10px] font-mono uppercase text-[#7C9A88] mb-1 font-bold">Facility / Site</label>
+              <label className="block text-[10px] font-mono uppercase text-legacy-text-muted mb-1 font-bold">Facility / Site</label>
               <select
                 value={facilityFilter}
                 onChange={(e) => setFacilityFilter(e.target.value)}
-                className={`w-full text-xs font-sans p-2 rounded-xl border focus:outline-none focus:border-[#00C853] cursor-pointer ${
-                  isLight ? 'bg-slate-50 border-slate-200 text-slate-800' : 'bg-[#040906] border-[#152B1D] text-white'
+                className={`w-full text-xs font-sans p-2 rounded-xl border focus:outline-none focus:border-legacy-brand-base cursor-pointer ${
+                  isLight ? 'bg-slate-50 border-slate-200 text-slate-800' : 'bg-legacy-canvas-deep border-legacy-divider-base text-white'
                 }`}
               >
                 <option value="all">All Facilities ({activeClient.facilities?.length || 1})</option>
@@ -773,12 +773,12 @@ export const ActivityEvidenceWorkspace = ({
             </div>
 
             <div>
-              <label className="block text-[10px] font-mono uppercase text-[#7C9A88] mb-1 font-bold">Data Quality</label>
+              <label className="block text-[10px] font-mono uppercase text-legacy-text-muted mb-1 font-bold">Data Quality</label>
               <select
                 value={qualityFilter}
                 onChange={(e) => setQualityFilter(e.target.value)}
-                className={`w-full text-xs font-sans p-2 rounded-xl border focus:outline-none focus:border-[#00C853] cursor-pointer ${
-                  isLight ? 'bg-slate-50 border-slate-200 text-slate-800' : 'bg-[#040906] border-[#152B1D] text-white'
+                className={`w-full text-xs font-sans p-2 rounded-xl border focus:outline-none focus:border-legacy-brand-base cursor-pointer ${
+                  isLight ? 'bg-slate-50 border-slate-200 text-slate-800' : 'bg-legacy-canvas-deep border-legacy-divider-base text-white'
                 }`}
               >
                 <option value="all">All Data Qualities</option>
@@ -789,12 +789,12 @@ export const ActivityEvidenceWorkspace = ({
             </div>
 
             <div>
-              <label className="block text-[10px] font-mono uppercase text-[#7C9A88] mb-1 font-bold">Audit Status</label>
+              <label className="block text-[10px] font-mono uppercase text-legacy-text-muted mb-1 font-bold">Audit Status</label>
               <select
                 value={statusFilter}
                 onChange={(e) => setStatusFilter(e.target.value)}
-                className={`w-full text-xs font-sans p-2 rounded-xl border focus:outline-none focus:border-[#00C853] cursor-pointer ${
-                  isLight ? 'bg-slate-50 border-slate-200 text-slate-800' : 'bg-[#040906] border-[#152B1D] text-white'
+                className={`w-full text-xs font-sans p-2 rounded-xl border focus:outline-none focus:border-legacy-brand-base cursor-pointer ${
+                  isLight ? 'bg-slate-50 border-slate-200 text-slate-800' : 'bg-legacy-canvas-deep border-legacy-divider-base text-white'
                 }`}
               >
                 <option value="all">All Audit Statuses</option>
@@ -813,7 +813,7 @@ export const ActivityEvidenceWorkspace = ({
             <table className="w-full text-left font-sans text-xs border-collapse min-w-[1100px]">
               <thead>
                 <tr className={`border-b text-[10px] font-mono uppercase tracking-wider ${
-                  isLight ? 'text-slate-500 border-slate-200 bg-slate-50/50' : 'text-[#7C9A88] border-[#152B1D] bg-[#040906]/60'
+                  isLight ? 'text-slate-500 border-slate-200 bg-slate-50/50' : 'text-legacy-text-muted border-legacy-divider-base bg-legacy-canvas-deep/60'
                 }`}>
                   <th className="py-3 px-3">Activity & Scope</th>
                   <th className="py-3 px-3">Site / Facility</th>
@@ -827,7 +827,7 @@ export const ActivityEvidenceWorkspace = ({
                 </tr>
               </thead>
               <tbody className={`divide-y ${
-                isLight ? 'divide-slate-100 text-slate-800' : 'divide-[#152B1D]/40 text-slate-200'
+                isLight ? 'divide-slate-100 text-slate-800' : 'divide-legacy-divider-base/40 text-slate-200'
               }`}>
                 {filteredActivities.length === 0 ? (
                   <tr>
@@ -843,7 +843,7 @@ export const ActivityEvidenceWorkspace = ({
                       <tr 
                         key={row.id}
                         className={`transition-colors group ${
-                          isLight ? 'hover:bg-slate-50' : 'hover:bg-[#00C853]/5'
+                          isLight ? 'hover:bg-slate-50' : 'hover:bg-legacy-brand-base/5'
                         }`}
                       >
                         {/* Activity & Scope */}
@@ -853,7 +853,7 @@ export const ActivityEvidenceWorkspace = ({
                               row.scopeGroup === 'Scope 1'
                                 ? 'bg-amber-500/10 text-amber-400 border-amber-500/30'
                                 : row.scopeGroup === 'Scope 2'
-                                  ? 'bg-[#00C853]/10 text-[#00E676] border-[#00C853]/30'
+                                  ? 'bg-legacy-brand-base/10 text-legacy-brand-bright border-legacy-brand-base/30'
                                   : 'bg-purple-500/10 text-purple-400 border-purple-500/30'
                             }`}>
                               {row.scope}
@@ -889,7 +889,7 @@ export const ActivityEvidenceWorkspace = ({
 
                         {/* Factor Lineage */}
                         <td className="py-3.5 px-3 font-mono text-[11px]">
-                          <span className="text-[#00C853] font-bold block">{row.kgCO2ePerUnit} kg/unit</span>
+                          <span className="text-legacy-brand-base font-bold block">{row.kgCO2ePerUnit} kg/unit</span>
                           <span className="text-[9px] text-gray-400 block truncate max-w-[170px]" title={row.emissionFactorVersion}>
                             {row.emissionFactorId} ({row.emissionFactorVersion})
                           </span>
@@ -897,7 +897,7 @@ export const ActivityEvidenceWorkspace = ({
 
                         {/* Total Footprint */}
                         <td className="py-3.5 px-3 text-right font-mono">
-                          <span className="font-bold text-sm text-[#00C853] block">
+                          <span className="font-bold text-sm text-legacy-brand-base block">
                             {fmt(row.tCO2e, 2)}
                           </span>
                           <span className="text-[9px] text-gray-400 block">tCO₂e</span>
@@ -910,9 +910,9 @@ export const ActivityEvidenceWorkspace = ({
                               onClick={() => {
                                 if (linkedEvidence) setSelectedEvidence(linkedEvidence);
                               }}
-                              className="text-left group/btn flex items-center space-x-1.5 text-[#00C853] hover:underline cursor-pointer"
+                              className="text-left group/btn flex items-center space-x-1.5 text-legacy-brand-base hover:underline cursor-pointer"
                             >
-                              <FileText className="w-3.5 h-3.5 text-[#00C853] shrink-0" />
+                              <FileText className="w-3.5 h-3.5 text-legacy-brand-base shrink-0" />
                               <span className="font-mono text-[11px] truncate max-w-[150px]">
                                 {row.evidenceFileName}
                               </span>
@@ -929,7 +929,7 @@ export const ActivityEvidenceWorkspace = ({
                         <td className="py-3.5 px-3 text-center">
                           <span className={`text-[10px] font-mono font-bold px-2 py-0.5 rounded-full border ${
                             row.dataQualityRating === 'High'
-                              ? 'bg-[#00C853]/15 text-[#00E676] border-[#00C853]/30'
+                              ? 'bg-legacy-brand-base/15 text-legacy-brand-bright border-legacy-brand-base/30'
                               : row.dataQualityRating === 'Medium'
                                 ? 'bg-amber-500/15 text-amber-400 border-amber-500/30'
                                 : 'bg-red-500/15 text-red-400 border-red-500/30'
@@ -973,20 +973,20 @@ export const ActivityEvidenceWorkspace = ({
                     onClick={() => setSelectedEvidence(doc)}
                     className={`p-5 rounded-2xl border transition-all cursor-pointer relative group flex flex-col justify-between ${
                       isLight 
-                        ? 'bg-slate-50/70 border-slate-200 hover:border-[#00C853] hover:bg-white' 
-                        : 'bg-[#040906] border-[#152B1D] hover:border-[#00C853]/50 hover:bg-[#00C853]/5'
+                        ? 'bg-slate-50/70 border-slate-200 hover:border-legacy-brand-base hover:bg-white'
+                        : 'bg-legacy-canvas-deep border-legacy-divider-base hover:border-legacy-brand-base/50 hover:bg-legacy-brand-base/5'
                     }`}
                   >
                     <div>
                       <div className="flex items-start justify-between gap-2">
                         <div className="flex items-center space-x-2">
-                          <div className="w-8 h-8 rounded-xl bg-[#00C853]/15 flex items-center justify-center text-[#00E676]">
+                          <div className="w-8 h-8 rounded-xl bg-legacy-brand-base/15 flex items-center justify-center text-legacy-brand-bright">
                             <FileText className="w-4 h-4" />
                           </div>
                           <div>
                             <span className="font-mono text-[10px] text-gray-400 block">{doc.id}</span>
                             <h4 className={`font-sans font-bold text-sm truncate max-w-[280px] ${
-                              isLight ? 'text-[#0F2417]' : 'text-white'
+                              isLight ? 'text-legacy-forest-43' : 'text-white'
                             }`}>
                               {doc.title}
                             </h4>
@@ -1013,7 +1013,7 @@ export const ActivityEvidenceWorkspace = ({
                         </div>
                         <div>
                           <span className="text-gray-400 block text-[10px]">Recorded Spend</span>
-                          <span className="font-mono font-bold text-[#00C853] block">
+                          <span className="font-mono font-bold text-legacy-brand-base block">
                             {doc.amountBdt > 0 ? `BDT ${fmt(doc.amountBdt, 0)}` : 'Internal Census'}
                           </span>
                         </div>
@@ -1024,8 +1024,8 @@ export const ActivityEvidenceWorkspace = ({
                       </p>
                     </div>
 
-                    <div className="mt-4 pt-3 border-t border-[#152B1D]/40 flex items-center justify-between text-[10px] font-mono text-gray-400">
-                      <div className="flex items-center space-x-1 text-[#00C853]">
+                    <div className="mt-4 pt-3 border-t border-legacy-divider-base/40 flex items-center justify-between text-[10px] font-mono text-gray-400">
+                      <div className="flex items-center space-x-1 text-legacy-brand-base">
                         <ShieldCheck className="w-3.5 h-3.5" />
                         <span>SHA-256 Verified</span>
                       </div>
@@ -1045,7 +1045,7 @@ export const ActivityEvidenceWorkspace = ({
       {selectedEvidence && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 backdrop-blur-md bg-black/70 overflow-y-auto">
           <div className={`max-w-2xl w-full rounded-3xl p-6 sm:p-8 shadow-2xl relative border transition-all ${
-            isLight ? 'bg-white border-slate-300 text-slate-800' : 'bg-[#08130C] border-[#152B1D] text-white'
+            isLight ? 'bg-white border-slate-300 text-slate-800' : 'bg-legacy-surface-base border-legacy-divider-base text-white'
           }`}>
             <button
               onClick={() => setSelectedEvidence(null)}
@@ -1054,7 +1054,7 @@ export const ActivityEvidenceWorkspace = ({
               <X className="w-5 h-5" />
             </button>
 
-            <div className="flex items-center space-x-2 text-[10px] font-mono uppercase tracking-widest text-[#00C853] font-bold">
+            <div className="flex items-center space-x-2 text-[10px] font-mono uppercase tracking-widest text-legacy-brand-base font-bold">
               <ShieldCheck className="w-4 h-4" />
               <span>Primary Evidence Audit Trail</span>
             </div>
@@ -1066,7 +1066,7 @@ export const ActivityEvidenceWorkspace = ({
               Official verification record under ISAE 3410 assurance for {activeClient.name}.
             </p>
 
-            <div className="grid grid-cols-2 gap-4 mt-6 p-4 rounded-2xl bg-black/30 border border-[#152B1D] text-xs">
+            <div className="grid grid-cols-2 gap-4 mt-6 p-4 rounded-2xl bg-black/30 border border-legacy-divider-base text-xs">
               <div>
                 <span className="text-gray-400 text-[10px] block">DOCUMENT IDENTIFIER</span>
                 <span className="font-mono font-bold text-white text-sm">{selectedEvidence.id}</span>
@@ -1085,7 +1085,7 @@ export const ActivityEvidenceWorkspace = ({
               </div>
               <div>
                 <span className="text-gray-400 text-[10px] block">VERIFIED MONETARY AMOUNT</span>
-                <span className="font-mono font-bold text-[#00C853] text-sm">
+                <span className="font-mono font-bold text-legacy-brand-base text-sm">
                   {selectedEvidence.amountBdt > 0 ? `BDT ${fmt(selectedEvidence.amountBdt, 0)}` : 'Internal Census / Free'}
                 </span>
               </div>
@@ -1096,15 +1096,15 @@ export const ActivityEvidenceWorkspace = ({
             </div>
 
             {/* Cryptographic SHA-256 Stamp */}
-            <div className="mt-4 p-3.5 rounded-xl bg-black/40 border border-[#152B1D] font-mono text-[11px] space-y-1">
+            <div className="mt-4 p-3.5 rounded-xl bg-black/40 border border-legacy-divider-base font-mono text-[11px] space-y-1">
               <span className="text-gray-400 text-[10px] block">SHA-256 CRYPTOGRAPHIC PROVENANCE HASH</span>
-              <span className="text-[#00E676] break-all select-all font-mono">
+              <span className="text-legacy-brand-bright break-all select-all font-mono">
                 {selectedEvidence.sha256}
               </span>
             </div>
 
             {/* Notes */}
-            <div className="mt-4 p-3.5 rounded-xl bg-black/20 border border-[#152B1D] text-xs leading-relaxed text-gray-300">
+            <div className="mt-4 p-3.5 rounded-xl bg-black/20 border border-legacy-divider-base text-xs leading-relaxed text-gray-300">
               <span className="font-bold text-white block mb-0.5">Assurance Note:</span>
               {selectedEvidence.notes}
             </div>
@@ -1112,7 +1112,7 @@ export const ActivityEvidenceWorkspace = ({
             <div className="mt-6 flex justify-end space-x-3">
               <button
                 onClick={() => setSelectedEvidence(null)}
-                className="px-4 py-2 rounded-xl text-xs font-sans font-bold bg-[#00C853] text-[#05180B] hover:bg-[#00E676]"
+                className="px-4 py-2 rounded-xl text-xs font-sans font-bold bg-legacy-brand-base text-legacy-forest-67 hover:bg-legacy-brand-bright"
               >
                 Close Audit Record
               </button>
@@ -1125,7 +1125,7 @@ export const ActivityEvidenceWorkspace = ({
       {isAddModalOpen && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 backdrop-blur-md bg-black/70 overflow-y-auto">
           <div className={`max-w-xl w-full rounded-3xl p-6 sm:p-8 shadow-2xl relative border transition-all my-8 ${
-            isLight ? 'bg-white border-slate-300 text-slate-800' : 'bg-[#08130C] border-[#152B1D] text-white'
+            isLight ? 'bg-white border-slate-300 text-slate-800' : 'bg-legacy-surface-base border-legacy-divider-base text-white'
           }`}>
             <button
               onClick={() => setIsAddModalOpen(false)}
@@ -1134,7 +1134,7 @@ export const ActivityEvidenceWorkspace = ({
               <X className="w-5 h-5" />
             </button>
 
-            <div className="flex items-center space-x-2 text-[10px] font-mono uppercase tracking-widest text-[#00C853] font-bold">
+            <div className="flex items-center space-x-2 text-[10px] font-mono uppercase tracking-widest text-legacy-brand-base font-bold">
               <Plus className="w-4 h-4" />
               <span>New Operational Activity Entry</span>
             </div>
@@ -1155,8 +1155,8 @@ export const ActivityEvidenceWorkspace = ({
                   placeholder="e.g. Backup Generator Diesel Consumption (Stationary)"
                   value={newActivity.activityType}
                   onChange={(e) => setNewActivity({ ...newActivity, activityType: e.target.value })}
-                  className={`w-full text-xs font-sans p-2.5 rounded-xl border focus:outline-none focus:border-[#00C853] ${
-                    isLight ? 'bg-slate-50 border-slate-300 text-slate-900' : 'bg-[#040906] border-[#152B1D] text-white'
+                  className={`w-full text-xs font-sans p-2.5 rounded-xl border focus:outline-none focus:border-legacy-brand-base ${
+                    isLight ? 'bg-slate-50 border-slate-300 text-slate-900' : 'bg-legacy-canvas-deep border-legacy-divider-base text-white'
                   }`}
                 />
               </div>
@@ -1179,8 +1179,8 @@ export const ActivityEvidenceWorkspace = ({
                       }
                       setNewActivity({ ...newActivity, scope: sc, factorValue: defaultFactor, unit: defaultUnit });
                     }}
-                    className={`w-full text-xs font-sans p-2.5 rounded-xl border focus:outline-none focus:border-[#00C853] ${
-                      isLight ? 'bg-slate-50 border-slate-300 text-slate-900' : 'bg-[#040906] border-[#152B1D] text-white'
+                    className={`w-full text-xs font-sans p-2.5 rounded-xl border focus:outline-none focus:border-legacy-brand-base ${
+                      isLight ? 'bg-slate-50 border-slate-300 text-slate-900' : 'bg-legacy-canvas-deep border-legacy-divider-base text-white'
                     }`}
                   >
                     <option value="Scope 1">Scope 1 (Direct Stationary/Mobile)</option>
@@ -1194,8 +1194,8 @@ export const ActivityEvidenceWorkspace = ({
                   <select
                     value={newActivity.facility}
                     onChange={(e) => setNewActivity({ ...newActivity, facility: e.target.value })}
-                    className={`w-full text-xs font-sans p-2.5 rounded-xl border focus:outline-none focus:border-[#00C853] ${
-                      isLight ? 'bg-slate-50 border-slate-300 text-slate-900' : 'bg-[#040906] border-[#152B1D] text-white'
+                    className={`w-full text-xs font-sans p-2.5 rounded-xl border focus:outline-none focus:border-legacy-brand-base ${
+                      isLight ? 'bg-slate-50 border-slate-300 text-slate-900' : 'bg-legacy-canvas-deep border-legacy-divider-base text-white'
                     }`}
                   >
                     {activeClient.facilities?.map((f, i) => (
@@ -1215,8 +1215,8 @@ export const ActivityEvidenceWorkspace = ({
                     placeholder="e.g. 5000"
                     value={newActivity.quantity}
                     onChange={(e) => setNewActivity({ ...newActivity, quantity: e.target.value })}
-                    className={`w-full text-xs font-mono p-2.5 rounded-xl border focus:outline-none focus:border-[#00C853] ${
-                      isLight ? 'bg-slate-50 border-slate-300 text-slate-900' : 'bg-[#040906] border-[#152B1D] text-white'
+                    className={`w-full text-xs font-mono p-2.5 rounded-xl border focus:outline-none focus:border-legacy-brand-base ${
+                      isLight ? 'bg-slate-50 border-slate-300 text-slate-900' : 'bg-legacy-canvas-deep border-legacy-divider-base text-white'
                     }`}
                   />
                 </div>
@@ -1226,8 +1226,8 @@ export const ActivityEvidenceWorkspace = ({
                   <select
                     value={newActivity.unit}
                     onChange={(e) => setNewActivity({ ...newActivity, unit: e.target.value })}
-                    className={`w-full text-xs font-sans p-2.5 rounded-xl border focus:outline-none focus:border-[#00C853] ${
-                      isLight ? 'bg-slate-50 border-slate-300 text-slate-900' : 'bg-[#040906] border-[#152B1D] text-white'
+                    className={`w-full text-xs font-sans p-2.5 rounded-xl border focus:outline-none focus:border-legacy-brand-base ${
+                      isLight ? 'bg-slate-50 border-slate-300 text-slate-900' : 'bg-legacy-canvas-deep border-legacy-divider-base text-white'
                     }`}
                   >
                     <option value="kWh">kWh (Power)</option>
@@ -1247,17 +1247,17 @@ export const ActivityEvidenceWorkspace = ({
                     required
                     value={newActivity.factorValue}
                     onChange={(e) => setNewActivity({ ...newActivity, factorValue: e.target.value })}
-                    className={`w-full text-xs font-mono p-2.5 rounded-xl border focus:outline-none focus:border-[#00C853] ${
-                      isLight ? 'bg-slate-50 border-slate-300 text-slate-900' : 'bg-[#040906] border-[#152B1D] text-white'
+                    className={`w-full text-xs font-mono p-2.5 rounded-xl border focus:outline-none focus:border-legacy-brand-base ${
+                      isLight ? 'bg-slate-50 border-slate-300 text-slate-900' : 'bg-legacy-canvas-deep border-legacy-divider-base text-white'
                     }`}
                   />
                 </div>
               </div>
 
               {/* Realtime Footprint Preview */}
-              <div className="p-3.5 rounded-xl bg-black/40 border border-[#152B1D] flex items-center justify-between text-xs">
+              <div className="p-3.5 rounded-xl bg-black/40 border border-legacy-divider-base flex items-center justify-between text-xs">
                 <span className="text-gray-400">Calculated Emission Footprint:</span>
-                <span className="font-mono font-bold text-sm text-[#00E676]">
+                <span className="font-mono font-bold text-sm text-legacy-brand-bright">
                   {fmt(((parseFloat(newActivity.quantity) || 0) * (parseFloat(newActivity.factorValue) || 0)) / 1000, 3)} tCO₂e
                 </span>
               </div>
@@ -1270,8 +1270,8 @@ export const ActivityEvidenceWorkspace = ({
                     placeholder="e.g. Plant Energy Lead"
                     value={newActivity.responsiblePerson}
                     onChange={(e) => setNewActivity({ ...newActivity, responsiblePerson: e.target.value })}
-                    className={`w-full text-xs font-sans p-2.5 rounded-xl border focus:outline-none focus:border-[#00C853] ${
-                      isLight ? 'bg-slate-50 border-slate-300 text-slate-900' : 'bg-[#040906] border-[#152B1D] text-white'
+                    className={`w-full text-xs font-sans p-2.5 rounded-xl border focus:outline-none focus:border-legacy-brand-base ${
+                      isLight ? 'bg-slate-50 border-slate-300 text-slate-900' : 'bg-legacy-canvas-deep border-legacy-divider-base text-white'
                     }`}
                   />
                 </div>
@@ -1281,8 +1281,8 @@ export const ActivityEvidenceWorkspace = ({
                   <select
                     value={newActivity.dataQuality}
                     onChange={(e) => setNewActivity({ ...newActivity, dataQuality: e.target.value })}
-                    className={`w-full text-xs font-sans p-2.5 rounded-xl border focus:outline-none focus:border-[#00C853] ${
-                      isLight ? 'bg-slate-50 border-slate-300 text-slate-900' : 'bg-[#040906] border-[#152B1D] text-white'
+                    className={`w-full text-xs font-sans p-2.5 rounded-xl border focus:outline-none focus:border-legacy-brand-base ${
+                      isLight ? 'bg-slate-50 border-slate-300 text-slate-900' : 'bg-legacy-canvas-deep border-legacy-divider-base text-white'
                     }`}
                   >
                     <option value="High">High (Direct Meter / Invoiced)</option>
@@ -1292,7 +1292,7 @@ export const ActivityEvidenceWorkspace = ({
                 </div>
               </div>
 
-              <div className="flex justify-end space-x-3 pt-4 border-t border-[#152B1D]/40">
+              <div className="flex justify-end space-x-3 pt-4 border-t border-legacy-divider-base/40">
                 <button
                   type="button"
                   onClick={() => setIsAddModalOpen(false)}
@@ -1302,7 +1302,7 @@ export const ActivityEvidenceWorkspace = ({
                 </button>
                 <button
                   type="submit"
-                  className="px-5 py-2.5 rounded-xl text-xs font-sans font-bold bg-[#00C853] text-[#05180B] hover:bg-[#00E676] shadow-sm cursor-pointer"
+                  className="px-5 py-2.5 rounded-xl text-xs font-sans font-bold bg-legacy-brand-base text-legacy-forest-67 hover:bg-legacy-brand-bright shadow-sm cursor-pointer"
                 >
                   Commit Activity Record
                 </button>

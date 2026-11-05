@@ -146,7 +146,7 @@ const LiveMetrics = () => {
   return (
     <section 
       ref={containerRef} 
-      className="w-full bg-[#050C07] text-white py-24 px-6 lg:px-12 relative overflow-hidden border-t border-white/10"
+      className="w-full bg-legacy-forest-80 text-white py-24 px-6 lg:px-12 relative overflow-hidden border-t border-white/10"
     >
       {/* Background ambient radial illumination */}
       <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[800px] h-[500px] bg-emerald-950/20 blur-[140px] pointer-events-none rounded-full" />
@@ -214,7 +214,7 @@ const LiveMetrics = () => {
                     {station.location.split('(')[0]}
                   </div>
                 </div>
-                <div className={`w-2 h-2 rounded-full ${isActive ? 'bg-emerald-400 shadow-[0_0_8px_#10B981]' : 'bg-white/20'}`} />
+                <div className={`w-2 h-2 rounded-full ${isActive ? 'bg-emerald-400 shadow-[0_0_8px] shadow-legacy-emerald-500' : 'bg-white/20'}`} />
               </button>
             );
           })}

@@ -42,7 +42,7 @@ const ClientShowcase = () => {
     return (
       <div
         key={client.id}
-        className={`group relative rounded-3xl p-7 sm:p-8 xl:p-8 2xl:p-9 bg-gradient-to-b from-[#091A10]/95 via-[#06130B]/95 to-[#030805] hover:bg-[#0C2416] border border-[#184227]/75 hover:border-[#00E676]/80 transition-all duration-300 shadow-[0_12px_40px_rgba(0,0,0,0.6),inset_0_1px_0_rgba(255,255,255,0.06)] hover:shadow-[0_20px_60px_rgba(0,200,83,0.18),inset_0_1px_0_rgba(0,230,118,0.3)] hover:-translate-y-2 flex flex-col justify-between h-full min-h-[440px] sm:min-h-[460px] overflow-hidden`}
+        className={`group relative rounded-3xl p-7 sm:p-8 xl:p-8 2xl:p-9 bg-gradient-to-b from-legacy-forest-59/95 via-legacy-forest-74/95 to-legacy-forest-82 hover:bg-legacy-forest-45 border border-legacy-forest-18/75 hover:border-legacy-brand-bright/80 transition-all duration-300 shadow-[0_12px_40px_rgba(0,0,0,0.6),inset_0_1px_0_rgba(255,255,255,0.06)] hover:shadow-[0_20px_60px_rgba(0,200,83,0.18),inset_0_1px_0_rgba(0,230,118,0.3)] hover:-translate-y-2 flex flex-col justify-between h-full min-h-[440px] sm:min-h-[460px] overflow-hidden`}
       >
         {/* Ambient Card Hover Glow */}
         <div className="absolute inset-0 rounded-3xl bg-[radial-gradient(ellipse_at_top,_var(--tw-gradient-stops))] from-emerald-500/[0.08] via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500 pointer-events-none" />
@@ -56,7 +56,7 @@ const ClientShowcase = () => {
                 isLowerRow ? 'w-32 sm:w-36 xl:w-36 2xl:w-40' : 'w-36 sm:w-42 xl:w-44'
               } px-3.5 py-2 rounded-2xl flex items-center justify-center shrink-0 transition-all duration-300 group-hover:scale-105 ${
                 isDarkLogo
-                  ? 'bg-[#06160C] border-2 border-[#1B4D2B] shadow-[0_0_24px_rgba(0,200,83,0.2)] ring-1 ring-emerald-500/30'
+                  ? 'bg-legacy-forest-69 border-2 border-legacy-forest-12 shadow-[0_0_24px_rgba(0,200,83,0.2)] ring-1 ring-emerald-500/30'
                   : 'bg-white border-2 border-slate-200 shadow-md ring-1 ring-black/5'
               }`}
             >
@@ -70,10 +70,10 @@ const ClientShowcase = () => {
 
             {/* Verified Badge & Live Domain: Generously spaced from card border */}
             <div className="flex flex-col items-end shrink-0 gap-2">
-              <div className="inline-flex items-center space-x-2 px-3.5 py-1.5 rounded-full bg-[#00C853]/12 group-hover:bg-[#00C853]/20 border border-[#00C853]/35 text-[#00E676] transition-all shadow-xs">
-                <span className="w-1.5 h-1.5 rounded-full bg-[#00E676] animate-pulse shrink-0" />
-                <ShieldCheck className="w-3.5 h-3.5 text-[#00C853] shrink-0" />
-                <span className="text-[11px] sm:text-xs font-mono font-semibold tracking-wide text-[#34D399] whitespace-nowrap">
+              <div className="inline-flex items-center space-x-2 px-3.5 py-1.5 rounded-full bg-legacy-brand-base/12 group-hover:bg-legacy-brand-base/20 border border-legacy-brand-base/35 text-legacy-brand-bright transition-all shadow-xs">
+                <span className="w-1.5 h-1.5 rounded-full bg-legacy-brand-bright animate-pulse shrink-0" />
+                <ShieldCheck className="w-3.5 h-3.5 text-legacy-brand-base shrink-0" />
+                <span className="text-[11px] sm:text-xs font-mono font-semibold tracking-wide text-legacy-emerald-400 whitespace-nowrap">
                   Sample profile
                 </span>
               </div>
@@ -81,21 +81,21 @@ const ClientShowcase = () => {
                 href={client.website}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="text-[11px] sm:text-xs font-mono text-gray-400 hover:text-[#00E676] flex items-center space-x-1.5 transition-colors group/link px-1 py-0.5"
+                className="text-[11px] sm:text-xs font-mono text-gray-400 hover:text-legacy-brand-bright flex items-center space-x-1.5 transition-colors group/link px-1 py-0.5"
                 title={`Visit ${client.name} official website`}
               >
                 <span className="truncate max-w-[120px] sm:max-w-[150px] xl:max-w-[170px]">{cleanUrl}</span>
-                <ArrowUpRight className="w-3.5 h-3.5 text-[#00C853] group-hover/link:translate-x-0.5 group-hover/link:-translate-y-0.5 transition-transform shrink-0" />
+                <ArrowUpRight className="w-3.5 h-3.5 text-legacy-brand-base group-hover/link:translate-x-0.5 group-hover/link:-translate-y-0.5 transition-transform shrink-0" />
               </a>
             </div>
           </div>
 
           {/* Company Name & Sector */}
           <div className="mb-4">
-            <h3 className="font-sans font-extrabold text-2xl sm:text-[26px] text-white group-hover:text-[#00E676] transition-colors tracking-tight leading-snug">
+            <h3 className="font-sans font-extrabold text-2xl sm:text-[26px] text-white group-hover:text-legacy-brand-bright transition-colors tracking-tight leading-snug">
               {client.name}
             </h3>
-            <span className="text-xs sm:text-[13px] font-mono font-bold text-[#00E676] uppercase tracking-wider block mt-1.5">
+            <span className="text-xs sm:text-[13px] font-mono font-bold text-legacy-brand-bright uppercase tracking-wider block mt-1.5">
               {client.sector}
             </span>
           </div>
@@ -107,10 +107,10 @@ const ClientShowcase = () => {
           </div>
 
           {/* Sustainability Highlight with Left Accent Bar */}
-          <div className="relative p-4 sm:p-5 rounded-2xl bg-[#030A05]/90 border border-[#163822] group-hover:border-[#00C853]/40 mb-6 shadow-inner overflow-hidden transition-colors">
-            <div className="absolute left-0 top-0 bottom-0 w-1 bg-gradient-to-b from-[#00E676] to-[#10B981] rounded-l-2xl" />
+          <div className="relative p-4 sm:p-5 rounded-2xl bg-legacy-forest-81/90 border border-legacy-forest-29 group-hover:border-legacy-brand-base/40 mb-6 shadow-inner overflow-hidden transition-colors">
+            <div className="absolute left-0 top-0 bottom-0 w-1 bg-gradient-to-b from-legacy-brand-bright to-legacy-emerald-500 rounded-l-2xl" />
             <div className="flex items-start space-x-3 pl-1">
-              <Leaf className="w-4 h-4 text-[#00E676] shrink-0 mt-0.5" />
+              <Leaf className="w-4 h-4 text-legacy-brand-bright shrink-0 mt-0.5" />
               <p className="text-xs sm:text-[13.5px] text-gray-200 font-sans leading-relaxed font-normal min-h-[46px]">
                 {client.sustainabilityHighlight}
               </p>
@@ -122,13 +122,13 @@ const ClientShowcase = () => {
         <div className="relative z-10 pt-5 border-t border-white/[0.08] flex items-center justify-between text-xs font-mono text-gray-400">
           <div className="flex items-center space-x-2">
             <span className="relative flex h-2.5 w-2.5">
-              <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-[#00E676] opacity-75" />
-              <span className="relative inline-flex rounded-full h-2.5 w-2.5 bg-[#00C853]" />
+              <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-legacy-brand-bright opacity-75" />
+              <span className="relative inline-flex rounded-full h-2.5 w-2.5 bg-legacy-brand-base" />
             </span>
             <span className="text-gray-300 font-medium text-xs sm:text-[13px]">{client.facilities.length} Sample Sites</span>
           </div>
           <div className="text-right">
-            <span className="text-[#00E676] font-extrabold font-mono text-base sm:text-lg">
+            <span className="text-legacy-brand-bright font-extrabold font-mono text-base sm:text-lg">
               {client.activeInsets.toLocaleString()} tCO₂e
             </span>
             <span className="text-gray-400 text-xs ml-1.5 font-sans">Illustrative figure</span>
@@ -139,19 +139,19 @@ const ClientShowcase = () => {
   };
 
   return (
-    <section className="w-full bg-[#040A06] py-24 sm:py-32 relative overflow-hidden font-sans border-b border-white/5">
+    <section className="w-full bg-legacy-canvas-night py-24 sm:py-32 relative overflow-hidden font-sans border-b border-white/5">
       {/* Ambient background glows */}
-      <div className="absolute top-1/4 left-1/2 -translate-x-1/2 w-[900px] h-[450px] bg-[#00C853]/10 rounded-full blur-[180px] pointer-events-none" />
+      <div className="absolute top-1/4 left-1/2 -translate-x-1/2 w-[900px] h-[450px] bg-legacy-brand-base/10 rounded-full blur-[180px] pointer-events-none" />
       <div className="absolute bottom-10 right-10 w-[600px] h-[400px] bg-emerald-500/5 rounded-full blur-[160px] pointer-events-none" />
-      <div className="absolute top-10 left-10 w-[500px] h-[300px] bg-[#00E676]/5 rounded-full blur-[150px] pointer-events-none" />
+      <div className="absolute top-10 left-10 w-[500px] h-[300px] bg-legacy-brand-bright/5 rounded-full blur-[150px] pointer-events-none" />
 
       {/* Expanded Container Width to utilize high-resolution canvas generously */}
       <div className="max-w-[2100px] 2xl:max-w-[2300px] w-full mx-auto px-6 sm:px-10 lg:px-14 xl:px-18 2xl:px-24 relative z-10">
         
         {/* Section Header */}
         <div className="text-center max-w-3xl mx-auto mb-16">
-          <div className="inline-flex items-center space-x-2 px-4 py-1.5 rounded-full bg-[#00C853]/10 border border-[#00C853]/30 text-[#00E676] font-mono text-xs font-bold uppercase tracking-wider mb-4 shadow-sm">
-            <Award className="w-4 h-4 text-[#00C853]" />
+          <div className="inline-flex items-center space-x-2 px-4 py-1.5 rounded-full bg-legacy-brand-base/10 border border-legacy-brand-base/30 text-legacy-brand-bright font-mono text-xs font-bold uppercase tracking-wider mb-4 shadow-sm">
+            <Award className="w-4 h-4 text-legacy-brand-base" />
             <span>Illustrative sector profiles</span>
           </div>
 
@@ -169,7 +169,7 @@ const ClientShowcase = () => {
 
         {/* Sector Filter Tabs - Impeccable Segmented Control Dock */}
         <div className="flex justify-center mb-16 px-2">
-          <div className="inline-flex flex-wrap items-center justify-center p-1.5 sm:p-2 rounded-2xl sm:rounded-full bg-[#051108]/90 backdrop-blur-xl border border-[#143B22] shadow-[0_12px_40px_rgba(0,0,0,0.6),inset_0_1px_0_rgba(255,255,255,0.06)] gap-1.5 sm:gap-2 max-w-full">
+          <div className="inline-flex flex-wrap items-center justify-center p-1.5 sm:p-2 rounded-2xl sm:rounded-full bg-legacy-forest-77/90 backdrop-blur-xl border border-legacy-forest-28 shadow-[0_12px_40px_rgba(0,0,0,0.6),inset_0_1px_0_rgba(255,255,255,0.06)] gap-1.5 sm:gap-2 max-w-full">
             {CLIENT_SECTORS.map((sec) => {
               const IconComponent = getSectorIcon(sec.id);
               const isActive = selectedCategory === sec.id;
@@ -180,17 +180,17 @@ const ClientShowcase = () => {
                   onClick={() => setSelectedCategory(sec.id)}
                   className={`group px-4 sm:px-5 py-2 sm:py-2.5 rounded-xl sm:rounded-full text-xs sm:text-[13px] font-sans font-semibold transition-all duration-200 cursor-pointer flex items-center space-x-2.5 border ${
                     isActive
-                      ? 'bg-gradient-to-r from-[#00C853] via-[#00E676] to-[#00C853] text-[#031508] font-extrabold border-[#00E676] shadow-[0_0_24px_rgba(0,200,83,0.35),inset_0_1px_0_rgba(255,255,255,0.35)] scale-[1.02]'
-                      : 'bg-[#08180E]/60 hover:bg-[#0D2616] text-gray-300 hover:text-white border-[#13331E] hover:border-emerald-500/40 shadow-xs'
+                      ? 'bg-gradient-to-r from-legacy-brand-base via-legacy-brand-bright to-legacy-brand-base text-legacy-forest-75 font-extrabold border-legacy-brand-bright shadow-[0_0_24px_rgba(0,200,83,0.35),inset_0_1px_0_rgba(255,255,255,0.35)] scale-[1.02]'
+                      : 'bg-legacy-forest-63/60 hover:bg-legacy-forest-44 text-gray-300 hover:text-white border-legacy-forest-33 hover:border-emerald-500/40 shadow-xs'
                   }`}
                 >
                   <IconComponent className={`w-3.5 h-3.5 sm:w-4 sm:h-4 shrink-0 transition-transform group-hover:scale-110 ${
-                    isActive ? 'text-[#031508]' : 'text-emerald-400/90 group-hover:text-[#00E676]'
+                    isActive ? 'text-legacy-forest-75' : 'text-emerald-400/90 group-hover:text-legacy-brand-bright'
                   }`} />
                   <span className="tracking-tight">{sec.label}</span>
                   <span className={`text-[11px] font-mono font-bold px-2.5 py-0.5 rounded-full transition-colors ${
                     isActive 
-                      ? 'bg-[#031508]/20 text-[#031508] border border-[#031508]/15' 
+                      ? 'bg-legacy-forest-75/20 text-legacy-forest-75 border border-legacy-forest-75/15'
                       : 'bg-white/[0.06] text-gray-300 group-hover:text-white group-hover:bg-white/[0.12] border border-white/5'
                   }`}>
                     {sec.count}
@@ -222,10 +222,10 @@ const ClientShowcase = () => {
         )}
 
         {/* Enterprise Bottom Strip */}
-        <div className="mt-16 sm:mt-20 p-6 sm:p-8 rounded-3xl bg-gradient-to-r from-[#081A0F] via-[#0E2618] to-[#081A0F] border border-[#1B4D2E] flex flex-col md:flex-row items-center justify-between gap-6 shadow-2xl">
+        <div className="mt-16 sm:mt-20 p-6 sm:p-8 rounded-3xl bg-gradient-to-r from-legacy-forest-61 via-legacy-forest-41 to-legacy-forest-61 border border-legacy-forest-11 flex flex-col md:flex-row items-center justify-between gap-6 shadow-2xl">
           <div className="flex items-center space-x-4">
-            <div className="w-14 h-14 rounded-2xl bg-[#00C853]/20 border border-[#00C853]/40 flex items-center justify-center shrink-0">
-              <Sparkles className="w-7 h-7 text-[#00C853]" />
+            <div className="w-14 h-14 rounded-2xl bg-legacy-brand-base/20 border border-legacy-brand-base/40 flex items-center justify-center shrink-0">
+              <Sparkles className="w-7 h-7 text-legacy-brand-base" />
             </div>
             <div>
               <h4 className="font-sans font-bold text-white text-lg">
@@ -240,7 +240,7 @@ const ClientShowcase = () => {
           <div className="flex items-center space-x-3 shrink-0">
             <a
               href="/platform/esg"
-              className="bg-[#00C853] hover:bg-[#00E676] text-[#050C07] font-sans font-extrabold text-sm px-7 py-3.5 rounded-full transition-all shadow-lg shadow-[#00C853]/25 flex items-center space-x-2 cursor-pointer"
+              className="bg-legacy-brand-base hover:bg-legacy-brand-bright text-legacy-forest-80 font-sans font-extrabold text-sm px-7 py-3.5 rounded-full transition-all shadow-lg shadow-legacy-brand-base/25 flex items-center space-x-2 cursor-pointer"
             >
               <span>Try the ESG demo</span>
               <ArrowUpRight className="w-4 h-4" />
