@@ -12,6 +12,7 @@ const API_BASE = (typeof import.meta !== 'undefined' && import.meta.env?.VITE_FA
 
 export const authConfigured = Boolean(issuer && clientId);
 export const DEMO_SESSION_KEY = 'carbonos.esg.demo_session';
+const DEMO_SIGNED_OUT_KEY = 'carbonos.esg.demo_signed_out';
 
 function safeStorage(fn) {
   try {
@@ -44,6 +45,9 @@ export function saveDemoSession(sessionData) {
 export function clearStoredDemoSession() {
   safeStorage(() => sessionStorage.removeItem(DEMO_SESSION_KEY));
 }
+
+export const isDemoSignedOut = () => safeStorage(() => sessionStorage.getItem(DEMO_SIGNED_OUT_KEY)) === 'true';
+export const resumeDemo = () => safeStorage(() => sessionStorage.removeItem(DEMO_SIGNED_OUT_KEY));
 
 let pendingDemoSession = null;
 export async function requestDemoSession() {
@@ -174,6 +178,7 @@ export async function loadSession() {
   }
 
   // 2. Demo session in sessionStorage
+  if (isDemoSignedOut()) return null;
   let demo = getStoredDemoSession();
   if (!demo) {
     try {
@@ -214,10 +219,11 @@ export async function signOut() {
     } catch {
       /* ignore */
     }
-  }
-  if (typeof window !== 'undefined') {
     window.location.href = '/platform/esg';
+    return;
   }
+  safeStorage(() => sessionStorage.setItem(DEMO_SIGNED_OUT_KEY, 'true'));
+  if (typeof window !== 'undefined') window.location.replace(isDemoSignedOut() ? '/platform/esg' : '/');
 }
 
 export const completeSignIn = () => getManager().signinRedirectCallback();

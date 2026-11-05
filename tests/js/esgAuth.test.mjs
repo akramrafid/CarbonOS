@@ -1,6 +1,7 @@
 import { test, beforeEach, afterEach } from 'node:test';
 import assert from 'node:assert/strict';
-import { requestDemoSession, loadSession, DEMO_SESSION_KEY, getStoredDemoSession } from '../../src/lib/esgAuth.js';
+import { requestDemoSession, loadSession, DEMO_SESSION_KEY, getStoredDemoSession, resumeDemo, signOut } from '../../src/lib/esgAuth.js';
+import { hasEsgToken } from '../../src/lib/esgApi.js';
 
 const originalFetch = globalThis.fetch;
 const session = { access_token: 'sample-token', tenant_id: 'sample-tenant', is_demo: true, expires_in: 7200,
@@ -23,6 +24,20 @@ test('simultaneous demo startup provisions one tenant and stores the shared sess
 test('protected deployment returns signed-out state without pretending the service is offline', async () => {
   globalThis.fetch = async () => new Response('', { status: 403 });
   assert.equal(await loadSession(), null);
+});
+
+test('signing out clears demo credentials and stops provisioning until explicitly restarted', async () => {
+  let calls = 0;
+  globalThis.fetch = async () => { calls++; return Response.json(session); };
+  assert.equal((await loadSession()).isDemo, true);
+  await signOut();
+  assert.equal(getStoredDemoSession(), null);
+  assert.equal(hasEsgToken(), false);
+  assert.equal(await loadSession(), null);
+  assert.equal(calls, 1);
+  resumeDemo();
+  assert.equal((await loadSession()).isDemo, true);
+  assert.equal(calls, 2);
 });
 
 test('network failure is recoverable and does not poison a later retry', async () => {

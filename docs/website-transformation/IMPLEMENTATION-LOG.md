@@ -313,3 +313,7 @@ Next: remaining sector/research route truth, source/theme, auth and selective ma
 Reproduced the 47 source findings from [the failed GitHub contract job](https://github.com/akramrafid/CarbonOS/actions/runs/41818155064/job/126534157967). The affected components, chart colors and map layers now consume a shared palette. Tailwind and the light-theme rules use the new class names. Reusable grid and mask styles live in the stylesheet.
 
 The full contract passes locally with zero findings. All 388 compared Tailwind utility declarations match after normalizing hex letter case. TypeScript/Vite, 20 JavaScript tests and 34 orchestrator tests pass. Hosted validation is pending. PR #2 also has conflicts with main.
+
+## Demo sign out
+
+Signing out clears the local demo credentials and prevents automatic provisioning in the same tab until the visitor chooses Start demo. The browser regression covers sign out, reload and explicit restart at desktop and phone widths. The build, frontend contract and all 21 JavaScript tests pass.

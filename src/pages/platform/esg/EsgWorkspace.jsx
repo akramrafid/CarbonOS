@@ -3,7 +3,7 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import { esgFetch, esgGet, esgSend, hasEsgToken, setEsgSession } from '../../../lib/esgApi';
-import { authConfigured, completeSignIn, loadSession, resetDemoSession, signIn, signOut, switchDemoPersona } from '../../../lib/esgAuth';
+import { authConfigured, completeSignIn, isDemoSignedOut, loadSession, resetDemoSession, resumeDemo, signIn, signOut, switchDemoPersona } from '../../../lib/esgAuth';
 import { Button, Input, Notice, Panel, Select, useAction } from './ui';
 import SetupPanel from './SetupPanel';
 import FactorsPanel from './FactorsPanel';
@@ -166,7 +166,7 @@ export default function EsgWorkspace() {
         {user && (
           <div className="flex min-w-0 flex-wrap items-center gap-3 text-sm text-mist">
             <span className="min-w-0 break-words">{user.name}</span>
-            <Button variant="secondary" onClick={signOut}>Sign out</Button>
+            <Button variant="secondary" onClick={signOut} disabled={action.busy}>Sign out</Button>
           </div>
         )}
       </header>
@@ -176,6 +176,14 @@ export default function EsgWorkspace() {
   );
 
   if (user === undefined) return shell(<p role="status" className="text-mist">Loading workspace…</p>);
+
+  if (!user && !authConfigured && isDemoSignedOut()) {
+    return shell(
+      <Panel title="Signed out" description="Start a fresh demo workspace when you’re ready.">
+        <Button onClick={() => { resumeDemo(); refreshAll(); }}>Start demo</Button>
+      </Panel>,
+    );
+  }
 
   if (!user) {
     return shell(

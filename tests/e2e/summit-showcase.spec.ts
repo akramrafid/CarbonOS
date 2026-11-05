@@ -1,5 +1,27 @@
 import { test, expect } from '@playwright/test';
 
+test('signing out stays signed out after reload until the visitor starts a new demo', async ({ page }) => {
+  test.skip(process.env.ESG_E2E_ACCESS_MODE !== 'isolated_demo', 'Requires an isolated synthetic demo session.');
+  const demoRequests: string[] = [];
+  page.on('request', (request) => {
+    if (request.method() === 'POST' && new URL(request.url()).pathname === '/api/esg/demo/session') {
+      demoRequests.push(request.url());
+    }
+  });
+  await page.goto('/platform/esg');
+  const signOutButton = page.getByRole('button', { name: 'Sign out', exact: true });
+  await signOutButton.click();
+  const signedOut = page.getByRole('heading', { name: 'Signed out', exact: true });
+  await expect(signedOut).toBeVisible();
+  await page.reload();
+  await expect(signedOut).toBeVisible();
+  await expect(signOutButton).toHaveCount(0);
+  expect(demoRequests).toHaveLength(1);
+  await page.getByRole('button', { name: 'Start demo', exact: true }).click();
+  await expect(page.getByRole('heading', { name: 'Your three-minute demo' })).toBeVisible();
+  expect(demoRequests).toHaveLength(2);
+});
+
 test('evidence assistant indexes, cites, abstains, and runs an actual extraction regression', async ({ page }) => {
   test.skip(process.env.ESG_E2E_ACCESS_MODE !== 'isolated_demo', 'Requires an isolated synthetic demo session.');
   await page.goto('/platform/esg');
