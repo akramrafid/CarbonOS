@@ -1,0 +1,203 @@
+import React from 'react';
+import { Link, useLocation, useNavigate, useSearchParams } from 'react-router-dom';
+import { ArrowLeft, Home, Lock, ShieldAlert, KeyRound, Building2, Terminal } from 'lucide-react';
+import { useTheme } from '../context/ThemeContext';
+
+export const Forbidden = () => {
+  const location = useLocation();
+  const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
+  const { theme } = useTheme();
+  const isLight = theme === 'light';
+
+  const reason = searchParams.get('reason') || 'insufficient_clearance';
+  const requiredRole = searchParams.get('required') || searchParams.get('role');
+
+  const getReasonText = () => {
+    switch (reason) {
+      case 'unauthenticated':
+      case 'auth_required':
+        return 'Cryptographic authentication is required to access this sovereign endpoint.';
+      case 'token_expired':
+        return 'Your active authentication token has expired. Please re-authenticate.';
+      case 'role_unauthorized':
+      case 'insufficient_clearance':
+      default:
+        return 'Your sovereign persona lacks the cryptographic signature or authorization level required for this registry partition.';
+    }
+  };
+
+  return (
+    <main
+      className={`min-h-[85vh] flex items-center justify-center px-4 sm:px-6 py-28 relative overflow-hidden font-sans transition-colors duration-300 ${
+        isLight ? 'bg-[#f2f3ee] text-[#181414]' : 'bg-carbon text-registry'
+      }`}
+    >
+      {/* Ambient Radial Mesh Gradients */}
+      <div
+        className={`absolute top-1/4 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[600px] rounded-full blur-[120px] pointer-events-none ${
+          isLight ? 'bg-amber-500/10' : 'bg-amber/10'
+        }`}
+      ></div>
+      <div
+        className={`absolute bottom-10 right-10 w-80 h-80 rounded-full blur-[100px] pointer-events-none ${
+          isLight ? 'bg-rose-500/5' : 'bg-rose-500/10'
+        }`}
+      ></div>
+
+      <div className="max-w-2xl w-full text-center relative z-10">
+        {/* Terminal Header Tag */}
+        <div
+          className={`inline-flex items-center space-x-2 px-3.5 py-1.5 rounded-full mb-8 backdrop-blur-md shadow-xs ${
+            isLight
+              ? 'bg-amber-50 border border-amber-300 text-amber-800'
+              : 'bg-amber/10 border border-amber/25 text-amber'
+          }`}
+        >
+          <Lock size={14} className={isLight ? 'text-amber-800' : 'text-amber'} />
+          <span className="font-mono text-xs uppercase tracking-widest font-semibold">
+            Status 403 // Access Restriction
+          </span>
+        </div>
+
+        {/* Big 403 Numerals */}
+        <div className="flex items-center justify-center font-sans font-extrabold text-7xl sm:text-9xl tracking-tight mb-4 select-none">
+          <span className={isLight ? 'text-[#181414]' : 'text-white'}>4</span>
+          <span className={`serif-drama italic px-2 ${isLight ? 'text-amber-600' : 'text-amber'}`}>
+            0
+          </span>
+          <span className={isLight ? 'text-[#181414]' : 'text-white'}>3</span>
+        </div>
+
+        <h1
+          className={`font-sans font-bold text-2xl sm:text-3xl mb-4 tracking-tight ${
+            isLight ? 'text-[#181414]' : 'text-white'
+          }`}
+        >
+          Cryptographic Clearance Required
+        </h1>
+
+        <p
+          className={`font-sans text-sm sm:text-base max-w-lg mx-auto leading-relaxed mb-6 font-normal ${
+            isLight ? 'text-[#4b5563]' : 'text-mist'
+          }`}
+        >
+          {getReasonText()}
+        </p>
+
+        {/* Diagnostic Metadata Pill */}
+        <div
+          className={`inline-flex flex-wrap items-center justify-center gap-2 border px-4 py-2 rounded-xl font-mono text-xs mb-8 shadow-xs max-w-lg mx-auto ${
+            isLight
+              ? 'bg-white border-slate-200 text-slate-700'
+              : 'bg-black/40 border-white/10 text-white/70'
+          }`}
+        >
+          <span className={`font-bold ${isLight ? 'text-amber-700' : 'text-amber'}`}>PATH:</span>
+          <span className={`font-medium ${isLight ? 'text-[#181414]' : 'text-white/90'}`}>
+            {location.pathname}
+          </span>
+          {requiredRole && (
+            <span className="bg-amber-500/10 text-amber-700 dark:text-amber-400 px-2 py-0.5 rounded border border-amber-500/20 font-semibold">
+              REQUIRED: {requiredRole}
+            </span>
+          )}
+        </div>
+
+        {/* Primary Rescue CTAs */}
+        <div className="flex flex-wrap items-center justify-center gap-3 sm:gap-4 mb-10">
+          <button
+            onClick={() => navigate(-1)}
+            className={`inline-flex items-center space-x-2 px-5 py-3 rounded-full text-sm font-semibold transition-all hover:scale-[1.02] active:scale-[0.98] ${
+              isLight
+                ? 'bg-white hover:bg-slate-50 text-slate-800 border border-slate-300 shadow-xs'
+                : 'bg-white/[0.06] hover:bg-white/[0.12] text-white border border-white/15'
+            }`}
+          >
+            <ArrowLeft size={16} />
+            <span>Go Back</span>
+          </button>
+
+          <Link
+            to="/"
+            className="keep-white inline-flex items-center space-x-2 px-6 py-3 rounded-full bg-[#166534] hover:bg-[#14532d] dark:bg-emerald dark:hover:bg-emerald/90 text-white dark:text-[#040A06] text-sm font-bold shadow-[0_0_25px_rgba(0,200,83,0.3)] transition-all hover:scale-[1.02] active:scale-[0.98]"
+          >
+            <Home size={16} />
+            <span>Return to Home</span>
+          </Link>
+
+          <Link
+            to="/platform/esg"
+            className={`inline-flex items-center space-x-2 px-5 py-3 rounded-full text-sm font-semibold transition-all hover:scale-[1.02] active:scale-[0.98] ${
+              isLight
+                ? 'bg-white hover:bg-slate-50 text-slate-800 border border-slate-300 shadow-xs'
+                : 'bg-white/[0.06] hover:bg-white/[0.12] text-white border border-white/15'
+            }`}
+          >
+            <KeyRound size={16} className={isLight ? 'text-[#166534]' : 'text-emerald'} />
+            <span>Switch Persona</span>
+          </Link>
+        </div>
+
+        {/* Alternate Navigation Portals */}
+        <div
+          className={`pt-8 border-t grid grid-cols-1 sm:grid-cols-2 gap-3 text-left ${
+            isLight ? 'border-slate-200' : 'border-white/10'
+          }`}
+        >
+          <Link
+            to="/platform/saas-dashboard"
+            className={`p-4 rounded-2xl border transition-all group flex items-center space-x-3.5 ${
+              isLight
+                ? 'bg-white hover:bg-slate-50 border-slate-200 hover:border-slate-300 shadow-xs'
+                : 'bg-white/[0.03] hover:bg-white/[0.07] border-white/10 hover:border-emerald/30'
+            }`}
+          >
+            <div
+              className={`p-2.5 rounded-xl transition-transform group-hover:scale-110 shrink-0 ${
+                isLight ? 'bg-emerald-50 text-[#166534]' : 'bg-emerald/10 text-emerald'
+              }`}
+            >
+              <Building2 size={18} />
+            </div>
+            <div>
+              <div className={`font-sans font-semibold text-xs ${isLight ? 'text-[#181414]' : 'text-white'}`}>
+                Enterprise Overview
+              </div>
+              <div className={`font-mono text-[11px] ${isLight ? 'text-slate-600' : 'text-mist'}`}>
+                Scope 1, 2 & 3 Emissions Workspace
+              </div>
+            </div>
+          </Link>
+
+          <Link
+            to="/platform/carbon-registry"
+            className={`p-4 rounded-2xl border transition-all group flex items-center space-x-3.5 ${
+              isLight
+                ? 'bg-white hover:bg-slate-50 border-slate-200 hover:border-slate-300 shadow-xs'
+                : 'bg-white/[0.03] hover:bg-white/[0.07] border-white/10 hover:border-emerald/30'
+            }`}
+          >
+            <div
+              className={`p-2.5 rounded-xl transition-transform group-hover:scale-110 shrink-0 ${
+                isLight ? 'bg-emerald-50 text-[#166534]' : 'bg-emerald/10 text-emerald'
+              }`}
+            >
+              <Terminal size={18} />
+            </div>
+            <div>
+              <div className={`font-sans font-semibold text-xs ${isLight ? 'text-[#181414]' : 'text-white'}`}>
+                Public Registry Terminal
+              </div>
+              <div className={`font-mono text-[11px] ${isLight ? 'text-slate-600' : 'text-mist'}`}>
+                Open telemetry & authorized serials
+              </div>
+            </div>
+          </Link>
+        </div>
+      </div>
+    </main>
+  );
+};
+
+export default Forbidden;

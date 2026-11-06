@@ -4,6 +4,7 @@ import Navbar from './components/Navbar';
 import Footer from './components/Footer';
 import Home from './pages/Home';
 import LoadingSpinner from './components/LoadingSpinner';
+import OfflineBanner from './components/OfflineBanner';
 
 function ScrollToTop() {
   const { pathname } = useLocation();
@@ -28,7 +29,7 @@ const EsgCallback = React.lazy(() => import('./pages/platform/esg/EsgWorkspace')
 const Impact = React.lazy(() => import('./pages/platform/Impact'));
 const CarbonMonitoring = React.lazy(() => import('./pages/platform/CarbonMonitoring'));
 
-// The new integrated features
+// The integrated features
 const Technology = React.lazy(() => import('./pages/Technology'));
 const MarketplaceBrowse = React.lazy(() => import('./components/marketplace/MarketplaceBrowse'));
 const FarmerCreditsWidget = React.lazy(() => import('./components/dashboard/FarmerCreditsWidget'));
@@ -59,10 +60,15 @@ const Careers = React.lazy(() => import('./pages/company/Careers'));
 const Privacy = React.lazy(() => import('./pages/company/Privacy'));
 const Terms = React.lazy(() => import('./pages/company/Terms'));
 
+// 404 Not Found Page
+const NotFound = React.lazy(() => import('./pages/NotFound'));
+const Forbidden = React.lazy(() => import('./pages/Forbidden'));
+
 function App() {
   return (
-    <div className="bg-carbon min-h-screen text-registry font-sans selection:bg-emerald selection:text-carbon">
+    <div className="bg-carbon min-h-screen text-registry font-sans selection:bg-emerald selection:text-carbon flex flex-col justify-between">
       <ScrollToTop />
+      <OfflineBanner />
       <Navbar />
       <Suspense fallback={<LoadingSpinner />}>
         <Routes>
@@ -116,6 +122,13 @@ function App() {
           <Route path="/company/careers" element={<Careers />} />
           <Route path="/company/privacy" element={<Privacy />} />
           <Route path="/company/terms" element={<Terms />} />
+
+          {/* Access Restriction / Forbidden Routes */}
+          <Route path="/forbidden" element={<Forbidden />} />
+          <Route path="/unauthorized" element={<Forbidden />} />
+
+          {/* Catch-all 404 Route */}
+          <Route path="*" element={<NotFound />} />
         </Routes>
       </Suspense>
       <Footer />
