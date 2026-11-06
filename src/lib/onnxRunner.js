@@ -123,11 +123,10 @@ export async function detectSpecies(canvas) {
     validResults.sort((a, b) => b.maxProb - a.maxProb);
     const best = validResults[0];
 
-    console.log('[CropDetector] Species confidence scores:');
-    validResults.forEach(r => {
-        console.log(`  ${r.species}: ${(r.maxProb * 100).toFixed(1)}%`);
-    });
-    console.log(`[CropDetector] Detected: ${best.species} (${(best.maxProb * 100).toFixed(1)}%)`);
+    if (import.meta.env?.DEV) {
+        console.debug('[CropDetector] Species confidence scores:', validResults.map(r => `${r.species}: ${(r.maxProb * 100).toFixed(1)}%`));
+        console.debug(`[CropDetector] Detected: ${best.species} (${(best.maxProb * 100).toFixed(1)}%)`);
+    }
 
     return {
         detectedSpecies: best.species,

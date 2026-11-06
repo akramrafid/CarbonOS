@@ -55,7 +55,7 @@ const CameraCapture = ({ isInline = false, onBack = null, onScanComplete = null 
           const latStr = position.coords.latitude.toFixed(4);
           const lngStr = position.coords.longitude.toFixed(4);
           setDeviceCoords({ lat: latStr, lng: lngStr });
-          console.log(`Device location acquired: Lat ${latStr}, Lng ${lngStr}`);
+          if (import.meta.env?.DEV) console.debug(`Device location acquired: Lat ${latStr}, Lng ${lngStr}`);
         },
         (err) => {
           console.warn("Geolocation permission denied or failed. Operating with default location:", err.message);
@@ -74,9 +74,9 @@ const CameraCapture = ({ isInline = false, onBack = null, onScanComplete = null 
       ws.onmessage = (event) => {
         const data = JSON.parse(event.data);
         if (data.status === 'processing') {
-          console.log("Cloud Inference processing... (via WebSocket)");
+          if (import.meta.env?.DEV) console.debug("Cloud Inference processing... (via WebSocket)");
         } else if (data.status === 'done') {
-          console.log("Cloud Inference done. (via WebSocket)");
+          if (import.meta.env?.DEV) console.debug("Cloud Inference done. (via WebSocket)");
         }
       };
       ws.onerror = () => console.warn('WebSocket connection failed, continuing without real-time updates.');
@@ -140,9 +140,9 @@ const CameraCapture = ({ isInline = false, onBack = null, onScanComplete = null 
         if (detection.detectedSpecies !== species) {
           setCropMismatch({ selected: species, detected: detection.detectedSpecies });
           effectiveSpecies = detection.detectedSpecies;
-          console.log(`[CropDetector] Overriding '${species}' → '${detection.detectedSpecies}' (confidence: ${(detection.confidence * 100).toFixed(1)}%)`);
+          if (import.meta.env?.DEV) console.debug(`[CropDetector] Overriding '${species}' → '${detection.detectedSpecies}' (confidence: ${(detection.confidence * 100).toFixed(1)}%)`);
         } else {
-          console.log(`[CropDetector] User selection '${species}' confirmed by detector.`);
+          if (import.meta.env?.DEV) console.debug(`[CropDetector] User selection '${species}' confirmed by detector.`);
         }
       }
     } catch (e) {
@@ -168,7 +168,7 @@ const CameraCapture = ({ isInline = false, onBack = null, onScanComplete = null 
           },
           isOffline: true
         };
-        console.log('[Offline] Disease result:', offlineRes);
+        if (import.meta.env?.DEV) console.debug('[Offline] Disease result:', offlineRes);
       }
     } catch (e) {
       console.warn('Offline inference skipped:', e);
@@ -382,32 +382,7 @@ const CameraCapture = ({ isInline = false, onBack = null, onScanComplete = null 
 
   return (
     <div className={`pb-16 px-4 max-w-xl mx-auto flex flex-col ${isInline ? 'pt-4' : 'pt-24 min-h-screen'}`}>
-      <style dangerouslySetInnerHTML={{__html: `
-        @keyframes scan-line {
-          0% { top: 0%; }
-          50% { top: 100%; }
-          100% { top: 0%; }
-        }
-        @keyframes pulse-ring {
-          0% { transform: scale(0.95); opacity: 0.5; }
-          50% { transform: scale(1); opacity: 1; }
-          100% { transform: scale(0.95); opacity: 0.5; }
-        }
-        @keyframes slide-in-down {
-          from { opacity: 0; transform: translateY(-8px); }
-          to { opacity: 1; transform: translateY(0); }
-        }
-        .crop-scroll-container::-webkit-scrollbar {
-          display: none !important;
-        }
-        .crop-scroll-container {
-          -ms-overflow-style: none !important;
-          scrollbar-width: none !important;
-        }
-        .mismatch-banner {
-          animation: slide-in-down 0.3s ease-out;
-        }
-      `}} />
+      {/* Scanner & camera animations defined in index.css */}
 
       {isInline && onBack && (
         <button onClick={onBack} className="self-start flex items-center text-white/50 hover:text-[#CCFF00] mb-6 transition-colors text-sm font-semibold group">

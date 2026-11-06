@@ -72,6 +72,31 @@ L.Icon.Default.mergeOptions({
 
 const FASTAPI_API_URL = import.meta.env.VITE_FASTAPI_API_URL || 'http://localhost:8000';
 
+const getAuthHeaders = () => {
+  let token = null;
+  try {
+    const raw = sessionStorage.getItem('carbonos.esg.demo_session');
+    if (raw) {
+      const parsed = JSON.parse(raw);
+      if (parsed?.access_token) token = parsed.access_token;
+    }
+  } catch {}
+  if (!token) {
+    token = localStorage.getItem('token') || sessionStorage.getItem('token') || 'demo-token-operator';
+  }
+  return {
+    'Authorization': `Bearer ${token}`
+  };
+};
+
+const authFetch = (url, options = {}) => {
+  const headers = {
+    ...getAuthHeaders(),
+    ...(options.headers || {})
+  };
+  return fetch(url, { ...options, headers });
+};
+
 // Geodesic Area & Perimeter calculation on WGS84 ellipsoid
 const calculateGeodesicMetrics = (coords) => {
   if (!coords || coords.length < 3) {
@@ -733,7 +758,7 @@ const CarbonMonitoring = () => {
   const handleVerifyChain = async () => {
     setVerifyingLedger(true);
     try {
-      const res = await fetch(`${FASTAPI_API_URL}/api/carbon/provenance/verify-chain`);
+      const res = await authFetch(`${FASTAPI_API_URL}/api/carbon/provenance/verify-chain`);
       if (res.ok) {
         const data = await res.json();
         setLedgerStatus({
@@ -837,7 +862,7 @@ const CarbonMonitoring = () => {
   const fetchVerificationTasks = async () => {
     setLoadingTasks(true);
     try {
-      const res = await fetch(`${FASTAPI_API_URL}/api/carbon/verification-tasks`);
+      const res = await authFetch(`${FASTAPI_API_URL}/api/carbon/verification-tasks`);
       if (res.ok) {
         const data = await res.json();
         if (Array.isArray(data) && data.length > 0) {
@@ -854,7 +879,7 @@ const CarbonMonitoring = () => {
   // Fetch model architecture settings
   const fetchModelSettings = async () => {
     try {
-      const res = await fetch(`${FASTAPI_API_URL}/api/carbon/settings`);
+      const res = await authFetch(`${FASTAPI_API_URL}/api/carbon/settings`);
       if (res.ok) {
         const data = await res.json();
         setModelSettings(prev => ({ ...prev, ...data }));
@@ -868,7 +893,7 @@ const CarbonMonitoring = () => {
   const fetchProvenanceTrust = async (resultId) => {
     const rId = resultId || selectedJob?.id || 'res_sundarbans_001';
     try {
-      const res = await fetch(`${FASTAPI_API_URL}/api/carbon/provenance/${rId}`);
+      const res = await authFetch(`${FASTAPI_API_URL}/api/carbon/provenance/${rId}`);
       if (res.ok) {
         const data = await res.json();
         if (data.signatures && data.signatures.length > 0) {
@@ -891,7 +916,7 @@ const CarbonMonitoring = () => {
   const handleSelectModel = async (newModelType) => {
     setUpdatingModel(true);
     try {
-      const res = await fetch(`${FASTAPI_API_URL}/api/carbon/settings`, {
+      const res = await authFetch(`${FASTAPI_API_URL}/api/carbon/settings`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ model_type: newModelType })
@@ -922,7 +947,7 @@ const CarbonMonitoring = () => {
     if (!selectedTaskForDrone) return;
     setSubmittingDrone(true);
     try {
-      const res = await fetch(`${FASTAPI_API_URL}/api/carbon/verification-tasks/${selectedTaskForDrone.id}/complete`, {
+      const res = await authFetch(`${FASTAPI_API_URL}/api/carbon/verification-tasks/${selectedTaskForDrone.id}/complete`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
@@ -981,7 +1006,7 @@ const CarbonMonitoring = () => {
   const handleGenerateKeypair = async () => {
     setGeneratingKeys(true);
     try {
-      const res = await fetch(`${FASTAPI_API_URL}/api/carbon/provenance/generate-keys`, { method: 'POST' });
+      const res = await authFetch(`${FASTAPI_API_URL}/api/carbon/provenance/generate-keys`, { method: 'POST' });
       if (res.ok) {
         const data = await res.json();
         setSignFormData(prev => ({ ...prev, private_key_hex: data.private_key }));
@@ -1016,7 +1041,7 @@ const CarbonMonitoring = () => {
     setSigningLedger(true);
     const rId = selectedJob?.id || 'res_sundarbans_001';
     try {
-      const res = await fetch(`${FASTAPI_API_URL}/api/carbon/provenance/${rId}/sign`, {
+      const res = await authFetch(`${FASTAPI_API_URL}/api/carbon/provenance/${rId}/sign`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(signFormData)
@@ -1112,7 +1137,7 @@ const CarbonMonitoring = () => {
   const handleExportVM0047Bundle = async () => {
     const projectId = selectedJob?.project_id || 'sundarbans-b2';
     try {
-      const res = await fetch(`${FASTAPI_API_URL}/api/carbon/registry-export/vm0047/${projectId}`);
+      const res = await authFetch(`${FASTAPI_API_URL}/api/carbon/registry-export/vm0047/${projectId}`);
       if (res.ok) {
         const bundle = await res.json();
         const blob = new Blob([JSON.stringify(bundle, null, 2)], { type: 'application/json' });
@@ -1147,7 +1172,7 @@ const CarbonMonitoring = () => {
     try {
       const controller = new AbortController();
       const tId = setTimeout(() => controller.abort(), 1200);
-      const res = await fetch(`${FASTAPI_API_URL}/api/carbon/dashboard`, { signal: controller.signal });
+      const res = await authFetch(`${FASTAPI_API_URL}/api/carbon/dashboard`, { signal: controller.signal });
       clearTimeout(tId);
       if (res.ok) {
         const data = await res.json();
@@ -1162,7 +1187,7 @@ const CarbonMonitoring = () => {
     try {
       const controller = new AbortController();
       const tId = setTimeout(() => controller.abort(), 1200);
-      const res = await fetch(`${FASTAPI_API_URL}/api/carbon/history`, { signal: controller.signal });
+      const res = await authFetch(`${FASTAPI_API_URL}/api/carbon/history`, { signal: controller.signal });
       clearTimeout(tId);
       if (res.ok) {
         const data = await res.json();
@@ -1181,7 +1206,7 @@ const CarbonMonitoring = () => {
     try {
       const controller = new AbortController();
       const tId = setTimeout(() => controller.abort(), 1200);
-      const res = await fetch(`${FASTAPI_API_URL}/api/carbon/alerts`, { signal: controller.signal });
+      const res = await authFetch(`${FASTAPI_API_URL}/api/carbon/alerts`, { signal: controller.signal });
       clearTimeout(tId);
       if (res.ok) {
         const data = await res.json();
@@ -1361,7 +1386,7 @@ const CarbonMonitoring = () => {
       formData.append("end_date", endDate);
       formData.append("analysis_type", activeLayer);
       formData.append("project_name", projectName);
-      fetch(`${FASTAPI_API_URL}/api/carbon/analyze`, {
+      authFetch(`${FASTAPI_API_URL}/api/carbon/analyze`, {
         method: 'POST',
         body: formData,
         signal: controller.signal
@@ -1380,7 +1405,7 @@ const CarbonMonitoring = () => {
     formData.append("file", file);
 
     try {
-      const res = await fetch(`${FASTAPI_API_URL}/api/carbon/boundary/upload`, {
+      const res = await authFetch(`${FASTAPI_API_URL}/api/carbon/boundary/upload`, {
         method: 'POST',
         body: formData
       });
@@ -1611,7 +1636,7 @@ const CarbonMonitoring = () => {
   // Resolve Alert action
   const handleResolveAlert = async (id) => {
     try {
-      const res = await fetch(`${FASTAPI_API_URL}/api/carbon/alerts/resolve/${id}`, {
+      const res = await authFetch(`${FASTAPI_API_URL}/api/carbon/alerts/resolve/${id}`, {
         method: 'POST'
       });
       if (res.ok) {
@@ -3768,7 +3793,9 @@ const CarbonMonitoring = () => {
                 />
                 <button 
                   onClick={handleCoordsSearch}
-                  className="bg-emerald text-carbon font-bold p-2.5 rounded-xl hover:bg-emerald/80 transition-colors cursor-pointer"
+                  aria-label="Search coordinates"
+                  title="Search coordinates"
+                  className="bg-emerald text-carbon font-bold p-2.5 min-w-[44px] min-h-[44px] flex items-center justify-center rounded-xl hover:bg-emerald/80 transition-colors cursor-pointer"
                 >
                   <Search size={16} />
                 </button>
@@ -4034,7 +4061,7 @@ const CarbonMonitoring = () => {
                       : (isLight ? 'bg-[#F8FAFC] border-[#E2E8F0] text-[#475569] hover:bg-[#E2E8F0]' : 'bg-white/5 border-white/10 hover:bg-white/10 text-white')
                   }`}
                 >
-                  Dark Mode
+                  {isLight ? 'Carto Light' : 'Carto Dark'}
                 </button>
               </div>
             </div>
@@ -4045,7 +4072,7 @@ const CarbonMonitoring = () => {
           <div className="lg:col-span-3 flex flex-col space-y-4">
             
             {/* Map Frame */}
-            <div className="relative rounded-3xl overflow-hidden border border-white/10 h-[500px] z-10">
+            <div className="relative rounded-3xl overflow-hidden border border-gray-200 dark:border-white/10 h-[500px] z-10">
               
               <MapContainer 
                 center={mapCenter} 
@@ -4057,10 +4084,12 @@ const CarbonMonitoring = () => {
                 <MapResizeHandler />
 
                 {/* Tile Layer Toggle */}
-                {basemap === 'dark' ? (
+                {basemap === 'dark' || basemap === 'carto' ? (
                   <TileLayer
-                    key="dark"
-                    url="https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png"
+                    key={isLight ? 'carto-light' : 'carto-dark'}
+                    url={isLight 
+                      ? "https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png"
+                      : "https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png"}
                     attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors &copy; <a href="https://carto.com/attributions">CARTO</a>'
                     maxZoom={19}
                   />

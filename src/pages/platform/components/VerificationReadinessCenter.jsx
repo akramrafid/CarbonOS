@@ -36,7 +36,7 @@ export const VerificationReadinessCenter = ({
   isLight = false,
   locale = 'en',
   currency = 'BDT',
-  showToast = (msg, type) => console.log(msg, type)
+  showToast = (msg, type) => { if (import.meta.env?.DEV) console.debug(msg, type); }
 }) => {
   const [activeTab, setActiveTab] = useState('checklist'); // 'checklist' | 'datagaps' | 'inquiries' | 'baseyear' | 'cbam' | 'signoff'
   const [isAuditorLocked, setIsAuditorLocked] = useState(false);
