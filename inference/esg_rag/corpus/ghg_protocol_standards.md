@@ -1,6 +1,6 @@
 ---
 authored_by: "AI Agent"
-source_documents:
+claimed_derivation_unverified:
   - "GHG Protocol Corporate Accounting and Reporting Standard (Revised Edition)"
   - "GHG Protocol Scope 2 Guidance (2015)"
 verbatim: false

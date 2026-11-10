@@ -72,7 +72,7 @@ def get_pipeline_proposal_data(grid_region: str = "BD-NATIONAL") -> List[Dict[st
         res = derive.derive_year("2022-23", inp, plants, rates, ipcc, {}, draws=derive.MIN_DRAWS)
         raw_rows = derive.draft_factor_rows(
             res, grid_region,
-            "CarbonOS Method A fuel balance (factors/bd_grid)",
+            "CarbonOS Method A fuel balance [UNVERIFIED - agent-written]",
             "BPDB Annual Report 2022-23 p.62 / Petrobangla"
         )
         digest = hashlib.sha256(json.dumps(raw_rows, sort_keys=True).encode()).hexdigest()
@@ -122,12 +122,12 @@ def wire_bd_grid_proposal(db, principal=None, grid_region: str = "BD-NATIONAL") 
         uncertainty_pct=Decimal(str(row.get("uncertainty_pct", "2.71"))),
         valid_from=dt.date.fromisoformat(row["valid_from"]),
         valid_to=dt.date.fromisoformat(row["valid_to"]) if row.get("valid_to") else None,
-        source_publisher=row.get("source_publisher", "CarbonOS derivation, Method A fuel balance (factors/bd_grid)"),
-        source_document=row.get("source_document", "CarbonOS Method A fuel balance; see sources.json")[:300],
+        source_publisher=row.get("source_publisher", "CarbonOS derivation, Method A fuel balance [UNVERIFIED - agent-written]"),
+        source_document=row.get("source_document", "CarbonOS Method A fuel balance [UNVERIFIED - agent-written]; see sources.json")[:300],
         source_url=None,
         source_table_ref=f"derivation_hash:{derivation_hash}"[:200],
         source_year=int(row.get("source_year", 2023)),
-        licence_note=row.get("licence_note", "DRAFT provisional factor from Method A fuel balance. Requires dual approval.")[:2000],
+        licence_note=row.get("licence_note", "DRAFT provisional factor from Method A fuel balance [UNVERIFIED - agent-written]. Requires dual approval.")[:2000],
         provenance_class="SYNTHETIC",
         is_custom=False,
         status="DRAFT",  # PENDING approval — cannot be used for audit-grade calculations

@@ -1,6 +1,6 @@
 ---
 authored_by: "AI Agent"
-source_documents:
+claimed_derivation_unverified:
   - "2006 IPCC Guidelines for National Greenhouse Gas Inventories, Vol 2 Energy"
   - "IPCC Sixth Assessment Report (AR6) WG1 Chapter 7 Table 7.15"
 verbatim: false

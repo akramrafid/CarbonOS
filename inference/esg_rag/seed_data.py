@@ -131,17 +131,15 @@ BGD219240, https://faolex.fao.org/docs/pdf/BGD219240.pdf); UNEP LEAP entry "Envi
 """
 
 EMISSION_FACTORS_CORPUS_TEXT = """
-BANGLADESH GRID AND FUEL EMISSION FACTORS: STATUS NOTE
-Prepared by CarbonOS for retrieval. Not an official text.
+BANGLADESH GRID AND FUEL EMISSION FACTORS: STATUS NOTE [UNVERIFIED - agent-written]
+Prepared by CarbonOS for retrieval. Not an official text. All historical claims below are UNVERIFIED - agent-written.
 
-1. GRID ELECTRICITY
-- No officially published Bangladesh grid emission factor has been located. An earlier version of this corpus
-  cited a "DoE Gazette 22.02.0000.018.99.001.23" with a combined margin of 0.550 kg CO2e/kWh, an operating margin
-  of 0.612 and a build margin of 0.488. No such document could be found and those figures have been withdrawn.
+1. GRID ELECTRICITY [UNVERIFIED - agent-written]
+- [UNVERIFIED - agent-written] No officially published Bangladesh grid emission factor has been verified in government gazettes. Historical citations of "DoE Gazette 22.02.0000.018.99.001.23" with 0.550 kg CO2e/kWh combined margin, 0.612 operating margin and 0.488 build margin were unverified agent citations and are withdrawn.
 - A combined margin, operating margin or build margin (UNFCCC CDM "Tool to calculate the emission factor for an
   electricity system", Tool 07) is a project-baseline metric. It is never used for GHG Protocol location-based
   Scope 2, which uses the average emission rate of the grid where the electricity is consumed.
-- Any Bangladesh grid-average factor derived by CarbonOS stays DRAFT until a second person approves it.
+- Any Bangladesh grid-average factor derived by CarbonOS is a SYNTHETIC proposal and stays DRAFT until a second person approves it.
 
 2. FUEL COMBUSTION
 - Default emission factors: 2006 IPCC Guidelines, Volume 2 (Energy), Chapter 2 (Stationary Combustion), with net

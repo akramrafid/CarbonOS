@@ -1,4 +1,7 @@
-# Bangladesh grid-average emission factor (Step 1): DRAFT, waiting for source files
+# Bangladesh grid-average emission factor (Step 1): DRAFT [UNVERIFIED - agent-written]
+
+> [!WARNING]
+> **UNVERIFIED - agent-written**: All contents in this directory — including "Method A", "Method B", method agreement claims (e.g. within 5%), Monte Carlo uncertainty bounds, and proposed grid factors (e.g. 0.663096) — are UNVERIFIED agent-written proposals. They are not approved official methodologies. Grid factor values derived from these files are classified `provenance_class="SYNTHETIC"` and cannot enter the production ledger without verified published source documents. Grid uncertainty must not appear next to any user-facing number.
 
 Location-based Scope 2 needs the **average** emission rate of the Bangladesh grid. No official published factor was
 located, so CarbonOS derives one, two ways, from national data. Nothing here is approved: results load as DRAFT

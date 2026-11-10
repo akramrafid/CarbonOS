@@ -1,6 +1,6 @@
 ---
 authored_by: "AI Agent"
-source_documents:
+claimed_derivation_unverified:
   - "Fictional Demonstration Facility Energy Logbook"
 verbatim: false
 ---

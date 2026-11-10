@@ -138,20 +138,18 @@ def format_factor_qa_response(
             f"- **Factor**: {f['kgco2e_per_unit']} kgCO2e / {f['unit']}\n"
             f"- **Activity / Method**: {f['family']} ({f['method']}, GWP {f['gwp_basis']})\n"
             f"- **Vintage & Region**: {f['vintage']} | {f['region']}\n"
-            f"- **Uncertainty**: ±{f['uncertainty_pct']}%\n"
             f"- **Source**: {f['source_publisher']} ({f['source_document']})\n\n"
             f"This factor is **approved** in the CarbonOS registry under dual control and is eligible for sealed audit calculations."
         )
     elif status_category == "PROVISIONAL":
         f = factor_info
         header = (
-            f"**CarbonOS Factor Registry Status: PROVISIONAL (Pending Dual Approval)**\n\n"
-            f"- **Proposed Factor**: {f['kgco2e_per_unit']} kgCO2e / {f['unit']}\n"
-            f"- **Activity / Method**: {f['family']} ({f['method']}, GWP {f['gwp_basis']})\n"
+            f"**CarbonOS Factor Registry Status: PROVISIONAL (Pending Dual Approval) [UNVERIFIED - agent-written]**\n\n"
+            f"- **Proposed Factor**: {f['kgco2e_per_unit']} kgCO2e / {f['unit']} [UNVERIFIED - agent-written]\n"
+            f"- **Activity / Method**: {f['family']} ({f['method']}, GWP {f['gwp_basis']}) [UNVERIFIED - agent-written]\n"
             f"- **Derivation Hash**: `{f['derivation_hash']}`\n"
-            f"- **Uncertainty**: ±{f['uncertainty_pct']}% (95% CI from Monte Carlo simulation)\n"
             f"- **Source**: {f['source_publisher']} ({f['source_document']})\n\n"
-            f"**Notice**: This factor is currently a **DRAFT proposal** awaiting secondary dual-control approval. "
+            f"**Notice**: This factor is currently an **UNVERIFIED agent-written DRAFT proposal** awaiting secondary dual-control approval. "
             f"It can be used for **indicative estimates only** (`allow_provisional=true`), not for compliance filings."
         )
     else:

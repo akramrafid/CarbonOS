@@ -1,6 +1,6 @@
 ---
 authored_by: "AI Agent"
-source_documents:
+claimed_derivation_unverified:
   - "Bangladesh Climate Change Strategy and Action Plan (BCCSAP)"
   - "Environmental Conservation Rules 2023 (ECR 2023)"
   - "Updated Nationally Determined Contributions (NDC) 2021"

@@ -30,7 +30,7 @@ EXPECTED_CORPUS_FILES = [
 
 class TestCorpusHonesty(unittest.TestCase):
     def test_corpus_front_matter_presence_and_truthfulness(self):
-        """All 5 corpus files must declare authored_by, source_documents, and verbatim: false."""
+        """All 5 corpus files must declare authored_by, claimed_derivation_unverified, and verbatim: false."""
         for fname in EXPECTED_CORPUS_FILES:
             path = CORPUS_DIR / fname
             self.assertTrue(path.is_file(), f"Missing corpus file: {fname}")
@@ -40,7 +40,7 @@ class TestCorpusHonesty(unittest.TestCase):
             self.assertGreaterEqual(len(parts), 3, f"{fname} has malformed front-matter delimiter")
             front_matter = parts[1]
             self.assertIn("authored_by:", front_matter, f"{fname} missing 'authored_by' in front-matter")
-            self.assertIn("source_documents:", front_matter, f"{fname} missing 'source_documents' in front-matter")
+            self.assertIn("claimed_derivation_unverified:", front_matter, f"{fname} missing 'claimed_derivation_unverified' in front-matter")
             self.assertIn("verbatim: false", front_matter, f"{fname} must declare 'verbatim: false'")
 
     def test_agent_authored_exclusion_defaults(self):
