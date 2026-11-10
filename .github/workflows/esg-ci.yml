@@ -43,6 +43,8 @@ jobs:
         run: python -m unittest discover -s tests -p "test_esg_ocr_smoke.py" -v
       - name: Grid factor derivation (synthetic inputs)
         run: python -m unittest discover -s tests -p "test_bd_grid.py" -v
+      - name: dMRV tests (modules run individually)
+        run: python -m unittest discover -s tests -p "test_dmrv*.py" -v
       - name: ESG tests (PostgreSQL + Alembic migrations)
         env:
           ESG_TEST_DATABASE_URL: postgresql+psycopg2://esg:esg@localhost:5432/esg_test
