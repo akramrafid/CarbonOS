@@ -43,6 +43,9 @@ STOP
 
 # ESG local env and tenant uploads (never commit customer documents)
 .venv-esg/
+uploads/
+inference/uploads/
+inference/chroma_data/uploads/
 inference/chroma_data/uploads/*/
 
 # Playwright output
