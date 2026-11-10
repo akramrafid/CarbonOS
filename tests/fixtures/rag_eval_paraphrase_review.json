@@ -1,0 +1,642 @@
+[
+  {
+    "id": "PARAPHRASE-EN-01",
+    "query": "Under corporate carbon guidelines, what test decides whether an asset falls under operational control?",
+    "expected_doc": "ghg_protocol_standards.md",
+    "language": "en",
+    "query_type": "paraphrase",
+    "needs_human_review": true
+  },
+  {
+    "id": "PARAPHRASE-EN-02",
+    "query": "How does the GHG Protocol differentiate direct stationary fuel emissions from purchased energy impacts?",
+    "expected_doc": "ghg_protocol_standards.md",
+    "language": "en",
+    "query_type": "paraphrase",
+    "needs_human_review": true
+  },
+  {
+    "id": "PARAPHRASE-EN-03",
+    "query": "When an entity holds equity in a subsidiary without operational management, which consolidation approach is required?",
+    "expected_doc": "ghg_protocol_standards.md",
+    "language": "en",
+    "query_type": "paraphrase",
+    "needs_human_review": true
+  },
+  {
+    "id": "PARAPHRASE-EN-04",
+    "query": "What are the two mandatory calculation methodologies required for Scope 2 electricity accounting?",
+    "expected_doc": "ghg_protocol_standards.md",
+    "language": "en",
+    "query_type": "paraphrase",
+    "needs_human_review": true
+  },
+  {
+    "id": "PARAPHRASE-EN-05",
+    "query": "Why does the GHG Protocol prohibit netting offsite exported renewable electricity against Scope 2 totals?",
+    "expected_doc": "ghg_protocol_standards.md",
+    "language": "en",
+    "query_type": "paraphrase",
+    "needs_human_review": true
+  },
+  {
+    "id": "PARAPHRASE-EN-06",
+    "query": "Which greenhouse gas inventory scope covers company-owned diesel forklifts and factory standby generators?",
+    "expected_doc": "ghg_protocol_standards.md",
+    "language": "en",
+    "query_type": "paraphrase",
+    "needs_human_review": true
+  },
+  {
+    "id": "PARAPHRASE-EN-07",
+    "query": "Under dual-reporting rules, which Scope 2 figure reflects physical grid carbon intensity versus supplier contracts?",
+    "expected_doc": "ghg_protocol_standards.md",
+    "language": "en",
+    "query_type": "paraphrase",
+    "needs_human_review": true
+  },
+  {
+    "id": "PARAPHRASE-EN-08",
+    "query": "Can a corporation retroactively alter historical base year emissions without formal threshold recalculation?",
+    "expected_doc": "ghg_protocol_standards.md",
+    "language": "en",
+    "query_type": "paraphrase",
+    "needs_human_review": true
+  },
+  {
+    "id": "PARAPHRASE-EN-09",
+    "query": "What percentage reduction in greenhouse gases did Bangladesh pledge unconditionally under its NDC by 2030?",
+    "expected_doc": "bangladesh_climate_regulatory.md",
+    "language": "en",
+    "query_type": "paraphrase",
+    "needs_human_review": true
+  },
+  {
+    "id": "PARAPHRASE-EN-10",
+    "query": "Under the Environmental Conservation Rules 2023, which risk category includes industrial textile dyeing and wet processing?",
+    "expected_doc": "bangladesh_climate_regulatory.md",
+    "language": "en",
+    "query_type": "paraphrase",
+    "needs_human_review": true
+  },
+  {
+    "id": "PARAPHRASE-EN-11",
+    "query": "What governmental authority is tasked with issuing environmental clearance certificates to manufacturing facilities in Dhaka?",
+    "expected_doc": "bangladesh_climate_regulatory.md",
+    "language": "en",
+    "query_type": "paraphrase",
+    "needs_human_review": true
+  },
+  {
+    "id": "PARAPHRASE-EN-12",
+    "query": "Which national policy framework articulates Bangladesh's goal of transitioning from climate vulnerability to resilience by 2050?",
+    "expected_doc": "bangladesh_climate_regulatory.md",
+    "language": "en",
+    "query_type": "paraphrase",
+    "needs_human_review": true
+  },
+  {
+    "id": "PARAPHRASE-EN-13",
+    "query": "Under ECR 2023, what is the validity duration for an Environmental Clearance Certificate for Red category plants?",
+    "expected_doc": "bangladesh_climate_regulatory.md",
+    "language": "en",
+    "query_type": "paraphrase",
+    "needs_human_review": true
+  },
+  {
+    "id": "PARAPHRASE-EN-14",
+    "query": "What sectoral mitigation measures are prioritized in Bangladesh's updated climate action commitments for the industrial energy sector?",
+    "expected_doc": "bangladesh_climate_regulatory.md",
+    "language": "en",
+    "query_type": "paraphrase",
+    "needs_human_review": true
+  },
+  {
+    "id": "PARAPHRASE-EN-15",
+    "query": "How does the 2023 environmental regulatory schedule classify captive natural gas power plants versus small diesel sets?",
+    "expected_doc": "bangladesh_climate_regulatory.md",
+    "language": "en",
+    "query_type": "paraphrase",
+    "needs_human_review": true
+  },
+  {
+    "id": "PARAPHRASE-EN-16",
+    "query": "What conditional emission reduction target did Bangladesh propose contingent on international climate finance?",
+    "expected_doc": "bangladesh_climate_regulatory.md",
+    "language": "en",
+    "query_type": "paraphrase",
+    "needs_human_review": true
+  },
+  {
+    "id": "PARAPHRASE-EN-17",
+    "query": "Why is the Clean Development Mechanism combined margin factor unsuitable for corporate Scope 2 reporting in Bangladesh?",
+    "expected_doc": "bd_grid_methodology.md",
+    "language": "en",
+    "query_type": "paraphrase",
+    "needs_human_review": true
+  },
+  {
+    "id": "PARAPHRASE-EN-18",
+    "query": "In the national grid factor estimation, how does Method A derive total fuel carbon from energy balances?",
+    "expected_doc": "bd_grid_methodology.md",
+    "language": "en",
+    "query_type": "paraphrase",
+    "needs_human_review": true
+  },
+  {
+    "id": "PARAPHRASE-EN-19",
+    "query": "What statistical threshold is required between Method A and Method B before a national grid factor is eligible for review?",
+    "expected_doc": "bd_grid_methodology.md",
+    "language": "en",
+    "query_type": "paraphrase",
+    "needs_human_review": true
+  },
+  {
+    "id": "PARAPHRASE-EN-20",
+    "query": "Why must captive industrial generators be removed when calculating the public utility average grid factor?",
+    "expected_doc": "bd_grid_methodology.md",
+    "language": "en",
+    "query_type": "paraphrase",
+    "needs_human_review": true
+  },
+  {
+    "id": "PARAPHRASE-EN-21",
+    "query": "What primary data sources from Petrobangla and BPDB supply the generation inputs for the grid emission model?",
+    "expected_doc": "bd_grid_methodology.md",
+    "language": "en",
+    "query_type": "paraphrase",
+    "needs_human_review": true
+  },
+  {
+    "id": "PARAPHRASE-EN-22",
+    "query": "How are cross-border electricity imports from Indian interconnectors accounted for in the Bangladesh grid mix?",
+    "expected_doc": "bd_grid_methodology.md",
+    "language": "en",
+    "query_type": "paraphrase",
+    "needs_human_review": true
+  },
+  {
+    "id": "PARAPHRASE-EN-23",
+    "query": "What uncertainty assessment technique is applied to determine confidence intervals for the grid emission factor?",
+    "expected_doc": "bd_grid_methodology.md",
+    "language": "en",
+    "query_type": "paraphrase",
+    "needs_human_review": true
+  },
+  {
+    "id": "PARAPHRASE-EN-24",
+    "query": "Under what condition does an unexplained discrepancy between generation methods cause a provisional factor to remain in draft status?",
+    "expected_doc": "bd_grid_methodology.md",
+    "language": "en",
+    "query_type": "paraphrase",
+    "needs_human_review": true
+  },
+  {
+    "id": "PARAPHRASE-EN-25",
+    "query": "What are the default net calorific values and carbon content factors for natural gas in IPCC Tier 1 stationary combustion?",
+    "expected_doc": "ipcc_2006_combustion_and_ar6_gwp.md",
+    "language": "en",
+    "query_type": "paraphrase",
+    "needs_human_review": true
+  },
+  {
+    "id": "PARAPHRASE-EN-26",
+    "query": "Under the IPCC Sixth Assessment Report (AR6), what is the 100-year Global Warming Potential for methane compared to CO2?",
+    "expected_doc": "ipcc_2006_combustion_and_ar6_gwp.md",
+    "language": "en",
+    "query_type": "paraphrase",
+    "needs_human_review": true
+  },
+  {
+    "id": "PARAPHRASE-EN-27",
+    "query": "How does the IPCC guidance distinguish Tier 1 default emission factors from Tier 2 country-specific fuel specifications?",
+    "expected_doc": "ipcc_2006_combustion_and_ar6_gwp.md",
+    "language": "en",
+    "query_type": "paraphrase",
+    "needs_human_review": true
+  },
+  {
+    "id": "PARAPHRASE-EN-28",
+    "query": "What is the AR6 100-year GWP value assigned to nitrous oxide in combustion inventory calculations?",
+    "expected_doc": "ipcc_2006_combustion_and_ar6_gwp.md",
+    "language": "en",
+    "query_type": "paraphrase",
+    "needs_human_review": true
+  },
+  {
+    "id": "PARAPHRASE-EN-29",
+    "query": "In stationary combustion accounting, why is biogenic CO2 reported as an informational memo rather than within Scope 1 totals?",
+    "expected_doc": "ipcc_2006_combustion_and_ar6_gwp.md",
+    "language": "en",
+    "query_type": "paraphrase",
+    "needs_human_review": true
+  },
+  {
+    "id": "PARAPHRASE-EN-30",
+    "query": "What conversion equation relates fuel volume in cubic meters to gigajoules using higher versus lower heating values?",
+    "expected_doc": "ipcc_2006_combustion_and_ar6_gwp.md",
+    "language": "en",
+    "query_type": "paraphrase",
+    "needs_human_review": true
+  },
+  {
+    "id": "PARAPHRASE-EN-31",
+    "query": "What default emission factors does IPCC 2006 provide for heavy fuel oil (HFO) combustion in industrial boilers?",
+    "expected_doc": "ipcc_2006_combustion_and_ar6_gwp.md",
+    "language": "en",
+    "query_type": "paraphrase",
+    "needs_human_review": true
+  },
+  {
+    "id": "PARAPHRASE-EN-32",
+    "query": "Why is standard temperature and pressure normalization essential when converting gaseous fuel volume to mass basis?",
+    "expected_doc": "ipcc_2006_combustion_and_ar6_gwp.md",
+    "language": "en",
+    "query_type": "paraphrase",
+    "needs_human_review": true
+  },
+  {
+    "id": "PARAPHRASE-EN-33",
+    "query": "What are the primary production units and registered operational facilities at Dexterity Textiles in Gazipur?",
+    "expected_doc": "dexterity_textiles_demo.md",
+    "language": "en",
+    "query_type": "paraphrase",
+    "needs_human_review": true
+  },
+  {
+    "id": "PARAPHRASE-EN-34",
+    "query": "Which natural gas utility company supplies the main pipeline feed to Dexterity Textiles manufacturing complex?",
+    "expected_doc": "dexterity_textiles_demo.md",
+    "language": "en",
+    "query_type": "paraphrase",
+    "needs_human_review": true
+  },
+  {
+    "id": "PARAPHRASE-EN-35",
+    "query": "What is the sanctioned electrical load and utility feeder category for Dexterity's spinning division?",
+    "expected_doc": "dexterity_textiles_demo.md",
+    "language": "en",
+    "query_type": "paraphrase",
+    "needs_human_review": true
+  },
+  {
+    "id": "PARAPHRASE-EN-36",
+    "query": "How does Dexterity Textiles record monthly fuel oil intake for its backup steam boilers?",
+    "expected_doc": "dexterity_textiles_demo.md",
+    "language": "en",
+    "query_type": "paraphrase",
+    "needs_human_review": true
+  },
+  {
+    "id": "PARAPHRASE-EN-37",
+    "query": "What refrigerant gas is utilized in the factory's industrial air conditioning chillers at the spinning plant?",
+    "expected_doc": "dexterity_textiles_demo.md",
+    "language": "en",
+    "query_type": "paraphrase",
+    "needs_human_review": true
+  },
+  {
+    "id": "PARAPHRASE-EN-38",
+    "query": "What was Dexterity Textiles' audited Scope 1 natural gas consumption during the baseline reporting year?",
+    "expected_doc": "dexterity_textiles_demo.md",
+    "language": "en",
+    "query_type": "paraphrase",
+    "needs_human_review": true
+  },
+  {
+    "id": "PARAPHRASE-EN-39",
+    "query": "Which distribution company provides high-tension electrical connection to Dexterity's Gazipur plant?",
+    "expected_doc": "dexterity_textiles_demo.md",
+    "language": "en",
+    "query_type": "paraphrase",
+    "needs_human_review": true
+  },
+  {
+    "id": "PARAPHRASE-EN-40",
+    "query": "How does Dexterity track electricity meter multipliers when verifying utility billing records for carbon accounting?",
+    "expected_doc": "dexterity_textiles_demo.md",
+    "language": "en",
+    "query_type": "paraphrase",
+    "needs_human_review": true
+  },
+  {
+    "id": "PARAPHRASE-BN-01",
+    "query": "কর্পোরেট কার্বন হিসাবরক্ষণ পদ্ধতিতে অপারেশনাল কন্ট্রোল এবং ফিনান্সিয়াল কন্ট্রোলের মধ্যে মূল পার্থক্য কী?",
+    "expected_doc": "ghg_protocol_standards.md",
+    "language": "bn",
+    "query_type": "paraphrase",
+    "needs_human_review": true
+  },
+  {
+    "id": "PARAPHRASE-BN-02",
+    "query": "জিএইচজি প্রটোকল অনুযায়ী প্রতিষ্ঠানের নিজস্ব বিদ্যুৎ জেনারেটরের জ্বালানি কোন স্কোপের অন্তর্ভুক্ত?",
+    "expected_doc": "ghg_protocol_standards.md",
+    "language": "bn",
+    "query_type": "paraphrase",
+    "needs_human_review": true
+  },
+  {
+    "id": "PARAPHRASE-BN-03",
+    "query": "স্কোপ ২ বিদ্যুৎ হিসাবের ক্ষেত্রে লোকেশন-বেসড এবং মার্কেট-বেসড পদ্ধতির দ্বৈত রিপোর্টিং কেন বাধ্যতামূলক?",
+    "expected_doc": "ghg_protocol_standards.md",
+    "language": "bn",
+    "query_type": "paraphrase",
+    "needs_human_review": true
+  },
+  {
+    "id": "PARAPHRASE-BN-04",
+    "query": "কোনো কোম্পানি সৌর বিদ্যুৎ জাতীয় গ্রিডে রপ্তানি করলে তা কি স্কোপ ২ এর মোট হিসাব থেকে বাদ দেওয়া যায়?",
+    "expected_doc": "ghg_protocol_standards.md",
+    "language": "bn",
+    "query_type": "paraphrase",
+    "needs_human_review": true
+  },
+  {
+    "id": "PARAPHRASE-BN-05",
+    "query": "একটি সহযোগী প্রতিষ্ঠানে আর্থিক বিনিয়োগ থাকলে কিন্তু পরিচালন ক্ষমতা না থাকলে কোন পদ্ধতিতে কার্বন হিসাব করতে হয়?",
+    "expected_doc": "ghg_protocol_standards.md",
+    "language": "bn",
+    "query_type": "paraphrase",
+    "needs_human_review": true
+  },
+  {
+    "id": "PARAPHRASE-BN-06",
+    "query": "প্রতিষ্ঠানের সীমানা নির্ধারণের ক্ষেত্রে ইক্যুইটি শেয়ার পদ্ধতির নিয়ম কী?",
+    "expected_doc": "ghg_protocol_standards.md",
+    "language": "bn",
+    "query_type": "paraphrase",
+    "needs_human_review": true
+  },
+  {
+    "id": "PARAPHRASE-BN-07",
+    "query": "বায়োজেনিক বা জৈব জ্বালানির নির্গমন কি সরাসরি স্কোপ ১ এ যোগ করা হয় নাকি আলাদা মেমো হিসেবে রাখতে হয়?",
+    "expected_doc": "ghg_protocol_standards.md",
+    "language": "bn",
+    "query_type": "paraphrase",
+    "needs_human_review": true
+  },
+  {
+    "id": "PARAPHRASE-BN-08",
+    "query": "ভিত্তি বছরের নির্গমন তথ্য কখন বা কোন পরিস্থিতিতে পুনরায় গণনা করা আবশ্যক?",
+    "expected_doc": "ghg_protocol_standards.md",
+    "language": "bn",
+    "query_type": "paraphrase",
+    "needs_human_review": true
+  },
+  {
+    "id": "PARAPHRASE-BN-09",
+    "query": "বাংলাদেশের হালনাগাদ এনডিসিতে (NDC) ২০৩০ সালের মধ্যে নিজস্ব অর্থায়নে কতটা নির্গমন কমানোর প্রতিশ্রুতি রয়েছে?",
+    "expected_doc": "bangladesh_climate_regulatory.md",
+    "language": "bn",
+    "query_type": "paraphrase",
+    "needs_human_review": true
+  },
+  {
+    "id": "PARAPHRASE-BN-10",
+    "query": "পরিবেশ সংরক্ষণ বিধিমালা ২০২৩ অনুসারে টেক্সটাইল ডাইং ও ওয়াশিং কারখানা কোন পরিবেশগত শ্রেণিতে পড়ে?",
+    "expected_doc": "bangladesh_climate_regulatory.md",
+    "language": "bn",
+    "query_type": "paraphrase",
+    "needs_human_review": true
+  },
+  {
+    "id": "PARAPHRASE-BN-11",
+    "query": "লাল শ্রেণির শিল্প কারখানার জন্য পরিবেশ ছাড়পত্রের মেয়াদ কত বছর নির্ধারণ করা হয়েছে?",
+    "expected_doc": "bangladesh_climate_regulatory.md",
+    "language": "bn",
+    "query_type": "paraphrase",
+    "needs_human_review": true
+  },
+  {
+    "id": "PARAPHRASE-BN-12",
+    "query": "মুজিব জলবায়ু সমৃদ্ধি পরিকল্পনার মূল লক্ষ্য এবং দৃষ্টিভঙ্গি কী?",
+    "expected_doc": "bangladesh_climate_regulatory.md",
+    "language": "bn",
+    "query_type": "paraphrase",
+    "needs_human_review": true
+  },
+  {
+    "id": "PARAPHRASE-BN-13",
+    "query": "বাংলাদেশে শিল্প প্রতিষ্ঠানের পরিবেশ ছাড়পত্র ইস্যু করার দায়িত্বপ্রাপ্ত সরকারি সংস্থা কোনটি?",
+    "expected_doc": "bangladesh_climate_regulatory.md",
+    "language": "bn",
+    "query_type": "paraphrase",
+    "needs_human_review": true
+  },
+  {
+    "id": "PARAPHRASE-BN-14",
+    "query": "২০২৩ সালের পরিবেশ বিধিমালার অধীনে ক্যাপটিভ বিদ্যুৎ কেন্দ্রগুলোকে কীভাবে শ্রেণিবদ্ধ করা হয়েছে?",
+    "expected_doc": "bangladesh_climate_regulatory.md",
+    "language": "bn",
+    "query_type": "paraphrase",
+    "needs_human_review": true
+  },
+  {
+    "id": "PARAPHRASE-BN-15",
+    "query": "আন্তর্জাতিক আর্থিক ও প্রযুক্তিগত সহায়তা সাপেক্ষে বাংলাদেশ ২০৩০ সালের মধ্যে কত শতাংশ নির্গমন কমানোর লক্ষ্য নির্ধারণ করেছে?",
+    "expected_doc": "bangladesh_climate_regulatory.md",
+    "language": "bn",
+    "query_type": "paraphrase",
+    "needs_human_review": true
+  },
+  {
+    "id": "PARAPHRASE-BN-16",
+    "query": "শিল্প খাতের শক্তি দক্ষতা বৃদ্ধিতে জাতীয় কর্মপরিকল্পনায় কী কী ব্যবস্থা উল্লেখ করা হয়েছে?",
+    "expected_doc": "bangladesh_climate_regulatory.md",
+    "language": "bn",
+    "query_type": "paraphrase",
+    "needs_human_review": true
+  },
+  {
+    "id": "PARAPHRASE-BN-17",
+    "query": "কর্পোরেট স্কোপ ২ হিসাবের ক্ষেত্রে সিডিএম (CDM) কম্বাইন্ড মার্জিন পদ্ধতি কেন গ্রহণযোগ্য নয়?",
+    "expected_doc": "bd_grid_methodology.md",
+    "language": "bn",
+    "query_type": "paraphrase",
+    "needs_human_review": true
+  },
+  {
+    "id": "PARAPHRASE-BN-18",
+    "query": "বাংলাদেশের জাতীয় গ্রিড নির্গমন সহগ নির্ণয়ে মেথড এ (জ্বালানি ভারসাম্য) কীভাবে কাজ করে?",
+    "expected_doc": "bd_grid_methodology.md",
+    "language": "bn",
+    "query_type": "paraphrase",
+    "needs_human_review": true
+  },
+  {
+    "id": "PARAPHRASE-BN-19",
+    "query": "মেথড এ এবং মেথড বি এর মধ্যে ফলাফলের সর্বোচ্চ কত শতাংশ পার্থক্য থাকলে তা পর্যালোচনার যোগ্য হয়?",
+    "expected_doc": "bd_grid_methodology.md",
+    "language": "bn",
+    "query_type": "paraphrase",
+    "needs_human_review": true
+  },
+  {
+    "id": "PARAPHRASE-BN-20",
+    "query": "জাতীয় গ্রিডের গড় নির্গমন ফ্যাক্টর থেকে ক্যাপটিভ জেনারেটরের উৎপাদন কেন বাদ দেওয়া আবশ্যক?",
+    "expected_doc": "bd_grid_methodology.md",
+    "language": "bn",
+    "query_type": "paraphrase",
+    "needs_human_review": true
+  },
+  {
+    "id": "PARAPHRASE-BN-21",
+    "query": "গ্রিড নির্গমন ফ্যাক্টর গণনার জন্য পিডিবি এবং পেট্রোবাংলার কোন কোন বার্ষিক প্রতিবেদন ব্যবহার করা হয়?",
+    "expected_doc": "bd_grid_methodology.md",
+    "language": "bn",
+    "query_type": "paraphrase",
+    "needs_human_review": true
+  },
+  {
+    "id": "PARAPHRASE-BN-22",
+    "query": "ভারত থেকে আমদানিকৃত বিদ্যুতের কার্বন নির্গমন কীভাবে বাংলাদেশ গ্রিডের মডেলে অন্তর্ভুক্ত করা হয়?",
+    "expected_doc": "bd_grid_methodology.md",
+    "language": "bn",
+    "query_type": "paraphrase",
+    "needs_human_review": true
+  },
+  {
+    "id": "PARAPHRASE-BN-23",
+    "query": "গ্রিড ফ্যাক্টরের অনিশ্চয়তা (Uncertainty) পরিমাপের জন্য কোন পরিসংখ্যানিক পদ্ধতি ব্যবহার করা হয়?",
+    "expected_doc": "bd_grid_methodology.md",
+    "language": "bn",
+    "query_type": "paraphrase",
+    "needs_human_review": true
+  },
+  {
+    "id": "PARAPHRASE-BN-24",
+    "query": "দুই পদ্ধতির মধ্যে ব্যাখ্যাতীত ব্যবধান ৫ শতাংশের বেশি হলে খসড়া ফ্যাক্টরের ক্ষেত্রে কী সিদ্ধান্ত নেওয়া হয়?",
+    "expected_doc": "bd_grid_methodology.md",
+    "language": "bn",
+    "query_type": "paraphrase",
+    "needs_human_review": true
+  },
+  {
+    "id": "PARAPHRASE-BN-25",
+    "query": "আইপিসিসি টিয়ার ১ পদ্ধতিতে প্রাকৃতিক গ্যাসের ডিফল্ট নেট ক্যালরিফিক মান এবং কার্বন সহগ কত?",
+    "expected_doc": "ipcc_2006_combustion_and_ar6_gwp.md",
+    "language": "bn",
+    "query_type": "paraphrase",
+    "needs_human_review": true
+  },
+  {
+    "id": "PARAPHRASE-BN-26",
+    "query": "আইপিসিসি সিক্সথ অ্যাসেসমেন্ট রিপোর্ট (AR6) অনুযায়ী মিথেন গ্যাসের ১০০ বছরের জিডব্লিউপি (GWP) মান কত?",
+    "expected_doc": "ipcc_2006_combustion_and_ar6_gwp.md",
+    "language": "bn",
+    "query_type": "paraphrase",
+    "needs_human_review": true
+  },
+  {
+    "id": "PARAPHRASE-BN-27",
+    "query": "স্থায়ী জ্বালানি দহনের ক্ষেত্রে টিয়ার ১ ডিফল্ট ফ্যাক্টর এবং টিয়ার ২ স্থানীয় ফ্যাক্টরের মধ্যে পার্থক্য কী?",
+    "expected_doc": "ipcc_2006_combustion_and_ar6_gwp.md",
+    "language": "bn",
+    "query_type": "paraphrase",
+    "needs_human_review": true
+  },
+  {
+    "id": "PARAPHRASE-BN-28",
+    "query": "এআর৬ অনুযায়ী নাইট্রাস অক্সাইডের (N2O) ১০০ বছরের গ্লোবাল ওয়ার্মিং পটেনশিয়াল মান কত ধরা হয়?",
+    "expected_doc": "ipcc_2006_combustion_and_ar6_gwp.md",
+    "language": "bn",
+    "query_type": "paraphrase",
+    "needs_human_review": true
+  },
+  {
+    "id": "PARAPHRASE-BN-29",
+    "query": "শিল্প বয়লারে ফার্নেস অয়েল (HFO) পোড়ানোর জন্য আইপিসিসি ২০০৬ এর ডিফল্ট নির্গমন সহগ কত?",
+    "expected_doc": "ipcc_2006_combustion_and_ar6_gwp.md",
+    "language": "bn",
+    "query_type": "paraphrase",
+    "needs_human_review": true
+  },
+  {
+    "id": "PARAPHRASE-BN-30",
+    "query": "গ্যাসীয় জ্বালানির ভলিউম (ঘনমিটার) থেকে শক্তিতে (GJ) রূপান্তরের সময় এনসিভি এবং জিসিভির নিয়ম কী?",
+    "expected_doc": "ipcc_2006_combustion_and_ar6_gwp.md",
+    "language": "bn",
+    "query_type": "paraphrase",
+    "needs_human_review": true
+  },
+  {
+    "id": "PARAPHRASE-BN-31",
+    "query": "প্রাকৃতিক গ্যাস পরিমাপের সময় প্রমাণ তাপমাত্রা ও চাপের (STP/NTP) সমন্বয় কেন প্রয়োজন?",
+    "expected_doc": "ipcc_2006_combustion_and_ar6_gwp.md",
+    "language": "bn",
+    "query_type": "paraphrase",
+    "needs_human_review": true
+  },
+  {
+    "id": "PARAPHRASE-BN-32",
+    "query": "বিভিন্ন গ্রিনহাউস গ্যাসের নির্গমনকে CO2 সমতুল্যে রূপান্তরের সাধারণ সূত্রটি কী?",
+    "expected_doc": "ipcc_2006_combustion_and_ar6_gwp.md",
+    "language": "bn",
+    "query_type": "paraphrase",
+    "needs_human_review": true
+  },
+  {
+    "id": "PARAPHRASE-BN-33",
+    "query": "ডেক্সটোরি টেক্সটাইলস এর গাজীপুর কারখানার প্রধান উৎপাদন ইউনিটগুলো কী কী?",
+    "expected_doc": "dexterity_textiles_demo.md",
+    "language": "bn",
+    "query_type": "paraphrase",
+    "needs_human_review": true
+  },
+  {
+    "id": "PARAPHRASE-BN-34",
+    "query": "ডেক্সটোরি টেক্সটাইলসে প্রাকৃতিক গ্যাস সরবরাহকারী গ্যাস বিতরণ কোম্পানির নাম কী?",
+    "expected_doc": "dexterity_textiles_demo.md",
+    "language": "bn",
+    "query_type": "paraphrase",
+    "needs_human_review": true
+  },
+  {
+    "id": "PARAPHRASE-BN-35",
+    "query": "ডেক্সটোরির স্পিনিং ইউনিটের অনুমোদিত বৈদ্যুতিক লোড এবং সংযোগের ধরন কী?",
+    "expected_doc": "dexterity_textiles_demo.md",
+    "language": "bn",
+    "query_type": "paraphrase",
+    "needs_human_review": true
+  },
+  {
+    "id": "PARAPHRASE-BN-36",
+    "query": "কারখানার বয়লারে বিকল্প জ্বালানি হিসেবে ব্যবহৃত ডিজেলের চালান কীভাবে সংরক্ষণ করা হয়?",
+    "expected_doc": "dexterity_textiles_demo.md",
+    "language": "bn",
+    "query_type": "paraphrase",
+    "needs_human_review": true
+  },
+  {
+    "id": "PARAPHRASE-BN-37",
+    "query": "কারখানার এসি চিলারে কোন ধরনের রেফ্রিজারেন্ট গ্যাস ব্যবহার করা হয়?",
+    "expected_doc": "dexterity_textiles_demo.md",
+    "language": "bn",
+    "query_type": "paraphrase",
+    "needs_human_review": true
+  },
+  {
+    "id": "PARAPHRASE-BN-38",
+    "query": "ডেক্সটোরির বেসলাইন বছরের নিরীক্ষিত স্কোপ ১ প্রাকৃতিক গ্যাস ব্যবহারের পরিমাণ কত ছিল?",
+    "expected_doc": "dexterity_textiles_demo.md",
+    "language": "bn",
+    "query_type": "paraphrase",
+    "needs_human_review": true
+  },
+  {
+    "id": "PARAPHRASE-BN-39",
+    "query": "গাজীপুর কারখানায় হাই-টেনশন বিদ্যুৎ সরবরাহকারী বিতরণ কর্তৃপক্ষ কোনটি?",
+    "expected_doc": "dexterity_textiles_demo.md",
+    "language": "bn",
+    "query_type": "paraphrase",
+    "needs_human_review": true
+  },
+  {
+    "id": "PARAPHRASE-BN-40",
+    "query": "কার্বন হিসাব নিরীক্ষায় বিদ্যুৎ বিলের মিটার মাল্টিপ্লায়ার কীভাবে যাচাই করা হয়?",
+    "expected_doc": "dexterity_textiles_demo.md",
+    "language": "bn",
+    "query_type": "paraphrase",
+    "needs_human_review": true
+  }
+]

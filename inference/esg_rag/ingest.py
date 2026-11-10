@@ -34,6 +34,8 @@ def get_chroma_client():
 
 def get_embedding_model():
     global _embedding_model
+    if os.environ.get("ESG_FAST_EMBEDDING") == "1":
+        return None
     if _embedding_model is None:
         try:
             from sentence_transformers import SentenceTransformer
