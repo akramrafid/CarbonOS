@@ -121,10 +121,18 @@ GENERATOR_BANDS: Dict[str, Tuple[Decimal, Decimal, str]] = {
 }
 
 # unit -> (dimension, size in the dimension's base unit). Exact conversion constants only.
+# cft is derived as (0.3048 m)^3 per cft * 1000 L/m3 (exact definition of international foot).
+# Sm3 is standard cubic metre at 15 °C (288.15 K), 101.325 kPa (Petrobangla / ISO 13443 reference conditions).
+# Nm3 is normal cubic metre at 0 °C (273.15 K), 101.325 kPa (DIN 1343 / ISO 2533 reference conditions),
+# converted to standard conditions via ideal gas expansion ratio (288.15 / 273.15) * 1000 L.
 UNITS: Dict[str, Tuple[str, Decimal]] = {
     "L": ("volume", Decimal("1")),
     "kL": ("volume", Decimal("1000")),
     "m3": ("volume", Decimal("1000")),
+    "cft": ("volume", (Decimal("0.3048") ** 3) * Decimal("1000")),
+    "ft3": ("volume", (Decimal("0.3048") ** 3) * Decimal("1000")),
+    "Sm3": ("volume", Decimal("1000")),
+    "Nm3": ("volume", (Decimal("288.15") / Decimal("273.15")) * Decimal("1000")),
     "US_gal": ("volume", Decimal("3.785411784")),
     "kg": ("mass", Decimal("1")),
     "t": ("mass", Decimal("1000")),
@@ -158,6 +166,20 @@ def canonical_unit(activity_type: str) -> str:
     raise UnitError(f"Unknown activity type '{activity_type}'")
 
 
+def convert(quantity: Decimal, from_unit: str, to_unit: str) -> Decimal:
+    """Convert quantity between compatible units defined in UNITS."""
+    if from_unit == to_unit:
+        return Decimal(quantity)
+    if from_unit not in UNITS:
+        raise UnitError(f"Unknown unit '{from_unit}'")
+    if to_unit not in UNITS:
+        raise UnitError(f"Unknown unit '{to_unit}'")
+    if UNITS[from_unit][0] != UNITS[to_unit][0]:
+        raise UnitError(f"Cannot convert between {UNITS[from_unit][0]} ({from_unit}) and {UNITS[to_unit][0]} ({to_unit})")
+    q = Decimal(quantity)
+    return q * UNITS[from_unit][1] / UNITS[to_unit][1]
+
+
 def normalize(quantity: Decimal, unit: str, activity_type: str) -> Decimal:
     """Convert to the activity type's canonical unit, or raise UnitError."""
     target = canonical_unit(activity_type)
@@ -165,9 +187,9 @@ def normalize(quantity: Decimal, unit: str, activity_type: str) -> Decimal:
         raise UnitError(f"Unknown unit '{unit}'")
     if UNITS[unit][0] != UNITS[target][0]:
         raise UnitError(f"Unit '{unit}' cannot be converted to '{target}' for {activity_type}")
-    if activity_type == "natural_gas" and unit != "m3":
+    if activity_type == "natural_gas" and unit not in ("m3", "Sm3", "Nm3", "cft", "ft3"):
         # Litres of gas are almost always a data-entry error; energy units need a heating value.
-        raise UnitError("Natural gas must be entered in m3")
+        raise UnitError("Natural gas must be entered in m3, Sm3, Nm3, or cft")
     q = Decimal(quantity)
     if q < 0:
         raise UnitError("Quantity must not be negative")

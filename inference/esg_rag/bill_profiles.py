@@ -50,8 +50,9 @@ KEY = re.compile(r"^[a-z][a-z0-9_]*(\.[a-z0-9_]+)+$")
 NAME = re.compile(r"^[a-z][a-z0-9_]{0,39}$")
 CODE = re.compile(r"^[A-Z][A-Z0-9_]{2,59}$")
 PROFILE_KEY = re.compile(r"^[a-z0-9][a-z0-9._-]{2,79}$")
-# Bill spellings → pint expressions. Sm3 is a volume at stated reference conditions (see the heating value).
-UNIT_SPELLINGS = {"m3": "m**3", "Sm3": "m**3", "Nm3": "m**3", "ft3": "ft**3", "cft": "ft**3", "%": "percent", "": "dimensionless"}
+# Bill spellings → pint expressions. Sm3 is a volume at standard reference conditions (15 °C, 101.325 kPa);
+# Nm3 is at normal conditions (0 °C, 101.325 kPa) expanded via ideal gas law.
+UNIT_SPELLINGS = {"m3": "m**3", "ft3": "cft", "%": "percent", "": "dimensionless"}
 
 
 class ProfileError(ValueError):
@@ -71,6 +72,10 @@ def units():
     ureg.define("var = [reactive_power] = VAr")  # its own dimension: kvarh can never pass as kWh
     ureg.define("varh = var * hour = VArh")
     ureg.define("BDT = [currency] = Tk = taka")
+    ureg.define("cft = (0.3048 * meter) ** 3")
+    ureg.define("Sm3 = meter ** 3")  # Standard m3 at 15 °C, 101.325 kPa
+    ratio = str(Decimal("288.15") / Decimal("273.15"))
+    ureg.define(f"Nm3 = {ratio} * meter ** 3")  # Normal m3 at 0 °C (15 °C reference)
     return ureg
 
 

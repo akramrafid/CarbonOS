@@ -10,7 +10,7 @@ from decimal import Decimal as D
 
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), "..", "inference"))
 from esg_rag.accounting import (  # noqa: E402
-    Activity, Facility, Factor, UnitError, calculate, normalize, to_tonnes,
+    Activity, Facility, Factor, UNITS, UnitError, calculate, convert, normalize, to_tonnes,
 )
 
 JAN1, DEC31 = dt.date(2025, 1, 1), dt.date(2025, 12, 31)
@@ -44,6 +44,49 @@ class UnitTests(unittest.TestCase):
         self.assertEqual(normalize(D("2"), "kL", "diesel"), D("2000"))
         self.assertEqual(normalize(D("1"), "US_gal", "diesel"), D("3.785411784"))
         self.assertEqual(normalize(D("2"), "t", "lpg"), D("2000"))
+
+    def test_gas_volume_conversions_cft_sm3_nm3(self):
+        # 1 cft = (0.3048 m)^3 = 0.028316846592 m3 (exact derived)
+        cft_m3 = convert(D("1"), "cft", "m3")
+        self.assertEqual(cft_m3, (D("0.3048") ** 3))
+        self.assertEqual(str(cft_m3), "0.028316846592")
+
+        # 1 Sm3 = 1 m3 at standard reference conditions (15 °C, 101.325 kPa)
+        sm3_m3 = convert(D("1"), "Sm3", "m3")
+        self.assertEqual(sm3_m3, D("1"))
+
+        # 1 Nm3 at 0 °C (273.15 K) expands to 288.15 / 273.15 Sm3 at 15 °C
+        nm3_m3 = convert(D("1"), "Nm3", "m3")
+        self.assertEqual(nm3_m3, D("288.15") / D("273.15"))
+        self.assertGreater(nm3_m3, D("1.0549"))
+        self.assertLess(nm3_m3, D("1.0550"))
+
+    def test_all_parameters_yaml_units_have_conversion_paths(self):
+        import yaml
+        from esg_rag import bill_profiles as bp
+        params_path = os.path.join(os.path.dirname(__file__), "..", "inference", "esg_rag", "bill_profiles", "parameters.yaml")
+        with open(params_path, encoding="utf-8") as fh:
+            data = yaml.safe_load(fh)
+        parameters = data.get("parameters", [])
+
+        checked = 0
+        for p in parameters:
+            allowed = p.get("allowed_units") or []
+            canonical = p.get("canonical_unit")
+            if not allowed or not canonical:
+                continue
+            for u in allowed:
+                # Test bill_profiles.convert path
+                val = bp.convert(D("10.0"), u, canonical)
+                self.assertIsInstance(val, D, f"bp.convert failed for {u} -> {canonical}")
+                self.assertGreater(val, 0, f"bp.convert produced zero/negative for {u} -> {canonical}")
+                # For inventory activity units in accounting.UNITS, test accounting.convert path
+                if u in UNITS and canonical in UNITS and UNITS[u][0] == UNITS[canonical][0]:
+                    act_val = convert(D("10.0"), u, canonical)
+                    self.assertIsInstance(act_val, D, f"accounting.convert failed for {u} -> {canonical}")
+                    self.assertGreater(act_val, 0)
+                checked += 1
+        self.assertGreater(checked, 10, "Expected at least 10 parameter unit conversion paths")
 
     def test_incompatible_units_fail(self):
         for qty, unit, at in ((1, "kg", "electricity"), (1, "kWh", "diesel"), (1, "L", "natural_gas"),
