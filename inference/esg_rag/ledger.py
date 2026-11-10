@@ -481,6 +481,14 @@ def create_factor(db, principal, data, platform_wide=False):
     units = (accounting.canonical_unit(data["activity_type"]), accounting.ENERGY_BASIS_UNITS.get(data["activity_type"]))
     if data["unit"] not in units:
         raise DomainError(422, f"Factor unit must be kgCO2e per {' or per '.join(u for u in units if u)}")
+    # Natural gas outside TEST must be on an energy basis (GJ)
+    if data["activity_type"] == "natural_gas" and data["unit"] in ("m3", "cft"):
+        provenance = (data.get("provenance_class") or "").upper()
+        all_text = " ".join(str(data.get(k) or "") for k in (
+            "source_publisher", "source_document", "source_table_ref", "licence_note", "family"
+        )).upper()
+        if provenance != "TEST" and "TEST" not in all_text:
+            raise DomainError(422, "Natural gas emission factors must use an energy basis (GJ) outside TEST fixtures.")
     scope = accounting.ACTIVITY_TYPES[data["activity_type"]][0]
     if (scope == "1") != (data["method"] == "direct"):
         raise DomainError(422, "Scope 1 factors use method 'direct'; Scope 2 factors use 'location' or 'market'")

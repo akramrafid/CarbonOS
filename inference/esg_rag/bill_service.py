@@ -24,7 +24,7 @@ from . import accounting
 
 from .grid_factor_service import wire_bd_grid_proposal
 
-from .ledger_models import Bill, BillParameter, BillProfile, BillValue, Facility, EmissionFactor, ReportingPeriod, _now
+from .ledger_models import Bill, BillParameter, BillProfile, BillValue, Facility, EmissionFactor, GasCertificate, ReportingPeriod, _now
 
 MAX_PAGES, MAX_WORDS = 20, 20000
 WIDE_PRECISION = 80  # digits for sums and averages of bill values (each value has at most 30 characters)
@@ -793,6 +793,13 @@ def post_bill(db, principal, bill_id: str, period_id: str) -> List:
                 "idempotency_key": f"bill:{bill.id}:{v.id}"[:100]}
         if p.ledger.get("generator_ref_from"):
             data["generator_ref"] = _scalar_text(lookup, p.ledger["generator_ref_from"])
+        if p.ledger["activity_type"] == "natural_gas":
+            try:
+                vc_val = lookup("gas.volume.correction_factor")
+                if vc_val is not None:
+                    data["volume_correction"] = Decimal(str(vc_val))
+            except Exception:
+                pass
         rec, _ = ledger.create_activity(db, principal, data)
         v.activity_id = rec.id
         created.append(rec)
@@ -923,6 +930,11 @@ def estimate_bill(db, principal, bill_id: str, allow_provisional: bool = False,
         calc_blockers.append("MISSING_BILL_PERIOD")
 
     scoped = bx.Values(rows, params, profile.definition.get("groups", {}) if profile else {})
+    gas_certs = db.query(GasCertificate).filter(
+        GasCertificate.organization_id == principal.organization_id,
+        GasCertificate.facility_id == bill.facility_id,
+        GasCertificate.status == "APPROVED"
+    ).order_by(GasCertificate.valid_from.desc()).all() if bill.facility_id else []
     activities = []
     consumption_acts = set()
     for v in estimate_values:
@@ -933,6 +945,23 @@ def estimate_bill(db, principal, bill_id: str, allow_provisional: bool = False,
         act_type = p.ledger["activity_type"]
         consumption_acts.add(act_type)
         qty = bp.convert(Decimal(v.value_text), v.unit, p.ledger["unit"])
+        hv_act = None
+        vol_corr = Decimal("1.0")
+        if act_type == "natural_gas":
+            try:
+                vc_val = lookup("gas.volume.correction_factor")
+                if vc_val is not None:
+                    vol_corr = Decimal(str(vc_val))
+            except Exception:
+                pass
+            cert = next((c for c in gas_certs if (start is None or c.valid_from <= start) and (end is None or end <= c.valid_to)), None) if gas_certs else None
+            if cert:
+                hv_act = accounting.HeatingValue(
+                    Decimal(str(cert.gcv_mj_per_m3)), Decimal(str(cert.ncv_to_gcv)),
+                    cert.reference_conditions,
+                    f"gas certificate {cert.certificate_ref} ({cert.distributor})",
+                    False, Decimal(str(cert.uncertainty_pct)) if cert.uncertainty_pct is not None else None
+                )
         activities.append(accounting.Activity(
             id=f"est:{bill.id}:{v.id}",
             facility_id=bill.facility_id,
@@ -946,8 +975,8 @@ def estimate_bill(db, principal, bill_id: str, allow_provisional: bool = False,
             data_quality="billed",
             uncertainty_pct=Decimal("5.0"),
             generator_ref=_scalar_text(lookup, p.ledger.get("generator_ref_from")),
-            heating_value=None,
-            volume_correction=Decimal("1.0"),
+            heating_value=hv_act,
+            volume_correction=vol_corr,
             refrigerant=None,
             mass_balance=None
         ))

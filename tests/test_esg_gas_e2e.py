@@ -2,11 +2,15 @@
 End-to-end trace for natural gas through real profile detection (Task 3):
 Profile Detection -> Extraction -> Gaps -> Entered Value -> Estimate -> Post -> Dual Approval -> Period Calculation.
 
-All factor values used are test fixtures clearly labelled 'TEST'.
-Hand-calculation:
-  Activity: 5,000 m3 natural gas
-  Factor: 1.915000 kgCO2e / m3 (TEST factor, IPCC 2006 Vol 2 Ch 2 default combustion energy basis)
-  Emissions: 5,000 * 1.915000 = 9,575.00 kgCO2e = 9.575000 tCO2e (Scope 1)
+Energy-basis calculation stoichiometry:
+  Billed Volume: 5,000 m3
+  Volume Correction: 1.0 (standard conditions: 15 °C, 101.325 kPa)
+  Gas Certificate: GCV = 38.0 MJ/m3, NCV/GCV = 0.90 -> NCV = 34.2 MJ/m3
+  Energy Content: 5,000 m3 * 1.0 * 38.0 MJ/m3 * 0.90 / 1000 = 171.0 GJ (NCV basis)
+  Emission Factor: 56.157100 kgCO2e/GJ (TEST fixture, IPCC 2006 Vol 2 Table 2.3 NCV basis)
+    Gases included: CO2 (56.1 kg/GJ), fossil CH4 (0.001 kg/GJ * 29.8 = 0.0298), N2O (0.0001 kg/GJ * 273 = 0.0273)
+    Total kgCO2e/GJ = 56.100 + 0.0298 + 0.0273 = 56.157100 (AR6 GWP basis)
+  Total Emissions: 171.0 GJ * 56.157100 kgCO2e/GJ = 9,602.864100 kgCO2e = 9.602864 tCO2e (Scope 1)
 """
 import datetime as dt
 from decimal import Decimal as D
@@ -86,24 +90,40 @@ class TestGasEndToEndRealDetection(unittest.TestCase):
         self.db.add(self.profile)
         self.db.commit()
 
-        # Load and dual-approve published natural gas factor (TEST fixture)
-        self.factor = ledger.load_published_factor(
-            self.db, self.p_preparer,
-            family="titas-natural-gas-test",
-            activity_type="natural_gas",
-            unit="m3",
-            kgco2e_per_unit=D("1.915000"),
-            region="BD-NATIONAL",
-            source_publisher="TEST fixture - IPCC 2006 Guidelines for National GHG Inventories",
-            source_document="IPCC Vol 2 Energy, Ch 2 Stationary Combustion, Table 2.2 (default 56.1 kg/TJ, 34.13 MJ/m3)",
-            source_year=2021,
-            source_page="Table 2.2, p. 2.16",
-            source_url="https://www.ipcc-nggip.iges.or.jp/public/2006gl/pdf/2_Volume2/V2_2_Ch2_Stationary_Combustion.pdf",
-            gwp_basis="AR6",
-            valid_from=dt.date(2025, 1, 1),
-            valid_to=dt.date(2025, 12, 31),
-            method="direct"
-        )
+        # Create and dual-approve a TEST Gas Certificate for the facility
+        self.cert = ledger.create_gas_certificate(self.db, self.p_preparer, {
+            "facility_id": self.fac.id,
+            "distributor": "Titas Gas Transmission and Distribution Company Limited",
+            "certificate_ref": "TITAS-TEST-QC-2025-05",
+            "gcv": D("38.0"),
+            "gcv_unit": "MJ/m3",
+            "ncv_to_gcv": D("0.90"),
+            "reference_conditions": "15 C, 101.325 kPa",
+            "valid_from": dt.date(2025, 1, 1),
+            "valid_to": dt.date(2025, 12, 31),
+            "uncertainty_pct": D("1.0"),
+            "evidence_snippet": "TEST gas certificate from Titas lab"
+        })
+        ledger.approve_gas_certificate(self.db, self.p_approver, self.cert.id)
+
+        # Load and dual-approve natural gas factor on energy basis (TEST fixture, NCV basis)
+        self.factor = ledger.create_factor(self.db, self.p_preparer, {
+            "family": "titas-natural-gas-energy-test",
+            "activity_type": "natural_gas",
+            "unit": "GJ",
+            "kgco2e_per_unit": D("56.157100"),
+            "region": "BD-NATIONAL",
+            "source_publisher": "TEST fixture - IPCC 2006 Guidelines for National GHG Inventories",
+            "source_document": "IPCC Vol 2 Energy, Ch 2 Stationary Combustion, Table 2.3 (natural gas, 56.1 kg/GJ CO2, 0.001 kg/GJ CH4, 0.0001 kg/GJ N2O)",
+            "source_year": 2021,
+            "source_table_ref": "Table 2.3, p. 2.18",
+            "source_url": "https://www.ipcc-nggip.iges.or.jp/public/2006gl/pdf/2_Volume2/V2_2_Ch2_Stationary_Combustion.pdf",
+            "gwp_basis": "AR6",
+            "valid_from": dt.date(2025, 1, 1),
+            "valid_to": dt.date(2025, 12, 31),
+            "method": "direct",
+            "provenance_class": "TEST"
+        })
         ledger.approve_factor(self.db, self.p_approver, self.factor.id)
 
     def tearDown(self):
@@ -215,16 +235,19 @@ class TestGasEndToEndRealDetection(unittest.TestCase):
             "ready_to_post": gaps_after["ready_to_post"]
         }
 
-        # Step 5: Estimate
+        # Step 5: Estimate (Energy Basis)
+        # 5,000 m3 * 1.0 * 38.0 MJ/m3 * 0.90 / 1000 = 171.0 GJ NCV
+        # 171.0 GJ * 56.157100 kgCO2e/GJ = 9,602.864100 kgCO2e = 9.602864 tCO2e
         estimate = bill_service.estimate_bill(self.db, self.p_preparer, bill.id, allow_provisional=False)
         self.assertEqual(estimate["status"], "INDICATIVE")
         self.assertEqual(len(estimate["calc_blockers"]), 0)
         emissions = estimate["emissions"]
         self.assertIsNotNone(emissions)
-        self.assertEqual(emissions["scope1_kg"], "9575.000000")
+        self.assertEqual(emissions["scope1_kg"], "9602.864100")
         self.assertEqual(emissions["scope2_location_kg"], "0")
-        self.assertEqual(emissions["scope1_tco2e"], "9.575")
-        self.assertEqual(emissions["total_tco2e"], "9.575")
+        self.assertEqual(emissions["scope1_tco2e"], "9.603")
+        self.assertEqual(emissions["total_tco2e"], "9.603")
+        self.assertIn("171.0000 GJ NCV", estimate["lines"][0]["formula"])
         trace["5_estimate"] = {
             "status": estimate["status"],
             "scope1_kg": emissions["scope1_kg"],
@@ -270,9 +293,9 @@ class TestGasEndToEndRealDetection(unittest.TestCase):
             "review_comment": approved_act.review_comment
         }
 
-        # Step 8: Period Calculation & Lock
+        # Step 8: Period Calculation & Lock (Energy Basis)
         calc_run = ledger.calculate_period(self.db, self.p_preparer, self.period.id)
-        self.assertEqual(str(calc_run.scope1_kg), "9575.000000")
+        self.assertEqual(str(calc_run.scope1_kg), "9602.864100")
         self.assertFalse(calc_run.blocking)
         self.assertIsNotNone(calc_run.input_sha256)
 
@@ -307,6 +330,69 @@ class TestGasEndToEndRealDetection(unittest.TestCase):
         trace_file.write_text(json.dumps(trace, indent=2), encoding="utf-8")
         print("\n=== GAS E2E TRACE SUCCESSFUL ===")
         print(json.dumps(trace, indent=2))
+
+    def test_per_volume_gas_factor_fails_outside_test(self):
+        """Assert that per-volume natural gas factors (m3 or cft) are strictly rejected outside TEST."""
+        # 1. Attempt to create per-volume factor with PUBLISHED provenance without TEST
+        with self.assertRaises(ledger.DomainError) as ctx1:
+            ledger.create_factor(self.db, self.p_preparer, {
+                "family": "published-gas-volume",
+                "activity_type": "natural_gas",
+                "unit": "m3",
+                "kgco2e_per_unit": D("1.915000"),
+                "region": "BD-NATIONAL",
+                "source_publisher": "Official Gazette",
+                "source_document": "National Energy Report",
+                "source_year": 2024,
+                "source_table_ref": "Table 1",
+                "gwp_basis": "AR6",
+                "valid_from": dt.date(2025, 1, 1),
+                "valid_to": dt.date(2025, 12, 31),
+                "method": "direct",
+                "provenance_class": "PUBLISHED"
+            })
+        self.assertEqual(ctx1.exception.status, 422)
+        self.assertIn("energy basis (GJ)", ctx1.exception.message)
+
+        # 2. Attempt via load_published_factor with m3
+        with self.assertRaises(ledger.DomainError) as ctx2:
+            ledger.load_published_factor(
+                self.db, self.p_preparer,
+                family="published-gas-volume-loader",
+                activity_type="natural_gas",
+                unit="m3",
+                kgco2e_per_unit=D("1.915000"),
+                region="BD-NATIONAL",
+                source_publisher="Official Gazette",
+                source_document="National Energy Report",
+                source_year=2024,
+                source_page="1",
+                gwp_basis="AR6",
+                valid_from=dt.date(2025, 1, 1),
+                valid_to=dt.date(2025, 12, 31),
+                method="direct"
+            )
+        self.assertEqual(ctx2.exception.status, 422)
+        self.assertIn("energy basis (GJ)", ctx2.exception.message)
+
+        # 3. Permitted when explicitly marked TEST
+        test_factor = ledger.create_factor(self.db, self.p_preparer, {
+            "family": "test-gas-volume",
+            "activity_type": "natural_gas",
+            "unit": "m3",
+            "kgco2e_per_unit": D("1.915000"),
+            "region": "BD-NATIONAL",
+            "source_publisher": "TEST suite only",
+            "source_document": "TEST mock document",
+            "source_year": 2024,
+            "source_table_ref": "TEST Table",
+            "gwp_basis": "AR6",
+            "valid_from": dt.date(2025, 1, 1),
+            "valid_to": dt.date(2025, 12, 31),
+            "method": "direct",
+            "provenance_class": "TEST"
+        })
+        self.assertEqual(test_factor.unit, "m3")
 
 
 if __name__ == "__main__":
