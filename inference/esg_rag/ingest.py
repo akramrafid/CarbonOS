@@ -1,4 +1,6 @@
 import os
+os.environ.setdefault("TRANSFORMERS_NO_TF", "1")
+os.environ.setdefault("USE_TF", "0")
 import hashlib
 import json
 import re
@@ -32,22 +34,48 @@ def get_chroma_client():
             _chroma_client = False
     return _chroma_client if _chroma_client is not False else None
 
-def get_embedding_model():
+def get_embedding_model(model_name: Optional[str] = None):
     global _embedding_model
+    target = model_name or EMBEDDING_MODEL
     if os.environ.get("ESG_FAST_EMBEDDING") == "1":
         return None
-    if _embedding_model is None:
+    if _embedding_model is None or getattr(_embedding_model, "_model_name", None) != target:
         try:
             from sentence_transformers import SentenceTransformer
-            _embedding_model = SentenceTransformer(EMBEDDING_MODEL)
+            try:
+                m = SentenceTransformer(target, local_files_only=True)
+            except Exception:
+                m = SentenceTransformer(target)
+            m._model_name = target
+            _embedding_model = m
         except Exception as e:
             print(f"[ESG RAG] SentenceTransformer not loaded ({e}), using fast hash-vector fallback")
             _embedding_model = False
     return _embedding_model if _embedding_model is not False else None
 
-def compute_embedding(text: str) -> List[float]:
+
+def get_embedding_info(model_name: Optional[str] = None) -> Dict[str, Any]:
+    target = model_name or EMBEDDING_MODEL
+    model = get_embedding_model(target)
+    if model is not None:
+        dim = getattr(model, "get_sentence_embedding_dimension", lambda: 384)()
+        return {
+            "mode": "PRODUCTION",
+            "model_name": target,
+            "is_fallback": False,
+            "dimension": dim
+        }
+    return {
+        "mode": "FALLBACK EMBEDDING - NOT PRODUCTION",
+        "model_name": "deterministic-hash-vector-384",
+        "is_fallback": True,
+        "dimension": 384
+    }
+
+
+def compute_embedding(text: str, model_name: Optional[str] = None) -> List[float]:
     """Generates 384-dimensional dense embedding vector."""
-    model = get_embedding_model()
+    model = get_embedding_model(model_name)
     if model is not None:
         try:
             emb = model.encode(text, convert_to_numpy=True)

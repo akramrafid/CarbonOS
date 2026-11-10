@@ -26,6 +26,7 @@ if PROJECT_ROOT not in sys.path:
 from esg_rag import bill_extract as bx
 from esg_rag import bill_profiles as bp
 from esg_rag.hybrid_retriever import hybrid_retrieve
+from esg_rag.ingest import get_embedding_info
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
 from esg_rag.database import EsgBase as Base
@@ -468,11 +469,23 @@ def eval_safety_and_injection(db=None, principal=None, profile_id=None,
 # UNIFIED HARNESS RUNNER
 # =====================================================================
 
-def run_evaluation_suite(output_file: Optional[str] = None, compare_baseline: Optional[str] = None, verbose: bool = False) -> Dict[str, Any]:
+def run_evaluation_suite(output_file: Optional[str] = None, compare_baseline: Optional[str] = None, verbose: bool = False, allow_fallback: bool = False) -> Dict[str, Any]:
     """Execute complete 5-dimension evaluation suite and return structured report."""
+    emb_info = get_embedding_info()
     print("=" * 78)
     print("CarbonOS ESG Evaluation & Quality Gate Harness (ATLAS v2)")
+    print(f"Embedding Mode: {emb_info['mode']}")
+    print(f"Model Name:     {emb_info['model_name']}")
+    print(f"Dimension:      {emb_info['dimension']}")
     print("=" * 78)
+
+    if emb_info["is_fallback"]:
+        if not allow_fallback:
+            print("\n[ERROR] Fallback embedding is active. Production model failed to load.")
+            print("Run with --allow-fallback to proceed with fallback embeddings.")
+            sys.exit(1)
+        else:
+            print("\n[WARNING] FALLBACK EMBEDDING - NOT PRODUCTION is active (--allow-fallback passed).")
 
     engine = create_engine("sqlite:///:memory:")
     Base.metadata.create_all(engine)
@@ -528,6 +541,8 @@ def run_evaluation_suite(output_file: Optional[str] = None, compare_baseline: Op
         summary = {
             "timestamp": time.strftime("%Y-%m-%dT%H:%M:%SZ", time.gmtime()),
             "elapsed_seconds": round(elapsed, 2),
+            "embedding": emb_info,
+            "evaluation_label": "FALLBACK EMBEDDING - NOT PRODUCTION" if emb_info["is_fallback"] else "PRODUCTION EMBEDDING",
             "quality_gates": {
                 "bill_extraction": extraction_res["status"],
                 "gap_detection": gap_res["status"],
@@ -586,9 +601,10 @@ def main():
     parser.add_argument("--output", default="tests/eval_results.json", help="Path to write JSON results")
     parser.add_argument("--compare-baseline", default=None, help="Path to baseline file to compare against")
     parser.add_argument("--verbose", action="store_true", help="Print verbose per-case details")
+    parser.add_argument("--allow-fallback", action="store_true", help="Allow running with fallback hash embeddings")
     args = parser.parse_args()
 
-    results = run_evaluation_suite(output_file=args.output, compare_baseline=args.compare_baseline, verbose=args.verbose)
+    results = run_evaluation_suite(output_file=args.output, compare_baseline=args.compare_baseline, verbose=args.verbose, allow_fallback=args.allow_fallback)
     all_passed = all(st == "PASS" for st in results["quality_gates"].values())
     sys.exit(0 if all_passed else 1)
 

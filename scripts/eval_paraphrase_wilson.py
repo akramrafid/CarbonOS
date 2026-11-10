@@ -7,12 +7,13 @@ import math
 import os
 import sys
 import json
+import argparse
 from typing import Dict, Any, List, Tuple
 
-os.environ["ESG_FAST_EMBEDDING"] = "1"
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), "..", "inference"))
 
 from esg_rag.hybrid_retriever import hybrid_retrieve
+from esg_rag.ingest import get_embedding_info
 
 
 def wilson_score_interval(successes: int, trials: int, confidence: float = 0.95) -> Tuple[float, float, float]:
@@ -44,10 +45,26 @@ def mrr_confidence_interval(reciprocal_ranks: List[float], confidence: float = 0
     return mean, lower, upper
 
 
-def run_paraphrase_eval():
+def run_paraphrase_eval(allow_fallback: bool = False, output_file: str = "scratch/paraphrase_eval_report.json"):
+    emb_info = get_embedding_info()
+    print("=" * 70)
+    print("EMBEDDING DISCLOSURE & MODEL CONFIGURATION")
+    print(f"Embedding Mode: {emb_info['mode']}")
+    print(f"Model Name:     {emb_info['model_name']}")
+    print(f"Dimension:      {emb_info['dimension']}")
+    print("=" * 70)
+
+    if emb_info["is_fallback"]:
+        if not allow_fallback:
+            print("\n[ERROR] Fallback embedding is active. Production model failed to load.")
+            print("Run with --allow-fallback to proceed with fallback embeddings.")
+            sys.exit(1)
+        else:
+            print("\n[WARNING] FALLBACK EMBEDDING - NOT PRODUCTION is active (--allow-fallback passed).")
+
     fixture_path = os.path.join(os.path.dirname(__file__), "..", "tests", "fixtures", "rag_eval_paraphrase_review.json")
     pairs = json.load(open(fixture_path, encoding="utf-8"))
-    print(f"Loaded {len(pairs)} paraphrase query pairs from {fixture_path}")
+    print(f"\nLoaded {len(pairs)} paraphrase query pairs from {fixture_path}")
 
     groups = {"en": [], "bn": [], "all": []}
 
@@ -79,7 +96,13 @@ def run_paraphrase_eval():
         groups[lang].append(record)
         groups["all"].append(record)
 
-    report = {}
+    report = {
+        "embedding": emb_info,
+        "evaluation_label": "FALLBACK EMBEDDING - NOT PRODUCTION" if emb_info["is_fallback"] else "PRODUCTION EMBEDDING",
+        "fixture": "tests/fixtures/rag_eval_paraphrase_review.json",
+        "fixture_status": "needs_human_review",
+        "results": {}
+    }
     for group_name in ("en", "bn", "all"):
         records = groups[group_name]
         n = len(records)
@@ -93,7 +116,7 @@ def run_paraphrase_eval():
         p_h5, l_h5, u_h5 = wilson_score_interval(h5, n)
         m_mrr, l_mrr, u_mrr = mrr_confidence_interval(rrs)
 
-        report[group_name] = {
+        report["results"][group_name] = {
             "n": n,
             "hit@1": {"point": round(p_h1, 4), "ci_95": (round(l_h1, 4), round(u_h1, 4)), "count": f"{h1}/{n}"},
             "hit@3": {"point": round(p_h3, 4), "ci_95": (round(l_h3, 4), round(u_h3, 4)), "count": f"{h3}/{n}"},
@@ -102,7 +125,7 @@ def run_paraphrase_eval():
         }
 
     print("\n================ RAG PARAPHRASE RETRIEVAL REPORT (needs_human_review) ================")
-    for g, data in report.items():
+    for g, data in report["results"].items():
         title = "English (n=40)" if g == "en" else ("Bengali (n=40)" if g == "bn" else "Combined (n=80)")
         print(f"\n--- {title} ---")
         print(f"Hit@1: {data['hit@1']['point']:.1%} [{data['hit@1']['ci_95'][0]:.1%}, {data['hit@1']['ci_95'][1]:.1%}] (count: {data['hit@1']['count']})")
@@ -110,11 +133,16 @@ def run_paraphrase_eval():
         print(f"Hit@5: {data['hit@5']['point']:.1%} [{data['hit@5']['ci_95'][0]:.1%}, {data['hit@5']['ci_95'][1]:.1%}] (count: {data['hit@5']['count']})")
         print(f"MRR:   {data['mrr']['point']:.4f} [{data['mrr']['ci_95'][0]:.4f}, {data['mrr']['ci_95'][1]:.4f}]")
 
-    out_file = os.path.join(os.path.dirname(__file__), "..", "scratch", "paraphrase_eval_report.json")
+    out_file = os.path.join(os.path.dirname(__file__), "..", output_file)
+    os.makedirs(os.path.dirname(out_file), exist_ok=True)
     with open(out_file, "w", encoding="utf-8") as f:
         json.dump(report, f, indent=2)
     print(f"\nSaved report to {out_file}")
     return report
 
 if __name__ == "__main__":
-    run_paraphrase_eval()
+    parser = argparse.ArgumentParser(description="Evaluate RAG retrieval with Wilson CIs")
+    parser.add_argument("--allow-fallback", action="store_true", help="Allow running with fallback hash embeddings")
+    parser.add_argument("--output", default="scratch/paraphrase_eval_report.json", help="Path to write JSON report")
+    args = parser.parse_args()
+    run_paraphrase_eval(allow_fallback=args.allow_fallback, output_file=args.output)
