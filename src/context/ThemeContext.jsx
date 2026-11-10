@@ -11,7 +11,9 @@ export const useTheme = () => {
 export const ThemeProvider = ({ children }) => {
   const [theme, setTheme] = useState(() => {
     try {
-      return localStorage.getItem('carbonos-theme') || 'dark';
+      const saved = localStorage.getItem('carbonos-theme');
+      if (saved === 'light' || saved === 'dark') return saved;
+      return window.matchMedia('(prefers-color-scheme: light)').matches ? 'light' : 'dark';
     } catch {
       return 'dark';
     }
@@ -20,7 +22,18 @@ export const ThemeProvider = ({ children }) => {
   useEffect(() => {
     const root = document.documentElement;
     root.setAttribute('data-theme', theme);
-    localStorage.setItem('carbonos-theme', theme);
+    if (theme === 'dark') {
+      root.classList.add('dark');
+      root.classList.remove('light');
+    } else {
+      root.classList.remove('dark');
+      root.classList.add('light');
+    }
+    try {
+      localStorage.setItem('carbonos-theme', theme);
+    } catch {
+      // Storage unavailable or disabled
+    }
   }, [theme]);
 
   const toggleTheme = () => {
@@ -28,7 +41,7 @@ export const ThemeProvider = ({ children }) => {
   };
 
   return (
-    <ThemeContext.Provider value={{ theme, toggleTheme }}>
+    <ThemeContext.Provider value={{ theme, toggleTheme, isDark: theme === 'dark', isLight: theme === 'light' }}>
       {children}
     </ThemeContext.Provider>
   );

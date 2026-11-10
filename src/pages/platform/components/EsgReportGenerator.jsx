@@ -583,8 +583,12 @@ ${activeClient.assignedAuditor}
             <span>Appendices • Complete Activity & Evidence Ledger</span>
           </div>
 
-          <div className="p-5 rounded-2xl bg-black/30 border border-[#152B1D] space-y-3">
-            <div className="overflow-x-auto">
+          <div className="p-3 sm:p-5 rounded-2xl bg-black/30 border border-[#152B1D] space-y-3 w-full overflow-hidden">
+            <div className="text-[11px] font-mono text-gray-400 flex items-center justify-between pb-1 md:hidden">
+              <span>← Scroll report table horizontally →</span>
+              <span className="text-[10px]">700px</span>
+            </div>
+            <div className="w-full overflow-x-auto touch-pan-x">
               <table className="w-full text-left font-sans text-xs min-w-[700px]">
                 <thead>
                   <tr className="text-gray-400 border-b border-[#152B1D] pb-2 font-mono uppercase text-[10px]">

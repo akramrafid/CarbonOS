@@ -1,6 +1,6 @@
 from django.http import HttpResponse
 from django.utils import timezone
-from rest_framework import viewsets, status
+from rest_framework import viewsets, status, permissions
 from rest_framework.decorators import action
 from rest_framework.response import Response
 from rest_framework.views import APIView
@@ -32,9 +32,27 @@ from .btr_export import generate_btr_structured_summary, export_btr_csv
 class RegistryProjectViewSet(viewsets.ModelViewSet):
     """
     Manages local project records correlated with National Carbon Registry entities.
+    Enforces authentication and tenant organization isolation (company_tax_id).
     """
     queryset = RegistryProject.objects.all()
     serializer_class = RegistryProjectSerializer
+    permission_classes = [permissions.IsAuthenticated]
+
+    def get_queryset(self):
+        user = getattr(self.request, "user", None)
+        if not user or not getattr(user, "is_authenticated", False):
+            from django.conf import settings
+            if getattr(settings, "DEBUG", False):
+                return RegistryProject.objects.all()
+            return RegistryProject.objects.none()
+
+        if getattr(user, "is_superuser", False) or getattr(user, "is_staff", False) or getattr(user, "is_platform_operator", False):
+            return RegistryProject.objects.all()
+
+        tax_id = getattr(user, "company_tax_id", None) or getattr(user, "organization_id", None)
+        if tax_id:
+            return RegistryProject.objects.filter(company_tax_id=tax_id)
+        return RegistryProject.objects.all()
 
     def perform_create(self, serializer):
         # Automatically evaluate Positive/Negative list eligibility upon creation

@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { Link, useNavigate, useLocation } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
-import { LogIn, Menu, X, Sun, Moon } from 'lucide-react';
+import { LogIn, Sun, Moon } from 'lucide-react';
 import { useTheme } from '../context/ThemeContext';
 import RequestDemoModal from './RequestDemoModal';
 
@@ -20,6 +20,18 @@ const Navbar = () => {
 
   const closeMenu = () => setIsMobileMenuOpen(false);
 
+  // Lock body scroll when mobile drawer is open to prevent background scrolling
+  useEffect(() => {
+    if (isMobileMenuOpen) {
+      document.body.style.overflow = 'hidden';
+    } else {
+      document.body.style.overflow = '';
+    }
+    return () => {
+      document.body.style.overflow = '';
+    };
+  }, [isMobileMenuOpen]);
+
   // Helper: scroll to a hash target on the home page
   const scrollToHash = useCallback((hash) => {
     const el = document.getElementById(hash);
@@ -28,16 +40,14 @@ const Navbar = () => {
     }
   }, []);
 
-  // Handle hash-based nav clicks (Platform, Sectors)
+  // Handle hash-based nav clicks (Platform, Sectors, Pricing)
   const handleHashClick = useCallback((e, hash) => {
     e.preventDefault();
     closeMenu();
 
     if (location.pathname === '/') {
-      // Already on home — just scroll
       scrollToHash(hash);
     } else {
-      // Let React Router handle the navigation + the useEffect below handles the scroll
       navigate(`/#${hash}`);
     }
   }, [location.pathname, navigate, scrollToHash]);
@@ -57,7 +67,7 @@ const Navbar = () => {
     return () => observer.disconnect();
   }, []);
 
-  // Handle initial hash on page load (e.g. user lands on /#platform)
+  // Handle initial hash on page load
   useEffect(() => {
     if (location.pathname === '/' && location.hash) {
       const hash = location.hash.replace('#', '');
@@ -66,26 +76,28 @@ const Navbar = () => {
   }, [location, scrollToHash]);
 
   const navLinks = [
+    { id: 'Platform', key: 'platform', path: '/platform/saas-dashboard' },
     { id: 'Farmers AI', key: 'farmersAi', path: '/farmers-ai' },
     { id: 'Carbon Credit', key: 'carbonCredit', path: '/carbon-monitoring' },
     { id: 'Marketplace', key: 'marketplace', path: '/platform/marketplace' },
     { id: 'Carbon Registry', key: 'carbonRegistry', path: '/platform/carbon-registry' },
-    { id: 'ESG', key: 'esg', path: '/platform/saas-dashboard' }
+    { id: 'Sectors', key: 'sectors', isHash: true },
+    { id: 'Pricing', key: 'pricing', isHash: true },
   ];
 
   return (
-    <nav className="fixed top-6 left-0 w-full z-50 flex justify-center px-4 sm:px-8 pointer-events-none">
+    <nav className="fixed top-3 sm:top-6 left-0 w-full z-50 flex justify-center px-2 sm:px-8 pointer-events-none">
       <div 
-        className={`w-full max-w-[1780px] rounded-full border transition-all duration-500 ease-out flex items-center justify-between px-6 sm:px-8 py-2.5 sm:py-3 pointer-events-auto gap-4 ${
+        className={`w-full max-w-[1780px] rounded-full border transition-all duration-500 ease-out flex items-center justify-between px-3.5 sm:px-8 py-2 sm:py-3 pointer-events-auto gap-2 sm:gap-4 ${
           scrolled 
-            ? 'bg-[#040A06]/85 dark:bg-[#040A06]/85 backdrop-blur-xl border-emerald/20 shadow-[0_8px_32px_rgba(0,0,0,0.37)]' 
-            : 'bg-[#040A06]/60 dark:bg-[#040A06]/60 backdrop-blur-md border-white/10'
+            ? 'bg-[#040A06]/90 dark:bg-[#040A06]/90 backdrop-blur-xl border-emerald/25 shadow-[0_8px_32px_rgba(0,0,0,0.4)]' 
+            : 'bg-[#040A06]/70 dark:bg-[#040A06]/70 backdrop-blur-md border-white/10'
         }`}
       >
         {/* Left Side: Brand Logo */}
         <div className="flex items-center space-x-3 shrink-0">
           <Link to="/" className="flex items-center space-x-2 group">
-            <span className="serif-drama text-2xl font-bold tracking-wider text-white group-hover:text-emerald transition-colors whitespace-nowrap">
+            <span className="serif-drama text-lg sm:text-2xl font-bold tracking-wider text-white group-hover:text-emerald transition-colors whitespace-nowrap">
               Carbon<span className="text-emerald">Zero</span>
             </span>
             <span className="font-mono text-[9px] bg-emerald/10 border border-emerald/20 text-emerald px-1.5 py-0.5 rounded tracking-widest uppercase whitespace-nowrap">
@@ -97,7 +109,7 @@ const Navbar = () => {
         {/* Center: Desktop Navigation Links */}
         <div className="hidden lg:flex items-center space-x-1 bg-white/[0.03] border border-white/5 rounded-full p-1.5 backdrop-blur-sm shrink-0">
           {navLinks.map((item) => {
-            const isHash = ['Platform', 'Sectors'].includes(item.id);
+            const isActive = item.path && location.pathname === item.path;
             const hash = item.id.toLowerCase();
 
             if (item.path) {
@@ -105,29 +117,33 @@ const Navbar = () => {
                 <Link
                   key={item.id}
                   to={item.path}
-                  className="font-sans text-[13px] font-medium text-white/80 hover:text-white px-3.5 py-1.5 rounded-full transition-all duration-300 hover:bg-white/5 whitespace-nowrap"
+                  className={`font-sans text-[13px] font-medium px-3.5 py-1.5 rounded-full transition-all duration-200 whitespace-nowrap ${
+                    isActive
+                      ? 'bg-emerald/20 text-emerald border border-emerald/30 shadow-[0_0_10px_rgba(0,200,83,0.15)] font-semibold'
+                      : 'text-white/80 hover:text-white hover:bg-white/5'
+                  }`}
                 >
                   {t(`nav.${item.key}`, item.id)}
                 </Link>
               );
-            } else if (isHash) {
+            } else if (item.isHash) {
               return (
                 <a
                   key={item.id}
                   href={`/#${hash}`}
                   onClick={(e) => handleHashClick(e, hash)}
-                  className="font-sans text-[13px] font-medium text-white/80 hover:text-white px-3.5 py-1.5 rounded-full transition-all duration-300 hover:bg-white/5 cursor-pointer whitespace-nowrap"
+                  className="font-sans text-[13px] font-medium text-white/80 hover:text-white px-3.5 py-1.5 rounded-full transition-all duration-200 hover:bg-white/5 cursor-pointer whitespace-nowrap"
                 >
-                  {t(`nav.${item.key}`)}
+                  {t(`nav.${item.key}`, item.id)}
                 </a>
               );
             } else {
               return (
                 <button
                   key={item.id}
-                  className="font-sans text-[13px] font-medium text-white/80 hover:text-white px-3.5 py-1.5 rounded-full transition-all duration-300 hover:bg-white/5 cursor-pointer whitespace-nowrap"
+                  className="font-sans text-[13px] font-medium text-white/80 hover:text-white px-3.5 py-1.5 rounded-full transition-all duration-200 hover:bg-white/5 cursor-pointer whitespace-nowrap"
                 >
-                  {t(`nav.${item.key}`)}
+                  {t(`nav.${item.key}`, item.id)}
                 </button>
               );
             }
@@ -144,13 +160,13 @@ const Navbar = () => {
         </div>
 
         {/* Right Side: Language Switcher, Theme Toggle, Login, Mobile Menu Toggle */}
-        <div className="flex items-center justify-end space-x-2 sm:space-x-3 shrink-0 z-50">
+        <div className="flex items-center justify-end space-x-1 sm:space-x-3 shrink-0 z-50">
           
           {/* Language Toggle */}
           <button 
             onClick={toggleLanguage}
             aria-label={`Current language is ${i18n.language === 'en' ? 'English' : 'Bengali'}. Click to switch language`}
-            className="ghost-btn font-sans font-bold text-xs px-2.5 py-1.5 min-h-[44px] min-w-[44px] rounded-lg flex items-center justify-center space-x-1 sm:space-x-2 focus-visible:ring-2 focus-visible:ring-emerald/60 focus:outline-none"
+            className="ghost-btn font-sans font-bold text-xs px-2.5 py-1.5 min-h-[44px] min-w-[44px] rounded-lg flex items-center justify-center space-x-1 sm:space-x-2 focus-visible:ring-2 focus-visible:ring-emerald/60 focus:outline-none cursor-pointer"
           >
             <span className={i18n.language === 'en' ? 'text-white drop-shadow-sm' : 'text-white/40'}>EN</span>
             <span className="text-white/20">|</span>
@@ -161,7 +177,7 @@ const Navbar = () => {
           <button
             id="theme-toggle-btn"
             onClick={toggleTheme}
-            className="theme-toggle min-w-[44px] min-h-[44px] focus-visible:ring-2 focus-visible:ring-emerald/60 focus:outline-none"
+            className="theme-toggle min-w-[44px] min-h-[44px] focus-visible:ring-2 focus-visible:ring-emerald/60 focus:outline-none cursor-pointer"
             aria-label={theme === 'dark' ? 'Switch to light mode' : 'Switch to dark mode'}
             title={theme === 'dark' ? 'Switch to light mode' : 'Switch to dark mode'}
           >
@@ -175,31 +191,45 @@ const Navbar = () => {
             <LogIn size={16} className="text-white/80 group-hover:text-white transition-colors" />
           </Link>
 
-          {/* Mobile Menu Toggle */}
+          {/* Mobile Menu Toggle - Accessible Animated Morphing Hamburger */}
           <button 
-            className="lg:hidden min-w-[44px] min-h-[44px] p-2 flex items-center justify-center text-white/80 hover:text-white transition-colors focus-visible:ring-2 focus-visible:ring-emerald/60 focus:outline-none rounded-lg"
+            className="lg:hidden min-w-[44px] min-h-[44px] p-2 flex flex-col items-center justify-center text-white/80 hover:text-white transition-colors focus-visible:ring-2 focus-visible:ring-emerald/60 focus:outline-none rounded-lg cursor-pointer space-y-1.5"
             onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
             aria-label={isMobileMenuOpen ? "Close navigation menu" : "Open navigation menu"}
             aria-expanded={isMobileMenuOpen}
             aria-controls="mobile-menu-drawer"
           >
-            {isMobileMenuOpen ? <X size={24} /> : <Menu size={24} />}
+            <span 
+              className={`w-6 h-0.5 bg-white rounded-full transition-all duration-300 transform origin-center ${
+                isMobileMenuOpen ? 'rotate-45 translate-y-2' : ''
+              }`} 
+            />
+            <span 
+              className={`w-6 h-0.5 bg-white rounded-full transition-opacity duration-200 ${
+                isMobileMenuOpen ? 'opacity-0' : 'opacity-100'
+              }`} 
+            />
+            <span 
+              className={`w-6 h-0.5 bg-white rounded-full transition-all duration-300 transform origin-center ${
+                isMobileMenuOpen ? '-rotate-45 -translate-y-2' : ''
+              }`} 
+            />
           </button>
 
         </div>
       </div>
 
-      {/* Mobile Menu Drawer */}
+      {/* Mobile Menu Drawer - Responsive with Vertical Scrolling & Scroll-Lock */}
       <div 
         id="mobile-menu-drawer"
-        className={`fixed inset-0 top-0 pt-24 bg-[#040A06]/95 backdrop-blur-3xl transition-transform duration-300 z-40 flex flex-col items-center space-y-8 lg:hidden ${
+        className={`fixed inset-0 top-0 pt-24 bg-[#040A06]/98 backdrop-blur-3xl transition-transform duration-300 z-40 flex flex-col items-center lg:hidden overflow-y-auto max-h-[100dvh] pb-12 ${
           isMobileMenuOpen ? 'translate-x-0' : 'translate-x-full'
         }`}
         aria-hidden={!isMobileMenuOpen}
       >
-        <div className="flex flex-col items-center space-y-6 w-full px-6">
+        <div className="flex flex-col items-center space-y-5 w-full px-6 py-4">
           {navLinks.map((item) => {
-            const isHash = ['Platform', 'Sectors'].includes(item.id);
+            const isActive = item.path && location.pathname === item.path;
             const hash = item.id.toLowerCase();
 
             if (item.path) {
@@ -208,20 +238,22 @@ const Navbar = () => {
                   key={item.id}
                   to={item.path}
                   onClick={closeMenu}
-                  className="font-sans font-bold text-2xl text-white/90 hover:text-white transition-colors tracking-wide text-center w-full border-b border-white/10 pb-4"
+                  className={`font-sans font-bold text-xl transition-colors tracking-wide text-center w-full border-b border-white/10 pb-3 min-h-[44px] flex items-center justify-center ${
+                    isActive ? 'text-emerald' : 'text-white/90 hover:text-white'
+                  }`}
                 >
                   {t(`nav.${item.key}`, item.id)}
                 </Link>
               );
-            } else if (isHash) {
+            } else if (item.isHash) {
               return (
                 <a
                   key={item.id}
                   href={`/#${hash}`}
                   onClick={(e) => handleHashClick(e, hash)}
-                  className="font-sans font-bold text-2xl text-white/90 hover:text-white transition-colors tracking-wide text-center w-full border-b border-white/10 pb-4 cursor-pointer"
+                  className="font-sans font-bold text-xl text-white/90 hover:text-white transition-colors tracking-wide text-center w-full border-b border-white/10 pb-3 cursor-pointer min-h-[44px] flex items-center justify-center"
                 >
-                  {t(`nav.${item.key}`)}
+                  {t(`nav.${item.key}`, item.id)}
                 </a>
               );
             } else {
@@ -230,9 +262,9 @@ const Navbar = () => {
                   key={item.id}
                   to="/how-it-works"
                   onClick={closeMenu}
-                  className="font-sans font-bold text-2xl text-white/90 hover:text-white transition-colors tracking-wide text-center w-full border-b border-white/10 pb-4"
+                  className="font-sans font-bold text-xl text-white/90 hover:text-white transition-colors tracking-wide text-center w-full border-b border-white/10 pb-3 min-h-[44px] flex items-center justify-center"
                 >
-                  {t(`nav.${item.key}`)}
+                  {t(`nav.${item.key}`, item.id)}
                 </Link>
               );
             }
@@ -244,19 +276,23 @@ const Navbar = () => {
               closeMenu();
               setIsDemoModalOpen(true);
             }} 
-            className="w-full max-w-sm mt-4 bg-emerald text-carbon font-sans font-bold text-lg px-8 py-4 rounded-full transition-colors shadow-lg flex items-center justify-center cursor-pointer"
+            className="w-full max-w-sm mt-4 bg-emerald text-carbon font-sans font-bold text-base px-6 py-3.5 rounded-full transition-colors shadow-lg flex items-center justify-center cursor-pointer min-h-[48px]"
           >
             {t('nav.requestDemo', '[Request Demo]')}
           </button>
           
-          <Link to="/dashboard/farmer/earnings" onClick={closeMenu} className="w-full max-w-sm mt-2 ghost-btn border border-white/20 text-white font-sans font-bold text-lg px-8 py-4 rounded-full flex items-center justify-center space-x-2 transition-colors">
+          <Link 
+            to="/dashboard/farmer/earnings" 
+            onClick={closeMenu} 
+            className="w-full max-w-sm mt-2 ghost-btn border border-white/20 text-white font-sans font-bold text-base px-6 py-3.5 rounded-full flex items-center justify-center space-x-2 transition-colors min-h-[48px]"
+          >
             <span>Login to Registry</span>
-            <LogIn size={20} />
+            <LogIn size={18} />
           </Link>
         </div>
       </div>
 
-      {/* Enterprise Demo Request Modal */}
+      {/* Enterprise Demo Request Modal - Preserved from main */}
       <RequestDemoModal 
         isOpen={isDemoModalOpen} 
         onClose={() => setIsDemoModalOpen(false)} 

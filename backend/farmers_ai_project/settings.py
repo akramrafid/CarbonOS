@@ -26,7 +26,7 @@ INSECURE_DEV_KEY = 'django-insecure-&!^evp!(vub%e4=yh$@go=+yt(yk6i_740922c)#l1_i
 SECRET_KEY = os.getenv('DJANGO_SECRET_KEY', INSECURE_DEV_KEY)
 
 # DEBUG defaults to True in local development; set DJANGO_DEBUG=False in production
-DEBUG = os.getenv('DJANGO_DEBUG', 'True').lower() in ('true', '1')
+DEBUG = os.getenv('DJANGO_DEBUG', 'False').lower() in ('true', '1') or os.getenv('DJANGO_ENV') == 'development'
 
 # In production (DEBUG=False), enforce secret key and host constraints
 if not DEBUG:
@@ -175,10 +175,13 @@ REST_FRAMEWORK = {
 }
 
 # Production Security Headers & Cookies
+SESSION_COOKIE_SAMESITE = 'Lax'
+CSRF_COOKIE_SAMESITE = 'Lax'
+SESSION_COOKIE_HTTPONLY = True
+
 if not DEBUG:
     SESSION_COOKIE_SECURE = True
     CSRF_COOKIE_SECURE = True
-    SESSION_COOKIE_HTTPONLY = True
     CSRF_COOKIE_HTTPONLY = False  # Allows frontend SPA to read CSRF token if needed
     SECURE_BROWSER_XSS_FILTER = True
     SECURE_CONTENT_TYPE_NOSNIFF = True

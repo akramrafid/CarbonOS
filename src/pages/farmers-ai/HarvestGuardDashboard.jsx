@@ -23,19 +23,18 @@ const HarvestGuardDashboard = ({ isInline = false, onBack = null, onAddBatchClic
     setWeatherLoading(true);
     
     const fetchWeather = async () => {
-      const apiKey = '895284852c5a6104617a26ba3534b46c';
       try {
-        const res = await fetch(`https://api.openweathermap.org/data/2.5/weather?q=${userLocation},BD&units=metric&appid=${apiKey}`);
-        if (!res.ok) throw new Error("OpenWeather API failed");
+        const res = await fetch(`/api/farmers-ai/weather/current/?location=${encodeURIComponent(userLocation)}`);
+        if (!res.ok) throw new Error("Backend weather proxy failed");
         const data = await res.json();
         if (isMounted) {
           setWeatherData({
-            temp: Math.round(data.main.temp),
-            humidity: data.main.humidity,
-            description: data.weather[0].description,
-            icon: data.weather[0].icon,
-            wind: data.wind.speed,
-            source: 'OpenWeather API'
+            temp: Math.round(data.temp),
+            humidity: data.humidity,
+            description: data.description,
+            icon: data.icon,
+            wind: data.wind,
+            source: data.source || 'Regional Telemetry'
           });
           setWeatherLoading(false);
         }

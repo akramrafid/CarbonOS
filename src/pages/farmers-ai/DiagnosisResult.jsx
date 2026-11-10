@@ -792,12 +792,7 @@ const DiagnosisResult = ({ isInline = false, onBack = null, inlineResult = null,
 
   const mainResultContent = (
     <div className="max-w-lg mx-auto w-full flex flex-col space-y-5">
-      <style dangerouslySetInnerHTML={{__html: `
-        @keyframes fade-in-up { from { opacity:0; transform:translateY(8px); } to { opacity:1; transform:translateY(0); } }
-        .fade-in-up { animation: fade-in-up 0.35s ease-out both; }
-        @keyframes bar-fill { from { width: 0%; } to { width: var(--target-width); } }
-        .bar-fill { animation: bar-fill 1s ease-out both; animation-delay: 0.2s; }
-      `}} />
+      {/* Diagnosis result animations defined in index.css */}
 
       {/* Back Button */}
       {!isInline ? (

@@ -1,3 +1,4 @@
+import { getPrefersReducedMotion } from '../lib/motion';
 import React, { useEffect, useRef } from 'react';
 import gsap from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
@@ -22,7 +23,15 @@ const Philosophy = () => {
   const containerRef = useRef(null);
 
   useEffect(() => {
+    const prefersReducedMotion = getPrefersReducedMotion();
+
     let ctx = gsap.context(() => {
+      if (prefersReducedMotion) {
+        gsap.set('.philosophy-bg', { yPercent: 0 });
+        gsap.set('.philosophy-word', { y: 0, opacity: 1 });
+        return;
+      }
+
       // Parallax image
       gsap.to('.philosophy-bg', {
         yPercent: 30,

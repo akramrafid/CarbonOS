@@ -10,6 +10,33 @@ const BASE_URL = import.meta.env.VITE_FASTAPI_API_URL || 'http://localhost:8000'
 let session = { token: null, organizationId: null };
 let offlineStore = getInitialDemoState();
 
+let isDemoDataActive = false;
+const demoDataListeners = new Set();
+
+export function isMockFallbackActive() {
+  return isDemoDataActive;
+}
+
+export function subscribeDemoDataActive(listener) {
+  demoDataListeners.add(listener);
+  try {
+    listener(isDemoDataActive);
+  } catch {}
+  return () => demoDataListeners.delete(listener);
+}
+
+function notifyDemoDataActive(path, reason) {
+  if (!isDemoDataActive) {
+    isDemoDataActive = true;
+    demoDataListeners.forEach((fn) => {
+      try { fn(true, { path, reason }); } catch {}
+    });
+    if (typeof window !== 'undefined' && window.dispatchEvent) {
+      window.dispatchEvent(new CustomEvent('carbonos:esg:demo-data-active', { detail: { path, reason } }));
+    }
+  }
+}
+
 export function resetOfflineStore() {
   offlineStore = getInitialDemoState();
 }
@@ -21,6 +48,10 @@ export function setEsgSession({ token = session.token, organizationId = session.
 
 export function clearEsgSession() {
   session = { token: null, organizationId: null };
+  isDemoDataActive = false;
+  demoDataListeners.forEach((fn) => {
+    try { fn(false); } catch {}
+  });
 }
 
 export const hasEsgToken = () => Boolean(session.token);
@@ -464,6 +495,7 @@ async function request(path, { headers = {}, ...options } = {}) {
 
   // If session is explicitly marked as offline demo, bypass network directly
   if (session.token.startsWith('demo-offline-')) {
+    notifyDemoDataActive(path, 'explicit_offline_demo');
     return handleOfflineRequest(path, options);
   }
 
@@ -478,10 +510,15 @@ async function request(path, { headers = {}, ...options } = {}) {
       },
     });
   } catch (err) {
+    // In production builds, never silently substitute mock demo data for real backend failures
+    if (import.meta.env.PROD) {
+      throw new EsgApiError(0, 'ESG service is unreachable.');
+    }
     // If backend is unreachable (Render cold start, sleeping, offline, network failure),
-    // and this is a demo session or request, seamlessly serve client-side demo fallback
+    // and this is a demo session or request, serve client-side demo fallback with active banner notification
     if (session.token.startsWith('demo-') || path.startsWith('/api/esg/')) {
       console.warn(`[ESG API] Backend unreachable for ${path}. Serving client-side demo fallback.`);
+      notifyDemoDataActive(path, 'network_unreachable');
       return handleOfflineRequest(path, options);
     }
     throw new EsgApiError(0, 'ESG service is unreachable.');
@@ -489,7 +526,17 @@ async function request(path, { headers = {}, ...options } = {}) {
 
   // If backend returns 404 (e.g. older deployment on Render) or 502/503 during restarts
   if (!res.ok && (res.status === 404 || res.status >= 500) && (session.token.startsWith('demo-') || path.startsWith('/api/esg/'))) {
+    // In production builds, never mask backend HTTP errors with demo mocks
+    if (import.meta.env.PROD) {
+      let detail = '';
+      try {
+        const body = await res.json();
+        detail = typeof body.detail === 'string' ? body.detail : '';
+      } catch {}
+      throw new EsgApiError(res.status, detail || `ESG request failed (${res.status}).`);
+    }
     console.warn(`[ESG API] Backend returned HTTP ${res.status} for ${path}. Serving client-side demo fallback.`);
+    notifyDemoDataActive(path, `HTTP_${res.status}`);
     return handleOfflineRequest(path, options);
   }
 

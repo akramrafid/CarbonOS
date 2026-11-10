@@ -165,7 +165,7 @@ parameters:
     dtype: decimal
     dimension: "[length] ** 3"
     canonical_unit: m3
-    allowed_units: [m3, Sm3, ft3]
+    allowed_units: [m3, Sm3, Nm3, ft3, cft]
     role: meter_read
     group: meter
   - key: gas.volume.correction_factor
@@ -180,7 +180,7 @@ parameters:
     dtype: decimal
     dimension: "[length] ** 3"
     canonical_unit: m3
-    allowed_units: [m3, Sm3, ft3]
+    allowed_units: [m3, Sm3, Nm3, ft3, cft]
     role: consumption
     group: meter
     ledger: {activity_type: natural_gas, unit: m3, meter_ref_from: meter.serial}

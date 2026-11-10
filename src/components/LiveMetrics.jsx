@@ -1,3 +1,4 @@
+import { getPrefersReducedMotion } from '../lib/motion';
 import React, { useState, useEffect, useRef } from 'react';
 import gsap from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
@@ -166,7 +167,14 @@ const LiveMetrics = () => {
   }, [activeStation]);
 
   useEffect(() => {
+    const prefersReducedMotion = getPrefersReducedMotion();
+
     let ctx = gsap.context(() => {
+      if (prefersReducedMotion) {
+        gsap.set('.mrv-telemetry-card', { y: 0, opacity: 1 });
+        return;
+      }
+
       gsap.fromTo('.mrv-telemetry-card', 
         { y: 35, opacity: 0 },
         { 

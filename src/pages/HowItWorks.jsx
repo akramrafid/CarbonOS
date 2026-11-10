@@ -240,14 +240,7 @@ const HowItWorks = () => {
       
 
 
-      <style dangerouslySetInnerHTML={{__html: `
-        @keyframes slide {
-          0% { transform: translateY(-100%); opacity: 0; }
-          20% { opacity: 1; }
-          80% { opacity: 1; }
-          100% { transform: translateY(300%); opacity: 0; }
-        }
-      `}} />
+      {/* Slide animation defined in index.css */}
     </div>
   );
 };

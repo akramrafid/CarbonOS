@@ -21,6 +21,7 @@ from .config import CORPUS_TENANT_DOCS, CORPUS_REGULATORY, CORPUS_EMISSION_FACTO
 from .ingest import ingest_document, IngestRejected, MAX_UPLOAD_BYTES
 from .retriever import retrieve
 from .generator import generate_answer
+from .factor_qa import detect_factor_intent, query_factor_registry, format_factor_qa_response
 from .extractor import extract_footprint_from_text, detect_all_utility_segments
 
 router = APIRouter(prefix="/api/esg", tags=["ESG RAG Intelligence"])
@@ -101,12 +102,58 @@ def esg_query(
 ):
     """
     Query the ESG RAG system across regulatory, emission factors, and the caller's tenant corpus.
-    Returns grounded answers with source citations. Retrieval similarity is not verification.
+    Returns grounded answers with source citations. Factor questions query structured registry first.
     """
     start_time = time.time()
     tenant_id = principal.organization_id
 
-    # 1. Retrieve relevant chunks
+    # 1. Check if user query is asking about an emission factor
+    factor_intent = detect_factor_intent(request.query)
+    if factor_intent:
+        factor_info, status_cat = query_factor_registry(db, principal, factor_intent["activity_type"])
+        retrieval_res = retrieve(
+            query=request.query,
+            corpus="emission_factors",
+            tenant_id=tenant_id,
+            top_k=request.top_k or 3,
+            min_confidence=0.25
+        )
+        text_context = ""
+        if retrieval_res.get("chunks"):
+            top_c = retrieval_res["chunks"][0]
+            text_context = f"> \"{top_c.content[:400]}...\"\n[Source: {top_c.filename}, Page {top_c.page}]"
+
+        factor_ans = format_factor_qa_response(request.query, factor_info, status_cat, text_context)
+        latency = round((time.time() - start_time) * 1000, 2)
+        citations_data = retrieval_res.get("citations", [])
+
+        # Log query
+        log = ESGQueryLog(
+            tenant_id=tenant_id,
+            corpus="emission_factors",
+            query_text=request.query,
+            answer_text=factor_ans["answer"],
+            confidence=1.0 if status_cat == "APPROVED" else (0.85 if status_cat == "PROVISIONAL" else 0.4),
+            citations=citations_data,
+            latency_ms=latency,
+            llm_model="carbonos-factor-registry",
+            verified_by_audit=(status_cat == "APPROVED")
+        )
+        db.add(log)
+        db.commit()
+
+        return QueryResponse(
+            query=request.query,
+            answer=factor_ans["answer"],
+            confidence=1.0 if status_cat == "APPROVED" else (0.85 if status_cat == "PROVISIONAL" else 0.4),
+            citations=[Citation(**c) for c in citations_data],
+            corpus="emission_factors",
+            model_used="carbonos-factor-registry",
+            insufficient_data=(status_cat == "NOT_FOUND" and not retrieval_res.get("chunks")),
+            latency_ms=latency
+        )
+
+    # 2. General methodology / regulatory query
     retrieval_res = retrieve(
         query=request.query,
         corpus=request.corpus or "all",
@@ -114,13 +161,41 @@ def esg_query(
         top_k=request.top_k or 5
     )
 
-    # 2. Generate grounded answer
-    gen_res = generate_answer(request.query, retrieval_res)
+    if retrieval_res.get("insufficient_data"):
+        latency = round((time.time() - start_time) * 1000, 2)
+        honest_answer = (
+            f"I cannot find guidance on '{request.query}' in the verified corpus. "
+            f"Please refer to your regulatory authority or enter the value manually in the bill intake form (/platform/esg/intake)."
+        )
+        log = ESGQueryLog(
+            tenant_id=tenant_id,
+            corpus=request.corpus or "all",
+            query_text=request.query,
+            answer_text=honest_answer,
+            confidence=round(retrieval_res.get("best_score", 0.0), 3),
+            citations=[],
+            latency_ms=latency,
+            llm_model="carbonos-policy-guard",
+            verified_by_audit=False
+        )
+        db.add(log)
+        db.commit()
+        return QueryResponse(
+            query=request.query,
+            answer=honest_answer,
+            confidence=round(retrieval_res.get("best_score", 0.0), 3),
+            citations=[],
+            corpus=request.corpus or "all",
+            model_used="carbonos-policy-guard",
+            insufficient_data=True,
+            latency_ms=latency
+        )
 
+    # 3. Generate grounded answer
+    gen_res = generate_answer(request.query, retrieval_res)
     latency = round((time.time() - start_time) * 1000, 2)
     citations_data = retrieval_res.get("citations", [])
 
-    # 3. Log query in audit trail
     log = ESGQueryLog(
         tenant_id=tenant_id,
         corpus=request.corpus or "all",
@@ -155,8 +230,15 @@ async def extract_footprint(
     db: Session = Depends(get_db)
 ):
     """
+    HEURISTIC QUICK ESTIMATOR (UNVERIFIED INPUTS):
     Extracts activity quantities (diesel, petrol, LPG, electricity, …) with source snippets from an
     uploaded document or pasted text. Results are REVIEW_REQUIRED inputs, never verified values.
+
+    SYSTEM OF RECORD NOTE:
+    For audit-grade, dual-control regulatory accounting and carbon credit registry verification,
+    use the bill intake pipeline (`/api/esg/bills/*`) which enforces profile anchoring, OCR pre-processing,
+    field gap detection, and deterministic Python ledger calculations.
+
     Returns 422 when nothing readable or extractable is found — it never substitutes sample data.
     """
     tenant_id = principal.organization_id

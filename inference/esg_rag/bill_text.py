@@ -50,6 +50,9 @@ def parse_number(text: str) -> Decimal:
 def parse_date(text: str) -> dt.date:
     """'১৫ জুলাই ২০২৫', '15 July 2025', '15-07-2025' or '15/07/2025' (day first) → date."""
     s = to_ascii_digits(text).strip()
+    m = re.fullmatch(r"(\d{4})[-/.](\d{1,2})[-/.](\d{1,2})", s)
+    if m:
+        return _date(int(m.group(1)), int(m.group(2)), int(m.group(3)), text)
     m = re.fullmatch(r"(\d{1,2})[-/.](\d{1,2})[-/.](\d{4})", s)
     if m:
         return _date(int(m.group(3)), int(m.group(2)), int(m.group(1)), text)

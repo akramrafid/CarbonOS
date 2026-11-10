@@ -22,6 +22,18 @@ from .uncertainty import (compute_conformal_verra_assessment, ConformalUncertain
                           VerraPrecisionDeductionEngine)
 from .tiering import flag_for_verification, complete_verification_task, list_verification_tasks
 from .registry_export import export_vm0047_stocking_index
+from .auth import (
+    CarbonUser,
+    get_current_user,
+    require_permission,
+    verify_job_ownership,
+    verify_boundary_ownership,
+)
+from .rate_limiter import (
+    rate_limit_analyze,
+    rate_limit_upload,
+    rate_limit_standard,
+)
 
 class CompleteTaskRequest(BaseModel):
     measured_biomass_mg_ha: float
@@ -267,7 +279,7 @@ def random_trigger_fire_alert(coords):
 
 # Endpoints
 
-@router.post("/analyze")
+@router.post("/analyze", dependencies=[Depends(rate_limit_analyze)])
 async def analyze_carbon(
     background_tasks: BackgroundTasks,
     polygon_geojson: str = Form(...),
@@ -275,6 +287,7 @@ async def analyze_carbon(
     end_date: str = Form(...),
     analysis_type: str = Form("ndvi"),
     project_name: str = Form("Carbon Project"),
+    current_user: CarbonUser = Depends(get_current_user),
     db: Session = Depends(get_db)
 ):
     """
@@ -294,7 +307,9 @@ async def analyze_carbon(
         polygon_geojson=polygon_geojson,
         analysis_type=analysis_type,
         start_date=s_date,
-        end_date=e_date
+        end_date=e_date,
+        user_id=current_user.sub,
+        organization_id=current_user.organization_id
     )
     db.add(job)
     db.commit()
@@ -311,14 +326,28 @@ async def analyze_carbon(
         "project_name": project_name
     }
 
-@router.get("/history")
-def get_analysis_history(page: int = 1, limit: int = 10, db: Session = Depends(get_db)):
+@router.get("/history", dependencies=[Depends(rate_limit_standard)])
+def get_analysis_history(
+    page: int = 1,
+    limit: int = 10,
+    current_user: CarbonUser = Depends(get_current_user),
+    db: Session = Depends(get_db)
+):
     """
-    Retrieves pagination list of past analyses and results.
+    Retrieves pagination list of past analyses and results scoped to current tenant.
     """
     offset = (page - 1) * limit
-    jobs = db.query(AnalysisJob).order_by(AnalysisJob.created_at.desc()).offset(offset).limit(limit).all()
-    total = db.query(AnalysisJob).count()
+    from sqlalchemy import or_
+    query = db.query(AnalysisJob)
+    if not current_user.is_platform_operator:
+        query = query.filter(
+            or_(
+                AnalysisJob.organization_id == current_user.organization_id,
+                AnalysisJob.user_id == current_user.sub,
+            )
+        )
+    total = query.count()
+    jobs = query.order_by(AnalysisJob.created_at.desc()).offset(offset).limit(limit).all()
 
     results = []
     for job in jobs:
@@ -391,16 +420,22 @@ def get_analysis_history(page: int = 1, limit: int = 10, db: Session = Depends(g
         "items": results
     }
 
-@router.get("/results/{result_id}")
-def get_result(result_id: str, db: Session = Depends(get_db)):
+@router.get("/results/{result_id}", dependencies=[Depends(rate_limit_standard)])
+def get_result(
+    result_id: str,
+    current_user: CarbonUser = Depends(get_current_user),
+    db: Session = Depends(get_db)
+):
     """
-    Retrieves a single carbon result by result_id or job_id, including 90% prediction intervals, multi-pool vector, and Verra conformal precision.
+    Retrieves a single carbon result by result_id or job_id, verifying tenant ownership.
     """
     res = db.query(CarbonResult).filter(CarbonResult.id == result_id).first()
     if not res:
         res = db.query(CarbonResult).filter(CarbonResult.job_id == result_id).first()
     if not res:
         raise HTTPException(status_code=404, detail="Carbon result not found.")
+    if res.job:
+        verify_job_ownership(res.job, current_user)
 
     return {
         "id": res.id,
@@ -427,8 +462,15 @@ def get_result(result_id: str, db: Session = Depends(get_db)):
         "created_at": res.created_at.isoformat() if res.created_at else None
     }
 
-@router.get("/baseline/{job_id}")
-def get_baseline_assessment(job_id: str, db: Session = Depends(get_db)):
+@router.get("/baseline/{job_id}", dependencies=[Depends(rate_limit_standard)])
+def get_baseline_assessment(
+    job_id: str,
+    current_user: CarbonUser = Depends(get_current_user),
+    db: Session = Depends(get_db)
+):
+    job = db.query(AnalysisJob).filter(AnalysisJob.id == job_id).first()
+    if job:
+        verify_job_ownership(job, current_user)
     """
     Retrieves the Verra VM0047 dynamic synthetic control baseline assessment,
     including donor weights, counterfactual trajectory, leakage deduction, and buffer pool withholding.
@@ -467,8 +509,9 @@ def get_baseline_assessment(job_id: str, db: Session = Depends(get_db)):
         "created_at": baseline.created_at.isoformat() if baseline.created_at else None
     }
 
-@router.post("/baseline/assess")
+@router.post("/baseline/assess", dependencies=[Depends(rate_limit_standard)])
 def assess_baseline_direct(
+    current_user: CarbonUser = Depends(get_current_user),
     polygon_geojson: str = Form(...),
     forest_area_ha: float = Form(...),
     project_carbon_tc_ha: float = Form(...),
@@ -489,8 +532,12 @@ def assess_baseline_direct(
         regional_control_loss_rate=regional_control_loss_rate
     )
 
-@router.get("/uncertainty/{result_id}")
-def get_uncertainty_assessment(result_id: str, db: Session = Depends(get_db)):
+@router.get("/uncertainty/{result_id}", dependencies=[Depends(rate_limit_standard)])
+def get_uncertainty_assessment(
+    result_id: str,
+    current_user: CarbonUser = Depends(get_current_user),
+    db: Session = Depends(get_db)
+):
     """
     Retrieves finite-sample distribution-free conformal uncertainty intervals (90% CI)
     and Verra VM0047 precision deduction evaluation for a carbon analysis result.
@@ -500,6 +547,8 @@ def get_uncertainty_assessment(result_id: str, db: Session = Depends(get_db)):
         res = db.query(CarbonResult).filter(CarbonResult.job_id == result_id).first()
     if not res:
         raise HTTPException(status_code=404, detail="Carbon result not found.")
+    if res.job:
+        verify_job_ownership(res.job, current_user)
 
     assessment = compute_conformal_verra_assessment(
         net_creditable_tco2e=res.tonnes_co2e,
@@ -513,8 +562,9 @@ def get_uncertainty_assessment(result_id: str, db: Session = Depends(get_db)):
     assessment["verra_compliance_standard"] = "Verra VM0047 Section 8.4 & VCS Standard v4.5"
     return assessment
 
-@router.post("/uncertainty/assess")
+@router.post("/uncertainty/assess", dependencies=[Depends(rate_limit_standard)])
 def assess_uncertainty_direct(
+    current_user: CarbonUser = Depends(get_current_user),
     net_creditable_tco2e: float = Form(...),
     carbon_lower_90: float = Form(...),
     carbon_upper_90: float = Form(...),
@@ -532,14 +582,20 @@ def assess_uncertainty_direct(
         allowable_error=allowable_error
     )
 
-@router.get("/report/{job_id}")
-def get_report(job_id: str, format: str = "pdf", db: Session = Depends(get_db)):
+@router.get("/report/{job_id}", dependencies=[Depends(rate_limit_standard)])
+def get_report(
+    job_id: str,
+    format: str = "pdf",
+    current_user: CarbonUser = Depends(get_current_user),
+    db: Session = Depends(get_db)
+):
     """
-    Compiles and downloads report in PDF, CSV, or GeoJSON formats.
+    Compiles and downloads report in PDF, CSV, or GeoJSON formats with ownership verification.
     """
     job = db.query(AnalysisJob).filter(AnalysisJob.id == job_id).first()
     if not job or not job.result:
         raise HTTPException(status_code=404, detail="Analysis result or job not found.")
+    verify_job_ownership(job, current_user)
 
     # Project metadata mapping
     job_data = {
@@ -597,8 +653,13 @@ def get_report(job_id: str, format: str = "pdf", db: Session = Depends(get_db)):
             headers={"Content-Disposition": f"attachment; filename=carbon_report_{job_id}.pdf"}
         )
 
-@router.get("/report/audit-dossier/{job_id}")
-def get_audit_dossier(job_id: str, format: str = "json", db: Session = Depends(get_db)):
+@router.get("/report/audit-dossier/{job_id}", dependencies=[Depends(rate_limit_standard)])
+def get_audit_dossier(
+    job_id: str,
+    format: str = "json",
+    current_user: CarbonUser = Depends(get_current_user),
+    db: Session = Depends(get_db)
+):
     """
     Generates an automated, institutional-grade Verra VM0047 Monitoring Dossier & VVB Audit Package.
     Outputs: JSON (default), Markdown ('markdown' or 'md'), or PDF ('pdf').
@@ -606,6 +667,7 @@ def get_audit_dossier(job_id: str, format: str = "json", db: Session = Depends(g
     job = db.query(AnalysisJob).filter(AnalysisJob.id == job_id).first()
     if not job or not job.result:
         raise HTTPException(status_code=404, detail="Analysis result or job not found.")
+    verify_job_ownership(job, current_user)
 
     provenance = db.query(EstimateProvenance).filter(EstimateProvenance.result_id == job.result.id).first()
     dossier = ReportGenerator.build_vvb_audit_dossier(job, job.result, job.baseline, provenance, db=db)
@@ -627,9 +689,10 @@ def get_audit_dossier(job_id: str, format: str = "json", db: Session = Depends(g
     else:
         return dossier
 
-@router.post("/boundary/upload")
+@router.post("/boundary/upload", dependencies=[Depends(rate_limit_upload)])
 async def upload_boundary(
     file: UploadFile = File(...),
+    current_user: CarbonUser = Depends(get_current_user),
     db: Session = Depends(get_db)
 ):
     """
@@ -707,7 +770,9 @@ async def upload_boundary(
         boundary = UploadedBoundary(
             name=filename,
             file_type=file_ext,
-            boundary_data=boundary_geojson
+            boundary_data=boundary_geojson,
+            user_id=current_user.sub,
+            organization_id=current_user.organization_id
         )
         db.add(boundary)
         db.commit()
@@ -722,13 +787,24 @@ async def upload_boundary(
     except Exception as e:
         raise HTTPException(status_code=400, detail=f"Failed to parse spatial file: {str(e)}")
 
-@router.get("/dashboard")
-def get_dashboard_summary(db: Session = Depends(get_db)):
+@router.get("/dashboard", dependencies=[Depends(rate_limit_standard)])
+def get_dashboard_summary(
+    current_user: CarbonUser = Depends(get_current_user),
+    db: Session = Depends(get_db)
+):
     """
-    Returns aggregated carbon estimates, NDVI, and forest health statistics.
+    Returns aggregated carbon estimates, NDVI, and forest health statistics scoped to current tenant.
     """
-    # Fetch completed analysis jobs
-    results = db.query(CarbonResult).all()
+    from sqlalchemy import or_
+    query = db.query(CarbonResult).join(AnalysisJob, CarbonResult.job_id == AnalysisJob.id)
+    if not current_user.is_platform_operator:
+        query = query.filter(
+            or_(
+                AnalysisJob.organization_id == current_user.organization_id,
+                AnalysisJob.user_id == current_user.sub,
+            )
+        )
+    results = query.all()
     alerts_count = db.query(CarbonAlert).filter(CarbonAlert.is_resolved == False).count()
     
     total_co2e = sum([r.tonnes_co2e for r in results])
@@ -758,8 +834,11 @@ def get_dashboard_summary(db: Session = Depends(get_db)):
         "active_alerts_count": alerts_count
     }
 
-@router.get("/alerts", response_model=List[dict])
-def get_alerts(db: Session = Depends(get_db)):
+@router.get("/alerts", response_model=List[dict], dependencies=[Depends(rate_limit_standard)])
+def get_alerts(
+    current_user: CarbonUser = Depends(get_current_user),
+    db: Session = Depends(get_db)
+):
     """
     List all active satellite-triggered forest risk alerts.
     """
@@ -777,8 +856,12 @@ def get_alerts(db: Session = Depends(get_db)):
         } for a in alerts
     ]
 
-@router.post("/alerts/resolve/{alert_id}")
-def resolve_alert(alert_id: str, db: Session = Depends(get_db)):
+@router.post("/alerts/resolve/{alert_id}", dependencies=[Depends(rate_limit_standard)])
+def resolve_alert(
+    alert_id: str,
+    current_user: CarbonUser = Depends(require_permission("write")),
+    db: Session = Depends(get_db)
+):
     """
     Marks an alert as resolved.
     """
@@ -789,27 +872,8 @@ def resolve_alert(alert_id: str, db: Session = Depends(get_db)):
     db.commit()
     return {"status": "success", "message": "Alert marked as resolved."}
 
-@router.post("/settings")
-def update_settings(model_type: Optional[str] = Form(None), payload: Optional[UpdateSettingsRequest] = None):
-    """
-    Toggles the active carbon estimation machine learning model (random_forest, xgboost, fusion).
-    """
-    chosen_type = (payload.model_type if payload else None) or model_type
-    if not chosen_type:
-        raise HTTPException(status_code=400, detail="model_type is required.")
-    success = carbon_estimator.set_model_type(chosen_type)
-    if not success:
-        raise HTTPException(status_code=400, detail=f"Model type '{chosen_type}' is invalid or not available.")
-    return {
-        "status": "success",
-        "active_model": carbon_estimator.model_type,
-        "xgboost_available": XGB_AVAILABLE,
-        "fusion_model_available": True,
-        "fusion_model_loaded": carbon_estimator.fusion_estimator.is_loaded
-    }
-
-@router.get("/settings")
-def get_settings():
+@router.get("/settings", dependencies=[Depends(rate_limit_standard)])
+def get_settings(current_user: CarbonUser = Depends(get_current_user)):
     """
     Retrieves active model settings including multi-modal fusion model gate status.
     """
@@ -825,11 +889,13 @@ def get_settings():
         "model_trained_on": carbon_estimator.model_meta.get("trained_on")
     }
 
-
-@router.post("/settings")
-def update_settings(payload: UpdateSettingsRequest):
+@router.post("/settings", dependencies=[Depends(rate_limit_standard)])
+def update_settings(
+    payload: UpdateSettingsRequest,
+    current_user: CarbonUser = Depends(require_permission("admin"))
+):
     """
-    Updates the active estimator model type (e.g. 'random_forest', 'xgboost', 'fusion').
+    Updates the active estimator model type (admin role required).
     """
     try:
         carbon_estimator.set_model_type(payload.model_type)
@@ -843,7 +909,7 @@ def update_settings(payload: UpdateSettingsRequest):
 
 # --- Part (b): ground-truth plots ---
 
-@router.post("/ground-truth")
+@router.post("/ground-truth", dependencies=[Depends(rate_limit_standard)])
 def submit_ground_truth_plot(
     plot_name: str = Form(...),
     location_lat: float = Form(...),
@@ -855,15 +921,14 @@ def submit_ground_truth_plot(
     collected_by: str = Form(...),
     plot_radius_m: float = Form(15.0),
     notes: Optional[str] = Form(None),
+    current_user: CarbonUser = Depends(require_permission("write")),
     db: Session = Depends(get_db)
 ):
     """
     Logs a real field measurement. This is the only thing that can ever make
     the model's accuracy claims real - there is no code substitute for someone
-    physically measuring trees. TODO: gate this behind field-team authentication
-    once auth exists; right now anyone who can reach this endpoint can write to
-    the calibration dataset, which is a data-integrity risk worth closing before
-    this goes anywhere near a VVB conversation.
+    physically measuring trees. Gated behind authenticated field-team permission
+    (`write` role required) to protect data integrity and calibration dataset validity.
     """
     try:
         m_date = datetime.datetime.strptime(measurement_date, "%Y-%m-%d").date()
@@ -888,8 +953,11 @@ def submit_ground_truth_plot(
     return {"id": plot.id, "status": "recorded", "used_in_training": False}
 
 
-@router.get("/ground-truth")
-def list_ground_truth_plots(db: Session = Depends(get_db)):
+@router.get("/ground-truth", dependencies=[Depends(rate_limit_standard)])
+def list_ground_truth_plots(
+    current_user: CarbonUser = Depends(get_current_user),
+    db: Session = Depends(get_db)
+):
     plots = db.query(GroundTruthPlot).order_by(GroundTruthPlot.measurement_date.desc()).all()
     return [{
         "id": p.id, "plot_name": p.plot_name, "location": [p.location_lat, p.location_lng],
@@ -898,22 +966,23 @@ def list_ground_truth_plots(db: Session = Depends(get_db)):
     } for p in plots]
 
 
-@router.post("/recalibrate")
-def trigger_recalibration():
+@router.post("/recalibrate", dependencies=[Depends(rate_limit_standard)])
+def trigger_recalibration(current_user: CarbonUser = Depends(require_permission("admin"))):
     """
     Manually triggers the recalibration job (normally run on a schedule via
-    Celery beat - see calibration.py). TODO: gate behind admin auth before
-    exposing this outside internal use; it's a cheap operation to abuse
-    (mostly Earth Engine quota) even though it can't corrupt the live model
-    thanks to the staging/validate/promote design.
+    Celery beat - see calibration.py). Gated behind admin authorization
+    (`admin` role required) to protect Earth Engine quota and trigger staging pipeline safely.
     """
     result = run_recalibration()
     return result
 
 # --- Part (c): provenance ---
 
-@router.get("/provenance/verify-chain")
-def verify_provenance_chain(db: Session = Depends(get_db)):
+@router.get("/provenance/verify-chain", dependencies=[Depends(rate_limit_standard)])
+def verify_provenance_chain(
+    current_user: CarbonUser = Depends(get_current_user),
+    db: Session = Depends(get_db)
+):
     """
     Walks the entire provenance chain and confirms nothing has been altered
     after the fact. Run this before any audit conversation.
@@ -921,8 +990,12 @@ def verify_provenance_chain(db: Session = Depends(get_db)):
     return provenance_utils.verify_chain(db)
 
 
-@router.get("/provenance/{result_id}")
-def get_provenance(result_id: str, db: Session = Depends(get_db)):
+@router.get("/provenance/{result_id}", dependencies=[Depends(rate_limit_standard)])
+def get_provenance(
+    result_id: str,
+    current_user: CarbonUser = Depends(get_current_user),
+    db: Session = Depends(get_db)
+):
     """
     Returns the full provenance record for one estimate with dual trust status:
     1. Hash-chain integrity
@@ -932,6 +1005,8 @@ def get_provenance(result_id: str, db: Session = Depends(get_db)):
     if not record:
         raise HTTPException(status_code=404, detail="No provenance record found for this result.")
 
+    if record.result and record.result.job:
+        verify_job_ownership(record.result.job, current_user)
     trust_status = provenance_utils.get_provenance_trust_status(record, db)
 
     payload = {
@@ -952,16 +1027,21 @@ def get_provenance(result_id: str, db: Session = Depends(get_db)):
     }
 
 
-@router.post("/provenance/generate-keys")
-def generate_validator_keys():
+@router.post("/provenance/generate-keys", dependencies=[Depends(rate_limit_standard)])
+def generate_validator_keys(current_user: CarbonUser = Depends(get_current_user)):
     """
     Generates a new Ed25519 keypair for an accredited validator or VVB auditor.
     """
     return provenance_utils.generate_validator_keypair()
 
 
-@router.post("/provenance/{result_id}/sign")
-def sign_provenance(result_id: str, payload: SignProvenanceRequest, db: Session = Depends(get_db)):
+@router.post("/provenance/{result_id}/sign", dependencies=[Depends(rate_limit_standard)])
+def sign_provenance(
+    result_id: str,
+    payload: SignProvenanceRequest,
+    current_user: CarbonUser = Depends(require_permission("review")),
+    db: Session = Depends(get_db)
+):
     """
     Attaches an external validator's Ed25519 co-signature to the provenance record.
     Cryptographically verifies the signature over record_hash.
@@ -992,16 +1072,25 @@ def sign_provenance(result_id: str, payload: SignProvenanceRequest, db: Session 
 
 # --- Tiered Monitoring & Drone Verification Tasks (Treeconomy Pattern) ---
 
-@router.get("/verification-tasks")
-def get_verification_tasks(status: Optional[str] = None, db: Session = Depends(get_db)):
+@router.get("/verification-tasks", dependencies=[Depends(rate_limit_standard)])
+def get_verification_tasks(
+    status: Optional[str] = None,
+    current_user: CarbonUser = Depends(get_current_user),
+    db: Session = Depends(get_db)
+):
     """
     Lists verification tasks flagged due to high model prediction uncertainty.
     """
     return list_verification_tasks(status=status, db=db)
 
 
-@router.post("/verification-tasks/{task_id}/complete")
-def complete_task(task_id: int, payload: CompleteTaskRequest, db: Session = Depends(get_db)):
+@router.post("/verification-tasks/{task_id}/complete", dependencies=[Depends(rate_limit_standard)])
+def complete_task(
+    task_id: int,
+    payload: CompleteTaskRequest,
+    current_user: CarbonUser = Depends(require_permission("write")),
+    db: Session = Depends(get_db)
+):
     """
     Marks a verification task as completed and ingests drone survey measurements.
     """
@@ -1016,11 +1105,12 @@ def complete_task(task_id: int, payload: CompleteTaskRequest, db: Session = Depe
 
 # --- Verra VM0047 Dynamic Stocking Index Registry Export ---
 
-@router.get("/registry-export/vm0047/{project_id}")
+@router.get("/registry-export/vm0047/{project_id}", dependencies=[Depends(rate_limit_standard)])
 def get_vm0047_export(
     project_id: str,
     result_id: Optional[str] = None,
     buffer_pool_pct: float = 18.0,
+    current_user: CarbonUser = Depends(get_current_user),
     db: Session = Depends(get_db)
 ):
     """

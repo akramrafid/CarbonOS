@@ -25,6 +25,7 @@ from sqlalchemy.orm import Session
 
 # Add repo root and inference directory to path
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 sys.path.append(BASE_DIR)
 sys.path.append(os.path.join(BASE_DIR, "inference"))
 
@@ -55,6 +56,7 @@ class TestDMRVv2TestSuite(unittest.TestCase):
         cls.app = FastAPI(title="dMRV v2 Test Harness")
         cls.app.include_router(carbon_router)
         cls.client = TestClient(cls.app)
+        cls.client.headers.update({"Authorization": "Bearer demo-token-operator"})
 
     def setUp(self):
         self.db: Session = SessionLocal()

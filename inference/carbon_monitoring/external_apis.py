@@ -111,6 +111,23 @@ class CopernicusClient:
             return False
 
 
+from urllib.parse import urlparse
+
+
+class EarthdataAuthSession(requests.Session):
+    """
+    Custom requests session preserving authentication across NASA Earthdata domain redirects.
+    Standard requests.Session drops the Authorization header when redirected cross-domain
+    (e.g., from data.lpdaac.earthdatacloud.nasa.gov to urs.earthdata.nasa.gov).
+    """
+    def rebuild_auth(self, prepared_request, response):
+        hostname = urlparse(prepared_request.url).hostname
+        if hostname and (hostname.endswith("earthdata.nasa.gov") or hostname.endswith("earthdatacloud.nasa.gov")):
+            prepared_request.prepare_auth(self.auth)
+        elif "Authorization" in prepared_request.headers:
+            del prepared_request.headers["Authorization"]
+
+
 class EarthdataClient:
     """
     Client for NASA Earthdata API.
@@ -157,17 +174,12 @@ class EarthdataClient:
             return False
 
         try:
-            # NASA redirects to OAuth, requests handles authentication challenge via auth parameter
-            session = requests.Session()
+            session = EarthdataAuthSession()
             session.auth = (self.username, self.password)
             
             print(f"[NASA Earthdata] downloading dataset from {download_url}...")
             with session.get(download_url, stream=True, timeout=60) as r:
-                # Handle redirection auth handshake
-                if r.history:
-                    # Session automatically preserves auth headers across redirects
-                    pass
-                if r.status_code == 200:
+                if r.status_code in [200, 206]:
                     with open(output_path, 'wb') as f:
                         for chunk in r.iter_content(chunk_size=8192):
                             f.write(chunk)
@@ -179,3 +191,4 @@ class EarthdataClient:
         except Exception as e:
             print(f"[NASA Earthdata] Download exception: {e}")
             return False
+

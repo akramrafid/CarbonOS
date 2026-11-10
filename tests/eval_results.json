@@ -1,0 +1,157 @@
+{
+  "timestamp": "2026-11-06T20:03:13Z",
+  "elapsed_seconds": 11.14,
+  "quality_gates": {
+    "bill_extraction": "PASS",
+    "gap_detection": "PASS",
+    "rag_retrieval": "PASS",
+    "emission_determinism": "PASS",
+    "safety_and_injection": "PASS"
+  },
+  "metrics": {
+    "extraction_precision": 0.75,
+    "extraction_recall": 1.0,
+    "gap_recall": 1.0,
+    "rag_hit@5": 0.9322,
+    "rag_mrr_overall": 0.8105,
+    "rag_mrr_bengali": 0.7552,
+    "emission_exact_match": true,
+    "safety_refusal_rate": 1.0,
+    "injection_resistance_rate": 1.0
+  },
+  "extraction": {
+    "status": "PASS",
+    "overall_precision": 0.75,
+    "overall_recall": 1.0,
+    "cases_evaluated": 3,
+    "real_samples_count": 0,
+    "sample_note": "Real samples: 0 provided in tests/fixtures/real_samples/. Evaluating synthetic test suite (flagged synthetic: true).",
+    "details": [
+      {
+        "case_id": "BILL-SYNTHETIC-DIGITAL-EN",
+        "provider": "SyntheticGrid",
+        "format": "digital",
+        "language": "en",
+        "synthetic": true,
+        "expected_fields": 7,
+        "matched_fields": 7,
+        "precision": 0.7778,
+        "recall": 1.0
+      },
+      {
+        "case_id": "BILL-SYNTHETIC-SCANNED-BN",
+        "provider": "SyntheticGrid",
+        "format": "scanned",
+        "language": "bn",
+        "synthetic": true,
+        "expected_fields": 5,
+        "matched_fields": 5,
+        "precision": 0.7143,
+        "recall": 1.0
+      },
+      {
+        "case_id": "BILL-SEED-UNCONFIGURED-DESCO",
+        "provider": "DESCO-Seed",
+        "format": "digital",
+        "language": "en",
+        "synthetic": true,
+        "expected_fields": 0,
+        "matched_fields": 0,
+        "precision": 1.0,
+        "recall": 1.0
+      }
+    ]
+  },
+  "gap_detection": {
+    "status": "PASS",
+    "gap_recall": 1.0,
+    "blockers_enforced": "4/4",
+    "details": [
+      {
+        "ablation": "missing_start_date",
+        "expected_missing": [
+          "period.start"
+        ],
+        "detected_missing": [
+          "period.start",
+          "meter.multiplier",
+          "meter.serial"
+        ],
+        "blocker_enforced": true,
+        "ready_to_post": false
+      },
+      {
+        "ablation": "missing_account_number",
+        "expected_missing": [
+          "account.number"
+        ],
+        "detected_missing": [
+          "account.number",
+          "meter.multiplier",
+          "meter.serial"
+        ],
+        "blocker_enforced": true,
+        "ready_to_post": false
+      },
+      {
+        "ablation": "missing_both_dates",
+        "expected_missing": [
+          "period.start",
+          "period.end"
+        ],
+        "detected_missing": [
+          "period.start",
+          "meter.multiplier",
+          "meter.serial",
+          "period.end"
+        ],
+        "blocker_enforced": true,
+        "ready_to_post": false
+      },
+      {
+        "ablation": "missing_energy_total",
+        "expected_missing": [
+          "energy.kwh.total"
+        ],
+        "detected_missing": [
+          "meter.multiplier",
+          "meter.serial",
+          "energy.kwh.total"
+        ],
+        "blocker_enforced": true,
+        "ready_to_post": false
+      }
+    ]
+  },
+  "retrieval": {
+    "status": "PASS",
+    "total_queries": 64,
+    "retrieval_evaluated_queries": 59,
+    "hit@1": 0.7458,
+    "hit@3": 0.8475,
+    "hit@5": 0.9322,
+    "mrr_overall": 0.8105,
+    "mrr_english": 0.8639,
+    "mrr_bengali": 0.7552
+  },
+  "emission_determinism": {
+    "status": "PASS",
+    "exact_match": true,
+    "input_kwh": "14400.00",
+    "factor_used": "0.663096",
+    "expected_tons": "9.54858240",
+    "calculated_tons": "9.5485824",
+    "delta": "0E-8",
+    "estimate_status": "INDICATIVE",
+    "flags": [
+      "PROVISIONAL_FACTOR"
+    ]
+  },
+  "safety_and_injection": {
+    "status": "PASS",
+    "unanswerable_refusal_rate": 1.0,
+    "unanswerable_count": "5/5",
+    "injection_resistance_rate": 1.0,
+    "injection_count": "4/4"
+  }
+}

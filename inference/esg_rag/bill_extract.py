@@ -104,42 +104,31 @@ def _source(source):
     return io.BytesIO(source) if isinstance(source, (bytes, bytearray)) else source
 
 
-def document_from_pdf(source, max_pages: Optional[int] = None) -> Document:
+def document_from_pdf(source, max_pages: Optional[int] = None, auto_ocr: bool = True,
+                      lang: str = "ben+eng") -> Document:
     """Text layer of a PDF via pdfplumber, locally. Pages without text are scans: OCR them instead."""
     import pdfplumber
     pages = []
     with pdfplumber.open(_source(source)) as pdf:
         if max_pages is not None and len(pdf.pages) > max_pages:
             raise ValueError(f"A bill may have at most {max_pages} pages")
+        total_words = 0
         for n, page in enumerate(pdf.pages, start=1):
             words = [Word(w["text"], (float(w["x0"]), float(w["top"]), float(w["x1"]), float(w["bottom"])))
                      for w in page.extract_words(keep_blank_chars=False)]
+            total_words += len(words)
             pages.append(Page(n, tuple(words)))
+        if total_words == 0 and auto_ocr:
+            from .ocr import is_ocr_available, ocr_pdf_to_document
+            if is_ocr_available():
+                return ocr_pdf_to_document(source, lang=lang, max_pages=max_pages, preprocess=True)
     return Document(tuple(pages), "pdf_text")
 
 
-def document_from_image(source, lang: str = "ben+eng") -> Document:
+def document_from_image(source, lang: str = "ben+eng", preprocess: bool = True) -> Document:
     """Local Tesseract OCR (Bengali + English). Word confidence is measured, so it is kept."""
-    from .bills import OCRUnavailable
-    try:
-        import pytesseract
-        from PIL import Image
-    except ImportError as e:
-        raise OCRUnavailable("Install Tesseract with the 'ben' and 'eng' language data and pytesseract") from e
-    if os.environ.get("TESSERACT_CMD"):  # a local install that is not on PATH (the Windows installer does not add it)
-        pytesseract.pytesseract.tesseract_cmd = os.environ["TESSERACT_CMD"]
-    with Image.open(_source(source), formats=OCR_FORMATS) as image:  # closed even when OCR fails
-        if image.width * image.height > MAX_OCR_PIXELS:
-            raise ValueError(f"Image larger than {MAX_OCR_PIXELS} pixels")
-        data = pytesseract.image_to_data(image, lang=lang, output_type=pytesseract.Output.DICT,
-                                         timeout=OCR_TIMEOUT_S)
-    words = []
-    for i, text in enumerate(data["text"]):
-        if text.strip():
-            x, y, w, h = data["left"][i], data["top"][i], data["width"][i], data["height"][i]
-            conf = float(data["conf"][i])
-            words.append(Word(text, (x, y, x + w, y + h), conf / 100 if conf >= 0 else None))
-    return Document((Page(1, tuple(words)),), "ocr")
+    from .ocr import ocr_image_to_document
+    return ocr_image_to_document(source, lang=lang, preprocess=preprocess)
 
 
 def _lines(doc: Document) -> List[_Line]:

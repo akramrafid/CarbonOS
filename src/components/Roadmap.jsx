@@ -1,3 +1,4 @@
+import { getPrefersReducedMotion } from '../lib/motion';
 import React, { useEffect, useRef } from 'react';
 import gsap from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
@@ -42,7 +43,15 @@ const Roadmap = () => {
   const lineRef = useRef(null);
 
   useEffect(() => {
+    const prefersReducedMotion = getPrefersReducedMotion();
+
     let ctx = gsap.context(() => {
+      if (prefersReducedMotion) {
+        if (lineRef.current) gsap.set(lineRef.current, { scaleY: 1 });
+        gsap.set('.roadmap-step', { opacity: 1, x: 0 });
+        return;
+      }
+
       // Animate the central connecting line drawing down
       gsap.fromTo(lineRef.current,
         { scaleY: 0 },

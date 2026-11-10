@@ -1,3 +1,4 @@
+import { getPrefersReducedMotion } from '../lib/motion';
 import React, { useEffect, useRef } from 'react';
 import gsap from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
@@ -51,13 +52,7 @@ const EKGWave = () => (
       strokeDashoffset="400"
       style={{ filter: 'drop-shadow(0 0 8px rgba(0,200,83,0.5))' }}
     />
-    <style>{`
-      @keyframes dash {
-        to {
-          stroke-dashoffset: 0;
-        }
-      }
-    `}</style>
+    {/* Keyframe dash defined in index.css */}
   </svg>
 );
 
@@ -66,9 +61,18 @@ const FrameworkAlignment = () => {
   const cardsRef = useRef([]);
 
   useEffect(() => {
+    const prefersReducedMotion = getPrefersReducedMotion();
+
     let ctx = gsap.context(() => {
       const cards = cardsRef.current;
       
+      if (prefersReducedMotion) {
+        cards.forEach((card) => {
+          gsap.set(card, { scale: 1, filter: 'none', opacity: 1 });
+        });
+        return;
+      }
+
       cards.forEach((card, i) => {
         if (i === 0) return; // Skip first card
         
@@ -98,7 +102,7 @@ const FrameworkAlignment = () => {
       {/* Card 1 */}
       <section 
         ref={el => cardsRef.current[0] = el}
-        className="w-full h-screen sticky top-0 flex items-center bg-[#0D2B1A] overflow-hidden"
+        className="w-full min-h-[100dvh] lg:h-[100dvh] sticky top-0 flex items-center bg-[#0D2B1A] overflow-hidden py-12 lg:py-0"
       >
         <div className="max-w-7xl mx-auto px-6 lg:px-12 w-full grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
           <div className="flex justify-center lg:justify-start">
@@ -122,7 +126,7 @@ const FrameworkAlignment = () => {
       {/* Card 2 */}
       <section 
         ref={el => cardsRef.current[1] = el}
-        className="w-full h-screen sticky top-0 flex items-center bg-[#080F0B] noise-overlay overflow-hidden shadow-[0_-20px_50px_rgba(0,0,0,0.5)]"
+        className="w-full min-h-[100dvh] lg:h-[100dvh] sticky top-0 flex items-center bg-[#080F0B] noise-overlay overflow-hidden shadow-[0_-20px_50px_rgba(0,0,0,0.5)] py-12 lg:py-0"
       >
         <div className="max-w-7xl mx-auto px-6 lg:px-12 w-full grid grid-cols-1 lg:grid-cols-2 gap-12 items-center relative z-10">
           <div className="flex justify-center lg:justify-start">
@@ -146,7 +150,7 @@ const FrameworkAlignment = () => {
       {/* Card 3 */}
       <section 
         ref={el => cardsRef.current[2] = el}
-        className="w-full h-screen sticky top-0 flex items-center bg-[#0D2B1A] overflow-hidden shadow-[0_-20px_50px_rgba(0,0,0,0.5)]"
+        className="w-full min-h-[100dvh] lg:h-[100dvh] sticky top-0 flex items-center bg-[#0D2B1A] overflow-hidden shadow-[0_-20px_50px_rgba(0,0,0,0.5)] py-12 lg:py-0"
       >
         <div className="max-w-7xl mx-auto px-6 lg:px-12 w-full grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
           <div className="flex justify-center lg:justify-start w-full pr-12">

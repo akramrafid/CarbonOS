@@ -1,3 +1,7 @@
+import threading
+from carbon_monitoring.auth import CarbonUser, get_current_user
+from carbon_monitoring.rate_limiter import rate_limit_predict
+from fastapi import HTTPException, Depends
 import sys
 import os
 import io
@@ -9,6 +13,7 @@ import torch.nn.functional as F
 import numpy as np
 import cv2
 from PIL import Image
+Image.MAX_IMAGE_PIXELS = 10_000_000
 import torchvision.transforms as transforms
 from fastapi import FastAPI, File, UploadFile, Form
 from fastapi.middleware.cors import CORSMiddleware
@@ -56,6 +61,16 @@ allowed_origins_str = os.getenv(
 )
 allowed_origins = [orig.strip() for orig in allowed_origins_str.split(",") if orig.strip()]
 
+
+@app.middleware("http")
+async def add_security_headers(request, call_next):
+    response = await call_next(request)
+    response.headers["X-Content-Type-Options"] = "nosniff"
+    response.headers["X-Frame-Options"] = "DENY"
+    response.headers["X-XSS-Protection"] = "1; mode=block"
+    response.headers["Strict-Transport-Security"] = "max-age=31536000; includeSubDomains"
+    return response
+
 app.add_middleware(
     CORSMiddleware,
     allow_origins=allowed_origins,
@@ -88,24 +103,31 @@ else:
     print(f"Notice: Checkpoint {model_path} not found. Local model marked untrained.")
 model.eval()
 
-# Grad-CAM Hooks
-cam_gradients = None
-cam_activations = None
+# Thread-safe Grad-CAM context extractor (avoids concurrent race conditions)
+_model_lock = threading.Lock()
 
-def save_gradient(grad):
-    global cam_gradients
-    cam_gradients = grad
+class GradCamExtractor:
+    def __init__(self, target_layer):
+        self.target_layer = target_layer
+        self.activations = None
+        self.gradients = None
+        self._fwd_handle = None
 
-def forward_hook(module, input, output):
-    global cam_activations
-    cam_activations = output
-    if output.requires_grad:
-        output.register_hook(save_gradient)
+    def _save_gradient(self, grad):
+        self.gradients = grad
 
-# Register hook on the last conv layer of the backbone
-# For EfficientNet-B3, it's typically features[-1]
-target_layer = model.features[-1]
-target_layer.register_forward_hook(forward_hook)
+    def _forward_hook(self, module, input, output):
+        self.activations = output
+        if output.requires_grad:
+            output.register_hook(self._save_gradient)
+
+    def __enter__(self):
+        self._fwd_handle = self.target_layer.register_forward_hook(self._forward_hook)
+        return self
+
+    def __exit__(self, exc_type, exc_val, exc_tb):
+        if self._fwd_handle:
+            self._fwd_handle.remove()
 
 transform = transforms.Compose([
     transforms.Resize(256),
@@ -227,17 +249,29 @@ Return your response in JSON format matching this schema:
         "explanation": parsed.get("explanation", "")
     }
 
-@app.post("/predict")
+@app.post("/predict", dependencies=[Depends(rate_limit_predict)])
 async def predict(
     image: UploadFile = File(...),
-    species: str = Form(...)
+    species: str = Form(...),
+    current_user: CarbonUser = Depends(get_current_user)
 ):
     species = species.lower()
     if species not in SPECIES_COUNTS:
-        return {"error": f"Species '{species}' not supported."}
-        
+        raise HTTPException(status_code=400, detail=f"Species '{species}' not supported.")
+
+    # Enforce maximum image size limit of 10MB
     contents = await image.read()
-    pil_img = Image.open(io.BytesIO(contents)).convert('RGB')
+    if len(contents) > 10 * 1024 * 1024:
+        raise HTTPException(status_code=413, detail="Image file exceeds maximum limit of 10MB.")
+
+    # Validate MIME type
+    if image.content_type and not image.content_type.startswith("image/"):
+        raise HTTPException(status_code=400, detail="Invalid file type. Only image files are accepted.")
+
+    try:
+        pil_img = Image.open(io.BytesIO(contents)).convert('RGB')
+    except Exception as img_err:
+        raise HTTPException(status_code=400, detail=f"Invalid or corrupted image: {str(img_err)}")
     input_tensor = transform(pil_img).unsqueeze(0).to(device)
     
     gemini_success = False
@@ -303,41 +337,42 @@ async def predict(
     except ValueError:
         predicted_idx = 0
 
-    # Now run forward pass with gradients enabled on the species for Grad-CAM
-    model.zero_grad()
-    outputs = model(input_tensor, species_name=best_species)
-    probabilities = F.softmax(outputs, dim=1)[0]
-    
-    # If using local fallback, we can use the local model confidence score
-    if not gemini_success:
-        conf_val = probabilities[predicted_idx].item()
+    # Thread-safe Grad-CAM inference execution
+    heatmap_url = None
+    with _model_lock:
+        with GradCamExtractor(model.features[-1]) as cam:
+            model.zero_grad()
+            outputs = model(input_tensor, species_name=best_species)
+            probabilities = F.softmax(outputs, dim=1)[0]
 
-    # Backward pass for Grad-CAM on the detected species and class index
-    outputs[0, predicted_idx].backward()
-    
-    # Compute CAM
-    global cam_gradients, cam_activations
-    if cam_gradients is not None and cam_activations is not None:
-        pooled_gradients = torch.mean(cam_gradients, dim=[0, 2, 3])
-        for i in range(cam_activations.shape[1]):
-            cam_activations[:, i, :, :] *= pooled_gradients[i]
-            
-        heatmap = torch.mean(cam_activations, dim=1).squeeze().detach().numpy()
-        heatmap = np.maximum(heatmap, 0) # ReLU
-        heatmap /= (np.max(heatmap) + 1e-8) # Normalize
-        
-        heatmap = cv2.resize(heatmap, (pil_img.width, pil_img.height))
-        heatmap = np.uint8(255 * heatmap)
-        heatmap = cv2.applyColorMap(heatmap, cv2.COLORMAP_JET)
-        
-        original_img = np.array(pil_img)[:, :, ::-1] # RGB to BGR
-        superimposed_img = heatmap * 0.4 + original_img * 0.6
-        
-        _, buffer = cv2.imencode('.jpg', superimposed_img)
-        dummy_heatmap_b64 = base64.b64encode(buffer).decode('utf-8')
-        heatmap_url = f"data:image/jpeg;base64,{dummy_heatmap_b64}"
-    else:
-        heatmap_url = None
+            if not gemini_success:
+                conf_val = probabilities[predicted_idx].item()
+
+            outputs[0, predicted_idx].backward()
+
+            cam_gradients = cam.gradients
+            cam_activations = cam.activations
+
+            if cam_gradients is not None and cam_activations is not None:
+                pooled_gradients = torch.mean(cam_gradients, dim=[0, 2, 3])
+                act_cloned = cam_activations.clone()
+                for i in range(act_cloned.shape[1]):
+                    act_cloned[:, i, :, :] *= pooled_gradients[i]
+
+                heatmap = torch.mean(act_cloned, dim=1).squeeze().detach().numpy()
+                heatmap = np.maximum(heatmap, 0)
+                heatmap /= (np.max(heatmap) + 1e-8)
+
+                heatmap = cv2.resize(heatmap, (pil_img.width, pil_img.height))
+                heatmap = np.uint8(255 * heatmap)
+                heatmap = cv2.applyColorMap(heatmap, cv2.COLORMAP_JET)
+
+                original_img = np.array(pil_img)[:, :, ::-1]
+                superimposed_img = heatmap * 0.4 + original_img * 0.6
+
+                _, buffer = cv2.imencode('.jpg', superimposed_img)
+                dummy_heatmap_b64 = base64.b64encode(buffer).decode('utf-8')
+                heatmap_url = f"data:image/jpeg;base64,{dummy_heatmap_b64}" 
 
     severity = "mild"
     if conf_val > 0.8: severity = "moderate"

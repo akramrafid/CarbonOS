@@ -29,8 +29,8 @@ def get_chroma_client():
             _chroma_client = chromadb.PersistentClient(path=CHROMA_PERSIST_DIR)
         except Exception as e:
             print(f"[ESG RAG] ChromaDB init error ({e}), using in-memory/file fallback")
-            _chroma_client = None
-    return _chroma_client
+            _chroma_client = False
+    return _chroma_client if _chroma_client is not False else None
 
 def get_embedding_model():
     global _embedding_model
@@ -40,8 +40,8 @@ def get_embedding_model():
             _embedding_model = SentenceTransformer(EMBEDDING_MODEL)
         except Exception as e:
             print(f"[ESG RAG] SentenceTransformer not loaded ({e}), using fast hash-vector fallback")
-            _embedding_model = None
-    return _embedding_model
+            _embedding_model = False
+    return _embedding_model if _embedding_model is not False else None
 
 def compute_embedding(text: str) -> List[float]:
     """Generates 384-dimensional dense embedding vector."""

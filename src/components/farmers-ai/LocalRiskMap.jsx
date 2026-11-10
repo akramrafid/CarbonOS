@@ -5,6 +5,7 @@ import L from 'leaflet';
 import 'leaflet/dist/leaflet.css';
 import { ArrowLeft, ShieldAlert } from 'lucide-react';
 import { useHarvestStore } from '../../lib/useHarvestStore';
+import { useTheme } from '../../context/ThemeContext';
 
 // Fix Leaflet's default icon path issues in React
 delete L.Icon.Default.prototype._getIconUrl;
@@ -57,7 +58,9 @@ function MapUpdater({ center }) {
 
 const LocalRiskMap = ({ isEmbedded = false }) => {
   const navigate = useNavigate();
-  const { profile, batches } = useHarvestStore();
+  const { batches } = useHarvestStore();
+  const { theme } = useTheme();
+  const isLight = theme === 'light';
   
   const [center, setCenter] = useState(defaultCenter);
   const [neighbors, setNeighbors] = useState([]);
@@ -114,18 +117,18 @@ const LocalRiskMap = ({ isEmbedded = false }) => {
   const mapContent = (
     <div className="w-full flex flex-col">
       {!isEmbedded && (
-        <button onClick={() => navigate('/farmers-ai')} className="self-start flex items-center text-white/50 hover:text-white mb-6 transition-colors">
+        <button onClick={() => navigate('/farmers-ai')} className="self-start flex items-center text-gray-600 dark:text-white/50 hover:text-gray-900 dark:hover:text-white mb-6 transition-colors font-medium">
           <ArrowLeft size={20} className="mr-2" /> Back to Landing
         </button>
       )}
 
       <div className="flex flex-col md:flex-row items-start md:items-center justify-between mb-6">
         <div>
-          <h2 className="text-3xl font-extrabold text-white mb-2 tracking-tight">Local Risk Map</h2>
-          <p className="text-white/60 text-sm">Community spoilage threats around {activeDistrict}</p>
+          <h2 className="text-3xl font-extrabold text-gray-900 dark:text-white mb-2 tracking-tight">Local Risk Map</h2>
+          <p className="text-gray-600 dark:text-white/60 text-sm">Community spoilage threats around {activeDistrict}</p>
         </div>
         
-        <div className="flex flex-wrap items-center gap-4 mt-4 md:mt-0 bg-white/5 border border-white/10 p-3 rounded-2xl text-xs font-bold text-white/80">
+        <div className="flex flex-wrap items-center gap-4 mt-4 md:mt-0 bg-white/90 dark:bg-white/5 border border-gray-200 dark:border-white/10 p-3 rounded-2xl text-xs font-bold text-gray-800 dark:text-white/80 shadow-sm backdrop-blur-md">
           <div className="flex items-center"><span className="w-3 h-3 rounded-full bg-blue-500 mr-2 shadow-[0_0_10px_rgba(59,130,246,0.3)]"></span> You</div>
           <div className="flex items-center"><span className="w-3 h-3 rounded-full bg-green-500 mr-2 shadow-[0_0_10px_rgba(34,197,94,0.3)]"></span> Low Risk</div>
           <div className="flex items-center"><span className="w-3 h-3 rounded-full bg-yellow-500 mr-2 shadow-[0_0_10px_rgba(234,179,8,0.3)]"></span> Medium</div>
@@ -133,7 +136,7 @@ const LocalRiskMap = ({ isEmbedded = false }) => {
         </div>
       </div>
 
-      <div className="bg-white/5 backdrop-blur-md border border-white/10 p-2.5 rounded-[32px] relative overflow-hidden shadow-2xl" style={{ height: '550px' }}>
+      <div className="bg-white/90 dark:bg-white/5 backdrop-blur-md border border-gray-200 dark:border-white/10 p-2.5 rounded-[32px] relative overflow-hidden shadow-2xl" style={{ height: '550px' }}>
         <MapContainer 
           center={center} 
           zoom={11} 
@@ -141,8 +144,14 @@ const LocalRiskMap = ({ isEmbedded = false }) => {
           className="w-full h-full rounded-[24px] z-10"
         >
           <TileLayer
-            attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
-            url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
+            key={isLight ? 'carto-light' : 'carto-dark'}
+            attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors &copy; <a href="https://carto.com/attributions">CARTO</a>'
+            url={
+              isLight
+                ? "https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png"
+                : "https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png"
+            }
+            maxZoom={19}
             className="map-tiles"
           />
           <MapUpdater center={center} />
@@ -150,8 +159,8 @@ const LocalRiskMap = ({ isEmbedded = false }) => {
           {/* Farmer's Own Location */}
           <Marker position={center} icon={icons.blue}>
             <Popup>
-              <div className="font-sans text-gray-900 text-sm">
-                <strong className="text-blue-600 block mb-1">আপনার অবস্থান</strong>
+              <div className="font-sans text-gray-900 dark:text-white text-sm">
+                <strong className="text-blue-600 dark:text-blue-400 block mb-1">আপনার অবস্থান</strong>
                 {batches.length > 0 ? `ফসল: ${batches[0].cropType}` : "কোনো ফসল নেই"}
               </div>
             </Popup>
@@ -161,19 +170,19 @@ const LocalRiskMap = ({ isEmbedded = false }) => {
           {neighbors.map(n => (
             <Marker key={n.id} position={[n.lat, n.lng]} icon={icons[n.color]}>
               <Popup>
-                <div className="font-sans min-w-[130px] text-gray-900 text-sm">
-                  <div className="font-bold border-b pb-1 mb-2">এলাকার তথ্য</div>
+                <div className="font-sans min-w-[130px] text-gray-900 dark:text-white text-sm">
+                  <div className="font-bold border-b border-gray-200 dark:border-white/10 pb-1 mb-2">এলাকার তথ্য</div>
                   <div className="flex items-center justify-between mb-1">
-                    <span className="text-gray-600">ফসল:</span>
-                    <strong className="text-gray-900">{n.cropBn}</strong>
+                    <span className="text-gray-600 dark:text-white/70">ফসল:</span>
+                    <strong className="text-gray-900 dark:text-white">{n.cropBn}</strong>
                   </div>
                   <div className="flex items-center justify-between mb-1">
-                    <span className="text-gray-600">ঝুঁকি:</span>
-                    <strong className={n.color === 'red' ? 'text-red-600' : n.color === 'gold' ? 'text-yellow-600' : 'text-green-600'}>
+                    <span className="text-gray-600 dark:text-white/70">ঝুঁকি:</span>
+                    <strong className={n.color === 'red' ? 'text-red-600 dark:text-red-400' : n.color === 'gold' ? 'text-yellow-700 dark:text-yellow-400' : 'text-green-700 dark:text-green-400'}>
                       {n.bnRisk}
                     </strong>
                   </div>
-                  <div className="text-xs text-gray-400 mt-2 text-right">
+                  <div className="text-xs text-gray-500 dark:text-white/50 mt-2 text-right font-mono">
                     আপডেট: {n.timeStr}
                   </div>
                 </div>
@@ -183,8 +192,8 @@ const LocalRiskMap = ({ isEmbedded = false }) => {
         </MapContainer>
         
         {/* Privacy Disclaimer Overlay */}
-        <div className="absolute bottom-6 left-6 z-20 bg-black/80 backdrop-blur-md border border-white/10 px-4 py-2.5 rounded-xl flex items-center text-xs text-white/70 max-w-sm">
-          <ShieldAlert size={16} className="text-[#CCFF00] mr-2 shrink-0 animate-pulse" />
+        <div className="absolute bottom-6 left-6 z-20 bg-white/95 dark:bg-black/85 backdrop-blur-md border border-gray-200 dark:border-white/10 px-4 py-2.5 rounded-xl flex items-center text-xs text-gray-700 dark:text-white/80 max-w-sm shadow-md">
+          <ShieldAlert size={16} className="text-emerald-600 dark:text-[#CCFF00] mr-2 shrink-0 animate-pulse" />
           <p><strong>Privacy Protected:</strong> All neighbor data is completely anonymous. Personal identifiers are never shared.</p>
         </div>
       </div>

@@ -40,6 +40,11 @@ def validate_config():
         problems.append("ALLOWED_ORIGINS must list the production web origins only")
     if os.getenv("ESG_LLM_EXTRACTION_ENABLED", "").lower() == "true" and not os.getenv("ESG_LLM_PROCESSING_TERMS_REF"):
         problems.append("ESG_LLM_PROCESSING_TERMS_REF must reference the signed data-processing terms before enabling LLM extraction")
+    if os.getenv("ESG_OCR_REQUIRED", "").lower() in ("true", "1") or os.getenv("ESG_REQUIRE_OCR", "").lower() in ("true", "1"):
+        from esg_rag.ocr import check_tesseract_environment
+        ready, msg, _ = check_tesseract_environment()
+        if not ready:
+            problems.append(f"OCR required at startup: {msg}")
     if problems:
         raise RuntimeError("Insecure ESG configuration: " + "; ".join(problems))
 

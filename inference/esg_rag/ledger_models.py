@@ -46,7 +46,7 @@ EQUIPMENT_EVENT_TYPES = ("install", "retire", "recharge")
 BILL_DEFINITION_STATUSES = ("DRAFT", "APPROVED", "RETIRED")
 BILL_STATUSES = ("UNKNOWN_PROFILE", "AMBIGUOUS_PROFILE", "EXTRACTED", "POSTED")
 BILL_SOURCES = ("pdf_text", "ocr", "manual")
-BILL_VALUE_STATUSES = ("extracted", "confirmed", "corrected", "rejected", "unmapped", "derived", "superseded")
+BILL_VALUE_STATUSES = ("extracted", "confirmed", "corrected", "entered", "rejected", "unmapped", "derived", "superseded")
 
 
 def _org_fk():
@@ -641,7 +641,7 @@ class BillValue(EsgBase):
                              name="fk_esg_bill_value_bill"),
         CheckConstraint(_in("status", BILL_VALUE_STATUSES), name="ck_esg_bill_value_status"),
         CheckConstraint(_in("source", BILL_SOURCES + ("derived",)), name="ck_esg_bill_value_source"),
-        CheckConstraint("status NOT IN ('confirmed','corrected','rejected') OR confirmed_by IS NOT NULL",
+        CheckConstraint("status NOT IN ('confirmed','corrected','entered','rejected') OR confirmed_by IS NOT NULL",
                         name="ck_esg_bill_value_reviewer"),
         CheckConstraint("status = 'unmapped' OR status = 'superseded' OR parameter_key IS NOT NULL",
                         name="ck_esg_bill_value_key"),

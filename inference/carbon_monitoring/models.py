@@ -17,6 +17,8 @@ class AnalysisJob(Base):
     start_date = Column(Date, nullable=False)
     end_date = Column(Date, nullable=False)
     processing_time = Column(Float, default=0.0)
+    user_id = Column(String(100), nullable=True)
+    organization_id = Column(String(100), nullable=True)
     created_at = Column(DateTime, default=datetime.datetime.utcnow)
     updated_at = Column(DateTime, default=datetime.datetime.utcnow, onupdate=datetime.datetime.utcnow)
 
@@ -158,6 +160,8 @@ class UploadedBoundary(Base):
     name = Column(String(255), nullable=False)
     file_type = Column(String(50), nullable=False)
     boundary_data = Column(Text, nullable=False)
+    user_id = Column(String(100), nullable=True)
+    organization_id = Column(String(100), nullable=True)
     created_at = Column(DateTime, default=datetime.datetime.utcnow)
 
 

@@ -66,3 +66,4 @@ test.describe('E2E QA Smoke Screenshots', () => {
     }
   }
 });
+

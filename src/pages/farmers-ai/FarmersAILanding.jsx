@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { Camera, ShieldAlert, WifiOff, Sprout, ArrowRight, ArrowUpRight, LayoutDashboard, Map as MapIcon, Database, Leaf, ShieldCheck, Sun } from 'lucide-react';
 import { motion } from 'framer-motion';
+import { createContainerVariants, createItemVariants } from '../../lib/motion';
 import LocalRiskMap from '../../components/farmers-ai/LocalRiskMap';
 import CameraCapture from './CameraCapture';
 import HarvestGuardDashboard from './HarvestGuardDashboard';
@@ -141,19 +142,9 @@ const FarmersAILanding = () => {
 
   const text = t[lang];
 
-  // Animation variants
-  const containerVariants = {
-    hidden: { opacity: 0 },
-    visible: { 
-      opacity: 1,
-      transition: { staggerChildren: 0.3 }
-    }
-  };
-
-  const itemVariants = {
-    hidden: { y: 20, opacity: 0 },
-    visible: { y: 0, opacity: 1 }
-  };
+  // Animation variants configured from motion system
+  const containerVariants = createContainerVariants(0.2);
+  const itemVariants = createItemVariants(16);
 
   const workflowDetails = {
     en: [

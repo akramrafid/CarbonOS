@@ -65,6 +65,20 @@ def init_db():
                 for col_name, col_type in cols_to_add:
                     if col_name not in existing_cols:
                         conn.execute(text(f"ALTER TABLE farmers_ai_carbonresult ADD COLUMN {col_name} {col_type}"))
+        if "farmers_ai_analysisjob" in inspector.get_table_names():
+            existing_job_cols = {c["name"] for c in inspector.get_columns("farmers_ai_analysisjob")}
+            job_cols = [("user_id", "VARCHAR(100)"), ("organization_id", "VARCHAR(100)")]
+            with engine.begin() as conn:
+                for col_name, col_type in job_cols:
+                    if col_name not in existing_job_cols:
+                        conn.execute(text(f"ALTER TABLE farmers_ai_analysisjob ADD COLUMN {col_name} {col_type}"))
+        if "farmers_ai_uploadedboundary" in inspector.get_table_names():
+            existing_b_cols = {c["name"] for c in inspector.get_columns("farmers_ai_uploadedboundary")}
+            b_cols = [("user_id", "VARCHAR(100)"), ("organization_id", "VARCHAR(100)")]
+            with engine.begin() as conn:
+                for col_name, col_type in b_cols:
+                    if col_name not in existing_b_cols:
+                        conn.execute(text(f"ALTER TABLE farmers_ai_uploadedboundary ADD COLUMN {col_name} {col_type}"))
     except Exception as e:
         print(f"[DB Init Warning] Schema check/migration error: {e}")
 

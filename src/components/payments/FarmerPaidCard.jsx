@@ -53,12 +53,6 @@ const FarmerPaidCard = ({ amount, txHash }) => {
         </div>
       </div>
 
-      <style dangerouslySetInnerHTML={{__html: `
-        @keyframes fall {
-          0% { transform: translateY(-20px) rotate(0deg); opacity: 1; }
-          100% { transform: translateY(200px) rotate(360deg); opacity: 0; }
-        }
-      `}} />
     </div>
   );
 };

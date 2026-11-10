@@ -1091,8 +1091,13 @@ const CarbonRegistry = () => {
               </div>
 
               {/* Rules Table */}
-              <div className="overflow-x-auto mt-6">
-                <table className="w-full text-left font-mono text-xs">
+              <div className="mt-6 w-full overflow-hidden">
+                <div className="text-[11px] font-mono text-gray-400 flex items-center justify-between pb-1 md:hidden">
+                  <span>← Scroll rules table horizontally →</span>
+                  <span className="text-[10px]">720px</span>
+                </div>
+                <div className="overflow-x-auto touch-pan-x w-full">
+                  <table className="w-full text-left font-mono text-xs min-w-[720px]">
                   <thead>
                     <tr className="border-b border-[#152B1D] text-white/50 uppercase tracking-wider">
                       <th className="pb-3 px-4">Sector</th>
@@ -1136,6 +1141,7 @@ const CarbonRegistry = () => {
                     })}
                   </tbody>
                 </table>
+                </div>
               </div>
 
               {/* Interactive Eligibility Tester */}
@@ -1351,8 +1357,13 @@ const CarbonRegistry = () => {
               </div>
 
               {/* Ledger Table */}
-              <div className="overflow-x-auto mt-6">
-                <table className="w-full text-left font-mono text-xs">
+              <div className="mt-6 w-full overflow-hidden">
+                <div className="text-[11px] font-mono text-gray-400 flex items-center justify-between pb-1 md:hidden">
+                  <span>← Scroll ledger table horizontally →</span>
+                  <span className="text-[10px]">800px</span>
+                </div>
+                <div className="overflow-x-auto touch-pan-x w-full">
+                  <table className="w-full text-left font-mono text-xs min-w-[800px]">
                   <thead>
                     <tr className="border-b border-[#152B1D] text-white/50 uppercase tracking-wider">
                       <th className="pb-3 px-4">Serial Number Block</th>
@@ -1412,6 +1423,7 @@ const CarbonRegistry = () => {
                     ))}
                   </tbody>
                 </table>
+                </div>
               </div>
 
             </div>

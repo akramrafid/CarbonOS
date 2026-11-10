@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { 
   CheckCircle2, 
   ShieldCheck, 
@@ -41,6 +41,21 @@ const PurchaseConfirmModal = ({ credit, creditId, onClose, onPurchaseComplete })
   const [txId, setTxId] = useState(null);
   const [isProcessing, setIsProcessing] = useState(false);
   const [copiedSerial, setCopiedSerial] = useState(false);
+
+  useEffect(() => {
+    const handleKeyDown = (e) => {
+      if (e.key === 'Escape' && !isProcessing) {
+        onClose();
+      }
+    };
+    const original = document.body.style.overflow;
+    document.body.style.overflow = 'hidden';
+    window.addEventListener('keydown', handleKeyDown);
+    return () => {
+      document.body.style.overflow = original;
+      window.removeEventListener('keydown', handleKeyDown);
+    };
+  }, [onClose, isProcessing]);
 
   // Corporate Details
   const [companyName, setCompanyName] = useState('Apex Footwear Ltd');
@@ -124,8 +139,15 @@ const PurchaseConfirmModal = ({ credit, creditId, onClose, onPurchaseComplete })
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/75 backdrop-blur-md animate-fade-in overflow-y-auto">
-      <div className={`w-full max-w-2xl rounded-2xl shadow-2xl overflow-hidden relative border my-8 transition-colors ${
+    <div 
+      className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/75 backdrop-blur-md animate-fade-in overflow-y-auto"
+      role="dialog"
+      aria-modal="true"
+      onClick={() => !isProcessing && onClose()}
+    >
+      <div 
+        onClick={(e) => e.stopPropagation()}
+        className={`w-full max-w-2xl rounded-2xl shadow-2xl overflow-hidden relative border my-8 transition-colors ${
         isLight 
           ? 'bg-white border-[#dbf0ea]' 
           : 'bg-[#080F0B] border-emerald/30 shadow-[0_0_50px_rgba(0,200,83,0.15)]'

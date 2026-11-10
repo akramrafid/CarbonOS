@@ -132,7 +132,7 @@ const Hero = () => {
         </span>
       </div>
 
-      <div className="relative z-10 container mx-auto px-6 lg:px-12 pt-32 pb-16 w-full flex flex-col justify-between min-h-[100dvh]">
+      <div className="relative z-10 container mx-auto px-4 sm:px-6 lg:px-12 pt-28 sm:pt-32 pb-16 w-full flex flex-col justify-between min-h-[100dvh]">
         
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-12 lg:gap-8 items-center my-auto">
           
@@ -140,7 +140,7 @@ const Hero = () => {
           <div className="lg:col-span-7 flex flex-col items-start text-left pt-6 lg:pt-0">
             
             {/* Live Protocol Status Pill */}
-            <div className="hero-pill inline-flex items-center gap-2.5 bg-black/40 hover:bg-black/60 backdrop-blur-xl border border-emerald/30 hover:border-emerald/60 rounded-full py-1.5 px-4 mb-6 shadow-[0_0_20px_rgba(0,200,83,0.15)] transition-all duration-300">
+            <div className="hero-pill inline-flex flex-wrap items-center gap-2 sm:gap-2.5 bg-black/40 hover:bg-black/60 backdrop-blur-xl border border-emerald/30 hover:border-emerald/60 rounded-full py-1.5 px-3 sm:px-4 mb-6 max-w-full shadow-[0_0_20px_rgba(0,200,83,0.15)] transition-all duration-300">
               <span className="flex h-2 w-2 relative">
                 <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-[#00C853] opacity-75"></span>
                 <span className="relative inline-flex rounded-full h-2 w-2 bg-[#00C853]"></span>
@@ -157,15 +157,15 @@ const Hero = () => {
               </span>
             </div>
 
-            {/* Headline with High-Impact Contrast */}
+            {/* Headline with High-Impact Contrast & Fluid Responsiveness */}
             <h1 className="flex flex-col mb-6 w-full tracking-tight">
-              <span className="hero-h1 font-sans font-extrabold text-4xl sm:text-6xl lg:text-[68px] leading-[1.08] text-white">
+              <span className="hero-h1 font-sans font-extrabold text-3xl sm:text-5xl lg:text-[68px] leading-[1.08] text-white">
                 Bangladesh's
               </span>
-              <span className="hero-h1 font-sans font-extrabold text-4xl sm:text-6xl lg:text-[68px] leading-[1.08] text-white">
+              <span className="hero-h1 font-sans font-extrabold text-3xl sm:text-5xl lg:text-[68px] leading-[1.08] text-white">
                 Carbon Infrastructure
               </span>
-              <span className="hero-h1 serif-drama italic text-5xl sm:text-7xl lg:text-[80px] leading-[1.05] bg-gradient-to-r from-[#00C853] via-[#69F0AE] to-[#A7F3D0] bg-clip-text text-transparent mt-1 drop-shadow-sm">
+              <span className="hero-h1 serif-drama italic text-4xl sm:text-6xl lg:text-[80px] leading-[1.05] bg-gradient-to-r from-[#00C853] via-[#69F0AE] to-[#A7F3D0] bg-clip-text text-transparent mt-1 drop-shadow-sm">
                 & Credit Exchange.
               </span>
             </h1>

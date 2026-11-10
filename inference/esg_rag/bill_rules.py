@@ -77,8 +77,8 @@ def compile_expression(source: str, known_keys: Iterable[str]) -> Expression:
         raise RuleError(f"Expression longer than {MAX_LENGTH} characters")
     try:
         tree = ast.parse(source.strip(), mode="eval")
-    except SyntaxError as e:
-        raise RuleError(f"Not a valid expression: {e.msg}") from None
+    except (SyntaxError, ValueError) as e:
+        raise RuleError(f"Not a valid expression: {getattr(e, 'msg', str(e))}") from None
     known, keys = set(known_keys), set()
     count = 0
 

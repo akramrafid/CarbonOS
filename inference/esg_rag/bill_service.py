@@ -18,17 +18,48 @@ from . import bill_profiles as bp
 from . import bill_rules
 from . import ledger
 from .ledger import DomainError, _get, _jsonable, _need, audit
-from .ledger_models import Bill, BillParameter, BillProfile, BillValue, Facility, _now
+from . import document_store
+
+from . import accounting
+
+from .grid_factor_service import wire_bd_grid_proposal
+
+from .ledger_models import Bill, BillParameter, BillProfile, BillValue, Facility, EmissionFactor, ReportingPeriod, _now
 
 MAX_PAGES, MAX_WORDS = 20, 20000
 WIDE_PRECISION = 80  # digits for sums and averages of bill values (each value has at most 30 characters)
 MALFORMED = (TypeError, AttributeError, KeyError, ValueError, RecursionError)  # wrong shapes in submitted YAML
-LIVE = ("extracted", "confirmed", "corrected")  # values validation reads
-REVIEWED = ("confirmed", "corrected")
-ANALYSED = ("confirmed", "corrected", "derived")
+LIVE = ("extracted", "confirmed", "corrected", "entered")  # values validation reads
+REVIEWED = ("confirmed", "corrected", "entered")
+ANALYSED = ("confirmed", "corrected", "entered", "derived")
 DIMENSIONS = ("organization", "facility", "meter", "band", "period")
 EMPTY_PROFILE = {"parameters": {}, "groups": {"bill": None}, "fields": [], "tables": [], "sections": {},
                  "rules": [], "derived": []}
+
+FIELD_CONFIDENCE_THRESHOLDS = {
+    "energy.kwh.total": 0.85,
+    "gas.volume.total": 0.85,
+    "invoice.amount.total": 0.85,
+    "account.number": 0.80,
+    "meter.serial": 0.80,
+    "period.start": 0.80,
+    "period.end": 0.80,
+    "customer.name": 0.70,
+    "customer.address": 0.65,
+}
+DEFAULT_OCR_CONFIDENCE_THRESHOLD = 0.75
+
+
+def get_field_confidence_threshold(field_key: str, profile: Optional[BillProfile] = None) -> float:
+    """Return required OCR confidence threshold for a field, allowing profile override."""
+    if profile and isinstance(profile.definition, dict):
+        for f in profile.definition.get("fields") or []:
+            if f.get("key") == field_key and "min_confidence" in f:
+                try:
+                    return float(f["min_confidence"])
+                except (ValueError, TypeError):
+                    pass
+    return FIELD_CONFIDENCE_THRESHOLDS.get(field_key, DEFAULT_OCR_CONFIDENCE_THRESHOLD)
 
 
 # --- shared ------------------------------------------------------------------------------------
@@ -472,6 +503,248 @@ def assign_profile(db, principal, bill_id: str, profile_id: str) -> Bill:
     return bill
 
 
+def enter_value(db, principal, bill_id: str, parameter_key: str, value: str,
+                unit: Optional[str] = None, group_index: str = "", comment: Optional[str] = None) -> BillValue:
+    """Enter a value for a field that has no extracted row.
+    Validates type and unit against esg_bill_parameter (allowed units),
+    normalises Bengali digits and Indian comma grouping,
+    records status 'entered' with who/when, and writes an esg_audit_event.
+    Never overwrites an extracted value silently (corrections keep the original).
+    """
+    _need(principal, "write")
+    bill = _get(db, Bill, principal, bill_id)
+    if bill.status == "POSTED":
+        raise DomainError(409, "The bill is posted to the ledger; its values are frozen")
+    if not (value or "").strip():
+        raise DomainError(422, "A value is required")
+
+    params = _bill_profile_params(db, principal, bill)
+    if parameter_key not in params or params[parameter_key].derived:
+        raise DomainError(422, f"Unknown or derived parameter '{parameter_key}'")
+
+    p = params[parameter_key]
+    if bx.group_of(group_index) != p.group:
+        raise DomainError(422, f"{parameter_key} belongs to group '{p.group}'; give a matching group_index")
+
+    # Check if a live value already exists for this parameter_key and group_index
+    existing = db.query(BillValue).filter(
+        BillValue.bill_id == bill.id,
+        BillValue.organization_id == principal.organization_id,
+        BillValue.parameter_key == parameter_key,
+        BillValue.group_index == group_index,
+        BillValue.status.in_(LIVE)
+    ).first()
+    if existing:
+        raise DomainError(409, f"A value for '{parameter_key}' already exists (status '{existing.status}'). "
+                               "Use the review/correction endpoint to correct extracted values.")
+
+    allowed = tuple(p.allowed_units) + ((p.canonical_unit,) if p.canonical_unit else ())
+    if unit is not None and unit not in allowed:
+        raise DomainError(422, f"{p.key}: unit must be one of {', '.join(allowed) or 'none (no unit)'}")
+
+    try:
+        normalised, canonical = bx.normalise(p, value, unit)
+    except (bx.BillParseError, ValueError, ArithmeticError, TypeError, AttributeError) as e:
+        raise DomainError(422, f"{p.key}: {e}")
+
+    v = BillValue(
+        organization_id=principal.organization_id,
+        bill_id=bill.id,
+        parameter_key=p.key,
+        profile_version=bill.profile_version,
+        group_index=group_index,
+        raw_text=value,
+        value_text=_text(normalised),
+        unit=canonical,
+        page=None,
+        bbox=None,
+        source="manual",
+        status="entered",
+        confirmed_by=principal.sub,
+        confirmed_at=_now(),
+        review_comment=comment
+    )
+    db.add(v)
+    db.flush()
+    _refresh(db, principal, bill)
+    audit(db, principal, "bill_value.enter", "bill_value", str(v.id), {
+        "bill_id": bill.id, "parameter_key": p.key, "group_index": group_index,
+        "value": v.value_text, "unit": v.unit, "comment": comment
+    })
+    db.commit()
+    db.refresh(v)
+    return v
+
+
+def bill_gaps(db, principal, bill_id: str) -> dict:
+    """Gap analysis and calculation readiness for a bill."""
+    _need(principal, "read")
+    bill = _get(db, Bill, principal, bill_id)
+    profile = db.get(BillProfile, bill.profile_id) if bill.profile_id else None
+    values = _bill_rows(db, bill)
+    params = _bill_profile_params(db, principal, bill)
+
+    present = []
+    low_confidence = []
+    unmapped_candidates = []
+    live_by_key = {}
+
+    for v in values:
+        if v.status in ("superseded", "rejected"):
+            continue
+        if v.status == "unmapped" or not v.parameter_key:
+            unmapped_candidates.append({
+                "value_id": v.id,
+                "raw_text": v.raw_text,
+                "page": v.page,
+                "bbox": v.bbox
+            })
+            continue
+
+        conf_float = float(v.confidence) if v.confidence is not None else None
+        item = {
+            "field": v.parameter_key,
+            "group_index": v.group_index,
+            "value": v.value_text,
+            "unit": v.unit,
+            "confidence": conf_float,
+            "page": v.page,
+            "bbox": v.bbox,
+            "status": v.status
+        }
+        present.append(item)
+        if v.value_text is not None:
+            live_by_key.setdefault(v.parameter_key, []).append(v)
+
+        field_thresh = get_field_confidence_threshold(v.parameter_key, profile)
+        if conf_float is not None and conf_float < field_thresh:
+            low_confidence.append({
+                "field": v.parameter_key,
+                "value_id": v.id,
+                "value": v.value_text,
+                "confidence": conf_float,
+                "threshold": field_thresh,
+                "reason": "ocr_below_threshold"
+            })
+
+    missing_required = []
+    required_keys = set()
+    if profile and isinstance(profile.definition, dict):
+        for f in profile.definition.get("fields") or []:
+            if f.get("required"):
+                required_keys.add(f["key"])
+    if not required_keys:
+        required_keys = {"account.number", "period.start", "period.end"}
+
+    for req_key in sorted(required_keys):
+        if req_key not in live_by_key:
+            p = params.get(req_key)
+            missing_required.append({
+                "field": req_key,
+                "label": p.labels if p else {"en": req_key},
+                "type": p.dtype if p else "text",
+                "allowed_units": list(p.allowed_units) if p else []
+            })
+
+    findings_list = [f.get("code") for f in (bill.findings or []) if f.get("code")]
+    calc_blockers = []
+
+    if bill.status in ("UNKNOWN_PROFILE", "AMBIGUOUS_PROFILE") or not profile:
+        calc_blockers.append("UNKNOWN_PROFILE")
+    elif profile.status != "APPROVED":
+        calc_blockers.append("PROFILE_NOT_APPROVED")
+
+    if missing_required:
+        calc_blockers.append("MISSING_REQUIRED_FIELDS")
+
+    unreviewed_low = [
+        item for item in low_confidence
+        if not any(v.id == item["value_id"] and v.status in REVIEWED for v in values)
+    ]
+    if unreviewed_low and "UNREVIEWED_LOW_CONFIDENCE" not in calc_blockers:
+        calc_blockers.append("UNREVIEWED_LOW_CONFIDENCE")
+
+    for f in (bill.findings or []):
+        if f.get("blocking") and f.get("code") not in calc_blockers:
+            calc_blockers.append(f["code"])
+
+    if "OVERLAPPING_PERIOD" in findings_list and "OVERLAPPING_PERIOD" not in calc_blockers:
+        calc_blockers.append("OVERLAPPING_PERIOD")
+    if "DUPLICATE_PERIOD" in findings_list and "DUPLICATE_PERIOD" not in calc_blockers:
+        calc_blockers.append("DUPLICATE_PERIOD")
+
+    dup_hash = db.query(Bill).filter(
+        Bill.organization_id == principal.organization_id,
+        Bill.id != bill.id,
+        Bill.document_sha256 == bill.document_sha256
+    ).first()
+    if dup_hash and "DUPLICATE_BILL_HASH" not in calc_blockers:
+        calc_blockers.append("DUPLICATE_BILL_HASH")
+
+    bill_start = next((v.value_text for v in values if v.parameter_key == "period.start" and v.status in LIVE and v.value_text), None)
+    bill_end = next((v.value_text for v in values if v.parameter_key == "period.end" and v.status in LIVE and v.value_text), None)
+    if bill_start and bill_end:
+        try:
+            b_s = dt.date.fromisoformat(bill_start)
+            b_e = dt.date.fromisoformat(bill_end)
+            covering = db.query(ReportingPeriod).filter(
+                ReportingPeriod.organization_id == principal.organization_id,
+                ReportingPeriod.start_date <= b_s,
+                ReportingPeriod.end_date >= b_e
+            ).first()
+            if not covering:
+                calc_blockers.append("PERIOD_OUTSIDE_REPORTING_PERIOD")
+        except Exception:
+            calc_blockers.append("PERIOD_OUTSIDE_REPORTING_PERIOD")
+    else:
+        calc_blockers.append("PERIOD_OUTSIDE_REPORTING_PERIOD")
+
+    consumption_activities = set()
+    for v in values:
+        if v.status in LIVE and v.parameter_key in params:
+            p = params[v.parameter_key]
+            if p.ledger and p.ledger.get("activity_type"):
+                consumption_activities.add(p.ledger["activity_type"])
+
+    for act in sorted(consumption_activities):
+        factor = db.query(EmissionFactor).filter(
+            _visible(EmissionFactor, principal),
+            EmissionFactor.activity_type == act,
+            EmissionFactor.status == "APPROVED"
+        ).first()
+        if not factor:
+            if act == "electricity":
+                if "MISSING_GRID_AVERAGE_FACTOR" not in calc_blockers:
+                    calc_blockers.append("MISSING_GRID_AVERAGE_FACTOR")
+            else:
+                blocker_code = f"NO_APPROVED_FACTOR_{act.upper()}"
+                if blocker_code not in calc_blockers:
+                    calc_blockers.append(blocker_code)
+
+    gwp_bases = {r[0] for r in db.query(EmissionFactor.gwp_basis).filter(
+        _visible(EmissionFactor, principal), EmissionFactor.status == "APPROVED"
+    ).all() if r[0]}
+    if len(gwp_bases) > 1:
+        calc_blockers.append("MIXED_GWP_BASIS")
+
+    ready_to_post = len(calc_blockers) == 0 and len(missing_required) == 0 and bill.status != "POSTED"
+
+    return {
+        "profile_key": bill.profile_key or "unknown",
+        "present": present,
+        "missing_required": missing_required,
+        "low_confidence": low_confidence,
+        "unmapped_candidates": unmapped_candidates,
+        "findings": findings_list,
+        "calc_blockers": calc_blockers,
+        "ready_to_post": ready_to_post,
+        "has_source_document": document_store.document_exists(
+            principal.organization_id,
+            bill.filename.split("_")[0] if bill.filename and "_" in bill.filename else bill.document_sha256
+        )
+    }
+
+
 def _scalar_text(lookup, key) -> Optional[str]:
     if not key:
         return None
@@ -592,3 +865,311 @@ def analyse(db, principal, keys: Sequence[str], group_by: Sequence[str], grain: 
             g.update(sum=_text(total), min=_text(min(nums)), max=_text(max(nums)), avg=_text(avg))
         rows.append(g)
     return {"keys": list(keys), "group_by": list(group_by), "grain": grain, "rows": rows}
+
+
+def log_document_retention(db, principal, bill_id: str, file_sha256: str):
+    audit(db, principal, "bill_document.retain", "bill", bill_id, {"sha256": file_sha256})
+    db.commit()
+
+
+def log_document_read(db, principal, bill_id: str, file_sha256: str):
+    audit(db, principal, "bill_document.read", "bill", bill_id, {"sha256": file_sha256})
+    db.commit()
+
+
+def log_document_delete(db, principal, bill_id: str, file_sha256: str):
+    audit(db, principal, "bill_document.delete", "bill", bill_id, {"sha256": file_sha256})
+    db.commit()
+
+
+def estimate_bill(db, principal, bill_id: str, allow_provisional: bool = False,
+                  boundary_method: str = "operational_control") -> dict:
+    """Run in-memory deterministic accounting on reviewed/live values of a bill.
+    Does NOT create approved ledger records or mutate the ledger. Returns status: 'INDICATIVE'."""
+    _need(principal, "read")
+    bill = _get(db, Bill, principal, bill_id)
+    facility = db.get(Facility, bill.facility_id)
+    profile = db.get(BillProfile, bill.profile_id) if bill.profile_id else None
+
+    disclaimer = ("INDICATIVE ESTIMATE ONLY: This calculation is an estimate for screening and planning. "
+                  "It has not undergone dual-control review or audit sealing. "
+                  "Not for regulatory reporting or carbon credit registry submission.")
+    actions = [{
+        "type": "invite_approver",
+        "label": "Invite an Approver",
+        "endpoint": "/api/esg/invitations",
+        "description": "Invite a second team member to approve the bill activities and factor for an audit-grade run."
+    }]
+
+    calc_blockers = []
+    if not profile:
+        calc_blockers.append("UNKNOWN_PROFILE")
+    elif profile.status != "APPROVED":
+        calc_blockers.append("PROFILE_NOT_APPROVED")
+
+    values = _bill_rows(db, bill)
+    params = _bill_profile_params(db, principal, bill)
+
+    estimate_values = [v for v in values if v.status in REVIEWED]
+    if not estimate_values:
+        estimate_values = [v for v in values if v.status in LIVE and v.value_text is not None]
+
+    if not estimate_values:
+        calc_blockers.append("NO_VALUES_AVAILABLE")
+
+    rows = _extracted(estimate_values, params)
+    _, start, end = _bill_period(rows)
+    if not isinstance(start, dt.date) or not isinstance(end, dt.date):
+        calc_blockers.append("MISSING_BILL_PERIOD")
+
+    scoped = bx.Values(rows, params, profile.definition.get("groups", {}) if profile else {})
+    activities = []
+    consumption_acts = set()
+    for v in estimate_values:
+        p = params.get(v.parameter_key)
+        if not p or not p.ledger or not p.ledger.get("activity_type"):
+            continue
+        lookup = scoped.lookup(v.group_index)
+        act_type = p.ledger["activity_type"]
+        consumption_acts.add(act_type)
+        qty = bp.convert(Decimal(v.value_text), v.unit, p.ledger["unit"])
+        activities.append(accounting.Activity(
+            id=f"est:{bill.id}:{v.id}",
+            facility_id=bill.facility_id,
+            activity_type=act_type,
+            quantity=qty,
+            unit=p.ledger["unit"],
+            period_start=start,
+            period_end=end,
+            factor_id=None,
+            meter_ref=_scalar_text(lookup, p.ledger.get("meter_ref_from")),
+            data_quality="billed",
+            uncertainty_pct=Decimal("5.0"),
+            generator_ref=_scalar_text(lookup, p.ledger.get("generator_ref_from")),
+            heating_value=None,
+            volume_correction=Decimal("1.0"),
+            refrigerant=None,
+            mass_balance=None
+        ))
+
+    if not activities and "NO_VALUES_AVAILABLE" not in calc_blockers:
+        calc_blockers.append("NO_CONSUMPTION_PARAMETERS_MAPPED")
+
+    fac_map = {}
+    if facility:
+        fac_map[facility.id] = accounting.Facility(
+            facility.id, facility.grid_region, facility.operational_control,
+            facility.financial_control, Decimal(str(facility.equity_share_pct)), facility.legal_entity_id
+        )
+
+    approved_factors = db.query(EmissionFactor).filter(
+        _visible(EmissionFactor, principal),
+        EmissionFactor.status == "APPROVED"
+    ).all()
+
+    used_provisional = False
+    provisional_factor_record = None
+    factors_for_calc = [ledger._accounting_factor(f) for f in approved_factors]
+
+    if "electricity" in consumption_acts and facility:
+        has_approved_grid = any(
+            f.activity_type == "electricity" and f.kind == "grid_average"
+            and f.region == facility.grid_region
+            and (start is None or f.valid_from <= start)
+            and (end is None or f.valid_to is None or end <= f.valid_to)
+            for f in factors_for_calc
+        )
+        if not has_approved_grid:
+            provisional_factor_record = wire_bd_grid_proposal(db, principal, grid_region=facility.grid_region)
+            if not allow_provisional:
+                if "MISSING_GRID_AVERAGE_FACTOR" not in calc_blockers:
+                    calc_blockers.append("MISSING_GRID_AVERAGE_FACTOR")
+            else:
+                used_provisional = True
+                prov_f = accounting.Factor(
+                    id=provisional_factor_record.id,
+                    version=provisional_factor_record.version,
+                    family=provisional_factor_record.family,
+                    activity_type=provisional_factor_record.activity_type,
+                    unit=provisional_factor_record.unit,
+                    kgco2e_per_unit=Decimal(str(provisional_factor_record.kgco2e_per_unit)),
+                    region=facility.grid_region,
+                    gwp_basis=provisional_factor_record.gwp_basis,
+                    method=provisional_factor_record.method,
+                    valid_from=min(provisional_factor_record.valid_from, start) if start else provisional_factor_record.valid_from,
+                    valid_to=max(provisional_factor_record.valid_to or end, end) if end else provisional_factor_record.valid_to,
+                    kind=provisional_factor_record.factor_kind,
+                    gases=(),
+                    uncertainty_pct=Decimal(str(provisional_factor_record.uncertainty_pct or 0))
+                )
+                factors_for_calc.append(prov_f)
+
+    # Check gap analysis
+    gaps = bill_gaps(db, principal, bill_id)
+    if gaps.get("missing_required"):
+        # If any missing required field is a consumption parameter or if we can't calculate
+        if not activities or "MISSING_BILL_PERIOD" in calc_blockers:
+            if "MISSING_REQUIRED_FIELDS" not in calc_blockers:
+                calc_blockers.append("MISSING_REQUIRED_FIELDS")
+
+    if calc_blockers:
+        prov_dict = None
+        if provisional_factor_record:
+            prov_dict = {
+                "id": provisional_factor_record.id,
+                "family": provisional_factor_record.family,
+                "version": provisional_factor_record.version,
+                "kgco2e_per_unit": str(provisional_factor_record.kgco2e_per_unit),
+                "uncertainty_pct": str(provisional_factor_record.uncertainty_pct),
+                "method": provisional_factor_record.method,
+                "vintage": f"{provisional_factor_record.valid_from.year}-{str(provisional_factor_record.valid_to.year)[-2:]}" if provisional_factor_record.valid_to else "current",
+                "derivation_hash": provisional_factor_record.source_table_ref or "bd_grid"
+            }
+        msg = ("Blockers prevent calculation: " + ", ".join(calc_blockers))
+        if "MISSING_GRID_AVERAGE_FACTOR" in calc_blockers and facility:
+            msg = (f"No approved grid-average factor exists for region '{facility.grid_region}'. "
+                   f"A pending provisional factor proposal from the bd_grid pipeline is available. "
+                   f"To generate an indicative estimate using this factor, pass allow_provisional=true. "
+                   f"For an audit-grade calculation, a second user must approve the factor.")
+        return {
+            "status": "INDICATIVE",
+            "flags": ["PROVISIONAL_FACTOR"] if used_provisional else [],
+            "audit_grade": False,
+            "registry_eligible": False,
+            "disclaimer": disclaimer,
+            "emissions": None,
+            "lines": [],
+            "factor_citations": [],
+            "assumptions": [],
+            "uncertainty": None,
+            "calc_blockers": sorted(list(set(calc_blockers))),
+            "provisional_factor_available": bool(provisional_factor_record),
+            "provisional_factor": prov_dict,
+            "message": msg,
+            "actions": actions
+        }
+
+    res = accounting.calculate(activities, fac_map, factors_for_calc, boundary_method=boundary_method, gwp_basis="AR6")
+
+    blocking_exceptions = [e.get("code") for e in res.exceptions if e.get("blocking")]
+    if blocking_exceptions:
+        for b in blocking_exceptions:
+            if b not in calc_blockers:
+                calc_blockers.append(b)
+        return {
+            "status": "INDICATIVE",
+            "flags": ["PROVISIONAL_FACTOR"] if used_provisional else [],
+            "audit_grade": False,
+            "registry_eligible": False,
+            "disclaimer": disclaimer,
+            "emissions": None,
+            "lines": [],
+            "factor_citations": [],
+            "assumptions": [],
+            "uncertainty": None,
+            "calc_blockers": calc_blockers,
+            "actions": actions
+        }
+
+    out_lines = []
+    citations = []
+    seen_factors = set()
+
+    for line in res.lines:
+        act_for_line = next((a for a in activities if a.id == line.activity_id), None)
+        out_lines.append({
+            "activity_type": act_for_line.activity_type if act_for_line else "electricity",
+            "scope": line.scope,
+            "method": line.method,
+            "quantity": str(line.quantity),
+            "unit": line.unit,
+            "factor_id": line.factor_id,
+            "factor_version": line.factor_version,
+            "factor_value": str(line.factor_value),
+            "factor_status": "PROVISIONAL" if (used_provisional and provisional_factor_record and line.factor_id == provisional_factor_record.id) else "APPROVED",
+            "emissions_kg": str(line.emissions_kg),
+            "formula": line.formula,
+            "uncertainty_pct": str(line.uncertainty_pct) if line.uncertainty_pct is not None else None
+        })
+
+        if line.factor_id and line.factor_id not in seen_factors:
+            seen_factors.add(line.factor_id)
+            if used_provisional and provisional_factor_record and line.factor_id == provisional_factor_record.id:
+                citations.append({
+                    "factor_id": provisional_factor_record.id,
+                    "family": provisional_factor_record.family,
+                    "version": provisional_factor_record.version,
+                    "status": "PROVISIONAL",
+                    "is_provisional": True,
+                    "kgco2e_per_unit": str(provisional_factor_record.kgco2e_per_unit),
+                    "unit": provisional_factor_record.unit,
+                    "region": provisional_factor_record.region,
+                    "method": provisional_factor_record.method,
+                    "gwp_basis": provisional_factor_record.gwp_basis,
+                    "source_publisher": provisional_factor_record.source_publisher,
+                    "source_document": provisional_factor_record.source_document,
+                    "derivation_hash": provisional_factor_record.source_table_ref,
+                    "uncertainty_pct": str(provisional_factor_record.uncertainty_pct)
+                })
+            else:
+                db_f = next((f for f in approved_factors if f.id == line.factor_id), None)
+                if db_f:
+                    citations.append({
+                        "factor_id": db_f.id,
+                        "family": db_f.family,
+                        "version": db_f.version,
+                        "status": "APPROVED",
+                        "is_provisional": False,
+                        "kgco2e_per_unit": str(db_f.kgco2e_per_unit),
+                        "unit": db_f.unit,
+                        "region": db_f.region,
+                        "method": db_f.method,
+                        "gwp_basis": db_f.gwp_basis,
+                        "source_publisher": db_f.source_publisher,
+                        "source_document": db_f.source_document,
+                        "uncertainty_pct": str(db_f.uncertainty_pct) if db_f.uncertainty_pct else None
+                    })
+
+    assumptions = [
+        f"Boundary method: {boundary_method} (100% operational control inclusion share)",
+        "GWP basis: IPCC AR6 100-year metric without climate-carbon feedback",
+        "Scope 2 location-based calculated via national grid-average emission rate",
+        "Scope 2 market-based falls back to location-based grid average in absence of contractual instruments",
+        "Deterministic Python execution (accounting.py); in-memory only without mutating ledger"
+    ]
+    if used_provisional and provisional_factor_record:
+        assumptions.append(
+            f"Provisional grid factor '{provisional_factor_record.family}' v{provisional_factor_record.version} "
+            f"(vintage {provisional_factor_record.valid_from.year}-{provisional_factor_record.valid_to.year if provisional_factor_record.valid_to else 'present'}) "
+            f"used as indicative proxy pending published national grid factor."
+        )
+
+    s1_kg = res.scope1_kg
+    s2_loc_kg = res.scope2_location_kg
+    s2_mkt_kg = res.scope2_market_kg
+    tot_kg = s1_kg + s2_loc_kg
+
+    return {
+        "status": "INDICATIVE",
+        "flags": ["PROVISIONAL_FACTOR"] if used_provisional else [],
+        "audit_grade": False,
+        "registry_eligible": False,
+        "disclaimer": disclaimer,
+        "emissions": {
+            "scope1_kg": str(s1_kg),
+            "scope2_location_kg": str(s2_loc_kg),
+            "scope2_market_kg": str(s2_mkt_kg) if s2_mkt_kg is not None else None,
+            "scope1_tco2e": str((s1_kg / Decimal(1000)).quantize(Decimal("0.001"))),
+            "scope2_location_tco2e": str((s2_loc_kg / Decimal(1000)).quantize(Decimal("0.001"))),
+            "total_tco2e": str((tot_kg / Decimal(1000)).quantize(Decimal("0.001")))
+        },
+        "lines": out_lines,
+        "factor_citations": citations,
+        "assumptions": assumptions,
+        "uncertainty": {
+            "combined_uncertainty_pct": float(provisional_factor_record.uncertainty_pct) if used_provisional and provisional_factor_record else 5.0,
+            "method": "GHG Protocol / IPCC Tier 1 error propagation"
+        },
+        "calc_blockers": [],
+        "actions": actions
+    }

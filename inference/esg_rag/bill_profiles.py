@@ -51,7 +51,7 @@ NAME = re.compile(r"^[a-z][a-z0-9_]{0,39}$")
 CODE = re.compile(r"^[A-Z][A-Z0-9_]{2,59}$")
 PROFILE_KEY = re.compile(r"^[a-z0-9][a-z0-9._-]{2,79}$")
 # Bill spellings → pint expressions. Sm3 is a volume at stated reference conditions (see the heating value).
-UNIT_SPELLINGS = {"m3": "m**3", "Sm3": "m**3", "ft3": "ft**3", "%": "percent", "": "dimensionless"}
+UNIT_SPELLINGS = {"m3": "m**3", "Sm3": "m**3", "Nm3": "m**3", "ft3": "ft**3", "cft": "ft**3", "%": "percent", "": "dimensionless"}
 
 
 class ProfileError(ValueError):

@@ -45,7 +45,8 @@ def cmd_status(engine: OrchestratorEngine, args: argparse.Namespace) -> int:
     status = engine.get_status()
     print()
     print(colorize(f"=== Akram-Stack: {status['project_name']} ===", COLOR_BOLD + COLOR_CYAN))
-    print(f"Track: {colorize(status['track'], COLOR_BOLD)} | Active Phase: {colorize(f'Phase {status['active_phase']}', COLOR_YELLOW)}")
+    phase_label = f"Phase {status['active_phase']}"
+    print(f"Track: {colorize(status['track'], COLOR_BOLD)} | Active Phase: {colorize(phase_label, COLOR_YELLOW)}")
     if status.get("stop_active"):
         print(colorize("STOP file present — human handoff is active.", COLOR_RED))
     print()

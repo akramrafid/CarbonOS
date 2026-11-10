@@ -809,8 +809,13 @@ export const ActivityEvidenceWorkspace = ({
 
         {/* Tab 1: Activities Table */}
         {activeTab === 'activities' && (
-          <div className="mt-4 overflow-x-auto">
-            <table className="w-full text-left font-sans text-xs border-collapse min-w-[1100px]">
+          <div className="mt-4 w-full overflow-hidden">
+            <div className="text-[11px] font-mono text-gray-500 dark:text-mist flex items-center justify-between pb-2 md:hidden">
+              <span className="flex items-center gap-1">← Scroll table horizontally →</span>
+              <span className="text-[10px]">1,100px wide</span>
+            </div>
+            <div className="w-full overflow-x-auto touch-pan-x rounded-xl border border-gray-200 dark:border-[#152B1D]">
+              <table className="w-full text-left font-sans text-xs border-collapse min-w-[1100px]">
               <thead>
                 <tr className={`border-b text-[10px] font-mono uppercase tracking-wider ${
                   isLight ? 'text-slate-500 border-slate-200 bg-slate-50/50' : 'text-[#7C9A88] border-[#152B1D] bg-[#040906]/60'
@@ -957,6 +962,7 @@ export const ActivityEvidenceWorkspace = ({
                 )}
               </tbody>
             </table>
+            </div>
           </div>
         )}
 

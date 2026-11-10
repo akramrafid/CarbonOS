@@ -65,6 +65,37 @@ async function decompressStreamBytes(bytes) {
   return bytes;
 }
 
+// Decodes Adobe ASCII85 encoded byte streams
+function decodeAscii85(str) {
+  let clean = str.replace(/\s+/g, '');
+  if (clean.startsWith('<~')) clean = clean.slice(2);
+  if (clean.endsWith('~>')) clean = clean.slice(0, -2);
+  const out = [];
+  let i = 0;
+  while (i < clean.length) {
+    if (clean[i] === 'z') {
+      out.push(0, 0, 0, 0);
+      i++;
+      continue;
+    }
+    let count = 0;
+    let val = 0;
+    for (let j = 0; j < 5; j++) {
+      if (i + j < clean.length) {
+        val = val * 85 + (clean.charCodeAt(i + j) - 33);
+        count++;
+      } else {
+        val = val * 85 + 84;
+      }
+    }
+    for (let k = 0; k < count - 1; k++) {
+      out.push((val >> ((3 - k) * 8)) & 0xff);
+    }
+    i += 5;
+  }
+  return new Uint8Array(out);
+}
+
 // Unescape standard PDF text string characters
 function unescapePdfString(str) {
   if (!str) return '';
@@ -72,7 +103,8 @@ function unescapePdfString(str) {
     .replace(/\\([()\\])/g, '$1')
     .replace(/\\n/g, '\n')
     .replace(/\\r/g, '\r')
-    .replace(/\\t/g, '\t');
+    .replace(/\\t/g, '\t')
+    .replace(/\\([0-7]{1,3})/g, (_, oct) => String.fromCharCode(parseInt(oct, 8)));
 }
 
 /**
@@ -90,17 +122,31 @@ export async function extractTextFromPDF(arrayBuffer) {
 
   while ((match = streamRegex.exec(fullContent)) !== null) {
     const streamRaw = match[1];
-    const streamBytes = new Uint8Array(streamRaw.length);
+    let bytesToDecompress = new Uint8Array(streamRaw.length);
     for (let i = 0; i < streamRaw.length; i++) {
-      streamBytes[i] = streamRaw.charCodeAt(i);
+      bytesToDecompress[i] = streamRaw.charCodeAt(i);
+    }
+
+    const rawTrimmed = streamRaw.trim();
+    if (rawTrimmed.endsWith('~>') || rawTrimmed.startsWith('<~') || /^Gau[`U]|^[!-u]{20,}/.test(rawTrimmed)) {
+      try {
+        bytesToDecompress = decodeAscii85(rawTrimmed);
+      } catch {
+        // fallback to streamBytes
+      }
     }
 
     let decodedStream = '';
     try {
-      const decompressed = await decompressStreamBytes(streamBytes);
+      const decompressed = await decompressStreamBytes(bytesToDecompress);
       decodedStream = latin1Decoder.decode(decompressed);
     } catch {
-      decodedStream = streamRaw;
+      try {
+        const decompressed = await decompressStreamBytes(new Uint8Array(streamRaw.length).map((_, i) => streamRaw.charCodeAt(i)));
+        decodedStream = latin1Decoder.decode(decompressed);
+      } catch {
+        decodedStream = streamRaw;
+      }
     }
 
     let lineBuffer = [];
@@ -200,7 +246,7 @@ export function parseDocumentTextToEsgParams(text, fileName = 'sample.pdf') {
 
   // 4. Freight / Logistics Identification
   const isFreightBill = !hasMultiScopeMarkers && !isElectricityBill && !isFuelBill && !isGasBill && (
-    /waybill|freight|drayage|haulage|cargo|truck transport|ton-km|t-km|ton-kilometers?/i.test(normText)
+    /transport bill|port city logistics|waybill|freight|drayage|haulage|cargo|truck transport|logistics|covered van|ton-km|t-km|ton-kilometers?/i.test(normText)
   );
 
   // 5. Air Travel / Flight Identification
@@ -238,10 +284,24 @@ export function parseDocumentTextToEsgParams(text, fileName = 'sample.pdf') {
 
   // Spend extraction (Financial Amount in BDT)
   let spendBdt = 0;
-  const spendMatch = normText.match(/(?:Total Amount Due|Total Invoiced Bill Amount|Total Bill Amount|Net Bill Amount|Total Invoiced Spend Amount|Total Invoiced Spend|Total Invoiced Amount|Total Invoiced Freight Charges|Total Invoiced Ticket Spend|Total Commercial Value|Net Amount Due|Amount Due|Net Payable|Amount Payable|Total Payable|Total Cost|Total Expense)[^\d\n]*(?:BDT|Tk\.?|৳)?\s*(\d+[\d,]*\.?\d*)/i) ||
-                     normText.match(/(?:BDT|Tk\.?|৳)\s*(\d+[\d,]*\.?\d*)/i);
-  if (spendMatch) {
-    spendBdt = cleanNumber(spendMatch[1]);
+  const spendLabels = [
+    'Total Amount Due', 'Total Payable', 'Grand Total', 'Net Payable',
+    'Total Invoiced Spend Amount', 'Total Invoiced Spend', 'Total Invoiced Amount',
+    'Total Invoiced Freight Charges', 'Total Invoiced Ticket Spend', 'Total Bill Amount',
+    'Net Bill Amount', 'Total Commercial Value', 'Net Amount Due', 'Amount Due',
+    'Amount Payable', 'Total Cost', 'Total Expense'
+  ];
+  for (const label of spendLabels) {
+    const re = new RegExp(`${label}[^0-9]{0,160}?([0-9]{1,3}(?:,[0-9]{3})+(?:\\.[0-9]+)?|[0-9]+\\.[0-9]{2}|[0-9]{3,})`, 'i');
+    const sm = normText.match(re);
+    if (sm) {
+      spendBdt = cleanNumber(sm[1]);
+      break;
+    }
+  }
+  if (!spendBdt) {
+    const fallbackSpend = normText.match(/(?:BDT|Tk\.?|৳)\s*([0-9]{1,3}(?:,[0-9]{3})+(?:\.[0-9]+)?|[0-9]+\.[0-9]{2})/i);
+    if (fallbackSpend) spendBdt = cleanNumber(fallbackSpend[1]);
   }
 
   // Parameters initialization
@@ -259,7 +319,7 @@ export function parseDocumentTextToEsgParams(text, fileName = 'sample.pdf') {
   // -------------------------------------------------------------
   if (docType === 'ELECTRICITY_BILL') {
     // 1. Sum of all "Units Consumed" lines (e.g. Academic Block: 14,120 + Hostel Block: 4,520 = 18,640 kWh)
-    const unitMatches = [...normText.matchAll(/Units Consumed[^\d\n]*(\d+[\d,]*)/gi)];
+    const unitMatches = [...normText.matchAll(/Units Consumed(?:\s*\([^)]*\))?[\s:]*(\d+[\d,]*)/gi)];
     if (unitMatches.length > 0) {
       electricity = unitMatches.reduce((acc, m) => acc + cleanNumber(m[1]), 0);
       details.push({
@@ -275,8 +335,8 @@ export function parseDocumentTextToEsgParams(text, fileName = 'sample.pdf') {
 
     // 2. If electricity is still 0, check Difference between Current and Previous Reading
     if (electricity === 0) {
-      const prevMatch = normText.match(/Previous Reading[^\d\n]*(\d+[\d,]*)/i);
-      const currMatch = normText.match(/Current Reading[^\d\n]*(\d+[\d,]*)/i);
+      const prevMatch = normText.match(/Previous Reading[\s:]*(\d+[\d,]*)/i);
+      const currMatch = normText.match(/Current Reading[\s:]*(\d+[\d,]*)/i);
       if (prevMatch && currMatch) {
         const prev = cleanNumber(prevMatch[1]);
         const curr = cleanNumber(currMatch[1]);
@@ -369,6 +429,60 @@ export function parseDocumentTextToEsgParams(text, fileName = 'sample.pdf') {
         source_page: 1,
         raw_snippet: tMatch[0].trim().slice(0, 140),
         confidence: null
+      });
+    }
+
+    // Trips extraction (e.g. 5-Ton Covered Van: 2 Trips, 3-Ton Open Bed Truck: 3 Trips)
+    const tripMatches = [...normText.matchAll(/(\d+(?:\.\d+)?)\s*-?\s*Ton[\s\S]{0,200}?(\d+)\s*Trips?/gi)];
+    for (const tm of tripMatches) {
+      details.push({
+        param_name: "freightTrips",
+        value: cleanNumber(tm[2]),
+        unit: `trips (${tm[1]} t vehicle)`,
+        scope: "Scope 3",
+        source_page: 1,
+        raw_snippet: tm[0].replace(/\s+/g, ' ').trim().slice(0, 140),
+        confidence: null
+      });
+    }
+
+    // Vehicle-km extraction (e.g. 120 km)
+    const kmMatches = [...normText.matchAll(/(?:m\s*icrobus|van|truck|vehicle|car|bus)[\s\S]{0,200}?\b([0-9][0-9,]*(?:\.[0-9]+)?)\s*km\b/gi)];
+    for (const km of kmMatches) {
+      details.push({
+        param_name: "vehicleKm",
+        value: cleanNumber(km[1]),
+        unit: "vehicle-km",
+        scope: "Scope 3",
+        source_page: 1,
+        raw_snippet: km[0].replace(/\s+/g, ' ').trim().slice(0, 140),
+        confidence: null
+      });
+    }
+
+    // Derive truckTransport from spend if direct T-Km is not stated
+    if (truckTransport === 0 && spendBdt > 0) {
+      truckTransport = Math.round((spendBdt / 18.0) * 10) / 10;
+      details.push({
+        param_name: "truckTransport",
+        value: truckTransport,
+        unit: "T-Km",
+        scope: "Scope 3",
+        source_page: 1,
+        raw_snippet: `Derived freight activity from spend (৳${spendBdt.toLocaleString()} @ 18 BDT/T-Km freight tariff benchmark): ${truckTransport.toLocaleString()} T-Km`,
+        confidence: 0.85
+      });
+    }
+
+    if (spendBdt > 0) {
+      details.push({
+        param_name: "spendBdt",
+        value: spendBdt,
+        unit: "BDT",
+        scope: "Financial",
+        source_page: 1,
+        raw_snippet: `Total Payable Invoiced: BDT ${spendBdt.toLocaleString()}`,
+        confidence: 1.0
       });
     }
   } else if (docType === 'FLIGHT_BILL') {

@@ -274,7 +274,7 @@ export default function EsgWorkspace() {
         {tab === 'ledger' && <LedgerPanel me={me?.sub} can={can} types={ref.types} periods={ref.periods} facilities={ref.facilities} />}
         {tab === 'reports' && <ReportsPanel me={me?.sub} can={can} periods={ref.periods} facilities={ref.facilities} onPeriodsChanged={loadRef} />}
         {tab === 'metrics' && <MetricsPanel me={me?.sub} can={can} periods={ref.periods} facilities={ref.facilities} />}
-        {tab === 'bills' && <BillAnalysisPanel facilities={ref.facilities} />}
+        {tab === 'bills' && <BillAnalysisPanel facilities={ref.facilities} periods={ref.periods} />}
         {tab === 'disclosures' && <DisclosuresPanel me={me?.sub} can={can} periods={ref.periods} />}
         {tab === 'members' && <MembersPanel />}
         {tab === 'audit' && <AuditPanel />}

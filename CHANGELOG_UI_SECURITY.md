@@ -216,7 +216,8 @@ To purge the historical commits that contained the hardcoded weather key, run th
 ```bash
 # Using git-filter-repo (Recommended)
 pip install git-filter-repo
-git filter-repo --replace-text <(echo "c72df8996b278f244105bb9dcfa0c704==>REDACTED_API_KEY")
+# Replace <LEAKED_KEY_VALUE> with the exact key string from the old commits (see `git log -p -S OPENWEATHER`)
+git filter-repo --replace-text <(echo "<LEAKED_KEY_VALUE>==>REDACTED_API_KEY")
 
 # Force-push updated branches and tags
 git push origin --force --all
@@ -260,3 +261,4 @@ Use this checklist for rapid manual verification of any deployment:
   - Visit `/this-route-does-not-exist` -> Confirm on-brand 404 page renders with requested path and quick rescue buttons.
   - Visit `/forbidden` -> Confirm Status 403 Access Restriction page renders with clear explanation and persona switch option.
 - [ ] **Reduced Motion**: In OS settings (or Chrome DevTools Rendering tab), enable "prefers-reduced-motion". Confirm GSAP scroll sections and loaders immediately switch to static, opacity-only transitions without disorientation.
+

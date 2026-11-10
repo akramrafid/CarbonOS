@@ -82,6 +82,26 @@ def retrieve(
     corpus: str = "all",
     tenant_id: str = "default_tenant",
     top_k: int = TOP_K,
+    min_confidence: float = MIN_CONFIDENCE,
+    filters: Optional[Dict[str, Any]] = None
+) -> Dict[str, Any]:
+    """Delegates to multi-stage hybrid retriever (dense + BM25 + RRF)."""
+    from .hybrid_retriever import hybrid_retrieve
+    return hybrid_retrieve(
+        query=query,
+        corpus=corpus,
+        tenant_id=tenant_id,
+        top_k=top_k,
+        min_confidence=min_confidence,
+        filters=filters
+    )
+
+
+def legacy_retrieve(
+    query: str,
+    corpus: str = "all",
+    tenant_id: str = "default_tenant",
+    top_k: int = TOP_K,
     min_confidence: float = MIN_CONFIDENCE
 ) -> Dict[str, Any]:
     """

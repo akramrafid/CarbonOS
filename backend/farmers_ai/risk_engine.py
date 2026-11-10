@@ -1,3 +1,4 @@
+import os
 import requests
 
 def get_open_meteo_data(lat, lng):
@@ -20,7 +21,7 @@ def get_open_meteo_data(lat, lng):
         return None, None
 
 def get_agro_data(lat, lng, poly_id="mock_poly"):
-    api_key = "062104651c60e66e0115c841bd40f62e"
+    api_key = os.getenv("OPENWEATHER_AGRO_API_KEY", "")
     # Note: The OpenWeatherMap Agro API requires registering a polygon first to get a poly_id.
     # URL: http://api.agromonitoring.com/agro/1.0/soil?polyid={poly_id}&appid={api_key}
     # For this MVP, we will simulate the agro response since polygon registration requires MRV pipeline setup.
@@ -30,7 +31,9 @@ def get_agro_data(lat, lng, poly_id="mock_poly"):
     }
 
 def get_open_weather_data(lat, lng):
-    api_key = "895284852c5a6104617a26ba3534b46c"
+    api_key = os.getenv("OPENWEATHER_API_KEY", "")
+    if not api_key:
+        return None, None
     url = f"https://api.openweathermap.org/data/2.5/weather?lat={lat}&lon={lng}&units=metric&appid={api_key}"
     try:
         response = requests.get(url, timeout=10)

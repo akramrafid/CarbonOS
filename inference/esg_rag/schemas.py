@@ -59,6 +59,7 @@ class ExtractionResponse(BaseModel):
     extracted_at: str
     summary: str
     review_status: str = "REVIEW_REQUIRED"
+    system_of_record_note: str = "Heuristic unverified extractor only. Use /api/esg/bills/* for audit-grade ledger recording."
 
 class EmissionFactorItem(BaseModel):
     id: str

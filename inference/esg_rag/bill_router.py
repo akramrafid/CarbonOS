@@ -6,12 +6,14 @@ import hashlib
 import os
 from typing import List, Literal, Optional
 
-from fastapi import APIRouter, Depends, File, Form, HTTPException, Query, UploadFile
+from fastapi import APIRouter, Response, Depends, File, Form, HTTPException, Query, UploadFile
 from pydantic import BaseModel, Field
 from sqlalchemy.orm import Session
 
 from . import bill_extract as bx
 from . import bill_service
+from . import document_store
+from .bills import OCRUnavailable
 from .auth import Principal, require
 from .ratelimit import limited
 from .database import get_db
@@ -38,6 +40,14 @@ class BillIn(BaseModel):
     filename: Optional[str] = Field(None, max_length=255)
     profile_id: Optional[str] = None  # a person routing the bill; otherwise APPROVED profiles are detected
     document: DocumentIn
+
+
+class EnterValueIn(BaseModel):
+    parameter_key: str = Field(..., max_length=100)
+    value: str = Field(..., min_length=1, max_length=200)
+    unit: Optional[str] = Field(None, max_length=30)
+    group_index: str = Field("", max_length=200)
+    comment: Optional[str] = Field(None, max_length=2000)
 
 
 class ReviewValueIn(BaseModel):
@@ -134,10 +144,23 @@ def upload_bill(facility_id: str = Form(...), file: UploadFile = File(...), ocr:
     try:
         doc = (bx.document_from_image(data) if (ocr or not is_pdf)
                else bx.document_from_pdf(data, max_pages=bill_service.MAX_PAGES))
+    except OCRUnavailable as e:
+        raise HTTPException(422, f"OCR unavailable: {e}. Scanned bills require Tesseract (ben+eng). Please enter values manually via the intake wizard.")
     except Exception as e:  # unreadable, too large, or Tesseract missing or timed out: say so, keep nothing
         raise HTTPException(422, f"Could not read the document locally ({type(e).__name__})")
-    name = f"{hashlib.sha256(data).hexdigest()[:12]}_{os.path.basename(file.filename or 'bill')}"[:255]
+    file_sha256 = hashlib.sha256(data).hexdigest()
+    prefix = file_sha256[:12]
+    existing = db.query(Bill).filter(
+        Bill.organization_id == p.organization_id,
+        Bill.filename.like(f"{prefix}_%")
+    ).first()
+    if existing:
+        raise HTTPException(409, f"Duplicate bill: file already uploaded for this tenant as bill {existing.id}")
+    name = f"{file_sha256}_{os.path.basename(file.filename or 'bill')}"[:255]
     bill = run(bill_service.create_bill, db, p, facility_id, doc, name)
+    if document_store.is_retention_enabled():
+        document_store.save_document(p.organization_id, data, file_sha256)
+        run(bill_service.log_document_retention, db, p, bill.id, file_sha256)
     return _bill_out(run(bill_service.bill_detail, db, p, bill.id))
 
 
@@ -153,6 +176,19 @@ def list_bills(facility_id: Optional[str] = None, status: Optional[str] = None, 
 @router.get("/bills/{bill_id}")
 def get_bill(bill_id: str, p: Principal = Depends(require("read")), db: Session = Depends(get_db)):
     return _bill_out(run(bill_service.bill_detail, db, p, bill_id))
+
+
+@router.get("/bills/{bill_id}/gaps")
+def get_bill_gaps(bill_id: str, p: Principal = Depends(require("read")), db: Session = Depends(get_db)):
+    """Structured gap analysis, low confidence fields, and calculation blockers for a bill."""
+    return run(bill_service.bill_gaps, db, p, bill_id)
+
+
+@router.post("/bills/{bill_id}/values", status_code=201)
+def enter_bill_value(bill_id: str, body: EnterValueIn, p: Principal = Depends(require("write")), db: Session = Depends(get_db)):
+    """Enter a value for a missing field without an extracted row."""
+    return out(run(bill_service.enter_value, db, p, bill_id, body.parameter_key, body.value,
+                   body.unit, body.group_index, body.comment))
 
 
 @router.post("/bill-values/{value_id}/map")
@@ -185,3 +221,52 @@ def bill_analysis(keys: str = Query(..., max_length=2000), group_by: str = Query
     key_list = [k.strip() for k in keys.split(",") if k.strip()]
     dims = [d.strip() for d in group_by.split(",") if d.strip()]
     return run(bill_service.analyse, db, p, key_list, dims, grain)
+
+
+@router.get("/bills/{bill_id}/document")
+def get_bill_document(bill_id: str, p: Principal = Depends(require("read")), db: Session = Depends(get_db)):
+    """Download or view retained source PDF with SHA-256 header."""
+    bill = run(bill_service._get, db, Bill, p, bill_id)
+    file_sha256 = bill.filename.split("_")[0] if bill.filename and "_" in bill.filename else bill.document_sha256
+    content = document_store.read_document(p.organization_id, file_sha256)
+    if not content:
+        raise HTTPException(404, "Source document not retained or deleted")
+    actual_sha = hashlib.sha256(content).hexdigest()
+    run(bill_service.log_document_read, db, p, bill.id, actual_sha)
+    return Response(
+        content=content,
+        media_type="application/pdf",
+        headers={
+            "X-Content-SHA256": actual_sha,
+            "Content-Disposition": f'inline; filename="{bill.filename or "bill.pdf"}"'
+        }
+    )
+
+
+@router.delete("/bills/{bill_id}/document", status_code=200)
+def delete_bill_document(bill_id: str, p: Principal = Depends(require("write")), db: Session = Depends(get_db)):
+    """Hard-delete retained source document upon request."""
+    bill = run(bill_service._get, db, Bill, p, bill_id)
+    file_sha256 = bill.filename.split("_")[0] if bill.filename and "_" in bill.filename else bill.document_sha256
+    deleted = document_store.delete_document(p.organization_id, file_sha256)
+    if not deleted:
+        raise HTTPException(404, "Source document not found or already deleted")
+    run(bill_service.log_document_delete, db, p, bill.id, file_sha256)
+    return {"deleted": True, "sha256": file_sha256}
+
+
+class BillEstimateIn(BaseModel):
+    allow_provisional: bool = False
+    boundary_method: str = "operational_control"
+
+
+@router.post("/bills/{bill_id}/estimate")
+def estimate_bill_emissions(bill_id: str, body: Optional[BillEstimateIn] = None,
+                            p: Principal = Depends(require("read")), db: Session = Depends(get_db)):
+    """Indicative carbon footprint calculation for a bill (solo users / screening).
+    Deterministic Python calculation on confirmed/corrected/entered values.
+    Does NOT mutate the ledger or create approved records."""
+    allow_provisional = body.allow_provisional if body else False
+    boundary_method = body.boundary_method if body else "operational_control"
+    return run(bill_service.estimate_bill, db, p, bill_id,
+               allow_provisional=allow_provisional, boundary_method=boundary_method)
