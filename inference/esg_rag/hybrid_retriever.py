@@ -25,6 +25,18 @@ from .retriever import RetrievedChunk, cosine_similarity
 from .bm25 import BM25Index
 
 RRF_K = 60
+AGENT_AUTHORED_DOCUMENTS = {
+    "bangladesh_climate_regulatory.md",
+    "bd_grid_methodology.md",
+    "dexterity_textiles_demo.md",
+    "ghg_protocol_standards.md",
+    "ipcc_2006_combustion_and_ar6_gwp.md"
+}
+
+def is_agent_authored_excluded() -> bool:
+    """True if agent-authored synthetic corpus files are excluded from retrieval."""
+    return os.getenv("ESG_EXCLUDE_AGENT_AUTHORED_CORPUS", "false").lower() in ("true", "1", "yes")
+
 _bm25_indexes: Dict[str, BM25Index] = {}
 
 
@@ -219,6 +231,12 @@ def hybrid_retrieve(
 
     # Sort merged candidates descending by score
     sorted_candidates = sorted(all_scored_candidates.values(), key=lambda x: x["score"], reverse=True)
+    if is_agent_authored_excluded():
+        sorted_candidates = [
+            c for c in sorted_candidates
+            if getattr(c["chunk"], "filename", "") not in AGENT_AUTHORED_DOCUMENTS
+            and (c["chunk"].metadata or {}).get("filename") not in AGENT_AUTHORED_DOCUMENTS
+        ]
     top_chunks = [c["chunk"] for c in sorted_candidates[:top_k]]
     best_score = top_chunks[0].score if top_chunks else 0.0
 
