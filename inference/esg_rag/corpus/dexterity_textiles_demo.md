@@ -1,3 +1,10 @@
+---
+authored_by: "AI Agent"
+source_documents:
+  - "Fictional Demonstration Facility Energy Logbook"
+verbatim: false
+---
+
 # Dexterity Textiles Ltd: Fictional Sample Energy Logbook
 
 **Publisher**: Dexterity Textiles Ltd (Fictional Demo Tenant)  

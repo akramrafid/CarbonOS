@@ -18,6 +18,7 @@ class RetrievedChunk:
     def __init__(self, content: str, score: float, metadata: Dict[str, Any]):
         self.content = content
         self.score = float(score)
+        self.metadata = metadata or {}
         self.doc_id = metadata.get("doc_id", "")
         self.tenant_id = metadata.get("tenant_id", "")
         self.filename = metadata.get("filename", "unknown")
@@ -25,13 +26,34 @@ class RetrievedChunk:
         self.page = metadata.get("page", 1)
 
     def to_citation(self) -> Dict[str, Any]:
-        return {
-            "source": self.filename,
-            "page": self.page,
+        meta = self.metadata or {}
+        is_agent_authored = self.filename in {
+            "bangladesh_climate_regulatory.md",
+            "bd_grid_methodology.md",
+            "dexterity_textiles_demo.md",
+            "ghg_protocol_standards.md",
+            "ipcc_2006_combustion_and_ar6_gwp.md"
+        }
+        is_verbatim = bool(meta.get("verbatim", False)) if not is_agent_authored else False
+
+        if not is_verbatim:
+            source = "CarbonOS summary (not the official text)"
+            page_val = None
+        else:
+            source = self.filename
+            page_val = self.page
+
+        citation = {
+            "source": source,
             "section": f"Corpus: {self.corpus}",
             "snippet": self.content[:240] + ("..." if len(self.content) > 240 else ""),
             "relevance_score": round(self.score, 3)
         }
+        if page_val is not None:
+            citation["page"] = page_val
+        if meta.get("file_sha256"):
+            citation["file_sha256"] = meta["file_sha256"]
+        return citation
 
 def cosine_similarity(v1: List[float], v2: List[float]) -> float:
     a = np.array(v1, dtype=np.float32)

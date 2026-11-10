@@ -1,3 +1,12 @@
+---
+authored_by: "AI Agent"
+source_documents:
+  - "Bangladesh Climate Change Strategy and Action Plan (BCCSAP)"
+  - "Environmental Conservation Rules 2023 (ECR 2023)"
+  - "Updated Nationally Determined Contributions (NDC) 2021"
+verbatim: false
+---
+
 # Bangladesh Climate, Environment & Energy Regulatory Framework
 
 **Publisher**: Ministry of Environment, Forest and Climate Change (MoEFCC) & Bangladesh Energy Regulatory Commission (BERC)  

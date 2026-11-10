@@ -33,9 +33,17 @@ AGENT_AUTHORED_DOCUMENTS = {
     "ipcc_2006_combustion_and_ar6_gwp.md"
 }
 
-def is_agent_authored_excluded() -> bool:
-    """True if agent-authored synthetic corpus files are excluded from retrieval."""
-    return os.getenv("ESG_EXCLUDE_AGENT_AUTHORED_CORPUS", "false").lower() in ("true", "1", "yes")
+def is_agent_authored_excluded(tenant_is_demo: bool = False) -> bool:
+    """True if agent-authored synthetic corpus files are excluded from retrieval.
+    Defaults to True when ESG_ENV=production or for non-demo tenants."""
+    raw = os.getenv("ESG_EXCLUDE_AGENT_AUTHORED_CORPUS")
+    if raw is not None:
+        return raw.strip().lower() in ("true", "1", "yes")
+    if os.getenv("ESG_ENV") == "production":
+        return True
+    if not tenant_is_demo:
+        return True
+    return False
 
 _bm25_indexes: Dict[str, BM25Index] = {}
 
@@ -231,7 +239,8 @@ def hybrid_retrieve(
 
     # Sort merged candidates descending by score
     sorted_candidates = sorted(all_scored_candidates.values(), key=lambda x: x["score"], reverse=True)
-    if is_agent_authored_excluded():
+    is_demo = tenant_id in ("demo_tenant", "demo-corp", "demo") or str(tenant_id).startswith("demo")
+    if is_agent_authored_excluded(tenant_is_demo=is_demo):
         sorted_candidates = [
             c for c in sorted_candidates
             if getattr(c["chunk"], "filename", "") not in AGENT_AUTHORED_DOCUMENTS

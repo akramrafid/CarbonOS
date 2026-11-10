@@ -273,13 +273,18 @@ def ingest_document(
         ids.append(chunk_id)
         embeddings.append(vec)
         documents.append(c["content"])
-        metadatas.append({
+        meta_entry = {
             "doc_id": doc_rec.id,
             "tenant_id": tenant_id,
             "filename": filename,
             "corpus": corpus,
             "page": c["page_number"]
-        })
+        }
+        if meta_info:
+            for mk, mv in meta_info.items():
+                if isinstance(mv, (str, int, float, bool)):
+                    meta_entry[mk] = mv
+        metadatas.append(meta_entry)
 
     if collection is not None and ids:
         try:
@@ -313,3 +318,36 @@ def ingest_document(
     db.commit()
     db.refresh(doc_rec)
     return IngestResult(doc_rec, pages, False)
+
+
+def ingest_official_pdf(
+    db: Session,
+    file_bytes: bytes,
+    filename: str,
+    publisher: str,
+    year: int,
+    corpus: str = CORPUS_REGULATORY,
+    tenant_id: str = "global_regulatory",
+    source_url: Optional[str] = None
+) -> IngestResult:
+    """Ingestion path for official PDFs with verifiable provenance.
+    Preserves SHA256, verbatim status, and 1-based page indices so citations point at real pages."""
+    if not filename.lower().endswith(".pdf"):
+        raise IngestRejected("Official document must be a PDF file")
+    checksum = hashlib.sha256(file_bytes).hexdigest()
+    meta_info = {
+        "publisher": publisher,
+        "year": year,
+        "source_url": source_url or "",
+        "file_sha256": checksum,
+        "verbatim": True,
+        "is_official": True
+    }
+    return ingest_document(
+        db=db,
+        file_bytes=file_bytes,
+        filename=filename,
+        corpus=corpus,
+        tenant_id=tenant_id,
+        meta_info=meta_info
+    )

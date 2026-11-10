@@ -1,3 +1,12 @@
+---
+authored_by: "AI Agent"
+source_documents:
+  - "CarbonOS Bangladesh Grid Derivation Pipeline (factors/bd_grid)"
+  - "BPDB Annual Report 2022-23 p.62"
+  - "Petrobangla Annual Report"
+verbatim: false
+---
+
 # CarbonOS Bangladesh Grid Emission Factor Methodology Note
 
 **Publisher**: CarbonOS Research & Engineering Team  

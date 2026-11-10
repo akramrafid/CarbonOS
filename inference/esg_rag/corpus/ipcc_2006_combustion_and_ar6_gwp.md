@@ -1,3 +1,11 @@
+---
+authored_by: "AI Agent"
+source_documents:
+  - "2006 IPCC Guidelines for National Greenhouse Gas Inventories, Vol 2 Energy"
+  - "IPCC Sixth Assessment Report (AR6) WG1 Chapter 7 Table 7.15"
+verbatim: false
+---
+
 # IPCC 2006 Stationary & Mobile Combustion & AR6 GWP Values
 
 **Publisher**: Intergovernmental Panel on Climate Change (IPCC)  

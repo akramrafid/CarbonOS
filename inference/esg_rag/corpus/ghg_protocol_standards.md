@@ -1,3 +1,11 @@
+---
+authored_by: "AI Agent"
+source_documents:
+  - "GHG Protocol Corporate Accounting and Reporting Standard (Revised Edition)"
+  - "GHG Protocol Scope 2 Guidance (2015)"
+verbatim: false
+---
+
 # GHG Protocol Standards & Accounting Principles
 
 **Publisher**: World Resources Institute (WRI) & World Business Council for Sustainable Development (WBCSD)  
