@@ -1,0 +1,142 @@
+import React from 'react';
+import { RefreshCw } from 'lucide-react';
+
+export const EsgSettingsPanel = (props) => {
+  const {
+    reductionTarget,
+    setReductionTarget,
+    baseYear,
+    setBaseYear,
+    baseYearEmissions,
+    setBaseYearEmissions,
+    acquisitionsDivestments,
+    setAcquisitionsDivestments,
+    cbamCommodity,
+    setCbamCommodity,
+    cbamWeight,
+    setCbamWeight,
+    ef,
+    setEf,
+    syncOfficialFactors,
+    isSyncingFactors,
+    handleSaveSettings
+  } = props;
+
+  return (
+          <div className="bg-white border border-[#E2E8F0] rounded-3xl p-6 lg:p-8 shadow-sm space-y-6">
+            <div>
+              <h1 className="font-sans font-bold text-3xl text-[#0F291B]">ESG Parameter Settings</h1>
+              <p className="text-sm text-[#64748B] mt-1 font-sans">Configure GHG Protocol emission factors and reduction targets.</p>
+            </div>
+
+            <form onSubmit={handleSaveSettings} className="space-y-6">
+              
+              {/* Target configurations */}
+              <div className="space-y-4">
+                <h3 className="font-sans font-bold text-base text-[#0F291B] border-b border-[#F1F5F9] pb-2">Target Metrics</h3>
+                <div>
+                  <label className="block text-xs font-bold text-[#64748B] uppercase mb-1">Corporate Reduction Target (%)</label>
+                  <input 
+                    type="number"
+                    value={reductionTarget}
+                    onChange={(e) => setReductionTarget(e.target.value)}
+                    className="w-full max-w-xs text-xs font-mono p-2 border border-[#E2E8F0] rounded-lg focus:outline-none focus:border-[#0F291B] bg-[#F8F9FA]"
+                  />
+                  <p className="text-[10px] text-[#64748B] mt-1">This configures the target carbon footprint reduction card on the dashboard.</p>
+                </div>
+              </div>
+
+              {/* Emission Factors grid */}
+              <div className="space-y-4">
+                <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-2 border-b border-[#F1F5F9] pb-2">
+                  <h3 className="font-sans font-bold text-base text-[#0F291B]">GHG Emission Factors (EF)</h3>
+                  <button
+                    type="button"
+                    onClick={syncOfficialFactors}
+                    disabled={isSyncingFactors}
+                    className="text-xs font-mono font-bold px-3.5 py-2 rounded-xl bg-[#00C853] text-white hover:bg-[#00E676] flex items-center space-x-1.5 transition-all shadow-sm cursor-pointer"
+                  >
+                    <RefreshCw className={`w-3.5 h-3.5 text-white ${isSyncingFactors ? 'animate-spin' : ''}`} />
+                    <span className="text-white font-mono font-bold">Load legacy factor table (unverified, no grid factor)</span>
+                  </button>
+                </div>
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+                  <div>
+                    <label className="block text-xs font-bold text-[#64748B] uppercase mb-1">Diesel (kg CO₂e/L)</label>
+                    <input 
+                      type="number"
+                      step="0.01"
+                      value={ef.diesel}
+                      onChange={(e) => setEf({ ...ef, diesel: parseFloat(e.target.value) || 0 })}
+                      className="w-full text-xs font-mono p-2 border border-[#E2E8F0] rounded-lg focus:outline-none focus:border-[#0F291B] bg-[#F8F9FA]"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-xs font-bold text-[#64748B] uppercase mb-1">Petrol (kg CO₂e/L)</label>
+                    <input 
+                      type="number"
+                      step="0.01"
+                      value={ef.petrol}
+                      onChange={(e) => setEf({ ...ef, petrol: parseFloat(e.target.value) || 0 })}
+                      className="w-full text-xs font-mono p-2 border border-[#E2E8F0] rounded-lg focus:outline-none focus:border-[#0F291B] bg-[#F8F9FA]"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-xs font-bold text-[#64748B] uppercase mb-1">LPG Gas (kg CO₂e/kg)</label>
+                    <input 
+                      type="number"
+                      step="0.01"
+                      value={ef.lpg}
+                      onChange={(e) => setEf({ ...ef, lpg: parseFloat(e.target.value) || 0 })}
+                      className="w-full text-xs font-mono p-2 border border-[#E2E8F0] rounded-lg focus:outline-none focus:border-[#0F291B] bg-[#F8F9FA]"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-xs font-bold text-[#64748B] uppercase mb-1">Grid average, location-based (kg CO₂e/kWh)</label>
+                    <input
+                      type="number"
+                      step="0.001"
+                      min="0"
+                      placeholder="Approved grid-average factor"
+                      title="Location-based Scope 2 uses the grid's average emission rate. A CDM combined margin is not allowed."
+                      value={ef.electricity ?? ''}
+                      onChange={(e) => setEf({ ...ef, electricity: e.target.value === '' ? null : parseFloat(e.target.value) })}
+                      className="w-full text-xs font-mono p-2 border border-[#E2E8F0] rounded-lg focus:outline-none focus:border-[#0F291B] bg-[#F8F9FA]"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-xs font-bold text-[#64748B] uppercase mb-1">Commute (tCO₂e/emp/yr)</label>
+                    <input 
+                      type="number"
+                      step="0.01"
+                      value={ef.employees}
+                      onChange={(e) => setEf({ ...ef, employees: parseFloat(e.target.value) || 0 })}
+                      className="w-full text-xs font-mono p-2 border border-[#E2E8F0] rounded-lg focus:outline-none focus:border-[#0F291B] bg-[#F8F9FA]"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-xs font-bold text-[#64748B] uppercase mb-1">Air Travel (kg CO₂e/km)</label>
+                    <input 
+                      type="number"
+                      step="0.01"
+                      value={ef.airTravel}
+                      onChange={(e) => setEf({ ...ef, airTravel: parseFloat(e.target.value) || 0 })}
+                      className="w-full text-xs font-mono p-2 border border-[#E2E8F0] rounded-lg focus:outline-none focus:border-[#0F291B] bg-[#F8F9FA]"
+                    />
+                  </div>
+                </div>
+              </div>
+
+              <button 
+                type="submit"
+                className="bg-[#0F291B] hover:bg-[#1A4B31] text-white font-sans font-bold text-xs px-6 py-3 rounded-xl transition-all shadow-md inline-block"
+              >
+                Save Settings
+              </button>
+
+            </form>
+          </div>
+  );
+};
+
+export default EsgSettingsPanel;

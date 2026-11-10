@@ -63,7 +63,13 @@ test('Mobile Touch Targets: Key navigation toggles and buttons meet 44px minimum
   );
 
   const saasPath = path.join(ROOT, 'src/pages/platform/SaaSDashboard.jsx');
-  const saasCode = fs.readFileSync(saasPath, 'utf-8');
+  let saasCode = fs.readFileSync(saasPath, 'utf-8');
+  const saasFeaturesDir = path.join(ROOT, 'src/features/saas/components');
+  if (fs.existsSync(saasFeaturesDir)) {
+    for (const f of fs.readdirSync(saasFeaturesDir)) {
+      saasCode += fs.readFileSync(path.join(saasFeaturesDir, f), 'utf-8');
+    }
+  }
   assert.ok(
     saasCode.includes('min-w-[44px]') && saasCode.includes('min-h-[44px]'),
     'SaaSDashboard action buttons must have min 44px touch targets'

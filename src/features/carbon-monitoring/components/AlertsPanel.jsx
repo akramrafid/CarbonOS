@@ -1,0 +1,156 @@
+import React from 'react';
+import {
+  AlertTriangle,
+  CheckCircle,
+  MapPin,
+  ChevronRight,
+  TrendingDown,
+  Trees
+} from 'lucide-react';
+
+export function AlertsPanel(props) {
+  const {
+    isLight,
+    isBn,
+    t,
+    activeAlerts = [],
+    handleResolveAlert,
+    setActiveTab,
+    setMapCenter,
+    setMapZoom
+  } = props;
+
+  return (
+    <div className={`border rounded-3xl p-6 transition-all ${
+          isLight ? 'bg-white border-[#E2E8F0] shadow-xs' : 'bg-[#08130C] border-[#152B1D]'
+        }`}>
+          <h2 className={`text-2xl font-bold font-sans mb-6 flex items-center space-x-2 ${
+            isLight ? 'text-[#0F291B]' : 'text-white'
+          }`}>
+            <AlertTriangle className="text-amber" size={24} />
+            <span>Canopy Anomaly Alert Board</span>
+          </h2>
+
+          {loadingAlerts ? (
+            <div className="space-y-4">
+              {Array(2).fill(0).map((_, i) => (
+                <div key={i} className={`h-20 rounded-xl animate-pulse ${isLight ? 'bg-[#E2E8F0]' : 'bg-white/5'}`}></div>
+              ))}
+            </div>
+          ) : (
+            <div className="space-y-4">
+              {activeAlerts.length > 0 ? (
+                activeAlerts.map((alert) => (
+                  <div 
+                    key={alert.id} 
+                    className={`border rounded-2xl p-5 relative overflow-hidden transition-all ${
+                      alert.is_resolved 
+                        ? (isLight ? 'border-[#E2E8F0] bg-[#F8FAFC] opacity-75' : 'border-white/10 bg-white/5 opacity-60')
+                        : alert.severity === 'critical'
+                          ? (isLight ? 'border-[#FECACA] bg-[#FEF2F2]' : 'border-red-500/25 bg-red-500/5')
+                          : (isLight ? 'border-[#FDE68A] bg-[#FFFBEB]' : 'border-amber/25 bg-amber/5')
+                    }`}
+                  >
+                    <div className="flex items-start justify-between">
+                      <div className="space-y-2">
+                        <div className="flex items-center space-x-2">
+                          <span className={`text-[10px] font-bold uppercase tracking-wider px-2 py-0.5 rounded-full ${
+                            alert.is_resolved
+                              ? (isLight ? 'bg-[#E2E8F0] text-[#475569]' : 'bg-white/10 text-white')
+                              : alert.severity === 'critical'
+                                ? 'bg-red-500/20 text-red-500 font-bold'
+                                : 'bg-amber/20 text-amber font-bold'
+                          }`}>
+                            {alert.severity}
+                          </span>
+                          
+                          <span className={`text-xs font-mono ${isLight ? 'text-[#64748B]' : 'text-mist'}`}>
+                            {new Date(alert.timestamp).toLocaleDateString()} {new Date(alert.timestamp).toLocaleTimeString()}
+                          </span>
+
+                          <span className={`text-[10px] font-mono px-2 py-0.5 rounded font-bold ${
+                            isLight ? 'bg-[#E8F8EE] text-[#00873E]' : 'bg-emerald/10 text-emerald'
+                          }`}>
+                            Lat: {alert.location[0].toFixed(4)}, Lng: {alert.location[1].toFixed(4)}
+                          </span>
+                        </div>
+                        
+                        <h4 className={`font-bold text-sm flex items-center gap-2 ${isLight ? 'text-[#0F291B]' : 'text-white'}`}>
+                          {alert.alert_type === 'rapid_decline' ? (
+                            <>
+                              <Trees size={16} className={isLight ? 'text-[#00873E]' : 'text-emerald'} />
+                              <span>Rapid Vegetation Loss Anomaly</span>
+                            </>
+                          ) : (
+                            <>
+                              <Flame size={16} className="text-red-500" />
+                              <span>Fire Risk Threat Detected</span>
+                            </>
+                          )}
+                        </h4>
+                        
+                        <p className={`text-xs ${isLight ? 'text-[#475569]' : 'text-mist'}`}>{alert.message}</p>
+                        
+                        <div className={`border rounded-xl p-3 text-xs mt-2 ${
+                          isLight ? 'bg-white border-[#E2E8F0]' : 'bg-white/5 border-white/5'
+                        }`}>
+                          <span className={`font-bold block ${isLight ? 'text-[#0F291B]' : 'text-white'}`}>Suggested Preventive Action:</span>
+                          <span className={`block mt-0.5 ${isLight ? 'text-[#64748B]' : 'text-mist'}`}>{alert.suggested_action}</span>
+                        </div>
+                      </div>
+
+                      <div className="flex flex-col space-y-2">
+                        {alert.is_resolved ? (
+                          <span className="text-xs text-emerald font-bold flex items-center space-x-1">
+                            <CheckCircle size={14} />
+                            <span>Resolved</span>
+                          </span>
+                        ) : (
+                          <button 
+                            onClick={() => handleResolveAlert(alert.id)}
+                            className={`font-bold text-xs px-3 py-1.5 rounded-lg transition-all cursor-pointer ${
+                              isLight 
+                                ? 'bg-[#E8F8EE] border border-[#C2E9CF] text-[#00873E] hover:bg-[#00873E] hover:text-white' 
+                                : 'bg-white/5 hover:bg-emerald hover:text-carbon text-white'
+                            }`}
+                          >
+                            Resolve Alert
+                          </button>
+                        )}
+                        
+                        <button 
+                          onClick={() => {
+                            setMapCenter(alert.location);
+                            setMapZoom(14);
+                            setMapBounds([
+                              [alert.location[0] - 0.01, alert.location[1] - 0.01], 
+                              [alert.location[0] + 0.01, alert.location[1] + 0.01]
+                            ]);
+                            setActiveTab('map');
+                          }}
+                          className={`font-bold text-xs px-3 py-1.5 rounded-lg transition-all cursor-pointer ${
+                            isLight 
+                              ? 'bg-[#F1F5F9] border border-[#CBD5E1] text-[#0F291B] hover:bg-[#E2E8F0]' 
+                              : 'bg-white/5 hover:bg-white/10 text-white'
+                          }`}
+                        >
+                          Show on Map
+                        </button>
+                      </div>
+                    </div>
+                  </div>
+                ))
+              ) : (
+                <div className={`text-center py-12 border border-dashed rounded-2xl ${
+                  isLight ? 'border-[#CBD5E1] text-[#64748B]' : 'border-white/10 text-mist'
+                }`}>
+                  No canopy anomalies detected. Forests are displaying robust photosynthetic activity.
+                </div>
+              )}
+            </div>
+          )}
+        </div>
+  );
+}
+
+export default AlertsPanel;

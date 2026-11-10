@@ -40,14 +40,26 @@ test('ToastContext: provides aria-live announcements and accessible region', () 
 // -------------------------------------------------------------
 test('Action Buttons: icon-only controls have explicit aria-label and >= 44px tap target', () => {
   const saasPath = path.join(ROOT, 'src/pages/platform/SaaSDashboard.jsx');
-  const saasCode = fs.readFileSync(saasPath, 'utf-8');
+  let saasCode = fs.readFileSync(saasPath, 'utf-8');
+  const saasFeaturesDir = path.join(ROOT, 'src/features/saas/components');
+  if (fs.existsSync(saasFeaturesDir)) {
+    for (const f of fs.readdirSync(saasFeaturesDir)) {
+      saasCode += fs.readFileSync(path.join(saasFeaturesDir, f), 'utf-8');
+    }
+  }
 
   assert.ok(saasCode.includes('aria-label="Inspect ESG calculation methodology"'), 'Impact overview info button must have aria-label');
   assert.ok(saasCode.includes('aria-label="Inspect carbon target methodology"'), 'Target progress info button must have aria-label');
   assert.ok(saasCode.includes('aria-label="More telemetry options"'), 'Active telemetry options button must have aria-label');
 
   const cmPath = path.join(ROOT, 'src/pages/platform/CarbonMonitoring.jsx');
-  const cmCode = fs.readFileSync(cmPath, 'utf-8');
+  let cmCode = fs.readFileSync(cmPath, 'utf-8');
+  const cmFeaturesDir = path.join(ROOT, 'src/features/carbon-monitoring/components');
+  if (fs.existsSync(cmFeaturesDir)) {
+    for (const f of fs.readdirSync(cmFeaturesDir)) {
+      cmCode += fs.readFileSync(path.join(cmFeaturesDir, f), 'utf-8');
+    }
+  }
   assert.ok(cmCode.includes('aria-label="Search coordinates"'), 'Coordinates search button must have aria-label');
 });
 
