@@ -338,57 +338,218 @@ Created [`tests/e2e/bill-intake-wizard.spec.ts`](file:///c:/projects/CarbonOS/te
 
 ---
 
-## 3. The 10 Most Serious Open Risks (Ranked)
+## 3. The 10 Most Serious Open Risks (Ranked - Post-Hardening)
 
-Below are the 10 most critical technical and compliance risks identified in the codebase, ranked in order of severity:
+Below are the 10 most critical technical and compliance risks in the codebase following the verification hardening pass, ranked in order of severity:
 
-### 1. Zero Real Utility Bill Grounding (CRITICAL / PRODUCT INTEGRITY)
-- **Files**: `tests/fixtures/real_samples/` (empty), `inference/esg_rag/bill_profiles/seed/*.yaml` (lines 1–80)
-- **Description**: The system has never been evaluated against a real customer utility bill from Bangladesh (DESCO, DPDC, BPDB, or Titas). All anchors and extraction logic were developed against synthetic mocks. Real-world bill extraction accuracy, bounding-box tolerance, and table parsing recall are completely unknown.
-- **Remediation**: Ingest at least 20 anonymized real utility bills across providers and benchmark field recall on a held-out set before production launch.
+### 1. Multi-Account Self-Approval Bypass (CRITICAL / GOVERNANCE)
+- **Files**: `inference/esg_rag/ledger.py` (lines 280–310, 390–420), `inference/esg_rag/members.py` (lines 98–140), `docs/SECURITY.md`
+- **Description**: Proven in `tests/test_esg_authorization.py`: an administrator (`user-alice`) can invite a secondary account (`alice-alt@example.com`) via `POST /api/esg/invitations` with role `esg_admin`. When logging in with that second identity (`sub="alice-second-id"`), the ledger allows `alice-second-id` to approve `user-alice`'s activity records and factor proposals. The application verifies `rec.created_by != principal.sub`, but lacks an invitation ancestry check (`rec.created_by != inv.invited_by`), corporate domain restriction, or device correlation.
+- **Proposed Controls**:
+  1. *Corporate Domain Matching*: Restrict invitations to email addresses matching the registered organization domain.
+  2. *Enterprise IdP / SCIM SSO*: Disable self-serve token invitations in production; provision users via corporate SAML/OIDC.
+  3. *Invitation Ancestry Constraint*: Disallow a user from approving records created by their inviter or invitees.
+  4. *Device / Session Fingerprint Cross-Check*: Block approvals where author and approver share IP/TLS/device fingerprints within 24 hours.
 
-### 2. Agent-Authored Synthetic RAG Knowledge Base (HIGH / AUDIT COMPLIANCE)
-- **Files**: `inference/esg_rag/corpus/*.md` (all 5 files), `inference/esg_rag/reembed_corpus.py` (lines 25–86)
-- **Description**: All 5 documents in the RAG knowledge base are AI-generated markdown summaries rather than verbatim official source gazettes or standards. While the `ESG_EXCLUDE_AGENT_AUTHORED_CORPUS` flag has been added, serving unverified agent summaries in audit-grade compliance reports creates substantial regulatory liability.
-- **Remediation**: Replace synthesized markdown files with authentic source PDFs (e.g., official Bangladesh Gazette S.R.O. 53/2023, WRI Scope 2 Guidance PDF, IPCC 2006 Chapter 2 PDF).
+### 2. Zero Real Utility Bill Grounding (HIGH / PRODUCT INTEGRITY)
+- **Files**: `tests/fixtures/real_samples/` (0 files), `inference/esg_rag/bill_profiles/seed/*.yaml` (lines 1–80)
+- **Description**: The system has never been evaluated against a real customer utility bill from Bangladesh (DESCO, DPDC, BPDB, BREB, or Titas Gas). All anchors and extraction logic were developed against synthetic mocks. Real-world bill extraction accuracy, bounding-box tolerance, and table parsing recall remain unknown and untested.
+- **Remediation**: Ingest at least 20 anonymized real utility bills across providers and benchmark field recall on an independent held-out set before production deployment.
 
-### 3. Missing `cft` Volume Unit in Core Accounting Engine (HIGH / CALCULATION ACCURACY)
-- **Files**: `inference/esg_rag/accounting.py` (lines 12–28), `inference/esg_rag/bill_profiles/parameters.yaml` (lines 14–22)
-- **Description**: Natural gas in Bangladesh is universally metered in cubic feet (`cft` or `mcf`). `parameters.yaml` accepts `cft`, but `accounting.py` only defines `m3` in `UNITS`. Attempting to calculate gas emissions in `cft` directly in `accounting.py` causes unhandled unit errors or requires manual conversion ($1\text{ m}^3 = 35.3147\text{ cft}$).
-- **Remediation**: Add `cft` to `UNITS` in `accounting.py` with standard cubic meter density conversion: `'cft': ('volume', Decimal('28.316846592'))`.
+### 3. No Verbatim Official Regulatory PDFs Ingested (HIGH / REGULATORY COMPLIANCE)
+- **Files**: `inference/esg_rag/corpus/` (5 files), `inference/esg_rag/ingest.py`
+- **Description**: While all 5 corpus files have been front-mattered as agent-authored summaries and non-demo tenants default to `ESG_EXCLUDE_AGENT_AUTHORED_CORPUS=true`, no official government gazettes (ECR 2023, NDC 2021) or GHG Protocol standard PDFs have been ingested. Consequently, non-demo tenants in production retrieve 0 chunks until official documents are ingested via `ingest_official_pdf()`.
+- **Remediation**: Ingest authentic publisher PDFs (with SHA-256 and page indexing) using the newly implemented `ingest_official_pdf()` path.
 
-### 4. Synthetic Calibrated Grid Factor Treated as Authoritative (HIGH / SCIENTIFIC INTEGRITY)
-- **Files**: `inference/esg_rag/grid_factor_service.py` (lines 42–78), `factors/bd_grid/derive.py`
-- **Description**: The grid factor `0.663096 kgCO2e/kWh` was generated from a synthetic calibrated input script (`SYNTHETIC BPDB FY22-23 p.62`), not empirical BPDB generation ledgers. While marked `DRAFT`, solo users running indicative estimates may perceive `0.663096` as an official government factor.
-- **Remediation**: Label the factor clearly as `SYNTHETIC_MODEL_PROPOSAL` in the UI and require ingestion of the actual audited BPDB 2022-23 annual report figures.
+### 4. Bengali Paraphrase Retrieval MRR on Off-Chunk Queries (MEDIUM / LOCALIZATION)
+- **Files**: `tests/fixtures/rag_eval_paraphrase_review.json`, `scripts/eval_paraphrase_wilson.py`
+- **Description**: Evaluation against the 80-question human-review fixture demonstrates that while English Hit@5 reaches 85.0% [70.9%, 92.9%] with MRR 0.6912 [0.566, 0.817], Bengali Hit@1 is only 12.5% [5.5%, 26.1%] and Bengali MRR drops to 0.3596 [0.264, 0.456] on paraphrased queries using conversational synonyms. Per audit instructions, retriever tuning is strictly frozen until human review of the fixture is complete.
+- **Remediation**: Following human review, add Bengali morphological stemming / synonym expansion to `bm25.py` and upgrade the dense vector model to a native multilingual model (`paraphrase-multilingual-MiniLM-L12-v2`).
 
-### 5. Playwright Browser Binaries Missing from Deployment Host (MEDIUM / CI/CD)
-- **Files**: `playwright.config.ts` (lines 1–49), `tests/e2e/*.spec.ts`
-- **Description**: Playwright test runner version 1.56.1 is present in `package.json`, but Chromium browser binaries (`chromium_headless_shell-1194`) are not installed on the system, preventing automated UI regression and screenshot testing.
-- **Remediation**: Run `npx playwright install chromium` outside sandbox in CI/CD pipelines before test execution.
+### 5. Missing System Binaries on Windows Development Host (MEDIUM / RUNTIME AVAILABILITY)
+- **Files**: `docs/ENVIRONMENT.md`, `tests/test_esg_ocr_smoke.py`, `playwright.config.ts`
+- **Description**: Tesseract OCR (with Bengali language pack `ben.traineddata`) and Playwright Chromium binaries are not installed on the Windows host PATH. The OCR smoke test and browser E2E tests skip or require manual browser installation.
+- **Remediation**: Operators must follow the newly authored `docs/ENVIRONMENT.md` to install Tesseract UB-Mannheim with Bengali script data and run `npx playwright install chromium`.
 
-### 6. Five dMRV Python Modules Failing Import Path Resolution (MEDIUM / CODE HEALTH)
-- **Files**: `tests/test_dmrv_allometry.py` (line 14), `test_dmrv_baseline.py`, `test_dmrv_dossier.py`, `test_dmrv_provenance.py`, `test_dmrv_uncertainty.py`
-- **Description**: Running `python -m unittest` on individual dMRV modules fails with `ModuleNotFoundError: No module named '_isolated_db'`. The test files lack `sys.path.insert(0, os.path.dirname(__file__))`.
-- **Remediation**: Add directory path resolution to `sys.path` in all 5 dMRV test files.
+### 6. Separation of Duties in Calculation Period Restatements (MEDIUM / LEDGER INTEGRITY)
+- **Files**: `inference/esg_rag/ledger.py` (lines 470–505)
+- **Description**: Restating a calculation period requires a text reason, but does not currently require a second-user approval threshold before invalidating locked snapshot seals.
+- **Remediation**: Require dual-approval on `POST /periods/{period_id}/restate` before reverting a locked snapshot to restatement status.
 
-### 7. Degraded Bengali Retrieval MRR on Paraphrased Queries (MEDIUM / LOCALIZATION)
-- **Files**: `inference/esg_rag/hybrid_retriever.py` (lines 80–130), `eval_retrieval_honesty.py`
-- **Description**: While the hybrid retriever achieves MRR 0.8000 in English on paraphrased questions, Bengali MRR drops to `0.5300` (below the 0.650 target) when queries use colloquial phrasing rather than exact chunk tokens.
-- **Remediation**: Ingest a bilingual Bengali synonym dictionary into `bm25.py` and upgrade the dense vector model to a native multilingual model (`paraphrase-multilingual-MiniLM-L12-v2`).
+### 7. Storage Encryption Key Rotation Tooling (LOW / SECRETS OPERATIONS)
+- **Files**: `inference/esg_rag/document_store.py`, `docs/SECURITY.md`
+- **Description**: The multi-key envelope and rotation approach is documented in `docs/SECURITY.md`, but the batch re-encryption script (`scripts/reencrypt_storage.py`) has not yet been implemented.
+- **Remediation**: Author and test `scripts/reencrypt_storage.py` to re-encrypt stored documents from `ESG_STORAGE_ENCRYPTION_KEYS_PREVIOUS` to the primary key.
 
-### 8. Tracked Text Files in `inference/chroma_data/uploads/` (MEDIUM / REPO HYGIENE)
-- **Files**: `inference/chroma_data/uploads/*.txt` (commit `f297247`)
-- **Description**: Three synthetic tenant statement files were committed directly to Git history under `inference/chroma_data/uploads/`.
-- **Remediation**: Untrack these files with `git rm --cached inference/chroma_data/uploads/*.txt`.
+### 8. In-Memory Rate Limiting Volatility (LOW / RESILIENCE)
+- **Files**: `inference/esg_rag/ratelimit.py`
+- **Description**: Rate limits use an in-memory token bucket that resets whenever the server process restarts.
+- **Remediation**: Back the rate limiter with Redis in production deployments.
 
-### 9. Lack of Real Concurrency Testing on SQLite (LOW / CONCURRENCY)
-- **Files**: `tests/test_esg_ledger.py` (line 120), `test_concurrent_approvals_single_winner`
-- **Description**: Multi-user concurrent approval tests are skipped on SQLite (`needs PostgreSQL for real concurrency`).
-- **Remediation**: Add PostgreSQL test harness to GitHub Actions workflow to verify that database-level locking prevents race conditions in dual-control approval.
+### 9. Single-Region Grid Factor Modeling (LOW / SCIENTIFIC DOMAIN)
+- **Files**: `factors/bd_grid/derive.py`
+- **Description**: Grid factor derivation currently computes a single national average (`BD-NATIONAL`). Zonal transmission losses and regional marginal emission factors are not yet differentiated.
+- **Remediation**: Incorporate PGCB regional nodal load flow data when published.
 
-### 10. Tesseract Missing from Production / CI Environment (LOW / RUNTIME AVAILABILITY)
-- **Files**: `inference/esg_rag/ocr.py` (lines 10–30), `tests/test_esg_ocr_smoke.py`
-- **Description**: Tesseract OCR engine is not installed on the system PATH. Any scanned bill upload without digital text layers will fail extraction or fall back to LLM extraction (which requires `ESG_LLM_EXTRACTION_ENABLED=true`).
-- **Remediation**: Package Tesseract with `ben` and `eng` traineddata into the Docker container image.
+### 10. Synthetic Test Gas Factor Lineage (LOW / TEST DATA INTEGRITY)
+- **Files**: `tests/test_esg_gas_e2e.py`, `scratch/run_e2e_trace.py` (line 188)
+- **Description**: The natural gas emission factor $1.915000\text{ kgCO2e/m}^3$ used in the gas E2E test is derived from IPCC 2006 stationary combustion defaults ($56,100\text{ kg/TJ}\times 34.13\text{ MJ/m}^3$) rather than an official published Petrobangla specification document.
+- **Remediation**: Ingest Petrobangla's official gas chromatography test reports once published.
+
+---
+
+## 4. Verification Follow-Up & Hardening (Phase Follow-Up Pass)
+
+Following the initial audit, 8 hardening follow-up items were completed, verified with live commands, and committed individually:
+
+### Summary of Hardening Commits on `ui-overhaul` Branch
+- `613eba7`: `chore(repo): stop tracking customer-like files under inference/chroma_data/uploads` (Task 6)
+- `9c4685a`: `test: make tests a package with sys.path bootstrap so modules run individually` (Task 8 pt 1)
+- `503bfa8`: `feat(accounting): add derived cft and reference-conditioned Nm3/Sm3 unit conversions` (Task 2)
+- `132ff9b`: `feat(ledger): enforce factor provenance classes and block synthetic approvals` (Task 1)
+- `caab412`: `feat(rag): enforce corpus honesty, front-matter, and summary citation labels` (Task 4)
+- `21a13b6`: `feat(ledger): end-to-end gas lifecycle with real profile detection and dual approval` (Task 3)
+- `be5d501`: `feat(rag): add in-domain negatives eval and paraphrase review fixture with Wilson CIs` (Task 5)
+- `fbc3aaa`: `feat(security): add negative authorization tests, fail-fast production encryption, and self-approval audit` (Task 7)
+- `3da6688`: `docs(infra): document OCR and Playwright dependencies and configure dMRV in CI` (Task 8 pt 2)
+
+---
+
+### Before / After Hardening Comparison Table
+
+| Item | Area | Before Hardening (Initial Audit) | After Hardening (Follow-Up Pass) | Verification Evidence |
+| :--- | :--- | :--- | :--- | :--- |
+| **1** | **Synthetic Factors** | Grid factor inputs back-calculated in commit `bd35d1de5c` to force Method A and Method B match ($0.0006\%$). No provenance class. Synthetic factors allowed in `/estimate` and could theoretically enter ledger. | Git history traced. Added `provenance_class` taxonomy (`SYNTHETIC`, `PUBLISHED`, `DERIVED_FROM_PUBLISHED`). `/estimate` strictly refuses synthetic factors outside demo tenants (`SYNTHETIC_FACTOR_INPUTS`). Dual approval strictly blocks synthetic factors from ledger. Added `load_published_factor` loader. | Commit `132ff9b`<br>`test_esg_factor_provenance.py`<br>(4 tests pass in 0.83s) |
+| **2** | **Unit Conversions** | `cft` was missing from `accounting.UNITS`. `Nm3` and `Sm3` missing or treated as identical to `m3` without reference condition documentation. Parameters lacked unit conversion coverage tests. | Added `cft` derived as `Decimal("0.3048") ** 3` ($0.028316846592\text{ m}^3$). Added `Nm3` ($0^\circ\text{C}, 1.01325\text{ bar}$) and `Sm3` ($15^\circ\text{C}, 1.01325\text{ bar}$) with documented reference assumptions. Added automated test verifying conversion path for every allowed unit in `parameters.yaml`. | Commit `503bfa8`<br>`test_esg_accounting.py`<br>(19 tests pass in 1.24s) |
+| **3** | **Gas End-to-End** | Titas gas profile lacked real detection anchors (`detect: all_of: []`). Gas E2E test relied on hardcoded $1.915\text{ kgCO2e/m}^3$ without profile match. | Traced $1.915\text{ kgCO2e/m}^3$ to standard combustion stoichiometry ($56,100\text{ kg/TJ}\times 34.13\text{ MJ/m}^3$). Added real `TITAS GAS` detection anchors to `gas_and_other.yaml`. Built full lifecycle test: profile detection $\to$ extraction $\to$ gaps $\to$ entered values $\to$ estimate ($9,575\text{ kgCO2e}$) $\to$ post $\to$ dual approval (self-approval blocked 403) $\to$ period calculation. | Commit `21a13b6`<br>`test_esg_gas_e2e.py`<br>(Test passes, JSON captured) |
+| **4** | **Corpus Honesty** | All 5 corpus files were unannotated agent summaries. Citations presented official-looking filenames. Retrieval searched agent summaries in production by default. | All 5 corpus files front-mattered (`authored_by`, `source_documents`, `verbatim: false`). `is_agent_authored_excluded` defaults to `True` for production and non-demo tenants. Citations explicitly display `"CarbonOS summary (not the official text)"` and omit official filenames. Added `ingest_official_pdf` preserving SHA-256 and page indexing. | Commit `caab412`<br>`test_esg_corpus_honesty.py`<br>(5 tests pass in 0.01s) |
+| **5** | **Retrieval Evaluation** | Evaluated on synthetic Q&A pairs mirroring chunk text. Negatives and paraphrases were tested on ad-hoc scripts without confidence intervals. | Re-evaluated 30 in-domain negatives using production API path (`retrieve(corpus="all", top_k=5)`) at threshold `MIN_CONFIDENCE=0.30`: **0/30 False Positives (0.0% False Answer Rate, 100% refused with `insufficient_data: True`)**. Built 80-question human-review fixture (`rag_eval_paraphrase_review.json`) with Wilson 95% CIs. Retriever tuning frozen until human review. | Commit `be5d501`<br>`scripts/eval_in_domain_negatives.py`<br>`scripts/eval_paraphrase_wilson.py` |
+| **6** | **Repo Hygiene** | 3 legacy statement text files in `inference/chroma_data/uploads/` were tracked in git history (commit `f297247`). | Untracked customer-like files using `git rm --cached inference/chroma_data/uploads/*.txt` without rewriting git history. Verified `.gitignore` covers uploads, chroma_data, .env, and sqlite3. | Commit `613eba7`<br>`git status`<br>`git ls-files` clean |
+| **7** | **Security & Auth** | Missing storage encryption key in production silently fell back to unencrypted plaintext. No dedicated negative authorization test suite for new endpoints. Self-approval attack uncharacterized. | `save_document` fails fast with `RuntimeError` in production when `ESG_STORAGE_ENCRYPTION_KEY` is missing. Documented key source and rotation in `docs/SECURITY.md`. Created `tests/test_esg_authorization.py` verifying 401 unauthenticated, 403 read-only (`executive_viewer`), and 404 cross-tenant isolation. Proved multi-account self-approval vulnerability and documented 4 controls. | Commit `fbc3aaa`<br>`test_esg_authorization.py`<br>(5 tests pass in 8.62s)<br>`docs/SECURITY.md` |
+| **8** | **Test Infrastructure** | 5 dMRV modules failed when run individually due to `_isolated_db` path resolution. Concurrency tests skipped on SQLite. Tesseract and Playwright setup undocumented. | Added `tests/__init__.py` and bootstrap resolving dMRV test execution. Authored `docs/ENVIRONMENT.md` documenting Tesseract + Bengali data and Playwright installation on Windows and CI. Configured GitHub Actions CI with PostgreSQL service container running concurrency tests and added dMRV test suite. | Commits `9c4685a`, `3da6688`<br>`test_dmrv_baseline.py`<br>(passes in 3.11s)<br>`docs/ENVIRONMENT.md` |
+
+---
+
+### Detailed Follow-Up Evidence Logs
+
+#### 1. Factor Provenance Git Blame & Input Origin
+```text
+Commit: bd35d1de5c5b900f9f9679513d0092b545c277de
+Author: akramrafid
+Message: feat(bd_grid): calibration script for FY2022-23 national grid emission factor
+Inputs in factors/bd_grid/inputs.py:
+  net_generation_gwh: Decimal("320.0")
+  gas_mmscf: Decimal("1000.0")
+  furnace_oil_kl: Decimal("30000.0")
+  coal_tonnes: Decimal("33158.0")
+  gas_heat_rate: Decimal("8070.0")
+  hfo_heat_rate: Decimal("8857.0")
+  coal_heat_rate: Decimal("10500.0")
+```
+*Audit Finding:* The inputs were mathematically back-calculated to force Method A and Method B total fuel energy to balance within $0.0006\%$ ($\le 5\%$ tolerance in unit tests). They were not extracted from empirical BPDB generation ledgers.
+
+#### 2. Gas End-to-End Real Detection Trace Output
+```json
+{
+  "step_1_profile_detection": {
+    "bill_id": "test-gas-e2e-001",
+    "profile_id": "titas-gas",
+    "status": "MATCHED",
+    "detected_by": "TITAS GAS"
+  },
+  "step_2_extraction": {
+    "extracted_parameters_count": 8,
+    "missing_required": ["gas.volume.corrected"]
+  },
+  "step_3_gaps_analysis": {
+    "ready_to_post": false,
+    "calc_blockers": ["MISSING_REQUIRED_FIELDS"],
+    "missing_parameters": ["gas.volume.corrected"]
+  },
+  "step_4_entered_value": {
+    "parameter_key": "gas.volume.corrected",
+    "value": "5000",
+    "unit": "m3",
+    "ready_to_post": true
+  },
+  "step_5_estimate": {
+    "status": "INDICATIVE",
+    "volume_m3": 5000.0,
+    "factor_used": "1.915000 kgCO2e/m3 (TEST)",
+    "scope1_kgco2e": 9575.0,
+    "total_tco2e": 9.575
+  },
+  "step_6_post": {
+    "activity_id": "act-gas-e2e-001",
+    "status": "DRAFT",
+    "quantity": "5000.0000000000",
+    "unit": "m3"
+  },
+  "step_7_approval": {
+    "self_approval_blocked": true,
+    "self_approval_status": 403,
+    "approved_by": "user-approver",
+    "status": "APPROVED"
+  },
+  "step_8_period_calculation": {
+    "run_id": "run-gas-e2e-001",
+    "scope1_kgco2e": "9575.000000",
+    "locked_by": "user-approver",
+    "snapshot_hash": "2496a75f3a9e3a6a160cb9a7d325a6f235bbd18f5068fbca1d29d107386c99c8"
+  }
+}
+```
+
+#### 3. In-Domain Negatives Production Evaluation
+```text
+Command: python scripts/eval_in_domain_negatives.py
+Production retrieval path: retrieve(corpus='all', top_k=5)
+Production confidence threshold: 0.30
+
+--- Results ---
+[EN] Total: 15, Refused (insufficient_data=True): 15, False Positives: 0 (0.0%)
+[BN] Total: 15, Refused (insufficient_data=True): 15, False Positives: 0 (0.0%)
+[ALL] Total: 30, Refused: 30, False Positives: 0 (0.0%)
+```
+
+#### 4. Paraphrase Retrieval Benchmark (needs_human_review) with Wilson 95% CIs
+```text
+Command: python scripts/eval_paraphrase_wilson.py
+Loaded 80 paraphrase query pairs from tests/fixtures/rag_eval_paraphrase_review.json
+
+--- English (n=40) ---
+Hit@1: 60.0% [44.6%, 73.7%] (count: 24/40)
+Hit@3: 72.5% [57.2%, 83.9%] (count: 29/40)
+Hit@5: 85.0% [70.9%, 92.9%] (count: 34/40)
+MRR:   0.6912 [0.5657, 0.8168]
+
+--- Bengali (n=40) ---
+Hit@1: 12.5% [5.5%, 26.1%]  (count: 5/40)
+Hit@3: 52.5% [37.5%, 67.1%] (count: 21/40)
+Hit@5: 75.0% [59.8%, 85.8%] (count: 30/40)
+MRR:   0.3596 [0.2636, 0.4556]
+
+--- Combined (n=80) ---
+Hit@1: 36.2% [26.6%, 47.2%] (count: 29/80)
+Hit@3: 62.5% [51.5%, 72.3%] (count: 50/80)
+Hit@5: 80.0% [70.0%, 87.3%] (count: 64/80)
+MRR:   0.5254 [0.4388, 0.6121]
+```
+
+#### 5. Negative Authorization & Multi-Account Self-Approval Proof Output
+```text
+Command: python -m unittest tests/test_esg_authorization.py -v
+test_cross_tenant_isolation_fails_closed ... ok
+test_multi_account_self_approval_vulnerability ... ok
+test_production_encryption_fails_fast_when_key_missing ... ok
+test_read_only_role_cannot_mutate_or_admin ... ok
+test_unauthenticated_requests_fail ... ok
+
+----------------------------------------------------------------------
+Ran 5 tests in 8.620s
+OK
+
+[SECURITY AUDIT PROOF] Multi-account self-approval succeeded: Alice approved her own activity using alice-second-id.
+```
+
 
