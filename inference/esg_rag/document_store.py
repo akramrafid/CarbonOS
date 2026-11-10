@@ -19,15 +19,22 @@ def is_retention_enabled() -> bool:
 
 
 def _get_aes_gcm():
-    """Derives a 256-bit AES-GCM cipher from ESG_STORAGE_ENCRYPTION_KEY."""
+    """Derives a 256-bit AES-GCM cipher from ESG_STORAGE_ENCRYPTION_KEY.
+    In production environments, fails fast if the key is missing or invalid.
+    """
     key = os.getenv("ESG_STORAGE_ENCRYPTION_KEY")
+    is_prod = os.getenv("ESG_ENV") == "production" or os.getenv("ENVIRONMENT") == "production"
     if not key:
+        if is_prod and is_retention_enabled():
+            raise RuntimeError("ESG_STORAGE_ENCRYPTION_KEY must be configured in production environment when document retention is enabled")
         return None
     try:
         from cryptography.hazmat.primitives.ciphers.aead import AESGCM
         key_bytes = hashlib.sha256(key.encode("utf-8")).digest()
         return AESGCM(key_bytes)
-    except Exception:
+    except Exception as e:
+        if is_prod:
+            raise RuntimeError(f"Failed to initialize AES-GCM encryption in production: {e}")
         return None
 
 
