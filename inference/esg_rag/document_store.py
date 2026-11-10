@@ -18,19 +18,15 @@ def is_retention_enabled() -> bool:
     return os.getenv("ESG_RETAIN_SOURCE_DOCUMENTS", "false").lower() in ("true", "1", "yes")
 
 
-def _get_fernet():
+def _get_aes_gcm():
+    """Derives a 256-bit AES-GCM cipher from ESG_STORAGE_ENCRYPTION_KEY."""
     key = os.getenv("ESG_STORAGE_ENCRYPTION_KEY")
     if not key:
         return None
     try:
-        from cryptography.fernet import Fernet
-        if len(key) == 32:
-            key_b64 = base64.urlsafe_b64encode(key.encode("utf-8")).decode("utf-8")
-        elif len(key) == 44 and key.endswith("="):
-            key_b64 = key
-        else:
-            key_b64 = base64.urlsafe_b64encode(hashlib.sha256(key.encode("utf-8")).digest()).decode("utf-8")
-        return Fernet(key_b64.encode("utf-8"))
+        from cryptography.hazmat.primitives.ciphers.aead import AESGCM
+        key_bytes = hashlib.sha256(key.encode("utf-8")).digest()
+        return AESGCM(key_bytes)
     except Exception:
         return None
 
@@ -38,17 +34,30 @@ def _get_fernet():
 def get_tenant_dir(tenant_id: str) -> Path:
     # Sanitize tenant_id to prevent path traversal
     safe_tenant = "".join(c for c in str(tenant_id) if c.isalnum() or c in ("-", "_"))
-    return UPLOADS_DIR / safe_tenant
+    if not safe_tenant or safe_tenant in (".", ".."):
+        raise ValueError(f"Invalid tenant_id: {tenant_id}")
+    tenant_dir = (UPLOADS_DIR / safe_tenant).resolve()
+    base_dir = UPLOADS_DIR.resolve()
+    if not tenant_dir.is_relative_to(base_dir):
+        raise ValueError(f"Path traversal detected in tenant_id: {tenant_id}")
+    return tenant_dir
 
 
 def get_document_path(tenant_id: str, sha256: str) -> Path:
     safe_sha = "".join(c for c in sha256 if c.isalnum())
-    return get_tenant_dir(tenant_id) / f"{safe_sha}.pdf"
+    if not safe_sha:
+        raise ValueError(f"Invalid sha256: {sha256}")
+    doc_path = (get_tenant_dir(tenant_id) / f"{safe_sha}.pdf").resolve()
+    base_dir = UPLOADS_DIR.resolve()
+    if not doc_path.is_relative_to(base_dir):
+        raise ValueError(f"Path traversal detected in sha256: {sha256}")
+    return doc_path
 
 
 def save_document(tenant_id: str, data: bytes, sha256: Optional[str] = None) -> Optional[Path]:
     """Saves document bytes content-addressed by SHA-256 under uploads/<tenant_id>/<sha256>.pdf.
-    Encrypts at rest if ESG_STORAGE_ENCRYPTION_KEY is set.
+    Encrypts at rest via AES-256-GCM if ESG_STORAGE_ENCRYPTION_KEY is set.
+    Each write uses a fresh, random 12-byte nonce.
     Returns the file Path if saved, or None if retention is disabled.
     """
     if not is_retention_enabled():
@@ -60,32 +69,49 @@ def save_document(tenant_id: str, data: bytes, sha256: Optional[str] = None) -> 
     file_path = get_document_path(tenant_id, sha256)
 
     payload = data
-    f = _get_fernet()
-    if f:
-        payload = f.encrypt(data)
+    aes = _get_aes_gcm()
+    if aes:
+        nonce = os.urandom(12)  # Unique 96-bit nonce
+        ct = aes.encrypt(nonce, data, None)
+        payload = nonce + ct
 
     file_path.write_bytes(payload)
     return file_path
 
 
 def read_document(tenant_id: str, sha256: str) -> Optional[bytes]:
-    """Reads and decrypts document bytes for the given tenant and sha256."""
-    file_path = get_document_path(tenant_id, sha256)
+    """Reads and decrypts document bytes for the given tenant and sha256.
+    Fails closed (returns None) on tampering, invalid key, or corrupted payload.
+    Never falls back to CBC or returns unverified raw bytes.
+    """
+    try:
+        file_path = get_document_path(tenant_id, sha256)
+    except ValueError:
+        return None
+
     if not file_path.exists():
         prefix = sha256[:12]
-        matches = list(get_tenant_dir(tenant_id).glob(f"{prefix}*.pdf"))
-        if matches:
-            file_path = matches[0]
-        else:
+        try:
+            matches = list(get_tenant_dir(tenant_id).glob(f"{prefix}*.pdf"))
+            if matches:
+                file_path = matches[0]
+            else:
+                return None
+        except ValueError:
             return None
 
     raw = file_path.read_bytes()
-    f = _get_fernet()
-    if f:
+    aes = _get_aes_gcm()
+    if aes:
+        if len(raw) < 28:  # 12-byte nonce + 16-byte GCM auth tag
+            return None  # Fail closed on truncated file
+        nonce = raw[:12]
+        ct = raw[12:]
         try:
-            return f.decrypt(raw)
+            return aes.decrypt(nonce, ct, None)
         except Exception:
-            return raw
+            # FAIL CLOSED: Authentication failed or corrupted payload
+            return None
     return raw
 
 
