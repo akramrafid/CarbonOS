@@ -1004,6 +1004,20 @@ def estimate_bill(db, principal, bill_id: str, allow_provisional: bool = False,
                 )
                 factors_for_calc.append(prov_f)
 
+    # Check synthetic factor gate: refuse synthetic factors outside demo tenants
+    is_demo = bool(getattr(principal, "is_demo", False))
+    synthetic_factors = [
+        f for f in approved_factors
+        if getattr(f, "provenance_class", None) == "SYNTHETIC"
+    ]
+    if used_provisional and provisional_factor_record and getattr(provisional_factor_record, "provenance_class", None) == "SYNTHETIC":
+        synthetic_factors.append(provisional_factor_record)
+
+    if synthetic_factors:
+        if not is_demo:
+            if "SYNTHETIC_FACTOR_INPUTS" not in calc_blockers:
+                calc_blockers.append("SYNTHETIC_FACTOR_INPUTS")
+
     # Check gap analysis
     gaps = bill_gaps(db, principal, bill_id)
     if gaps.get("missing_required"):
@@ -1026,14 +1040,22 @@ def estimate_bill(db, principal, bill_id: str, allow_provisional: bool = False,
                 "derivation_hash": provisional_factor_record.source_table_ref or "bd_grid"
             }
         msg = ("Blockers prevent calculation: " + ", ".join(calc_blockers))
-        if "MISSING_GRID_AVERAGE_FACTOR" in calc_blockers and facility:
+        if "SYNTHETIC_FACTOR_INPUTS" in calc_blockers:
+            msg = "Synthetic factor inputs are rejected outside demo tenants (blocker: SYNTHETIC_FACTOR_INPUTS). Use published factors."
+        elif "MISSING_GRID_AVERAGE_FACTOR" in calc_blockers and facility:
             msg = (f"No approved grid-average factor exists for region '{facility.grid_region}'. "
                    f"A pending provisional factor proposal from the bd_grid pipeline is available. "
                    f"To generate an indicative estimate using this factor, pass allow_provisional=true. "
                    f"For an audit-grade calculation, a second user must approve the factor.")
+        ret_flags = []
+        if used_provisional:
+            ret_flags.append("PROVISIONAL_FACTOR")
+        if is_demo and synthetic_factors:
+            ret_flags.append("DEMO - SYNTHETIC FACTOR")
         return {
             "status": "INDICATIVE",
-            "flags": ["PROVISIONAL_FACTOR"] if used_provisional else [],
+            "flags": ret_flags,
+            "label": "DEMO - SYNTHETIC FACTOR" if (is_demo and synthetic_factors) else None,
             "audit_grade": False,
             "registry_eligible": False,
             "disclaimer": disclaimer,
@@ -1149,12 +1171,19 @@ def estimate_bill(db, principal, bill_id: str, allow_provisional: bool = False,
     s2_mkt_kg = res.scope2_market_kg
     tot_kg = s1_kg + s2_loc_kg
 
+    ret_flags = []
+    if used_provisional:
+        ret_flags.append("PROVISIONAL_FACTOR")
+    if is_demo and synthetic_factors:
+        ret_flags.append("DEMO - SYNTHETIC FACTOR")
+
     return {
         "status": "INDICATIVE",
-        "flags": ["PROVISIONAL_FACTOR"] if used_provisional else [],
+        "flags": ret_flags,
+        "label": "DEMO - SYNTHETIC FACTOR" if (is_demo and synthetic_factors) else None,
         "audit_grade": False,
         "registry_eligible": False,
-        "disclaimer": disclaimer,
+        "disclaimer": ("DEMO - SYNTHETIC FACTOR: " + disclaimer) if (is_demo and synthetic_factors) else disclaimer,
         "emissions": {
             "scope1_kg": str(s1_kg),
             "scope2_location_kg": str(s2_loc_kg),

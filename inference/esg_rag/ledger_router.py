@@ -91,6 +91,7 @@ class FactorIn(BaseModel):
     source_table_ref: Optional[str] = Field(None, max_length=200)
     source_year: int = Field(..., ge=1990, le=2100)
     licence_note: Optional[str] = Field(None, max_length=2000)
+    provenance_class: Optional[Literal["SYNTHETIC", "PUBLISHED", "DERIVED_FROM_PUBLISHED"]] = "PUBLISHED"
 
 
 class HeatingValueIn(BaseModel):

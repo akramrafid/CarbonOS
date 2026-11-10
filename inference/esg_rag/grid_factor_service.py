@@ -19,10 +19,14 @@ PROJECT_ROOT = HERE.parent.parent
 if str(PROJECT_ROOT) not in sys.path:
     sys.path.insert(0, str(PROJECT_ROOT))
 OUTPUT_FILE = PROJECT_ROOT / "factors" / "bd_grid" / "output" / "bd_grid_factors.json"
+_PROPOSAL_CACHE: Dict[str, List[Dict[str, Any]]] = {}
 
 
 def get_pipeline_proposal_data(grid_region: str = "BD-NATIONAL") -> List[Dict[str, Any]]:
     """Retrieve draft factor rows from pipeline output file or derived calibrated inputs."""
+    if grid_region in _PROPOSAL_CACHE:
+        return [dict(r) for r in _PROPOSAL_CACHE[grid_region]]
+
     if OUTPUT_FILE.is_file():
         try:
             data = json.loads(OUTPUT_FILE.read_text(encoding="utf-8"))
@@ -74,6 +78,7 @@ def get_pipeline_proposal_data(grid_region: str = "BD-NATIONAL") -> List[Dict[st
         digest = hashlib.sha256(json.dumps(raw_rows, sort_keys=True).encode()).hexdigest()
         for r in raw_rows:
             r["derivation_hash"] = digest
+        _PROPOSAL_CACHE[grid_region] = raw_rows
         return raw_rows
     except Exception as e:
         return []
@@ -123,6 +128,7 @@ def wire_bd_grid_proposal(db, principal=None, grid_region: str = "BD-NATIONAL") 
         source_table_ref=f"derivation_hash:{derivation_hash}"[:200],
         source_year=int(row.get("source_year", 2023)),
         licence_note=row.get("licence_note", "DRAFT provisional factor from Method A fuel balance. Requires dual approval.")[:2000],
+        provenance_class="SYNTHETIC",
         is_custom=False,
         status="DRAFT",  # PENDING approval — cannot be used for audit-grade calculations
         created_by="pipeline:bd_grid"

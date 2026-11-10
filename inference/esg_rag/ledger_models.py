@@ -36,6 +36,7 @@ KG = Numeric(28, 6)
 PERIOD_STATUSES = ("OPEN", "LOCKED")
 ACTIVITY_STATUSES = ("DRAFT", "SUBMITTED", "APPROVED", "REJECTED", "SUPERSEDED")
 FACTOR_STATUSES = ("DRAFT", "APPROVED", "RETIRED")
+PROVENANCE_CLASSES = ("SYNTHETIC", "PUBLISHED", "DERIVED_FROM_PUBLISHED")
 FACTOR_METHODS = ("direct", "location", "market")
 FACTOR_KINDS = ("grid_average", "grid_combined_margin", "supplier_specific", "residual_mix")
 DATA_QUALITY_GRADES = ("metered", "billed", "estimated", "default")
@@ -276,6 +277,8 @@ class EmissionFactor(EsgBase):
         CheckConstraint("NOT (activity_type = 'electricity' AND method = 'location' AND factor_kind <> 'grid_average')",
                         name="ck_esg_factor_location_grid_average"),
         CheckConstraint("method <> 'direct' OR factor_kind IS NULL", name="ck_esg_factor_direct_kind"),
+        CheckConstraint("provenance_class IS NULL OR " + _in("provenance_class", PROVENANCE_CLASSES),
+                        name="ck_esg_factor_provenance"),
     )
 
     id = Column(String(36), primary_key=True, default=_id)
@@ -291,6 +294,7 @@ class EmissionFactor(EsgBase):
     method = Column(String(10), nullable=False)
     # NULL only on rows created before migration 0003; new Scope 2 electricity factors must declare it.
     factor_kind = Column(String(30))
+    provenance_class = Column(String(30), nullable=False, default="PUBLISHED")
     # Gas-level factor: [{"gas": "CO2", "kg_per_unit": "56.1", "uncertainty_pct": "3.92"}, ...]. kgco2e_per_unit is
     # then computed from it with gwp_basis by the service. NULL = a CO2e-only factor.
     gas_components = Column(JSON)

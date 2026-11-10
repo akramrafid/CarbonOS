@@ -486,6 +486,20 @@ def create_factor(db, principal, data, platform_wide=False):
         raise DomainError(422, "Scope 1 factors use method 'direct'; Scope 2 factors use 'location' or 'market'")
     _check_factor_kind(data)
     data = _factor_values(dict(data))
+
+    # Detect synthetic provenance: any factor with a SYNTHETIC-labelled input is SYNTHETIC
+    declared_provenance = data.get("provenance_class")
+    all_text = " ".join(str(data.get(k) or "") for k in (
+        "source_publisher", "source_document", "source_table_ref", "licence_note", "family"
+    )).upper()
+    if "SYNTHETIC" in all_text or declared_provenance == "SYNTHETIC":
+        provenance = "SYNTHETIC"
+    elif declared_provenance in ("PUBLISHED", "DERIVED_FROM_PUBLISHED"):
+        provenance = declared_provenance
+    else:
+        provenance = "PUBLISHED"
+    data["provenance_class"] = provenance
+
     latest = db.query(EmissionFactor.version).filter(EmissionFactor.family == family) \
         .order_by(EmissionFactor.version.desc()).first()
     payload = {k: v for k, v in data.items() if k != "family"}
@@ -502,6 +516,8 @@ def approve_factor(db, principal, factor_id):
     f = visible_factors(db, principal).filter(EmissionFactor.id == factor_id).first()
     if f is None:
         raise DomainError(404, "EmissionFactor not found")
+    if getattr(f, "provenance_class", None) == "SYNTHETIC":
+        raise DomainError(422, "Synthetic factors cannot be approved into the audit ledger")
     if f.organization_id is None and not principal.is_platform_operator:
         raise DomainError(403, "Only platform operators may approve platform-wide factors")
     if f.organization_id is not None:
@@ -517,6 +533,41 @@ def approve_factor(db, principal, factor_id):
     db.commit()
     db.refresh(f)
     return f
+
+
+def load_published_factor(db, principal, *, family: str, activity_type: str, unit: str,
+                          kgco2e_per_unit: Decimal, region: str, source_publisher: str,
+                          source_document: str, source_year: int, source_page: str,
+                          source_url: Optional[str] = None, gwp_basis: str = "AR6",
+                          valid_from: Optional[dt.date] = None, valid_to: Optional[dt.date] = None,
+                          method: Optional[str] = None, factor_kind: Optional[str] = None,
+                          platform_wide: bool = False):
+    """Load a factor directly from a named published source without guessing values.
+    Creates a DRAFT factor with provenance_class='PUBLISHED' awaiting dual-control approval."""
+    if method is None:
+        scope = accounting.ACTIVITY_TYPES.get(activity_type, ("1",))[0]
+        method = "location" if scope == "2" else "direct"
+    if factor_kind is None and activity_type == "electricity" and method == "location":
+        factor_kind = "grid_average"
+    payload = {
+        "family": family,
+        "activity_type": activity_type,
+        "unit": unit,
+        "kgco2e_per_unit": Decimal(str(kgco2e_per_unit)),
+        "region": region,
+        "gwp_basis": gwp_basis,
+        "method": method,
+        "factor_kind": factor_kind,
+        "valid_from": valid_from or dt.date(source_year, 1, 1),
+        "valid_to": valid_to,
+        "source_publisher": source_publisher,
+        "source_document": source_document,
+        "source_year": source_year,
+        "source_table_ref": f"Page {source_page}" if not str(source_page).startswith("Page") else str(source_page),
+        "source_url": source_url,
+        "provenance_class": "PUBLISHED"
+    }
+    return create_factor(db, principal, payload, platform_wide=platform_wide)
 
 
 # --- activity records -------------------------------------------------------------------
