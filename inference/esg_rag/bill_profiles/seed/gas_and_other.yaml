@@ -16,8 +16,27 @@ templates:
     - {key: cost.total}
   gas_rules: &gas_rules [period, gas_volume]
 profiles:
-  - {profile_key: titas-gas, issuer: Titas, document_type: gas, layout_version: seed-1, languages: [en, bn],
-     effective_from: 2000-01-01, fields: *gas_fields, rulesets: *gas_rules, notes: *note}
+  - profile_key: titas-gas
+    issuer: Titas Gas Transmission and Distribution Company Limited
+    document_type: gas
+    layout_version: fixture-1
+    languages: [en, bn]
+    effective_from: 2000-01-01
+    detect:
+      all_of: ["TITAS GAS"]
+    fields:
+      - {key: account.number, required: true, hints: [{anchor: ["Customer Code", "Account No"], take: value}]}
+      - {key: bill.number, hints: [{anchor: ["Bill No"], take: value}]}
+      - {key: period.start, required: true, hints: [{anchor: ["Period From"]}]}
+      - {key: period.end, required: true, hints: [{anchor: ["Period To"]}]}
+      - {key: tariff.category, hints: [{anchor: ["Tariff"]}]}
+      - {key: meter.serial, required: true, hints: [{anchor: ["Meter No"], take: value}]}
+      - {key: gas.volume.measured, required: true, unit: m3, hints: [{anchor: ["Measured Volume", "Measured Consumption"]}]}
+      - {key: gas.volume.correction_factor, hints: [{anchor: ["Correction Factor"]}]}
+      - {key: gas.volume.corrected, required: true, unit: m3, hints: [{anchor: ["Corrected Volume"]}]}
+      - {key: cost.total, unit: BDT, hints: [{anchor: ["Total Amount", "Total BDT"]}]}
+    rulesets: *gas_rules
+    notes: "Titas Gas profile with detection anchors and field hints"
   - {profile_key: bakhrabad-gas, issuer: Bakhrabad, document_type: gas, layout_version: seed-1, languages: [en, bn],
      effective_from: 2000-01-01, fields: *gas_fields, rulesets: *gas_rules, notes: *note}
   - {profile_key: kgdcl-gas, issuer: KGDCL, document_type: gas, layout_version: seed-1, languages: [en, bn],
