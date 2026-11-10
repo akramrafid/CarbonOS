@@ -47,6 +47,7 @@ uploads/
 inference/uploads/
 inference/chroma_data/uploads/
 inference/chroma_data/uploads/*/
+tests/fixtures/real_samples/
 
 # Playwright output
 docs/qa/playwright-report/
