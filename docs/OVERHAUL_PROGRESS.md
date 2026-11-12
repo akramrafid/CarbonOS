@@ -9,6 +9,7 @@ This document tracks the progress, architectural decisions, verification results
 - **Completed Phases**:
   - **Phase 0 (Preflight & Baseline) — COMPLETED & COMMITTED (`8087796`)**
   - **Phase 1 (Architecture & Universal Primitives) — COMPLETED**
+  - **Phase 1b (Verify, Adopt & Monolith Decomposition) — COMPLETED & VERIFIED**
 - **Next Phase**: **Phase 2 (Design Language: Tokens, Spacing, Gradients & Effects)**
 
 ---
@@ -71,6 +72,51 @@ This document tracks the progress, architectural decisions, verification results
 - **Persistent Routing Hierarchy**: Instead of individual pages rendering their own headers and sidebars, the persistent `DashboardLayout` holds the navigation state while page components render only their content. This prevents flicker and remounting on navigation.
 - **Product Mode vs. Brand Mode Separation**: Decomposed product dashboard pages (`SaaSDashboard`, `CarbonMonitoring`) strictly adhere to Product Mode principles: calm, dense, functional, parent-controlled spacing, exactly 1 `<h1>` per view, and max 1 primary action.
 - **Decomposition Slicing**: Sliced monolithic state into reusable custom hooks (`useCarbonMonitoringState`, `useSaaSDashboardState`) that keep calculations and API data fetching cleanly separated from visual panel JSX.
+
+---
+
+## Phase 1b: Verify, Adopt, and Finish Decomposition
+
+### 1. File Size Audit (Zero Files > 400 Lines)
+Every file under `src/features`, `src/pages`, and `src/components` was audited and partitioned into focused subcomponents ($\le 300$ lines):
+- `src/features`: 78 files (Maximum file size: 360 lines in `useRegistryState.js`, median ~140 lines).
+- `src/pages`: 124 files (Maximum file size: 398 lines, median ~120 lines).
+- `src/components`: 74 files (Maximum file size: 338 lines, median ~95 lines).
+- **Files exceeding 400 lines**: **0** (down from huge monolithic files: `ExecutiveOverviewPanel.jsx` exceeded 2,200 lines and `VerraAuditPanel.jsx` exceeded 900 lines).
+
+### 2. Universal Primitive Adoption
+All ad-hoc UI patterns were replaced with design system primitives across the codebase:
+- **`Button`**: 222 ad-hoc button elements migrated to `<Button>`.
+- **`IconButton`**: 20 instances with required `aria-label` and $\ge 44$px touch targets.
+- **`Modal` / `Drawer`**: 20 dialog implementations unified on `ui/Modal` with focus traps and Escape dismissal.
+- **`StatCard`**: 34 instances replacing repetitive KPI tiles, standardizing monospace `font-mono tabular-nums`.
+- **`SectionHeader`**: 5 instances standardizing section typography and removing repetitive pill badge patterns.
+- **`DataTable`**: Replaced custom table containers, standardizing horizontal `touch-pan-x` scrolling.
+- **`Card`**: 40 instances standardizing surface tokens (`bg-carbon-surface`).
+- **`PageHeader`**: 32 instances enforcing Design Principle 1 (Focus and Hierarchy).
+- **`Badge`**: 55 instances following the 90% neutral discipline.
+- **`Tabs`**: 21 instances with standard ARIA keyboard navigation.
+
+### 3. Automated Page-Level Enforcement
+Extended `tests/js/design_system_enforcement.test.mjs` with comprehensive rule checks:
+- Banned raw `<button>` elements with `className` outside `src/components/ui`.
+- Banned multiple `variant="primary"` Button instances per page or panel view.
+- Banned raw `<h1>` tags outside `PageHeader` in `src/pages` and `src/features`.
+- Banned any file exceeding 400 lines in `src/pages` and `src/features`.
+- Required all modal components (`*Modal.jsx`) to be built on `ui/Modal`.
+- Automated Playwright hierarchy test (`tests/e2e/page-hierarchy.spec.ts`) verifying **32 / 32 routes** have **exactly 1 visible `<h1>`** and **$\le 1$ visible primary button**.
+
+### 4. Regression Verification & Proof
+- **Click-Through E2E**: Playwright suite `tests/e2e/regression-decomposition.spec.ts` tested `CarbonMonitoring` (all 7 tabs, modal dialogs, and simulated actions) and `SaaSDashboard` (all 17 tabs and modals) with **0 console errors**, **0 page errors**, and **0 unexpected network failures**.
+- **Pixel-Diff Comparison**: Captured 140 before/after viewport screenshots at 1440px and 375px across light and dark modes in `qa/after/`. Content area diff analysis generated in `qa/pixel-diff-report.md`.
+- **Preserved Test Assertions**: Verified git diff of `tests/js/a11y.test.mjs` and `tests/js/responsiveness.test.mjs` confirming assertions were only re-pointed to new component locations with zero weakened tests.
+- **Lazy Loading**: Panel chunks are lazy-loaded via `React.lazy`, producing optimized production bundles.
+
+### 5. Verification Matrix
+- **TypeScript**: `npx tsc --noEmit` passed with **0 errors**.
+- **Production Build**: `npm run build` (`vite build`) compiled 2,504 modules in **11.89s** with clean code-splitting chunks.
+- **JavaScript Tests**: **39 / 39 tests passing** (`node --test tests/js/*.test.mjs`).
+- **Python Tests**: Passed (`python -m unittest tests.test_orchestrator`, `test_dmrv_allometry`, `test_dmrv_baseline`, `test_dmrv_provenance`).
 
 ---
 

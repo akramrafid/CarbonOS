@@ -27,16 +27,25 @@ class RetrievedChunk:
 
     def to_citation(self) -> Dict[str, Any]:
         meta = self.metadata or {}
-        is_agent_authored = self.filename in {
-            "bangladesh_climate_regulatory.md",
-            "bd_grid_methodology.md",
-            "dexterity_textiles_demo.md",
-            "ghg_protocol_standards.md",
-            "ipcc_2006_combustion_and_ar6_gwp.md"
-        }
-        is_verbatim = bool(meta.get("verbatim", False)) if not is_agent_authored else False
+        # The summary label applies ONLY to shipped corpus files with verbatim: false.
+        # Tenant uploads cite their real filename and page.
+        is_tenant_upload = (
+            self.corpus == "tenant_docs"
+            or bool(meta.get("document_id") or meta.get("doc_id"))
+            or (self.tenant_id and self.tenant_id not in ("global_regulatory", "global_ef", "demo_tenant"))
+        )
+        is_shipped_summary = not is_tenant_upload and (
+            self.filename in {
+                "bangladesh_climate_regulatory.md",
+                "bd_grid_methodology.md",
+                "dexterity_textiles_demo.md",
+                "ghg_protocol_standards.md",
+                "ipcc_2006_combustion_and_ar6_gwp.md"
+            }
+            or not bool(meta.get("verbatim", False))
+        )
 
-        if not is_verbatim:
+        if not is_tenant_upload and is_shipped_summary:
             source = "CarbonOS summary (not the official text)"
             page_val = None
         else:
