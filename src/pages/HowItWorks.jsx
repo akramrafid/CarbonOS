@@ -1,5 +1,6 @@
 import React, { useEffect, useRef, useState } from 'react';
 import { Link } from 'react-router-dom';
+import { PageHeader } from '../components/ui/PageHeader';
 
 const StepCard = ({ step, index, inView }) => {
   return (
@@ -185,16 +186,14 @@ const HowItWorks = () => {
       {/* Hero Section */}
       <header className="relative pt-40 pb-20 px-6 lg:px-12 z-10 border-b border-white/5">
         <div className="max-w-4xl mx-auto text-center">
-          <span className="font-mono text-xs text-emerald tracking-widest px-3 py-1 bg-[#0D2B1A]/40 border border-[#00C853]/20 rounded-full mb-6 inline-block">
-            DATA TO BDT PIPELINE
-          </span>
-          <h1 className="serif-drama text-5xl md:text-7xl text-white leading-tight mb-6 tracking-tight">
-            The Lifecycle of a <br/>
-            <span className="text-emerald italic">Verified Credit</span>
-          </h1>
-          <p className="text-lg md:text-xl text-mist font-sans font-light max-w-2xl mx-auto">
-            Carbon Zero BD is the first end-to-end registry in South Asia with zero payment friction. See how we move value from the farm directly to the farmer.
-          </p>
+          <PageHeader
+            badge="DATA TO BDT PIPELINE"
+            title={<>The Lifecycle of a <br/><span className="text-emerald italic">Verified Credit</span></>}
+            description="Carbon Zero BD is the first end-to-end registry in South Asia with zero payment friction. See how we move value from the farm directly to the farmer."
+            align="center"
+            className="border-none mb-0 pb-0"
+            titleClassName="serif-drama !text-5xl md:!text-7xl !text-white !leading-tight !tracking-tight font-normal"
+          />
         </div>
       </header>
 

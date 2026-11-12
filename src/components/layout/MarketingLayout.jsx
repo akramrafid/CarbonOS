@@ -24,3 +24,4 @@ export function MarketingLayout() {
 }
 
 export default MarketingLayout;
+

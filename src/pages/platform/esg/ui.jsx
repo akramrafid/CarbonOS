@@ -2,6 +2,7 @@
 // components render explicit loading, empty and error states instead of placeholder numbers.
 import { useCallback, useEffect, useId, useState } from 'react';
 import { esgGet } from '../../../lib/esgApi';
+import { Button as UniversalButton } from '../../../components/ui/Button';
 
 export function useEsgData(path) {
   const [state, setState] = useState({ data: null, error: null, loading: Boolean(path) });
@@ -93,18 +94,7 @@ export function Select({ label, hint, options, ...props }) {
   );
 }
 
-export function Button({ variant = 'primary', className = '', ...props }) {
-  const styles = variant === 'primary'
-    ? 'bg-emerald text-carbon hover:bg-emerald-400'
-    : 'border border-mist/40 text-registry hover:border-emerald';
-  return (
-    <button
-      type="button"
-      className={`min-h-[40px] rounded-lg px-4 py-2 font-mono text-xs font-bold transition-colors disabled:cursor-not-allowed disabled:opacity-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald ${styles} ${className}`}
-      {...props}
-    />
-  );
-}
+export { UniversalButton as Button };
 
 export function Table({ caption, columns, rows, rowKey = 'id' }) {
   return (

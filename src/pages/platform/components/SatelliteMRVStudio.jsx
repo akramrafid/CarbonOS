@@ -15,6 +15,7 @@ import {
   Check,
   RefreshCw
 } from 'lucide-react';
+import { Button } from '../../../components/ui/Button';
 
 const SATELLITE_PROJECTS = [
   {
@@ -274,13 +275,15 @@ export const SatelliteMRVStudio = ({
             </div>
 
             <div className="pt-2">
-              <button
+              <Button
+                variant="primary"
+                size="md"
                 onClick={handleRetire}
-                className="w-full py-2.5 rounded-2xl bg-emerald-600 hover:bg-emerald-500 text-white font-sans font-semibold text-xs shadow-md transition-all flex items-center justify-center space-x-2 cursor-pointer"
+                className="w-full"
+                leftIcon={<ShieldCheck className="w-4 h-4" />}
               >
-                <ShieldCheck className="w-4 h-4" />
-                <span>Retire {retireAmount} tCO₂e Insets Now</span>
-              </button>
+                Retire {retireAmount} tCO₂e Insets Now
+              </Button>
             </div>
 
             {showCertificate && (

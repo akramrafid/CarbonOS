@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { Suspense, lazy } from 'react';
 import { 
   Grid, 
   Compass, 
@@ -23,30 +23,36 @@ import { Button } from '../../components/ui/Button';
 // State hook
 import { useSaaSDashboardState } from '../../features/saas/useSaaSDashboardState';
 
-// Modular Feature Panels
-import ExecutiveOverviewPanel from '../../features/saas/components/ExecutiveOverviewPanel';
-import MaterialityPanel from '../../features/saas/components/MaterialityPanel';
-import TasksPanel from '../../features/saas/components/TasksPanel';
-import EsgCalendarPanel from '../../features/saas/components/EsgCalendarPanel';
-import EsgAnalyticsPanel from '../../features/saas/components/EsgAnalyticsPanel';
-import EsgTeamPanel from '../../features/saas/components/EsgTeamPanel';
-import EsgSettingsPanel from '../../features/saas/components/EsgSettingsPanel';
-import EsgHelpPanel from '../../features/saas/components/EsgHelpPanel';
+// Lazy-loaded Feature Panels
+const ExecutiveOverviewPanel = lazy(() => import('../../features/saas/components/ExecutiveOverviewPanel'));
+const MaterialityPanel = lazy(() => import('../../features/saas/components/MaterialityPanel'));
+const TasksPanel = lazy(() => import('../../features/saas/components/TasksPanel'));
+const EsgCalendarPanel = lazy(() => import('../../features/saas/components/EsgCalendarPanel'));
+const EsgAnalyticsPanel = lazy(() => import('../../features/saas/components/EsgAnalyticsPanel'));
+const EsgTeamPanel = lazy(() => import('../../features/saas/components/EsgTeamPanel'));
+const EsgSettingsPanel = lazy(() => import('../../features/saas/components/EsgSettingsPanel'));
+const EsgHelpPanel = lazy(() => import('../../features/saas/components/EsgHelpPanel'));
 
-// Core Studios & Modals
-import { DuckDBEngineView } from './components/DuckDBEngineView';
-import { SatelliteMRVStudio } from './components/SatelliteMRVStudio';
-import { FactorRegistryStudio } from './components/FactorRegistryStudio';
-import { AtlasBenchmarkStudio } from './components/AtlasBenchmarkStudio';
-import { ConglomerateTreeStudio } from './components/ConglomerateTreeStudio';
-import { UniversalUtilityExtractor } from './components/UniversalUtilityExtractor';
-import { ActivityEvidenceWorkspace } from './components/ActivityEvidenceWorkspace';
-import { EsgReportGenerator } from './components/EsgReportGenerator';
-import { VerificationReadinessCenter } from './components/VerificationReadinessCenter';
-import { EsgAuditModal } from './components/EsgAuditModal';
-import CorporateClientModal from '../../features/saas/components/CorporateClientModal';
-import AddProjectModal from '../../features/saas/components/AddProjectModal';
-import AddMemberModal from '../../features/saas/components/AddMemberModal';
+// Lazy-loaded Core Studios & Modals
+const DuckDBEngineView = lazy(() => import('./components/DuckDBEngineView').then(m => ({ default: m.DuckDBEngineView })));
+const SatelliteMRVStudio = lazy(() => import('./components/SatelliteMRVStudio').then(m => ({ default: m.SatelliteMRVStudio })));
+const FactorRegistryStudio = lazy(() => import('./components/FactorRegistryStudio').then(m => ({ default: m.FactorRegistryStudio })));
+const AtlasBenchmarkStudio = lazy(() => import('./components/AtlasBenchmarkStudio').then(m => ({ default: m.AtlasBenchmarkStudio })));
+const ConglomerateTreeStudio = lazy(() => import('./components/ConglomerateTreeStudio').then(m => ({ default: m.ConglomerateTreeStudio })));
+const UniversalUtilityExtractor = lazy(() => import('./components/UniversalUtilityExtractor').then(m => ({ default: m.UniversalUtilityExtractor })));
+const ActivityEvidenceWorkspace = lazy(() => import('./components/ActivityEvidenceWorkspace').then(m => ({ default: m.ActivityEvidenceWorkspace })));
+const EsgReportGenerator = lazy(() => import('./components/EsgReportGenerator').then(m => ({ default: m.EsgReportGenerator })));
+const VerificationReadinessCenter = lazy(() => import('./components/VerificationReadinessCenter').then(m => ({ default: m.VerificationReadinessCenter })));
+const EsgAuditModal = lazy(() => import('./components/EsgAuditModal').then(m => ({ default: m.EsgAuditModal })));
+const CorporateClientModal = lazy(() => import('../../features/saas/components/CorporateClientModal'));
+const AddProjectModal = lazy(() => import('../../features/saas/components/AddProjectModal'));
+const AddMemberModal = lazy(() => import('../../features/saas/components/AddMemberModal'));
+
+const PanelFallback = () => (
+  <div className="w-full min-h-[380px] rounded-2xl border border-white/10 bg-white/[0.02] flex items-center justify-center text-sm font-mono text-mist/60 animate-pulse">
+    Loading workspace panel...
+  </div>
+);
 
 /**
  * SaaSDashboard Page
@@ -178,118 +184,130 @@ export const SaaSDashboard = () => {
 
       {/* Active Tab Panel */}
       <div className="w-full">
-        {activeMenu === 'Dashboard' && <ExecutiveOverviewPanel {...state} />}
-        {activeMenu === 'Materiality' && <MaterialityPanel {...state} />}
-        {activeMenu === 'Audit & Compliance' && (
-          <VerificationReadinessCenter 
-            activeClientId={state.activeClientId}
-            isLight={isLight}
-            locale={locale}
-            currency={currency}
-            showToast={showToast}
-          />
-        )}
-        {activeMenu === 'Tasks' && <TasksPanel {...state} />}
-        {activeMenu === 'Calendar' && <EsgCalendarPanel {...state} />}
-        {activeMenu === 'Analytics' && <EsgAnalyticsPanel {...state} />}
-        {activeMenu === 'Team' && <EsgTeamPanel {...state} />}
-        {activeMenu === 'Settings' && <EsgSettingsPanel {...state} />}
-        {activeMenu === 'Help' && <EsgHelpPanel {...state} />}
+        <Suspense fallback={<PanelFallback />}>
+          {activeMenu === 'Dashboard' && <ExecutiveOverviewPanel {...state} />}
+          {activeMenu === 'Materiality' && <MaterialityPanel {...state} />}
+          {activeMenu === 'Audit & Compliance' && (
+            <VerificationReadinessCenter 
+              activeClientId={state.activeClientId}
+              isLight={isLight}
+              locale={locale}
+              currency={currency}
+              showToast={showToast}
+            />
+          )}
+          {activeMenu === 'Tasks' && <TasksPanel {...state} />}
+          {activeMenu === 'Calendar' && <EsgCalendarPanel {...state} />}
+          {activeMenu === 'Analytics' && <EsgAnalyticsPanel {...state} />}
+          {activeMenu === 'Team' && <EsgTeamPanel {...state} />}
+          {activeMenu === 'Settings' && <EsgSettingsPanel {...state} />}
+          {activeMenu === 'Help' && <EsgHelpPanel {...state} />}
 
-        {/* Studios */}
-        {activeMenu === 'DuckDB Engine' && (
-          <DuckDBEngineView 
-            isLight={isLight} 
-            locale={locale} 
-            currency={currency}
-            activityInputs={inputs}
-            activityResults={results}
-            onRecalculate={() => calculateEmissions(inputs, ef)}
-          />
-        )}
-        {activeMenu === 'Utility Invoices' && (
-          <UniversalUtilityExtractor 
-            isLight={isLight} 
-            locale={locale} 
-            activeClientId={state.activeClientId}
-            onApplyToLedger={(extractedData) => {
-              showToast(
-                lang === 'bn'
-                  ? `ইউটিলিটি লেজার আপডেট সম্পন্ন: ${extractedData.segments?.length || 0} টি সেগমেন্ট অন্তর্ভুক্ত`
-                  : `Universal utility ledger updated: ${extractedData.segments?.length || 0} segments committed with SHA-256 seal.`, 
-                "success"
-              );
-            }}
-          />
-        )}
-        {activeMenu === 'Satellite MRV' && (
-          <SatelliteMRVStudio isLight={isLight} locale={locale} />
-        )}
-        {activeMenu === 'Factor Registry' && (
-          <FactorRegistryStudio isLight={isLight} locale={locale} />
-        )}
-        {activeMenu === 'ATLAS Benchmark' && (
-          <AtlasBenchmarkStudio isLight={isLight} locale={locale} />
-        )}
-        {activeMenu === 'Entity Tree' && (
-          <ConglomerateTreeStudio isLight={isLight} locale={locale} />
-        )}
-        {activeMenu === 'Activity & Evidence' && (
-          <ActivityEvidenceWorkspace 
-            activeClientId={state.activeClientId}
-            isLight={isLight}
-            locale={locale}
-            currency={currency}
-            showToast={showToast}
-          />
-        )}
-        {activeMenu === 'ESG Reports' && (
-          <EsgReportGenerator 
-            activeClientId={state.activeClientId}
-            isLight={isLight}
-            locale={locale}
-            currency={currency}
-            showToast={showToast}
-          />
-        )}
+          {/* Studios */}
+          {activeMenu === 'DuckDB Engine' && (
+            <DuckDBEngineView 
+              isLight={isLight} 
+              locale={locale} 
+              currency={currency}
+              activityInputs={inputs}
+              activityResults={results}
+              onRecalculate={() => calculateEmissions(inputs, ef)}
+            />
+          )}
+          {activeMenu === 'Utility Invoices' && (
+            <UniversalUtilityExtractor 
+              isLight={isLight} 
+              locale={locale} 
+              activeClientId={state.activeClientId}
+              onApplyToLedger={(extractedData) => {
+                showToast(
+                  lang === 'bn'
+                    ? `ইউটিলিটি লেজার আপডেট সম্পন্ন: ${extractedData.segments?.length || 0} টি সেগমেন্ট অন্তর্ভুক্ত`
+                    : `Universal utility ledger updated: ${extractedData.segments?.length || 0} segments committed with SHA-256 seal.`, 
+                  "success"
+                );
+              }}
+            />
+          )}
+          {activeMenu === 'Satellite MRV' && (
+            <SatelliteMRVStudio isLight={isLight} locale={locale} />
+          )}
+          {activeMenu === 'Factor Registry' && (
+            <FactorRegistryStudio isLight={isLight} locale={locale} />
+          )}
+          {activeMenu === 'ATLAS Benchmark' && (
+            <AtlasBenchmarkStudio isLight={isLight} locale={locale} />
+          )}
+          {activeMenu === 'Entity Tree' && (
+            <ConglomerateTreeStudio isLight={isLight} locale={locale} />
+          )}
+          {activeMenu === 'Activity & Evidence' && (
+            <ActivityEvidenceWorkspace 
+              activeClientId={state.activeClientId}
+              isLight={isLight}
+              locale={locale}
+              currency={currency}
+              showToast={showToast}
+            />
+          )}
+          {activeMenu === 'ESG Reports' && (
+            <EsgReportGenerator 
+              activeClientId={state.activeClientId}
+              isLight={isLight}
+              locale={locale}
+              currency={currency}
+              showToast={showToast}
+            />
+          )}
+        </Suspense>
       </div>
 
-      {/* Global Modals */}
-      <EsgAuditModal
-        isOpen={isEsgAuditModalOpen}
-        onClose={() => setIsEsgAuditModalOpen(false)}
-        isLight={isLight}
-        activeClient={activeClient}
-        esgMetrics={esgMetrics}
-        results={results}
-        inputs={inputs}
-        ef={ef}
-        marketFactor={0.12}
-      />
+      {/* Global Modals with Suspense */}
+      <Suspense fallback={null}>
+        {isEsgAuditModalOpen && (
+          <EsgAuditModal
+            isOpen={isEsgAuditModalOpen}
+            onClose={() => setIsEsgAuditModalOpen(false)}
+            isLight={isLight}
+            activeClient={activeClient}
+            esgMetrics={esgMetrics}
+            results={results}
+            inputs={inputs}
+            ef={ef}
+            marketFactor={0.12}
+          />
+        )}
 
-      <CorporateClientModal
-        isOpen={isClientModalOpen}
-        onClose={() => setIsClientModalOpen(false)}
-        isLight={isLight}
-        activeClientId={state.activeClientId}
-        handleSelectClient={handleSelectClient}
-      />
+        {isClientModalOpen && (
+          <CorporateClientModal
+            isOpen={isClientModalOpen}
+            onClose={() => setIsClientModalOpen(false)}
+            isLight={isLight}
+            activeClientId={state.activeClientId}
+            handleSelectClient={handleSelectClient}
+          />
+        )}
 
-      <AddProjectModal
-        isOpen={isAddProjectOpen}
-        onClose={() => setIsAddProjectOpen(false)}
-        newProject={newProject}
-        setNewProject={setNewProject}
-        handleAddProject={handleAddProject}
-      />
+        {isAddProjectOpen && (
+          <AddProjectModal
+            isOpen={isAddProjectOpen}
+            onClose={() => setIsAddProjectOpen(false)}
+            newProject={newProject}
+            setNewProject={setNewProject}
+            handleAddProject={handleAddProject}
+          />
+        )}
 
-      <AddMemberModal
-        isOpen={isAddMemberOpen}
-        onClose={() => setIsAddMemberOpen(false)}
-        newMember={newMember}
-        setNewMember={setNewMember}
-        handleAddMember={handleAddMember}
-      />
+        {isAddMemberOpen && (
+          <AddMemberModal
+            isOpen={isAddMemberOpen}
+            onClose={() => setIsAddMemberOpen(false)}
+            newMember={newMember}
+            setNewMember={setNewMember}
+            handleAddMember={handleAddMember}
+          />
+        )}
+      </Suspense>
     </div>
   );
 };

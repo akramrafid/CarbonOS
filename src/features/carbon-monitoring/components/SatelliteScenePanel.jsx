@@ -7,9 +7,22 @@ import {
   MapPin,
   Calendar,
   Layers,
-  ChevronRight
+  ChevronRight,
+  Navigation,
+  Trees,
+  Mountain,
+  PenTool,
+  Zap,
+  Cpu
 } from 'lucide-react';
-import { FASTAPI_API_URL } from '../constants';
+import {
+  FASTAPI_API_URL,
+  LAYER_CONFIG,
+  SUNDARBANS_RESERVE,
+  CHT_RESERVE,
+  calculateGeodesicMetrics
+} from '../constants';
+import { Button } from '../../../components/ui/Button';
 
 export function SatelliteScenePanel(props) {
   const {
@@ -25,8 +38,16 @@ export function SatelliteScenePanel(props) {
     analyzing,
     handleRunAnalysis,
     setActiveTab,
-    selectedJob
+    selectedJob,
+    activeLayer = 'ndvi',
+    setActiveLayer = () => {},
+    drawPoints = [],
+    setDrawPoints = () => {}
   } = props;
+
+  const [projectName, setProjectName] = React.useState(
+    props.projectName || "Sundarbans Mangrove Reserve (Block A)"
+  );
 
   return (
     <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
@@ -180,52 +201,47 @@ export function SatelliteScenePanel(props) {
                 </span>
               </div>
               <div className="grid grid-cols-1 sm:grid-cols-3 gap-2">
-                <button
-                  type="button"
+                <Button
+                  variant="secondary"
+                  size="sm"
                   onClick={() => {
                     setDrawPoints(SUNDARBANS_RESERVE);
                     setProjectName("Sundarbans Mangrove Reserve (Block A)");
                   }}
-                  className={`text-xs py-2 px-3 rounded-xl border text-left truncate transition-all cursor-pointer ${
+                  className={`text-xs text-left truncate justify-start ${
                     drawPoints === SUNDARBANS_RESERVE || (drawPoints.length === SUNDARBANS_RESERVE.length && drawPoints[0][0] === SUNDARBANS_RESERVE[0][0])
-                      ? (isLight ? 'bg-[#E8F8EE] border-[#00873E] text-[#00873E] font-bold' : 'bg-emerald/15 border-emerald text-emerald font-bold')
-                      : (isLight ? 'bg-white border-[#E2E8F0] text-[#475569] hover:bg-[#E2E8F0]' : 'bg-white/5 border-white/10 hover:bg-white/10 text-mist')
+                      ? (isLight ? '!bg-[#E8F8EE] !border-[#00873E] !text-[#00873E] font-bold' : '!bg-emerald/15 !border-emerald !text-emerald font-bold')
+                      : ''
                   }`}
+                  leftIcon={<Trees size={13} className={drawPoints === SUNDARBANS_RESERVE || (drawPoints.length === SUNDARBANS_RESERVE.length && drawPoints[0][0] === SUNDARBANS_RESERVE[0][0]) ? (isLight ? 'text-[#00873E]' : 'text-emerald') : 'text-mist'} />}
                 >
-                  <span className="flex items-center gap-1.5">
-                    <Trees size={13} className={drawPoints === SUNDARBANS_RESERVE || (drawPoints.length === SUNDARBANS_RESERVE.length && drawPoints[0][0] === SUNDARBANS_RESERVE[0][0]) ? (isLight ? 'text-[#00873E]' : 'text-emerald') : 'text-mist'} />
-                    <span>Sundarbans (3,800 ha)</span>
-                  </span>
-                </button>
-                <button
-                  type="button"
+                  <span>Sundarbans (3,800 ha)</span>
+                </Button>
+                <Button
+                  variant="secondary"
+                  size="sm"
                   onClick={() => {
                     setDrawPoints(CHT_RESERVE);
                     setProjectName("Chittagong Hill Tracts Rain Forest");
                   }}
-                  className={`text-xs py-2 px-3 rounded-xl border text-left truncate transition-all cursor-pointer ${
+                  className={`text-xs text-left truncate justify-start ${
                     drawPoints === CHT_RESERVE || (drawPoints.length === CHT_RESERVE.length && drawPoints[0][0] === CHT_RESERVE[0][0])
-                      ? (isLight ? 'bg-[#E8F8EE] border-[#00873E] text-[#00873E] font-bold' : 'bg-emerald/15 border-emerald text-emerald font-bold')
-                      : (isLight ? 'bg-white border-[#E2E8F0] text-[#475569] hover:bg-[#E2E8F0]' : 'bg-white/5 border-white/10 hover:bg-white/10 text-mist')
+                      ? (isLight ? '!bg-[#E8F8EE] !border-[#00873E] !text-[#00873E] font-bold' : '!bg-emerald/15 !border-emerald !text-emerald font-bold')
+                      : ''
                   }`}
+                  leftIcon={<Mountain size={13} className={drawPoints === CHT_RESERVE || (drawPoints.length === CHT_RESERVE.length && drawPoints[0][0] === CHT_RESERVE[0][0]) ? (isLight ? 'text-[#00873E]' : 'text-emerald') : 'text-mist'} />}
                 >
-                  <span className="flex items-center gap-1.5">
-                    <Mountain size={13} className={drawPoints === CHT_RESERVE || (drawPoints.length === CHT_RESERVE.length && drawPoints[0][0] === CHT_RESERVE[0][0]) ? (isLight ? 'text-[#00873E]' : 'text-emerald') : 'text-mist'} />
-                    <span>CHT Reserve (5,420 ha)</span>
-                  </span>
-                </button>
-                <button
-                  type="button"
+                  <span>CHT Reserve (5,420 ha)</span>
+                </Button>
+                <Button
+                  variant="secondary"
+                  size="sm"
                   onClick={() => setActiveTab('map')}
-                  className={`text-xs py-2 px-3 rounded-xl border text-center transition-all cursor-pointer ${
-                    isLight ? 'bg-white border-[#E2E8F0] text-[#00873E] hover:bg-[#E2E8F0]' : 'bg-white/5 border-white/10 hover:bg-white/10 text-emerald'
-                  }`}
+                  className="text-xs text-center justify-center"
+                  leftIcon={<PenTool size={13} className={isLight ? 'text-[#00873E]' : 'text-emerald'} />}
                 >
-                  <span className="flex items-center justify-center gap-1.5">
-                    <PenTool size={13} className={isLight ? 'text-[#00873E]' : 'text-emerald'} />
-                    <span>Draw / Edit on Map</span>
-                  </span>
-                </button>
+                  <span>Draw / Edit on Map</span>
+                </Button>
               </div>
             </div>
 
@@ -241,23 +257,16 @@ export function SatelliteScenePanel(props) {
                   <span>Sub-120ms deterministic inference calibrated to IPCC Tier-3 and GEDI LiDAR.</span>
                 </span>
               </div>
-              <button 
+              <Button 
+                variant="primary"
+                size="lg"
                 onClick={handleRunAnalysis}
-                disabled={analyzing}
-                className="bg-emerald hover:bg-emerald/90 text-carbon font-extrabold px-6 py-3 rounded-xl shadow-md transition-all flex items-center space-x-2 cursor-pointer shrink-0"
+                loading={analyzing}
+                leftIcon={analyzing ? <RefreshCw size={18} className="animate-spin" /> : <Cpu size={18} />}
+                className="font-extrabold shrink-0"
               >
-                {analyzing ? (
-                  <>
-                    <RefreshCw size={18} className="animate-spin" />
-                    <span>Processing AI Model...</span>
-                  </>
-                ) : (
-                  <>
-                    <Cpu size={18} />
-                    <span>Trigger AI Estimation</span>
-                  </>
-                )}
-              </button>
+                <span>{analyzing ? 'Processing AI Model...' : 'Trigger AI Estimation'}</span>
+              </Button>
             </div>
 
           </div>

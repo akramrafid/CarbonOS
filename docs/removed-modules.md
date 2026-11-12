@@ -62,3 +62,4 @@ Consolidated ad-hoc styling across pages into unified primitives in `src/compone
 - `Dropdown.jsx` & `Tooltip.jsx`: Accessible overlays with keyboard and click-outside handling.
 - `Toast.jsx`: Universal aria-live status alerts.
 - `DevGridOverlay.jsx`: 12-column grid and 4px baseline rhythm overlay toggled via `G` key in dev.
+

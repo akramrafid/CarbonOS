@@ -11,7 +11,7 @@ export const MaterialityPanel = (props) => {
   return (
           <div className="bg-[#08130C] border border-[#152B1D] rounded-3xl p-6 lg:p-8 shadow-xl space-y-6 text-white">
             <div>
-              <h1 className="font-sans font-bold text-3xl text-white">Double Materiality Assessment</h1>
+              <h2 className="font-sans font-bold text-3xl text-white">Double Materiality Assessment</h2>
               <p className="text-sm text-[#7C9A88] mt-1 font-sans">
                 Identify and prioritize key ESG issues based on their Impact Materiality and Financial Materiality (CSRD/ESRS aligned).
               </p>

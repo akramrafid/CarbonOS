@@ -13,6 +13,8 @@ import MetricsPanel from './MetricsPanel';
 import DisclosuresPanel from './DisclosuresPanel';
 import BillAnalysisPanel from './BillAnalysisPanel';
 import { AuditPanel, MembersPanel } from './PeoplePanel';
+import { Tabs } from '../../../components/ui/Tabs';
+import { PageHeader } from '../../../components/ui/PageHeader';
 
 const PERMS = {
   org_owner: ['read', 'write', 'review', 'admin'], esg_admin: ['read', 'write', 'review', 'admin'],
@@ -130,18 +132,18 @@ export default function EsgWorkspace() {
 
   const shell = (children) => (
     <main className="mx-auto max-w-6xl space-y-6 px-4 pb-16 pt-28 sm:px-6">
-      <header className="flex flex-wrap items-end justify-between gap-4">
-        <div>
-          <p className="font-mono text-[11px] uppercase tracking-wider text-emerald">CarbonOS ESG</p>
-          <h1 className="font-serif text-4xl text-registry">GHG accounting workspace</h1>
-        </div>
-        {user && (
-          <div className="flex items-center gap-3 text-sm text-mist">
-            <span>{user.name}</span>
-            <Button variant="secondary" onClick={signOut}>Sign out</Button>
-          </div>
-        )}
-      </header>
+      <PageHeader
+        title="GHG accounting workspace"
+        badge="CarbonOS ESG"
+        secondaryActions={
+          user ? (
+            <div className="flex items-center gap-3 text-sm text-mist">
+              <span>{user.name}</span>
+              <Button variant="secondary" onClick={signOut}>Sign out</Button>
+            </div>
+          ) : null
+        }
+      />
       <Notice error={action.error || loadError} message={action.message} />
       {children}
     </main>
@@ -222,26 +224,15 @@ export default function EsgWorkspace() {
             </div>
             <div className="flex flex-wrap items-center gap-2">
               <span className="text-[11px] text-mist">Dual-control persona:</span>
-              <div className="inline-flex rounded-lg border border-mist/20 p-0.5">
-                <button
-                  type="button"
-                  onClick={() => handlePersonaChange('owner')}
-                  className={`rounded-md px-2.5 py-1 font-mono text-[11px] transition-colors ${
-                    user?.activePersona !== 'reviewer' ? 'bg-emerald text-carbon font-semibold' : 'text-mist hover:text-registry'
-                  }`}
-                >
-                  Submitter (Owner)
-                </button>
-                <button
-                  type="button"
-                  onClick={() => handlePersonaChange('reviewer')}
-                  className={`rounded-md px-2.5 py-1 font-mono text-[11px] transition-colors ${
-                    user?.activePersona === 'reviewer' ? 'bg-emerald text-carbon font-semibold' : 'text-mist hover:text-registry'
-                  }`}
-                >
-                  Auditor (Reviewer)
-                </button>
-              </div>
+              <Tabs
+                tabs={[
+                  { id: 'owner', label: 'Submitter (Owner)' },
+                  { id: 'reviewer', label: 'Auditor (Reviewer)' }
+                ]}
+                activeTab={user?.activePersona === 'reviewer' ? 'reviewer' : 'owner'}
+                onChange={handlePersonaChange}
+                size="sm"
+              />
               <Button variant="secondary" onClick={handleResetDemo} disabled={action.busy}>
                 Reset demo data
               </Button>
@@ -260,13 +251,13 @@ export default function EsgWorkspace() {
         )}
       </div>
 
-      <nav aria-label="ESG workspace sections" className="flex gap-2 overflow-x-auto pb-1">
-        {tabs.map(([key, label]) => (
-          <button key={key} type="button" onClick={() => setTab(key)} aria-current={tab === key ? 'page' : undefined}
-            className={`whitespace-nowrap rounded-lg px-4 py-2 font-mono text-xs focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald ${tab === key ? 'bg-emerald text-carbon' : 'border border-mist/30 text-registry'}`}>
-            {label}
-          </button>
-        ))}
+      <nav aria-label="ESG workspace sections" className="overflow-x-auto pb-1">
+        <Tabs
+          tabs={tabs.map(([key, label]) => ({ id: key, label }))}
+          activeTab={tab}
+          onChange={setTab}
+          size="sm"
+        />
       </nav>
       <div key={orgId + tab}>
         {tab === 'setup' && <SetupPanel canAdmin={can.admin} />}

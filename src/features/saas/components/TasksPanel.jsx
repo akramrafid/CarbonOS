@@ -10,7 +10,8 @@ export const TasksPanel = (props) => {
     deleteTask,
     taskInput,
     setTaskInput,
-    handleAddTask
+    handleAddTask,
+    searchQuery = ''
   } = props;
 
   return (

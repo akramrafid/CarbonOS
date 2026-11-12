@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { Suspense, lazy } from 'react';
 import { 
   Activity, 
   ShieldCheck, 
@@ -15,15 +15,21 @@ import { Tabs } from '../../components/ui/Tabs';
 import { Badge } from '../../components/ui/Badge';
 import { useCarbonMonitoringState } from '../../features/carbon-monitoring/useCarbonMonitoringState';
 
-// Modular Feature Panels
-import BiomassOverviewPanel from '../../features/carbon-monitoring/components/BiomassOverviewPanel';
-import VerraAuditPanel from '../../features/carbon-monitoring/components/VerraAuditPanel';
-import TieredVerificationPanel from '../../features/carbon-monitoring/components/TieredVerificationPanel';
-import GisMapPanel from '../../features/carbon-monitoring/components/GisMapPanel';
-import SatelliteScenePanel from '../../features/carbon-monitoring/components/SatelliteScenePanel';
-import ReportsPanel from '../../features/carbon-monitoring/components/ReportsPanel';
-import AlertsPanel from '../../features/carbon-monitoring/components/AlertsPanel';
-import SettingsPanel from '../../features/carbon-monitoring/components/SettingsPanel';
+// Lazy-loaded Feature Panels
+const BiomassOverviewPanel = lazy(() => import('../../features/carbon-monitoring/components/BiomassOverviewPanel'));
+const VerraAuditPanel = lazy(() => import('../../features/carbon-monitoring/components/VerraAuditPanel'));
+const TieredVerificationPanel = lazy(() => import('../../features/carbon-monitoring/components/TieredVerificationPanel'));
+const GisMapPanel = lazy(() => import('../../features/carbon-monitoring/components/GisMapPanel'));
+const SatelliteScenePanel = lazy(() => import('../../features/carbon-monitoring/components/SatelliteScenePanel'));
+const ReportsPanel = lazy(() => import('../../features/carbon-monitoring/components/ReportsPanel'));
+const AlertsPanel = lazy(() => import('../../features/carbon-monitoring/components/AlertsPanel'));
+const SettingsPanel = lazy(() => import('../../features/carbon-monitoring/components/SettingsPanel'));
+
+const PanelLoadingFallback = () => (
+  <div className="w-full min-h-[360px] rounded-2xl border border-white/10 bg-white/[0.02] flex items-center justify-center text-sm font-mono text-mist/60 animate-pulse">
+    Loading panel...
+  </div>
+);
 
 /**
  * CarbonMonitoring Page
@@ -104,16 +110,18 @@ export const CarbonMonitoring = () => {
         />
       </div>
 
-      {/* Active Tab Panel */}
+      {/* Active Tab Panel with Suspense Lazy Loading */}
       <div className="w-full">
-        {activeTab === 'dashboard' && <BiomassOverviewPanel {...state} />}
-        {activeTab === 'verra_audit' && <VerraAuditPanel {...state} />}
-        {activeTab === 'tiered_verification' && <TieredVerificationPanel {...state} />}
-        {activeTab === 'map' && <GisMapPanel {...state} />}
-        {activeTab === 'satellite' && <SatelliteScenePanel {...state} />}
-        {activeTab === 'reports' && <ReportsPanel {...state} />}
-        {activeTab === 'alerts' && <AlertsPanel {...state} />}
-        {activeTab === 'settings' && <SettingsPanel {...state} />}
+        <Suspense fallback={<PanelLoadingFallback />}>
+          {activeTab === 'dashboard' && <BiomassOverviewPanel {...state} />}
+          {activeTab === 'verra_audit' && <VerraAuditPanel {...state} />}
+          {activeTab === 'tiered_verification' && <TieredVerificationPanel {...state} />}
+          {activeTab === 'map' && <GisMapPanel {...state} />}
+          {activeTab === 'satellite' && <SatelliteScenePanel {...state} />}
+          {activeTab === 'reports' && <ReportsPanel {...state} />}
+          {activeTab === 'alerts' && <AlertsPanel {...state} />}
+          {activeTab === 'settings' && <SettingsPanel {...state} />}
+        </Suspense>
       </div>
     </div>
   );

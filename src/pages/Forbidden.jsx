@@ -2,6 +2,8 @@ import React from 'react';
 import { Link, useLocation, useNavigate, useSearchParams } from 'react-router-dom';
 import { ArrowLeft, Home, Lock, ShieldAlert, KeyRound, Building2, Terminal } from 'lucide-react';
 import { useTheme } from '../context/ThemeContext';
+import { Button } from '../components/ui/Button';
+import { PageHeader } from '../components/ui/PageHeader';
 
 export const Forbidden = () => {
   const location = useLocation();
@@ -69,21 +71,12 @@ export const Forbidden = () => {
           <span className={isLight ? 'text-[#181414]' : 'text-white'}>3</span>
         </div>
 
-        <h1
-          className={`font-sans font-bold text-2xl sm:text-3xl mb-4 tracking-tight ${
-            isLight ? 'text-[#181414]' : 'text-white'
-          }`}
-        >
-          Cryptographic Clearance Required
-        </h1>
-
-        <p
-          className={`font-sans text-sm sm:text-base max-w-lg mx-auto leading-relaxed mb-6 font-normal ${
-            isLight ? 'text-[#4b5563]' : 'text-mist'
-          }`}
-        >
-          {getReasonText()}
-        </p>
+        <PageHeader
+          title="Cryptographic Clearance Required"
+          description={getReasonText()}
+          align="center"
+          className="border-none mb-4 pb-0"
+        />
 
         {/* Diagnostic Metadata Pill */}
         <div
@@ -106,17 +99,14 @@ export const Forbidden = () => {
 
         {/* Primary Rescue CTAs */}
         <div className="flex flex-wrap items-center justify-center gap-3 sm:gap-4 mb-10">
-          <button
+          <Button
+            variant="secondary"
+            size="md"
             onClick={() => navigate(-1)}
-            className={`inline-flex items-center space-x-2 px-5 py-3 rounded-full text-sm font-semibold transition-all hover:scale-[1.02] active:scale-[0.98] ${
-              isLight
-                ? 'bg-white hover:bg-slate-50 text-slate-800 border border-slate-300 shadow-xs'
-                : 'bg-white/[0.06] hover:bg-white/[0.12] text-white border border-white/15'
-            }`}
+            leftIcon={<ArrowLeft size={16} />}
           >
-            <ArrowLeft size={16} />
             <span>Go Back</span>
-          </button>
+          </Button>
 
           <Link
             to="/"

@@ -124,3 +124,4 @@ export const navConfig = {
 };
 
 export default navConfig;
+

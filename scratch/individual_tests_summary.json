@@ -1,0 +1,499 @@
+{
+  "total_modules": 41,
+  "passed_modules": 35,
+  "failed_modules": 6,
+  "modules": {
+    "test_bd_grid": {
+      "status": "PASS",
+      "returncode": 0,
+      "elapsed_sec": 0.69,
+      "skipped": 0,
+      "failures": 0,
+      "stderr_tail": [
+        "Ran 13 tests in 0.241s",
+        "",
+        "OK"
+      ]
+    },
+    "test_carbon_security": {
+      "status": "PASS",
+      "returncode": 0,
+      "elapsed_sec": 1.04,
+      "skipped": 0,
+      "failures": 0,
+      "stderr_tail": [
+        "Ran 12 tests in 0.059s",
+        "",
+        "OK"
+      ]
+    },
+    "test_dmrv_allometry": {
+      "status": "PASS",
+      "returncode": 0,
+      "elapsed_sec": 11.78,
+      "skipped": 0,
+      "failures": 0,
+      "stderr_tail": [
+        "Ran 5 tests in 3.292s",
+        "",
+        "OK"
+      ]
+    },
+    "test_dmrv_baseline": {
+      "status": "PASS",
+      "returncode": 0,
+      "elapsed_sec": 10.38,
+      "skipped": 0,
+      "failures": 0,
+      "stderr_tail": [
+        "Ran 5 tests in 2.952s",
+        "",
+        "OK"
+      ]
+    },
+    "test_dmrv_dossier": {
+      "status": "FAIL",
+      "returncode": 1,
+      "elapsed_sec": 6.57,
+      "skipped": 0,
+      "failures": 1,
+      "stderr_tail": [
+        "Ran 4 tests in 0.243s",
+        "",
+        "FAILED (failures=1)"
+      ]
+    },
+    "test_dmrv_provenance": {
+      "status": "PASS",
+      "returncode": 0,
+      "elapsed_sec": 9.5,
+      "skipped": 0,
+      "failures": 0,
+      "stderr_tail": [
+        "Ran 6 tests in 3.013s",
+        "",
+        "OK"
+      ]
+    },
+    "test_dmrv_satellite": {
+      "status": "PASS",
+      "returncode": 0,
+      "elapsed_sec": 5.61,
+      "skipped": 0,
+      "failures": 0,
+      "stderr_tail": [
+        "Ran 5 tests in 5.391s",
+        "",
+        "OK"
+      ]
+    },
+    "test_dmrv_uncertainty": {
+      "status": "FAIL",
+      "returncode": 1,
+      "elapsed_sec": 6.69,
+      "skipped": 0,
+      "failures": 1,
+      "stderr_tail": [
+        "Ran 5 tests in 0.111s",
+        "",
+        "FAILED (failures=1)"
+      ]
+    },
+    "test_dmrv_v2": {
+      "status": "PASS",
+      "returncode": 0,
+      "elapsed_sec": 7.53,
+      "skipped": 0,
+      "failures": 0,
+      "stderr_tail": [
+        "Ran 12 tests in 0.528s",
+        "",
+        "OK"
+      ]
+    },
+    "test_esg_accounting": {
+      "status": "PASS",
+      "returncode": 0,
+      "elapsed_sec": 0.84,
+      "skipped": 0,
+      "failures": 0,
+      "stderr_tail": [
+        "Ran 19 tests in 0.653s",
+        "",
+        "OK"
+      ]
+    },
+    "test_esg_app": {
+      "status": "PASS",
+      "returncode": 0,
+      "elapsed_sec": 2.22,
+      "skipped": 0,
+      "failures": 0,
+      "stderr_tail": [
+        "Ran 2 tests in 0.033s",
+        "",
+        "OK"
+      ]
+    },
+    "test_esg_authenticity": {
+      "status": "PASS",
+      "returncode": 0,
+      "elapsed_sec": 15.83,
+      "skipped": 0,
+      "failures": 0,
+      "stderr_tail": [
+        "Ran 10 tests in 12.439s",
+        "",
+        "OK"
+      ]
+    },
+    "test_esg_authorization": {
+      "status": "PASS",
+      "returncode": 0,
+      "elapsed_sec": 6.95,
+      "skipped": 0,
+      "failures": 0,
+      "stderr_tail": [
+        "Ran 5 tests in 4.812s",
+        "",
+        "OK"
+      ]
+    },
+    "test_esg_bill_cases": {
+      "status": "PASS",
+      "returncode": 0,
+      "elapsed_sec": 4.94,
+      "skipped": 0,
+      "failures": 0,
+      "stderr_tail": [
+        "Ran 2 tests in 2.920s",
+        "",
+        "OK"
+      ]
+    },
+    "test_esg_bill_estimate": {
+      "status": "FAIL",
+      "returncode": 1,
+      "elapsed_sec": 7.03,
+      "skipped": 0,
+      "failures": 1,
+      "stderr_tail": [
+        "Ran 6 tests in 4.955s",
+        "",
+        "FAILED (failures=1)"
+      ]
+    },
+    "test_esg_bill_gaps": {
+      "status": "PASS",
+      "returncode": 0,
+      "elapsed_sec": 7.3,
+      "skipped": 0,
+      "failures": 0,
+      "stderr_tail": [
+        "Ran 6 tests in 5.095s",
+        "",
+        "OK"
+      ]
+    },
+    "test_esg_bill_hardening": {
+      "status": "PASS",
+      "returncode": 0,
+      "elapsed_sec": 2.76,
+      "skipped": 0,
+      "failures": 0,
+      "stderr_tail": [
+        "Ran 11 tests in 2.451s",
+        "",
+        "OK"
+      ]
+    },
+    "test_esg_bill_profiles": {
+      "status": "FAIL",
+      "returncode": 1,
+      "elapsed_sec": 11.88,
+      "skipped": 0,
+      "failures": 1,
+      "stderr_tail": [
+        "Ran 17 tests in 9.760s",
+        "",
+        "FAILED (failures=1)"
+      ]
+    },
+    "test_esg_bill_rules": {
+      "status": "PASS",
+      "returncode": 0,
+      "elapsed_sec": 0.14,
+      "skipped": 0,
+      "failures": 0,
+      "stderr_tail": [
+        "Ran 10 tests in 0.003s",
+        "",
+        "OK"
+      ]
+    },
+    "test_esg_bills": {
+      "status": "PASS",
+      "returncode": 0,
+      "elapsed_sec": 0.84,
+      "skipped": 0,
+      "failures": 0,
+      "stderr_tail": [
+        "Ran 9 tests in 0.612s",
+        "",
+        "OK"
+      ]
+    },
+    "test_esg_corpus_honesty": {
+      "status": "PASS",
+      "returncode": 0,
+      "elapsed_sec": 0.78,
+      "skipped": 0,
+      "failures": 0,
+      "stderr_tail": [
+        "Ran 5 tests in 0.006s",
+        "",
+        "OK"
+      ]
+    },
+    "test_esg_data_migrations": {
+      "status": "PASS",
+      "returncode": 0,
+      "elapsed_sec": 5.22,
+      "skipped": 0,
+      "failures": 0,
+      "stderr_tail": [
+        "Ran 8 tests in 3.183s",
+        "",
+        "OK"
+      ]
+    },
+    "test_esg_demo_mode": {
+      "status": "PASS",
+      "returncode": 0,
+      "elapsed_sec": 3.1,
+      "skipped": 0,
+      "failures": 0,
+      "stderr_tail": [
+        "Ran 5 tests in 1.175s",
+        "",
+        "OK"
+      ]
+    },
+    "test_esg_disclosures": {
+      "status": "PASS",
+      "returncode": 0,
+      "elapsed_sec": 4.61,
+      "skipped": 0,
+      "failures": 0,
+      "stderr_tail": [
+        "Ran 7 tests in 2.603s",
+        "",
+        "OK"
+      ]
+    },
+    "test_esg_engine": {
+      "status": "PASS",
+      "returncode": 0,
+      "elapsed_sec": 0.32,
+      "skipped": 0,
+      "failures": 0,
+      "stderr_tail": [
+        "Ran 8 tests in 0.169s",
+        "",
+        "OK"
+      ]
+    },
+    "test_esg_eval_harness": {
+      "status": "FAIL",
+      "returncode": 1,
+      "elapsed_sec": 14.37,
+      "skipped": 0,
+      "failures": 2,
+      "stderr_tail": [
+        "Ran 2 tests in 12.301s",
+        "",
+        "FAILED (failures=2)"
+      ]
+    },
+    "test_esg_evidence_retention": {
+      "status": "PASS",
+      "returncode": 0,
+      "elapsed_sec": 7.18,
+      "skipped": 0,
+      "failures": 0,
+      "stderr_tail": [
+        "Ran 5 tests in 4.806s",
+        "",
+        "OK"
+      ]
+    },
+    "test_esg_factor_provenance": {
+      "status": "PASS",
+      "returncode": 0,
+      "elapsed_sec": 3.36,
+      "skipped": 0,
+      "failures": 0,
+      "stderr_tail": [
+        "Ran 4 tests in 1.412s",
+        "",
+        "OK"
+      ]
+    },
+    "test_esg_gas_e2e": {
+      "status": "PASS",
+      "returncode": 0,
+      "elapsed_sec": 6.28,
+      "skipped": 0,
+      "failures": 0,
+      "stderr_tail": [
+        "Ran 2 tests in 1.685s",
+        "",
+        "OK"
+      ]
+    },
+    "test_esg_hardening": {
+      "status": "PASS",
+      "returncode": 0,
+      "elapsed_sec": 45.39,
+      "skipped": 0,
+      "failures": 0,
+      "stderr_tail": [
+        "Ran 5 tests in 34.245s",
+        "",
+        "OK"
+      ]
+    },
+    "test_esg_ledger": {
+      "status": "PASS",
+      "returncode": 0,
+      "elapsed_sec": 36.29,
+      "skipped": 0,
+      "failures": 0,
+      "stderr_tail": [
+        "Ran 35 tests in 30.623s",
+        "",
+        "OK (skipped=1)"
+      ]
+    },
+    "test_esg_market_based": {
+      "status": "PASS",
+      "returncode": 0,
+      "elapsed_sec": 6.95,
+      "skipped": 0,
+      "failures": 0,
+      "stderr_tail": [
+        "Ran 21 tests in 3.898s",
+        "",
+        "OK"
+      ]
+    },
+    "test_esg_members": {
+      "status": "PASS",
+      "returncode": 0,
+      "elapsed_sec": 7.17,
+      "skipped": 0,
+      "failures": 0,
+      "stderr_tail": [
+        "Ran 6 tests in 4.117s",
+        "",
+        "OK"
+      ]
+    },
+    "test_esg_ocr_pipeline": {
+      "status": "PASS",
+      "returncode": 0,
+      "elapsed_sec": 16.26,
+      "skipped": 0,
+      "failures": 0,
+      "stderr_tail": [
+        "Ran 14 tests in 12.308s",
+        "",
+        "OK"
+      ]
+    },
+    "test_esg_ocr_smoke": {
+      "status": "PASS",
+      "returncode": 0,
+      "elapsed_sec": 1.22,
+      "skipped": 0,
+      "failures": 0,
+      "stderr_tail": [
+        "Ran 1 test in 0.894s",
+        "",
+        "OK (skipped=1)"
+      ]
+    },
+    "test_esg_properties": {
+      "status": "PASS",
+      "returncode": 0,
+      "elapsed_sec": 19.34,
+      "skipped": 0,
+      "failures": 0,
+      "stderr_tail": [
+        "Ran 19 tests in 18.407s",
+        "",
+        "OK"
+      ]
+    },
+    "test_esg_rag_phase5": {
+      "status": "PASS",
+      "returncode": 0,
+      "elapsed_sec": 34.86,
+      "skipped": 0,
+      "failures": 0,
+      "stderr_tail": [
+        "Ran 7 tests in 30.633s",
+        "",
+        "OK"
+      ]
+    },
+    "test_esg_scope1": {
+      "status": "PASS",
+      "returncode": 0,
+      "elapsed_sec": 0.19,
+      "skipped": 0,
+      "failures": 0,
+      "stderr_tail": [
+        "Ran 39 tests in 0.007s",
+        "",
+        "OK"
+      ]
+    },
+    "test_esg_security": {
+      "status": "FAIL",
+      "returncode": 1,
+      "elapsed_sec": 18.58,
+      "skipped": 0,
+      "failures": 1,
+      "stderr_tail": [
+        "Ran 13 tests in 14.960s",
+        "",
+        "FAILED (failures=1)"
+      ]
+    },
+    "test_orchestrator": {
+      "status": "PASS",
+      "returncode": 0,
+      "elapsed_sec": 4.58,
+      "skipped": 0,
+      "failures": 0,
+      "stderr_tail": [
+        "Ran 34 tests in 4.385s",
+        "",
+        "OK"
+      ]
+    },
+    "test_tenant_isolation": {
+      "status": "PASS",
+      "returncode": 0,
+      "elapsed_sec": 12.37,
+      "skipped": 0,
+      "failures": 0,
+      "stderr_tail": [
+        "Ran 4 tests in 10.524s",
+        "",
+        "OK"
+      ]
+    }
+  }
+}

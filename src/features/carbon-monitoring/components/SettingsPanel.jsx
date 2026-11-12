@@ -49,11 +49,11 @@ export function SettingsPanel(props) {
                   </p>
                 </div>
                 <span className={`px-2.5 py-1 rounded-full text-[10px] font-mono font-bold uppercase tracking-wider ${
-                  modelSettings.active_model === 'fusion'
+                  modelSettings?.active_model === 'fusion'
                     ? 'bg-purple-500/10 text-purple-400 border border-purple-500/20'
                     : 'bg-emerald/10 text-emerald border border-emerald/20'
                 }`}>
-                  Engine: {modelSettings.active_model.toUpperCase()}
+                  Engine: {(modelSettings?.active_model || 'fusion').toUpperCase()}
                 </span>
               </div>
 

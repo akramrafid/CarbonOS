@@ -17,13 +17,16 @@ export function PageHeader({
   primaryAction,
   secondaryActions,
   badge,
-  className = ''
+  className = '',
+  titleClassName = '',
+  align = 'left'
 }) {
+  const isCentered = align === 'center';
   return (
-    <header className={`w-full mb-6 pb-6 border-b border-carbon-border/60 dark:border-[#1E3326]/60 ${className}`}>
+    <header className={`w-full mb-6 pb-6 ${isCentered ? 'text-center' : 'border-b border-carbon-border/60 dark:border-[#1E3326]/60'} ${className}`}>
       {/* Breadcrumbs */}
       {breadcrumbs.length > 0 && (
-        <nav aria-label="Breadcrumb" className="flex items-center gap-1.5 text-xs text-mist mb-2">
+        <nav aria-label="Breadcrumb" className={`flex items-center gap-1.5 text-xs text-mist mb-2 ${isCentered ? 'justify-center' : ''}`}>
           {breadcrumbs.map((crumb, idx) => {
             const isLast = idx === breadcrumbs.length - 1;
             return (
@@ -48,16 +51,17 @@ export function PageHeader({
       )}
 
       {/* Title & Actions Row */}
-      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
-        <div className="flex flex-col gap-1 min-w-0">
-          <div className="flex items-center gap-3 flex-wrap">
-            <h1 className="text-2xl sm:text-3xl font-sans font-bold text-registry tracking-tight truncate dark:text-[#E2ECE5]">
+      <div className={`flex flex-col ${isCentered ? 'items-center justify-center' : 'sm:flex-row sm:items-center sm:justify-between'} gap-4`}>
+        <div className={`flex flex-col gap-1 min-w-0 ${isCentered ? 'items-center' : ''}`}>
+          <div className={`flex items-center gap-3 flex-wrap ${isCentered ? 'justify-center' : ''}`}>
+            {badge && isCentered && <div className="mb-2">{badge}</div>}
+            <h1 className={`text-2xl sm:text-3xl font-sans font-bold text-registry tracking-tight dark:text-[#E2ECE5] ${titleClassName}`}>
               {title}
             </h1>
-            {badge && <span className="inline-flex shrink-0">{badge}</span>}
+            {badge && !isCentered && <span className="inline-flex shrink-0">{badge}</span>}
           </div>
           {description && (
-            <p className="text-sm text-mist font-sans max-w-3xl leading-relaxed dark:text-[#7A9A85]">
+            <p className={`text-sm text-mist font-sans max-w-3xl leading-relaxed dark:text-[#7A9A85] ${isCentered ? 'mx-auto' : ''}`}>
               {description}
             </p>
           )}
@@ -65,7 +69,7 @@ export function PageHeader({
 
         {/* Action Group: Max 1 Primary Action */}
         {(primaryAction || secondaryActions) && (
-          <div className="flex items-center gap-2.5 shrink-0 flex-wrap sm:flex-nowrap">
+          <div className={`flex items-center gap-2.5 shrink-0 flex-wrap sm:flex-nowrap ${isCentered ? 'justify-center' : ''}`}>
             {secondaryActions}
             {primaryAction}
           </div>
@@ -76,3 +80,4 @@ export function PageHeader({
 }
 
 export default PageHeader;
+

@@ -1,6 +1,8 @@
 import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { ArrowRight, CheckCircle2, ShieldCheck, Zap, Building2, HelpCircle, FileCheck2 } from 'lucide-react';
+import { SectionHeader } from './ui/Section';
+import { Badge } from './ui/Badge';
 
 const Pricing = () => {
   const [isAnnual, setIsAnnual] = useState(true);
@@ -14,19 +16,12 @@ const Pricing = () => {
         
         {/* Header */}
         <div className="mb-14 text-center max-w-3xl mx-auto">
-          <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-emerald-950/60 border border-[#00C853]/40 text-[#00E676] font-mono text-xs font-semibold uppercase tracking-wider mb-5 shadow-[0_0_15px_rgba(0,230,118,0.15)]">
-            <span>Sovereign Infrastructure SaaS & Node Licensure</span>
-          </div>
-
-          <h2 className="text-3xl sm:text-4xl lg:text-5xl font-sans font-bold tracking-tight text-white leading-tight">
-            Predictable Scaling for{' '}
-            <span className="bg-gradient-to-r from-[#00E676] via-[#10B981] to-[#00C853] bg-clip-text text-transparent font-extrabold">
-              Carbon Developers
-            </span>
-          </h2>
-          <p className="font-sans text-base sm:text-lg text-white/70 mt-4 leading-relaxed">
-            Deploy automated MRV, satellite data pipelines, and sovereign ledger registry nodes with zero hidden transaction tariffs.
-          </p>
+          <SectionHeader
+            centered
+            badge={<Badge variant="emerald">Sovereign Infrastructure SaaS & Node Licensure</Badge>}
+            title="Predictable Scaling for Carbon Developers"
+            subtitle="Deploy automated MRV, satellite data pipelines, and sovereign ledger registry nodes with zero hidden transaction tariffs."
+          />
 
           {/* Billing Interval Toggle Switch */}
           <div className="mt-8 inline-flex items-center p-1.5 rounded-2xl bg-[#08150D] border border-[#183822] shadow-lg backdrop-blur-xl">

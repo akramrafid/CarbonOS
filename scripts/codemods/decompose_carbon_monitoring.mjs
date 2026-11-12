@@ -134,3 +134,4 @@ export default useCarbonMonitoringState;
 
 fs.writeFileSync('src/features/carbon-monitoring/useCarbonMonitoringState.js', hookCode, 'utf8');
 console.log('Successfully wrote useCarbonMonitoringState.js');
+

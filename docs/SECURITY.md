@@ -73,3 +73,4 @@ This vulnerability was proven and confirmed by test `test_multi_account_self_app
    - Enforce that a user cannot approve records created by the user who invited them, nor can a user approve records created by their invitees (`rec.created_by != inv.invited_by`).
 4. **Session / Device Fingerprint Correlation:**
    - Correlate client IP, TLS JA3/JA4 fingerprint, and browser device signatures. If the record author and the approver share identical fingerprints within a 24-hour window, flag for external audit or require step-up MFA.
+

@@ -14,6 +14,8 @@ import {
   Info,
   Server
 } from 'lucide-react';
+import { Button } from '../../../components/ui/Button';
+import { Tabs } from '../../../components/ui/Tabs';
 
 const EEIO_SECTOR_DEFAULTS = {
   textiles_yarn: 15000000,     // 1.5 Crore BDT (~$125,000)
@@ -165,53 +167,41 @@ export const DuckDBEngineView = ({
               <Server className="w-3.5 h-3.5 text-cyan-500" />
               <span>Routing: <strong>30GB Microservice Tier</strong></span>
             </div>
-            <button
+            <Button
+              variant="primary"
+              size="sm"
               onClick={handleSimulateDuckDBCalculate}
               disabled={isCalculating}
-              className="px-4 py-1.5 rounded-2xl bg-emerald-600 hover:bg-emerald-500 text-white font-sans font-semibold text-xs transition-all shadow-sm flex items-center space-x-1.5 cursor-pointer disabled:opacity-50"
+              leftIcon={<RefreshCw className={`w-3.5 h-3.5 ${isCalculating ? 'animate-spin' : ''}`} />}
             >
-              <RefreshCw className={`w-3.5 h-3.5 ${isCalculating ? 'animate-spin' : ''}`} />
-              <span>{locale?.calculateNow || 'Recalculate OLAP Footprint'}</span>
-            </button>
+              {locale?.calculateNow || 'Recalculate OLAP Footprint'}
+            </Button>
           </div>
         </div>
       </div>
 
       {/* Mode Switcher: Activity vs EEIO Spend */}
-      <div className="flex items-center justify-between border-b border-gray-200 dark:border-[#1B4D2E] pb-3">
-        <div className="flex space-x-2">
-          <button
-            onClick={() => setCalculationMode('activity')}
-            className={`px-4 py-2 rounded-2xl text-xs font-sans font-semibold transition-all cursor-pointer ${
-              calculationMode === 'activity'
-                ? 'bg-emerald-600 text-white shadow-md'
-                : (isLight ? 'bg-gray-100 text-gray-600 hover:text-gray-900' : 'bg-[#0A160F] text-gray-400 hover:text-white')
-            }`}
-          >
-            {locale?.activityMode || 'Physical Activity Accounting'}
-          </button>
-          <button
-            onClick={() => setCalculationMode('spend_eeio')}
-            className={`px-4 py-2 rounded-2xl text-xs font-sans font-semibold transition-all cursor-pointer flex items-center space-x-1.5 ${
-              calculationMode === 'spend_eeio'
-                ? 'bg-emerald-600 text-white shadow-md'
-                : (isLight ? 'bg-gray-100 text-gray-600 hover:text-gray-900' : 'bg-[#0A160F] text-gray-400 hover:text-white')
-            }`}
-          >
-            <DollarSign className="w-3.5 h-3.5" />
-            <span>{locale?.spendMode || 'Spend-Based EEIO (CEDA Model)'}</span>
-          </button>
-        </div>
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-gray-200 dark:border-[#1B4D2E] pb-3">
+        <Tabs
+          tabs={[
+            { id: 'activity', label: locale?.activityMode || 'Physical Activity Accounting' },
+            { id: 'spend_eeio', label: locale?.spendMode || 'Spend-Based EEIO (CEDA Model)', icon: <DollarSign className="w-3.5 h-3.5" /> }
+          ]}
+          activeTab={calculationMode}
+          onChange={setCalculationMode}
+        />
 
         {calculationMode === 'spend_eeio' && (
           <div className="flex items-center space-x-2 text-xs font-sans">
             <span className={isLight ? 'text-gray-500' : 'text-gray-400'}>Currency:</span>
-            <button
+            <Button
+              variant="secondary"
+              size="sm"
               onClick={() => setSelectedCurrency(selectedCurrency === 'BDT' ? 'USD' : 'BDT')}
-              className="px-3 py-1 rounded-xl bg-emerald-500/15 text-emerald-600 dark:text-emerald-400 border border-emerald-500/30 font-bold cursor-pointer"
+              className="text-xs h-auto min-h-0 py-1 px-3 font-mono"
             >
               {selectedCurrency === 'BDT' ? 'BDT (৳) [1 USD = 120 BDT]' : 'USD ($)'}
-            </button>
+            </Button>
           </div>
         )}
       </div>

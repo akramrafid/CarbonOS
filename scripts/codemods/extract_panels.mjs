@@ -392,3 +392,4 @@ export default SettingsPanel;
 fs.writeFileSync('src/features/carbon-monitoring/components/SettingsPanel.jsx', setCode, 'utf8');
 
 console.log('Successfully generated all 8 sub-panel components under src/features/carbon-monitoring/components/');
+

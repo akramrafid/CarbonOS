@@ -5,8 +5,11 @@ import {
   ExternalLink,
   ShieldCheck,
   CheckCircle,
-  FileCheck
+  FileCheck,
+  Lock,
+  Database
 } from 'lucide-react';
+import { Button } from '../../../components/ui/Button';
 
 export function ReportsPanel(props) {
   const {
@@ -18,7 +21,10 @@ export function ReportsPanel(props) {
     setSelectedJob,
     triggerReportDownload,
     triggerDossierDownload,
-    setActiveTab
+    setActiveTab,
+    loadingHistory = false,
+    handleVerifyChain = () => {},
+    verifyingLedger = false
   } = props;
 
   return (
@@ -47,15 +53,17 @@ export function ReportsPanel(props) {
                 <Database size={12} className="text-emerald" />
                 <span>{analysisHistory.length} Recorded Blocks</span>
               </span>
-              <button 
-                onClick={handleVerifyChain}
-                disabled={verifyingLedger}
-                className="inline-flex items-center space-x-1.5 px-3.5 py-1.5 rounded-xl border border-emerald/40 bg-emerald/10 hover:bg-emerald/20 text-emerald text-xs font-semibold transition-all cursor-pointer"
+              <Button 
+                variant="secondary"
+                size="sm"
+                onClick={typeof handleVerifyChain === 'function' ? handleVerifyChain : undefined}
+                loading={typeof verifyingLedger !== 'undefined' ? verifyingLedger : false}
+                leftIcon={<Lock size={12} />}
+                className="text-xs font-semibold"
                 title="Verify cryptographic SHA-256 block succession"
               >
-                <Lock size={12} />
-                <span>{verifyingLedger ? 'Verifying...' : 'Verify Cryptographic Chain'}</span>
-              </button>
+                <span>{typeof verifyingLedger !== 'undefined' && verifyingLedger ? 'Verifying...' : 'Verify Cryptographic Chain'}</span>
+              </Button>
             </div>
           </div>
 
@@ -216,59 +224,51 @@ export function ReportsPanel(props) {
 
                           <td className="py-4">
                             <div className="flex items-center justify-end space-x-1.5 flex-wrap gap-y-1">
-                              <button 
+                              <Button 
+                                variant="secondary"
+                                size="sm"
                                 onClick={() => {
                                   setSelectedJob(job);
                                   setActiveTab('verra_audit');
                                 }}
-                                className={`font-semibold text-[11px] px-2.5 py-1.5 rounded-lg border transition-all flex items-center space-x-1 cursor-pointer ${
-                                  isLight 
-                                    ? 'bg-emerald/10 border-emerald/40 text-emerald hover:bg-emerald hover:text-white' 
-                                    : 'bg-emerald/15 border-emerald/30 text-emerald hover:bg-emerald hover:text-carbon'
-                                }`}
+                                leftIcon={<ShieldCheck size={12} />}
+                                className="font-semibold text-[11px]"
                                 title="Open Verra VM0047 VVB Audit Inspector"
                               >
-                                <ShieldCheck size={12} />
-                                <span>Audit Inspector</span>
-                              </button>
+                                Audit Inspector
+                              </Button>
 
-                              <button 
+                              <Button 
+                                variant="secondary"
+                                size="sm"
                                 onClick={() => triggerDossierDownload(job.id, 'pdf')}
-                                className={`font-semibold text-[11px] px-2.5 py-1.5 rounded-lg border transition-all flex items-center space-x-1 cursor-pointer ${
-                                  isLight 
-                                    ? 'bg-[#0F291B] border-[#0F291B] text-white hover:bg-[#00873E]' 
-                                    : 'bg-white/10 border-white/20 text-white hover:bg-white/20'
-                                }`}
+                                leftIcon={<FileCheck size={12} />}
+                                className="font-semibold text-[11px]"
                                 title="Download VM0047-format audit dossier PDF (draft)"
                               >
-                                <FileCheck size={12} />
-                                <span>VM0047 Dossier</span>
-                              </button>
+                                VM0047 Dossier
+                              </Button>
 
-                              <button 
+                              <Button 
+                                variant="ghost"
+                                size="sm"
                                 onClick={() => triggerDossierDownload(job.id, 'json')}
-                                className={`font-bold text-[10px] px-2 py-1.5 rounded-lg transition-all flex items-center space-x-1 cursor-pointer ${
-                                  isLight 
-                                    ? 'bg-[#F1F5F9] border border-[#CBD5E1] text-[#0F291B] hover:bg-white' 
-                                    : 'bg-white/5 hover:bg-white/10 text-white'
-                                }`}
+                                leftIcon={<Download size={10} />}
+                                className="font-bold text-[10px]"
                                 title="Download Machine-Readable JSON Telemetry"
                               >
-                                <Download size={10} />
-                                <span>JSON</span>
-                              </button>
+                                JSON
+                              </Button>
 
-                              <button 
+                              <Button 
+                                variant="ghost"
+                                size="sm"
                                 onClick={() => triggerReportDownload(job.id, 'csv')}
-                                className={`font-bold text-[10px] px-2 py-1.5 rounded-lg transition-all flex items-center space-x-1 cursor-pointer ${
-                                  isLight 
-                                    ? 'bg-[#F1F5F9] border border-[#CBD5E1] text-[#0F291B] hover:bg-white' 
-                                    : 'bg-white/5 hover:bg-white/10 text-white'
-                                }`}
+                                className="font-bold text-[10px]"
                                 title="Download CSV Log"
                               >
-                                <span>CSV</span>
-                              </button>
+                                CSV
+                              </Button>
                             </div>
                           </td>
                         </tr>

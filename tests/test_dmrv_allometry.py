@@ -12,6 +12,7 @@ sys.path.append(BASE_DIR)
 sys.path.append(os.path.join(BASE_DIR, "inference"))
 
 import _isolated_db  # noqa: F401,E402  (temporary database, never backend/db.sqlite3)
+from inference.carbon_monitoring.auth import mint_carbon_token
 from inference.carbon_monitoring.database import init_db, SessionLocal
 from inference.carbon_monitoring.models import CarbonResult, AnalysisJob
 from inference.carbon_monitoring.router import router as carbon_router
@@ -26,10 +27,12 @@ from inference.carbon_monitoring.estimator import (
 class TestDMRVAllometryMultiPool(unittest.TestCase):
     @classmethod
     def setUpClass(cls):
+        os.environ["DMRV_FORCE_SIMULATION"] = "1"
         init_db()
         cls.app = FastAPI(title="dMRV Allometry Test Harness")
         cls.app.include_router(carbon_router)
-        cls.client = TestClient(cls.app)
+        token = mint_carbon_token(sub="tester-1", organization_id="org-test", role="org_owner")
+        cls.client = TestClient(cls.app, headers={"Authorization": f"Bearer {token}"})
         cls.estimator = CarbonEstimator()
 
     def setUp(self):

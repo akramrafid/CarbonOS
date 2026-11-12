@@ -1,0 +1,1121 @@
+{
+  "src/features": {
+    "totalFiles": 78,
+    "files": [
+      {
+        "file": "src/features/carbon-monitoring/components/biomass/BiomassStatCards.jsx",
+        "lines": 360
+      },
+      {
+        "file": "src/features/carbon-monitoring/components/biomass/BiomassVerraStrip.jsx",
+        "lines": 332
+      },
+      {
+        "file": "src/features/carbon-monitoring/hooks/useCarbonMapState.js",
+        "lines": 318
+      },
+      {
+        "file": "src/features/carbon-monitoring/components/SatelliteScenePanel.jsx",
+        "lines": 302
+      },
+      {
+        "file": "src/features/carbon-monitoring/components/ReportsPanel.jsx",
+        "lines": 290
+      },
+      {
+        "file": "src/features/carbon-monitoring/hooks/useCarbonTelemetryData.js",
+        "lines": 286
+      },
+      {
+        "file": "src/features/carbon-monitoring/hooks/useCarbonVerraProvenance.js",
+        "lines": 284
+      },
+      {
+        "file": "src/features/carbon-monitoring/components/gis/BoundarySelectionBox.jsx",
+        "lines": 258
+      },
+      {
+        "file": "src/features/carbon-monitoring/components/verra/CryptographicLedgerCard.jsx",
+        "lines": 256
+      },
+      {
+        "file": "src/features/carbon-monitoring/components/SettingsPanel.jsx",
+        "lines": 252
+      },
+      {
+        "file": "src/features/carbon-monitoring/components/gis/GisLeafletViewer.jsx",
+        "lines": 251
+      },
+      {
+        "file": "src/features/carbon-monitoring/constants/mockData.js",
+        "lines": 250
+      },
+      {
+        "file": "src/features/carbon-monitoring/components/gis/GisInspectorDrawer.jsx",
+        "lines": 241
+      },
+      {
+        "file": "src/features/carbon-monitoring/components/biomass/BiomassChartSvg.jsx",
+        "lines": 235
+      },
+      {
+        "file": "src/features/saas/hooks/useSaaSOperationsState.js",
+        "lines": 235
+      },
+      {
+        "file": "src/features/saas/components/overview/InvoiceHeadlineAndDonut.jsx",
+        "lines": 219
+      },
+      {
+        "file": "src/features/carbon-monitoring/components/biomass/BiomassHorizonChart.jsx",
+        "lines": 211
+      },
+      {
+        "file": "src/features/saas/hooks/useSaaSEmissionsCalculator.js",
+        "lines": 198
+      },
+      {
+        "file": "src/features/saas/components/ExecutiveOverviewPanel.jsx",
+        "lines": 194
+      },
+      {
+        "file": "src/features/carbon-monitoring/components/verra/VerraSignModal.jsx",
+        "lines": 193
+      },
+      {
+        "file": "src/features/saas/components/overview/ScopeCalculatorSection.jsx",
+        "lines": 190
+      },
+      {
+        "file": "src/features/saas/components/overview/InvoiceCategoriesGrid.jsx",
+        "lines": 189
+      },
+      {
+        "file": "src/features/saas/hooks/useSaaSRagAndExtraction.js",
+        "lines": 189
+      },
+      {
+        "file": "src/features/carbon-monitoring/components/tiered/VerificationTasksTable.jsx",
+        "lines": 185
+      },
+      {
+        "file": "src/features/saas/components/overview/ExecutiveShowcaseRow.jsx",
+        "lines": 185
+      },
+      {
+        "file": "src/features/carbon-monitoring/constants/geoUtils.js",
+        "lines": 180
+      },
+      {
+        "file": "src/features/saas/constants/categoryMatrix.js",
+        "lines": 178
+      },
+      {
+        "file": "src/features/carbon-monitoring/components/tiered/DroneSurveyModal.jsx",
+        "lines": 173
+      },
+      {
+        "file": "src/features/carbon-monitoring/components/VerraAuditPanel.jsx",
+        "lines": 170
+      },
+      {
+        "file": "src/features/saas/components/overview/DeepTelemetryRow.jsx",
+        "lines": 166
+      },
+      {
+        "file": "src/features/carbon-monitoring/components/gis/GisSidebarControls.jsx",
+        "lines": 165
+      },
+      {
+        "file": "src/features/saas/constants/EmissionsTrendChart.jsx",
+        "lines": 162
+      },
+      {
+        "file": "src/features/carbon-monitoring/components/AlertsPanel.jsx",
+        "lines": 156
+      },
+      {
+        "file": "src/features/saas/components/overview/AddCustomItemModal.jsx",
+        "lines": 155
+      },
+      {
+        "file": "src/features/saas/components/overview/OverviewSideCards.jsx",
+        "lines": 154
+      },
+      {
+        "file": "src/features/saas/components/overview/InvoiceFootprintSection.jsx",
+        "lines": 150
+      },
+      {
+        "file": "src/features/saas/constants/GaugeAndCapsules.jsx",
+        "lines": 150
+      },
+      {
+        "file": "src/features/saas/components/overview/EsgAiRagSection.jsx",
+        "lines": 148
+      },
+      {
+        "file": "src/features/saas/components/EsgSettingsPanel.jsx",
+        "lines": 146
+      },
+      {
+        "file": "src/features/saas/components/MaterialityPanel.jsx",
+        "lines": 138
+      },
+      {
+        "file": "src/features/saas/components/overview/ScopeBreakdownRow.jsx",
+        "lines": 123
+      },
+      {
+        "file": "src/features/carbon-monitoring/components/verra/VerraControlBar.jsx",
+        "lines": 121
+      },
+      {
+        "file": "src/features/saas/components/EsgAnalyticsPanel.jsx",
+        "lines": 119
+      },
+      {
+        "file": "src/features/saas/components/overview/InvoiceUploadStep.jsx",
+        "lines": 116
+      },
+      {
+        "file": "src/features/carbon-monitoring/components/verra/ConformalUncertaintyCard.jsx",
+        "lines": 108
+      },
+      {
+        "file": "src/features/saas/components/EsgCalendarPanel.jsx",
+        "lines": 108
+      },
+      {
+        "file": "src/features/carbon-monitoring/components/verra/MultiPoolStockCard.jsx",
+        "lines": 105
+      },
+      {
+        "file": "src/features/carbon-monitoring/hooks/useCarbonDroneVerification.js",
+        "lines": 104
+      },
+      {
+        "file": "src/features/carbon-monitoring/components/GisMapPanel.jsx",
+        "lines": 103
+      },
+      {
+        "file": "src/features/saas/constants/CarbonDistributionDonut.jsx",
+        "lines": 103
+      },
+      {
+        "file": "src/features/carbon-monitoring/components/tiered/TieredStatsRow.jsx",
+        "lines": 102
+      },
+      {
+        "file": "src/features/carbon-monitoring/components/verra/SpatialBoundaryCard.jsx",
+        "lines": 97
+      },
+      {
+        "file": "src/features/saas/components/overview/InvoiceEvidenceTable.jsx",
+        "lines": 95
+      },
+      {
+        "file": "src/features/carbon-monitoring/constants/layerConfig.js",
+        "lines": 93
+      },
+      {
+        "file": "src/features/carbon-monitoring/components/verra/VvbAttestationCard.jsx",
+        "lines": 92
+      },
+      {
+        "file": "src/features/saas/components/AddMemberModal.jsx",
+        "lines": 88
+      },
+      {
+        "file": "src/features/carbon-monitoring/components/verra/DynamicBaselineCard.jsx",
+        "lines": 84
+      },
+      {
+        "file": "src/features/saas/components/EsgTeamPanel.jsx",
+        "lines": 80
+      },
+      {
+        "file": "src/features/saas/components/AddProjectModal.jsx",
+        "lines": 79
+      },
+      {
+        "file": "src/features/saas/hooks/useSaaSClientState.js",
+        "lines": 79
+      },
+      {
+        "file": "src/features/saas/components/CorporateClientModal.jsx",
+        "lines": 78
+      },
+      {
+        "file": "src/features/saas/components/overview/RefineCategoryModal.jsx",
+        "lines": 78
+      },
+      {
+        "file": "src/features/carbon-monitoring/components/verra/RemoteSensingCard.jsx",
+        "lines": 75
+      },
+      {
+        "file": "src/features/saas/components/TasksPanel.jsx",
+        "lines": 74
+      },
+      {
+        "file": "src/features/saas/components/EsgHelpPanel.jsx",
+        "lines": 72
+      },
+      {
+        "file": "src/features/saas/useSaaSDashboardState.js",
+        "lines": 72
+      },
+      {
+        "file": "src/features/saas/components/overview/OverviewProjectsCard.jsx",
+        "lines": 69
+      },
+      {
+        "file": "src/features/carbon-monitoring/components/TieredVerificationPanel.jsx",
+        "lines": 63
+      },
+      {
+        "file": "src/features/carbon-monitoring/hooks/useCarbonModelSettings.js",
+        "lines": 57
+      },
+      {
+        "file": "src/features/carbon-monitoring/constants/mapComponents.jsx",
+        "lines": 56
+      },
+      {
+        "file": "src/features/saas/components/overview/OverviewDistrictSelector.jsx",
+        "lines": 56
+      },
+      {
+        "file": "src/features/carbon-monitoring/useCarbonMonitoringState.js",
+        "lines": 54
+      },
+      {
+        "file": "src/features/carbon-monitoring/components/tiered/TieredHeaderCard.jsx",
+        "lines": 53
+      },
+      {
+        "file": "src/features/carbon-monitoring/components/BiomassOverviewPanel.jsx",
+        "lines": 48
+      },
+      {
+        "file": "src/features/saas/constants/districts.js",
+        "lines": 15
+      },
+      {
+        "file": "src/features/carbon-monitoring/constants.js",
+        "lines": 6
+      },
+      {
+        "file": "src/features/saas/constants.jsx",
+        "lines": 5
+      },
+      {
+        "file": "src/features/saas/constants/chartComponents.jsx",
+        "lines": 4
+      }
+    ]
+  },
+  "src/pages": {
+    "totalFiles": 124,
+    "files": [
+      {
+        "file": "src/pages/platform/esgMetricsCalculator.js",
+        "lines": 398
+      },
+      {
+        "file": "src/pages/farmers-ai/CameraCapture.jsx",
+        "lines": 374
+      },
+      {
+        "file": "src/pages/platform/components/DuckDBEngineView.jsx",
+        "lines": 361
+      },
+      {
+        "file": "src/pages/platform/MRVDashboard.jsx",
+        "lines": 360
+      },
+      {
+        "file": "src/pages/platform/registry/useRegistryState.js",
+        "lines": 359
+      },
+      {
+        "file": "src/pages/platform/registry/RegistryOverviewTab.jsx",
+        "lines": 341
+      },
+      {
+        "file": "src/pages/platform/components/SatelliteMRVStudio.jsx",
+        "lines": 335
+      },
+      {
+        "file": "src/pages/farmers-ai/HarvestGuardDashboard.jsx",
+        "lines": 318
+      },
+      {
+        "file": "src/pages/platform/SaaSDashboard.jsx",
+        "lines": 316
+      },
+      {
+        "file": "src/pages/farmers-ai/DiagnosisResult.jsx",
+        "lines": 313
+      },
+      {
+        "file": "src/pages/platform/components/utility-extractor/useUtilityExtractorState.js",
+        "lines": 294
+      },
+      {
+        "file": "src/pages/platform/components/EsgAuditModal.jsx",
+        "lines": 290
+      },
+      {
+        "file": "src/pages/platform/esg/EsgWorkspace.jsx",
+        "lines": 289
+      },
+      {
+        "file": "src/pages/platform/components/FactorRegistryStudio.jsx",
+        "lines": 288
+      },
+      {
+        "file": "src/pages/platform/components/activity-workspace/activitySeedData.js",
+        "lines": 284
+      },
+      {
+        "file": "src/pages/platform/components/verification-readiness/useVerificationReadinessState.js",
+        "lines": 284
+      },
+      {
+        "file": "src/pages/farmers-ai/treatmentDbFruitOrchard.js",
+        "lines": 277
+      },
+      {
+        "file": "src/pages/platform/components/EsgReportGenerator.jsx",
+        "lines": 274
+      },
+      {
+        "file": "src/pages/platform/components/ConglomerateTreeStudio.jsx",
+        "lines": 270
+      },
+      {
+        "file": "src/pages/platform/components/activity-workspace/ActivitiesTableTab.jsx",
+        "lines": 263
+      },
+      {
+        "file": "src/pages/platform/esg/BillIntakeWizard.jsx",
+        "lines": 262
+      },
+      {
+        "file": "src/pages/farmers-ai/treatmentDbTomatoMaize.js",
+        "lines": 259
+      },
+      {
+        "file": "src/pages/platform/clientProfiles.js",
+        "lines": 254
+      },
+      {
+        "file": "src/pages/platform/components/AtlasBenchmarkStudio.jsx",
+        "lines": 250
+      },
+      {
+        "file": "src/pages/HowItWorks.jsx",
+        "lines": 248
+      },
+      {
+        "file": "src/pages/platform/mrv/IotStationCard.jsx",
+        "lines": 234
+      },
+      {
+        "file": "src/pages/platform/esg/bill-wizard/Step4Confirm.jsx",
+        "lines": 231
+      },
+      {
+        "file": "src/pages/platform/impact/RerfDonutSection.jsx",
+        "lines": 225
+      },
+      {
+        "file": "src/pages/farmers-ai/BatchRegistration.jsx",
+        "lines": 222
+      },
+      {
+        "file": "src/pages/platform/registry/registryData.js",
+        "lines": 214
+      },
+      {
+        "file": "src/pages/platform/mrv/TelemetryChart.jsx",
+        "lines": 213
+      },
+      {
+        "file": "src/pages/platform/components/activity-workspace/useActivityWorkspaceState.js",
+        "lines": 198
+      },
+      {
+        "file": "src/pages/platform/SaaSLocalization.js",
+        "lines": 197
+      },
+      {
+        "file": "src/pages/Forbidden.jsx",
+        "lines": 195
+      },
+      {
+        "file": "src/pages/platform/registry/RegistryRulesTab.jsx",
+        "lines": 195
+      },
+      {
+        "file": "src/pages/platform/components/activity-workspace/AddActivityModal.jsx",
+        "lines": 191
+      },
+      {
+        "file": "src/pages/platform/components/VerificationReadinessCenter.jsx",
+        "lines": 184
+      },
+      {
+        "file": "src/pages/platform/registry/RegistryModals.jsx",
+        "lines": 178
+      },
+      {
+        "file": "src/pages/platform/components/utility-extractor/SegmentsTable.jsx",
+        "lines": 175
+      },
+      {
+        "file": "src/pages/platform/CarbonRegistry.jsx",
+        "lines": 168
+      },
+      {
+        "file": "src/pages/platform/components/ActivityEvidenceWorkspace.jsx",
+        "lines": 164
+      },
+      {
+        "file": "src/pages/farmers-ai/treatmentDbRicePotato.js",
+        "lines": 162
+      },
+      {
+        "file": "src/pages/platform/components/activity-workspace/WorkspaceHeader.jsx",
+        "lines": 160
+      },
+      {
+        "file": "src/pages/NotFound.jsx",
+        "lines": 157
+      },
+      {
+        "file": "src/pages/platform/components/UniversalUtilityExtractor.jsx",
+        "lines": 155
+      },
+      {
+        "file": "src/pages/platform/components/verification-readiness/BaseYearTab.jsx",
+        "lines": 149
+      },
+      {
+        "file": "src/pages/platform/esg/LedgerPanel.jsx",
+        "lines": 149
+      },
+      {
+        "file": "src/pages/platform/esg/bill-wizard/wizardTexts.js",
+        "lines": 147
+      },
+      {
+        "file": "src/pages/platform/esg/ReportsPanel.jsx",
+        "lines": 144
+      },
+      {
+        "file": "src/pages/farmers-ai/landing/cropsData.js",
+        "lines": 137
+      },
+      {
+        "file": "src/pages/platform/esg/bill-wizard/Step2Found.jsx",
+        "lines": 134
+      },
+      {
+        "file": "src/pages/platform/esg/ui.jsx",
+        "lines": 134
+      },
+      {
+        "file": "src/pages/platform/components/utility-extractor/AddSegmentModal.jsx",
+        "lines": 133
+      },
+      {
+        "file": "src/pages/platform/CarbonMonitoring.jsx",
+        "lines": 131
+      },
+      {
+        "file": "src/pages/platform/components/esg-report/HotspotsAndCommitmentsSection.jsx",
+        "lines": 130
+      },
+      {
+        "file": "src/pages/platform/FarmerEarnings.jsx",
+        "lines": 128
+      },
+      {
+        "file": "src/pages/platform/components/verification-readiness/ReadinessHeader.jsx",
+        "lines": 126
+      },
+      {
+        "file": "src/pages/farmers-ai/FarmersAILanding.jsx",
+        "lines": 124
+      },
+      {
+        "file": "src/pages/platform/components/verification-readiness/CbamTab.jsx",
+        "lines": 122
+      },
+      {
+        "file": "src/pages/platform/components/verification-readiness/DataGapsTab.jsx",
+        "lines": 120
+      },
+      {
+        "file": "src/pages/platform/mrv/AssetHealthAlertsCard.jsx",
+        "lines": 120
+      },
+      {
+        "file": "src/pages/platform/components/utility-extractor/ExtractorHeader.jsx",
+        "lines": 119
+      },
+      {
+        "file": "src/pages/platform/esg/bill-wizard/Step3FillGaps.jsx",
+        "lines": 117
+      },
+      {
+        "file": "src/pages/platform/registry/RegistryHeader.jsx",
+        "lines": 116
+      },
+      {
+        "file": "src/pages/Technology.jsx",
+        "lines": 116
+      },
+      {
+        "file": "src/pages/platform/registry/RegistryAdjustmentsTab.jsx",
+        "lines": 113
+      },
+      {
+        "file": "src/pages/platform/Impact.jsx",
+        "lines": 112
+      },
+      {
+        "file": "src/pages/platform/components/utility-extractor/EditSegmentModal.jsx",
+        "lines": 109
+      },
+      {
+        "file": "src/pages/platform/esg/bill-wizard/BoundingBoxViewer.jsx",
+        "lines": 108
+      },
+      {
+        "file": "src/pages/platform/components/verification-readiness/SignoffTab.jsx",
+        "lines": 106
+      },
+      {
+        "file": "src/pages/platform/components/verification-readiness/InquiriesTab.jsx",
+        "lines": 102
+      },
+      {
+        "file": "src/pages/farmers-ai/camera/CameraViewport.jsx",
+        "lines": 101
+      },
+      {
+        "file": "src/pages/platform/registry/RegistryJcmTab.jsx",
+        "lines": 99
+      },
+      {
+        "file": "src/pages/platform/esg/SetupPanel.jsx",
+        "lines": 97
+      },
+      {
+        "file": "src/pages/farmers-ai/components/JoinHarvestGuardCard.jsx",
+        "lines": 94
+      },
+      {
+        "file": "src/pages/platform/components/activity-workspace/EvidenceRegisterTab.jsx",
+        "lines": 94
+      },
+      {
+        "file": "src/pages/platform/components/utility-extractor/UploadSection.jsx",
+        "lines": 94
+      },
+      {
+        "file": "src/pages/platform/components/esg-report/BoundariesAndMethodologySection.jsx",
+        "lines": 93
+      },
+      {
+        "file": "src/pages/farmers-ai/landing/SupportedCropsSection.jsx",
+        "lines": 90
+      },
+      {
+        "file": "src/pages/platform/esg/DisclosuresPanel.jsx",
+        "lines": 88
+      },
+      {
+        "file": "src/pages/platform/impact/ImpactStatCards.jsx",
+        "lines": 87
+      },
+      {
+        "file": "src/pages/platform/components/esg-report/ExecutiveSummarySection.jsx",
+        "lines": 86
+      },
+      {
+        "file": "src/pages/platform/registry/RegistryBtrTab.jsx",
+        "lines": 85
+      },
+      {
+        "file": "src/pages/platform/components/activity-workspace/EvidenceDetailModal.jsx",
+        "lines": 84
+      },
+      {
+        "file": "src/pages/platform/esg/MetricsPanel.jsx",
+        "lines": 84
+      },
+      {
+        "file": "src/pages/farmers-ai/landing/WorkflowCards.jsx",
+        "lines": 83
+      },
+      {
+        "file": "src/pages/platform/esg/BillAnalysisPanel.jsx",
+        "lines": 83
+      },
+      {
+        "file": "src/pages/platform/impact/VerificationCtaSection.jsx",
+        "lines": 83
+      },
+      {
+        "file": "src/pages/platform/esg/PeoplePanel.jsx",
+        "lines": 82
+      },
+      {
+        "file": "src/pages/farmers-ai/camera/CropSelector.jsx",
+        "lines": 78
+      },
+      {
+        "file": "src/pages/platform/esg/FactorsPanel.jsx",
+        "lines": 77
+      },
+      {
+        "file": "src/pages/farmers-ai/landing/FarmersHero.jsx",
+        "lines": 76
+      },
+      {
+        "file": "src/pages/platform/components/esg-report/ReportHeaderToolbar.jsx",
+        "lines": 70
+      },
+      {
+        "file": "src/pages/farmers-ai/camera/cameraData.js",
+        "lines": 66
+      },
+      {
+        "file": "src/pages/platform/components/verification-readiness/ChecklistTab.jsx",
+        "lines": 65
+      },
+      {
+        "file": "src/pages/farmers-ai/landing/FeaturesGridAndCta.jsx",
+        "lines": 62
+      },
+      {
+        "file": "src/pages/platform/Marketplace.jsx",
+        "lines": 61
+      },
+      {
+        "file": "src/pages/platform/VerificationWorkflow.jsx",
+        "lines": 61
+      },
+      {
+        "file": "src/pages/platform/components/utility-extractor/AuditTrailDrawer.jsx",
+        "lines": 58
+      },
+      {
+        "file": "src/pages/platform/impact/LivePayoutLedger.jsx",
+        "lines": 58
+      },
+      {
+        "file": "src/pages/platform/components/esg-report/ActivityLedgerSection.jsx",
+        "lines": 56
+      },
+      {
+        "file": "src/pages/platform/mrv/SystemTelemetryCard.jsx",
+        "lines": 55
+      },
+      {
+        "file": "src/pages/platform/components/utility-extractor/invoiceTemplates.js",
+        "lines": 54
+      },
+      {
+        "file": "src/pages/platform/AIDetection.jsx",
+        "lines": 53
+      },
+      {
+        "file": "src/pages/platform/components/activity-workspace/activityData.js",
+        "lines": 51
+      },
+      {
+        "file": "src/pages/company/APIDocs.jsx",
+        "lines": 49
+      },
+      {
+        "file": "src/pages/company/Careers.jsx",
+        "lines": 49
+      },
+      {
+        "file": "src/pages/sectors/SolarIrrigation.jsx",
+        "lines": 49
+      },
+      {
+        "file": "src/pages/platform/ProjectOnboarding.jsx",
+        "lines": 47
+      },
+      {
+        "file": "src/pages/company/About.jsx",
+        "lines": 46
+      },
+      {
+        "file": "src/pages/company/FrameworkDocs.jsx",
+        "lines": 46
+      },
+      {
+        "file": "src/pages/platform/esg/bill-wizard/Step1Upload.jsx",
+        "lines": 43
+      },
+      {
+        "file": "src/pages/farmers-ai/camera/CameraControls.jsx",
+        "lines": 42
+      },
+      {
+        "file": "src/pages/sectors/BrickKilns.jsx",
+        "lines": 42
+      },
+      {
+        "file": "src/pages/sectors/CleanCookstoves.jsx",
+        "lines": 42
+      },
+      {
+        "file": "src/pages/sectors/MangroveCarbon.jsx",
+        "lines": 42
+      },
+      {
+        "file": "src/pages/sectors/RiceMethane.jsx",
+        "lines": 42
+      },
+      {
+        "file": "src/pages/sectors/WasteToEnergy.jsx",
+        "lines": 42
+      },
+      {
+        "file": "src/pages/company/Privacy.jsx",
+        "lines": 34
+      },
+      {
+        "file": "src/pages/Home.jsx",
+        "lines": 33
+      },
+      {
+        "file": "src/pages/company/Terms.jsx",
+        "lines": 32
+      },
+      {
+        "file": "src/pages/platform/impact/impactData.js",
+        "lines": 21
+      },
+      {
+        "file": "src/pages/farmers-ai/treatmentDb.js",
+        "lines": 19
+      },
+      {
+        "file": "src/pages/platform/esg/bill-wizard/Step5Result.jsx",
+        "lines": 19
+      }
+    ]
+  },
+  "src/components": {
+    "totalFiles": 74,
+    "files": [
+      {
+        "file": "src/components/Hero.jsx",
+        "lines": 338
+      },
+      {
+        "file": "src/components/ClientShowcase.jsx",
+        "lines": 317
+      },
+      {
+        "file": "src/components/Navbar.jsx",
+        "lines": 306
+      },
+      {
+        "file": "src/components/payments/purchase-modal/PaymentStep.jsx",
+        "lines": 288
+      },
+      {
+        "file": "src/components/layout/DashboardLayout.jsx",
+        "lines": 282
+      },
+      {
+        "file": "src/components/Pricing.jsx",
+        "lines": 281
+      },
+      {
+        "file": "src/components/LiveMetrics.jsx",
+        "lines": 236
+      },
+      {
+        "file": "src/components/marketplace/MarketplaceBrowse.jsx",
+        "lines": 227
+      },
+      {
+        "file": "src/components/payments/PurchaseConfirmModal.jsx",
+        "lines": 227
+      },
+      {
+        "file": "src/components/PlatformModules.jsx",
+        "lines": 224
+      },
+      {
+        "file": "src/components/RequestDemoModal.jsx",
+        "lines": 219
+      },
+      {
+        "file": "src/components/farmers-ai/LocalRiskMap.jsx",
+        "lines": 217
+      },
+      {
+        "file": "src/components/saas-pipeline/PipelineStagesCanvas.jsx",
+        "lines": 205
+      },
+      {
+        "file": "src/components/Modal.jsx",
+        "lines": 204
+      },
+      {
+        "file": "src/components/SectorFocus.jsx",
+        "lines": 204
+      },
+      {
+        "file": "src/components/marketplace/marketplaceSeedData1.js",
+        "lines": 201
+      },
+      {
+        "file": "src/components/marketplace/marketplaceSeedData2.js",
+        "lines": 201
+      },
+      {
+        "file": "src/components/ErrorBoundary.jsx",
+        "lines": 199
+      },
+      {
+        "file": "src/components/FrameworkAlignment.jsx",
+        "lines": 180
+      },
+      {
+        "file": "src/components/payments/purchase-modal/ConfigureStep.jsx",
+        "lines": 178
+      },
+      {
+        "file": "src/components/Roadmap.jsx",
+        "lines": 174
+      },
+      {
+        "file": "src/components/marketplace/MarketplaceGrid.jsx",
+        "lines": 172
+      },
+      {
+        "file": "src/components/marketplace/MarketplaceTable.jsx",
+        "lines": 171
+      },
+      {
+        "file": "src/components/OfflineBanner.jsx",
+        "lines": 166
+      },
+      {
+        "file": "src/components/platform-modules/CrystalHubSvg.jsx",
+        "lines": 166
+      },
+      {
+        "file": "src/components/marketplace/MarketplaceFilterBar.jsx",
+        "lines": 159
+      },
+      {
+        "file": "src/components/payments/purchase-modal/CertificateStep.jsx",
+        "lines": 149
+      },
+      {
+        "file": "src/components/ui/Drawer.jsx",
+        "lines": 142
+      },
+      {
+        "file": "src/components/platform-modules/PlatformModulesMobile.jsx",
+        "lines": 141
+      },
+      {
+        "file": "src/components/payments/PaymentStatusTracker.jsx",
+        "lines": 132
+      },
+      {
+        "file": "src/components/farmers-ai/WeatherRiskWidget.jsx",
+        "lines": 129
+      },
+      {
+        "file": "src/components/marketplace/MarketplaceHero.jsx",
+        "lines": 124
+      },
+      {
+        "file": "src/components/Philosophy.jsx",
+        "lines": 120
+      },
+      {
+        "file": "src/components/marketplace/MrvDossierModal.jsx",
+        "lines": 115
+      },
+      {
+        "file": "src/components/Footer.jsx",
+        "lines": 112
+      },
+      {
+        "file": "src/components/CorporateSaaSPipeline.jsx",
+        "lines": 111
+      },
+      {
+        "file": "src/components/ui/Dropdown.jsx",
+        "lines": 111
+      },
+      {
+        "file": "src/components/dashboard/FarmerCreditsWidget.jsx",
+        "lines": 109
+      },
+      {
+        "file": "src/components/live-metrics/TelemetryCardsGrid.jsx",
+        "lines": 107
+      },
+      {
+        "file": "src/components/saas-pipeline/PipelineControlPanel.jsx",
+        "lines": 107
+      },
+      {
+        "file": "src/components/marketplace/CheckoutModal.jsx",
+        "lines": 102
+      },
+      {
+        "file": "src/components/technology/DeploymentTimeline.jsx",
+        "lines": 96
+      },
+      {
+        "file": "src/components/platform-modules/crystalData.jsx",
+        "lines": 95
+      },
+      {
+        "file": "src/components/technology/SatelliteLayer.jsx",
+        "lines": 91
+      },
+      {
+        "file": "src/components/ui/DataTable.jsx",
+        "lines": 90
+      },
+      {
+        "file": "src/components/SkeletonLoader.jsx",
+        "lines": 87
+      },
+      {
+        "file": "src/components/ui/Section.jsx",
+        "lines": 85
+      },
+      {
+        "file": "src/components/ui/Button.jsx",
+        "lines": 84
+      },
+      {
+        "file": "src/components/ui/PageHeader.jsx",
+        "lines": 84
+      },
+      {
+        "file": "src/components/ui/StatCard.jsx",
+        "lines": 83
+      },
+      {
+        "file": "src/components/LoadingSpinner.jsx",
+        "lines": 80
+      },
+      {
+        "file": "src/components/ui/Tabs.jsx",
+        "lines": 78
+      },
+      {
+        "file": "src/components/live-metrics/StationSelector.jsx",
+        "lines": 69
+      },
+      {
+        "file": "src/components/ui/Input.jsx",
+        "lines": 68
+      },
+      {
+        "file": "src/components/technology/TechStackDiagram.jsx",
+        "lines": 66
+      },
+      {
+        "file": "src/components/ui/DevGridOverlay.jsx",
+        "lines": 66
+      },
+      {
+        "file": "src/components/live-metrics/liveMetricsData.js",
+        "lines": 65
+      },
+      {
+        "file": "src/components/saas-pipeline/PipelineStepper.jsx",
+        "lines": 65
+      },
+      {
+        "file": "src/components/ui/IconButton.jsx",
+        "lines": 63
+      },
+      {
+        "file": "src/components/ui/Badge.jsx",
+        "lines": 62
+      },
+      {
+        "file": "src/components/ui/Tooltip.jsx",
+        "lines": 62
+      },
+      {
+        "file": "src/components/payments/FarmerPaidCard.jsx",
+        "lines": 61
+      },
+      {
+        "file": "src/components/ui/Card.jsx",
+        "lines": 61
+      },
+      {
+        "file": "src/components/DynamicErrorAlert.jsx",
+        "lines": 56
+      },
+      {
+        "file": "src/components/ui/Toast.jsx",
+        "lines": 52
+      },
+      {
+        "file": "src/components/technology/DeviceCard.jsx",
+        "lines": 50
+      },
+      {
+        "file": "src/components/TrustBar.jsx",
+        "lines": 48
+      },
+      {
+        "file": "src/components/ui/EmptyState.jsx",
+        "lines": 41
+      },
+      {
+        "file": "src/components/ui/Skeleton.jsx",
+        "lines": 39
+      },
+      {
+        "file": "src/components/layout/MarketingLayout.jsx",
+        "lines": 28
+      },
+      {
+        "file": "src/components/saas-pipeline/pipelineStepsData.js",
+        "lines": 27
+      },
+      {
+        "file": "src/components/ui/index.js",
+        "lines": 19
+      },
+      {
+        "file": "src/components/marketplace/marketplaceData.js",
+        "lines": 15
+      },
+      {
+        "file": "src/components/ui/Modal.jsx",
+        "lines": 3
+      }
+    ]
+  }
+}

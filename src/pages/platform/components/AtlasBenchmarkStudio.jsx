@@ -13,6 +13,8 @@ import {
   Search,
   Quote
 } from 'lucide-react';
+import { Button } from '../../../components/ui/Button';
+import { StatCard } from '../../../components/ui/StatCard';
 
 const ATLAS_TEST_CASES = [
   {
@@ -153,54 +155,44 @@ export const AtlasBenchmarkStudio = ({ isLight, locale }) => {
             </p>
           </div>
 
-          <button
+          <Button
+            variant="primary"
+            size="sm"
             onClick={handleRunAtlas}
             disabled={isRunning}
-            className="px-4 py-2 rounded-2xl bg-cyan-600 hover:bg-cyan-500 text-white font-sans font-semibold text-xs shadow-md transition-all flex items-center space-x-1.5 cursor-pointer disabled:opacity-50"
+            leftIcon={<Play className={`w-3.5 h-3.5 ${isRunning ? 'animate-spin' : ''}`} />}
           >
-            <Play className={`w-3.5 h-3.5 ${isRunning ? 'animate-spin' : ''}`} />
-            <span>{locale.runAtlasEval}</span>
-          </button>
+            {locale.runAtlasEval}
+          </Button>
         </div>
       </div>
 
       {/* KPI Stats Grid */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-        <div className={`p-4 rounded-3xl border ${isLight ? 'bg-white border-gray-200' : 'bg-[#0A160F] border-[#1B4D2E]'}`}>
-          <div className="flex justify-between items-center mb-1">
-            <span className="text-[10px] font-mono text-gray-500 uppercase">Parameter Accuracy</span>
-            <span className="w-2 h-2 rounded-full bg-emerald-500" />
-          </div>
-          <span className="text-2xl font-bold font-mono text-emerald-500">98.4%</span>
-          <span className="text-[10px] text-gray-400 block mt-1">Exact numeric extraction</span>
-        </div>
-
-        <div className={`p-4 rounded-3xl border ${isLight ? 'bg-white border-gray-200' : 'bg-[#0A160F] border-[#1B4D2E]'}`}>
-          <div className="flex justify-between items-center mb-1">
-            <span className="text-[10px] font-mono text-gray-500 uppercase">Scope Mapping</span>
-            <span className="w-2 h-2 rounded-full bg-cyan-500" />
-          </div>
-          <span className="text-2xl font-bold font-mono text-cyan-500">100.0%</span>
-          <span className="text-[10px] text-gray-400 block mt-1">GHGP Scope 1/2/3 alignment</span>
-        </div>
-
-        <div className={`p-4 rounded-3xl border ${isLight ? 'bg-white border-gray-200' : 'bg-[#0A160F] border-[#1B4D2E]'}`}>
-          <div className="flex justify-between items-center mb-1">
-            <span className="text-[10px] font-mono text-gray-500 uppercase">Citation Fidelity</span>
-            <span className="w-2 h-2 rounded-full bg-emerald-500" />
-          </div>
-          <span className="text-2xl font-bold font-mono text-emerald-500">97.0%</span>
-          <span className="text-[10px] text-gray-400 block mt-1">Verbatim document grounding</span>
-        </div>
-
-        <div className={`p-4 rounded-3xl border ${isLight ? 'bg-white border-gray-200' : 'bg-[#0A160F] border-[#1B4D2E]'}`}>
-          <div className="flex justify-between items-center mb-1">
-            <span className="text-[10px] font-mono text-gray-500 uppercase">Average Latency</span>
-            <span className="w-2 h-2 rounded-full bg-cyan-500" />
-          </div>
-          <span className="text-2xl font-bold font-mono text-cyan-400">&lt; 1.5 ms</span>
-          <span className="text-[10px] text-gray-400 block mt-1">Deterministic SIMD pass</span>
-        </div>
+        <StatCard
+          title="Parameter Accuracy"
+          value="98.4%"
+          trend="up"
+          subtitle="Exact numeric extraction"
+        />
+        <StatCard
+          title="Scope Mapping"
+          value="100.0%"
+          trend="up"
+          subtitle="GHGP Scope 1/2/3 alignment"
+        />
+        <StatCard
+          title="Citation Fidelity"
+          value="97.0%"
+          trend="up"
+          subtitle="Verbatim document grounding"
+        />
+        <StatCard
+          title="Average Latency"
+          value="< 1.5 ms"
+          trend="neutral"
+          subtitle="Deterministic SIMD pass"
+        />
       </div>
 
       {/* Test Cases Table */}

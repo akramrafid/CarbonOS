@@ -35,6 +35,20 @@ test('ToastContext: provides aria-live announcements and accessible region', () 
   assert.ok(code.includes('aria-label="Close notification"'), 'Toast dismiss button must have accessible label');
 });
 
+function readDirFiles(dir) {
+  let content = '';
+  if (!fs.existsSync(dir)) return content;
+  for (const entry of fs.readdirSync(dir, { withFileTypes: true })) {
+    const full = path.join(dir, entry.name);
+    if (entry.isDirectory()) {
+      content += readDirFiles(full);
+    } else if (entry.isFile() && (entry.name.endsWith('.jsx') || entry.name.endsWith('.js'))) {
+      content += fs.readFileSync(full, 'utf-8');
+    }
+  }
+  return content;
+}
+
 // -------------------------------------------------------------
 // 3. Icon-Only Action Buttons Accessible Names (WCAG 1.3.1 / 4.1.2)
 // -------------------------------------------------------------
@@ -42,11 +56,7 @@ test('Action Buttons: icon-only controls have explicit aria-label and >= 44px ta
   const saasPath = path.join(ROOT, 'src/pages/platform/SaaSDashboard.jsx');
   let saasCode = fs.readFileSync(saasPath, 'utf-8');
   const saasFeaturesDir = path.join(ROOT, 'src/features/saas/components');
-  if (fs.existsSync(saasFeaturesDir)) {
-    for (const f of fs.readdirSync(saasFeaturesDir)) {
-      saasCode += fs.readFileSync(path.join(saasFeaturesDir, f), 'utf-8');
-    }
-  }
+  saasCode += readDirFiles(saasFeaturesDir);
 
   assert.ok(saasCode.includes('aria-label="Inspect ESG calculation methodology"'), 'Impact overview info button must have aria-label');
   assert.ok(saasCode.includes('aria-label="Inspect carbon target methodology"'), 'Target progress info button must have aria-label');
@@ -55,11 +65,7 @@ test('Action Buttons: icon-only controls have explicit aria-label and >= 44px ta
   const cmPath = path.join(ROOT, 'src/pages/platform/CarbonMonitoring.jsx');
   let cmCode = fs.readFileSync(cmPath, 'utf-8');
   const cmFeaturesDir = path.join(ROOT, 'src/features/carbon-monitoring/components');
-  if (fs.existsSync(cmFeaturesDir)) {
-    for (const f of fs.readdirSync(cmFeaturesDir)) {
-      cmCode += fs.readFileSync(path.join(cmFeaturesDir, f), 'utf-8');
-    }
-  }
+  cmCode += readDirFiles(cmFeaturesDir);
   assert.ok(cmCode.includes('aria-label="Search coordinates"'), 'Coordinates search button must have aria-label');
 });
 
@@ -79,7 +85,7 @@ test('Keyboard Focus: global stylesheet defines crisp :focus-visible indicators'
 // 5. Text Encoding Integrity
 // -------------------------------------------------------------
 test('Encoding Integrity: labels contain valid localized text without corruption', () => {
-  const hgPath = path.join(ROOT, 'src/pages/farmers-ai/HarvestGuardDashboard.jsx');
+  const hgPath = path.join(ROOT, 'src/pages/farmers-ai/components/JoinHarvestGuardCard.jsx');
   const hgCode = fs.readFileSync(hgPath, 'utf-8');
 
   assert.ok(hgCode.includes('Password / পাসওয়ার্ড'), 'Password label must contain valid Bengali characters');

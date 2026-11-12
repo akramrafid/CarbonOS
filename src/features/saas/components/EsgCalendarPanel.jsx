@@ -1,5 +1,6 @@
 import React from 'react';
 import { Calendar as CalendarIcon, CheckCircle2 } from 'lucide-react';
+import { Button } from '../../../components/ui/Button';
 
 export const EsgCalendarPanel = (props) => {
   const {
@@ -12,7 +13,7 @@ export const EsgCalendarPanel = (props) => {
   return (
           <div className="bg-white border border-[#E2E8F0] rounded-3xl p-6 lg:p-8 shadow-sm space-y-6">
             <div>
-              <h1 className="font-sans font-bold text-3xl text-[#0F291B]">ESG Reporting Calendar</h1>
+              <h2 className="font-sans font-bold text-3xl text-[#0F291B]">ESG Reporting Calendar</h2>
               <p className="text-sm text-[#64748B] mt-1 font-sans">Track verification schedules, third party audits, and offset purchases.</p>
             </div>
 
@@ -42,20 +43,23 @@ export const EsgCalendarPanel = (props) => {
                     const hasEvent = calendarEvents[day];
                     const isSelected = selectedCalendarDay === day;
                     return (
-                      <button
+                      <Button
                         key={day}
+                        variant="ghost"
+                        size="sm"
                         onClick={() => hasEvent && setSelectedCalendarDay(day)}
-                        className={`border rounded-xl p-3 relative flex flex-col items-center justify-between font-mono font-bold aspect-square transition-all ${
+                        disabled={!hasEvent}
+                        className={`border rounded-xl !p-3 relative flex flex-col items-center justify-between font-mono font-bold aspect-square transition-all !min-h-0 !h-auto ${
                           isSelected 
-                            ? 'bg-[#0F291B] border-[#0F291B] text-white shadow-md' 
-                            : 'border-[#F1F5F9] hover:bg-[#F8F9FA] text-[#1E293B]'
+                            ? '!bg-[#0F291B] !border-[#0F291B] !text-white shadow-md' 
+                            : '!border-[#F1F5F9] hover:!bg-[#F8F9FA] !text-[#1E293B]'
                         } ${hasEvent ? 'cursor-pointer' : 'cursor-default opacity-60'}`}
                       >
                         <span>{day}</span>
                         {hasEvent && (
                           <span className={`w-1.5 h-1.5 rounded-full ${isSelected ? 'bg-[#4ADE80]' : 'bg-[#10B981]'}`}></span>
                         )}
-                      </button>
+                      </Button>
                     );
                   })}
                 </div>
@@ -82,12 +86,13 @@ export const EsgCalendarPanel = (props) => {
                       <span className="text-[10px] text-[#64748B] block font-mono">SCHEDULED TIME</span>
                       <span className="font-mono font-bold text-[#1E293B]">{calendarEvents[selectedCalendarDay].time}</span>
                     </div>
-                    <button 
+                    <Button 
+                      variant="primary"
                       onClick={() => showToast(`Report for "${calendarEvents[selectedCalendarDay].title}" requested.`, "success")}
-                      className="w-full bg-[#00C853] hover:bg-[#00E676] text-white font-mono font-bold text-xs py-2 px-3 rounded-lg transition-all shadow-sm block text-center cursor-pointer"
+                      className="w-full font-mono text-xs"
                     >
                       Request Audit Dossier
-                    </button>
+                    </Button>
                   </div>
                 ) : (
                   <p className="text-xs text-[#64748B]">Click on any highlighted date in the calendar to view its ESG audit logs.</p>

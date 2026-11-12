@@ -4,6 +4,7 @@
 import { useState } from 'react';
 import { Button, Loading, Panel, Select, Table, useEsgData } from './ui';
 import BillIntakeWizard from './BillIntakeWizard';
+import { Tabs } from '../../../components/ui/Tabs';
 
 const DIMENSIONS = [['facility', 'Facility'], ['meter', 'Meter / account'], ['band', 'TOU band'], ['period', 'Period']];
 
@@ -25,29 +26,15 @@ export default function BillAnalysisPanel({ facilities = [], periods = [] }) {
 
   return (
     <div className="space-y-6">
-      <div className="flex items-center gap-3 border-b border-emerald/10 pb-3">
-        <button
-          type="button"
-          onClick={() => setMode('wizard')}
-          className={`px-4 py-2 rounded-xl font-mono text-xs transition-colors ${
-            mode === 'wizard'
-              ? 'bg-emerald text-carbon font-semibold'
-              : 'border border-mist/20 text-registry hover:border-emerald/40'
-          }`}
-        >
-          Guided Intake Wizard
-        </button>
-        <button
-          type="button"
-          onClick={() => setMode('analysis')}
-          className={`px-4 py-2 rounded-xl font-mono text-xs transition-colors ${
-            mode === 'analysis'
-              ? 'bg-emerald text-carbon font-semibold'
-              : 'border border-mist/20 text-registry hover:border-emerald/40'
-          }`}
-        >
-          Bill Parameter Analysis
-        </button>
+      <div className="border-b border-emerald/10 pb-3">
+        <Tabs
+          tabs={[
+            { id: 'wizard', label: 'Guided Intake Wizard' },
+            { id: 'analysis', label: 'Bill Parameter Analysis' }
+          ]}
+          activeTab={mode}
+          onChange={setMode}
+        />
       </div>
 
       {mode === 'wizard' ? (

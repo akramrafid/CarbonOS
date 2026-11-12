@@ -2,6 +2,9 @@ import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useHarvestStore } from '../../lib/useHarvestStore';
 import { ArrowLeft, Save } from 'lucide-react';
+import { Button } from '../../components/ui/Button';
+import { IconButton } from '../../components/ui/IconButton';
+import { PageHeader } from '../../components/ui/PageHeader';
 
 const districts = [
   "Bagerhat", "Bandarban", "Barguna", "Barisal", "Bhola", "Bogra", "Brahmanbaria", "Chandpur", 
@@ -102,20 +105,32 @@ const BatchRegistration = ({ isInline = false, onBack = null, onSaveBatch = null
   const formContent = (
     <div className="bg-white/5 backdrop-blur-md border border-white/10 p-8 rounded-[32px] w-full max-w-lg shadow-2xl relative hover:border-[#CCFF00]/25 transition-all duration-300">
       {!isInline && (
-        <button onClick={() => navigate('/harvestguard/dashboard')} className="absolute top-8 left-8 text-white/50 hover:text-white transition-colors">
-          <ArrowLeft size={24} />
-        </button>
+        <IconButton
+          icon={<ArrowLeft size={24} />}
+          aria-label="Back to HarvestGuard Dashboard"
+          onClick={() => navigate('/harvestguard/dashboard')}
+          className="absolute top-8 left-8 text-white/50 hover:text-white"
+        />
       )}
       {isInline && onBack && (
-        <button onClick={onBack} className="flex items-center text-white/50 hover:text-white mb-6 text-sm font-semibold transition-colors">
-          <ArrowLeft size={20} className="mr-2" /> Back
-        </button>
+        <Button
+          variant="ghost"
+          size="sm"
+          onClick={onBack}
+          leftIcon={<ArrowLeft size={20} />}
+          className="text-white/50 hover:text-white mb-6 font-semibold"
+        >
+          Back
+        </Button>
       )}
       
-      <div className="text-center mb-10">
-        <h2 className="text-3xl font-extrabold text-white tracking-tight mb-2 mt-4">Log New Harvest</h2>
-        <p className="text-white/60 text-sm">Offline mode supported</p>
-      </div>
+      <PageHeader
+        title="Log New Harvest"
+        description="Offline mode supported"
+        align="center"
+        className="border-none mb-10 pb-0 mt-4"
+        titleClassName="!text-3xl !font-extrabold !text-white !tracking-tight"
+      />
 
       <form onSubmit={handleSubmit} className="space-y-5">
         <div>
@@ -145,15 +160,17 @@ const BatchRegistration = ({ isInline = false, onBack = null, onSaveBatch = null
         <div>
           <div className="flex justify-between items-center mb-1.5">
             <label className="block text-white/80 text-sm font-bold">District / জেলা</label>
-            <button 
+            <Button 
               type="button" 
+              variant="link"
+              size="sm"
               onClick={detectLocation} 
               disabled={detectingLocation}
-              className="text-xs text-[#CCFF00] hover:text-[#bce500] hover:underline flex items-center space-x-1 focus:outline-none disabled:opacity-50 cursor-pointer"
+              className="text-xs text-[#CCFF00] hover:text-[#bce500] hover:underline flex items-center space-x-1 p-0 h-auto"
             >
               {detectingLocation ? (
                 <>
-                  <div className="w-2.5 h-2.5 border-2 border-[#CCFF00] border-t-transparent rounded-full animate-spin"></div>
+                  <div className="w-2.5 h-2.5 border-2 border-[#CCFF00] border-t-transparent rounded-full animate-spin mr-1"></div>
                   <span>Detecting...</span>
                 </>
               ) : locationError ? (
@@ -161,7 +178,7 @@ const BatchRegistration = ({ isInline = false, onBack = null, onSaveBatch = null
               ) : (
                 <span>Auto-detect 📍</span>
               )}
-            </button>
+            </Button>
           </div>
           <select value={district} onChange={e => setDistrict(e.target.value)} className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-white focus:outline-none focus:border-[#CCFF00] focus:ring-1 focus:ring-[#CCFF00]/50 transition-all">
             {districts.map(d => <option key={d} value={d} className="bg-carbon text-white">{d}</option>)}
@@ -177,10 +194,15 @@ const BatchRegistration = ({ isInline = false, onBack = null, onSaveBatch = null
           </select>
         </div>
 
-        <button type="submit" className="w-full bg-[#CCFF00] text-black font-extrabold py-4 rounded-xl mt-8 flex justify-center items-center space-x-2 hover:bg-[#bce500] hover:scale-[1.01] hover:shadow-[0_0_20px_rgba(204,255,0,0.25)] transition-all">
-          <Save size={20} />
-          <span>Save Batch</span>
-        </button>
+        <Button
+          type="submit"
+          variant="primary"
+          size="lg"
+          className="w-full mt-8"
+          leftIcon={<Save size={20} />}
+        >
+          Save Batch
+        </Button>
       </form>
     </div>
   );

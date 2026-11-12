@@ -1,49 +1,28 @@
 import React, { useRef, useState, useCallback, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Camera, AlertCircle, Loader2, Upload, Sprout, ChevronLeft, ChevronRight } from 'lucide-react';
+import { AlertCircle } from 'lucide-react';
+import { PageHeader } from '../../components/ui/PageHeader';
+import { Badge } from '../../components/ui/Badge';
+import { Button } from '../../components/ui/Button';
+import { IconButton } from '../../components/ui/IconButton';
 import { runOfflineInference, detectSpecies } from '../../lib/onnxRunner';
-
-const DISEASE_MAPS = {
-  rice: ["bacterialblight", "blast", "brownspot", "tungro"],
-  potato: ["early_blight", "healthy", "late_blight"],
-  tomato: ["bacterial_spot", "early_blight", "healthy", "late_blight", "leaf_mold", "septoria_leaf_spot", "spider_mites_two-spotted_spider_mite", "target_spot", "tomato_mosaic_virus", "tomato_yellow_leaf_curl_virus"],
-  maize: ["cercospora_leaf_spot_gray_leaf_spot", "common_rust", "healthy", "northern_leaf_blight"],
-  mango: ["anthracnose", "bacterial_canker", "cutting_weevil", "die_back", "gall_midge", "healthy", "powdery_mildew", "sooty_mould"],
-  jackfruit: ["Algal_Leaf_Spot_of_Jackfruit", "Black_Spot_of_Jackfruit", "Healthy_Leaf_of_Jackfruit"],
-  guava: ["Canker", "Dot", "Healthy", "Mummification", "Rust"],
-  citrus: ["Citrus_Canker_Diseases_Leaf_Orange", "Citrus_Nutrient_Deficiency_Yellow_Leaf_Orange", "Healthy_Leaf_Orange", "Multiple_Diseases_Leaf_Orange", "Young_Healthy_Leaf_Orange"]
-};
-
-const crops = [
-  { id: 'rice', name: 'Rice / ধান', icon: '🌾' },
-  { id: 'potato', name: 'Potato / আলু', icon: '🥔' },
-  { id: 'tomato', name: 'Tomato / টমেটো', icon: '🍅' },
-  { id: 'maize', name: 'Maize / ভুট্টা', icon: '🌽' },
-  { id: 'mango', name: 'Mango / আম', icon: '🥭' },
-  { id: 'jackfruit', name: 'Jackfruit / কাঁঠাল', icon: '🌳' },
-  { id: 'guava', name: 'Guava / পেয়ারা', icon: '🍏' },
-  { id: 'citrus', name: 'Citrus / লেবু', icon: '🍋' }
-];
-
-// Direct client-side Gemini API integration has been removed for security and key protection.
-// Requests are routed securely via the Django /api/diagnose backend.
+import { DISEASE_MAPS, checkImageBlur } from './camera/cameraData';
+import { CropSelector } from './camera/CropSelector';
+import { CameraViewport } from './camera/CameraViewport';
+import { CameraControls } from './camera/CameraControls';
 
 const CameraCapture = ({ isInline = false, onBack = null, onScanComplete = null }) => {
   const videoRef = useRef(null);
   const canvasRef = useRef(null);
   const fileInputRef = useRef(null);
-  const scrollContainerRef = useRef(null);
   const navigate = useNavigate();
   
   const [species, setSpecies] = useState('rice');
   const [isCameraActive, setIsCameraActive] = useState(false);
-  const [isCapturing, setIsCapturing] = useState(false);
-  const [offlineResult, setOfflineResult] = useState(null);
   const [error, setError] = useState('');
   const [isProcessing, setIsProcessing] = useState(false);
   const [isDragging, setIsDragging] = useState(false);
-  // Crop mismatch: set when the AI detects a different crop than the user selected
-  const [cropMismatch, setCropMismatch] = useState(null); // { selected: string, detected: string }
+  const [cropMismatch, setCropMismatch] = useState(null);
 
   // Geolocation state (defaults to Dhaka center)
   const [deviceCoords, setDeviceCoords] = useState({ lat: '23.8103', lng: '90.4125' });
@@ -66,7 +45,6 @@ const CameraCapture = ({ isInline = false, onBack = null, onScanComplete = null 
   }, []);
 
   useEffect(() => {
-    // Phase 9: Real-time WebSocket connection (best-effort, non-blocking)
     let ws = null;
     try {
       const wsUrl = `ws://${window.location.hostname}:8000/ws/inference/`;
@@ -115,24 +93,10 @@ const CameraCapture = ({ isInline = false, onBack = null, onScanComplete = null 
     return () => stopCamera();
   }, []);
 
-  /**
-   * Core processing pipeline — called for BOTH file upload and camera capture:
-   *
-   * Step 1 – AUTO-DETECT SPECIES: Run all 8 ONNX models in parallel. The model
-   *   that produces the highest max-class softmax probability wins. This means if
-   *   the user selects "Rice" but uploads a tomato leaf, the tomato model will
-   *   score much higher and the system auto-corrects to "tomato".
-   *
-   * Step 2 – DISEASE INFERENCE: Run the winning species model to classify the
-   *   exact disease.
-   *
-   * Step 3 – CLOUD FALLBACK: Try cloud API with the correct species; if it fails,
-   *   use the offline result.
-   */
   const processCanvas = useCallback(async (canvas, blob) => {
     setCropMismatch(null);
 
-    // ── Step 1: Auto-detect species (best-effort, non-blocking) ──────────────
+    // Step 1: Auto-detect species
     let effectiveSpecies = species;
     try {
       const detection = await detectSpecies(canvas);
@@ -140,16 +104,14 @@ const CameraCapture = ({ isInline = false, onBack = null, onScanComplete = null 
         if (detection.detectedSpecies !== species) {
           setCropMismatch({ selected: species, detected: detection.detectedSpecies });
           effectiveSpecies = detection.detectedSpecies;
-          if (import.meta.env?.DEV) console.debug(`[CropDetector] Overriding '${species}' → '${detection.detectedSpecies}' (confidence: ${(detection.confidence * 100).toFixed(1)}%)`);
-        } else {
-          if (import.meta.env?.DEV) console.debug(`[CropDetector] User selection '${species}' confirmed by detector.`);
+          if (import.meta.env?.DEV) console.debug(`[CropDetector] Overriding '${species}' → '${detection.detectedSpecies}'`);
         }
       }
     } catch (e) {
       console.warn('Species detection failed, using user selection:', e);
     }
 
-    // ── Step 2: Offline disease inference using the CORRECT species ──────────
+    // Step 2: Offline disease inference
     let offlineRes = null;
     try {
       const raw = await runOfflineInference(effectiveSpecies, canvas);
@@ -168,13 +130,12 @@ const CameraCapture = ({ isInline = false, onBack = null, onScanComplete = null 
           },
           isOffline: true
         };
-        if (import.meta.env?.DEV) console.debug('[Offline] Disease result:', offlineRes);
       }
     } catch (e) {
       console.warn('Offline inference skipped:', e);
     }
 
-    // ── Step 3: Cloud inference via server-side Django API ───────────────────
+    // Step 3: Cloud inference
     let cloudResult = null;
     let cloudError = null;
     try {
@@ -212,7 +173,7 @@ const CameraCapture = ({ isInline = false, onBack = null, onScanComplete = null 
       console.error('Cloud inference failed:', err.message);
     }
 
-    // ── Step 4: Navigate to results (cloud > offline > error) ────────────────
+    // Step 4: Finalize
     try {
       const finalResult = cloudResult || offlineRes;
       if (finalResult) {
@@ -224,7 +185,6 @@ const CameraCapture = ({ isInline = false, onBack = null, onScanComplete = null 
           navigate('/farmers-ai/result', { state: { result: finalResult, imageBlob: imageBlobUrl } });
         }
       } else {
-        // Both cloud and offline failed
         const isRateLimit = cloudError?.message?.includes('429') || cloudError?.message?.includes('quota');
         if (isRateLimit) {
           setError('API quota exceeded. Please wait a few minutes and try again. / এপিআই কোটা শেষ। কিছুক্ষণ পর আবার চেষ্টা করুন।');
@@ -238,7 +198,6 @@ const CameraCapture = ({ isInline = false, onBack = null, onScanComplete = null 
   }, [species, deviceCoords, isInline, onScanComplete, navigate]);
 
   const handleFileUpload = (e) => {
-    // Support both FileList from <input> and single File from drag-drop
     let file = null;
     if (e.target.files instanceof FileList) {
       file = e.target.files[0];
@@ -301,7 +260,7 @@ const CameraCapture = ({ isInline = false, onBack = null, onScanComplete = null 
     if (files && files.length > 0) {
       handleFileUpload({ target: { files } });
     }
-  }, [species, handleFileUpload]);
+  }, [handleFileUpload]);
 
   const captureAndAnalyze = useCallback(async () => {
     if (!videoRef.current || !canvasRef.current) return;
@@ -318,50 +277,11 @@ const CameraCapture = ({ isInline = false, onBack = null, onScanComplete = null 
     const ctx = canvas.getContext('2d');
     ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
     
-    // Client-Side Quality Check: Blur Detection via Laplacian Variance
-    try {
-      const checkCanvas = document.createElement('canvas');
-      const cw = 200;
-      const ch = Math.floor(canvas.height * (cw / canvas.width));
-      checkCanvas.width = cw;
-      checkCanvas.height = ch;
-      const checkCtx = checkCanvas.getContext('2d');
-      checkCtx.drawImage(canvas, 0, 0, cw, ch);
-      
-      const imgData = checkCtx.getImageData(0, 0, cw, ch);
-      const data = imgData.data;
-      const grayscale = new Float32Array(cw * ch);
-      
-      for (let i = 0; i < data.length; i += 4) {
-        grayscale[i / 4] = data[i] * 0.299 + data[i + 1] * 0.587 + data[i + 2] * 0.114;
-      }
-      
-      let mean = 0;
-      let count = 0;
-      const laplacians = new Float32Array((cw - 2) * (ch - 2));
-      
-      for (let y = 1; y < ch - 1; y++) {
-        for (let x = 1; x < cw - 1; x++) {
-          const idx = y * cw + x;
-          const laplacian = grayscale[(y - 1) * cw + x] + grayscale[(y + 1) * cw + x] + grayscale[y * cw + (x - 1)] + grayscale[y * cw + (x + 1)] - 4 * grayscale[idx];
-          laplacians[count++] = laplacian;
-          mean += laplacian;
-        }
-      }
-      mean /= count;
-      let variance = 0;
-      for (let i = 0; i < count; i++) {
-        variance += Math.pow(laplacians[i] - mean, 2);
-      }
-      variance /= count;
-      
-      if (variance < 30) {
-        setError("Image is too blurry! Please hold the camera steady and ensure the leaf is in focus.");
-        setIsProcessing(false);
-        return;
-      }
-    } catch (e) {
-      console.warn("Blur check failed, skipping", e);
+    const isSharp = checkImageBlur(canvas);
+    if (!isSharp) {
+      setError("Image is too blurry! Please hold the camera steady and ensure the leaf is in focus.");
+      setIsProcessing(false);
+      return;
     }
     
     canvas.toBlob(async (blob) => {
@@ -370,36 +290,36 @@ const CameraCapture = ({ isInline = false, onBack = null, onScanComplete = null 
     }, 'image/jpeg', 0.8);
   }, [processCanvas]);
 
-  const scroll = (direction) => {
-    if (scrollContainerRef.current) {
-      const scrollAmount = 180;
-      scrollContainerRef.current.scrollBy({
-        left: direction === 'left' ? -scrollAmount : scrollAmount,
-        behavior: 'smooth'
-      });
-    }
-  };
-
   return (
     <div className={`pb-16 px-4 max-w-xl mx-auto flex flex-col ${isInline ? 'pt-4' : 'pt-24 min-h-screen'}`}>
-      {/* Scanner & camera animations defined in index.css */}
-
       {isInline && onBack && (
-        <button onClick={onBack} className="self-start flex items-center text-white/50 hover:text-[#CCFF00] mb-6 transition-colors text-sm font-semibold group">
-          <span className="group-hover:-translate-x-1 transition-transform mr-1.5">&larr;</span> Back to Landing
-        </button>
+        <Button
+          variant="ghost"
+          size="sm"
+          onClick={onBack}
+          className="self-start text-white/50 hover:text-[#CCFF00] mb-6 font-semibold"
+        >
+          &larr; Back to Landing
+        </Button>
       )}
 
-      <div className="text-center mb-8 flex flex-col items-center">
-        <div className="inline-flex items-center space-x-1.5 bg-[#CCFF00]/10 border border-[#CCFF00]/25 px-3 py-1 rounded-full mb-3 shadow-[0_0_15px_rgba(204,255,0,0.05)]">
-          <span className="w-1.5 h-1.5 rounded-full bg-[#CCFF00] animate-pulse"></span>
-          <span className="text-[#CCFF00] text-xs font-semibold uppercase tracking-wider">AI Scanner / এআই স্ক্যানার</span>
+      {!isInline ? (
+        <div className="mb-8">
+          <PageHeader
+            title="Farmer's AI Scanner"
+            description="Select crop and scan leaf or upload a photo."
+            badge={<Badge variant="emerald">AI Scanner / এআই স্ক্যানার</Badge>}
+            align="center"
+          />
         </div>
-        <h1 className="text-3xl md:text-4xl font-extrabold text-white tracking-tight leading-tight">Farmer's AI Scanner</h1>
-        <p className="text-white/60 mt-2 text-sm font-medium max-w-sm">Select crop and scan leaf or upload a photo.</p>
-      </div>
+      ) : (
+        <div className="mb-6 text-center">
+          <Badge variant="emerald" className="mb-2">AI Scanner / এআই স্ক্যানার</Badge>
+          <h2 className="text-2xl md:text-3xl font-bold text-white tracking-tight">Farmer's AI Scanner</h2>
+          <p className="text-sm text-white/60 mt-1">Select crop and scan leaf or upload a photo.</p>
+        </div>
+      )}
 
-      {/* Crop Mismatch Auto-Correction Banner */}
       {cropMismatch && (
         <div className="mismatch-banner mb-5 flex items-start gap-3 bg-amber-500/10 border border-amber-400/30 px-4 py-3.5 rounded-2xl backdrop-blur-sm shadow-lg">
           <AlertCircle size={18} className="shrink-0 text-amber-400 mt-0.5" />
@@ -414,71 +334,17 @@ const CameraCapture = ({ isInline = false, onBack = null, onScanComplete = null 
               {' '}Analyzing as <span className="font-bold capitalize text-[#CCFF00]">{cropMismatch.detected}</span> for accurate results.
             </p>
           </div>
-          <button
+          <IconButton
+            icon={<span className="text-xl leading-none">&times;</span>}
+            aria-label="Dismiss crop mismatch notification"
             onClick={() => setCropMismatch(null)}
-            className="shrink-0 text-white/30 hover:text-white/70 transition-colors text-xl leading-none ml-1"
-          >
-            &times;
-          </button>
+            className="shrink-0 text-white/30 hover:text-white/70 min-h-[32px] min-w-[32px] p-1 ml-1"
+          />
         </div>
       )}
 
-      {/* Crop Selector Bar */}
-      <div className="mb-8 bg-white/5 border border-white/10 p-4 rounded-3xl relative overflow-hidden">
-        <div className="text-white/50 text-xs font-bold mb-3 uppercase tracking-wider flex items-center justify-between px-1">
-          <span>Target Crop / ফসল নির্বাচন করুন</span>
-          <span className="text-[#CCFF00] font-extrabold capitalize bg-[#CCFF00]/10 border border-[#CCFF00]/20 px-3 py-0.5 rounded-full text-[11px] tracking-wide">{species}</span>
-        </div>
-        
-        {/* Swipeable List with Fade Gradient Overlays & Scroll Buttons */}
-        <div className="relative flex items-center">
-          {/* Left Arrow Button */}
-          <button 
-            onClick={() => scroll('left')}
-            className="absolute left-0 z-20 w-8 h-8 rounded-full bg-black/60 border border-white/10 flex items-center justify-center text-white/70 hover:text-white hover:bg-black/80 hover:border-white/20 transition-all active:scale-95 shadow-lg"
-          >
-            <ChevronLeft size={16} />
-          </button>
+      <CropSelector species={species} onSelectSpecies={setSpecies} />
 
-          {/* Swipeable List Wrapper */}
-          <div className="relative w-full overflow-hidden mx-8">
-            {/* Left fade gradient */}
-            <div className="absolute left-0 top-0 bottom-0 w-8 bg-gradient-to-r from-carbon to-transparent pointer-events-none z-10" />
-            {/* Right fade gradient */}
-            <div className="absolute right-0 top-0 bottom-0 w-8 bg-gradient-to-l from-carbon to-transparent pointer-events-none z-10" />
-            
-            <div 
-              ref={scrollContainerRef}
-              className="crop-scroll-container flex space-x-2.5 overflow-x-auto pb-1 relative w-full scroll-smooth select-none"
-            >
-              {crops.map((crop) => (
-                <button
-                  key={crop.id}
-                  onClick={() => setSpecies(crop.id)}
-                  className={`px-5 py-2.5 rounded-full border text-xs md:text-sm font-bold flex items-center space-x-2 shrink-0 transition-all duration-300 ${
-                    species === crop.id
-                      ? 'bg-[#CCFF00] text-black border-transparent shadow-[0_4px_15px_rgba(204,255,0,0.25)] scale-[1.02]'
-                      : 'bg-white/5 border-white/10 text-white/70 hover:bg-white/10 hover:border-white/25 hover:text-white'
-                  }`}
-                >
-                  <span className="text-base">{crop.icon}</span>
-                  <span>{crop.name}</span>
-                </button>
-              ))}
-            </div>
-          </div>
-
-          {/* Right Arrow Button */}
-          <button 
-            onClick={() => scroll('right')}
-            className="absolute right-0 z-20 w-8 h-8 rounded-full bg-black/60 border border-white/10 flex items-center justify-center text-white/70 hover:text-white hover:bg-black/80 hover:border-white/20 transition-all active:scale-95 shadow-lg"
-          >
-            <ChevronRight size={16} />
-          </button>
-        </div>
-      </div>
-
-      {/* Hidden File Input for Image Upload */}
       <input 
         type="file" 
         ref={fileInputRef} 
@@ -487,158 +353,27 @@ const CameraCapture = ({ isInline = false, onBack = null, onScanComplete = null 
         className="hidden" 
       />
 
-      {/* Main Viewport Container */}
-      <div className="relative aspect-video w-full bg-black/40 border border-white/10 rounded-[32px] overflow-hidden shadow-2xl flex items-center justify-center min-h-[340px]">
-        
-        {/* Corner framing targets */}
-        {/* impeccable-disable side-tab, border-accent-on-rounded -- camera viewfinder reticle brackets */}
-        <div className="absolute top-6 left-6 w-5 h-5 border-t-2 border-l-2 border-[#CCFF00]/40 pointer-events-none z-10" />
-        <div className="absolute top-6 right-6 w-5 h-5 border-t-2 border-r-2 border-[#CCFF00]/40 pointer-events-none z-10" />
-        <div className="absolute bottom-6 left-6 w-5 h-5 border-b-2 border-l-2 border-[#CCFF00]/40 pointer-events-none z-10" />
-        <div className="absolute bottom-6 right-6 w-5 h-5 border-b-2 border-r-2 border-[#CCFF00]/40 pointer-events-none z-10" />
-        
-        {/* Subtle grid pattern */}
-        <div className="absolute inset-0 opacity-10 bg-[linear-gradient(rgba(255,255,255,0.05)_1px,transparent_1px),linear-gradient(90deg,rgba(255,255,255,0.05)_1px,transparent_1px)] bg-[size:20px_20px] pointer-events-none" />
+      <CameraViewport
+        videoRef={videoRef}
+        canvasRef={canvasRef}
+        isCameraActive={isCameraActive}
+        error={error}
+        isDragging={isDragging}
+        isProcessing={isProcessing}
+        onFileSelectClick={() => fileInputRef.current?.click()}
+        onDragOver={handleDragOver}
+        onDragLeave={handleDragLeave}
+        onDrop={handleDrop}
+      />
 
-        {/* Slow laser scanner sweep overlay */}
-        <div 
-          className="absolute left-0 right-0 h-[2px] bg-gradient-to-r from-transparent via-[#CCFF00] to-transparent shadow-[0_0_12px_#CCFF00] opacity-30 pointer-events-none z-10" 
-          style={{ animation: 'scan-line 4s linear infinite' }}
-        />
-
-        {!isCameraActive || error ? (
-          /* Dropzone Upload View */
-          <div 
-            onClick={() => fileInputRef.current.click()}
-            onDragOver={handleDragOver}
-            onDragLeave={handleDragLeave}
-            onDrop={handleDrop}
-            className={`cursor-pointer w-full h-full p-8 text-center flex flex-col items-center justify-center transition-all duration-300 rounded-[32px] border-2 border-dashed
-              ${isDragging 
-                ? 'border-[#CCFF00] bg-[#CCFF00]/5 scale-[1.01] shadow-[0_0_30px_rgba(204,255,0,0.1)]' 
-                : 'border-white/10 bg-transparent hover:border-[#CCFF00]/40 hover:bg-white/5'
-              }`}
-          >
-            {/* Glowing upload circle indicator */}
-            <div className="w-16 h-16 rounded-full bg-gradient-to-b from-[#CCFF00]/20 to-transparent border border-[#CCFF00]/30 flex items-center justify-center mb-5 text-[#CCFF00] transition-all duration-300 shadow-[0_0_20px_rgba(204,255,0,0.1)] group-hover:scale-105">
-              <Upload className="w-7 h-7" />
-            </div>
-            
-            <h3 className="text-xl font-extrabold text-white mb-2 tracking-tight">Upload Picture / ছবি আপলোড করুন</h3>
-            
-            <p className="text-white/60 text-sm max-w-xs mx-auto mb-3 leading-relaxed">Open gallery on phones or file explorer on PC. Support drag &amp; drop.</p>
-            
-            <p className="text-[#CCFF00]/90 font-semibold text-xs mb-3 px-3.5 py-1.5 rounded-full bg-[#CCFF00]/5 border border-[#CCFF00]/10">মোবাইলে গ্যালারি এবং পিসিতে ফাইল সিলেক্ট করতে এখানে ক্লিক করুন</p>
-
-            {error && (
-              <div className="flex items-center gap-2 bg-amber-500/10 border border-amber-500/20 px-4 py-2 rounded-2xl text-amber-400 text-xs mt-3 max-w-xs shadow-md backdrop-blur-md">
-                <AlertCircle size={14} className="shrink-0 text-amber-500" />
-                <span className="font-semibold">Camera unavailable. Upload mode active.</span>
-              </div>
-            )}
-          </div>
-        ) : (
-          /* Live Camera View */
-          <div className="absolute inset-0 w-full h-full">
-            <video 
-              ref={videoRef} 
-              autoPlay 
-              playsInline 
-              className="absolute inset-0 w-full h-full object-cover"
-            />
-            {/* Target Reticle framing guide */}
-            <div className="absolute inset-0 pointer-events-none flex items-center justify-center">
-              <div className="w-56 h-56 rounded-full border-2 border-dashed border-[#CCFF00]/60 flex items-center justify-center shadow-[0_0_0_9999px_rgba(0,0,0,0.6)]">
-                <span className="text-[#CCFF00] text-[10px] font-bold uppercase tracking-widest bg-black/60 px-2 py-0.5 rounded-full border border-[#CCFF00]/30 backdrop-blur-md">Align leaf / পাতা এখানে মেলান</span>
-              </div>
-            </div>
-          </div>
-        )}
-        <canvas ref={canvasRef} className="hidden" />
-
-        {/* Processing State Loader Overlay */}
-        {isProcessing && (
-          <div className="absolute inset-0 bg-black/85 backdrop-blur-md z-30 flex flex-col items-center justify-center p-6">
-            <div className="relative w-20 h-20 mb-6">
-              {/* Spinning active ring */}
-              <div className="absolute inset-0 rounded-full border-4 border-white/10 border-t-[#CCFF00] animate-spin" />
-              {/* Diagnostic core icon */}
-              <div className="absolute inset-3 rounded-full bg-[#CCFF00]/10 border border-[#CCFF00]/30 flex items-center justify-center text-[#CCFF00]" style={{ animation: 'pulse-ring 1.5s infinite' }}>
-                <Sprout className="w-7 h-7" />
-              </div>
-            </div>
-            <h3 className="text-xl font-extrabold text-white tracking-tight mb-2">Running AI Diagnostics...</h3>
-            <p className="text-white/60 text-sm mb-1">Detecting crop &amp; analyzing leaf diseases</p>
-            <p className="text-[#CCFF00] text-xs font-semibold">কৃত্রিম বুদ্ধিমত্তা ফসল ও রোগ শনাক্ত করছে...</p>
-          </div>
-        )}
-      </div>
-
-      {/* Button Controls */}
-      <div className="mt-8 flex flex-col sm:flex-row gap-4 w-full">
-        {isCameraActive && !error ? (
-          <>
-            <button
-              onClick={captureAndAnalyze}
-              disabled={isProcessing}
-              className={`flex-grow py-4 rounded-2xl flex items-center justify-center gap-2 text-base font-extrabold transition-all shadow-lg hover:scale-[1.02] active:scale-[0.98]
-                ${isProcessing 
-                  ? 'bg-white/5 text-white/30 border border-white/5 cursor-not-allowed' 
-                  : 'bg-[#CCFF00] text-black hover:bg-[#bce500] hover:shadow-[0_0_25px_rgba(204,255,0,0.35)]'}`}
-            >
-              {isProcessing ? (
-                <>
-                  <Loader2 className="w-5 h-5 animate-spin" />
-                  <span>Analyzing Leaf...</span>
-                </>
-              ) : (
-                <>
-                  <Camera className="w-5 h-5" />
-                  <span>Check my crop / রোগ নির্ণয় করুন</span>
-                </>
-              )}
-            </button>
-            <button
-              onClick={() => fileInputRef.current.click()}
-              disabled={isProcessing}
-              className="px-6 py-4 bg-white/5 border border-white/10 hover:bg-white/10 hover:border-[#CCFF00]/30 rounded-2xl text-white font-bold transition-all flex items-center justify-center gap-2 active:scale-95"
-            >
-              <Upload className="w-5 h-5 text-[#CCFF00]" />
-              <span>Upload / আপলোড</span>
-            </button>
-          </>
-        ) : (
-          <>
-            <button
-              onClick={() => fileInputRef.current.click()}
-              disabled={isProcessing}
-              className={`flex-grow py-4 rounded-2xl flex items-center justify-center gap-2 text-base font-extrabold transition-all shadow-lg hover:scale-[1.02] active:scale-[0.98]
-                ${isProcessing 
-                  ? 'bg-white/5 text-white/30 border border-white/5 cursor-not-allowed' 
-                  : 'bg-[#CCFF00] text-black hover:bg-[#bce500] hover:shadow-[0_0_25px_rgba(204,255,0,0.35)]'}`}
-            >
-              {isProcessing ? (
-                <>
-                  <Loader2 className="w-5 h-5 animate-spin" />
-                  <span>Analyzing Leaf...</span>
-                </>
-              ) : (
-                <>
-                  <Upload className="w-5 h-5" />
-                  <span>Upload Picture / ছবি আপলোড করুন</span>
-                </>
-              )}
-            </button>
-            <button
-              onClick={startCamera}
-              className="px-6 py-4 bg-white/5 border border-white/10 hover:bg-white/10 hover:border-[#CCFF00]/30 rounded-2xl text-white font-bold transition-all flex items-center justify-center gap-2 active:scale-95"
-            >
-              <Camera className="w-5 h-5 text-[#CCFF00]" />
-              <span>Retry Camera</span>
-            </button>
-          </>
-        )}
-      </div>
+      <CameraControls
+        isCameraActive={isCameraActive}
+        error={error}
+        isProcessing={isProcessing}
+        onCapture={captureAndAnalyze}
+        onFileSelectClick={() => fileInputRef.current?.click()}
+        onRetryCamera={startCamera}
+      />
     </div>
   );
 };

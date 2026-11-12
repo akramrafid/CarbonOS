@@ -90,3 +90,111 @@ test('DevGridOverlay: exists and supports "G" key shortcut for 12-column grid an
   assert.ok(gridCode.includes("e.key === 'g' || e.key === 'G'"), 'DevGridOverlay must toggle with "G" key');
   assert.ok(gridCode.includes('grid-cols-12'), 'DevGridOverlay must render 12-column grid');
 });
+
+// -------------------------------------------------------------
+// 3. Page-Level Design System Enforcement
+// -------------------------------------------------------------
+
+function walk(dir) {
+  let results = [];
+  if (!fs.existsSync(dir)) return results;
+  const list = fs.readdirSync(dir);
+  list.forEach((file) => {
+    const fullPath = path.join(dir, file);
+    const stat = fs.statSync(fullPath);
+    if (stat && stat.isDirectory()) {
+      results = results.concat(walk(fullPath));
+    } else if (file.endsWith('.jsx') || file.endsWith('.tsx')) {
+      results.push(fullPath);
+    }
+  });
+  return results;
+}
+
+const targetDirs = [path.join(ROOT, 'src/pages'), path.join(ROOT, 'src/features')];
+let allPageAndFeatureFiles = [];
+targetDirs.forEach((dir) => {
+  allPageAndFeatureFiles = allPageAndFeatureFiles.concat(walk(dir));
+});
+
+test('Enforcement: no raw <button> with className styling outside src/components/ui', () => {
+  const violations = [];
+  allPageAndFeatureFiles.forEach((f) => {
+    const content = fs.readFileSync(f, 'utf8');
+    const matches = content.match(/<button[\s\S]*?>/g) || [];
+    const withClass = matches.filter((m) => /className\s*=/i.test(m));
+    if (withClass.length > 0) {
+      violations.push(`${path.relative(ROOT, f)} (${withClass.length} raw buttons)`);
+    }
+  });
+  assert.strictEqual(
+    violations.length,
+    0,
+    `Raw <button> with className found outside src/components/ui:\n${violations.join('\n')}`
+  );
+});
+
+test('Enforcement: at most ONE variant="primary" Button per page or panel file', () => {
+  const violations = [];
+  allPageAndFeatureFiles.forEach((f) => {
+    const content = fs.readFileSync(f, 'utf8');
+    const matches = content.match(/variant\s*=\s*["']primary["']/g) || [];
+    if (matches.length > 1) {
+      violations.push(`${path.relative(ROOT, f)} (${matches.length} primary buttons)`);
+    }
+  });
+  assert.strictEqual(
+    violations.length,
+    0,
+    `Multiple variant="primary" Buttons found in single page or panel:\n${violations.join('\n')}`
+  );
+});
+
+test('Enforcement: no raw <h1> outside PageHeader in src/pages and src/features', () => {
+  const violations = [];
+  allPageAndFeatureFiles.forEach((f) => {
+    const content = fs.readFileSync(f, 'utf8');
+    const stripped = content.replace(/\/\*[\s\S]*?\*\/|\/\/.*/g, '');
+    const matches = stripped.match(/<h1[\s>]/g) || [];
+    if (matches.length > 0) {
+      violations.push(`${path.relative(ROOT, f)} (${matches.length} h1 elements)`);
+    }
+  });
+  assert.strictEqual(
+    violations.length,
+    0,
+    `Raw <h1> found outside PageHeader:\n${violations.join('\n')}`
+  );
+});
+
+test('Enforcement: zero files over 400 lines in src/pages and src/features', () => {
+  const violations = [];
+  allPageAndFeatureFiles.forEach((f) => {
+    const lines = fs.readFileSync(f, 'utf8').split('\n').length;
+    if (lines > 400) {
+      violations.push(`${path.relative(ROOT, f)} (${lines} lines)`);
+    }
+  });
+  assert.strictEqual(
+    violations.length,
+    0,
+    `Files exceeding 400 lines in src/pages and src/features:\n${violations.join('\n')}`
+  );
+});
+
+test('Enforcement: all modal components (*Modal.jsx) must be built on ui/Modal', () => {
+  const modalFiles = allPageAndFeatureFiles.filter((f) => /Modal\.jsx$/i.test(path.basename(f)));
+  const violations = [];
+  modalFiles.forEach((f) => {
+    const content = fs.readFileSync(f, 'utf8');
+    const importsModal = content.includes('/components/ui/Modal') || content.includes('@/components/ui/Modal');
+    if (!importsModal) {
+      violations.push(path.relative(ROOT, f));
+    }
+  });
+  assert.strictEqual(
+    violations.length,
+    0,
+    `Modal files not built on ui/Modal:\n${violations.join('\n')}`
+  );
+});

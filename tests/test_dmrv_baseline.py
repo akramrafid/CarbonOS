@@ -13,6 +13,7 @@ sys.path.append(BASE_DIR)
 sys.path.append(os.path.join(BASE_DIR, "inference"))
 
 import _isolated_db  # noqa: F401,E402  (temporary database, never backend/db.sqlite3)
+from inference.carbon_monitoring.auth import mint_carbon_token
 from inference.carbon_monitoring.database import init_db, SessionLocal
 from inference.carbon_monitoring.models import AnalysisJob, CarbonResult, BaselineAssessment
 from inference.carbon_monitoring.router import router as carbon_router
@@ -27,10 +28,12 @@ from inference.carbon_monitoring.baseline import (
 class TestDMRVDynamicBaseline(unittest.TestCase):
     @classmethod
     def setUpClass(cls):
+        os.environ["DMRV_FORCE_SIMULATION"] = "1"
         init_db()
         cls.app = FastAPI(title="dMRV Baseline Test Harness")
         cls.app.include_router(carbon_router)
-        cls.client = TestClient(cls.app)
+        token = mint_carbon_token(sub="tester-baseline", organization_id="org-baseline", role="org_owner")
+        cls.client = TestClient(cls.app, headers={"Authorization": f"Bearer {token}"})
 
     def setUp(self):
         self.db: Session = SessionLocal()

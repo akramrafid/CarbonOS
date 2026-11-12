@@ -14,6 +14,8 @@ import {
 } from 'lucide-react';
 import { CLIENT_PROFILES, CLIENT_SECTORS } from '../pages/platform/clientProfiles';
 import { useTheme } from '../context/ThemeContext';
+import { SectionHeader } from './ui/Section';
+import { Badge } from './ui/Badge';
 
 const ClientShowcase = () => {
   const [selectedCategory, setSelectedCategory] = useState('all');
@@ -198,32 +200,18 @@ const ClientShowcase = () => {
       <div className="max-w-[2100px] 2xl:max-w-[2300px] w-full mx-auto px-6 sm:px-10 lg:px-14 xl:px-18 2xl:px-24 relative z-10">
         
         {/* Section Header */}
-        <div className="text-center max-w-3xl mx-auto mb-16">
-          <div className={`inline-flex items-center space-x-2 px-4 py-1.5 rounded-full font-mono text-xs font-bold uppercase tracking-wider mb-4 shadow-xs ${
-            isLight
-              ? 'bg-[#dbf0ea] border border-[#15803d]/30 text-[#15803d]'
-              : 'bg-[#00C853]/10 border border-[#00C853]/30 text-[#00E676]'
-          }`}>
-            <Award className={`w-4 h-4 ${isLight ? 'text-[#15803d]' : 'text-[#00C853]'}`} />
-            <span>Trusted Enterprise Client Network</span>
-          </div>
-
-          <h2 className={`text-3xl sm:text-4xl lg:text-5xl font-extrabold tracking-tight leading-tight mb-4 ${
-            isLight ? 'text-[#181414]' : 'text-white'
-          }`}>
-            Powering Bangladesh's <br />
-            <span className={isLight ? 'text-[#15803d]' : 'bg-gradient-to-r from-[#00E676] via-[#10B981] to-[#34D399] bg-clip-text text-transparent'}>
-              Decarbonization Pioneers
-            </span>
-          </h2>
-
-          <p className={`text-sm sm:text-base leading-relaxed font-sans ${
-            isLight ? 'text-[#413f3f]' : 'text-gray-400'
-          }`}>
-            From electric mobility and smart student transit to circular jute biopolymers and premier universities, 
-            see how Bangladesh’s industry leaders use <strong className={`font-semibold ${isLight ? 'text-[#181414]' : 'text-white'}`}>CarbonZero BD</strong> for verified ESG carbon accounting.
-          </p>
-        </div>
+        <SectionHeader
+          centered
+          badge={
+            <Badge variant="emerald" className="inline-flex items-center gap-1.5 uppercase font-mono text-xs">
+              <Award className="w-3.5 h-3.5" />
+              <span>Trusted Enterprise Client Network</span>
+            </Badge>
+          }
+          title="Powering Bangladesh's Decarbonization Pioneers"
+          subtitle="From electric mobility and smart student transit to circular jute biopolymers and premier universities, see how Bangladesh’s industry leaders use CarbonZero BD for verified ESG carbon accounting."
+          className="max-w-3xl mx-auto mb-16"
+        />
 
         {/* Sector Filter Tabs - Impeccable Segmented Control Dock */}
         <div className="flex justify-center mb-16 px-2">

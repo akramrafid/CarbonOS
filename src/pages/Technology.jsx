@@ -3,6 +3,8 @@ import DeviceCard from '../components/technology/DeviceCard';
 import SatelliteLayer from '../components/technology/SatelliteLayer';
 import TechStackDiagram from '../components/technology/TechStackDiagram';
 import DeploymentTimeline from '../components/technology/DeploymentTimeline';
+import { Button } from '../components/ui/Button';
+import { PageHeader } from '../components/ui/PageHeader';
 
 const Technology = () => {
   const devices = [
@@ -22,15 +24,14 @@ const Technology = () => {
       {/* SECTION 1: HERO */}
       <section className="pb-16 px-4 sm:px-6 lg:px-8 bg-white border-b border-[#E2E8F0]">
         <div className="max-w-7xl mx-auto text-center">
-          <span className="font-mono text-sm tracking-widest text-[#16A34A] uppercase mb-4 block">
-            // PITCH POINT: Hardware-agnostic, LoRaWAN-native
-          </span>
-          <h1 className="text-[48px] leading-tight font-bold text-[#0F172A] tracking-[-0.02em] mb-6 max-w-4xl mx-auto">
-            The Infrastructure Behind Every Verified Carbon Credit
-          </h1>
-          <p className="text-lg text-[#475569] max-w-3xl mx-auto mb-12">
-            Carbon Zero BD operates a full-stack MRV infrastructure — combining ground-level IoT sensors with satellite remote sensing and AI-powered analytics. Processing 50,000+ readings/hour.
-          </p>
+          <PageHeader
+            badge="// PITCH POINT: Hardware-agnostic, LoRaWAN-native"
+            title="The Infrastructure Behind Every Verified Carbon Credit"
+            description="Carbon Zero BD operates a full-stack MRV infrastructure — combining ground-level IoT sensors with satellite remote sensing and AI-powered analytics. Processing 50,000+ readings/hour."
+            align="center"
+            className="border-none mb-12 pb-0"
+            titleClassName="!text-[48px] !leading-tight !font-bold !text-[#0F172A] !tracking-[-0.02em] max-w-4xl mx-auto"
+          />
           
           {/* Schematic Diagram placeholder */}
           <div className="w-full max-w-5xl mx-auto bg-[#0F172A] rounded-2xl p-8 flex flex-col md:flex-row items-center justify-between space-y-4 md:space-y-0 text-white font-mono text-sm shadow-xl">
@@ -101,9 +102,9 @@ const Technology = () => {
         <div className="max-w-4xl mx-auto">
           <h2 className="text-4xl font-bold text-white mb-8">Ready to integrate your project into Carbon Zero BD?</h2>
           <div className="flex flex-col sm:flex-row justify-center items-center space-y-4 sm:space-y-0 sm:space-x-6">
-            <button className="bg-[#16A34A] hover:bg-[#16A34A]/90 text-white font-bold py-4 px-8 rounded-xl transition-colors w-full sm:w-auto text-lg">
+            <Button variant="primary" size="lg" className="w-full sm:w-auto text-lg">
               Register a Carbon Project →
-            </button>
+            </Button>
           </div>
         </div>
       </section>

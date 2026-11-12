@@ -2,6 +2,10 @@ import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useHarvestStore } from '../../lib/useHarvestStore';
 import { User, LogIn, Award, List, Download, Plus, ArrowLeft, Sprout } from 'lucide-react';
+import { PageHeader } from '../../components/ui/PageHeader';
+import { Badge } from '../../components/ui/Badge';
+import { Button } from '../../components/ui/Button';
+import { JoinHarvestGuardCard } from './components/JoinHarvestGuardCard';
 
 const HarvestGuardDashboard = ({ isInline = false, onBack = null, onAddBatchClick = null, onViewRiskClick = null }) => {
   const { profile, batches, badges, registerProfile, exportData, exportCSV } = useHarvestStore();
@@ -109,61 +113,62 @@ const HarvestGuardDashboard = ({ isInline = false, onBack = null, onAddBatchClic
 
   if (!profile) {
     return (
-      <div className={`flex items-center justify-center w-full ${isInline ? 'py-4' : 'min-h-screen pt-24 pb-16 px-4'}`}>
-        <div className="bg-white/5 backdrop-blur-md border border-white/10 p-8 rounded-[32px] w-full max-w-md shadow-2xl hover:border-[#CCFF00]/25 transition-all duration-300">
-          {isInline && onBack && (
-            <button onClick={onBack} className="flex items-center text-white/50 hover:text-white mb-6 text-sm font-semibold transition-colors">
-              <ArrowLeft size={16} className="mr-2" /> Back
-            </button>
-          )}
-          <div className="text-center mb-8">
-            <h2 className="text-3xl font-extrabold text-white tracking-tight mb-2">Join HarvestGuard</h2>
-            <p className="text-white/60 text-sm">Register your offline profile</p>
-          </div>
-          <form onSubmit={handleRegister} className="space-y-4">
-            <div>
-              <label className="block text-white/80 text-sm font-bold mb-1.5">Name / নাম</label>
-              <input type="text" value={name} onChange={e => setName(e.target.value)} required className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-white focus:outline-none focus:border-[#CCFF00] focus:ring-1 focus:ring-[#CCFF00]/50 transition-all" />
-            </div>
-            <div>
-              <label className="block text-white/80 text-sm font-bold mb-1.5">Phone / মোবাইল</label>
-              <input type="tel" value={phone} onChange={e => setPhone(e.target.value)} required className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-white focus:outline-none focus:border-[#CCFF00] focus:ring-1 focus:ring-[#CCFF00]/50 transition-all" />
-            </div>
-            <div>
-              <label className="block text-white/80 text-sm font-bold mb-1.5">Password / পাসওয়ার্ড</label>
-              <input type="password" value={password} onChange={e => setPassword(e.target.value)} required className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-white focus:outline-none focus:border-[#CCFF00] focus:ring-1 focus:ring-[#CCFF00]/50 transition-all" />
-            </div>
-            <div>
-              <label className="block text-white/80 text-sm font-bold mb-1.5">Language / ভাষা</label>
-              <select value={lang} onChange={e => setLang(e.target.value)} className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-white focus:outline-none focus:border-[#CCFF00] transition-all">
-                <option value="bn" className="bg-carbon text-white">বাংলা (Bangla)</option>
-                <option value="en" className="bg-carbon text-white">English</option>
-              </select>
-            </div>
-            <button type="submit" className="w-full bg-[#CCFF00] text-black font-extrabold py-4 rounded-xl mt-6 flex justify-center items-center space-x-2 hover:bg-[#bce500] hover:scale-[1.01] hover:shadow-[0_0_20px_rgba(204,255,0,0.25)] transition-all">
-              <LogIn size={20} />
-              <span>Create Offline Profile</span>
-            </button>
-          </form>
-        </div>
-      </div>
+      <JoinHarvestGuardCard
+        isInline={isInline}
+        onBack={onBack}
+        name={name}
+        setName={setName}
+        phone={phone}
+        setPhone={setPhone}
+        password={password}
+        setPassword={setPassword}
+        lang={lang}
+        setLang={setLang}
+        handleRegister={handleRegister}
+      />
     );
   }
 
   const dashboardContent = (
     <div className="max-w-5xl mx-auto w-full">
       {!isInline && (
-        <button onClick={() => navigate('/farmers-ai')} className="flex items-center text-white/50 hover:text-white mb-8 transition-colors">
-          <ArrowLeft size={20} className="mr-2" />
+        <Button
+          variant="ghost"
+          size="sm"
+          onClick={() => navigate('/farmers-ai')}
+          leftIcon={<ArrowLeft size={20} />}
+          className="text-white/50 hover:text-white mb-8"
+        >
           Back to Landing
-        </button>
+        </Button>
       )}
       {isInline && onBack && (
-        <button onClick={onBack} className="flex items-center text-white/50 hover:text-white mb-8 text-sm font-semibold transition-colors">
-          <ArrowLeft size={20} className="mr-2" />
+        <Button
+          variant="ghost"
+          size="sm"
+          onClick={onBack}
+          leftIcon={<ArrowLeft size={20} />}
+          className="text-white/50 hover:text-white mb-8 font-semibold"
+        >
           Back to Landing
-        </button>
+        </Button>
       )}
+
+      <div className="mb-6">
+        {!isInline ? (
+          <PageHeader
+            title="A Farmer's Inventory"
+            description="Track harvest batches, local climate risk, and verified eco-credentials."
+            badge={<Badge variant="emerald">FARMER PORTAL</Badge>}
+          />
+        ) : (
+          <div>
+            <Badge variant="emerald" className="mb-2">FARMER PORTAL</Badge>
+            <h2 className="text-2xl md:text-3xl font-bold text-white tracking-tight">A Farmer's Inventory</h2>
+            <p className="text-sm text-white/60 mt-1">Track harvest batches, local climate risk, and verified eco-credentials.</p>
+          </div>
+        )}
+      </div>
 
       {/* Profile Header */}
       <div className="bg-white/5 backdrop-blur-md border border-white/10 p-6 md:p-8 rounded-[28px] mb-8 flex flex-col md:flex-row items-center justify-between shadow-lg relative overflow-hidden group">
@@ -173,7 +178,7 @@ const HarvestGuardDashboard = ({ isInline = false, onBack = null, onAddBatchClic
             <Sprout size={40} className="text-[#CCFF00] animate-pulse" />
           </div>
           <div>
-            <h1 className="text-3xl font-extrabold text-white tracking-tight">A Farmer's Inventory</h1>
+            <h2 className="text-xl font-bold text-white tracking-tight">Registered Farm Profile</h2>
             
             {/* Location Select and Weather details */}
             <div className="mt-3 flex flex-wrap items-center justify-center md:justify-start gap-4">
@@ -221,12 +226,22 @@ const HarvestGuardDashboard = ({ isInline = false, onBack = null, onAddBatchClic
           </div>
         </div>
         <div className="flex space-x-4 relative z-10 mt-4 md:mt-0">
-          <button onClick={exportCSV} className="px-4 py-2 rounded-xl flex items-center space-x-2 text-sm font-bold border border-white/15 hover:border-[#CCFF00]/30 hover:bg-white/5 transition-all text-white">
-            <Download size={16} className="text-[#CCFF00]" /> <span>Export CSV</span>
-          </button>
-          <button onClick={exportData} className="px-4 py-2 rounded-xl flex items-center space-x-2 text-sm font-bold border border-white/15 hover:border-[#CCFF00]/30 hover:bg-white/5 transition-all text-white">
-            <Download size={16} className="text-[#CCFF00]" /> <span>Backup JSON</span>
-          </button>
+          <Button
+            variant="secondary"
+            size="sm"
+            onClick={exportCSV}
+            leftIcon={<Download size={16} className="text-[#CCFF00]" />}
+          >
+            Export CSV
+          </Button>
+          <Button
+            variant="secondary"
+            size="sm"
+            onClick={exportData}
+            leftIcon={<Download size={16} className="text-[#CCFF00]" />}
+          >
+            Backup JSON
+          </Button>
         </div>
       </div>
 
@@ -251,12 +266,14 @@ const HarvestGuardDashboard = ({ isInline = false, onBack = null, onAddBatchClic
       <div>
         <div className="flex items-center justify-between mb-6">
           <h2 className="text-2xl font-extrabold text-white flex items-center tracking-tight"><List className="mr-2 text-[#CCFF00]" /> Crop Inventory</h2>
-          <button 
+          <Button 
+            variant="primary"
+            size="md"
             onClick={isInline && onAddBatchClick ? onAddBatchClick : () => navigate('/harvestguard/register-batch')} 
-            className="bg-[#CCFF00] text-black px-6 py-2.5 rounded-xl font-extrabold flex items-center space-x-2 hover:bg-[#bce500] hover:scale-[1.01] hover:shadow-[0_0_15px_rgba(204,255,0,0.2)] transition-all shadow-md"
+            leftIcon={<Plus size={18} />}
           >
-            <Plus size={18} /> <span>Add Batch</span>
-          </button>
+            Add Batch
+          </Button>
         </div>
 
         {batches.length === 0 ? (
@@ -278,12 +295,14 @@ const HarvestGuardDashboard = ({ isInline = false, onBack = null, onAddBatchClic
                   <p><span className="text-white/40 font-medium">Storage:</span> <span className="capitalize">{batch.storageType.replace('_', ' ')}</span></p>
                 </div>
                 
-                <button 
+                <Button 
+                  variant="secondary"
+                  size="md"
                   onClick={isInline && onViewRiskClick ? () => onViewRiskClick(batch.id) : () => navigate(`/harvestguard/risk-analysis/${batch.id}`)} 
-                  className="mt-6 w-full py-2.5 rounded-xl text-sm font-bold border border-[#CCFF00]/30 text-[#CCFF00] hover:bg-[#CCFF00]/10 hover:border-[#CCFF00] transition-all"
+                  className="mt-6 w-full"
                 >
                   View Weather Risk
-                </button>
+                </Button>
               </div>
             ))}
           </div>

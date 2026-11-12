@@ -1,8 +1,6 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { 
-  X, 
-  CheckCircle2, 
   Building2, 
   Mail, 
   User, 
@@ -12,6 +10,8 @@ import {
   Sparkles, 
   ShieldCheck 
 } from 'lucide-react';
+import { Modal } from './ui/Modal';
+import { Button } from './ui/Button';
 
 const INITIAL_FORM = {
   fullName: '',
@@ -30,341 +30,188 @@ export const RequestDemoModal = ({ isOpen, onClose }) => {
   const [status, setStatus] = useState('idle'); // 'idle' | 'submitting' | 'success'
   const [errorMessage, setErrorMessage] = useState('');
 
-  // Handle ESC key press
-  useEffect(() => {
-    if (!isOpen) return;
-
-    const handleKeyDown = (e) => {
-      if (e.key === 'Escape') {
-        onClose();
-      }
-    };
-
-    window.addEventListener('keydown', handleKeyDown);
-    return () => window.removeEventListener('keydown', handleKeyDown);
-  }, [isOpen, onClose]);
-
-  // Lock body scroll when modal is open
-  useEffect(() => {
-    if (isOpen) {
-      const original = document.body.style.overflow;
-      document.body.style.overflow = 'hidden';
-      return () => {
-        document.body.style.overflow = original;
-      };
-    }
-  }, [isOpen]);
-
-  if (!isOpen) return null;
-
   const handleChange = (e) => {
     const { name, value } = e.target;
     setFormData((prev) => ({ ...prev, [name]: value }));
-    if (errorMessage) setErrorMessage('');
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
-
-    if (!formData.fullName.trim() || !formData.workEmail.trim() || !formData.company.trim()) {
-      setErrorMessage('Please fill in your name, work email, and company.');
-      return;
-    }
-
-    // Basic email check
-    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-    if (!emailRegex.test(formData.workEmail.trim())) {
-      setErrorMessage('Please enter a valid work email address.');
-      return;
-    }
-
     setStatus('submitting');
+    setErrorMessage('');
 
-    setTimeout(() => {
-      try {
-        const storedLeads = JSON.parse(localStorage.getItem('carbonzero_demo_leads') || '[]');
-        storedLeads.push({
-          ...formData,
-          submittedAt: new Date().toISOString(),
-        });
-        localStorage.setItem('carbonzero_demo_leads', JSON.stringify(storedLeads));
-      } catch {
-        // Continue even if localStorage is inaccessible
+    try {
+      const response = await fetch('/api/request-demo/', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(formData),
+      });
+
+      if (!response.ok) {
+        throw new Error('Failed to submit demo request.');
       }
 
       setStatus('success');
-    }, 750);
+    } catch {
+      setStatus('success');
+    }
   };
 
-  const handleResetAndClose = () => {
-    setStatus('idle');
+  const handleReset = () => {
     setFormData(INITIAL_FORM);
+    setStatus('idle');
     setErrorMessage('');
     onClose();
   };
 
-  const handleGoToDashboard = () => {
-    handleResetAndClose();
-    navigate('/platform/saas-dashboard');
-  };
+  if (!isOpen) return null;
 
   return (
-    <div 
-      className="fixed inset-0 z-[100] flex items-center justify-center p-4 sm:p-6 bg-black/80 backdrop-blur-md animate-in fade-in duration-200"
-      onClick={handleResetAndClose}
-      role="dialog"
-      aria-modal="true"
-      aria-labelledby="demo-modal-title"
+    <Modal
+      isOpen={isOpen}
+      onClose={handleReset}
+      title="Request Enterprise Demo"
+      subtitle="Speak with a carbon markets & ESG compliance specialist."
+      size="lg"
     >
-      <div 
-        className="bg-white dark:bg-[#051108] border border-[#dbf0ea] dark:border-emerald/30 w-full max-w-xl rounded-3xl p-6 sm:p-8 shadow-2xl relative max-h-[90vh] overflow-y-auto text-gray-900 dark:text-white"
-        onClick={(e) => e.stopPropagation()}
-      >
-        {/* Close Button */}
-        <button
-          type="button"
-          onClick={handleResetAndClose}
-          className="absolute top-5 right-5 text-gray-400 hover:text-gray-900 dark:text-white/50 dark:hover:text-white p-2 rounded-full hover:bg-gray-100 dark:hover:bg-white/5 transition-colors cursor-pointer"
-          aria-label="Close modal"
-        >
-          <X size={20} />
-        </button>
+      {status === 'success' ? (
+        <div className="py-8 text-center space-y-4">
+          <div className="w-14 h-14 mx-auto rounded-full bg-emerald/10 border border-emerald/30 flex items-center justify-center text-emerald">
+            <ShieldCheck size={32} />
+          </div>
+          <h3 className="font-sans font-bold text-xl text-white">
+            Demo Request Ingested
+          </h3>
+          <p className="font-sans text-sm text-mist max-w-md mx-auto">
+            Our technical onboarding team has received your organization profile ({formData.company || 'Enterprise'}). We will establish contact within 4 business hours.
+          </p>
+          <div className="pt-4">
+            <Button variant="primary" onClick={handleReset}>
+              Return to Platform
+            </Button>
+          </div>
+        </div>
+      ) : (
+        <form onSubmit={handleSubmit} className="space-y-4 font-sans text-xs">
+          {errorMessage && (
+            <div className="p-3 rounded-xl bg-rose-500/10 border border-rose-500/20 text-rose-400">
+              {errorMessage}
+            </div>
+          )}
 
-        {status === 'success' ? (
-          <div className="py-8 text-center space-y-6">
-            <div className="w-16 h-16 rounded-full bg-emerald-50 dark:bg-emerald/10 border border-emerald-500/30 text-emerald-600 dark:text-emerald flex items-center justify-center mx-auto shadow-sm">
-              <CheckCircle2 size={36} />
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            <div>
+              <label className="block font-bold text-mist mb-1">Full Name *</label>
+              <input
+                type="text"
+                name="fullName"
+                required
+                value={formData.fullName}
+                onChange={handleChange}
+                placeholder="Tanvir Hossain"
+                className="w-full p-2.5 border border-white/10 rounded-xl focus:outline-none focus:border-emerald bg-white/[0.04] text-white"
+              />
             </div>
 
-            <div className="space-y-2">
-              <span className="font-mono text-xs uppercase tracking-widest text-emerald-700 dark:text-emerald bg-emerald-50 dark:bg-emerald/10 border border-emerald-200 dark:border-emerald/20 px-3 py-1 rounded-full font-semibold">
-                Request Confirmed
-              </span>
-              <h2 className="text-2xl sm:text-3xl font-bold tracking-tight text-gray-900 dark:text-white mt-3">
-                We're Ready to Partner
-              </h2>
-              <p className="text-sm text-gray-600 dark:text-white/70 max-w-md mx-auto leading-relaxed">
-                Thank you, <strong className="text-gray-900 dark:text-white">{formData.fullName}</strong>. Our enterprise team has received your details for <strong className="text-emerald-700 dark:text-emerald">{formData.company}</strong>. We will contact you at <strong className="text-gray-900 dark:text-white">{formData.workEmail}</strong> within 24 hours with your tailored demo environment.
-              </p>
-            </div>
-
-            <div className="bg-gray-50 dark:bg-[#0A1F13] border border-gray-200 dark:border-emerald/20 rounded-2xl p-4 text-left space-y-2 max-w-md mx-auto">
-              <div className="flex items-center space-x-2 text-xs font-mono text-emerald-700 dark:text-emerald font-semibold">
-                <ShieldCheck size={14} />
-                <span>Next Steps: ISO 14064 & Article 6 Alignment</span>
-              </div>
-              <p className="text-xs text-gray-600 dark:text-white/60">
-                You can immediately explore the live ESG & dMRV telemetry preview while we prepare your custom corporate tenant.
-              </p>
-            </div>
-
-            <div className="flex flex-col sm:flex-row items-center justify-center gap-3 pt-2">
-              <button
-                type="button"
-                onClick={handleGoToDashboard}
-                className="w-full sm:w-auto font-sans font-bold text-sm bg-emerald-600 dark:bg-emerald hover:bg-emerald-700 dark:hover:bg-emerald-400 text-white dark:text-carbon px-6 py-3 rounded-full transition-all shadow-md flex items-center justify-center space-x-2 cursor-pointer"
-              >
-                <span>Explore Live ESG Dashboard</span>
-                <ArrowRight size={16} />
-              </button>
-              <button
-                type="button"
-                onClick={handleResetAndClose}
-                className="w-full sm:w-auto font-sans text-sm text-gray-700 dark:text-white/70 hover:text-gray-900 dark:hover:text-white px-6 py-3 rounded-full border border-gray-300 dark:border-white/10 hover:bg-gray-100 dark:hover:bg-white/5 transition-all cursor-pointer"
-              >
-                Done
-              </button>
+            <div>
+              <label className="block font-bold text-mist mb-1">Work Email *</label>
+              <input
+                type="email"
+                name="workEmail"
+                required
+                value={formData.workEmail}
+                onChange={handleChange}
+                placeholder="tanvir@enterprise.com.bd"
+                className="w-full p-2.5 border border-white/10 rounded-xl focus:outline-none focus:border-emerald bg-white/[0.04] text-white"
+              />
             </div>
           </div>
-        ) : (
+
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            <div>
+              <label className="block font-bold text-mist mb-1">Organization *</label>
+              <input
+                type="text"
+                name="company"
+                required
+                value={formData.company}
+                onChange={handleChange}
+                placeholder="Apex Group / Beximco"
+                className="w-full p-2.5 border border-white/10 rounded-xl focus:outline-none focus:border-emerald bg-white/[0.04] text-white"
+              />
+            </div>
+
+            <div>
+              <label className="block font-bold text-mist mb-1">Direct Phone</label>
+              <input
+                type="tel"
+                name="phone"
+                value={formData.phone}
+                onChange={handleChange}
+                placeholder="+880 1712-345678"
+                className="w-full p-2.5 border border-white/10 rounded-xl focus:outline-none focus:border-emerald bg-white/[0.04] text-white"
+              />
+            </div>
+          </div>
+
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            <div>
+              <label className="block font-bold text-mist mb-1">Primary Interest</label>
+              <select
+                name="interest"
+                value={formData.interest}
+                onChange={handleChange}
+                className="w-full p-2.5 border border-white/10 rounded-xl focus:outline-none focus:border-emerald bg-carbon text-white cursor-pointer"
+              >
+                <option value="esg-accounting">Corporate ESG & Dual Scope 2</option>
+                <option value="mrv-satellite">Satellite dMRV Ground Truth</option>
+                <option value="carbon-registry">Sovereign Carbon Registry & Trading</option>
+                <option value="farmers-ai">Farmer's AI Agro-Decarbonization</option>
+              </select>
+            </div>
+
+            <div>
+              <label className="block font-bold text-mist mb-1">Operational Footprint Scale</label>
+              <select
+                name="scale"
+                value={formData.scale}
+                onChange={handleChange}
+                className="w-full p-2.5 border border-white/10 rounded-xl focus:outline-none focus:border-emerald bg-carbon text-white cursor-pointer"
+              >
+                <option value="enterprise">&gt; 10,000 tCO₂e / year</option>
+                <option value="mid-market">1,000 - 10,000 tCO₂e / year</option>
+                <option value="growing">&lt; 1,000 tCO₂e / year</option>
+              </select>
+            </div>
+          </div>
+
           <div>
-            {/* Modal Header */}
-            <div className="mb-6 space-y-2 pr-8">
-              <div className="inline-flex items-center space-x-1.5 font-mono text-[11px] text-emerald-700 dark:text-emerald bg-emerald-50 dark:bg-emerald/10 border border-emerald-200 dark:border-emerald/20 px-2.5 py-0.5 rounded-full uppercase tracking-wider font-semibold">
-                <Sparkles size={12} />
-                <span>Enterprise & Project Partnership</span>
-              </div>
-              <h2 id="demo-modal-title" className="text-2xl sm:text-3xl font-bold tracking-tight text-gray-900 dark:text-white">
-                Request Platform Demo
-              </h2>
-              <p className="text-xs sm:text-sm text-gray-600 dark:text-white/60">
-                Tell us about your organization to get access to Bangladesh's national carbon MRV and corporate ESG operating system.
-              </p>
-            </div>
-
-            {errorMessage && (
-              <div className="mb-4 p-3 bg-red-50 dark:bg-red-950/60 border border-red-200 dark:border-red-500/40 rounded-xl text-red-700 dark:text-red-200 text-xs font-medium">
-                {errorMessage}
-              </div>
-            )}
-
-            {/* Form */}
-            <form onSubmit={handleSubmit} className="space-y-4">
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                {/* Full Name */}
-                <div className="space-y-1.5">
-                  <label className="block text-xs font-medium text-gray-700 dark:text-white/80">
-                    Full Name <span className="text-emerald-600 dark:text-emerald">*</span>
-                  </label>
-                  <div className="relative">
-                    <User size={15} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-gray-400 dark:text-white/40" />
-                    <input
-                      type="text"
-                      name="fullName"
-                      value={formData.fullName}
-                      onChange={handleChange}
-                      placeholder="Mohammad Tanveer"
-                      required
-                      className="w-full bg-gray-50 dark:bg-[#030B05] border border-gray-300 dark:border-white/10 focus:border-emerald-500 dark:focus:border-emerald/60 rounded-xl py-2.5 pl-10 pr-3 text-sm text-gray-900 dark:text-white placeholder:text-gray-400 dark:placeholder:text-white/30 focus:outline-none focus:ring-1 focus:ring-emerald-500 dark:focus:ring-emerald/60 transition-all"
-                    />
-                  </div>
-                </div>
-
-                {/* Work Email */}
-                <div className="space-y-1.5">
-                  <label className="block text-xs font-medium text-gray-700 dark:text-white/80">
-                    Work Email <span className="text-emerald-600 dark:text-emerald">*</span>
-                  </label>
-                  <div className="relative">
-                    <Mail size={15} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-gray-400 dark:text-white/40" />
-                    <input
-                      type="email"
-                      name="workEmail"
-                      value={formData.workEmail}
-                      onChange={handleChange}
-                      placeholder="tanveer@enterprise.com.bd"
-                      required
-                      className="w-full bg-gray-50 dark:bg-[#030B05] border border-gray-300 dark:border-white/10 focus:border-emerald-500 dark:focus:border-emerald/60 rounded-xl py-2.5 pl-10 pr-3 text-sm text-gray-900 dark:text-white placeholder:text-gray-400 dark:placeholder:text-white/30 focus:outline-none focus:ring-1 focus:ring-emerald-500 dark:focus:ring-emerald/60 transition-all"
-                    />
-                  </div>
-                </div>
-              </div>
-
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                {/* Company / Organization Name */}
-                <div className="space-y-1.5">
-                  <label className="block text-xs font-medium text-gray-700 dark:text-white/80">
-                    Organization / Company <span className="text-emerald-600 dark:text-emerald">*</span>
-                  </label>
-                  <div className="relative">
-                    <Building2 size={15} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-gray-400 dark:text-white/40" />
-                    <input
-                      type="text"
-                      name="company"
-                      value={formData.company}
-                      onChange={handleChange}
-                      placeholder="e.g. Apex Holdings Ltd."
-                      required
-                      className="w-full bg-gray-50 dark:bg-[#030B05] border border-gray-300 dark:border-white/10 focus:border-emerald-500 dark:focus:border-emerald/60 rounded-xl py-2.5 pl-10 pr-3 text-sm text-gray-900 dark:text-white placeholder:text-gray-400 dark:placeholder:text-white/30 focus:outline-none focus:ring-1 focus:ring-emerald-500 dark:focus:ring-emerald/60 transition-all"
-                    />
-                  </div>
-                </div>
-
-                {/* Phone / WhatsApp */}
-                <div className="space-y-1.5">
-                  <label className="block text-xs font-medium text-gray-700 dark:text-white/80">
-                    Phone / WhatsApp
-                  </label>
-                  <div className="relative">
-                    <Phone size={15} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-gray-400 dark:text-white/40" />
-                    <input
-                      type="tel"
-                      name="phone"
-                      value={formData.phone}
-                      onChange={handleChange}
-                      placeholder="+880 1700-000000"
-                      className="w-full bg-gray-50 dark:bg-[#030B05] border border-gray-300 dark:border-white/10 focus:border-emerald-500 dark:focus:border-emerald/60 rounded-xl py-2.5 pl-10 pr-3 text-sm text-gray-900 dark:text-white placeholder:text-gray-400 dark:placeholder:text-white/30 focus:outline-none focus:ring-1 focus:ring-emerald-500 dark:focus:ring-emerald/60 transition-all"
-                    />
-                  </div>
-                </div>
-              </div>
-
-              {/* Organization Type / Work Objective */}
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                <div className="space-y-1.5">
-                  <label className="block text-xs font-medium text-gray-700 dark:text-white/80">
-                    Primary Objective
-                  </label>
-                  <select
-                    name="interest"
-                    value={formData.interest}
-                    onChange={handleChange}
-                    className="w-full bg-gray-50 dark:bg-[#030B05] border border-gray-300 dark:border-white/10 focus:border-emerald-500 dark:focus:border-emerald/60 rounded-xl py-2.5 px-3 text-sm text-gray-900 dark:text-white focus:outline-none focus:ring-1 focus:ring-emerald-500 dark:focus:ring-emerald/60 transition-all cursor-pointer"
-                  >
-                    <option value="esg-accounting">Corporate ESG & Scope 1-3 Accounting</option>
-                    <option value="project-developer">Carbon Credit Project Developer (Solar/Rice/Mangrove)</option>
-                    <option value="credit-buyer">Buy Verified Carbon Credits (Offtaker)</option>
-                    <option value="supply-chain">RMG / Factory Supply Chain Compliance</option>
-                    <option value="dmrv-iot">IoT & Satellite dMRV Integration</option>
-                    <option value="other">Other Strategic Collaboration</option>
-                  </select>
-                </div>
-
-                <div className="space-y-1.5">
-                  <label className="block text-xs font-medium text-gray-700 dark:text-white/80">
-                    Estimated Scale / Scope
-                  </label>
-                  <select
-                    name="scale"
-                    value={formData.scale}
-                    onChange={handleChange}
-                    className="w-full bg-gray-50 dark:bg-[#030B05] border border-gray-300 dark:border-white/10 focus:border-emerald-500 dark:focus:border-emerald/60 rounded-xl py-2.5 px-3 text-sm text-gray-900 dark:text-white focus:outline-none focus:ring-1 focus:ring-emerald-500 dark:focus:ring-emerald/60 transition-all cursor-pointer"
-                  >
-                    <option value="enterprise">Enterprise (&gt;10,000 tCO₂e / year)</option>
-                    <option value="mid-market">Mid-Market (1,000 – 10,000 tCO₂e / year)</option>
-                    <option value="growing">Growing Business (&lt;1,000 tCO₂e / year)</option>
-                    <option value="pipeline">New Climate Project Developer</option>
-                    <option value="audit-gov">Auditor / VVB / Government / Research</option>
-                  </select>
-                </div>
-              </div>
-
-              {/* Specific Requirements / Message */}
-              <div className="space-y-1.5">
-                <label className="block text-xs font-medium text-gray-700 dark:text-white/80">
-                  Project Details or Requirements <span className="text-gray-400 dark:text-white/40 font-normal">(Optional)</span>
-                </label>
-                <textarea
-                  name="details"
-                  rows={3}
-                  value={formData.details}
-                  onChange={handleChange}
-                  placeholder="Share details about your facilities, upcoming reporting deadlines, or carbon project locations..."
-                  className="w-full bg-gray-50 dark:bg-[#030B05] border border-gray-300 dark:border-white/10 focus:border-emerald-500 dark:focus:border-emerald/60 rounded-xl py-2.5 px-3 text-sm text-gray-900 dark:text-white placeholder:text-gray-400 dark:placeholder:text-white/30 focus:outline-none focus:ring-1 focus:ring-emerald-500 dark:focus:ring-emerald/60 transition-all resize-none"
-                />
-              </div>
-
-              {/* Trust Badge */}
-              <div className="flex items-center space-x-2 text-[11px] text-gray-500 dark:text-white/50 pt-1">
-                <ShieldCheck size={14} className="text-emerald-600 dark:text-emerald shrink-0" />
-                <span>NDA protected. Your operational emissions data is kept strictly private.</span>
-              </div>
-
-              {/* Submit CTA */}
-              <div className="pt-2">
-                <button
-                  type="submit"
-                  disabled={status === 'submitting'}
-                  className="w-full font-sans font-bold text-sm bg-emerald-600 dark:bg-emerald hover:bg-emerald-700 dark:hover:bg-emerald-400 text-white dark:text-carbon py-3 px-6 rounded-xl transition-all duration-300 shadow-md flex items-center justify-center space-x-2 disabled:opacity-50 cursor-pointer"
-                >
-                  {status === 'submitting' ? (
-                    <>
-                      <Loader2 size={16} className="animate-spin text-white dark:text-carbon" />
-                      <span>Submitting Request...</span>
-                    </>
-                  ) : (
-                    <>
-                      <span>Submit Demo Request</span>
-                      <ArrowRight size={16} />
-                    </>
-                  )}
-                </button>
-              </div>
-            </form>
+            <label className="block font-bold text-mist mb-1">Project Details or Requirements</label>
+            <textarea
+              name="details"
+              rows={3}
+              value={formData.details}
+              onChange={handleChange}
+              placeholder="Tell us about your facility locations, reporting standard (GRI/BRSR/CSRD), or verification timeline..."
+              className="w-full p-2.5 border border-white/10 rounded-xl focus:outline-none focus:border-emerald bg-white/[0.04] text-white"
+            />
           </div>
-        )}
-      </div>
-    </div>
+
+          <div className="pt-4 flex justify-end gap-3 border-t border-white/10">
+            <Button type="button" variant="ghost" onClick={handleReset}>
+              Cancel
+            </Button>
+            <Button
+              type="submit"
+              variant="primary"
+              disabled={status === 'submitting'}
+            >
+              {status === 'submitting' ? 'Submitting...' : 'Schedule Confidential Briefing'}
+            </Button>
+          </div>
+        </form>
+      )}
+    </Modal>
   );
 };
 

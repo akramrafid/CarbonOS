@@ -8,7 +8,8 @@ export const EsgTeamPanel = (props) => {
     teamMembers = [],
     toggleMemberStatus,
     removeMember,
-    setIsAddMemberOpen
+    setIsAddMemberOpen,
+    searchQuery = ''
   } = props;
 
   return (

@@ -93,3 +93,4 @@ For testing multi-threaded dual approval and transactional concurrency:
   export ESG_TEST_DATABASE_URL="postgresql+psycopg2://esg:esg@localhost:5432/esg_test"
   ```
 - In GitHub Actions CI, PostgreSQL is automatically provisioned as a service container (see `.github/workflows/esg-ci.yml`).
+

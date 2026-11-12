@@ -5,8 +5,10 @@ import {
   MapPin,
   ChevronRight,
   TrendingDown,
-  Trees
+  Trees,
+  Flame
 } from 'lucide-react';
+import { Button } from '../../../components/ui/Button';
 
 export function AlertsPanel(props) {
   const {
@@ -17,7 +19,8 @@ export function AlertsPanel(props) {
     handleResolveAlert,
     setActiveTab,
     setMapCenter,
-    setMapZoom
+    setMapZoom,
+    loadingAlerts = false
   } = props;
 
   return (
@@ -106,36 +109,34 @@ export function AlertsPanel(props) {
                             <span>Resolved</span>
                           </span>
                         ) : (
-                          <button 
+                          <Button 
+                            variant="secondary"
+                            size="sm"
                             onClick={() => handleResolveAlert(alert.id)}
-                            className={`font-bold text-xs px-3 py-1.5 rounded-lg transition-all cursor-pointer ${
-                              isLight 
-                                ? 'bg-[#E8F8EE] border border-[#C2E9CF] text-[#00873E] hover:bg-[#00873E] hover:text-white' 
-                                : 'bg-white/5 hover:bg-emerald hover:text-carbon text-white'
-                            }`}
+                            className="font-bold text-xs"
                           >
                             Resolve Alert
-                          </button>
+                          </Button>
                         )}
                         
-                        <button 
+                        <Button 
+                          variant="secondary"
+                          size="sm"
                           onClick={() => {
                             setMapCenter(alert.location);
                             setMapZoom(14);
-                            setMapBounds([
-                              [alert.location[0] - 0.01, alert.location[1] - 0.01], 
-                              [alert.location[0] + 0.01, alert.location[1] + 0.01]
-                            ]);
+                            if (typeof setMapBounds === 'function') {
+                              setMapBounds([
+                                [alert.location[0] - 0.01, alert.location[1] - 0.01], 
+                                [alert.location[0] + 0.01, alert.location[1] + 0.01]
+                              ]);
+                            }
                             setActiveTab('map');
                           }}
-                          className={`font-bold text-xs px-3 py-1.5 rounded-lg transition-all cursor-pointer ${
-                            isLight 
-                              ? 'bg-[#F1F5F9] border border-[#CBD5E1] text-[#0F291B] hover:bg-[#E2E8F0]' 
-                              : 'bg-white/5 hover:bg-white/10 text-white'
-                          }`}
+                          className="font-bold text-xs"
                         >
                           Show on Map
-                        </button>
+                        </Button>
                       </div>
                     </div>
                   </div>

@@ -12,6 +12,8 @@ import {
   TrendingUp,
   ShieldAlert
 } from 'lucide-react';
+import { SectionHeader } from './ui/Section';
+import { Badge } from './ui/Badge';
 
 const sectors = [
   {
@@ -105,19 +107,13 @@ const SectorFocus = () => {
       <div className="max-w-7xl mx-auto relative z-10">
         
         {/* Header */}
-        <div className="mb-20 text-center max-w-3xl mx-auto">
-          <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-emerald-950/50 border border-emerald-500/30 text-emerald-400 font-mono text-xs font-semibold uppercase tracking-wider mb-5 shadow-[0_0_15px_rgba(16,185,129,0.12)]">
-            <span>CarbonOS priority sectors</span>
-          </div>
-
-          <h2 className="text-3xl sm:text-4xl lg:text-5xl font-sans font-bold tracking-tight text-white leading-tight">
-            High-Integrity Carbon <span className="text-transparent bg-clip-text bg-gradient-to-r from-emerald-400 via-teal-300 to-cyan-400">Sector Portfolios</span>.
-          </h2>
-
-          <p className="font-sans text-base sm:text-lg text-white/70 mt-4 leading-relaxed">
-            Six priority sectors where Bangladeshi projects can show measurable reductions and direct social co-benefits.
-          </p>
-        </div>
+        <SectionHeader
+          centered
+          badge={<Badge variant="emerald">CarbonOS Priority Sectors</Badge>}
+          title="High-Integrity Carbon Sector Portfolios"
+          subtitle="Six priority sectors where Bangladeshi projects can show measurable reductions and direct social co-benefits."
+          className="max-w-3xl mx-auto mb-20"
+        />
 
         {/* 3x2 Grid */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-7">

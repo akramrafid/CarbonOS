@@ -12,6 +12,7 @@ import {
   ShieldCheck,
   BarChart3
 } from 'lucide-react';
+import { StatCard } from '../../../components/ui/StatCard';
 
 const CONGLOMERATE_ENTITIES = [
   {
@@ -116,29 +117,29 @@ export const ConglomerateTreeStudio = ({ isLight, locale }) => {
 
       {/* Group Consolidated Overview Cards */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-        <div className={`p-4 rounded-3xl border ${isLight ? 'bg-white border-gray-200' : 'bg-[#0A160F] border-[#1B4D2E]'}`}>
-          <span className="text-[10px] font-mono text-gray-500 uppercase block mb-1">Group Consolidated Gross</span>
-          <span className="text-2xl font-bold font-mono text-emerald-500">
-            {groupTotals.total.toFixed(1)} tCO₂e
-          </span>
-          <span className="text-[10px] text-gray-400 block mt-1">4 reporting legal entities</span>
-        </div>
+        <StatCard
+          title="Group Consolidated Gross"
+          value={groupTotals.total.toFixed(1)}
+          unit="tCO₂e"
+          trend="neutral"
+          subtitle="4 reporting legal entities"
+        />
 
-        <div className={`p-4 rounded-3xl border ${isLight ? 'bg-white border-gray-200' : 'bg-[#0A160F] border-[#1B4D2E]'}`}>
-          <span className="text-[10px] font-mono text-gray-500 uppercase block mb-1">Group Carbon Intensity</span>
-          <span className="text-2xl font-bold font-mono text-cyan-400">
-            {groupIntensity} t / Cr BDT
-          </span>
-          <span className="text-[10px] text-gray-400 block mt-1">৳ {groupTotals.revenue} Crore consolidated rev</span>
-        </div>
+        <StatCard
+          title="Group Carbon Intensity"
+          value={groupIntensity}
+          unit="t / Cr BDT"
+          trend="neutral"
+          subtitle={`৳ ${groupTotals.revenue} Crore consolidated rev`}
+        />
 
-        <div className={`p-4 rounded-3xl border ${isLight ? 'bg-white border-gray-200' : 'bg-[#0A160F] border-[#1B4D2E]'}`}>
-          <span className="text-[10px] font-mono text-gray-500 uppercase block mb-1">Total Group Workforce</span>
-          <span className="text-2xl font-bold font-mono text-purple-400">
-            {groupTotals.workforce} Staff
-          </span>
-          <span className="text-[10px] text-gray-400 block mt-1">Across Savar, Narayanganj & HQ</span>
-        </div>
+        <StatCard
+          title="Total Group Workforce"
+          value={groupTotals.workforce}
+          unit="Staff"
+          trend="neutral"
+          subtitle="Across Savar, Narayanganj & HQ"
+        />
 
         <div className={`p-4 rounded-3xl border ${isLight ? 'bg-white border-gray-200' : 'bg-[#0A160F] border-[#1B4D2E]'}`}>
           <span className="text-[10px] font-mono text-gray-500 uppercase block mb-1">GHGP Consolidation</span>

@@ -33,9 +33,9 @@ test('Mobile Viewport Height: Hero & sticky alignment cards use 100dvh', () => {
 // -------------------------------------------------------------
 test('Table Responsiveness: Wide data tables are wrapped in touch-pan-x overflow containers', () => {
   const filesToCheck = [
-    'src/pages/platform/components/ActivityEvidenceWorkspace.jsx',
-    'src/pages/platform/components/EsgReportGenerator.jsx',
-    'src/pages/platform/CarbonRegistry.jsx'
+    'src/pages/platform/components/activity-workspace/ActivitiesTableTab.jsx',
+    'src/pages/platform/components/esg-report/ActivityLedgerSection.jsx',
+    'src/pages/platform/registry/RegistryRulesTab.jsx'
   ];
 
   for (const relPath of filesToCheck) {
@@ -49,6 +49,20 @@ test('Table Responsiveness: Wide data tables are wrapped in touch-pan-x overflow
     );
   }
 });
+
+function readDirFiles(dir) {
+  let content = '';
+  if (!fs.existsSync(dir)) return content;
+  for (const entry of fs.readdirSync(dir, { withFileTypes: true })) {
+    const full = path.join(dir, entry.name);
+    if (entry.isDirectory()) {
+      content += readDirFiles(full);
+    } else if (entry.isFile() && (entry.name.endsWith('.jsx') || entry.name.endsWith('.js'))) {
+      content += fs.readFileSync(full, 'utf-8');
+    }
+  }
+  return content;
+}
 
 // -------------------------------------------------------------
 // 3. Touch Target Minimums (WCAG 2.5.5 >= 44px)
@@ -65,11 +79,7 @@ test('Mobile Touch Targets: Key navigation toggles and buttons meet 44px minimum
   const saasPath = path.join(ROOT, 'src/pages/platform/SaaSDashboard.jsx');
   let saasCode = fs.readFileSync(saasPath, 'utf-8');
   const saasFeaturesDir = path.join(ROOT, 'src/features/saas/components');
-  if (fs.existsSync(saasFeaturesDir)) {
-    for (const f of fs.readdirSync(saasFeaturesDir)) {
-      saasCode += fs.readFileSync(path.join(saasFeaturesDir, f), 'utf-8');
-    }
-  }
+  saasCode += readDirFiles(saasFeaturesDir);
   assert.ok(
     saasCode.includes('min-w-[44px]') && saasCode.includes('min-h-[44px]'),
     'SaaSDashboard action buttons must have min 44px touch targets'

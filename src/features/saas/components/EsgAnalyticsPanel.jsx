@@ -11,7 +11,7 @@ export const EsgAnalyticsPanel = (props) => {
   return (
           <div className="bg-white border border-[#E2E8F0] rounded-3xl p-6 lg:p-8 shadow-sm space-y-6">
             <div>
-              <h1 className="font-sans font-bold text-3xl text-[#0F291B]">Emissions Analytics</h1>
+              <h2 className="font-sans font-bold text-3xl text-[#0F291B]">Emissions Analytics</h2>
               <p className="text-sm text-[#64748B] mt-1 font-sans">Deep dive into corporate footprint breakdown per GHG Protocol Scopes.</p>
             </div>
 

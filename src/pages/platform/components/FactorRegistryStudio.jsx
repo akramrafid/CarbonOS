@@ -12,6 +12,7 @@ import {
   Info,
   Check
 } from 'lucide-react';
+import { Button } from '../../../components/ui/Button';
 
 const INITIAL_FACTORS = [
   {
@@ -172,14 +173,15 @@ export const FactorRegistryStudio = ({ isLight, locale }) => {
             <span className="px-3 py-1.5 rounded-2xl border bg-[#040A06] border-[#1B4D2E] text-gray-300">
               {locale.toleranceThreshold}
             </span>
-            <button
+            <Button
+              variant="primary"
+              size="sm"
               onClick={handleRunRegression}
               disabled={isRunningRegression}
-              className="px-4 py-2 rounded-2xl bg-emerald-600 hover:bg-emerald-500 text-white font-sans font-semibold text-xs shadow-md transition-all flex items-center space-x-1.5 cursor-pointer disabled:opacity-50"
+              leftIcon={<Play className={`w-3.5 h-3.5 ${isRunningRegression ? 'animate-spin' : ''}`} />}
             >
-              <Play className={`w-3.5 h-3.5 ${isRunningRegression ? 'animate-spin' : ''}`} />
-              <span>{locale.runRegression}</span>
-            </button>
+              {locale.runRegression}
+            </Button>
           </div>
         </div>
       </div>
@@ -264,12 +266,14 @@ export const FactorRegistryStudio = ({ isLight, locale }) => {
                   <div className="text-[10px] font-mono text-emerald-600 dark:text-emerald-400 truncate">{f.gazette}</div>
                 </td>
                 <td className="py-3 text-right">
-                  <button 
+                  <Button 
+                    variant="secondary"
+                    size="sm"
                     onClick={() => setSelectedFactor(f)}
-                    className="px-2.5 py-1 rounded-xl bg-gray-100 dark:bg-[#040A06] hover:bg-emerald-500/10 text-gray-700 dark:text-gray-300 hover:text-emerald-500 font-mono text-[10px]"
+                    className="text-[10px] font-mono h-auto min-h-0 py-1 px-2.5"
                   >
                     Inspect
-                  </button>
+                  </Button>
                 </td>
               </tr>
             ))}

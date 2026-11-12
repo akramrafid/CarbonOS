@@ -7,6 +7,7 @@ import React from 'react';
 export const Input = React.forwardRef(function Input(
   {
     size = 'md',
+    inputSize,
     error = false,
     errorMessage,
     leftIcon,
@@ -17,11 +18,12 @@ export const Input = React.forwardRef(function Input(
   },
   ref
 ) {
+  const resolvedSize = inputSize || size;
   const sizeClasses = {
     sm: 'h-8 px-3 text-xs min-h-[44px] sm:min-h-[32px]',
     md: 'h-10 px-4 text-sm min-h-[44px] sm:min-h-[40px]',
     lg: 'h-12 px-6 text-base min-h-[48px]'
-  }[size] || 'h-10 px-4 text-sm min-h-[44px] sm:min-h-[40px]';
+  }[resolvedSize] || 'h-10 px-4 text-sm min-h-[44px] sm:min-h-[40px]';
 
   return (
     <div className="w-full flex flex-col gap-1">
@@ -64,3 +66,4 @@ export const Input = React.forwardRef(function Input(
 });
 
 export default Input;
+

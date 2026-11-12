@@ -60,8 +60,11 @@ export function DataTable({
                   className="transition-colors duration-100 hover:bg-carbon-surface-raised/40 dark:hover:bg-[#13241B]/40"
                 >
                   {columns.map((col) => {
-                    const value = col.render ? col.render(row[col.key], row) : row[col.key];
-                    const isNumber = typeof row[col.key] === 'number' || col.isNumber;
+                    const cellVal = col.key ? row[col.key] : undefined;
+                    const value = col.render
+                      ? (col.render.length === 1 ? col.render(row) : col.render(cellVal, row, rIdx))
+                      : cellVal;
+                    const isNumber = typeof cellVal === 'number' || col.isNumber;
                     return (
                       <td
                         key={col.key || col.header}
@@ -86,3 +89,4 @@ export function DataTable({
 }
 
 export default DataTable;
+
