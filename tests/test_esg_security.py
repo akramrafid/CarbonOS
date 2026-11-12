@@ -67,6 +67,17 @@ class ESGSecurityTest(ESGApiTestCase):
         trail_a = self.client.get("/api/esg/audit-trail", headers=auth("user-a")).json()
         self.assertIn("alpha_invoice.txt", str(trail_a))
 
+    def test_tenant_upload_is_never_labelled_as_carbonos_summary(self):
+        res = self.upload("user-a", "utility_statement.txt", b"Monthly natural gas consumption 4500 m3 billing report")
+        self.assertEqual(res.status_code, 200, res.text)
+        q = {"query": "natural gas consumption billing report", "corpus": "tenant_docs", "top_k": 3}
+        ans = self.client.post("/api/esg/query", json=q, headers=auth("user-a")).json()
+        citations = ans.get("citations", [])
+        self.assertTrue(len(citations) > 0, "Expected at least one citation for tenant upload")
+        for c in citations:
+            self.assertNotEqual(c["source"], "CarbonOS summary (not the official text)")
+            self.assertEqual(c["source"], "utility_statement.txt")
+
     def test_client_supplied_tenant_id_is_ignored(self):
         res = self.upload("user-a", "a.txt", b"diesel 10 liters", extra={"tenant_id": self.org_b})
         self.assertEqual(res.json()["tenant_id"], self.org_a)
