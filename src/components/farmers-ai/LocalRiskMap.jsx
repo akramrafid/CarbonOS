@@ -193,7 +193,7 @@ const LocalRiskMap = ({ isEmbedded = false }) => {
         
         {/* Privacy Disclaimer Overlay */}
         <div className="absolute bottom-6 left-6 z-20 bg-white/95 dark:bg-black/85 backdrop-blur-md border border-gray-200 dark:border-white/10 px-4 py-2.5 rounded-xl flex items-center text-xs text-gray-700 dark:text-white/80 max-w-sm shadow-md">
-          <ShieldAlert size={16} className="text-emerald-600 dark:text-[#CCFF00] mr-2 shrink-0 animate-pulse" />
+          <ShieldAlert size={16} className="text-emerald-600 dark:text-lime-400 mr-2 shrink-0 animate-pulse" />
           <p><strong>Privacy Protected:</strong> All neighbor data is completely anonymous. Personal identifiers are never shared.</p>
         </div>
       </div>
@@ -205,7 +205,7 @@ const LocalRiskMap = ({ isEmbedded = false }) => {
   }
 
   return (
-    <div className="min-h-screen bg-carbon pt-24 pb-16 px-4 lg:px-12 flex flex-col">
+    <div className="min-h-screen bg-carbon pt-12 pb-8 sm:pt-16 sm:pb-12 px-4 lg:px-12 flex flex-col">
       <div className="max-w-6xl mx-auto w-full flex-grow flex flex-col">
         {mapContent}
       </div>

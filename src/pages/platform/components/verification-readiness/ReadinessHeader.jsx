@@ -16,12 +16,12 @@ export function ReadinessHeader({
   return (
     <div
       className={`rounded-3xl p-6 sm:p-8 border shadow-2xl relative overflow-hidden transition-all ${
-        isLight ? 'bg-white border-[#E2E8E3]' : 'bg-[#08130C] border-[#152B1D]'
+        isLight ? 'bg-white border-border-subtle' : 'bg-bg-elevated border-border-subtle'
       }`}
     >
       <div className="flex flex-col xl:flex-row justify-between items-start xl:items-center gap-6 relative z-10">
         <div>
-          <div className="flex items-center space-x-2 text-[10px] font-mono uppercase tracking-widest text-[#00C853] font-bold">
+          <div className="flex items-center space-x-2 text-[10px] font-mono uppercase tracking-widest text-accent font-bold">
             <ShieldCheck className="w-4 h-4" />
             <span>ISO 14064-1 &amp; GHG Protocol Assurance Portal</span>
           </div>
@@ -48,7 +48,7 @@ export function ReadinessHeader({
           {/* Auditor View Lock */}
           <div
             className={`flex items-center space-x-3 px-4 py-2.5 rounded-2xl border transition-all ${
-              isLight ? 'bg-slate-50 border-slate-200' : 'bg-[#040906] border-[#152B1D]'
+              isLight ? 'bg-slate-50 border-slate-200' : 'bg-bg-canvas border-border-subtle'
             }`}
           >
             <span className="text-xs font-bold">Auditor View Lock:</span>

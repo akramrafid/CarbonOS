@@ -15,11 +15,11 @@ export function RegistryRulesTab({
 }) {
   return (
     <div className="space-y-8 animate-fadeIn">
-      <div className="bg-[#08130C] border border-[#152B1D] rounded-2xl p-6 lg:p-8">
-        <div className="flex flex-col lg:flex-row items-start lg:items-center justify-between gap-4 pb-6 border-b border-[#152B1D]">
+      <div className="bg-bg-elevated border border-border-subtle rounded-2xl p-6 lg:p-8">
+        <div className="flex flex-col lg:flex-row items-start lg:items-center justify-between gap-4 pb-6 border-b border-border-subtle">
           <div>
             <h2 className="font-sans font-bold text-2xl text-white flex items-center gap-2">
-              <ShieldCheck className="text-[#00C853]" size={24} />
+              <ShieldCheck className="text-accent" size={24} />
               DOE Positive / Negative List Rules Engine
             </h2>
             <p className="font-sans text-sm text-white/70 max-w-3xl mt-1">
@@ -30,7 +30,7 @@ export function RegistryRulesTab({
 
           <div className="flex items-center space-x-2">
             <span className="font-mono text-xs text-white/50">Status:</span>
-            <span className="font-mono text-xs text-[#00C853] bg-[#00C853]/10 border border-[#00C853]/20 px-3 py-1 rounded-full">
+            <span className="font-mono text-xs text-accent bg-accent/10 border border-border-strong/20 px-3 py-1 rounded-full">
               Active & Synchronized
             </span>
           </div>
@@ -45,7 +45,7 @@ export function RegistryRulesTab({
           <div className="overflow-x-auto touch-pan-x w-full">
             <table className="w-full text-left font-mono text-xs min-w-[720px]">
               <thead>
-                <tr className="border-b border-[#152B1D] text-white/50 uppercase tracking-wider">
+                <tr className="border-b border-border-subtle text-white/50 uppercase tracking-wider">
                   <th className="pb-3 px-4">Sector</th>
                   <th className="pb-3 px-4">Mitigation Activity</th>
                   <th className="pb-3 px-4">NDC 3.0 Type</th>
@@ -59,15 +59,15 @@ export function RegistryRulesTab({
                   const isPositive = rule.status === 'positive_list';
                   const isNegative = rule.status === 'negative_list';
                   return (
-                    <tr key={rule.id} className="hover:bg-[#0D2B1A]/20 transition-colors">
+                    <tr key={rule.id} className="hover:bg-bg-surface/20 transition-colors">
                       <td className="py-3.5 px-4 font-bold text-white">{rule.sector}</td>
-                      <td className="py-3.5 px-4 text-[#00C853]">{rule.mitigation_type}</td>
+                      <td className="py-3.5 px-4 text-accent">{rule.mitigation_type}</td>
                       <td className="py-3.5 px-4 text-white/70 uppercase">{rule.ndc_commitment_type}</td>
                       <td className="py-3.5 px-4">
                         <span
                           className={`inline-flex items-center px-2.5 py-1 rounded-full text-[11px] font-bold uppercase tracking-wider ${
                             isPositive
-                              ? 'bg-[#00C853]/10 text-[#00C853] border border-[#00C853]/30'
+                              ? 'bg-accent/10 text-accent border border-border-strong/30'
                               : isNegative
                               ? 'bg-red-500/10 text-red-400 border border-red-500/30'
                               : 'bg-amber-500/10 text-amber-400 border border-amber-500/30'
@@ -84,7 +84,7 @@ export function RegistryRulesTab({
                       >
                         {rule.regulatory_reference || 'Official Article 6 Guidance'}
                       </td>
-                      <td className="py-3.5 px-4 text-[#00C853]">
+                      <td className="py-3.5 px-4 text-accent">
                         {rule.is_active ? 'TRUE' : 'FALSE'}
                       </td>
                     </tr>
@@ -96,9 +96,9 @@ export function RegistryRulesTab({
         </div>
 
         {/* Interactive Eligibility Tester */}
-        <div className="mt-10 p-6 rounded-2xl bg-[#040906] border border-[#152B1D]">
+        <div className="mt-10 p-6 rounded-2xl bg-bg-canvas border border-border-subtle">
           <h3 className="font-sans font-bold text-base text-white mb-2 flex items-center space-x-2">
-            <Filter size={16} className="text-[#00C853]" />
+            <Filter size={16} className="text-accent" />
             <span>Interactive DOE Compliance Sandbox Evaluator</span>
           </h3>
           <p className="font-sans text-xs text-white/60 mb-4">
@@ -111,7 +111,7 @@ export function RegistryRulesTab({
               <select
                 value={testSector}
                 onChange={(e) => setTestSector(e.target.value)}
-                className="w-full bg-[#08130C] border border-[#152B1D] text-white text-xs font-mono p-2.5 rounded-xl focus:border-[#00C853] focus:outline-none"
+                className="w-full bg-bg-elevated border border-border-subtle text-white text-xs font-mono p-2.5 rounded-xl focus:border-border-strong focus:outline-none"
               >
                 <option value="Forestry">Forestry</option>
                 <option value="Agriculture">Agriculture</option>
@@ -126,7 +126,7 @@ export function RegistryRulesTab({
               <select
                 value={testMitigation}
                 onChange={(e) => setTestMitigation(e.target.value)}
-                className="w-full bg-[#08130C] border border-[#152B1D] text-white text-xs font-mono p-2.5 rounded-xl focus:border-[#00C853] focus:outline-none"
+                className="w-full bg-bg-elevated border border-border-subtle text-white text-xs font-mono p-2.5 rounded-xl focus:border-border-strong focus:outline-none"
               >
                 <option value="Afforestation">Afforestation</option>
                 <option value="Reforestation">Reforestation</option>
@@ -143,7 +143,7 @@ export function RegistryRulesTab({
               <select
                 value={testNdc}
                 onChange={(e) => setTestNdc(e.target.value)}
-                className="w-full bg-[#08130C] border border-[#152B1D] text-white text-xs font-mono p-2.5 rounded-xl focus:border-[#00C853] focus:outline-none"
+                className="w-full bg-bg-elevated border border-border-subtle text-white text-xs font-mono p-2.5 rounded-xl focus:border-border-strong focus:outline-none"
               >
                 <option value="conditional">conditional</option>
                 <option value="unconditional">unconditional</option>
@@ -164,12 +164,12 @@ export function RegistryRulesTab({
             <div
               className={`mt-5 p-4 rounded-xl border font-mono text-xs flex items-start space-x-3 ${
                 testResult.eligible
-                  ? 'bg-[#0D2B1A] border-[#00C853]/40 text-[#00C853]'
+                  ? 'bg-bg-surface border-border-strong/40 text-accent'
                   : 'bg-red-950/40 border-red-500/40 text-red-400'
               }`}
             >
               {testResult.eligible ? (
-                <CheckCircle2 size={18} className="shrink-0 mt-0.5 text-[#00C853]" />
+                <CheckCircle2 size={18} className="shrink-0 mt-0.5 text-accent" />
               ) : (
                 <AlertTriangle size={18} className="shrink-0 mt-0.5 text-red-400" />
               )}

@@ -15,7 +15,7 @@ export function UploadSection({
   return (
     <div
       className={`p-6 rounded-3xl border ${
-        isLight ? 'bg-[#F4F7F4] border-[#DCE4DE]' : 'bg-[#040A06] border-[#152B1D]'
+        isLight ? 'bg-bg-muted border-border-subtle' : 'bg-bg-canvas border-border-subtle'
       }`}
     >
       <div className="flex flex-col md:flex-row items-center justify-between gap-4 mb-4">
@@ -38,7 +38,7 @@ export function UploadSection({
           />
           <label
             htmlFor="utility-pdf-upload"
-            className="px-4 py-2 rounded-xl bg-[#00C853] hover:bg-[#00E676] text-[#040906] font-sans font-bold text-xs flex items-center space-x-2 cursor-pointer transition-all shadow-md shadow-[#00C853]/20"
+            className="px-4 py-2 rounded-xl bg-accent hover:bg-accent-hover text-fg-primary font-sans font-bold text-xs flex items-center space-x-2 cursor-pointer transition-all shadow-md shadow-[#00C853]/20"
           >
             {isProcessing ? (
               <>
@@ -59,7 +59,7 @@ export function UploadSection({
             onClick={onOpenAddSegment}
             className="flex items-center space-x-1.5 font-sans font-bold text-xs"
           >
-            <Plus className="w-3.5 h-3.5 text-[#00C853]" />
+            <Plus className="w-3.5 h-3.5 text-accent" />
             <span>Add Custom Segment</span>
           </Button>
         </div>

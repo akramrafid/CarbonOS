@@ -6,7 +6,7 @@ import { Card } from '../../components/ui/Card';
 
 const Marketplace = () => {
   return (
-    <div className="pt-24 pb-16 min-h-[80vh] flex flex-col items-center noise-overlay">
+    <div className="pt-12 pb-8 sm:pt-16 sm:pb-12 min-h-[80vh] flex flex-col items-center noise-overlay">
       <div className="max-w-4xl w-full mx-auto px-6 lg:px-12">
         <PageHeader
           title="Carbon Marketplace"
@@ -22,7 +22,7 @@ const Marketplace = () => {
           </div>
           
           <div className="space-y-4">
-            <div className="flex justify-between items-center p-4 bg-[#040A06] border border-emerald/10 rounded-lg">
+            <div className="flex justify-between items-center p-4 bg-bg-canvas border border-emerald/10 rounded-lg">
               <div>
                 <div className="font-sans font-bold text-registry">BD Solar VCU</div>
                 <div className="font-mono text-[10px] text-mist">Vintage 2024-2025</div>
@@ -33,7 +33,7 @@ const Marketplace = () => {
               </div>
             </div>
             
-            <div className="flex justify-between items-center p-4 bg-[#040A06] border border-emerald/10 rounded-lg">
+            <div className="flex justify-between items-center p-4 bg-bg-canvas border border-emerald/10 rounded-lg">
               <div>
                 <div className="font-sans font-bold text-registry">BD Cookstove VER</div>
                 <div className="font-mono text-[10px] text-mist">Vintage 2025</div>

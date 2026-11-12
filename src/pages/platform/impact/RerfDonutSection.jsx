@@ -10,7 +10,7 @@ export function RerfDonutSection({
   return (
     <div 
       ref={rerfSectionRef}
-      className="border-t border-[#00C853]/15 pt-16 space-y-12"
+      className="border-t border-border-strong/15 pt-16 space-y-12"
     >
       {/* Header */}
       <div className="text-center space-y-3">
@@ -36,16 +36,16 @@ export function RerfDonutSection({
             onClick={() => showToast("Solar Irrigation projects are allocated 35% of fund flows.", "info")}
             className={`p-6 rounded-3xl border transition-all duration-300 relative group cursor-pointer text-left lg:text-right ${
               activeSegment === 1 
-                ? 'bg-[#0D2B1A] border-[#00C853] shadow-lg shadow-[#00C853]/5 -translate-y-1' 
-                : 'bg-[#0D2B1A]/20 border-white/5 hover:border-white/20'
+                ? 'bg-bg-surface border-border-strong shadow-lg shadow-[#00C853]/5 -translate-y-1' 
+                : 'bg-bg-surface/20 border-white/5 hover:border-white/20'
             }`}
           >
             <div className={`hidden lg:block absolute right-[-18px] top-1/2 -translate-y-1/2 w-[18px] h-[2px] transition-colors ${
-              activeSegment === 1 ? 'bg-[#00C853]' : 'bg-white/10'
+              activeSegment === 1 ? 'bg-accent' : 'bg-white/10'
             }`}></div>
 
             <div className="flex items-center lg:justify-end space-x-3 mb-2 lg:flex-row-reverse lg:space-x-reverse">
-              <div className="w-8 h-8 rounded-full bg-[#00C853]/10 flex items-center justify-center text-[#00C853]">
+              <div className="w-8 h-8 rounded-full bg-accent/10 flex items-center justify-center text-accent">
                 <Sprout className="w-4.5 h-4.5" />
               </div>
               <span className="font-mono text-xs font-bold text-emerald">35% FLOWS</span>
@@ -63,19 +63,19 @@ export function RerfDonutSection({
             onClick={() => showToast("Solar Cold Storage setups represent 30% of revolving allocations.", "info")}
             className={`p-6 rounded-3xl border transition-all duration-300 relative group cursor-pointer text-left lg:text-right ${
               activeSegment === 2 
-                ? 'bg-[#0D2B1A] border-[#20E070] shadow-lg shadow-[#20E070]/5 -translate-y-1' 
-                : 'bg-[#0D2B1A]/20 border-white/5 hover:border-white/20'
+                ? 'bg-bg-surface border-accent shadow-lg shadow-[#20E070]/5 -translate-y-1' 
+                : 'bg-bg-surface/20 border-white/5 hover:border-white/20'
             }`}
           >
             <div className={`hidden lg:block absolute right-[-18px] top-1/2 -translate-y-1/2 w-[18px] h-[2px] transition-colors ${
-              activeSegment === 2 ? 'bg-[#20E070]' : 'bg-white/10'
+              activeSegment === 2 ? 'bg-accent' : 'bg-white/10'
             }`}></div>
 
             <div className="flex items-center lg:justify-end space-x-3 mb-2 lg:flex-row-reverse lg:space-x-reverse">
-              <div className="w-8 h-8 rounded-full bg-[#20E070]/10 flex items-center justify-center text-[#20E070]">
+              <div className="w-8 h-8 rounded-full bg-accent/10 flex items-center justify-center text-accent">
                 <Wind className="w-4.5 h-4.5" />
               </div>
-              <span className="font-mono text-xs font-bold text-[#20E070]">30% FLOWS</span>
+              <span className="font-mono text-xs font-bold text-accent">30% FLOWS</span>
             </div>
             <h4 className="font-sans font-bold text-sm text-white mb-1.5">Solar-Powered Cold Storage</h4>
             <p className="text-xs text-mist leading-relaxed font-sans">
@@ -156,7 +156,7 @@ export function RerfDonutSection({
           <div className="absolute inset-0 flex flex-col items-center justify-center text-center pointer-events-none mt-1">
             <span className="font-mono text-[9px] uppercase tracking-wider text-mist">RERF</span>
             <span className="font-sans font-extrabold text-xl text-white">৳8.5M</span>
-            <span className="font-mono text-[8px] text-[#00C853] font-bold">100% DEPLOYED</span>
+            <span className="font-mono text-[8px] text-accent font-bold">100% DEPLOYED</span>
           </div>
         </div>
 
@@ -169,19 +169,19 @@ export function RerfDonutSection({
             onClick={() => showToast("Rooftop Solar in agro-processing consumes 20% of funds.", "info")}
             className={`p-6 rounded-3xl border transition-all duration-300 relative group cursor-pointer text-left ${
               activeSegment === 3 
-                ? 'bg-[#0D2B1A] border-[#80F5A0] shadow-lg shadow-[#80F5A0]/5 -translate-y-1' 
-                : 'bg-[#0D2B1A]/20 border-white/5 hover:border-white/20'
+                ? 'bg-bg-surface border-emerald-400 shadow-lg shadow-[#80F5A0]/5 -translate-y-1' 
+                : 'bg-bg-surface/20 border-white/5 hover:border-white/20'
             }`}
           >
             <div className={`hidden lg:block absolute left-[-18px] top-1/2 -translate-y-1/2 w-[18px] h-[2px] transition-colors ${
-              activeSegment === 3 ? 'bg-[#80F5A0]' : 'bg-white/10'
+              activeSegment === 3 ? 'bg-emerald-400' : 'bg-white/10'
             }`}></div>
 
             <div className="flex items-center space-x-3 mb-2">
-              <div className="w-8 h-8 rounded-full bg-[#80F5A0]/10 flex items-center justify-center text-[#80F5A0]">
+              <div className="w-8 h-8 rounded-full bg-emerald-400/10 flex items-center justify-center text-emerald-400">
                 <Building className="w-4.5 h-4.5" />
               </div>
-              <span className="font-mono text-xs font-bold text-[#80F5A0]">20% FLOWS</span>
+              <span className="font-mono text-xs font-bold text-emerald-400">20% FLOWS</span>
             </div>
             <h4 className="font-sans font-bold text-sm text-white mb-1.5">Rooftop Solar — Agro-Processing</h4>
             <p className="text-xs text-mist leading-relaxed font-sans">
@@ -196,8 +196,8 @@ export function RerfDonutSection({
             onClick={() => showToast("Biogas production takes 15% of deployed fund reserves.", "info")}
             className={`p-6 rounded-3xl border transition-all duration-300 relative group cursor-pointer text-left ${
               activeSegment === 4 
-                ? 'bg-[#0D2B1A] border-amber shadow-lg shadow-amber/5 -translate-y-1' 
-                : 'bg-[#0D2B1A]/20 border-white/5 hover:border-white/20'
+                ? 'bg-bg-surface border-amber shadow-lg shadow-amber/5 -translate-y-1' 
+                : 'bg-bg-surface/20 border-white/5 hover:border-white/20'
             }`}
           >
             <div className={`hidden lg:block absolute left-[-18px] top-1/2 -translate-y-1/2 w-[18px] h-[2px] transition-colors ${

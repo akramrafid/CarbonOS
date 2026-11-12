@@ -131,7 +131,7 @@ export default function EsgWorkspace() {
   };
 
   const shell = (children) => (
-    <main className="mx-auto max-w-6xl space-y-6 px-4 pb-16 pt-28 sm:px-6">
+    <main className="mx-auto max-w-6xl space-y-6 px-4 pb-16 pt-16 sm:px-6">
       <PageHeader
         title="GHG accounting workspace"
         badge="CarbonOS ESG"
@@ -281,7 +281,7 @@ export function EsgCallback() {
     completeSignIn().then(() => navigate('/platform/esg', { replace: true }), (e) => setError(e.message));
   }, [navigate]);
   return (
-    <main className="mx-auto max-w-xl px-4 pt-32">
+    <main className="mx-auto max-w-xl px-4 pt-16">
       {error ? <p role="alert" className="text-red-300">Sign-in failed: {error}</p> : <p role="status" className="text-mist">Completing sign-in…</p>}
     </main>
   );

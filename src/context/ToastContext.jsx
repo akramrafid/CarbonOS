@@ -84,7 +84,7 @@ const ToastContainer = ({ toasts, onDismiss }) => {
             role={isAlert ? 'alert' : 'status'}
             aria-live={isAlert ? 'assertive' : 'polite'}
             aria-atomic="true"
-            className={`pointer-events-auto toast-surface keep-white flex items-start gap-3 p-4 rounded-2xl bg-[#080F0B]/95 dark:bg-[#080F0B]/95 text-white border ${
+            className={`pointer-events-auto toast-surface keep-white flex items-start gap-3 p-4 rounded-2xl bg-bg-canvas/95 dark:bg-bg-canvas/95 text-white border ${
               TOAST_BORDER_COLORS[item.type] || 'border-white/10'
             } shadow-[0_12px_40px_rgba(0,0,0,0.6)] backdrop-blur-xl transition-all duration-300 animate-in fade-in slide-in-from-bottom-5`}
           >

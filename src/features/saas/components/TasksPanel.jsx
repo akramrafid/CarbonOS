@@ -15,10 +15,10 @@ export const TasksPanel = (props) => {
   } = props;
 
   return (
-          <div className="bg-white border border-[#E2E8F0] rounded-3xl p-6 lg:p-8 shadow-sm space-y-6">
+          <div className="bg-white border border-border-subtle rounded-3xl p-6 lg:p-8 shadow-sm space-y-6">
             <div>
-              <h2 className="font-sans font-bold text-3xl text-[#0F291B]">Verification Tasks</h2>
-              <p className="text-sm text-[#64748B] mt-1 font-sans">Verify, audit, and log compliance steps to confirm climate metrics.</p>
+              <h2 className="font-sans font-bold text-3xl text-fg-primary">Verification Tasks</h2>
+              <p className="text-sm text-fg-secondary mt-1 font-sans">Verify, audit, and log compliance steps to confirm climate metrics.</p>
             </div>
 
             {/* Task Add Form */}
@@ -28,7 +28,7 @@ export const TasksPanel = (props) => {
                 value={taskInput}
                 onChange={(e) => setTaskInput(e.target.value)}
                 placeholder="Type a new corporate ESG verification task..." 
-                className="flex-1 px-4 py-3 border border-[#E2E8F0] rounded-xl text-xs font-sans placeholder-[#94A3B8] focus:outline-none focus:border-[#0F291B] bg-[#F8F9FA]"
+                className="flex-1 px-4 py-3 border border-border-subtle rounded-xl text-xs font-sans placeholder-[#94A3B8] focus:outline-none focus:border-border-subtle bg-bg-muted"
               />
               <Button 
                 type="submit"
@@ -42,18 +42,18 @@ export const TasksPanel = (props) => {
             {/* Tasks list */}
             <div className="space-y-3">
               {tasks.filter(t => t.text.toLowerCase().includes(searchQuery.toLowerCase())).length === 0 ? (
-                <div className="text-center py-8 text-xs text-[#64748B]">No matching verification tasks found.</div>
+                <div className="text-center py-8 text-xs text-fg-secondary">No matching verification tasks found.</div>
               ) : (
                 tasks.filter(t => t.text.toLowerCase().includes(searchQuery.toLowerCase())).map(task => (
-                  <div key={task.id} className="flex items-center justify-between p-3.5 border border-[#F1F5F9] rounded-xl hover:bg-[#F8F9FA] transition-all">
+                  <div key={task.id} className="flex items-center justify-between p-3.5 border border-border-subtle rounded-xl hover:bg-bg-muted transition-all">
                     <div className="flex items-center space-x-3.5">
                       <input 
                         type="checkbox" 
                         checked={task.completed} 
                         onChange={() => toggleTask(task.id)}
-                        className="w-4.5 h-4.5 border-[#E2E8F0] rounded text-emerald focus:ring-emerald cursor-pointer"
+                        className="w-4.5 h-4.5 border-border-subtle rounded text-emerald focus:ring-emerald cursor-pointer"
                       />
-                      <span className={`text-sm font-sans font-medium ${task.completed ? 'text-[#94A3B8] line-through' : 'text-[#1E293B]'}`}>
+                      <span className={`text-sm font-sans font-medium ${task.completed ? 'text-fg-secondary line-through' : 'text-fg-primary'}`}>
                         {task.text}
                       </span>
                     </div>
@@ -61,7 +61,7 @@ export const TasksPanel = (props) => {
                       icon={<Trash2 className="w-4 h-4" />}
                       aria-label="Delete task"
                       onClick={() => deleteTask(task.id)}
-                      className="text-[#94A3B8] hover:text-[#EF4444] min-h-[32px] min-w-[32px] p-1"
+                      className="text-fg-secondary hover:text-red-400 min-h-[32px] min-w-[32px] p-1"
                     />
                   </div>
                 ))

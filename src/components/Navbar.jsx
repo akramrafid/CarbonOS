@@ -90,8 +90,8 @@ const Navbar = () => {
       <div 
         className={`w-full max-w-[1780px] rounded-full border transition-all duration-500 ease-out flex items-center justify-between px-3.5 sm:px-8 py-2 sm:py-3 pointer-events-auto gap-2 sm:gap-4 ${
           scrolled 
-            ? 'bg-[#040A06]/90 dark:bg-[#040A06]/90 backdrop-blur-xl border-emerald/25 shadow-[0_8px_32px_rgba(0,0,0,0.4)]' 
-            : 'bg-[#040A06]/70 dark:bg-[#040A06]/70 backdrop-blur-md border-white/10'
+            ? 'bg-bg-canvas/90 dark:bg-bg-canvas/90 backdrop-blur-xl border-emerald/25 shadow-[0_8px_32px_rgba(0,0,0,0.4)]' 
+            : 'bg-bg-canvas/70 dark:bg-bg-canvas/70 backdrop-blur-md border-white/10'
         }`}
       >
         {/* Left Side: Brand Logo */}
@@ -153,7 +153,7 @@ const Navbar = () => {
           <button
             type="button"
             onClick={() => setIsDemoModalOpen(true)}
-            className="font-mono text-[11px] font-bold text-white bg-[#0A1F13] hover:bg-[#00C853] hover:text-[#0A1F13] border border-[#00C853]/40 px-3.5 py-1.5 rounded-full transition-all duration-300 shadow-[0_0_12px_rgba(0,200,83,0.15)] ml-2 whitespace-nowrap shrink-0 cursor-pointer"
+            className="font-mono text-[11px] font-bold text-white bg-bg-elevated hover:bg-accent hover:text-bg-canvas border border-border-strong/40 px-3.5 py-1.5 rounded-full transition-all duration-300 shadow-[0_0_12px_rgba(0,200,83,0.15)] ml-2 whitespace-nowrap shrink-0 cursor-pointer"
           >
             {t('nav.requestDemo', '[Request Demo]')}
           </button>
@@ -222,7 +222,7 @@ const Navbar = () => {
       {/* Mobile Menu Drawer - Responsive with Vertical Scrolling & Scroll-Lock */}
       <div 
         id="mobile-menu-drawer"
-        className={`fixed inset-0 top-0 pt-24 bg-[#040A06]/98 backdrop-blur-3xl transition-transform duration-300 z-40 flex flex-col items-center lg:hidden overflow-y-auto max-h-[100dvh] pb-12 ${
+        className={`fixed inset-0 top-0 pt-16 bg-bg-canvas/98 backdrop-blur-3xl transition-transform duration-300 z-40 flex flex-col items-center lg:hidden overflow-y-auto max-h-[100dvh] pb-12 ${
           isMobileMenuOpen ? 'translate-x-0' : 'translate-x-full'
         }`}
         aria-hidden={!isMobileMenuOpen}

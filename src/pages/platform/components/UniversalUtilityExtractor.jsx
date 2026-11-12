@@ -53,7 +53,7 @@ export const UniversalUtilityExtractor = ({
   return (
     <div
       className={`space-y-8 rounded-3xl p-6 lg:p-8 border transition-all duration-300 ${
-        isLight ? 'bg-white border-[#E8ECE8] text-[#0F2417]' : 'bg-[#08130C] border-[#152B1D] text-white'
+        isLight ? 'bg-white border-border-subtle text-fg-primary' : 'bg-bg-elevated border-border-subtle text-white'
       }`}
     >
       {/* Header Banner & 4 StatCards */}
@@ -103,7 +103,7 @@ export const UniversalUtilityExtractor = ({
       {/* Action Footer: Approve & Commit */}
       <div className="flex flex-col sm:flex-row items-center justify-between gap-4 pt-4 border-t border-white/10">
         <div className="flex items-center space-x-2 text-xs text-gray-400">
-          <ShieldCheck className="w-4 h-4 text-[#00C853]" />
+          <ShieldCheck className="w-4 h-4 text-accent" />
           <span>Line items follow the GHG Protocol Corporate Standard. Nothing here is audited, verified or assured.</span>
         </div>
 

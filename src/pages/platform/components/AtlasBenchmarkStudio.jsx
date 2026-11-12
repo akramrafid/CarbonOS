@@ -135,7 +135,7 @@ export const AtlasBenchmarkStudio = ({ isLight, locale }) => {
       <div className={`p-6 rounded-3xl border ${
         isLight 
           ? 'bg-gradient-to-r from-cyan-50 to-emerald-50/50 border-cyan-200' 
-          : 'bg-gradient-to-r from-[#061414] to-[#0A2216] border-[#1B4D2E]'
+          : 'bg-gradient-to-r from-bg-surface to-bg-canvas border-border-subtle'
       }`}>
         <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
           <div className="space-y-1">
@@ -150,7 +150,7 @@ export const AtlasBenchmarkStudio = ({ isLight, locale }) => {
                 Watershed ATLAS Pattern
               </span>
             </div>
-            <p className={`text-xs ${isLight ? 'text-gray-600' : 'text-[#8FA899]'}`}>
+            <p className={`text-xs ${isLight ? 'text-gray-600' : 'text-fg-secondary'}`}>
               {locale.atlasSubtitle}
             </p>
           </div>
@@ -196,7 +196,7 @@ export const AtlasBenchmarkStudio = ({ isLight, locale }) => {
       </div>
 
       {/* Test Cases Table */}
-      <div className={`p-6 rounded-3xl border overflow-x-auto ${isLight ? 'bg-white border-gray-200' : 'bg-[#0A160F] border-[#1B4D2E]'}`}>
+      <div className={`p-6 rounded-3xl border overflow-x-auto ${isLight ? 'bg-white border-gray-200' : 'bg-bg-elevated border-border-subtle'}`}>
         <div className="flex items-center justify-between mb-4">
           <h3 className={`text-sm font-bold font-sans ${isLight ? 'text-gray-900' : 'text-white'}`}>
             ATLAS Benchmark Test Cases (Labeled Utility Bills & Invoices)
@@ -206,7 +206,7 @@ export const AtlasBenchmarkStudio = ({ isLight, locale }) => {
 
         <table className="w-full text-xs font-sans">
           <thead>
-            <tr className={`border-b text-left ${isLight ? 'border-gray-200 text-gray-500' : 'border-[#1B4D2E] text-gray-400'}`}>
+            <tr className={`border-b text-left ${isLight ? 'border-gray-200 text-gray-500' : 'border-border-subtle text-gray-400'}`}>
               <th className="pb-3 font-semibold">Test ID</th>
               <th className="pb-3 font-semibold">Bill / Invoice Document</th>
               <th className="pb-3 font-semibold">Ground Truth</th>

@@ -10,9 +10,9 @@ export function WorkflowCards({
   itemVariants
 }) {
   const workflowSteps = [
-    { icon: <Database size={32} />, label: text.workflowData, color: "text-[#CCFF00]", bg: "bg-[#CCFF00]/10", details: WORKFLOW_DETAILS[lang][0] },
+    { icon: <Database size={32} />, label: text.workflowData, color: "text-lime-400", bg: "bg-lime-400/10", details: WORKFLOW_DETAILS[lang][0] },
     { icon: <ShieldAlert size={32} />, label: text.workflowWarning, color: "text-orange-400", bg: "bg-orange-400/10", details: WORKFLOW_DETAILS[lang][1] },
-    { icon: <Sprout size={32} />, label: text.workflowAction, color: "text-black", bg: "bg-[#CCFF00]", details: WORKFLOW_DETAILS[lang][2] },
+    { icon: <Sprout size={32} />, label: text.workflowAction, color: "text-black", bg: "bg-lime-400", details: WORKFLOW_DETAILS[lang][2] },
     { icon: <ShieldCheck size={32} />, label: text.workflowSaved, color: "text-green-400", bg: "bg-green-400/10", details: WORKFLOW_DETAILS[lang][3] }
   ];
 
@@ -24,7 +24,7 @@ export function WorkflowCards({
       variants={containerVariants}
       className="mb-32 relative"
     >
-      <div className="absolute inset-0 bg-[#CCFF00]/5 blur-[120px] rounded-full pointer-events-none" />
+      <div className="absolute inset-0 bg-lime-400/5 blur-[120px] rounded-full pointer-events-none" />
       
       <motion.h2 variants={itemVariants} className="text-3xl md:text-5xl font-extrabold text-center text-white mb-4 tracking-tight">
         {text.solutionTitle}
@@ -42,8 +42,8 @@ export function WorkflowCards({
               variants={itemVariants}
               className={`p-8 rounded-[28px] text-left transition-all duration-300 relative flex flex-col justify-between min-h-[280px] group border
                 ${isSolidCard 
-                  ? 'bg-[#CCFF00] text-black border-transparent shadow-[0_15px_30px_rgba(204,255,0,0.15)] hover:scale-[1.02] hover:shadow-[0_20px_40px_rgba(204,255,0,0.25)]' 
-                  : 'bg-white/5 border-white/10 hover:border-[#CCFF00]/40 hover:scale-[1.02] hover:bg-white/10 text-white'
+                  ? 'bg-lime-400 text-black border-transparent shadow-[0_15px_30px_rgba(204,255,0,0.15)] hover:scale-[1.02] hover:shadow-[0_20px_40px_rgba(204,255,0,0.25)]' 
+                  : 'bg-white/5 border-white/10 hover:border-lime-400/40 hover:scale-[1.02] hover:bg-white/10 text-white'
                 }`}
             >
               <div>
@@ -51,7 +51,7 @@ export function WorkflowCards({
                   <div className={`text-sm font-black tracking-widest uppercase ${isSolidCard ? 'text-black/50' : 'text-white/40'}`}>
                     {idx + 1 === 1 ? '01' : idx + 1 === 2 ? '02' : idx + 1 === 3 ? '03' : '04'}
                   </div>
-                  <div className={`p-2.5 rounded-full ${isSolidCard ? 'bg-black text-[#CCFF00]' : 'bg-white/5 text-[#CCFF00] border border-white/10 group-hover:bg-[#CCFF00] group-hover:text-black group-hover:border-transparent'} transition-all duration-300`}>
+                  <div className={`p-2.5 rounded-full ${isSolidCard ? 'bg-black text-lime-400' : 'bg-white/5 text-lime-400 border border-white/10 group-hover:bg-lime-400 group-hover:text-black group-hover:border-transparent'} transition-all duration-300`}>
                     {isSolidCard ? <ArrowUpRight size={18} /> : step.icon}
                   </div>
                 </div>

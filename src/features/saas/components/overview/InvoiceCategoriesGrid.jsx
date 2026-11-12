@@ -18,10 +18,10 @@ export const InvoiceCategoriesGrid = ({
     <div className="space-y-6">
       <div className="flex justify-between items-center">
         <div>
-          <h4 className={`text-sm font-bold font-sans ${isLight ? 'text-[#0F2417]' : 'text-white'}`}>
+          <h4 className={`text-sm font-bold font-sans ${isLight ? 'text-fg-primary' : 'text-white'}`}>
             All 9 Activity & Invoiced Expense Categories
           </h4>
-          <p className={`text-[11px] ${isLight ? 'text-[#41634E]' : 'text-mist'}`}>
+          <p className={`text-[11px] ${isLight ? 'text-fg-muted' : 'text-mist'}`}>
             Categorized under GHG Protocol Corporate Standard & Bangladesh DoE Emission Factors
           </p>
         </div>
@@ -53,7 +53,7 @@ export const InvoiceCategoriesGrid = ({
                       <IconComp className="w-4 h-4 text-white" />
                     </div>
                     <div className="leading-tight">
-                      <div className={`text-xs font-bold ${isLight ? 'text-[#0F2417]' : 'text-white'}`}>
+                      <div className={`text-xs font-bold ${isLight ? 'text-fg-primary' : 'text-white'}`}>
                         {cat.name}
                       </div>
                       <Badge variant="neutral" size="sm" className="mt-0.5">
@@ -75,7 +75,7 @@ export const InvoiceCategoriesGrid = ({
                     <span className="text-[10px] font-mono uppercase text-mist">
                       Spend (BDT)
                     </span>
-                    <div className={`text-xs font-bold font-mono tabular-nums ${isLight ? 'text-[#0F2417]' : 'text-white'}`}>
+                    <div className={`text-xs font-bold font-mono tabular-nums ${isLight ? 'text-fg-primary' : 'text-white'}`}>
                       ৳ {cat.spendBdt?.toLocaleString() || 0}
                     </div>
                   </div>
@@ -122,7 +122,7 @@ export const InvoiceCategoriesGrid = ({
             <div className="flex items-center space-x-2">
               <Package className="w-4 h-4 text-emerald" />
               <h4 className={`text-xs font-bold uppercase font-mono tracking-wider ${
-                isLight ? 'text-[#0F2417]' : 'text-white'
+                isLight ? 'text-fg-primary' : 'text-white'
               }`}>
                 Custom Invoiced Additions ({customItems.length})
               </h4>
@@ -148,7 +148,7 @@ export const InvoiceCategoriesGrid = ({
               <tbody className="divide-y divide-inherit">
                 {customItems.map((item) => (
                   <tr key={item.id} className={isLight ? 'hover:bg-slate-50' : 'hover:bg-white/5'}>
-                    <td className={`py-2 font-bold ${isLight ? 'text-[#0F2417]' : 'text-white'}`}>
+                    <td className={`py-2 font-bold ${isLight ? 'text-fg-primary' : 'text-white'}`}>
                       {item.name}
                     </td>
                     <td className="capitalize text-mist">

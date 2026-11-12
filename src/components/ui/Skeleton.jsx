@@ -11,13 +11,13 @@ export function Skeleton({
   className = '',
   ...props
 }) {
-  const baseClasses = 'animate-pulse bg-carbon-surface-raised/70 dark:bg-[#13241B]/70 rounded';
+  const baseClasses = 'animate-pulse bg-carbon-surface-raised/70 dark:bg-bg-elevated/70 rounded';
 
   const variantClasses = {
     text: 'h-4 w-full rounded',
     rect: 'h-24 w-full rounded-xl',
     circle: 'rounded-full',
-    card: 'h-40 w-full rounded-xl border border-carbon-border/50 dark:border-[#1E3326]/50'
+    card: 'h-40 w-full rounded-xl border border-carbon-border/50 dark:border-border-subtle/50'
   }[variant] || 'h-4 w-full rounded';
 
   const style = {};

@@ -45,43 +45,43 @@ const DeploymentTimeline = () => {
 
   return (
     <div className="max-w-3xl mx-auto">
-      <div className="relative border-l-2 border-[#E2E8F0] ml-4 md:ml-0">
+      <div className="relative border-l-2 border-border-subtle ml-4 md:ml-0">
         {phases.map((phase, idx) => (
           <div key={phase.id} className="mb-12 ml-8 relative group">
             <div className={`absolute -left-[41px] w-6 h-6 rounded-full border-4 border-white ${
-              phase.active ? 'bg-[#16A34A]' : 'bg-[#E2E8F0]'
-            } shadow-sm transition-colors duration-300 group-hover:bg-[#0A5C36]`}></div>
+              phase.active ? 'bg-accent' : 'bg-bg-muted'
+            } shadow-sm transition-colors duration-300 group-hover:bg-accent`}></div>
             
-            <div className="bg-white p-6 rounded-xl border border-[#E2E8F0] shadow-sm hover:shadow-md transition-shadow">
+            <div className="bg-white p-6 rounded-xl border border-border-subtle shadow-sm hover:shadow-md transition-shadow">
               <div className="flex flex-col md:flex-row md:items-center justify-between mb-4">
                 <span className={`text-xs font-mono px-3 py-1 rounded-full ${
-                  phase.id === 'Phase 1' ? 'bg-[#16A34A]/10 text-[#16A34A]' :
-                  phase.id === 'Phase 2' ? 'bg-[#F59E0B]/10 text-[#F59E0B]' :
-                  'bg-[#3B82F6]/10 text-[#3B82F6]'
+                  phase.id === 'Phase 1' ? 'bg-accent/10 text-accent' :
+                  phase.id === 'Phase 2' ? 'bg-amber-500/10 text-amber-500' :
+                  'bg-blue-500/10 text-blue-400'
                 }`}>
                   {phase.id}
                 </span>
-                <span className="text-sm font-semibold text-[#475569] mt-2 md:mt-0">{phase.timeframe}</span>
+                <span className="text-sm font-semibold text-fg-secondary mt-2 md:mt-0">{phase.timeframe}</span>
               </div>
               
-              <h3 className="text-2xl font-bold text-[#0F172A] mb-4">{phase.title}</h3>
+              <h3 className="text-2xl font-bold text-fg-primary mb-4">{phase.title}</h3>
               
               <ul className="space-y-2 mb-6">
                 {phase.items.map((item, i) => (
                   <li key={i} className="flex items-start">
-                    <span className="text-[#16A34A] mr-2 mt-1">•</span>
-                    <span className="text-[#475569]">{item}</span>
+                    <span className="text-accent mr-2 mt-1">•</span>
+                    <span className="text-fg-secondary">{item}</span>
                   </li>
                 ))}
               </ul>
               
-              <div className="bg-[#F8FAFC] border border-[#E2E8F0] p-4 rounded-lg flex items-center">
-                <div className="w-8 h-8 rounded-full bg-[#16A34A]/10 flex items-center justify-center mr-3 shrink-0">
-                  <span className="text-[#16A34A]">🎯</span>
+              <div className="bg-bg-canvas border border-border-subtle p-4 rounded-lg flex items-center">
+                <div className="w-8 h-8 rounded-full bg-accent/10 flex items-center justify-center mr-3 shrink-0">
+                  <span className="text-accent">🎯</span>
                 </div>
                 <div>
-                  <p className="text-xs text-[#475569] uppercase tracking-wider font-semibold">Key Milestone</p>
-                  <p className="font-semibold text-[#0F172A]">{phase.milestone}</p>
+                  <p className="text-xs text-fg-secondary uppercase tracking-wider font-semibold">Key Milestone</p>
+                  <p className="font-semibold text-fg-primary">{phase.milestone}</p>
                 </div>
               </div>
             </div>

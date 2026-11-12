@@ -22,8 +22,8 @@ export function MarketplaceGrid({
             key={credit.id}
             className={`rounded-2xl border p-6 flex flex-col transition-all duration-300 group hover:-translate-y-1 relative overflow-hidden ${
               isLight
-                ? 'bg-white border-[#dbf0ea] shadow-[0_4px_20px_rgba(0,0,0,0.03)] hover:shadow-xl hover:border-emerald/40'
-                : 'bg-[#080F0B] border-white/10 hover:border-emerald/50 hover:shadow-[0_0_30px_rgba(0,200,83,0.1)]'
+                ? 'bg-white border-border-strong shadow-[0_4px_20px_rgba(0,0,0,0.03)] hover:shadow-xl hover:border-emerald/40'
+                : 'bg-bg-canvas border-white/10 hover:border-emerald/50 hover:shadow-[0_0_30px_rgba(0,200,83,0.1)]'
             }`}
           >
             {/* Top Ambient Highlight Banner */}
@@ -59,7 +59,7 @@ export function MarketplaceGrid({
             <div className="mb-3">
               <h3
                 className={`font-sans font-bold text-xl leading-snug group-hover:text-emerald transition-colors ${
-                  isLight ? 'text-[#181414]' : 'text-white'
+                  isLight ? 'text-fg-primary' : 'text-white'
                 }`}
               >
                 {credit.type}
@@ -89,7 +89,7 @@ export function MarketplaceGrid({
             {/* MRV Telemetry Tag */}
             <div
               className={`p-2.5 rounded-lg border text-[11px] font-mono mb-4 flex items-center space-x-2 ${
-                isLight ? 'bg-slate-50 border-slate-200 text-slate-700' : 'bg-[#040A06] border-white/5 text-slate-300'
+                isLight ? 'bg-slate-50 border-slate-200 text-slate-700' : 'bg-bg-canvas border-white/5 text-slate-300'
               }`}
             >
               <Satellite size={14} className="text-cyan-400 shrink-0" />
@@ -114,13 +114,13 @@ export function MarketplaceGrid({
             {/* Financial Metrics Box */}
             <div
               className={`mt-auto p-4 rounded-xl border mb-5 transition-colors ${
-                isLight ? 'bg-[#f2f3ee]/80 border-[#dbf0ea]' : 'bg-[#0D2B1A]/30 border-white/5'
+                isLight ? 'bg-bg-canvas/80 border-border-strong' : 'bg-bg-surface/30 border-white/5'
               }`}
             >
               <div className="grid grid-cols-2 gap-3 mb-2.5">
                 <div>
                   <span className="font-mono text-[10px] text-slate-400 block mb-0.5">VOLUME</span>
-                  <span className={`font-mono text-xl font-bold ${isLight ? 'text-[#181414]' : 'text-white'}`}>
+                  <span className={`font-mono text-xl font-bold ${isLight ? 'text-fg-primary' : 'text-white'}`}>
                     {credit.tonnage} <span className="text-xs font-sans text-slate-400">tCO₂e</span>
                   </span>
                 </div>

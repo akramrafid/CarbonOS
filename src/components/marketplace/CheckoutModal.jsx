@@ -32,7 +32,7 @@ export const CheckoutModal = ({ credit, onClose, onSuccess }) => {
       <div className="p-6">
         {step === 'review' && (
           <>
-            <div className="bg-gray-50 dark:bg-[#080F0B] rounded-xl p-4 border border-gray-200 dark:border-white/5 mb-6">
+            <div className="bg-gray-50 dark:bg-bg-canvas rounded-xl p-4 border border-gray-200 dark:border-white/5 mb-6">
               <div className="flex justify-between items-center mb-2">
                 <span className="font-mono text-xs text-gray-500 dark:text-mist">CREDIT ID</span>
                 <span className="font-mono text-sm text-emerald-600 dark:text-emerald font-semibold">{credit.id}</span>

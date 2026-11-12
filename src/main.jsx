@@ -5,6 +5,7 @@ import { ThemeProvider } from './context/ThemeContext'
 import { ToastProvider } from './context/ToastContext'
 import ErrorBoundary from './components/ErrorBoundary'
 import App from './App'
+import './styles/tokens.css'
 import './index.css'
 import './i18n'
 

@@ -134,7 +134,7 @@ export const DuckDBEngineView = ({
       <div className={`p-6 rounded-3xl border transition-all ${
         isLight 
           ? 'bg-gradient-to-r from-emerald-50/70 to-teal-50/40 border-emerald-200/80 shadow-sm' 
-          : 'bg-gradient-to-r from-[#06140D] to-[#0A2216] border-[#1B4D2E]'
+          : 'bg-gradient-to-r from-bg-surface to-bg-canvas border-border-subtle'
       }`}>
         <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
           <div className="space-y-1">
@@ -149,20 +149,20 @@ export const DuckDBEngineView = ({
                 OLAP v2026.2
               </span>
             </div>
-            <p className={`text-xs ${isLight ? 'text-gray-600' : 'text-[#8FA899]'}`}>
+            <p className={`text-xs ${isLight ? 'text-gray-600' : 'text-fg-secondary'}`}>
               {locale?.duckdbSubtitle || 'Sub-25ms calculation pipeline supporting Activity-based & Spend-based (EEIO) accounting'}
             </p>
           </div>
 
           <div className="flex flex-wrap items-center gap-2 text-xs font-mono">
             <div className={`px-3 py-1.5 rounded-2xl border flex items-center space-x-2 ${
-              isLight ? 'bg-white/80 border-gray-200 text-gray-700' : 'bg-[#040A06] border-[#1B4D2E] text-emerald-400'
+              isLight ? 'bg-white/80 border-gray-200 text-gray-700' : 'bg-bg-canvas border-border-subtle text-emerald-400'
             }`}>
               <Clock className="w-3.5 h-3.5 text-emerald-500" />
               <span>Latency: <strong>{latencyMs} ms</strong></span>
             </div>
             <div className={`px-3 py-1.5 rounded-2xl border flex items-center space-x-2 ${
-              isLight ? 'bg-white/80 border-gray-200 text-gray-700' : 'bg-[#040A06] border-[#1B4D2E] text-cyan-400'
+              isLight ? 'bg-white/80 border-gray-200 text-gray-700' : 'bg-bg-canvas border-border-subtle text-cyan-400'
             }`}>
               <Server className="w-3.5 h-3.5 text-cyan-500" />
               <span>Routing: <strong>30GB Microservice Tier</strong></span>
@@ -181,7 +181,7 @@ export const DuckDBEngineView = ({
       </div>
 
       {/* Mode Switcher: Activity vs EEIO Spend */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-gray-200 dark:border-[#1B4D2E] pb-3">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-gray-200 dark:border-border-subtle pb-3">
         <Tabs
           tabs={[
             { id: 'activity', label: locale?.activityMode || 'Physical Activity Accounting' },
@@ -210,7 +210,7 @@ export const DuckDBEngineView = ({
       {calculationMode === 'activity' && (
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
           {/* Scope 1 Panel */}
-          <div className={`p-5 rounded-3xl border ${isLight ? 'bg-white border-gray-200' : 'bg-[#0A160F] border-[#1B4D2E]'}`}>
+          <div className={`p-5 rounded-3xl border ${isLight ? 'bg-white border-gray-200' : 'bg-bg-elevated border-border-subtle'}`}>
             <div className="flex items-center justify-between mb-4">
               <span className="text-xs font-mono font-bold text-amber-500 uppercase tracking-wider">Scope 1 Direct</span>
               <span className="text-lg font-bold font-mono text-emerald-500">{safeResults?.scope1 || 0} tCO₂e</span>
@@ -235,7 +235,7 @@ export const DuckDBEngineView = ({
           </div>
 
           {/* Scope 2 Panel */}
-          <div className={`p-5 rounded-3xl border ${isLight ? 'bg-white border-gray-200' : 'bg-[#0A160F] border-[#1B4D2E]'}`}>
+          <div className={`p-5 rounded-3xl border ${isLight ? 'bg-white border-gray-200' : 'bg-bg-elevated border-border-subtle'}`}>
             <div className="flex items-center justify-between mb-4">
               <span className="text-xs font-mono font-bold text-cyan-500 uppercase tracking-wider">Scope 2 Grid</span>
               <span className="text-lg font-bold font-mono text-cyan-500">{safeResults?.scope2 ?? '—'} tCO₂e</span>
@@ -260,7 +260,7 @@ export const DuckDBEngineView = ({
           </div>
 
           {/* Scope 3 Panel */}
-          <div className={`p-5 rounded-3xl border ${isLight ? 'bg-white border-gray-200' : 'bg-[#0A160F] border-[#1B4D2E]'}`}>
+          <div className={`p-5 rounded-3xl border ${isLight ? 'bg-white border-gray-200' : 'bg-bg-elevated border-border-subtle'}`}>
             <div className="flex items-center justify-between mb-4">
               <span className="text-xs font-mono font-bold text-emerald-500 uppercase tracking-wider">Scope 3 Value Chain</span>
               <span className="text-lg font-bold font-mono text-emerald-500">{safeResults?.scope3 || 0} tCO₂e</span>
@@ -290,7 +290,7 @@ export const DuckDBEngineView = ({
       {calculationMode === 'spend_eeio' && (
         <div className="space-y-6">
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-            <div className={`p-4 rounded-2xl border ${isLight ? 'bg-white border-gray-200' : 'bg-[#0A160F] border-[#1B4D2E]'}`}>
+            <div className={`p-4 rounded-2xl border ${isLight ? 'bg-white border-gray-200' : 'bg-bg-elevated border-border-subtle'}`}>
               <span className="text-xs font-mono text-gray-500 block mb-1">Total Scope 3 Spend</span>
               <span className="text-xl font-bold font-mono">
                 {selectedCurrency === 'BDT' 
@@ -298,13 +298,13 @@ export const DuckDBEngineView = ({
                   : `$ ${(eeioResult.totalSpendUSD).toLocaleString()}`}
               </span>
             </div>
-            <div className={`p-4 rounded-2xl border ${isLight ? 'bg-white border-gray-200' : 'bg-[#0A160F] border-[#1B4D2E]'}`}>
+            <div className={`p-4 rounded-2xl border ${isLight ? 'bg-white border-gray-200' : 'bg-bg-elevated border-border-subtle'}`}>
               <span className="text-xs font-mono text-gray-500 block mb-1">CEDA EEIO Modeled Emissions</span>
               <span className="text-xl font-bold font-mono text-emerald-500">
                 {eeioResult.totalTCO2e.toFixed(2)} tCO₂e
               </span>
             </div>
-            <div className={`p-4 rounded-2xl border ${isLight ? 'bg-white border-gray-200' : 'bg-[#0A160F] border-[#1B4D2E]'}`}>
+            <div className={`p-4 rounded-2xl border ${isLight ? 'bg-white border-gray-200' : 'bg-bg-elevated border-border-subtle'}`}>
               <span className="text-xs font-mono text-gray-500 block mb-1">Methodology Alignment</span>
               <span className="text-xs font-semibold text-cyan-400 block mt-1">
                 GHG Protocol Scope 3 Guidance (Spend-Based Method)
@@ -313,13 +313,13 @@ export const DuckDBEngineView = ({
           </div>
 
           {/* Spend Items Table */}
-          <div className={`p-6 rounded-3xl border overflow-x-auto ${isLight ? 'bg-white border-gray-200' : 'bg-[#0A160F] border-[#1B4D2E]'}`}>
+          <div className={`p-6 rounded-3xl border overflow-x-auto ${isLight ? 'bg-white border-gray-200' : 'bg-bg-elevated border-border-subtle'}`}>
             <h3 className={`text-sm font-bold font-sans mb-4 ${isLight ? 'text-gray-900' : 'text-white'}`}>
               Input Enterprise Expenditure Across Sectors (Comprehensive Environmental Data Archive)
             </h3>
             <table className="w-full text-xs font-sans">
               <thead>
-                <tr className={`border-b text-left ${isLight ? 'border-gray-200 text-gray-500' : 'border-[#1B4D2E] text-gray-400'}`}>
+                <tr className={`border-b text-left ${isLight ? 'border-gray-200 text-gray-500' : 'border-border-subtle text-gray-400'}`}>
                   <th className="pb-3 font-semibold">Procurement Sector</th>
                   <th className="pb-3 font-semibold">Scope 3 Category</th>
                   <th className="pb-3 font-semibold">Expenditure ({selectedCurrency})</th>
@@ -338,7 +338,7 @@ export const DuckDBEngineView = ({
                         value={spendInputs[item.key] || ''}
                         onChange={(e) => handleSpendChange(item.key, e.target.value)}
                         className={`w-36 px-2.5 py-1 rounded-lg border font-mono text-xs ${
-                          isLight ? 'bg-gray-50 border-gray-300' : 'bg-[#040A06] border-[#1B4D2E] text-white'
+                          isLight ? 'bg-gray-50 border-gray-300' : 'bg-bg-canvas border-border-subtle text-white'
                         }`}
                       />
                     </td>

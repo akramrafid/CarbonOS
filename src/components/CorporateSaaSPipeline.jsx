@@ -61,7 +61,7 @@ const CorporateSaaSPipeline = () => {
   };
 
   return (
-    <div className="w-full bg-[#040A06] py-24 relative overflow-hidden font-sans border-t border-white/5">
+    <div className="w-full bg-bg-canvas py-10 md:py-16 relative overflow-hidden font-sans border-t border-white/5">
       {/* Decorative Blur Backgrounds */}
       <div className="absolute top-1/4 left-1/3 w-[600px] h-[600px] bg-emerald/5 rounded-full blur-[140px] pointer-events-none z-0"></div>
       <div className="absolute bottom-1/4 right-1/4 w-[500px] h-[500px] bg-cyan/5 rounded-full blur-[120px] pointer-events-none z-0"></div>
@@ -77,7 +77,7 @@ const CorporateSaaSPipeline = () => {
         />
 
         {/* Outer Visual Panel */}
-        <div className="grid grid-cols-1 lg:grid-cols-12 gap-10 bg-[#080F0B] border border-white/5 rounded-[3rem] p-10 lg:p-14 shadow-[0_0_100px_rgba(0,0,0,0.5)] backdrop-blur-md">
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-10 bg-bg-canvas border border-white/5 rounded-[3rem] p-10 lg:p-14 shadow-[0_0_100px_rgba(0,0,0,0.5)] backdrop-blur-md">
           <PipelineControlPanel
             steps={steps}
             activeStep={activeStep}

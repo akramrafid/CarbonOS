@@ -121,7 +121,7 @@ export const SatelliteMRVStudio = ({
       <div className={`p-6 rounded-3xl border ${
         isLight 
           ? 'bg-gradient-to-r from-emerald-50 to-teal-50/50 border-emerald-200' 
-          : 'bg-gradient-to-r from-[#06140D] to-[#0A2216] border-[#1B4D2E]'
+          : 'bg-gradient-to-r from-bg-surface to-bg-canvas border-border-subtle'
       }`}>
         <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
           <div className="space-y-1">
@@ -136,20 +136,20 @@ export const SatelliteMRVStudio = ({
                 Sentinel-2 + GEDI LiDAR
               </span>
             </div>
-            <p className={`text-xs ${isLight ? 'text-gray-600' : 'text-[#8FA899]'}`}>
+            <p className={`text-xs ${isLight ? 'text-gray-600' : 'text-fg-secondary'}`}>
               {locale.satelliteSubtitle}
             </p>
           </div>
 
           <div className="flex items-center space-x-4">
             <div className={`p-3 rounded-2xl border text-center ${
-              isLight ? 'bg-white/80 border-gray-200' : 'bg-[#040A06] border-[#1B4D2E]'
+              isLight ? 'bg-white/80 border-gray-200' : 'bg-bg-canvas border-border-subtle'
             }`}>
               <span className="text-[10px] font-mono text-gray-500 block uppercase">Gross Footprint</span>
               <span className="text-base font-bold font-mono text-gray-700 dark:text-gray-300">{grossEmissions.toFixed(1)} t</span>
             </div>
             <div className={`p-3 rounded-2xl border text-center ${
-              isLight ? 'bg-white/80 border-gray-200' : 'bg-[#040A06] border-[#1B4D2E]'
+              isLight ? 'bg-white/80 border-gray-200' : 'bg-bg-canvas border-border-subtle'
             }`}>
               <span className="text-[10px] font-mono text-emerald-500 block uppercase">Retired Insets</span>
               <span className="text-base font-bold font-mono text-emerald-500">-{totalRetired} t</span>
@@ -173,7 +173,7 @@ export const SatelliteMRVStudio = ({
               className={`rounded-3xl border overflow-hidden transition-all cursor-pointer ${
                 isSelected 
                   ? 'border-emerald-500 ring-2 ring-emerald-500/20 shadow-lg' 
-                  : (isLight ? 'bg-white border-gray-200 hover:border-gray-300' : 'bg-[#0A160F] border-[#1B4D2E] hover:border-[#2A6D42]')
+                  : (isLight ? 'bg-white border-gray-200 hover:border-gray-300' : 'bg-bg-elevated border-border-subtle hover:border-border-strong')
               }`}
             >
               <div className="h-32 w-full relative overflow-hidden">
@@ -213,7 +213,7 @@ export const SatelliteMRVStudio = ({
       </div>
 
       {/* Selected Project Detailed Inset Retirement Panel */}
-      <div className={`p-6 rounded-3xl border ${isLight ? 'bg-white border-gray-200' : 'bg-[#0A160F] border-[#1B4D2E]'}`}>
+      <div className={`p-6 rounded-3xl border ${isLight ? 'bg-white border-gray-200' : 'bg-bg-elevated border-border-subtle'}`}>
         <div className="flex flex-col lg:flex-row items-start justify-between gap-6">
           <div className="space-y-3 max-w-xl">
             <div className="flex items-center space-x-2">
@@ -231,15 +231,15 @@ export const SatelliteMRVStudio = ({
             </p>
 
             <div className="grid grid-cols-3 gap-3 pt-2">
-              <div className={`p-3 rounded-2xl border ${isLight ? 'bg-gray-50 border-gray-200' : 'bg-[#040A06] border-[#1B4D2E]'}`}>
+              <div className={`p-3 rounded-2xl border ${isLight ? 'bg-gray-50 border-gray-200' : 'bg-bg-canvas border-border-subtle'}`}>
                 <span className="text-[10px] font-mono text-gray-500 block">Additionality</span>
                 <span className="text-sm font-bold font-mono text-emerald-500">{selectedProject.additionality}%</span>
               </div>
-              <div className={`p-3 rounded-2xl border ${isLight ? 'bg-gray-50 border-gray-200' : 'bg-[#040A06] border-[#1B4D2E]'}`}>
+              <div className={`p-3 rounded-2xl border ${isLight ? 'bg-gray-50 border-gray-200' : 'bg-bg-canvas border-border-subtle'}`}>
                 <span className="text-[10px] font-mono text-gray-500 block">Annual Removal</span>
                 <span className="text-sm font-bold font-mono text-cyan-400">{(selectedProject.annual_removal / 1000).toFixed(1)}k t</span>
               </div>
-              <div className={`p-3 rounded-2xl border ${isLight ? 'bg-gray-50 border-gray-200' : 'bg-[#040A06] border-[#1B4D2E]'}`}>
+              <div className={`p-3 rounded-2xl border ${isLight ? 'bg-gray-50 border-gray-200' : 'bg-bg-canvas border-border-subtle'}`}>
                 <span className="text-[10px] font-mono text-gray-500 block">Vintage Year</span>
                 <span className="text-sm font-bold font-mono text-gray-300">{selectedProject.vintage}</span>
               </div>
@@ -248,7 +248,7 @@ export const SatelliteMRVStudio = ({
 
           {/* Retirement Action Box */}
           <div className={`w-full lg:w-96 p-5 rounded-3xl border space-y-4 ${
-            isLight ? 'bg-emerald-50/50 border-emerald-200' : 'bg-[#040A06] border-[#1B4D2E]'
+            isLight ? 'bg-emerald-50/50 border-emerald-200' : 'bg-bg-canvas border-border-subtle'
           }`}>
             <h4 className="text-xs font-bold font-mono uppercase tracking-wider text-emerald-500">
               Retire Nature Insets To Corporate Ledger
@@ -310,7 +310,7 @@ export const SatelliteMRVStudio = ({
               <div 
                 key={log.id} 
                 className={`p-3 rounded-xl border flex items-center justify-between text-xs font-mono ${
-                  isLight ? 'bg-gray-50 border-gray-200' : 'bg-[#040A06] border-[#1B4D2E]'
+                  isLight ? 'bg-gray-50 border-gray-200' : 'bg-bg-canvas border-border-subtle'
                 }`}
               >
                 <div className="flex items-center space-x-3">

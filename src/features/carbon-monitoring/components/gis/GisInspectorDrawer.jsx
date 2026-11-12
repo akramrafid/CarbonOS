@@ -20,12 +20,12 @@ export function GisInspectorDrawer(props) {
       {/* Interactive Pixel Query Results (Appears on Map Click) */}
       <div
         className={`border rounded-3xl p-6 relative overflow-hidden transition-all ${
-          isLight ? 'bg-white border-[#E2E8F0] shadow-xs' : 'bg-[#08130C] border-[#152B1D]'
+          isLight ? 'bg-white border-border-subtle shadow-xs' : 'bg-bg-elevated border-border-subtle'
         }`}
       >
         <h3
           className={`font-bold text-sm mb-4 uppercase tracking-wider flex items-center space-x-2 ${
-            isLight ? 'text-[#0F291B]' : 'text-mist'
+            isLight ? 'text-fg-primary' : 'text-mist'
           }`}
         >
           <Eye size={18} className="text-emerald" />
@@ -36,48 +36,48 @@ export function GisInspectorDrawer(props) {
           <div className="space-y-4">
             <div
               className={`p-4 rounded-2xl border ${
-                isLight ? 'bg-[#E8F8EE] border-[#C2E9CF]' : 'bg-emerald/10 border-emerald/20'
+                isLight ? 'bg-accent-muted border-border-subtle' : 'bg-emerald/10 border-emerald/20'
               }`}
             >
               <div className="flex items-center space-x-2 text-emerald mb-1 font-bold text-xs uppercase tracking-wider">
                 <MapPin size={16} />
                 <span>Resolved Location Name</span>
               </div>
-              <p className={`text-sm font-bold leading-relaxed ${isLight ? 'text-[#0F291B]' : 'text-white'}`}>
+              <p className={`text-sm font-bold leading-relaxed ${isLight ? 'text-fg-primary' : 'text-white'}`}>
                 {inspectedPixel.name}
               </p>
-              <p className={`text-[11px] mt-1 font-mono ${isLight ? 'text-[#64748B]' : 'text-mist'}`}>
+              <p className={`text-[11px] mt-1 font-mono ${isLight ? 'text-fg-secondary' : 'text-mist'}`}>
                 {inspectedPixel.region} • <span className="text-emerald font-bold">{inspectedPixel.forestType}</span>
               </p>
             </div>
 
             <div className="grid grid-cols-2 md:grid-cols-5 gap-4">
-              <div className={`p-4 rounded-xl border ${isLight ? 'bg-[#F8FAFC] border-[#E2E8F0]' : 'bg-white/5 border-white/5'}`}>
-                <span className={`text-[10px] block ${isLight ? 'text-[#64748B]' : 'text-mist'}`}>Target Coordinates</span>
-                <span className={`text-xs font-mono font-bold mt-1 block ${isLight ? 'text-[#0F291B]' : 'text-white'}`}>
+              <div className={`p-4 rounded-xl border ${isLight ? 'bg-bg-canvas border-border-subtle' : 'bg-white/5 border-white/5'}`}>
+                <span className={`text-[10px] block ${isLight ? 'text-fg-secondary' : 'text-mist'}`}>Target Coordinates</span>
+                <span className={`text-xs font-mono font-bold mt-1 block ${isLight ? 'text-fg-primary' : 'text-white'}`}>
                   {inspectedPixel.lat}, {inspectedPixel.lng}
                 </span>
               </div>
-              <div className={`p-4 rounded-xl border ${isLight ? 'bg-[#F8FAFC] border-[#E2E8F0]' : 'bg-white/5 border-white/5'}`}>
-                <span className={`text-[10px] block ${isLight ? 'text-[#64748B]' : 'text-mist'}`}>NDVI Value</span>
+              <div className={`p-4 rounded-xl border ${isLight ? 'bg-bg-canvas border-border-subtle' : 'bg-white/5 border-white/5'}`}>
+                <span className={`text-[10px] block ${isLight ? 'text-fg-secondary' : 'text-mist'}`}>NDVI Value</span>
                 <span className="text-sm font-bold text-emerald mt-1 block">
                   {inspectedPixel.ndvi}
                 </span>
               </div>
-              <div className={`p-4 rounded-xl border ${isLight ? 'bg-[#F8FAFC] border-[#E2E8F0]' : 'bg-white/5 border-white/5'}`}>
-                <span className={`text-[10px] block ${isLight ? 'text-[#64748B]' : 'text-mist'}`}>Estimated Biomass</span>
-                <span className={`text-sm font-bold mt-1 block ${isLight ? 'text-[#0F291B]' : 'text-white'}`}>
+              <div className={`p-4 rounded-xl border ${isLight ? 'bg-bg-canvas border-border-subtle' : 'bg-white/5 border-white/5'}`}>
+                <span className={`text-[10px] block ${isLight ? 'text-fg-secondary' : 'text-mist'}`}>Estimated Biomass</span>
+                <span className={`text-sm font-bold mt-1 block ${isLight ? 'text-fg-primary' : 'text-white'}`}>
                   {inspectedPixel.biomass} Mg/ha
                 </span>
               </div>
-              <div className={`p-4 rounded-xl border ${isLight ? 'bg-[#F8FAFC] border-[#E2E8F0]' : 'bg-white/5 border-white/5'}`}>
-                <span className={`text-[10px] block ${isLight ? 'text-[#64748B]' : 'text-mist'}`}>Estimated Carbon</span>
-                <span className={`text-sm font-bold mt-1 block ${isLight ? 'text-[#0F291B]' : 'text-white'}`}>
+              <div className={`p-4 rounded-xl border ${isLight ? 'bg-bg-canvas border-border-subtle' : 'bg-white/5 border-white/5'}`}>
+                <span className={`text-[10px] block ${isLight ? 'text-fg-secondary' : 'text-mist'}`}>Estimated Carbon</span>
+                <span className={`text-sm font-bold mt-1 block ${isLight ? 'text-fg-primary' : 'text-white'}`}>
                   {inspectedPixel.carbon} tC/ha
                 </span>
               </div>
-              <div className={`p-4 rounded-xl border ${isLight ? 'bg-[#F8FAFC] border-[#E2E8F0]' : 'bg-white/5 border-white/5'}`}>
-                <span className={`text-[10px] block ${isLight ? 'text-[#64748B]' : 'text-mist'}`}>Model Confidence</span>
+              <div className={`p-4 rounded-xl border ${isLight ? 'bg-bg-canvas border-border-subtle' : 'bg-white/5 border-white/5'}`}>
+                <span className={`text-[10px] block ${isLight ? 'text-fg-secondary' : 'text-mist'}`}>Model Confidence</span>
                 <span className="text-sm font-bold text-emerald mt-1 block">
                   {inspectedPixel.confidence}
                 </span>
@@ -87,7 +87,7 @@ export function GisInspectorDrawer(props) {
         ) : (
           <div
             className={`text-center py-6 border border-dashed rounded-2xl text-xs ${
-              isLight ? 'border-[#CBD5E1] text-[#64748B]' : 'border-white/5 text-mist'
+              isLight ? 'border-border-subtle text-fg-secondary' : 'border-white/5 text-mist'
             }`}
           >
             Click anywhere on the map to query specific coordinate metrics and reverse-geocode location name in Bangladesh.
@@ -98,13 +98,13 @@ export function GisInspectorDrawer(props) {
       {/* Stored Bangladesh Coordinates Registry */}
       <div
         className={`border rounded-3xl p-6 transition-all ${
-          isLight ? 'bg-white border-[#E2E8F0] shadow-xs' : 'bg-[#08130C] border-[#152B1D]'
+          isLight ? 'bg-white border-border-subtle shadow-xs' : 'bg-bg-elevated border-border-subtle'
         }`}
       >
         <div className="flex items-center justify-between mb-4">
           <div className="flex items-center space-x-2">
             <Database size={18} className="text-emerald" />
-            <h3 className={`font-bold text-sm uppercase tracking-wider ${isLight ? 'text-[#0F291B]' : 'text-mist'}`}>
+            <h3 className={`font-bold text-sm uppercase tracking-wider ${isLight ? 'text-fg-primary' : 'text-mist'}`}>
               Stored Coordinates Registry
             </h3>
           </div>
@@ -129,7 +129,7 @@ export function GisInspectorDrawer(props) {
               <thead>
                 <tr
                   className={`border-b text-[10px] uppercase font-bold ${
-                    isLight ? 'border-[#E2E8F0] text-[#64748B]' : 'border-white/10 text-mist'
+                    isLight ? 'border-border-subtle text-fg-secondary' : 'border-white/10 text-mist'
                   }`}
                 >
                   <th className="pb-2">Coordinates</th>
@@ -140,13 +140,13 @@ export function GisInspectorDrawer(props) {
               </thead>
               <tbody
                 className={`divide-y text-xs ${
-                  isLight ? 'divide-[#E2E8F0] text-[#0F291B]' : 'divide-white/5 text-registry'
+                  isLight ? 'divide-[#E2E8F0] text-fg-primary' : 'divide-white/5 text-registry'
                 }`}
               >
                 {storedLocations.map((loc, idx) => (
                   <tr
                     key={idx}
-                    className={`${isLight ? 'hover:bg-[#F8FAFC]' : 'hover:bg-white/5'} transition-colors`}
+                    className={`${isLight ? 'hover:bg-bg-canvas' : 'hover:bg-white/5'} transition-colors`}
                   >
                     <td className="py-2.5 font-mono text-[11px] text-emerald font-bold">
                       {loc.lat}, {loc.lng}
@@ -161,7 +161,7 @@ export function GisInspectorDrawer(props) {
                     </td>
                     <td
                       className={`py-2.5 text-right font-mono text-[10px] ${
-                        isLight ? 'text-[#64748B]' : 'text-mist'
+                        isLight ? 'text-fg-secondary' : 'text-mist'
                       }`}
                     >
                       {loc.timestamp}
@@ -174,7 +174,7 @@ export function GisInspectorDrawer(props) {
         ) : (
           <div
             className={`text-center py-6 border border-dashed rounded-2xl text-xs ${
-              isLight ? 'border-[#CBD5E1] text-[#64748B]' : 'border-white/5 text-mist'
+              isLight ? 'border-border-subtle text-fg-secondary' : 'border-white/5 text-mist'
             }`}
           >
             No coordinates stored yet. Click anywhere on the map to add locations to this registry.
@@ -185,15 +185,15 @@ export function GisInspectorDrawer(props) {
       {/* Time slider timeline */}
       <div
         className={`border rounded-3xl p-6 transition-all ${
-          isLight ? 'bg-white border-[#E2E8F0] shadow-xs' : 'bg-[#08130C] border-[#152B1D]'
+          isLight ? 'bg-white border-border-subtle shadow-xs' : 'bg-bg-elevated border-border-subtle'
         }`}
       >
         <div className="flex flex-col md:flex-row items-start md:items-center justify-between mb-4">
           <div>
-            <h3 className={`font-bold text-sm uppercase tracking-wider ${isLight ? 'text-[#0F291B]' : 'text-mist'}`}>
+            <h3 className={`font-bold text-sm uppercase tracking-wider ${isLight ? 'text-fg-primary' : 'text-mist'}`}>
               Historical Imagery Timeline
             </h3>
-            <p className={`text-[11px] mt-0.5 ${isLight ? 'text-[#64748B]' : 'text-mist'}`}>
+            <p className={`text-[11px] mt-0.5 ${isLight ? 'text-fg-secondary' : 'text-mist'}`}>
               Toggle satellite analysis runs across date epochs
             </p>
           </div>
@@ -220,13 +220,13 @@ export function GisInspectorDrawer(props) {
             }
           }}
           className={`w-full h-1.5 rounded-lg appearance-none cursor-pointer accent-emerald ${
-            isLight ? 'bg-[#CBD5E1]' : 'bg-white/10'
+            isLight ? 'bg-slate-300' : 'bg-white/10'
           }`}
           disabled={analysisHistory.length <= 1}
         />
         <div
           className={`flex justify-between text-[10px] mt-2 font-mono ${
-            isLight ? 'text-[#64748B]' : 'text-mist'
+            isLight ? 'text-fg-secondary' : 'text-mist'
           }`}
         >
           <span>{analysisHistory[analysisHistory.length - 1]?.start_date || 'Past'}</span>

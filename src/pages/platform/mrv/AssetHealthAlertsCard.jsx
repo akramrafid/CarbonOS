@@ -3,7 +3,7 @@ import { AlertTriangle, CheckCircle, Loader2 } from 'lucide-react';
 
 export function AssetHealthAlertsCard({ trendsLoading, hasAlerts, allAlerts }) {
   return (
-    <div className="bg-[#080F0B] registry-border p-8 rounded-[2rem] shadow-[0_0_30px_rgba(0,200,83,0.05)]">
+    <div className="bg-bg-canvas registry-border p-8 rounded-[2rem] shadow-[0_0_30px_rgba(0,200,83,0.05)]">
       <div className="flex items-center justify-between mb-6">
         <div className="flex items-center">
           <span className="w-2.5 h-2.5 rounded-full bg-purple-500 animate-pulse mr-3"></span>
@@ -20,7 +20,7 @@ export function AssetHealthAlertsCard({ trendsLoading, hasAlerts, allAlerts }) {
             <Loader2 className="w-6 h-6 animate-spin text-purple-400" />
           </div>
         ) : !hasAlerts ? (
-          <div className="text-xs text-gray-500 font-mono text-center py-12 border border-gray-800/40 rounded-xl bg-[#040A06]/50">
+          <div className="text-xs text-gray-500 font-mono text-center py-12 border border-gray-800/40 rounded-xl bg-bg-canvas/50">
             NO TIER B DIAGNOSIS DATA YET
           </div>
         ) : (

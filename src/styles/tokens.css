@@ -1,0 +1,260 @@
+/* ==========================================================================
+   CarbonOS Design Language - Semantic Tokens & Effects System
+   Phase 2: Semantic Tokens, Spacing Rhythm, Premium Effects & Typography
+   ========================================================================== */
+
+/* --------------------------------------------------------------------------
+   1. DARK THEME TOKENS (Default - Calm, Deep Charcoal & Forest)
+   Tuned independently. Not pure black. High contrast, zero eye strain.
+   -------------------------------------------------------------------------- */
+:root,
+[data-theme="dark"],
+.dark {
+  /* Canvas & Surfaces */
+  --color-bg-canvas: #080F0B;        /* Deep charcoal-forest canvas */
+  --color-bg-surface: #0D1812;       /* Calm dark pine container */
+  --color-bg-muted: #0A130E;         /* Deep neutral inset surface */
+  --color-bg-elevated: #13241B;      /* Raised interactive card surface */
+  --color-bg-glass: rgba(13, 24, 18, 0.75);
+
+  /* Typography & Foreground */
+  --color-fg-primary: #F0F4F1;       /* Crisp chalk white (WCAG AAA 16.2:1) */
+  --color-fg-secondary: rgba(240, 244, 241, 0.78); /* High-readability secondary (WCAG AA 12.6:1) */
+  --color-fg-muted: rgba(240, 244, 241, 0.55);     /* Muted metadata (WCAG AA 8.9:1) */
+  --color-fg-accent: #00C853;        /* Vivid emerald for singular key telemetry */
+  --color-fg-inverse: #080F0B;
+
+  /* Borders */
+  --color-border-subtle: rgba(240, 244, 241, 0.08); /* 1px hairline border */
+  --color-border-strong: rgba(0, 200, 83, 0.28);     /* Emerald-accented strong border */
+
+  /* Primary Accent & Interactive Action */
+  --color-accent-default: #00C853;   /* Signature Emerald */
+  --color-accent-hover: #00E676;     /* Luminous hover */
+  --color-accent-active: #00B248;    /* Pressed active state */
+  --color-accent-muted: rgba(0, 200, 83, 0.12);
+
+  /* Focus & Glow */
+  --color-focus-ring: #00C853;
+  --shadow-glow: 0 0 20px rgba(0, 200, 83, 0.15);
+  --shadow-glow-hover: 0 0 35px rgba(0, 200, 83, 0.28);
+  --shadow-card: 0 4px 20px rgba(0, 0, 0, 0.35);
+
+  /* Semantic Status Indicators */
+  --color-status-success: #10B981;
+  --color-status-warning: #F59E0B;
+  --color-status-error: #EF4444;
+  --color-status-info: #06B6D4;
+
+  /* Bangladesh MFS Brand Colors */
+  --color-brand-bkash: #E2136E;
+  --color-brand-nagad: #F7941D;
+  --color-brand-rocket: #8C3494;
+
+  /* Backward Compatibility Mappings */
+  --color-forest: var(--color-bg-surface);
+  --color-carbon: var(--color-bg-canvas);
+  --color-emerald: var(--color-accent-default);
+  --color-amber: var(--color-status-warning);
+  --color-registry: var(--color-fg-primary);
+  --color-mist: var(--color-fg-secondary);
+  --color-surface-base: var(--color-bg-canvas);
+  --color-surface-muted: var(--color-bg-muted);
+  --color-surface-strong: var(--color-bg-surface);
+  --color-text-primary: var(--color-fg-primary);
+  --color-text-secondary: var(--color-fg-secondary);
+  --color-text-muted: var(--color-fg-muted);
+  --color-text-inverse: var(--color-fg-inverse);
+  --color-border: var(--color-border-strong);
+  --color-card-bg: var(--color-bg-surface);
+  --color-card-border: var(--color-border-subtle);
+  --color-nav-bg: rgba(8, 15, 11, 0.88);
+  --color-nav-text: var(--color-fg-secondary);
+  --color-nav-text-hover: var(--color-fg-primary);
+}
+
+/* --------------------------------------------------------------------------
+   2. LIGHT THEME TOKENS (Warm, Editorial, Linen & Soft Mint Paper)
+   Tuned independently. Not harsh stark white. Natural tactile warmth.
+   -------------------------------------------------------------------------- */
+[data-theme="light"],
+.light {
+  /* Canvas & Surfaces */
+  --color-bg-canvas: #F2F3EE;        /* Warm tactile linen paper canvas */
+  --color-bg-surface: #FFFFFF;       /* Crisp white card surface */
+  --color-bg-muted: #E8ECE6;         /* Soft warm paper container */
+  --color-bg-elevated: #FFFFFF;      /* Clean elevated surface */
+  --color-bg-glass: rgba(255, 255, 255, 0.85);
+
+  /* Typography & Foreground */
+  --color-fg-primary: #181414;       /* Deep charcoal black (WCAG AAA 15.3:1) */
+  --color-fg-secondary: #413F3F;     /* Slate graphite (WCAG AA 6.9:1) */
+  --color-fg-muted: rgba(65, 63, 63, 0.72); /* Soft slate (WCAG AA 4.7:1) */
+  --color-fg-accent: #166534;        /* Deep forest emerald (WCAG AA 6.4:1) */
+  --color-fg-inverse: #FFFFFF;
+
+  /* Borders */
+  --color-border-subtle: rgba(65, 63, 63, 0.12); /* Subtle divider */
+  --color-border-strong: #DBF0EA;     /* Soft mint structural border */
+
+  /* Primary Accent & Interactive Action */
+  --color-accent-default: #166534;   /* Accessible deep emerald */
+  --color-accent-hover: #15803D;     /* Vibrant hover */
+  --color-accent-active: #14532D;    /* Pressed tone */
+  --color-accent-muted: rgba(22, 101, 52, 0.08);
+
+  /* Focus & Glow */
+  --color-focus-ring: #166534;
+  --shadow-glow: 0 4px 20px rgba(4, 18, 38, 0.06);
+  --shadow-glow-hover: 0 8px 30px rgba(4, 18, 38, 0.12);
+  --shadow-card: 0 2px 12px rgba(4, 18, 38, 0.04), 0 1px 2px rgba(4, 18, 38, 0.06);
+
+  /* Semantic Status Indicators */
+  --color-status-success: #15803D;
+  --color-status-warning: #B45309;
+  --color-status-error: #DC2626;
+  --color-status-info: #0284C7;
+
+  /* Backward Compatibility Mappings */
+  --color-forest: #DBF0EA;
+  --color-carbon: var(--color-bg-canvas);
+  --color-emerald: var(--color-accent-default);
+  --color-amber: var(--color-status-warning);
+  --color-registry: var(--color-fg-secondary);
+  --color-mist: var(--color-fg-muted);
+  --color-surface-base: var(--color-bg-canvas);
+  --color-surface-muted: var(--color-bg-muted);
+  --color-surface-strong: #DBF0EA;
+  --color-text-primary: var(--color-fg-primary);
+  --color-text-secondary: var(--color-fg-secondary);
+  --color-text-muted: var(--color-fg-muted);
+  --color-text-inverse: var(--color-fg-inverse);
+  --color-border: var(--color-border-strong);
+  --color-card-bg: var(--color-bg-surface);
+  --color-card-border: var(--color-border-strong);
+  --color-nav-bg: rgba(242, 243, 238, 0.92);
+  --color-nav-text: var(--color-fg-primary);
+  --color-nav-text-hover: var(--color-accent-default);
+}
+
+/* --------------------------------------------------------------------------
+   3. SPACING & LAYOUT SCALE (4px BASE RHYTHM)
+   Permitted tokens: 4, 8, 12, 16, 24, 32, 48, 64, 96 px
+   Desktop module max gap: 64px | Mobile module max gap: 40px
+   -------------------------------------------------------------------------- */
+:root {
+  --space-1: 0.25rem;  /* 4px */
+  --space-2: 0.5rem;   /* 8px */
+  --space-3: 0.75rem;  /* 12px */
+  --space-4: 1rem;     /* 16px */
+  --space-6: 1.5rem;   /* 24px */
+  --space-8: 2rem;     /* 32px */
+  --space-12: 3rem;    /* 48px */
+  --space-16: 4rem;    /* 64px - Maximum inter-module vertical spacing on desktop */
+  --space-24: 6rem;    /* 96px - Hero display boundary */
+
+  /* Max-width container tokens */
+  --container-marketing: 80rem; /* 1280px (Brand mode) */
+  --container-product: 90rem;   /* 1440px (Product mode workspace) */
+}
+
+/* --------------------------------------------------------------------------
+   4. FLUID TYPOGRAPHY SCALE (clamp() BASED)
+   16px minimum body. Line length capped at ~65ch.
+   -------------------------------------------------------------------------- */
+:root {
+  --font-display: 'Cormorant Garamond', Georgia, serif;
+  --font-ui: 'Instrument Sans', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  --font-data: 'JetBrains Mono', monospace;
+
+  /* Fluid typography */
+  --type-display: clamp(3.25rem, 6.5vw, 6.5rem); /* 52px - 104px (Display hero only) */
+  --type-h1: clamp(2rem, 3.8vw, 3rem);           /* 32px - 48px */
+  --type-h2: clamp(1.5rem, 2.4vw, 2.125rem);      /* 24px - 34px */
+  --type-h3: clamp(1.2rem, 1.6vw, 1.5rem);        /* 19px - 24px */
+  --type-body: clamp(1rem, 1.1vw, 1.125rem);      /* 16px - 18px */
+  --type-small: 0.875rem;                         /* 14px */
+  --type-caption: 0.75rem;                        /* 12px */
+}
+
+/* Display Headline (Brand Mode Hero only, max 1 per page) */
+.font-display-hero {
+  font-family: var(--font-display);
+  font-size: var(--type-display);
+  line-height: 0.98;
+  letter-spacing: -0.025em;
+  font-style: italic;
+  font-weight: 400;
+}
+
+/* Non-Latin (Bangla) Script Typography Tuning */
+:lang(bn),
+[lang="bn"],
+.script-bengali {
+  font-family: 'Hind Siliguri', 'Noto Sans Bengali', var(--font-ui);
+  letter-spacing: normal !important; /* Never apply negative tracking to Indic scripts */
+  line-height: 1.65 !important;      /* Ample ascender/descender clearance */
+}
+
+/* --------------------------------------------------------------------------
+   5. TWO BRAND GRADIENTS MAX (RESTRAINED, NON-RAINBOW)
+   - Aurora: Cool Emerald to Deep Teal (Eco / Satellite telemetry)
+   - Sunrise: Warm Amber to Muted Rose (Solar / Payout alerts)
+   -------------------------------------------------------------------------- */
+.bg-gradient-aurora {
+  background: linear-gradient(135deg, rgba(0, 200, 83, 0.12) 0%, rgba(13, 148, 136, 0.10) 50%, rgba(6, 78, 59, 0.05) 100%);
+}
+
+[data-theme="light"] .bg-gradient-aurora,
+.light .bg-gradient-aurora {
+  background: linear-gradient(135deg, rgba(22, 101, 52, 0.08) 0%, rgba(15, 118, 110, 0.06) 50%, rgba(219, 240, 234, 0.40) 100%);
+}
+
+.bg-gradient-sunrise {
+  background: linear-gradient(135deg, rgba(245, 158, 11, 0.14) 0%, rgba(225, 29, 72, 0.08) 100%);
+}
+
+[data-theme="light"] .bg-gradient-sunrise {
+  background: linear-gradient(135deg, rgba(180, 83, 9, 0.08) 0%, rgba(190, 24, 93, 0.05) 100%);
+}
+
+/* --------------------------------------------------------------------------
+   6. PREMIUM EFFECTS (NOISE TEXTURE, GLASSMORPHISM, MICRO-INTERACTIONS)
+   -------------------------------------------------------------------------- */
+/* Subtle Performant Noise Overlay (SVG Data-URI, 0.025 opacity, hardware-accelerated) */
+.bg-noise {
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.8' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)' opacity='0.028'/%3E%3C/svg%3E");
+}
+
+[data-theme="light"] .bg-noise,
+.light .bg-noise {
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.8' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)' opacity='0.018'/%3E%3C/svg%3E");
+}
+
+/* Glassmorphism Surface Token */
+.glass-panel {
+  background-color: var(--color-bg-glass);
+  backdrop-filter: blur(14px) saturate(160%);
+  -webkit-backdrop-filter: blur(14px) saturate(160%);
+  border: 1px solid var(--color-border-subtle);
+}
+
+/* Card Glow Micro-interaction */
+.card-glow-hover {
+  transition: box-shadow 0.25s cubic-bezier(0.16, 1, 0.3, 1), transform 0.25s cubic-bezier(0.16, 1, 0.3, 1), border-color 0.25s ease;
+}
+
+.card-glow-hover:hover {
+  box-shadow: var(--shadow-glow);
+  border-color: var(--color-border-strong);
+  transform: translateY(-1px);
+}
+
+/* Smooth Focus Ring System (2px ring with 2px offset) */
+.focus-ring-standard {
+  outline: none;
+}
+.focus-ring-standard:focus-visible {
+  outline: none;
+  box-shadow: 0 0 0 2px var(--color-bg-canvas), 0 0 0 4px var(--color-focus-ring);
+}

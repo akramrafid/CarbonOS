@@ -3,7 +3,7 @@ import { Upload, FileText, Cpu, ShieldCheck, Download } from 'lucide-react';
 
 export function PipelineStagesCanvas({ activeStep, transitionState }) {
   return (
-    <div className="relative bg-[#040A06] rounded-[2rem] border border-white/5 h-[420px] flex items-center justify-center overflow-hidden shadow-inner group">
+    <div className="relative bg-bg-canvas rounded-[2rem] border border-white/5 h-[420px] flex items-center justify-center overflow-hidden shadow-inner group">
       {/* Grid Overlay inside the canvas */}
       <div className="absolute inset-0 bg-[linear-gradient(to_right,#00c85302_1px,transparent_1px),linear-gradient(to_bottom,#00c85302_1px,transparent_1px)] bg-[size:2.5rem_2.5rem] z-0 pointer-events-none"></div>
 
@@ -13,14 +13,14 @@ export function PipelineStagesCanvas({ activeStep, transitionState }) {
           transitionState === 'transitioning' ? 'opacity-0 scale-95' : 'opacity-100 scale-100'
         }`}>
           <div className="relative h-36 mx-auto w-64 mb-8 flex justify-center items-end">
-            <div className="absolute w-20 h-24 bg-[#080F0B] border border-white/10 rounded-xl flex items-center justify-center text-white/20 transform -rotate-12 translate-x-[-25px] z-10">
+            <div className="absolute w-20 h-24 bg-bg-canvas border border-white/10 rounded-xl flex items-center justify-center text-white/20 transform -rotate-12 translate-x-[-25px] z-10">
               <FileText size={24} />
             </div>
-            <div className="absolute w-20 h-24 bg-[#080F0B] border border-white/10 rounded-xl flex items-center justify-center text-white/20 transform rotate-12 translate-x-[25px] z-10">
+            <div className="absolute w-20 h-24 bg-bg-canvas border border-white/10 rounded-xl flex items-center justify-center text-white/20 transform rotate-12 translate-x-[25px] z-10">
               <FileText size={24} />
             </div>
             
-            <div className="relative w-24 h-28 bg-[#080F0B]/90 border-2 border-dashed border-emerald/30 rounded-2xl flex items-center justify-center text-emerald shadow-[0_0_30px_rgba(16,185,129,0.15)] z-20">
+            <div className="relative w-24 h-28 bg-bg-canvas/90 border-2 border-dashed border-emerald/30 rounded-2xl flex items-center justify-center text-emerald shadow-[0_0_30px_rgba(16,185,129,0.15)] z-20">
               <Upload size={38} className="animate-pulse text-emerald drop-shadow-[0_0_8px_rgba(16,185,129,0.5)]" />
             </div>
 
@@ -59,13 +59,13 @@ export function PipelineStagesCanvas({ activeStep, transitionState }) {
               <path d="M 225 140 C 275 140, 275 225, 345 225" stroke="#10b981" strokeWidth="2.5" className="flow-path-scope3" />
             </svg>
 
-            <div className="absolute left-[175px] top-[80px] w-24 h-28 bg-[#080F0B] border border-emerald/30 rounded-xl flex flex-col items-center justify-center shadow-[0_0_40px_rgba(16,185,129,0.2)] z-20 overflow-hidden animate-float-doc">
+            <div className="absolute left-[175px] top-[80px] w-24 h-28 bg-bg-canvas border border-emerald/30 rounded-xl flex flex-col items-center justify-center shadow-[0_0_40px_rgba(16,185,129,0.2)] z-20 overflow-hidden animate-float-doc">
               <Cpu className="text-emerald mb-1 animate-pulse" size={32} />
               <span className="font-mono text-[10px] text-white/70 font-semibold tracking-wider">EXTRACTING</span>
               <div className="absolute left-0 right-0 h-[3px] bg-emerald shadow-[0_0_10px_#10b981] z-30 animate-laser"></div>
             </div>
 
-            <div className="absolute right-[10px] top-[15px] w-32 bg-[#080F0B]/95 border border-white/10 rounded-xl p-3 text-left z-20 hover:border-emerald/40 transition-colors">
+            <div className="absolute right-[10px] top-[15px] w-32 bg-bg-canvas/95 border border-white/10 rounded-xl p-3 text-left z-20 hover:border-emerald/40 transition-colors">
               <div className="flex items-center justify-between mb-1.5">
                 <span className="text-[11px] font-mono text-emerald font-bold">SCOPE 1</span>
                 <span className="w-1.5 h-1.5 rounded-full bg-emerald animate-pulse"></span>
@@ -74,7 +74,7 @@ export function PipelineStagesCanvas({ activeStep, transitionState }) {
               <span className="text-xs text-mist/60 block">Fuel/Diesel</span>
             </div>
 
-            <div className="absolute right-[10px] top-[100px] w-32 bg-[#080F0B]/95 border border-white/10 rounded-xl p-3 text-left z-20 hover:border-emerald/40 transition-colors">
+            <div className="absolute right-[10px] top-[100px] w-32 bg-bg-canvas/95 border border-white/10 rounded-xl p-3 text-left z-20 hover:border-emerald/40 transition-colors">
               <div className="flex items-center justify-between mb-1.5">
                 <span className="text-[11px] font-mono text-emerald font-bold">SCOPE 2</span>
                 <span className="w-1.5 h-1.5 rounded-full bg-emerald animate-pulse"></span>
@@ -83,7 +83,7 @@ export function PipelineStagesCanvas({ activeStep, transitionState }) {
               <span className="text-xs text-mist/60 block">Grid Electricity</span>
             </div>
 
-            <div className="absolute right-[10px] top-[185px] w-32 bg-[#080F0B]/95 border border-white/10 rounded-xl p-3 text-left z-20 hover:border-emerald/40 transition-colors">
+            <div className="absolute right-[10px] top-[185px] w-32 bg-bg-canvas/95 border border-white/10 rounded-xl p-3 text-left z-20 hover:border-emerald/40 transition-colors">
               <div className="flex items-center justify-between mb-1.5">
                 <span className="text-[11px] font-mono text-emerald font-bold">SCOPE 3</span>
                 <span className="w-1.5 h-1.5 rounded-full bg-emerald animate-pulse"></span>
@@ -111,7 +111,7 @@ export function PipelineStagesCanvas({ activeStep, transitionState }) {
               <path d="M 260 106 L 320 225" stroke="rgba(16, 185, 129, 0.4)" strokeWidth="1.5" className="pulse-dashed" />
             </svg>
 
-            <div className="absolute top-[20px] left-[170px] w-[110px] h-auto py-3 bg-[#080F0B] border border-emerald/40 rounded-xl text-center shadow-[0_0_25px_rgba(16,185,129,0.2)] animate-float-doc z-20">
+            <div className="absolute top-[20px] left-[170px] w-[110px] h-auto py-3 bg-bg-canvas border border-emerald/40 rounded-xl text-center shadow-[0_0_25px_rgba(16,185,129,0.2)] animate-float-doc z-20">
               <div className="w-7 h-7 rounded-full bg-emerald/20 flex items-center justify-center mx-auto mb-1 text-emerald">
                 <ShieldCheck size={16} />
               </div>
@@ -121,26 +121,26 @@ export function PipelineStagesCanvas({ activeStep, transitionState }) {
 
             <div className="flex items-end justify-between space-x-8 w-full max-w-[340px] px-4 h-[140px] border-b border-white/10 relative z-10">
               <div className="flex flex-col items-center flex-1 h-[70px] relative">
-                <div className="w-full bg-[#1A3A28]/80 hover:bg-[#1A3A28] border border-emerald/50 border-b-0 rounded-t-md shadow-[inset_0_1px_0_rgba(16,185,129,0.5)] grow-bar h-full transition-all duration-300 flex items-start justify-center pt-3">
+                <div className="w-full bg-bg-surface/80 hover:bg-bg-surface border border-emerald/50 border-b-0 rounded-t-md shadow-[inset_0_1px_0_rgba(16,185,129,0.5)] grow-bar h-full transition-all duration-300 flex items-start justify-center pt-3">
                   <span className="text-xs font-mono text-emerald font-bold">42t</span>
                 </div>
-                <div className="absolute top-0 w-3 h-3 bg-emerald rounded-full border-2 border-[#040A06] -translate-y-1.5 shadow-[0_0_8px_#10b981]"></div>
+                <div className="absolute top-0 w-3 h-3 bg-emerald rounded-full border-2 border-border-subtle -translate-y-1.5 shadow-[0_0_8px_#10b981]"></div>
                 <span className="text-xs font-mono text-mist/60 mt-2 font-medium">Scope 1</span>
               </div>
 
               <div className="flex flex-col items-center flex-1 h-[110px] relative">
-                <div className="w-full bg-[#1A3A28]/80 hover:bg-[#1A3A28] border border-emerald/50 border-b-0 rounded-t-md shadow-[inset_0_1px_0_rgba(16,185,129,0.5)] grow-bar h-full transition-all duration-300 flex items-start justify-center pt-3">
+                <div className="w-full bg-bg-surface/80 hover:bg-bg-surface border border-emerald/50 border-b-0 rounded-t-md shadow-[inset_0_1px_0_rgba(16,185,129,0.5)] grow-bar h-full transition-all duration-300 flex items-start justify-center pt-3">
                   <span className="text-xs font-mono text-emerald font-bold">88t</span>
                 </div>
-                <div className="absolute top-0 w-3 h-3 bg-emerald rounded-full border-2 border-[#040A06] -translate-y-1.5 shadow-[0_0_8px_#10b981]"></div>
+                <div className="absolute top-0 w-3 h-3 bg-emerald rounded-full border-2 border-border-subtle -translate-y-1.5 shadow-[0_0_8px_#10b981]"></div>
                 <span className="text-xs font-mono text-mist/60 mt-2 font-medium">Scope 2</span>
               </div>
 
               <div className="flex flex-col items-center flex-1 h-[45px] relative">
-                <div className="w-full bg-[#1A3A28]/80 hover:bg-[#1A3A28] border border-emerald/50 border-b-0 rounded-t-md shadow-[inset_0_1px_0_rgba(16,185,129,0.5)] grow-bar h-full transition-all duration-300 flex items-start justify-center pt-3">
+                <div className="w-full bg-bg-surface/80 hover:bg-bg-surface border border-emerald/50 border-b-0 rounded-t-md shadow-[inset_0_1px_0_rgba(16,185,129,0.5)] grow-bar h-full transition-all duration-300 flex items-start justify-center pt-3">
                   <span className="text-xs font-mono text-emerald font-bold">23t</span>
                 </div>
-                <div className="absolute top-0 w-3 h-3 bg-emerald rounded-full border-2 border-[#040A06] -translate-y-1.5 shadow-[0_0_8px_#10b981]"></div>
+                <div className="absolute top-0 w-3 h-3 bg-emerald rounded-full border-2 border-border-subtle -translate-y-1.5 shadow-[0_0_8px_#10b981]"></div>
                 <span className="text-xs font-mono text-mist/60 mt-2 font-medium">Scope 3</span>
               </div>
             </div>
@@ -167,28 +167,28 @@ export function PipelineStagesCanvas({ activeStep, transitionState }) {
               <path d="M 230 165 L 230 197" stroke="#10b981" strokeWidth="2.5" className="flow-arrow-path" />
             </svg>
 
-            <div className="absolute left-[180px] top-[55px] w-[100px] h-[110px] bg-[#080F0B] border border-emerald/40 rounded-xl flex flex-col items-center justify-center shadow-[0_0_40px_rgba(16,185,129,0.25)] animate-float-doc z-20">
+            <div className="absolute left-[180px] top-[55px] w-[100px] h-[110px] bg-bg-canvas border border-emerald/40 rounded-xl flex flex-col items-center justify-center shadow-[0_0_40px_rgba(16,185,129,0.25)] animate-float-doc z-20">
               <Download className="text-emerald mb-1 animate-pulse" size={32} />
               <span className="font-mono text-sm text-white font-bold">REPORT</span>
               <span className="text-[9px] text-mist/60 font-mono tracking-tighter uppercase mt-0.5">One-Click</span>
             </div>
 
-            <div className="absolute left-[10px] top-[30px] w-[110px] bg-[#080F0B]/95 border border-white/10 rounded-xl p-3 text-center z-20 hover:border-emerald/40 transition-colors">
+            <div className="absolute left-[10px] top-[30px] w-[110px] bg-bg-canvas/95 border border-white/10 rounded-xl p-3 text-center z-20 hover:border-emerald/40 transition-colors">
               <span className="text-[9px] font-mono text-emerald font-bold block mb-1">METHOD</span>
               <span className="text-xs text-white font-mono font-semibold block">GHG Protocol</span>
-              <span className="text-[9px] text-[#10b981] font-mono block mt-1 font-bold">✓ Scope 1 & 2</span>
+              <span className="text-[9px] text-emerald-500 font-mono block mt-1 font-bold">✓ Scope 1 & 2</span>
             </div>
 
-            <div className="absolute right-[10px] top-[30px] w-[110px] bg-[#080F0B]/95 border border-white/10 rounded-xl p-3 text-center z-20 hover:border-emerald/40 transition-colors">
+            <div className="absolute right-[10px] top-[30px] w-[110px] bg-bg-canvas/95 border border-white/10 rounded-xl p-3 text-center z-20 hover:border-emerald/40 transition-colors">
               <span className="text-[9px] font-mono text-emerald font-bold block mb-1">REGULATION</span>
               <span className="text-xs text-white font-mono font-semibold block">EU CBAM</span>
-              <span className="text-[9px] text-[#10b981] font-mono block mt-1 font-bold">Not yet supported</span>
+              <span className="text-[9px] text-emerald-500 font-mono block mt-1 font-bold">Not yet supported</span>
             </div>
 
-            <div className="absolute left-[175px] bottom-[15px] w-[110px] bg-[#080F0B]/95 border border-white/10 rounded-xl p-3 text-center z-20 hover:border-emerald/40 transition-colors">
+            <div className="absolute left-[175px] bottom-[15px] w-[110px] bg-bg-canvas/95 border border-white/10 rounded-xl p-3 text-center z-20 hover:border-emerald/40 transition-colors">
               <span className="text-[9px] font-mono text-emerald font-bold block mb-1">STANDARD</span>
               <span className="text-xs text-white font-mono font-semibold block">ISO 14064-1</span>
-              <span className="text-[9px] text-[#10b981] font-mono block mt-1 font-bold">Statement format</span>
+              <span className="text-[9px] text-emerald-500 font-mono block mt-1 font-bold">Statement format</span>
             </div>
           </div>
 

@@ -13,7 +13,7 @@ export const InvoiceEvidenceTable = ({
     return (
       <Card className="p-8 text-center space-y-3">
         <ShieldCheck className="w-8 h-8 text-emerald mx-auto" />
-        <div className={`text-sm font-bold ${isLight ? 'text-[#0F2417]' : 'text-white'}`}>
+        <div className={`text-sm font-bold ${isLight ? 'text-fg-primary' : 'text-white'}`}>
           No Extracted Audit Traces Yet
         </div>
         <p className="text-xs text-mist max-w-md mx-auto">
@@ -36,7 +36,7 @@ export const InvoiceEvidenceTable = ({
       <div className="flex justify-between items-center pb-2 border-b border-inherit">
         <div className="flex items-center space-x-2">
           <ShieldCheck className="w-4 h-4 text-emerald" />
-          <span className={`font-sans font-bold text-xs ${isLight ? 'text-[#0F2417]' : 'text-white'}`}>
+          <span className={`font-sans font-bold text-xs ${isLight ? 'text-fg-primary' : 'text-white'}`}>
             Extraction Evidence — {extractionResult.filename}
           </span>
         </div>
@@ -60,7 +60,7 @@ export const InvoiceEvidenceTable = ({
           <tbody className="divide-y divide-inherit">
             {(extractionResult.details || []).map((item, idx) => (
               <tr key={idx} className={isLight ? 'hover:bg-slate-50' : 'hover:bg-white/5'}>
-                <td className={`py-3 px-3 font-bold capitalize whitespace-nowrap ${isLight ? 'text-[#0F2417]' : 'text-white'}`}>
+                <td className={`py-3 px-3 font-bold capitalize whitespace-nowrap ${isLight ? 'text-fg-primary' : 'text-white'}`}>
                   {item.param_name}
                 </td>
                 <td className="py-3 px-3 whitespace-nowrap">

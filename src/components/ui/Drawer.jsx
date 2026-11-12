@@ -101,19 +101,19 @@ export function Drawer({
         onClick={(e) => e.stopPropagation()}
         className={`
           fixed top-0 bottom-0 ${positionClasses} w-full ${sizeClasses}
-          bg-carbon-surface dark:bg-[#0D1812] border-l border-carbon-border dark:border-[#1E3326]
+          bg-carbon-surface dark:bg-bg-surface border-l border-carbon-border dark:border-border-subtle
           shadow-2xl flex flex-col focus:outline-none transition-transform duration-200
           ${className}
         `.trim()}
       >
         {/* Header */}
-        <div className="flex items-start justify-between p-4 sm:p-5 border-b border-carbon-border dark:border-[#1E3326]">
+        <div className="flex items-start justify-between p-4 sm:p-5 border-b border-carbon-border dark:border-border-subtle">
           <div>
-            <h2 className="text-lg font-sans font-bold text-registry dark:text-[#E2ECE5]">
+            <h2 className="text-lg font-sans font-bold text-registry dark:text-fg-primary">
               {title}
             </h2>
             {subtitle && (
-              <p className="text-xs text-mist font-sans mt-0.5 dark:text-[#7A9A85]">
+              <p className="text-xs text-mist font-sans mt-0.5 dark:text-fg-secondary">
                 {subtitle}
               </p>
             )}

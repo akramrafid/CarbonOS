@@ -29,7 +29,7 @@ export const Toast = ({
     <div
       role="status"
       aria-live={type === 'error' ? 'assertive' : 'polite'}
-      className={`fixed bottom-6 right-6 z-[100] px-4 py-3 rounded-2xl bg-carbon-surface-raised dark:bg-[#0D1F14] border shadow-2xl flex items-center gap-3 text-carbon-text dark:text-[#E2ECE5] text-xs font-sans animate-in slide-in-from-bottom-3 duration-200 ${borders[type] || borders.success} ${className}`}
+      className={`fixed bottom-6 right-6 z-[100] px-4 py-3 rounded-2xl bg-carbon-surface-raised dark:bg-bg-elevated border shadow-2xl flex items-center gap-3 text-carbon-text dark:text-fg-primary text-xs font-sans animate-in slide-in-from-bottom-3 duration-200 ${borders[type] || borders.success} ${className}`}
     >
       <span className="shrink-0">{icons[type] || icons.success}</span>
       <span className="font-medium">{message}</span>

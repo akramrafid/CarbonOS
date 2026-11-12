@@ -172,10 +172,10 @@ const HarvestGuardDashboard = ({ isInline = false, onBack = null, onAddBatchClic
 
       {/* Profile Header */}
       <div className="bg-white/5 backdrop-blur-md border border-white/10 p-6 md:p-8 rounded-[28px] mb-8 flex flex-col md:flex-row items-center justify-between shadow-lg relative overflow-hidden group">
-        <div className="absolute top-0 right-0 w-32 h-32 bg-[#CCFF00]/5 blur-2xl rounded-full pointer-events-none" />
+        <div className="absolute top-0 right-0 w-32 h-32 bg-lime-400/5 blur-2xl rounded-full pointer-events-none" />
         <div className="flex flex-col md:flex-row items-center space-y-4 md:space-y-0 md:space-x-6 relative z-10 w-full md:w-auto text-center md:text-left">
-          <div className="w-20 h-20 bg-white/5 rounded-full flex items-center justify-center border-2 border-[#CCFF00] shrink-0">
-            <Sprout size={40} className="text-[#CCFF00] animate-pulse" />
+          <div className="w-20 h-20 bg-white/5 rounded-full flex items-center justify-center border-2 border-lime-400 shrink-0">
+            <Sprout size={40} className="text-lime-400 animate-pulse" />
           </div>
           <div>
             <h2 className="text-xl font-bold text-white tracking-tight">Registered Farm Profile</h2>
@@ -187,7 +187,7 @@ const HarvestGuardDashboard = ({ isInline = false, onBack = null, onAddBatchClic
                 <select 
                   value={userLocation} 
                   onChange={(e) => handleLocationChange(e.target.value)}
-                  className="bg-white/5 border border-white/10 hover:border-[#CCFF00]/40 rounded-full px-3 py-1 text-xs text-white focus:outline-none focus:border-[#CCFF00] transition-colors font-semibold font-sans"
+                  className="bg-white/5 border border-white/10 hover:border-lime-400/40 rounded-full px-3 py-1 text-xs text-white focus:outline-none focus:border-lime-400 transition-colors font-semibold font-sans"
                 >
                   <option value="Dhaka" className="bg-carbon text-white">Dhaka</option>
                   <option value="Rajshahi" className="bg-carbon text-white">Rajshahi</option>
@@ -201,7 +201,7 @@ const HarvestGuardDashboard = ({ isInline = false, onBack = null, onAddBatchClic
 
               {weatherLoading ? (
                 <div className="flex items-center space-x-1.5 text-white/50 text-xs animate-pulse">
-                  <span className="w-1.5 h-1.5 rounded-full bg-[#CCFF00]"></span>
+                  <span className="w-1.5 h-1.5 rounded-full bg-lime-400"></span>
                   <span>Fetching live weather...</span>
                 </div>
               ) : weatherData ? (
@@ -213,11 +213,11 @@ const HarvestGuardDashboard = ({ isInline = false, onBack = null, onAddBatchClic
                       className="w-5 h-5 object-contain"
                     />
                   )}
-                  <span className="font-extrabold text-[#CCFF00]">{weatherData.temp}°C</span>
+                  <span className="font-extrabold text-lime-400">{weatherData.temp}°C</span>
                   <span className="text-white/40">|</span>
                   <span className="capitalize">{weatherData.description}</span>
                   <span className="text-white/40">|</span>
-                  <span className="text-[10px] text-[#CCFF00]/80 font-bold bg-[#CCFF00]/5 px-2 py-0.5 rounded-full">
+                  <span className="text-[10px] text-lime-400/80 font-bold bg-lime-400/5 px-2 py-0.5 rounded-full">
                     {weatherData.source}
                   </span>
                 </div>
@@ -230,7 +230,7 @@ const HarvestGuardDashboard = ({ isInline = false, onBack = null, onAddBatchClic
             variant="secondary"
             size="sm"
             onClick={exportCSV}
-            leftIcon={<Download size={16} className="text-[#CCFF00]" />}
+            leftIcon={<Download size={16} className="text-lime-400" />}
           >
             Export CSV
           </Button>
@@ -238,7 +238,7 @@ const HarvestGuardDashboard = ({ isInline = false, onBack = null, onAddBatchClic
             variant="secondary"
             size="sm"
             onClick={exportData}
-            leftIcon={<Download size={16} className="text-[#CCFF00]" />}
+            leftIcon={<Download size={16} className="text-lime-400" />}
           >
             Backup JSON
           </Button>
@@ -247,7 +247,7 @@ const HarvestGuardDashboard = ({ isInline = false, onBack = null, onAddBatchClic
 
       {/* Gamification / Badges */}
       <div className="mb-12">
-        <h2 className="text-xl font-extrabold text-white mb-4 flex items-center tracking-tight"><Award className="mr-2 text-[#CCFF00]" /> Achievements</h2>
+        <h2 className="text-xl font-extrabold text-white mb-4 flex items-center tracking-tight"><Award className="mr-2 text-lime-400" /> Achievements</h2>
         {badges.length === 0 ? (
           <p className="text-white/50 bg-white/5 border border-white/5 p-4 rounded-2xl text-sm">No badges earned yet. Register your first crop batch!</p>
         ) : (
@@ -265,7 +265,7 @@ const HarvestGuardDashboard = ({ isInline = false, onBack = null, onAddBatchClic
       {/* Crop Batches Inventory */}
       <div>
         <div className="flex items-center justify-between mb-6">
-          <h2 className="text-2xl font-extrabold text-white flex items-center tracking-tight"><List className="mr-2 text-[#CCFF00]" /> Crop Inventory</h2>
+          <h2 className="text-2xl font-extrabold text-white flex items-center tracking-tight"><List className="mr-2 text-lime-400" /> Crop Inventory</h2>
           <Button 
             variant="primary"
             size="md"
@@ -284,10 +284,10 @@ const HarvestGuardDashboard = ({ isInline = false, onBack = null, onAddBatchClic
         ) : (
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             {batches.map(batch => (
-              <div key={batch.id} className="bg-white/5 border border-white/10 p-6 rounded-[24px] relative overflow-hidden group hover:border-[#CCFF00]/40 hover:bg-white/10 transition-all duration-300 shadow-md">
-                <div className={`absolute top-0 right-0 w-2.5 h-full ${batch.status === 'active' ? 'bg-[#CCFF00]' : 'bg-white/20'} transition-colors`} />
+              <div key={batch.id} className="bg-white/5 border border-white/10 p-6 rounded-[24px] relative overflow-hidden group hover:border-lime-400/40 hover:bg-white/10 transition-all duration-300 shadow-md">
+                <div className={`absolute top-0 right-0 w-2.5 h-full ${batch.status === 'active' ? 'bg-lime-400' : 'bg-white/20'} transition-colors`} />
                 <h3 className="text-xl font-extrabold text-white capitalize mb-1 tracking-tight">{batch.cropType}</h3>
-                <p className="text-[#CCFF00] font-extrabold text-lg mb-4">{batch.weight} kg</p>
+                <p className="text-lime-400 font-extrabold text-lg mb-4">{batch.weight} kg</p>
                 
                 <div className="space-y-2.5 text-sm text-white/70">
                   <p><span className="text-white/40 font-medium">Location:</span> {batch.district}</p>
@@ -316,7 +316,7 @@ const HarvestGuardDashboard = ({ isInline = false, onBack = null, onAddBatchClic
   }
 
   return (
-    <div className="min-h-screen bg-carbon pt-24 pb-16 px-4 lg:px-12">
+    <div className="min-h-screen bg-carbon pt-12 pb-8 sm:pt-16 sm:pb-12 px-4 lg:px-12">
       {dashboardContent}
     </div>
   );

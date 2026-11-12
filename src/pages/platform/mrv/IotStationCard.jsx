@@ -27,7 +27,7 @@ export function IotStationCard({
   setLeftTab
 }) {
   return (
-    <div className="bg-[#080F0B] registry-border p-8 rounded-[2rem] shadow-[0_0_30px_rgba(0,200,83,0.05)]">
+    <div className="bg-bg-canvas registry-border p-8 rounded-[2rem] shadow-[0_0_30px_rgba(0,200,83,0.05)]">
       {/* Header */}
       <div className="flex flex-col md:flex-row justify-between md:items-center mb-6 gap-4">
         <div>
@@ -71,7 +71,7 @@ export function IotStationCard({
       {/* Metric cards */}
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
         {/* Temp */}
-        <div className="p-5 bg-[#040A06] border border-emerald/10 rounded-xl relative group overflow-hidden transition-all duration-300 hover:border-cyan-500/30">
+        <div className="p-5 bg-bg-canvas border border-emerald/10 rounded-xl relative group overflow-hidden transition-all duration-300 hover:border-cyan-500/30">
           <div className="flex justify-between items-center mb-2">
             <span className="font-mono text-[9px] text-mist/50 uppercase tracking-wider">Temperature</span>
             <Thermometer className="w-3.5 h-3.5 text-cyan-400" />
@@ -86,7 +86,7 @@ export function IotStationCard({
         </div>
 
         {/* Hum */}
-        <div className="p-5 bg-[#040A06] border border-emerald/10 rounded-xl relative group overflow-hidden transition-all duration-300 hover:border-cyan-500/30">
+        <div className="p-5 bg-bg-canvas border border-emerald/10 rounded-xl relative group overflow-hidden transition-all duration-300 hover:border-cyan-500/30">
           <div className="flex justify-between items-center mb-2">
             <span className="font-mono text-[9px] text-mist/50 uppercase tracking-wider">Humidity</span>
             <Droplets className="w-3.5 h-3.5 text-cyan-400" />
@@ -102,7 +102,7 @@ export function IotStationCard({
 
         {/* Air Quality */}
         <div
-          className={`p-5 bg-[#040A06] border rounded-xl relative group overflow-hidden transition-all duration-500 ${
+          className={`p-5 bg-bg-canvas border rounded-xl relative group overflow-hidden transition-all duration-500 ${
             metrics.air !== null && deviceConnected ? 'border-emerald/15' : 'border-emerald/10'
           }`}
         >
@@ -125,7 +125,7 @@ export function IotStationCard({
 
         {/* CO2 */}
         <div
-          className={`p-5 bg-[#040A06] border rounded-xl relative group overflow-hidden transition-all duration-500 ${
+          className={`p-5 bg-bg-canvas border rounded-xl relative group overflow-hidden transition-all duration-500 ${
             metrics.co2 !== null && deviceConnected ? 'border-emerald/15' : 'border-emerald/10'
           }`}
         >
@@ -150,7 +150,7 @@ export function IotStationCard({
       {/* Historical Trends Visualized */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         {/* Chart Area */}
-        <div className="lg:col-span-2 p-6 bg-[#040A06] border border-emerald/10 rounded-2xl flex flex-col justify-between h-[420px]">
+        <div className="lg:col-span-2 p-6 bg-bg-canvas border border-emerald/10 rounded-2xl flex flex-col justify-between h-[420px]">
           <div className="flex flex-col sm:flex-row justify-between sm:items-center gap-3 mb-4">
             <span className="text-xs font-mono font-bold text-white tracking-wider flex items-center">
               <Activity className="w-4 h-4 text-emerald mr-1.5 animate-pulse" />
@@ -179,7 +179,7 @@ export function IotStationCard({
         </div>
 
         {/* Log stream / Mock Stream Panel */}
-        <div className="p-6 bg-[#040A06] border border-emerald/10 rounded-2xl flex flex-col justify-between h-[420px]">
+        <div className="p-6 bg-bg-canvas border border-emerald/10 rounded-2xl flex flex-col justify-between h-[420px]">
           <div className="flex justify-between items-center border-b border-emerald/10 pb-3 mb-3">
             <span className="text-xs font-mono font-bold text-amber tracking-wider">&gt;&gt; LOG STREAM</span>
             <Tabs

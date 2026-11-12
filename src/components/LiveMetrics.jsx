@@ -131,7 +131,7 @@ const LiveMetrics = () => {
   return (
     <section 
       ref={containerRef} 
-      className="w-full bg-[#050C07] text-white py-24 px-6 lg:px-12 relative overflow-hidden border-t border-white/10"
+      className="w-full bg-bg-canvas text-white py-10 md:py-16 px-6 lg:px-12 relative overflow-hidden border-t border-white/10"
     >
       {/* Background ambient radial illumination */}
       <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[800px] h-[500px] bg-emerald-950/20 blur-[140px] pointer-events-none rounded-full" />

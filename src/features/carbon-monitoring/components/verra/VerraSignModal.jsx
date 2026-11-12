@@ -31,13 +31,13 @@ export function VerraSignModal({
       <div className="space-y-4">
         {/* Target Hash Info */}
         <div className={`p-4 rounded-2xl border text-xs space-y-2 ${
-          isLight ? 'bg-[#F8FAFC] border-[#E2E8F0]' : 'bg-white/5 border-white/5'
+          isLight ? 'bg-bg-canvas border-border-subtle' : 'bg-white/5 border-white/5'
         }`}>
           <div className="flex items-center justify-between text-[11px]">
-            <span className={`font-bold ${isLight ? 'text-[#64748B]' : 'text-mist'}`}>Target Record ID:</span>
+            <span className={`font-bold ${isLight ? 'text-fg-secondary' : 'text-mist'}`}>Target Record ID:</span>
             <span className="font-mono text-emerald font-bold">{selectedJob?.id || 'res_sundarbans_001'}</span>
           </div>
-          <p className={`text-[10px] leading-relaxed ${isLight ? 'text-[#475569]' : 'text-mist'}`}>
+          <p className={`text-[10px] leading-relaxed ${isLight ? 'text-fg-secondary' : 'text-mist'}`}>
             Signing this calculation attests to the sensor telemetry, conformal uncertainty deductions, and IPCC Tier-3 compliance. Signatures are verified with Ed25519 and permanently anchored to the provenance block.
           </p>
         </div>
@@ -69,7 +69,7 @@ export function VerraSignModal({
         {/* Form */}
         <form onSubmit={handleSubmitSignature} className="space-y-4 text-xs">
           <div className="space-y-1.5">
-            <label htmlFor="validator_id" className={`font-bold block ${isLight ? 'text-[#0F291B]' : 'text-white'}`}>
+            <label htmlFor="validator_id" className={`font-bold block ${isLight ? 'text-fg-primary' : 'text-white'}`}>
               Validator ID
             </label>
             <Input
@@ -85,7 +85,7 @@ export function VerraSignModal({
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div className="space-y-1.5">
-              <label htmlFor="validator_name" className={`font-bold block ${isLight ? 'text-[#0F291B]' : 'text-white'}`}>
+              <label htmlFor="validator_name" className={`font-bold block ${isLight ? 'text-fg-primary' : 'text-white'}`}>
                 Validator Full Name
               </label>
               <Input
@@ -99,7 +99,7 @@ export function VerraSignModal({
             </div>
 
             <div className="space-y-1.5">
-              <label htmlFor="organization" className={`font-bold block ${isLight ? 'text-[#0F291B]' : 'text-white'}`}>
+              <label htmlFor="organization" className={`font-bold block ${isLight ? 'text-fg-primary' : 'text-white'}`}>
                 Accredited Organization
               </label>
               <Input
@@ -115,7 +115,7 @@ export function VerraSignModal({
 
           <div className="space-y-1.5">
             <div className="flex items-center justify-between">
-              <label htmlFor="private_key_hex" className={`font-bold block ${isLight ? 'text-[#0F291B]' : 'text-white'}`}>
+              <label htmlFor="private_key_hex" className={`font-bold block ${isLight ? 'text-fg-primary' : 'text-white'}`}>
                 Ed25519 Private Key (Hex, 64 characters)
               </label>
               <Button
@@ -148,7 +148,7 @@ export function VerraSignModal({
                 className="absolute right-2 top-1/2 -translate-y-1/2 !min-h-0 !h-7 !w-7"
               />
             </div>
-            <p className={`text-[10px] ${isLight ? 'text-[#64748B]' : 'text-mist'}`}>
+            <p className={`text-[10px] ${isLight ? 'text-fg-secondary' : 'text-mist'}`}>
               Private key never leaves the client/session. Only the signature and public key are affixed.
             </p>
           </div>

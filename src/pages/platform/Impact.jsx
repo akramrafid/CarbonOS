@@ -63,7 +63,7 @@ const Impact = () => {
   };
 
   return (
-    <div className="bg-[#080F0B] min-h-screen text-white pt-28 pb-24 px-6 lg:px-12 relative overflow-hidden">
+    <div className="bg-bg-canvas min-h-screen text-white pt-16 pb-12 px-6 lg:px-12 relative overflow-hidden">
       {/* Decorative background glows */}
       <div className="absolute top-20 left-10 w-96 h-96 bg-emerald/5 rounded-full filter blur-[100px] pointer-events-none"></div>
       <div className="absolute bottom-20 right-10 w-[450px] h-[450px] bg-emerald/10 rounded-full filter blur-[120px] pointer-events-none"></div>
@@ -72,8 +72,8 @@ const Impact = () => {
       {toast.show && (
         <div className={`fixed bottom-6 right-6 z-50 flex items-center space-x-3 px-4.5 py-3.5 rounded-2xl shadow-xl border text-white transition-all transform duration-300 animate-fade-in ${
           toast.type === 'success' 
-            ? 'bg-[#0D2B1A] border-[#00C853]/30' 
-            : 'bg-[#1E293B] border-[#E2E8F0]/20'
+            ? 'bg-bg-surface border-border-strong/30' 
+            : 'bg-bg-elevated border-border-subtle/20'
         }`}>
           <Info className="w-5 h-5 text-sky-400" />
           <span className="font-sans font-semibold text-xs tracking-wide">{toast.message}</span>

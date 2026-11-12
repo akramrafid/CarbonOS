@@ -10,14 +10,14 @@ export const EsgHelpPanel = (props) => {
   } = props;
 
   return (
-          <div className="bg-white border border-[#E2E8F0] rounded-3xl p-6 lg:p-8 shadow-sm space-y-6">
+          <div className="bg-white border border-border-subtle rounded-3xl p-6 lg:p-8 shadow-sm space-y-6">
             <div>
-              <h2 className="font-sans font-bold text-3xl text-[#0F291B]">FAQ & GHG Guidelines</h2>
-              <p className="text-sm text-[#64748B] mt-1 font-sans">Understand Scope definitions and carbon tracking calculations.</p>
+              <h2 className="font-sans font-bold text-3xl text-fg-primary">FAQ & GHG Guidelines</h2>
+              <p className="text-sm text-fg-secondary mt-1 font-sans">Understand Scope definitions and carbon tracking calculations.</p>
             </div>
 
             {/* Accordion */}
-            <div className="space-y-4 border-t border-[#F1F5F9] pt-4">
+            <div className="space-y-4 border-t border-border-subtle pt-4">
               {[
                 {
                   q: "What is Scope 1 Direct Emissions?",
@@ -32,18 +32,18 @@ export const EsgHelpPanel = (props) => {
                   a: "Scope 3 emissions are a consequence of the activities of the company, but occur from sources not owned or controlled by it. Examples include employee business commutes, supplier raw material logistics (plastic, glass), and third party flights."
                 }
               ].map((item, idx) => (
-                <div key={idx} className="border border-[#E2E8F0] rounded-xl overflow-hidden">
+                <div key={idx} className="border border-border-subtle rounded-xl overflow-hidden">
                   <Button
                     variant="ghost"
                     size="sm"
                     onClick={() => toggleFaq(idx)}
-                    className="w-full flex justify-between items-center p-4 bg-[#F8F9FA] text-left text-xs font-sans font-bold text-[#0F291B] rounded-none h-auto min-h-0"
-                    rightIcon={faqOpen[idx] ? <ChevronUp className="w-4 h-4 text-[#94A3B8]" /> : <ChevronDown className="w-4 h-4 text-[#94A3B8]" />}
+                    className="w-full flex justify-between items-center p-4 bg-bg-muted text-left text-xs font-sans font-bold text-fg-primary rounded-none h-auto min-h-0"
+                    rightIcon={faqOpen[idx] ? <ChevronUp className="w-4 h-4 text-fg-secondary" /> : <ChevronDown className="w-4 h-4 text-fg-secondary" />}
                   >
                     <span>{item.q}</span>
                   </Button>
                   {faqOpen[idx] && (
-                    <div className="p-4 bg-white border-t border-[#E2E8F0] text-xs font-sans text-[#64748B] leading-relaxed">
+                    <div className="p-4 bg-white border-t border-border-subtle text-xs font-sans text-fg-secondary leading-relaxed">
                       {item.a}
                     </div>
                   )}
@@ -52,9 +52,9 @@ export const EsgHelpPanel = (props) => {
             </div>
 
             {/* Contact Support */}
-            <div className="border-t border-[#F1F5F9] pt-6 space-y-4">
-              <h3 className="font-sans font-bold text-sm text-[#0F291B]">Need help with auditing?</h3>
-              <p className="text-xs text-[#64748B] font-sans">Our certified ESG specialists are available to review your corporate data streams.</p>
+            <div className="border-t border-border-subtle pt-6 space-y-4">
+              <h3 className="font-sans font-bold text-sm text-fg-primary">Need help with auditing?</h3>
+              <p className="text-xs text-fg-secondary font-sans">Our certified ESG specialists are available to review your corporate data streams.</p>
               <Button 
                 variant="primary"
                 size="sm"

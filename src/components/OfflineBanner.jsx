@@ -98,7 +98,7 @@ export const OfflineBanner = () => {
       <div
         className={`w-full z-[99] px-4 py-2.5 transition-all duration-300 font-sans border-b shadow-sm ${
           isLight
-            ? 'bg-emerald-50 border-emerald-200 text-[#166534]'
+            ? 'bg-emerald-50 border-emerald-200 text-accent'
             : 'bg-emerald/15 border-emerald/30 text-emerald'
         }`}
         role="status"
@@ -107,7 +107,7 @@ export const OfflineBanner = () => {
         <div className="max-w-7xl mx-auto flex items-center justify-between text-xs sm:text-sm font-medium">
           <div className="flex items-center space-x-2.5">
             <span className="p-1 rounded-full bg-emerald-500/20">
-              <Wifi size={14} className={isLight ? 'text-[#166534]' : 'text-emerald'} />
+              <Wifi size={14} className={isLight ? 'text-accent' : 'text-emerald'} />
             </span>
             <span>
               <strong>Connection restored:</strong> Sovereign ledger and telemetry synchronization active.

@@ -60,7 +60,7 @@ const CarbonRegistry = () => {
   } = state;
 
   return (
-    <div className="pt-24 pb-20 min-h-screen bg-[#040906] text-white selection:bg-[#00C853] selection:text-[#040906]">
+    <div className="pt-16 pb-12 min-h-screen bg-bg-canvas text-white selection:bg-accent selection:text-fg-primary">
       <div className="fixed inset-0 bg-[linear-gradient(to_right,#00C85308_1px,transparent_1px),linear-gradient(to_bottom,#00C85308_1px,transparent_1px)] bg-[size:3.5rem_3.5rem] [mask-image:radial-gradient(ellipse_80%_60%_at_50%_10%,#000_60%,transparent_100%)] pointer-events-none z-0"></div>
 
       <div className="max-w-[1720px] mx-auto px-4 sm:px-8 relative z-10">
@@ -72,7 +72,7 @@ const CarbonRegistry = () => {
         />
 
         {/* Sub-Navigation Tabs */}
-        <div className="overflow-x-auto pb-4 mb-6 border-b border-[#152B1D] scrollbar-none">
+        <div className="overflow-x-auto pb-4 mb-6 border-b border-border-subtle scrollbar-none">
           <Tabs
             tabs={[
               { id: 'overview', label: '1. Overview & dMRV Ingestion Hub', icon: <Activity size={14} /> },
@@ -83,7 +83,7 @@ const CarbonRegistry = () => {
             ]}
             activeTab={activeTab}
             onChange={setActiveTab}
-            className="bg-[#08130C] border-[#152B1D]"
+            className="bg-bg-elevated border-border-subtle"
           />
         </div>
 

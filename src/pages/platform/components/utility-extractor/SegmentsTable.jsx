@@ -13,7 +13,7 @@ export function SegmentsTable({
     <div className="space-y-4">
       <div className="flex justify-between items-center">
         <div className="flex items-center space-x-2">
-          <Sparkles className="w-4 h-4 text-[#00C853]" />
+          <Sparkles className="w-4 h-4 text-accent" />
           <h3 className="font-sans font-bold text-base">
             Detected Utility Segments ({segments.length} Line Items)
           </h3>
@@ -21,7 +21,7 @@ export function SegmentsTable({
 
         <div className="text-[11px] font-mono text-gray-400 flex items-center space-x-2">
           {auditSeal ? (
-            <span className="px-2 py-0.5 rounded-full bg-emerald-500/20 text-[#00E676] border border-emerald-500/40 flex items-center gap-1 font-bold">
+            <span className="px-2 py-0.5 rounded-full bg-emerald-500/20 text-accent-hover border border-emerald-500/40 flex items-center gap-1 font-bold">
               <Lock className="w-3 h-3" />
               {auditSeal}
             </span>
@@ -38,7 +38,7 @@ export function SegmentsTable({
         <table className="w-full text-left text-xs font-sans">
           <thead
             className={`text-[10px] font-mono uppercase tracking-wider ${
-              isLight ? 'bg-[#F2F5F2] text-gray-600' : 'bg-[#040A06] text-gray-400'
+              isLight ? 'bg-bg-muted text-gray-600' : 'bg-bg-canvas text-gray-400'
             }`}
           >
             <tr>
@@ -134,7 +134,7 @@ export function SegmentsTable({
                           ? 'bg-red-500/15 text-red-400 border-red-500/30'
                           : isCorrected
                           ? 'bg-amber-500/15 text-amber-400 border-amber-500/30'
-                          : 'bg-[#00C853]/15 text-[#00E676] border-[#00C853]/30'
+                          : 'bg-accent/15 text-accent-hover border-border-strong/30'
                       }`}
                     >
                       {isRejected ? 'REJECTED' : isCorrected ? 'MODIFIED' : 'AI EXTRACTED'}

@@ -28,7 +28,7 @@ export function EditSegmentModal({
             value={editingSegment.name}
             onChange={(e) => setEditingSegment({ ...editingSegment, name: e.target.value })}
             required
-            className="w-full p-2.5 rounded-xl bg-[#040A06] border border-white/10 text-white focus:outline-none focus:border-amber-400"
+            className="w-full p-2.5 rounded-xl bg-bg-canvas border border-white/10 text-white focus:outline-none focus:border-amber-400"
           />
         </div>
 
@@ -41,7 +41,7 @@ export function EditSegmentModal({
               value={editingSegment.qty}
               onChange={(e) => setEditingSegment({ ...editingSegment, qty: e.target.value })}
               required
-              className="w-full p-2.5 rounded-xl bg-[#040A06] border border-white/10 text-white focus:outline-none focus:border-amber-400 font-mono"
+              className="w-full p-2.5 rounded-xl bg-bg-canvas border border-white/10 text-white focus:outline-none focus:border-amber-400 font-mono"
             />
           </div>
           <div>
@@ -51,7 +51,7 @@ export function EditSegmentModal({
               value={editingSegment.unit}
               onChange={(e) => setEditingSegment({ ...editingSegment, unit: e.target.value })}
               required
-              className="w-full p-2.5 rounded-xl bg-[#040A06] border border-white/10 text-white focus:outline-none focus:border-amber-400 font-mono"
+              className="w-full p-2.5 rounded-xl bg-bg-canvas border border-white/10 text-white focus:outline-none focus:border-amber-400 font-mono"
             />
           </div>
           <div>
@@ -62,7 +62,7 @@ export function EditSegmentModal({
               value={editingSegment.factor ?? ''}
               onChange={(e) => setEditingSegment({ ...editingSegment, factor: e.target.value })}
               required
-              className="w-full p-2.5 rounded-xl bg-[#040A06] border border-white/10 text-white focus:outline-none focus:border-amber-400 font-mono text-emerald-400 font-bold"
+              className="w-full p-2.5 rounded-xl bg-bg-canvas border border-white/10 text-white focus:outline-none focus:border-amber-400 font-mono text-emerald-400 font-bold"
             />
           </div>
         </div>
@@ -74,7 +74,7 @@ export function EditSegmentModal({
             step="any"
             value={editingSegment.cost_bdt}
             onChange={(e) => setEditingSegment({ ...editingSegment, cost_bdt: e.target.value })}
-            className="w-full p-2.5 rounded-xl bg-[#040A06] border border-white/10 text-white focus:outline-none focus:border-amber-400 font-mono"
+            className="w-full p-2.5 rounded-xl bg-bg-canvas border border-white/10 text-white focus:outline-none focus:border-amber-400 font-mono"
           />
         </div>
 
@@ -88,7 +88,7 @@ export function EditSegmentModal({
             onChange={(e) => setEditingSegment({ ...editingSegment, reason: e.target.value })}
             placeholder="e.g., Physical meter verification discrepancy; adjusted peak tariff factor"
             required
-            className="w-full p-2.5 rounded-xl bg-[#040A06] border border-amber-500/40 text-white focus:outline-none focus:border-amber-400"
+            className="w-full p-2.5 rounded-xl bg-bg-canvas border border-amber-500/40 text-white focus:outline-none focus:border-amber-400"
           />
         </div>
 

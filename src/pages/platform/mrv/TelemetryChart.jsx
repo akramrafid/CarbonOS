@@ -6,7 +6,7 @@ export const TelemetryChart = ({ history, metricType }) => {
 
   if (data.length < 2) {
     return (
-      <div className="h-[180px] flex flex-col items-center justify-center border border-dashed border-emerald/10 rounded-xl bg-[#040A06]/80 p-4">
+      <div className="h-[180px] flex flex-col items-center justify-center border border-dashed border-emerald/10 rounded-xl bg-bg-canvas/80 p-4">
         <Activity className="w-8 h-8 text-emerald/30 animate-pulse mb-2" />
         <span className="text-xs text-mist/40 font-mono">Waiting for additional telemetry logs...</span>
       </div>

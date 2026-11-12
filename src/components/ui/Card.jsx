@@ -26,13 +26,13 @@ export const Card = React.forwardRef(function Card(
 
   const variantClasses = {
     default:
-      'bg-carbon-surface border border-carbon-border text-registry dark:bg-[#0D1812] dark:border-[#1E3326] dark:text-[#E2ECE5]',
+      'bg-carbon-surface border border-carbon-border text-registry dark:bg-bg-surface dark:border-border-subtle dark:text-fg-primary',
     raised:
-      'bg-carbon-surface-raised border border-carbon-border/80 shadow-md text-registry dark:bg-[#13241B] dark:border-[#2A4736] dark:text-[#E2ECE5]',
+      'bg-carbon-surface-raised border border-carbon-border/80 shadow-md text-registry dark:bg-bg-elevated dark:border-border-subtle dark:text-fg-primary',
     subtle:
-      'bg-carbon-surface/50 border border-carbon-border/40 text-registry dark:bg-[#09120D] dark:border-[#14231A] dark:text-[#E2ECE5]',
+      'bg-carbon-surface/50 border border-carbon-border/40 text-registry dark:bg-bg-muted dark:border-border-subtle dark:text-fg-primary',
     featured:
-      'bg-gradient-to-b from-carbon-surface to-carbon-surface-raised border border-emerald/30 shadow-lg text-registry dark:from-[#0D1812] dark:to-[#13241B] dark:border-emerald/40'
+      'bg-gradient-to-b from-carbon-surface to-carbon-surface-raised border border-emerald/30 shadow-lg text-registry dark:from-bg-surface dark:to-bg-elevated dark:border-emerald/40'
   }[variant] || '';
 
   const interactiveClasses = interactive

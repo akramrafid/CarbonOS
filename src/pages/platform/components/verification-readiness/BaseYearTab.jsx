@@ -20,11 +20,11 @@ export function BaseYearTab({
   return (
     <div
       className={`rounded-3xl p-6 sm:p-8 border shadow-xl space-y-6 ${
-        isLight ? 'bg-white border-[#E2E8E3]' : 'bg-[#08130C] border-[#152B1D]'
+        isLight ? 'bg-white border-border-subtle' : 'bg-bg-elevated border-border-subtle'
       }`}
     >
       <div>
-        <div className="flex items-center space-x-2 text-[10px] font-mono uppercase tracking-widest text-[#00C853] font-bold">
+        <div className="flex items-center space-x-2 text-[10px] font-mono uppercase tracking-widest text-accent font-bold">
           <span>GHG Protocol Corporate Standard Chapter 5</span>
         </div>
         <h3 className="font-bold text-lg mt-0.5">Base Year Emissions Recalculation Policy</h3>
@@ -44,7 +44,7 @@ export function BaseYearTab({
                 value={baseYear}
                 onChange={(e) => setBaseYear(parseInt(e.target.value) || 2024)}
                 disabled={isAuditorLocked}
-                className="w-full text-xs font-mono p-2.5 rounded-xl border border-white/10 bg-black/30 text-white focus:outline-none focus:border-[#00C853]"
+                className="w-full text-xs font-mono p-2.5 rounded-xl border border-white/10 bg-black/30 text-white focus:outline-none focus:border-border-strong"
               />
             </div>
             <div>
@@ -54,7 +54,7 @@ export function BaseYearTab({
                 value={baseYearEmissions}
                 onChange={(e) => setBaseYearEmissions(parseFloat(e.target.value) || 0)}
                 disabled={isAuditorLocked}
-                className="w-full text-xs font-mono p-2.5 rounded-xl border border-white/10 bg-black/30 text-white focus:outline-none focus:border-[#00C853]"
+                className="w-full text-xs font-mono p-2.5 rounded-xl border border-white/10 bg-black/30 text-white focus:outline-none focus:border-border-strong"
               />
             </div>
           </div>
@@ -67,7 +67,7 @@ export function BaseYearTab({
               value={structuralChangeTco2e || ''}
               onChange={(e) => setStructuralChangeTco2e(parseFloat(e.target.value) || 0)}
               disabled={isAuditorLocked}
-              className="w-full text-xs font-mono p-2.5 rounded-xl border border-white/10 bg-black/30 text-white focus:outline-none focus:border-[#00C853]"
+              className="w-full text-xs font-mono p-2.5 rounded-xl border border-white/10 bg-black/30 text-white focus:outline-none focus:border-border-strong"
             />
           </div>
 
@@ -78,7 +78,7 @@ export function BaseYearTab({
               value={structuralChangeReason}
               onChange={(e) => setStructuralChangeReason(e.target.value)}
               disabled={isAuditorLocked}
-              className="w-full text-xs font-sans p-2.5 rounded-xl border border-white/10 bg-black/30 text-white focus:outline-none focus:border-[#00C853]"
+              className="w-full text-xs font-sans p-2.5 rounded-xl border border-white/10 bg-black/30 text-white focus:outline-none focus:border-border-strong"
             />
           </div>
 

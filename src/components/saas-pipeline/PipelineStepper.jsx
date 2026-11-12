@@ -23,10 +23,10 @@ export function PipelineStepper({ steps, activeStep, onStepChange }) {
               onClick={() => onStepChange(idx)}
               className={`w-11 h-11 rounded-full border-2 flex items-center justify-center transition-all duration-300 focus:outline-none cursor-pointer z-10 ${
                 isActive 
-                  ? 'bg-[#040A06] border-emerald text-emerald shadow-[0_0_20px_rgba(0,200,83,0.4)] scale-110' 
+                  ? 'bg-bg-canvas border-emerald text-emerald shadow-[0_0_20px_rgba(0,200,83,0.4)] scale-110' 
                   : isCompleted 
                   ? 'bg-emerald border-emerald text-carbon font-bold' 
-                  : 'bg-[#040A06] border-white/15 text-white/40 hover:border-white/40 hover:scale-105'
+                  : 'bg-bg-canvas border-white/15 text-white/40 hover:border-white/40 hover:scale-105'
               }`}
             >
               {isCompleted ? (

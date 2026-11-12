@@ -10,7 +10,7 @@ export function TieredHeaderCard({
 }) {
   return (
     <Card className={`rounded-3xl p-6 md:p-8 border relative overflow-hidden transition-all ${
-      isLight ? 'bg-white border-[#E2E8F0] shadow-xs' : 'bg-[#08130C] border-[#152B1D]'
+      isLight ? 'bg-white border-border-subtle shadow-xs' : 'bg-bg-elevated border-border-subtle'
     }`}>
       <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-6 relative z-10">
         <div className="max-w-3xl">
@@ -23,11 +23,11 @@ export function TieredHeaderCard({
             </span>
           </div>
           <h2 className={`text-2xl md:text-3xl font-bold font-sans tracking-tight mb-2 ${
-            isLight ? 'text-[#0F291B]' : 'text-white'
+            isLight ? 'text-fg-primary' : 'text-white'
           }`}>
             Uncertainty-Tiered Monitoring & UAV LiDAR Dispatch
           </h2>
-          <p className={`text-xs md:text-sm leading-relaxed ${isLight ? 'text-[#64748B]' : 'text-mist'}`}>
+          <p className={`text-xs md:text-sm leading-relaxed ${isLight ? 'text-fg-secondary' : 'text-mist'}`}>
             Satellite SAR & optical imagery provide nationwide temporal screening. Parcels where relative conformal uncertainty <span className="font-mono font-bold text-emerald">W = (C_upper90 - C_lower90) / C_est &gt; 0.35</span> (35%) are automatically escalated to this queue. Dispatching targeted high-density drone LiDAR surveys tightens the error bound, prevents Verra VM0047 precision discount penalties, and directly recalibrates sovereign biomass models.
           </p>
         </div>

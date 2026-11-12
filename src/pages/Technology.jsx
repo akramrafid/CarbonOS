@@ -19,10 +19,10 @@ const Technology = () => {
   ];
 
   return (
-    <div className="bg-[#F8FAFC] font-sans pt-24 pb-16">
+    <div className="bg-bg-canvas font-sans pt-12 pb-8 sm:pt-16 sm:pb-12">
       
       {/* SECTION 1: HERO */}
-      <section className="pb-16 px-4 sm:px-6 lg:px-8 bg-white border-b border-[#E2E8F0]">
+      <section className="pb-16 px-4 sm:px-6 lg:px-8 bg-white border-b border-border-subtle">
         <div className="max-w-7xl mx-auto text-center">
           <PageHeader
             badge="// PITCH POINT: Hardware-agnostic, LoRaWAN-native"
@@ -30,30 +30,30 @@ const Technology = () => {
             description="Carbon Zero BD operates a full-stack MRV infrastructure — combining ground-level IoT sensors with satellite remote sensing and AI-powered analytics. Processing 50,000+ readings/hour."
             align="center"
             className="border-none mb-12 pb-0"
-            titleClassName="!text-[48px] !leading-tight !font-bold !text-[#0F172A] !tracking-[-0.02em] max-w-4xl mx-auto"
+            titleClassName="!text-[48px] !leading-tight !font-bold !text-fg-primary !tracking-[-0.02em] max-w-4xl mx-auto"
           />
           
           {/* Schematic Diagram placeholder */}
-          <div className="w-full max-w-5xl mx-auto bg-[#0F172A] rounded-2xl p-8 flex flex-col md:flex-row items-center justify-between space-y-4 md:space-y-0 text-white font-mono text-sm shadow-xl">
-            <div className="flex flex-col items-center"><div className="w-12 h-12 bg-[#16A34A]/20 rounded-lg border border-[#16A34A] mb-2 flex items-center justify-center">📡</div><span>Field Sensors</span></div>
-            <div className="text-[#16A34A]">→</div>
+          <div className="w-full max-w-5xl mx-auto bg-slate-900 rounded-2xl p-8 flex flex-col md:flex-row items-center justify-between space-y-4 md:space-y-0 text-white font-mono text-sm shadow-xl">
+            <div className="flex flex-col items-center"><div className="w-12 h-12 bg-accent/20 rounded-lg border border-border-strong mb-2 flex items-center justify-center">📡</div><span>Field Sensors</span></div>
+            <div className="text-accent">→</div>
             <div className="flex flex-col items-center"><div className="w-12 h-12 bg-white/10 rounded-lg border border-white/20 mb-2 flex items-center justify-center">📶</div><span>Edge Gateway</span></div>
-            <div className="text-[#16A34A]">→</div>
+            <div className="text-accent">→</div>
             <div className="flex flex-col items-center"><div className="w-12 h-12 bg-white/10 rounded-lg border border-white/20 mb-2 flex items-center justify-center">☁️</div><span>Cloud Backend</span></div>
-            <div className="text-[#16A34A]">↔</div>
+            <div className="text-accent">↔</div>
             <div className="flex flex-col items-center"><div className="w-12 h-12 bg-blue-500/20 rounded-lg border border-blue-500/50 mb-2 flex items-center justify-center">🛰️</div><span>Satellites</span></div>
-            <div className="text-[#16A34A]">→</div>
+            <div className="text-accent">→</div>
             <div className="flex flex-col items-center"><div className="w-12 h-12 bg-amber-500/20 rounded-lg border border-amber-500/50 mb-2 flex items-center justify-center">📝</div><span>Registry</span></div>
           </div>
         </div>
       </section>
 
       {/* SECTION 2: GROUND-LEVEL IoT DEVICES */}
-      <section className="py-20 px-4 sm:px-6 lg:px-8">
+      <section className="py-10 md:py-16 px-4 sm:px-6 lg:px-8">
         <div className="max-w-7xl mx-auto">
           <div className="mb-12 text-center">
-            <h2 className="text-[32px] font-bold text-[#0F172A] mb-4">Ground-Level IoT Sensors</h2>
-            <p className="text-[#475569] max-w-2xl mx-auto">Continuous, tamper-proof environmental data collection across 5 agro-ecological zones.</p>
+            <h2 className="text-[32px] font-bold text-fg-primary mb-4">Ground-Level IoT Sensors</h2>
+            <p className="text-fg-secondary max-w-2xl mx-auto">Continuous, tamper-proof environmental data collection across 5 agro-ecological zones.</p>
           </div>
           
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
@@ -65,40 +65,40 @@ const Technology = () => {
       </section>
 
       {/* SECTION 3: SATELLITE LAYER */}
-      <section className="py-20 px-4 sm:px-6 lg:px-8 bg-white border-y border-[#E2E8F0] overflow-hidden">
+      <section className="py-10 md:py-16 px-4 sm:px-6 lg:px-8 bg-white border-y border-border-subtle overflow-hidden">
         <div className="max-w-7xl mx-auto">
           <div className="mb-12">
-            <h2 className="text-[32px] font-bold text-[#0F172A] mb-4">Satellite & Remote Sensing Layer</h2>
-            <p className="text-[#475569] max-w-2xl">Cross-referencing ground truth data with orbital imagery for landscape-scale verification.</p>
+            <h2 className="text-[32px] font-bold text-fg-primary mb-4">Satellite & Remote Sensing Layer</h2>
+            <p className="text-fg-secondary max-w-2xl">Cross-referencing ground truth data with orbital imagery for landscape-scale verification.</p>
           </div>
           <SatelliteLayer />
         </div>
       </section>
 
       {/* SECTION 4: SOFTWARE STACK */}
-      <section className="py-20 px-4 sm:px-6 lg:px-8">
+      <section className="py-10 md:py-16 px-4 sm:px-6 lg:px-8">
         <div className="max-w-7xl mx-auto">
           <div className="mb-12 text-center">
-            <h2 className="text-[32px] font-bold text-[#0F172A] mb-4">Software & AI Stack</h2>
-            <p className="text-[#475569] max-w-2xl mx-auto">An enterprise-grade, scalable architecture processing massive geospatial datasets.</p>
+            <h2 className="text-[32px] font-bold text-fg-primary mb-4">Software & AI Stack</h2>
+            <p className="text-fg-secondary max-w-2xl mx-auto">An enterprise-grade, scalable architecture processing massive geospatial datasets.</p>
           </div>
           <TechStackDiagram />
         </div>
       </section>
 
       {/* SECTION 5: ROADMAP */}
-      <section className="py-20 px-4 sm:px-6 lg:px-8 bg-white border-t border-[#E2E8F0]">
+      <section className="py-10 md:py-16 px-4 sm:px-6 lg:px-8 bg-white border-t border-border-subtle">
         <div className="max-w-7xl mx-auto">
           <div className="mb-16 text-center">
-            <h2 className="text-[32px] font-bold text-[#0F172A] mb-4">Deployment Roadmap</h2>
-            <p className="text-[#475569] max-w-2xl mx-auto">Our path from regional pilot to national carbon registry.</p>
+            <h2 className="text-[32px] font-bold text-fg-primary mb-4">Deployment Roadmap</h2>
+            <p className="text-fg-secondary max-w-2xl mx-auto">Our path from regional pilot to national carbon registry.</p>
           </div>
           <DeploymentTimeline />
         </div>
       </section>
 
       {/* SECTION 6: CTA */}
-      <section className="py-24 px-4 sm:px-6 lg:px-8 bg-[#0A5C36] text-center">
+      <section className="py-10 md:py-16 px-4 sm:px-6 lg:px-8 bg-accent text-center">
         <div className="max-w-4xl mx-auto">
           <h2 className="text-4xl font-bold text-white mb-8">Ready to integrate your project into Carbon Zero BD?</h2>
           <div className="flex flex-col sm:flex-row justify-center items-center space-y-4 sm:space-y-0 sm:space-x-6">

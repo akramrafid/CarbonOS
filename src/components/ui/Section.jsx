@@ -2,7 +2,7 @@ import React from 'react';
 
 /**
  * Universal Section Container
- * Replaces unconstrained ad-hoc py-24/py-32 with structured design tokens:
+ * Replaces unconstrained ad-hoc py-10 md:py-16/py-10 md:py-16 with structured design tokens:
  * - Brand mode: clamp(2.5rem, 5vw, 5rem) vertical rhythm
  * - Product mode: 16-24px dense module spacing
  * - Standard 12-column grid container with responsive gutters
@@ -17,7 +17,7 @@ export function Section({
   ...props
 }) {
   const modePadding = mode === 'brand'
-    ? 'py-10 sm:py-16 lg:py-20'
+    ? 'py-10 md:py-16'
     : 'py-4 sm:py-6';
 
   const containerWidth = fullWidth
@@ -62,11 +62,11 @@ export function SectionHeader({
     >
       <div className={`flex flex-col gap-1.5 ${centered ? 'items-center max-w-2xl mx-auto' : 'max-w-3xl'}`}>
         {badge && <div className="mb-1">{badge}</div>}
-        <TitleTag className="text-xl sm:text-2xl font-sans font-bold text-registry tracking-tight dark:text-[#E2ECE5]">
+        <TitleTag className="text-xl sm:text-2xl font-sans font-bold text-registry tracking-tight dark:text-fg-primary">
           {title}
         </TitleTag>
         {subtitle && (
-          <p className="text-sm text-mist font-sans leading-relaxed dark:text-[#7A9A85]">
+          <p className="text-sm text-mist font-sans leading-relaxed dark:text-fg-secondary">
             {subtitle}
           </p>
         )}

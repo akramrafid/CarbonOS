@@ -24,7 +24,7 @@ export function AddActivityModal({
       size="lg"
     >
       <form onSubmit={onSubmit} className="space-y-4">
-        <div className="flex items-center space-x-2 text-[10px] font-mono uppercase tracking-widest text-[#00C853] font-bold">
+        <div className="flex items-center space-x-2 text-[10px] font-mono uppercase tracking-widest text-accent font-bold">
           <Plus className="w-4 h-4" />
           <span>New Operational Activity Entry</span>
         </div>
@@ -37,8 +37,8 @@ export function AddActivityModal({
             placeholder="e.g. Backup Generator Diesel Consumption (Stationary)"
             value={newActivity.activityType}
             onChange={(e) => setNewActivity({ ...newActivity, activityType: e.target.value })}
-            className={`w-full text-xs font-sans p-2.5 rounded-xl border focus:outline-none focus:border-[#00C853] ${
-              isLight ? 'bg-slate-50 border-slate-300 text-slate-900' : 'bg-[#040906] border-[#152B1D] text-white'
+            className={`w-full text-xs font-sans p-2.5 rounded-xl border focus:outline-none focus:border-border-strong ${
+              isLight ? 'bg-slate-50 border-slate-300 text-slate-900' : 'bg-bg-canvas border-border-subtle text-white'
             }`}
           />
         </div>
@@ -61,8 +61,8 @@ export function AddActivityModal({
                 }
                 setNewActivity({ ...newActivity, scope: sc, factorValue: defaultFactor, unit: defaultUnit });
               }}
-              className={`w-full text-xs font-sans p-2.5 rounded-xl border focus:outline-none focus:border-[#00C853] ${
-                isLight ? 'bg-slate-50 border-slate-300 text-slate-900' : 'bg-[#040906] border-[#152B1D] text-white'
+              className={`w-full text-xs font-sans p-2.5 rounded-xl border focus:outline-none focus:border-border-strong ${
+                isLight ? 'bg-slate-50 border-slate-300 text-slate-900' : 'bg-bg-canvas border-border-subtle text-white'
               }`}
             >
               <option value="Scope 1">Scope 1 (Direct Stationary/Mobile)</option>
@@ -76,8 +76,8 @@ export function AddActivityModal({
             <select
               value={newActivity.facility}
               onChange={(e) => setNewActivity({ ...newActivity, facility: e.target.value })}
-              className={`w-full text-xs font-sans p-2.5 rounded-xl border focus:outline-none focus:border-[#00C853] ${
-                isLight ? 'bg-slate-50 border-slate-300 text-slate-900' : 'bg-[#040906] border-[#152B1D] text-white'
+              className={`w-full text-xs font-sans p-2.5 rounded-xl border focus:outline-none focus:border-border-strong ${
+                isLight ? 'bg-slate-50 border-slate-300 text-slate-900' : 'bg-bg-canvas border-border-subtle text-white'
               }`}
             >
               {activeClient?.facilities?.map((f, i) => (
@@ -97,8 +97,8 @@ export function AddActivityModal({
               placeholder="e.g. 5000"
               value={newActivity.quantity}
               onChange={(e) => setNewActivity({ ...newActivity, quantity: e.target.value })}
-              className={`w-full text-xs font-mono p-2.5 rounded-xl border focus:outline-none focus:border-[#00C853] ${
-                isLight ? 'bg-slate-50 border-slate-300 text-slate-900' : 'bg-[#040906] border-[#152B1D] text-white'
+              className={`w-full text-xs font-mono p-2.5 rounded-xl border focus:outline-none focus:border-border-strong ${
+                isLight ? 'bg-slate-50 border-slate-300 text-slate-900' : 'bg-bg-canvas border-border-subtle text-white'
               }`}
             />
           </div>
@@ -108,8 +108,8 @@ export function AddActivityModal({
             <select
               value={newActivity.unit}
               onChange={(e) => setNewActivity({ ...newActivity, unit: e.target.value })}
-              className={`w-full text-xs font-sans p-2.5 rounded-xl border focus:outline-none focus:border-[#00C853] ${
-                isLight ? 'bg-slate-50 border-slate-300 text-slate-900' : 'bg-[#040906] border-[#152B1D] text-white'
+              className={`w-full text-xs font-sans p-2.5 rounded-xl border focus:outline-none focus:border-border-strong ${
+                isLight ? 'bg-slate-50 border-slate-300 text-slate-900' : 'bg-bg-canvas border-border-subtle text-white'
               }`}
             >
               <option value="kWh">kWh (Power)</option>
@@ -129,17 +129,17 @@ export function AddActivityModal({
               required
               value={newActivity.factorValue}
               onChange={(e) => setNewActivity({ ...newActivity, factorValue: e.target.value })}
-              className={`w-full text-xs font-mono p-2.5 rounded-xl border focus:outline-none focus:border-[#00C853] ${
-                isLight ? 'bg-slate-50 border-slate-300 text-slate-900' : 'bg-[#040906] border-[#152B1D] text-white'
+              className={`w-full text-xs font-mono p-2.5 rounded-xl border focus:outline-none focus:border-border-strong ${
+                isLight ? 'bg-slate-50 border-slate-300 text-slate-900' : 'bg-bg-canvas border-border-subtle text-white'
               }`}
             />
           </div>
         </div>
 
         {/* Realtime Footprint Preview */}
-        <div className="p-3.5 rounded-xl bg-black/40 border border-[#152B1D] flex items-center justify-between text-xs">
+        <div className="p-3.5 rounded-xl bg-black/40 border border-border-subtle flex items-center justify-between text-xs">
           <span className="text-gray-400">Calculated Emission Footprint:</span>
-          <span className="font-mono font-bold text-sm text-[#00E676]">
+          <span className="font-mono font-bold text-sm text-accent-hover">
             {fmt(((parseFloat(newActivity.quantity) || 0) * (parseFloat(newActivity.factorValue) || 0)) / 1000, 3)} tCO₂e
           </span>
         </div>
@@ -152,8 +152,8 @@ export function AddActivityModal({
               placeholder="e.g. Plant Energy Lead"
               value={newActivity.responsiblePerson}
               onChange={(e) => setNewActivity({ ...newActivity, responsiblePerson: e.target.value })}
-              className={`w-full text-xs font-sans p-2.5 rounded-xl border focus:outline-none focus:border-[#00C853] ${
-                isLight ? 'bg-slate-50 border-slate-300 text-slate-900' : 'bg-[#040906] border-[#152B1D] text-white'
+              className={`w-full text-xs font-sans p-2.5 rounded-xl border focus:outline-none focus:border-border-strong ${
+                isLight ? 'bg-slate-50 border-slate-300 text-slate-900' : 'bg-bg-canvas border-border-subtle text-white'
               }`}
             />
           </div>
@@ -163,8 +163,8 @@ export function AddActivityModal({
             <select
               value={newActivity.dataQuality}
               onChange={(e) => setNewActivity({ ...newActivity, dataQuality: e.target.value })}
-              className={`w-full text-xs font-sans p-2.5 rounded-xl border focus:outline-none focus:border-[#00C853] ${
-                isLight ? 'bg-slate-50 border-slate-300 text-slate-900' : 'bg-[#040906] border-[#152B1D] text-white'
+              className={`w-full text-xs font-sans p-2.5 rounded-xl border focus:outline-none focus:border-border-strong ${
+                isLight ? 'bg-slate-50 border-slate-300 text-slate-900' : 'bg-bg-canvas border-border-subtle text-white'
               }`}
             >
               <option value="High">High (Direct Meter / Invoiced)</option>
@@ -174,7 +174,7 @@ export function AddActivityModal({
           </div>
         </div>
 
-        <div className="flex justify-end space-x-3 pt-4 border-t border-[#152B1D]/40">
+        <div className="flex justify-end space-x-3 pt-4 border-t border-border-subtle/40">
           <Button type="button" variant="ghost" size="sm" onClick={onClose}>
             Cancel
           </Button>

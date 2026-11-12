@@ -14,8 +14,8 @@ export function RegistryHeader({
   return (
     <div className="mb-8">
       <div className="flex items-center space-x-3 mb-2">
-        <span className="inline-flex items-center space-x-1.5 font-mono text-[11px] font-bold text-[#00C853] bg-[#00C853]/10 border border-[#00C853]/30 px-3 py-1 rounded-full uppercase tracking-widest">
-          <Landmark size={13} className="text-[#00C853]" />
+        <span className="inline-flex items-center space-x-1.5 font-mono text-[11px] font-bold text-accent bg-accent/10 border border-border-strong/30 px-3 py-1 rounded-full uppercase tracking-widest">
+          <Landmark size={13} className="text-accent" />
           <span>People's Republic of Bangladesh</span>
         </span>
         <span className="text-white/30 text-xs">•</span>
@@ -34,11 +34,11 @@ export function RegistryHeader({
         ]}
         secondaryActions={
           <div className="flex flex-wrap items-center gap-2">
-            <div className="flex items-center space-x-2 px-3 py-1.5 rounded-xl bg-white/[0.02] border border-[#152B1D]">
+            <div className="flex items-center space-x-2 px-3 py-1.5 rounded-xl bg-white/[0.02] border border-border-subtle">
               <div
                 className={`w-2.5 h-2.5 rounded-full ${
                   isLiveConnected
-                    ? 'bg-[#00C853] animate-pulse shadow-[0_0_8px_#00C853]'
+                    ? 'bg-accent animate-pulse shadow-[0_0_8px_#00C853]'
                     : 'bg-emerald-400'
                 }`}
               ></div>
@@ -97,14 +97,14 @@ export function RegistryHeader({
           value="100% Eligible"
           trend="up"
           subtitle="0 Negative List Infractions"
-          icon={<ShieldCheck size={16} className="text-[#00C853]" />}
+          icon={<ShieldCheck size={16} className="text-accent" />}
         />
         <StatCard
           title="Cryptographic Provenance"
           value="Merkle Chain"
           trend="neutral"
           subtitle="SHA-256 Root Hash Verified"
-          icon={<Fingerprint size={16} className="text-[#00C853]" />}
+          icon={<Fingerprint size={16} className="text-accent" />}
           className="col-span-2 sm:col-span-1"
         />
       </div>

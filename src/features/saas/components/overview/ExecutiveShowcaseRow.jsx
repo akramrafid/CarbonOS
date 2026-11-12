@@ -23,7 +23,7 @@ export const ExecutiveShowcaseRow = ({
             <div className="w-7 h-7 rounded-xl bg-emerald/15 flex items-center justify-center">
               <Leaf className="w-4 h-4 text-emerald" />
             </div>
-            <h3 className={`font-sans font-bold text-base tracking-tight ${isLight ? 'text-[#0F2417]' : 'text-white'}`}>
+            <h3 className={`font-sans font-bold text-base tracking-tight ${isLight ? 'text-fg-primary' : 'text-white'}`}>
               Impact Overview
             </h3>
           </div>
@@ -43,10 +43,10 @@ export const ExecutiveShowcaseRow = ({
           <div className="sm:col-span-7 space-y-2.5">
             {/* Metric 1 */}
             <div className={`p-3 rounded-2xl border transition-all ${
-              isLight ? 'bg-[#F7FAF7] border-carbon-border' : 'bg-[#040906] border-[#152B1D]'
+              isLight ? 'bg-bg-muted border-carbon-border' : 'bg-bg-canvas border-border-subtle'
             }`}>
               <div className="flex items-center justify-between">
-                <span className={`text-[10px] font-sans font-medium ${isLight ? 'text-[#557361]' : 'text-mist'}`}>
+                <span className={`text-[10px] font-sans font-medium ${isLight ? 'text-fg-muted' : 'text-mist'}`}>
                   Emissions Abated & Inset
                 </span>
                 <Badge variant="emerald" size="sm">
@@ -54,10 +54,10 @@ export const ExecutiveShowcaseRow = ({
                 </Badge>
               </div>
               <div className="mt-1 flex items-baseline space-x-1.5 font-mono">
-                <span className={`font-sans font-extrabold text-lg tracking-tight tabular-nums ${isLight ? 'text-[#0F2417]' : 'text-white'}`}>
+                <span className={`font-sans font-extrabold text-lg tracking-tight tabular-nums ${isLight ? 'text-fg-primary' : 'text-white'}`}>
                   {Math.round(activeClient.activeInsets || (results.total * 0.18)).toLocaleString()}
                 </span>
-                <span className={`text-[11px] ${isLight ? 'text-[#7D9A8A]' : 'text-mist'}`}>
+                <span className={`text-[11px] ${isLight ? 'text-fg-secondary' : 'text-mist'}`}>
                   tCO2e
                 </span>
               </div>
@@ -65,19 +65,19 @@ export const ExecutiveShowcaseRow = ({
 
             {/* Metric 2 */}
             <div className={`p-3 rounded-2xl border transition-all ${
-              isLight ? 'bg-[#F7FAF7] border-carbon-border' : 'bg-[#040906] border-[#152B1D]'
+              isLight ? 'bg-bg-muted border-carbon-border' : 'bg-bg-canvas border-border-subtle'
             }`}>
               <div className="flex items-center justify-between">
-                <span className={`text-[10px] font-sans font-medium ${isLight ? 'text-[#557361]' : 'text-mist'}`}>
+                <span className={`text-[10px] font-sans font-medium ${isLight ? 'text-fg-muted' : 'text-mist'}`}>
                   Facilities & Insets
                 </span>
                 <span className="w-2 h-2 rounded-full bg-emerald" />
               </div>
               <div className="mt-1 flex items-baseline space-x-1.5 font-mono">
-                <span className={`font-sans font-extrabold text-lg tracking-tight tabular-nums ${isLight ? 'text-[#0F2417]' : 'text-white'}`}>
+                <span className={`font-sans font-extrabold text-lg tracking-tight tabular-nums ${isLight ? 'text-fg-primary' : 'text-white'}`}>
                   {(activeClient.facilities?.length || 1) + (activeClient.activeInsets ? 1 : 0)} Active
                 </span>
-                <span className={`text-[11px] font-sans ${isLight ? 'text-[#7D9A8A]' : 'text-mist'}`}>
+                <span className={`text-[11px] font-sans ${isLight ? 'text-fg-secondary' : 'text-mist'}`}>
                   sites & passports
                 </span>
               </div>
@@ -85,19 +85,19 @@ export const ExecutiveShowcaseRow = ({
 
             {/* Metric 3 */}
             <div className={`p-3 rounded-2xl border transition-all ${
-              isLight ? 'bg-[#F7FAF7] border-carbon-border' : 'bg-[#040906] border-[#152B1D]'
+              isLight ? 'bg-bg-muted border-carbon-border' : 'bg-bg-canvas border-border-subtle'
             }`}>
               <div className="flex items-center justify-between">
-                <span className={`text-[10px] font-sans font-medium ${isLight ? 'text-[#557361]' : 'text-mist'}`}>
+                <span className={`text-[10px] font-sans font-medium ${isLight ? 'text-fg-muted' : 'text-mist'}`}>
                   Audited Workforce
                 </span>
-                <Users className={`w-3.5 h-3.5 ${isLight ? 'text-[#7D9A8A]' : 'text-[#557361]'}`} />
+                <Users className={`w-3.5 h-3.5 ${isLight ? 'text-fg-secondary' : 'text-fg-muted'}`} />
               </div>
               <div className="mt-1 flex items-baseline space-x-1.5 font-mono">
-                <span className={`font-sans font-extrabold text-lg tracking-tight tabular-nums ${isLight ? 'text-[#0F2417]' : 'text-white'}`}>
+                <span className={`font-sans font-extrabold text-lg tracking-tight tabular-nums ${isLight ? 'text-fg-primary' : 'text-white'}`}>
                   {Number(inputs.employees || 0).toLocaleString()} FTE
                 </span>
-                <span className={`text-[11px] font-sans ${isLight ? 'text-[#7D9A8A]' : 'text-mist'}`}>
+                <span className={`text-[11px] font-sans ${isLight ? 'text-fg-secondary' : 'text-mist'}`}>
                   monitored
                 </span>
               </div>
@@ -124,7 +124,7 @@ export const ExecutiveShowcaseRow = ({
 
         {/* Footer Insight */}
         <div className={`pt-3 border-t text-[11px] font-sans flex items-center justify-between ${
-          isLight ? 'border-carbon-border text-[#557361]' : 'border-[#122418] text-mist'
+          isLight ? 'border-carbon-border text-fg-muted' : 'border-border-subtle text-mist'
         }`}>
           <span className="flex items-center space-x-1.5">
             <ShieldCheck className="w-3.5 h-3.5 text-emerald" />
@@ -139,10 +139,10 @@ export const ExecutiveShowcaseRow = ({
         {/* Header with Title & Metric Badges */}
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 pb-2">
           <div>
-            <h3 className={`font-sans font-bold text-base tracking-tight ${isLight ? 'text-[#0F2417]' : 'text-white'}`}>
+            <h3 className={`font-sans font-bold text-base tracking-tight ${isLight ? 'text-fg-primary' : 'text-white'}`}>
               Emissions Trend
             </h3>
-            <p className={`text-[11px] font-sans ${isLight ? 'text-[#557361]' : 'text-mist'}`}>
+            <p className={`text-[11px] font-sans ${isLight ? 'text-fg-muted' : 'text-mist'}`}>
               12-Month Trajectory: {activeClient.name} ({activeClient.sector})
             </p>
           </div>
@@ -162,7 +162,7 @@ export const ExecutiveShowcaseRow = ({
 
         {/* Chart Legend & Telemetry Status */}
         <div className={`pt-3 border-t text-[11px] font-sans flex flex-wrap items-center justify-between gap-2 ${
-          isLight ? 'border-carbon-border text-[#557361]' : 'border-[#122418] text-mist'
+          isLight ? 'border-carbon-border text-fg-muted' : 'border-border-subtle text-mist'
         }`}>
           <div className="flex items-center space-x-4">
             <div className="flex items-center space-x-1.5">
@@ -170,7 +170,7 @@ export const ExecutiveShowcaseRow = ({
               <span>Target Glidepath</span>
             </div>
             <div className="flex items-center space-x-1.5">
-              <span className={`w-2.5 h-2.5 rounded-full ${isLight ? 'bg-[#A3B8AC]' : 'bg-[#1D4A2F]'}`} />
+              <span className={`w-2.5 h-2.5 rounded-full ${isLight ? 'bg-slate-400' : 'bg-bg-surface'}`} />
               <span>Operational Actuals</span>
             </div>
           </div>

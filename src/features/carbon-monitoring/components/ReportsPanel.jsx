@@ -29,17 +29,17 @@ export function ReportsPanel(props) {
 
   return (
     <div className={`border rounded-3xl p-6 transition-all ${
-          isLight ? 'bg-white border-[#E2E8F0] shadow-xs' : 'bg-[#08130C] border-[#152B1D]'
+          isLight ? 'bg-white border-border-subtle shadow-xs' : 'bg-bg-elevated border-border-subtle'
         }`}>
           <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-6">
             <div>
               <h2 className={`text-2xl font-bold font-sans flex items-center space-x-2 ${
-                isLight ? 'text-[#0F291B]' : 'text-white'
+                isLight ? 'text-fg-primary' : 'text-white'
               }`}>
                 <FileText className="text-emerald" size={24} />
                 <span>{isBn ? 'ডিজিটাল এমআরভি এবং ভিভিবি অডিট ওয়ার্কস্পেস' : 'Digital dMRV & VVB Audit Workspace'}</span>
               </h2>
-              <p className={`text-xs mt-1 ${isLight ? 'text-[#64748B]' : 'text-mist'}`}>
+              <p className={`text-xs mt-1 ${isLight ? 'text-fg-secondary' : 'text-mist'}`}>
                 {isBn 
                   ? 'ভেরা VM0047 v1.0 ও VM0048 অনুসারে মডেল করা (যাচাই করা হয়নি) মাল্টি-পুল কার্বন স্টক, ডায়নামিক সিন্থেটিক বেসলাইন এবং SHA-256 লেজার অডিট ডসিয়ার।'
                   : 'Multi-pool carbon stocks modelled on Verra VM0047 v1.0 & VM0048 (not validated), dynamic synthetic baselines, and SHA-256 ledger audit dossiers.'}
@@ -48,7 +48,7 @@ export function ReportsPanel(props) {
             
             <div className="flex items-center space-x-3 self-start md:self-auto">
               <span className={`inline-flex items-center space-x-1.5 px-3 py-1.5 rounded-xl border text-[11px] font-mono ${
-                isLight ? 'bg-[#F8FAFC] border-[#CBD5E1] text-[#0F291B]' : 'bg-white/5 border-white/10 text-white'
+                isLight ? 'bg-bg-canvas border-border-subtle text-fg-primary' : 'bg-white/5 border-white/10 text-white'
               }`}>
                 <Database size={12} className="text-emerald" />
                 <span>{analysisHistory.length} Recorded Blocks</span>
@@ -70,7 +70,7 @@ export function ReportsPanel(props) {
           {loadingHistory ? (
             <div className="space-y-4">
               {Array(3).fill(0).map((_, i) => (
-                <div key={i} className={`h-16 rounded-xl animate-pulse ${isLight ? 'bg-[#E2E8F0]' : 'bg-white/5'}`}></div>
+                <div key={i} className={`h-16 rounded-xl animate-pulse ${isLight ? 'bg-bg-muted' : 'bg-white/5'}`}></div>
               ))}
             </div>
           ) : (
@@ -78,7 +78,7 @@ export function ReportsPanel(props) {
               <table className="w-full text-left text-xs">
                 <thead>
                   <tr className={`border-b text-[10px] uppercase tracking-wider font-bold ${
-                    isLight ? 'border-[#E2E8F0] text-[#64748B]' : 'border-white/10 text-mist'
+                    isLight ? 'border-border-subtle text-fg-secondary' : 'border-white/10 text-mist'
                   }`}>
                     <th className="pb-4">Job & Ledger ID</th>
                     <th className="pb-4">Project & Stratum</th>
@@ -153,20 +153,20 @@ export function ReportsPanel(props) {
 
                       return (
                         <tr key={job.id} className={`border-b transition-colors ${
-                          isLight ? 'border-[#E2E8F0] hover:bg-[#F8FAFC]' : 'border-white/5 hover:bg-white/5'
+                          isLight ? 'border-border-subtle hover:bg-bg-canvas' : 'border-white/5 hover:bg-white/5'
                         }`}>
                           <td className="py-4">
                             <div className="font-mono font-bold text-emerald text-xs">{job.id.slice(0, 10).toUpperCase()}</div>
                             <div className="flex items-center space-x-1 mt-0.5" title={hashDigest}>
                               <Lock size={10} className="text-emerald shrink-0" />
-                              <span className={`font-mono text-[10px] truncate max-w-[100px] ${isLight ? 'text-[#64748B]' : 'text-mist'}`}>
+                              <span className={`font-mono text-[10px] truncate max-w-[100px] ${isLight ? 'text-fg-secondary' : 'text-mist'}`}>
                                 {hashDigest.slice(0, 8)}...
                               </span>
                             </div>
                           </td>
 
                           <td className="py-4">
-                            <div className={`font-bold ${isLight ? 'text-[#0F291B]' : 'text-white'}`}>{locationName}</div>
+                            <div className={`font-bold ${isLight ? 'text-fg-primary' : 'text-white'}`}>{locationName}</div>
                             <div className="flex items-center space-x-1.5 mt-1">
                               <span className={`text-[9px] px-1.5 py-0.5 rounded font-mono font-semibold uppercase ${
                                 stratum.includes('MANGROVE') 
@@ -175,18 +175,18 @@ export function ReportsPanel(props) {
                               }`}>
                                 {stratum.replace(/_/g, ' ')}
                               </span>
-                              <span className={`font-mono text-[10px] ${isLight ? 'text-[#64748B]' : 'text-mist'}`}>
+                              <span className={`font-mono text-[10px] ${isLight ? 'text-fg-secondary' : 'text-mist'}`}>
                                 {lat.toFixed(3)}°N, {lng.toFixed(3)}°E
                               </span>
                             </div>
                           </td>
 
-                          <td className={`py-4 font-mono text-xs ${isLight ? 'text-[#64748B]' : 'text-mist'}`}>
+                          <td className={`py-4 font-mono text-xs ${isLight ? 'text-fg-secondary' : 'text-mist'}`}>
                             {new Date(job.created_at).toLocaleDateString()}
                           </td>
 
                           <td className="py-4">
-                            <span className={`font-bold font-mono text-xs ${isLight ? 'text-[#0F291B]' : 'text-white'}`}>
+                            <span className={`font-bold font-mono text-xs ${isLight ? 'text-fg-primary' : 'text-white'}`}>
                               {job.result?.forest_area_ha ? job.result.forest_area_ha.toFixed(1) : '-'} ha
                             </span>
                             <span className="block text-[10px] font-mono text-emerald mt-0.5">
@@ -195,10 +195,10 @@ export function ReportsPanel(props) {
                           </td>
 
                           <td className="py-4">
-                            <div className={`font-bold font-mono text-xs ${isLight ? 'text-[#0F291B]' : 'text-white'}`}>
-                              {totalPools} <span className={`text-[10px] font-normal ${isLight ? 'text-[#64748B]' : 'text-mist'}`}>tC/ha</span>
+                            <div className={`font-bold font-mono text-xs ${isLight ? 'text-fg-primary' : 'text-white'}`}>
+                              {totalPools} <span className={`text-[10px] font-normal ${isLight ? 'text-fg-secondary' : 'text-mist'}`}>tC/ha</span>
                             </div>
-                            <div className={`text-[9px] font-mono mt-0.5 ${isLight ? 'text-[#64748B]' : 'text-mist'}`}>
+                            <div className={`text-[9px] font-mono mt-0.5 ${isLight ? 'text-fg-secondary' : 'text-mist'}`}>
                               AGB {agb} · BGB {bgb} · SOC {soc}
                             </div>
                           </td>
@@ -206,18 +206,18 @@ export function ReportsPanel(props) {
                           <td className="py-4">
                             <div className="flex items-center space-x-1">
                               <span className="font-bold font-mono text-xs text-emerald">+{additionalityStock}</span>
-                              <span className={`text-[10px] font-mono ${isLight ? 'text-[#64748B]' : 'text-mist'}`}>tC/ha</span>
+                              <span className={`text-[10px] font-mono ${isLight ? 'text-fg-secondary' : 'text-mist'}`}>tC/ha</span>
                             </div>
-                            <div className={`text-[9px] font-mono mt-0.5 ${isLight ? 'text-[#64748B]' : 'text-mist'}`}>
+                            <div className={`text-[9px] font-mono mt-0.5 ${isLight ? 'text-fg-secondary' : 'text-mist'}`}>
                               Base: {counterfactual} tC/ha (VM0048)
                             </div>
                           </td>
 
                           <td className="py-4">
-                            <div className={`font-bold font-mono text-xs ${isLight ? 'text-[#0F291B]' : 'text-white'}`}>
+                            <div className={`font-bold font-mono text-xs ${isLight ? 'text-fg-primary' : 'text-white'}`}>
                               {netCreditable.toLocaleString()} <span className="text-[10px] text-emerald font-semibold">tCO₂e</span>
                             </div>
-                            <div className={`text-[9px] font-mono mt-0.5 ${isLight ? 'text-[#64748B]' : 'text-mist'}`}>
+                            <div className={`text-[9px] font-mono mt-0.5 ${isLight ? 'text-fg-secondary' : 'text-mist'}`}>
                               Buf: -18% · RME: {rme}%
                             </div>
                           </td>
@@ -276,7 +276,7 @@ export function ReportsPanel(props) {
                     })
                   ) : (
                     <tr>
-                      <td colSpan={8} className={`text-center py-12 ${isLight ? 'text-[#64748B]' : 'text-mist'}`}>
+                      <td colSpan={8} className={`text-center py-12 ${isLight ? 'text-fg-secondary' : 'text-mist'}`}>
                         No satellite monitoring analyses found in the historical registry database.
                       </td>
                     </tr>

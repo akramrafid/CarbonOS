@@ -13,18 +13,18 @@ export function VerraControlBar({
 }) {
   return (
     <div className={`border rounded-2xl p-5 md:p-6 transition-all ${
-      isLight ? 'bg-white border-[#CBD5E1] shadow-xs' : 'bg-[#08130C] border-[#152B1D]'
+      isLight ? 'bg-white border-border-subtle shadow-xs' : 'bg-bg-elevated border-border-subtle'
     }`}>
       <div className="flex flex-col xl:flex-row xl:items-center justify-between gap-6">
         <div>
           <div className="flex flex-wrap items-center gap-2 mb-2">
             <span className={`text-[11px] font-mono font-bold uppercase px-2.5 py-0.5 rounded-full border ${
-              isLight ? 'bg-[#E8F8EE] text-[#00873E] border-[#C2E9CF]' : 'bg-emerald/10 text-emerald border-emerald/25'
+              isLight ? 'bg-accent-muted text-accent border-border-subtle' : 'bg-emerald/10 text-emerald border-emerald/25'
             }`}>
               Verra VM0047 v1.0 & VM0048
             </span>
             <span className={`text-[11px] font-mono font-bold px-2.5 py-0.5 rounded-full border ${
-              isLight ? 'bg-[#F8FAFC] text-[#475569] border-[#CBD5E1]' : 'bg-white/5 text-mist border-white/10'
+              isLight ? 'bg-bg-canvas text-fg-secondary border-border-subtle' : 'bg-white/5 text-mist border-white/10'
             }`}>
               VVB Audit Package
             </span>
@@ -40,11 +40,11 @@ export function VerraControlBar({
             </span>
           </div>
           <h2 className={`text-xl md:text-2xl font-extrabold font-sans tracking-tight ${
-            isLight ? 'text-[#0F291B]' : 'text-white'
+            isLight ? 'text-fg-primary' : 'text-white'
           }`}>
             Verra VM0047 Methodology Monitoring Dossier & VVB Audit Inspector
           </h2>
-          <p className={`text-xs mt-1 max-w-3xl leading-relaxed ${isLight ? 'text-[#64748B]' : 'text-mist'}`}>
+          <p className={`text-xs mt-1 max-w-3xl leading-relaxed ${isLight ? 'text-fg-secondary' : 'text-mist'}`}>
             Institutional verification package for Validation & Verification Bodies (VVBs). Covers IPCC Tier-3 multi-pool living and sediment stocks, dynamic synthetic control additionality, 10km leakage belts, and conformal uncertainty precision deduction tests.
           </p>
         </div>
@@ -53,7 +53,7 @@ export function VerraControlBar({
         <div className="flex flex-wrap items-center gap-2.5">
           {/* Job Selector Dropdown */}
           <div className="flex items-center space-x-2">
-            <span className={`text-xs font-semibold whitespace-nowrap ${isLight ? 'text-[#64748B]' : 'text-mist'}`}>
+            <span className={`text-xs font-semibold whitespace-nowrap ${isLight ? 'text-fg-secondary' : 'text-mist'}`}>
               Audit Run:
             </span>
             <select
@@ -65,12 +65,12 @@ export function VerraControlBar({
               aria-label="Select historical audit run for Verra verification"
               className={`text-xs font-mono font-bold px-3 py-2 rounded-xl border cursor-pointer outline-hidden transition-all focus-visible:ring-2 focus-visible:ring-emerald focus-visible:ring-offset-2 ${
                 isLight 
-                  ? 'bg-[#F8FAFC] border-[#CBD5E1] text-[#0F291B] hover:border-slate-400' 
+                  ? 'bg-bg-canvas border-border-subtle text-fg-primary hover:border-slate-400' 
                   : 'bg-black/40 border-white/15 text-white hover:border-white/30'
               }`}
             >
               {analysisHistory.map(j => (
-                <option key={j.id} value={j.id} className={isLight ? 'bg-white text-slate-900' : 'bg-[#08130C] text-white'}>
+                <option key={j.id} value={j.id} className={isLight ? 'bg-white text-slate-900' : 'bg-bg-elevated text-white'}>
                   {j.project_name} ({j.id.slice(0, 8).toUpperCase()})
                 </option>
               ))}

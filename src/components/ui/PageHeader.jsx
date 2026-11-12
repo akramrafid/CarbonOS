@@ -23,7 +23,7 @@ export function PageHeader({
 }) {
   const isCentered = align === 'center';
   return (
-    <header className={`w-full mb-6 pb-6 ${isCentered ? 'text-center' : 'border-b border-carbon-border/60 dark:border-[#1E3326]/60'} ${className}`}>
+    <header className={`w-full mb-6 pb-6 ${isCentered ? 'text-center' : 'border-b border-carbon-border/60 dark:border-border-subtle/60'} ${className}`}>
       {/* Breadcrumbs */}
       {breadcrumbs.length > 0 && (
         <nav aria-label="Breadcrumb" className={`flex items-center gap-1.5 text-xs text-mist mb-2 ${isCentered ? 'justify-center' : ''}`}>
@@ -33,7 +33,7 @@ export function PageHeader({
               <React.Fragment key={crumb.path || crumb.label}>
                 {idx > 0 && <ChevronRight className="w-3.5 h-3.5 text-mist/40 shrink-0" aria-hidden="true" />}
                 {isLast ? (
-                  <span className="text-registry font-medium dark:text-[#E2ECE5]" aria-current="page">
+                  <span className="text-registry font-medium dark:text-fg-primary" aria-current="page">
                     {crumb.label}
                   </span>
                 ) : (
@@ -55,13 +55,13 @@ export function PageHeader({
         <div className={`flex flex-col gap-1 min-w-0 ${isCentered ? 'items-center' : ''}`}>
           <div className={`flex items-center gap-3 flex-wrap ${isCentered ? 'justify-center' : ''}`}>
             {badge && isCentered && <div className="mb-2">{badge}</div>}
-            <h1 className={`text-2xl sm:text-3xl font-sans font-bold text-registry tracking-tight dark:text-[#E2ECE5] ${titleClassName}`}>
+            <h1 className={`text-2xl sm:text-3xl font-sans font-bold text-registry tracking-tight dark:text-fg-primary ${titleClassName}`}>
               {title}
             </h1>
             {badge && !isCentered && <span className="inline-flex shrink-0">{badge}</span>}
           </div>
           {description && (
-            <p className={`text-sm text-mist font-sans max-w-3xl leading-relaxed dark:text-[#7A9A85] ${isCentered ? 'mx-auto' : ''}`}>
+            <p className={`text-sm text-mist font-sans max-w-3xl leading-relaxed dark:text-fg-secondary ${isCentered ? 'mx-auto' : ''}`}>
               {description}
             </p>
           )}

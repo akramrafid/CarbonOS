@@ -12,8 +12,8 @@ const NotFound = () => {
   const isLight = theme === 'light';
 
   return (
-    <main className={`min-h-[85vh] flex items-center justify-center px-4 sm:px-6 py-28 relative overflow-hidden font-sans transition-colors duration-300 ${
-      isLight ? 'bg-[#f2f3ee] text-[#181414]' : 'bg-carbon text-registry'
+    <main className={`min-h-[85vh] flex items-center justify-center px-4 sm:px-6 py-10 md:py-16 relative overflow-hidden font-sans transition-colors duration-300 ${
+      isLight ? 'bg-bg-canvas text-fg-primary' : 'bg-carbon text-registry'
     }`}>
       
       {/* Ambient Radial Mesh Gradients */}
@@ -29,10 +29,10 @@ const NotFound = () => {
         {/* Terminal Header Tag */}
         <div className={`inline-flex items-center space-x-2 px-3.5 py-1.5 rounded-full mb-8 backdrop-blur-md shadow-xs ${
           isLight
-            ? 'bg-[#dbf0ea] border border-[#166534]/30 text-[#166534]'
+            ? 'bg-accent-muted border border-border-strong/30 text-accent'
             : 'bg-emerald/10 border border-emerald/25 text-emerald'
         }`}>
-          <ShieldAlert size={14} className={isLight ? 'text-[#166534]' : 'text-emerald'} />
+          <ShieldAlert size={14} className={isLight ? 'text-accent' : 'text-emerald'} />
           <span className="font-mono text-xs uppercase tracking-widest font-semibold">
             Status 404 // Registry Node Unresolved
           </span>
@@ -40,11 +40,11 @@ const NotFound = () => {
 
         {/* Big 404 (Rendered cleanly without GPU Skia filter box artifacts) */}
         <div className="flex items-center justify-center font-sans font-extrabold text-7xl sm:text-9xl tracking-tight mb-4 select-none">
-          <span className={isLight ? 'text-[#181414]' : 'text-white'}>4</span>
-          <span className={`serif-drama italic px-2 ${isLight ? 'text-[#166534]' : 'text-emerald'}`}>
+          <span className={isLight ? 'text-fg-primary' : 'text-white'}>4</span>
+          <span className={`serif-drama italic px-2 ${isLight ? 'text-accent' : 'text-emerald'}`}>
             0
           </span>
-          <span className={isLight ? 'text-[#181414]' : 'text-white'}>4</span>
+          <span className={isLight ? 'text-fg-primary' : 'text-white'}>4</span>
         </div>
 
         <PageHeader
@@ -57,11 +57,11 @@ const NotFound = () => {
         {/* Attempted Route Display */}
         <div className={`inline-flex items-center space-x-2 border px-4 py-2 rounded-xl font-mono text-xs mb-10 shadow-xs ${
           isLight 
-            ? 'bg-white border-[#dbf0ea] text-slate-700' 
+            ? 'bg-white border-border-strong text-slate-700' 
             : 'bg-black/40 border-white/10 text-white/70'
         }`}>
-          <span className={`font-bold ${isLight ? 'text-[#166534]' : 'text-emerald'}`}>GET</span>
-          <span className={`font-medium ${isLight ? 'text-[#181414]' : 'text-white/90'}`}>{location.pathname}</span>
+          <span className={`font-bold ${isLight ? 'text-accent' : 'text-emerald'}`}>GET</span>
+          <span className={`font-medium ${isLight ? 'text-fg-primary' : 'text-white/90'}`}>{location.pathname}</span>
           <span className="text-rose-500 font-semibold">[404 NULL]</span>
         </div>
 
@@ -78,7 +78,7 @@ const NotFound = () => {
 
           <Link
             to="/"
-            className="keep-white inline-flex items-center space-x-2 px-6 py-3 rounded-full bg-[#166534] hover:bg-[#14532d] dark:bg-emerald dark:hover:bg-emerald/90 text-white dark:text-[#040A06] text-sm font-bold shadow-[0_0_25px_rgba(0,200,83,0.3)] transition-all hover:scale-[1.02] active:scale-[0.98]"
+            className="keep-white inline-flex items-center space-x-2 px-6 py-3 rounded-full bg-accent hover:bg-accent-active dark:bg-emerald dark:hover:bg-emerald/90 text-white dark:text-fg-primary text-sm font-bold shadow-[0_0_25px_rgba(0,200,83,0.3)] transition-all hover:scale-[1.02] active:scale-[0.98]"
           >
             <Home size={16} />
             <span>Return to Home</span>
@@ -92,7 +92,7 @@ const NotFound = () => {
                 : 'bg-white/[0.06] hover:bg-white/[0.12] text-white border border-white/15'
             }`}
           >
-            <ShoppingCart size={16} className={isLight ? 'text-[#166534]' : 'text-emerald'} />
+            <ShoppingCart size={16} className={isLight ? 'text-accent' : 'text-emerald'} />
             <span>Marketplace</span>
           </Link>
         </div>
@@ -105,17 +105,17 @@ const NotFound = () => {
             to="/platform/saas-dashboard"
             className={`p-4 rounded-2xl border transition-all group flex items-center space-x-3.5 ${
               isLight
-                ? 'bg-white hover:bg-slate-50 border-[#dbf0ea] hover:border-[#166534]/40 shadow-xs'
+                ? 'bg-white hover:bg-slate-50 border-border-strong hover:border-border-strong/40 shadow-xs'
                 : 'bg-white/[0.03] hover:bg-white/[0.07] border-white/10 hover:border-emerald/30'
             }`}
           >
             <div className={`p-2.5 rounded-xl transition-transform group-hover:scale-110 shrink-0 ${
-              isLight ? 'bg-[#dbf0ea] text-[#166534]' : 'bg-emerald/10 text-emerald'
+              isLight ? 'bg-accent-muted text-accent' : 'bg-emerald/10 text-emerald'
             }`}>
               <LayoutDashboard size={18} />
             </div>
             <div>
-              <div className={`font-sans font-semibold text-xs ${isLight ? 'text-[#181414]' : 'text-white'}`}>
+              <div className={`font-sans font-semibold text-xs ${isLight ? 'text-fg-primary' : 'text-white'}`}>
                 Enterprise ESG Portal
               </div>
               <div className={`font-mono text-[11px] ${isLight ? 'text-slate-600' : 'text-mist'}`}>
@@ -128,17 +128,17 @@ const NotFound = () => {
             to="/platform/carbon-registry"
             className={`p-4 rounded-2xl border transition-all group flex items-center space-x-3.5 ${
               isLight
-                ? 'bg-white hover:bg-slate-50 border-[#dbf0ea] hover:border-[#166534]/40 shadow-xs'
+                ? 'bg-white hover:bg-slate-50 border-border-strong hover:border-border-strong/40 shadow-xs'
                 : 'bg-white/[0.03] hover:bg-white/[0.07] border-white/10 hover:border-emerald/30'
             }`}
           >
             <div className={`p-2.5 rounded-xl transition-transform group-hover:scale-110 shrink-0 ${
-              isLight ? 'bg-[#dbf0ea] text-[#166534]' : 'bg-emerald/10 text-emerald'
+              isLight ? 'bg-accent-muted text-accent' : 'bg-emerald/10 text-emerald'
             }`}>
               <Terminal size={18} />
             </div>
             <div>
-              <div className={`font-sans font-semibold text-xs ${isLight ? 'text-[#181414]' : 'text-white'}`}>
+              <div className={`font-sans font-semibold text-xs ${isLight ? 'text-fg-primary' : 'text-white'}`}>
                 National Registry Terminal
               </div>
               <div className={`font-mono text-[11px] ${isLight ? 'text-slate-600' : 'text-mist'}`}>

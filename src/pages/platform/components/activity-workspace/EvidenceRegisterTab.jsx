@@ -20,21 +20,21 @@ export function EvidenceRegisterTab({
               onClick={() => onSelectEvidence(doc)}
               className={`p-5 rounded-2xl border transition-all cursor-pointer relative group flex flex-col justify-between ${
                 isLight
-                  ? 'bg-slate-50/70 border-slate-200 hover:border-[#00C853] hover:bg-white'
-                  : 'bg-[#040906] border-[#152B1D] hover:border-[#00C853]/50 hover:bg-[#00C853]/5'
+                  ? 'bg-slate-50/70 border-slate-200 hover:border-border-strong hover:bg-white'
+                  : 'bg-bg-canvas border-border-subtle hover:border-border-strong/50 hover:bg-accent/5'
               }`}
             >
               <div>
                 <div className="flex items-start justify-between gap-2">
                   <div className="flex items-center space-x-2">
-                    <div className="w-8 h-8 rounded-xl bg-[#00C853]/15 flex items-center justify-center text-[#00E676]">
+                    <div className="w-8 h-8 rounded-xl bg-accent/15 flex items-center justify-center text-accent-hover">
                       <FileText className="w-4 h-4" />
                     </div>
                     <div>
                       <span className="font-mono text-[10px] text-gray-400 block">{doc.id}</span>
                       <h4
                         className={`font-sans font-bold text-sm truncate max-w-[280px] ${
-                          isLight ? 'text-[#0F2417]' : 'text-white'
+                          isLight ? 'text-fg-primary' : 'text-white'
                         }`}
                       >
                         {doc.title}
@@ -62,7 +62,7 @@ export function EvidenceRegisterTab({
                   </div>
                   <div>
                     <span className="text-gray-400 block text-[10px]">Recorded Spend</span>
-                    <span className="font-mono font-bold text-[#00C853] block">
+                    <span className="font-mono font-bold text-accent block">
                       {doc.amountBdt > 0 ? `BDT ${fmt(doc.amountBdt, 0)}` : 'Internal Census'}
                     </span>
                   </div>
@@ -73,8 +73,8 @@ export function EvidenceRegisterTab({
                 </p>
               </div>
 
-              <div className="mt-4 pt-3 border-t border-[#152B1D]/40 flex items-center justify-between text-[10px] font-mono text-gray-400">
-                <div className="flex items-center space-x-1 text-[#00C853]">
+              <div className="mt-4 pt-3 border-t border-border-subtle/40 flex items-center justify-between text-[10px] font-mono text-gray-400">
+                <div className="flex items-center space-x-1 text-accent">
                   <ShieldCheck className="w-3.5 h-3.5" />
                   <span>SHA-256 Verified</span>
                 </div>

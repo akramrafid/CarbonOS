@@ -24,8 +24,8 @@ export const LoadingSpinner = ({
 
   if (variant === 'inline') {
     return (
-      <div className={`inline-flex items-center space-x-2 text-[#166534] dark:text-emerald font-sans text-xs ${className}`}>
-        <Loader2 size={16} className="animate-spin motion-reduce:animate-none text-[#166534] dark:text-emerald" />
+      <div className={`inline-flex items-center space-x-2 text-accent dark:text-emerald font-sans text-xs ${className}`}>
+        <Loader2 size={16} className="animate-spin motion-reduce:animate-none text-accent dark:text-emerald" />
         {text && <span>{text}</span>}
       </div>
     );
@@ -56,19 +56,19 @@ export const LoadingSpinner = ({
         
         {/* Inner Glowing Core Icon */}
         <div className="absolute inset-0 flex items-center justify-center">
-          <ShieldCheck size={22} className="text-[#166534] dark:text-emerald animate-pulse motion-reduce:animate-none" />
+          <ShieldCheck size={22} className="text-accent dark:text-emerald animate-pulse motion-reduce:animate-none" />
         </div>
       </div>
 
       {/* Primary Status Text */}
-      <div className="flex items-center space-x-2 font-mono text-xs sm:text-sm font-semibold tracking-widest text-[#166534] dark:text-emerald uppercase text-center px-4">
+      <div className="flex items-center space-x-2 font-mono text-xs sm:text-sm font-semibold tracking-widest text-accent dark:text-emerald uppercase text-center px-4">
         <Activity size={14} className="animate-pulse motion-reduce:animate-none" />
         <span>{text}</span>
       </div>
 
       {/* Optional Context Subtext */}
       {subtext && (
-        <p className="font-sans text-xs text-[#4b5563] dark:text-mist/80 mt-2 max-w-sm text-center px-6 leading-relaxed">
+        <p className="font-sans text-xs text-fg-muted dark:text-mist/80 mt-2 max-w-sm text-center px-6 leading-relaxed">
           {subtext}
         </p>
       )}

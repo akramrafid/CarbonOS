@@ -24,20 +24,20 @@ export function BiomassChartSvg({
         <div
           className={`absolute top-0 right-4 z-20 p-3.5 rounded-2xl border shadow-xl backdrop-blur-xl transition-all duration-200 pointer-events-none max-w-xs ${
             isLight
-              ? 'bg-white/95 border-[#E2E8F0] text-[#0F291B]'
-              : 'bg-[#08130C]/95 border-[#152B1D] text-white'
+              ? 'bg-white/95 border-border-subtle text-fg-primary'
+              : 'bg-bg-elevated/95 border-border-subtle text-white'
           }`}
         >
           <div
             className={`flex items-center justify-between gap-2 border-b pb-2 mb-2 ${
-              isLight ? 'border-[#E2E8F0]' : 'border-[#152B1D]'
+              isLight ? 'border-border-subtle' : 'border-border-subtle'
             }`}
           >
             <span className="font-extrabold text-xs">{hoveredQuarter.label}</span>
             <span
               className={`text-[10px] px-2 py-0.5 rounded-full font-bold border ${
                 isLight
-                  ? 'bg-[#E8F8EE] text-[#00873E] border-[#C2E9CF]'
+                  ? 'bg-accent-muted text-accent border-border-subtle'
                   : 'bg-emerald/10 text-emerald border-emerald/20'
               }`}
             >
@@ -46,26 +46,26 @@ export function BiomassChartSvg({
           </div>
           <div className="space-y-1.5 text-xs">
             <div className="flex justify-between">
-              <span className={isLight ? 'text-[#64748B]' : 'text-[#94A3B8]'}>Active Value:</span>
+              <span className={isLight ? 'text-fg-secondary' : 'text-fg-secondary'}>Active Value:</span>
               <span className="font-bold font-mono tabular-nums text-emerald">
                 {metricConfig.format(hoveredQuarter[metricConfig.primaryKey])}
               </span>
             </div>
             <div className="flex justify-between">
-              <span className={isLight ? 'text-[#64748B]' : 'text-[#94A3B8]'}>Pre-Project Base:</span>
+              <span className={isLight ? 'text-fg-secondary' : 'text-fg-secondary'}>Pre-Project Base:</span>
               <span className="font-bold font-mono tabular-nums text-amber-500">
                 {metricConfig.format(hoveredQuarter[metricConfig.baselineKey])}
               </span>
             </div>
             <div className="flex justify-between">
-              <span className={isLight ? 'text-[#64748B]' : 'text-[#94A3B8]'}>Additionality Delta:</span>
+              <span className={isLight ? 'text-fg-secondary' : 'text-fg-secondary'}>Additionality Delta:</span>
               <span className="font-bold font-mono tabular-nums text-emerald">
                 +{(hoveredQuarter[metricConfig.primaryKey] - hoveredQuarter[metricConfig.baselineKey]).toFixed(2)}
               </span>
             </div>
             <div
               className={`flex justify-between border-t pt-1.5 text-[10px] font-mono ${
-                isLight ? 'border-[#E2E8F0] text-[#64748B]' : 'border-[#152B1D] text-[#94A3B8]'
+                isLight ? 'border-border-subtle text-fg-secondary' : 'border-border-subtle text-fg-secondary'
               }`}
             >
               <span>Sensor: {hoveredQuarter.sensor}</span>

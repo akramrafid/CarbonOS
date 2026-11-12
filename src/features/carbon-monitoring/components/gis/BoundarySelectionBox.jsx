@@ -24,12 +24,12 @@ export function BoundarySelectionBox({
   return (
     <div
       className={`border rounded-2xl p-5 transition-all ${
-        isLight ? 'bg-white border-[#E2E8F0] shadow-xs' : 'bg-[#08130C] border-[#152B1D]'
+        isLight ? 'bg-white border-border-subtle shadow-xs' : 'bg-bg-elevated border-border-subtle'
       }`}
     >
       <h3
         className={`font-bold text-sm mb-3 uppercase tracking-wider flex items-center space-x-2 ${
-          isLight ? 'text-[#0F291B]' : 'text-mist'
+          isLight ? 'text-fg-primary' : 'text-mist'
         }`}
       >
         <Navigation size={16} className="text-emerald" />
@@ -41,7 +41,7 @@ export function BoundarySelectionBox({
         <div>
           <label
             className={`text-[10px] font-bold uppercase tracking-wider block mb-1.5 ${
-              isLight ? 'text-[#64748B]' : 'text-mist'
+              isLight ? 'text-fg-secondary' : 'text-mist'
             }`}
           >
             Quick Boundary Presets
@@ -61,7 +61,7 @@ export function BoundarySelectionBox({
                 drawPoints === SUNDARBANS_RESERVE ||
                 (drawPoints.length === SUNDARBANS_RESERVE.length && drawPoints[0][0] === SUNDARBANS_RESERVE[0][0])
                   ? isLight
-                    ? '!bg-[#E8F8EE] !border-[#00873E] !text-[#00873E] font-bold'
+                    ? '!bg-accent-muted !border-border-strong !text-accent font-bold'
                     : '!bg-emerald/15 !border-emerald !text-emerald font-bold'
                   : ''
               }`}
@@ -82,7 +82,7 @@ export function BoundarySelectionBox({
                 drawPoints === CHT_RESERVE ||
                 (drawPoints.length === CHT_RESERVE.length && drawPoints[0][0] === CHT_RESERVE[0][0])
                   ? isLight
-                    ? '!bg-[#E8F8EE] !border-[#00873E] !text-[#00873E] font-bold'
+                    ? '!bg-accent-muted !border-border-strong !text-accent font-bold'
                     : '!bg-emerald/15 !border-emerald !text-emerald font-bold'
                   : ''
               }`}
@@ -94,14 +94,14 @@ export function BoundarySelectionBox({
 
         <div
           className={`flex items-center justify-between p-3 rounded-xl border ${
-            isLight ? 'bg-[#F8FAFC] border-[#E2E8F0]' : 'bg-white/5 border-white/5'
+            isLight ? 'bg-bg-canvas border-border-subtle' : 'bg-white/5 border-white/5'
           }`}
         >
           <div>
-            <span className={`text-xs font-medium block ${isLight ? 'text-[#0F291B]' : 'text-white'}`}>
+            <span className={`text-xs font-medium block ${isLight ? 'text-fg-primary' : 'text-white'}`}>
               Custom Draw Polygon
             </span>
-            <span className={`text-[10px] block ${isLight ? 'text-[#64748B]' : 'text-mist'}`}>
+            <span className={`text-[10px] block ${isLight ? 'text-fg-secondary' : 'text-mist'}`}>
               {isDrawing ? 'Click points on map' : 'Click to plot custom bounds'}
             </span>
           </div>
@@ -124,13 +124,13 @@ export function BoundarySelectionBox({
           return (
             <div
               className={`p-3.5 rounded-xl border space-y-2.5 ${
-                isLight ? 'bg-[#E8F8EE]/60 border-[#C2E9CF]' : 'bg-emerald/10 border-emerald/20'
+                isLight ? 'bg-accent-muted/60 border-border-subtle' : 'bg-emerald/10 border-emerald/20'
               }`}
             >
               <div className="flex items-center justify-between">
                 <span
                   className={`text-[11px] font-bold uppercase tracking-wider flex items-center space-x-1.5 ${
-                    isLight ? 'text-[#00873E]' : 'text-emerald'
+                    isLight ? 'text-accent' : 'text-emerald'
                   }`}
                 >
                   <CheckCircle size={13} />
@@ -139,7 +139,7 @@ export function BoundarySelectionBox({
                 <span
                   className={`text-[10px] font-mono px-2 py-0.5 rounded-full ${
                     isLight
-                      ? 'bg-white text-[#475569] border border-[#C2E9CF]'
+                      ? 'bg-white text-fg-secondary border border-border-subtle'
                       : 'bg-carbon/60 text-mist border border-white/10'
                   }`}
                 >
@@ -149,33 +149,33 @@ export function BoundarySelectionBox({
 
               <div className="grid grid-cols-2 gap-2 pt-1 border-t border-emerald/15 text-xs">
                 <div>
-                  <span className={`text-[10px] block ${isLight ? 'text-[#64748B]' : 'text-mist'}`}>
+                  <span className={`text-[10px] block ${isLight ? 'text-fg-secondary' : 'text-mist'}`}>
                     Geodesic Area
                   </span>
                   <span
                     className={`font-extrabold font-mono text-sm block ${
-                      isLight ? 'text-[#0F291B]' : 'text-white'
+                      isLight ? 'text-fg-primary' : 'text-white'
                     }`}
                   >
                     {currentMetrics.areaHa} <span className="text-[10px] font-normal">ha</span>
                   </span>
-                  <span className={`block text-[10px] ${isLight ? 'text-[#64748B]' : 'text-mist'}`}>
+                  <span className={`block text-[10px] ${isLight ? 'text-fg-secondary' : 'text-mist'}`}>
                     ({currentMetrics.areaAcres} acres)
                   </span>
                 </div>
                 <div>
-                  <span className={`text-[10px] block ${isLight ? 'text-[#64748B]' : 'text-mist'}`}>
+                  <span className={`text-[10px] block ${isLight ? 'text-fg-secondary' : 'text-mist'}`}>
                     Perimeter
                   </span>
                   <span
                     className={`font-extrabold font-mono text-sm block ${
-                      isLight ? 'text-[#0F291B]' : 'text-white'
+                      isLight ? 'text-fg-primary' : 'text-white'
                     }`}
                   >
                     {currentMetrics.perimeterKm} <span className="text-[10px] font-normal">km</span>
                   </span>
                   <span
-                    className={`block text-[10px] truncate ${isLight ? 'text-[#00873E]' : 'text-emerald'}`}
+                    className={`block text-[10px] truncate ${isLight ? 'text-accent' : 'text-emerald'}`}
                     title={currentZone.zone}
                   >
                     {currentZone.zone.split(' ')[0]} {currentZone.zone.split(' ')[1] || ''}
@@ -209,7 +209,7 @@ export function BoundarySelectionBox({
         })() : drawPoints.length > 0 ? (
           <div
             className={`p-3 rounded-xl border text-xs ${
-              isLight ? 'bg-[#FFFBEB] border-[#FDE68A] text-[#92400E]' : 'bg-amber/10 border-amber/20 text-amber'
+              isLight ? 'bg-amber-50 border-amber-200 text-amber-700' : 'bg-amber/10 border-amber/20 text-amber'
             }`}
           >
             <div className="flex items-center justify-between font-semibold">
@@ -232,7 +232,7 @@ export function BoundarySelectionBox({
         {/* Upload GeoJSON/KML */}
         <div
           className={`border-2 border-dashed transition-colors rounded-xl p-4 text-center cursor-pointer relative ${
-            isLight ? 'border-[#CBD5E1] hover:border-[#00873E] bg-[#F8FAFC]' : 'border-white/10 hover:border-emerald/40'
+            isLight ? 'border-border-subtle hover:border-border-strong bg-bg-canvas' : 'border-white/10 hover:border-emerald/40'
           }`}
         >
           <input
@@ -242,10 +242,10 @@ export function BoundarySelectionBox({
             className="absolute inset-0 opacity-0 cursor-pointer"
           />
           <Upload className="mx-auto text-emerald mb-2" size={24} />
-          <span className={`text-xs font-semibold block ${isLight ? 'text-[#0F291B]' : 'text-white'}`}>
+          <span className={`text-xs font-semibold block ${isLight ? 'text-fg-primary' : 'text-white'}`}>
             Drag & Drop Boundary
           </span>
-          <span className={`text-[10px] block mt-1 ${isLight ? 'text-[#64748B]' : 'text-mist'}`}>
+          <span className={`text-[10px] block mt-1 ${isLight ? 'text-fg-secondary' : 'text-mist'}`}>
             GeoJSON / KML files supported
           </span>
         </div>

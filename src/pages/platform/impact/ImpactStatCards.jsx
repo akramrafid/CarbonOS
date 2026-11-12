@@ -6,14 +6,14 @@ export function ImpactStatCards({ onScrollToRerf }) {
   return (
     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
       {/* Card 1: Carbon Credit Generated */}
-      <div className="bg-[#0D2B1A]/30 border border-[#00C853]/15 rounded-[1.8rem] p-8 flex flex-col justify-between hover:border-[#00C853]/40 transition-all duration-300 hover:-translate-y-1.5 relative group overflow-hidden shadow-xl min-h-[300px]">
-        <div className="absolute top-0 right-0 w-24 h-24 bg-[#00C853]/5 rounded-bl-full group-hover:bg-[#00C853]/10 transition-colors"></div>
+      <div className="bg-bg-surface/30 border border-border-strong/15 rounded-[1.8rem] p-8 flex flex-col justify-between hover:border-border-strong/40 transition-all duration-300 hover:-translate-y-1.5 relative group overflow-hidden shadow-xl min-h-[300px]">
+        <div className="absolute top-0 right-0 w-24 h-24 bg-accent/5 rounded-bl-full group-hover:bg-accent/10 transition-colors"></div>
         <div className="space-y-4">
-          <div className="w-10 h-10 rounded-xl bg-[#0D2B1A] flex items-center justify-center border border-[#00C853]/20 text-[#00C853]">
+          <div className="w-10 h-10 rounded-xl bg-bg-surface flex items-center justify-center border border-border-strong/20 text-accent">
             <Activity className="w-5 h-5" />
           </div>
           <h3 className="font-sans font-bold text-lg text-white/90">Carbon Credit Generated</h3>
-          <p className="font-mono text-4xl font-extrabold text-[#00C853] tracking-tight">1,420,950</p>
+          <p className="font-mono text-4xl font-extrabold text-accent tracking-tight">1,420,950</p>
           <span className="font-mono text-xs text-mist block">tCO₂e Registered</span>
         </div>
         <p className="text-xs text-mist/75 mt-6 leading-relaxed font-sans">
@@ -22,14 +22,14 @@ export function ImpactStatCards({ onScrollToRerf }) {
       </div>
 
       {/* Card 2: Carbon Credit Sold */}
-      <div className="bg-[#0D2B1A]/30 border border-[#00C853]/15 rounded-[1.8rem] p-8 flex flex-col justify-between hover:border-[#00C853]/40 transition-all duration-300 hover:-translate-y-1.5 relative group overflow-hidden shadow-xl min-h-[300px]">
-        <div className="absolute top-0 right-0 w-24 h-24 bg-[#00C853]/5 rounded-bl-full group-hover:bg-[#00C853]/10 transition-colors"></div>
+      <div className="bg-bg-surface/30 border border-border-strong/15 rounded-[1.8rem] p-8 flex flex-col justify-between hover:border-border-strong/40 transition-all duration-300 hover:-translate-y-1.5 relative group overflow-hidden shadow-xl min-h-[300px]">
+        <div className="absolute top-0 right-0 w-24 h-24 bg-accent/5 rounded-bl-full group-hover:bg-accent/10 transition-colors"></div>
         <div className="space-y-4">
-          <div className="w-10 h-10 rounded-xl bg-[#0D2B1A] flex items-center justify-center border border-[#00C853]/20 text-[#00C853]">
+          <div className="w-10 h-10 rounded-xl bg-bg-surface flex items-center justify-center border border-border-strong/20 text-accent">
             <Globe className="w-5 h-5" />
           </div>
           <h3 className="font-sans font-bold text-lg text-white/90">Carbon Credit Sold</h3>
-          <p className="font-mono text-4xl font-extrabold text-[#00C853] tracking-tight">1,180,420</p>
+          <p className="font-mono text-4xl font-extrabold text-accent tracking-tight">1,180,420</p>
           <span className="font-mono text-xs text-mist block">tCO₂e Retired</span>
         </div>
         <p className="text-xs text-mist/75 mt-6 leading-relaxed font-sans">
@@ -38,10 +38,10 @@ export function ImpactStatCards({ onScrollToRerf }) {
       </div>
 
       {/* Card 3: Directly Community Benefited */}
-      <div className="bg-[#0D2B1A]/30 border border-[#00C853]/15 rounded-[1.8rem] p-8 flex flex-col justify-between hover:border-[#00C853]/40 transition-all duration-300 hover:-translate-y-1.5 relative group overflow-hidden shadow-xl min-h-[300px]">
-        <div className="absolute top-0 right-0 w-24 h-24 bg-[#00C853]/5 rounded-bl-full group-hover:bg-[#00C853]/10 transition-colors"></div>
+      <div className="bg-bg-surface/30 border border-border-strong/15 rounded-[1.8rem] p-8 flex flex-col justify-between hover:border-border-strong/40 transition-all duration-300 hover:-translate-y-1.5 relative group overflow-hidden shadow-xl min-h-[300px]">
+        <div className="absolute top-0 right-0 w-24 h-24 bg-accent/5 rounded-bl-full group-hover:bg-accent/10 transition-colors"></div>
         <div className="space-y-4">
-          <div className="w-10 h-10 rounded-xl bg-[#0D2B1A] flex items-center justify-center border border-[#00C853]/20 text-amber">
+          <div className="w-10 h-10 rounded-xl bg-bg-surface flex items-center justify-center border border-border-strong/20 text-amber">
             <Users className="w-5 h-5" />
           </div>
           <h3 className="font-sans font-bold text-lg text-white/90">Direct Community Benefit</h3>
@@ -54,10 +54,10 @@ export function ImpactStatCards({ onScrollToRerf }) {
       </div>
 
       {/* Card 4: Zero Finance Fund */}
-      <div className="bg-[#0D2B1A] border-2 border-amber/35 rounded-[1.8rem] p-8 flex flex-col justify-between hover:border-amber/60 transition-all duration-300 hover:-translate-y-1.5 relative group overflow-hidden shadow-xl shadow-amber/5 min-h-[300px]">
+      <div className="bg-bg-surface border-2 border-amber/35 rounded-[1.8rem] p-8 flex flex-col justify-between hover:border-amber/60 transition-all duration-300 hover:-translate-y-1.5 relative group overflow-hidden shadow-xl shadow-amber/5 min-h-[300px]">
         <div className="absolute top-0 right-0 w-24 h-24 bg-amber/5 rounded-bl-full group-hover:bg-amber/10 transition-colors"></div>
         <div className="space-y-4">
-          <div className="w-10 h-10 rounded-xl bg-[#080F0B] flex items-center justify-center border border-amber/30 text-amber">
+          <div className="w-10 h-10 rounded-xl bg-bg-canvas flex items-center justify-center border border-amber/30 text-amber">
             <Coins className="w-5 h-5" />
           </div>
           <h3 className="font-sans font-bold text-lg text-white/90">Zero Finance Fund</h3>

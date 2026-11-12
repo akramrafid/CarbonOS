@@ -48,7 +48,7 @@ export const Tooltip = ({
         <div
           id={tooltipId.current}
           role="tooltip"
-          className={`absolute z-50 px-2.5 py-1.5 text-[11px] font-sans font-medium text-white bg-slate-900/95 dark:bg-[#07130A] dark:border dark:border-emerald/40 rounded-lg shadow-xl pointer-events-none whitespace-nowrap animate-in fade-in zoom-in-95 duration-150 ${positionClasses}`}
+          className={`absolute z-50 px-2.5 py-1.5 text-[11px] font-sans font-medium text-white bg-slate-900/95 dark:bg-bg-canvas dark:border dark:border-emerald/40 rounded-lg shadow-xl pointer-events-none whitespace-nowrap animate-in fade-in zoom-in-95 duration-150 ${positionClasses}`}
         >
           {content}
         </div>

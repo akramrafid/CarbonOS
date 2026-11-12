@@ -17,8 +17,8 @@ export function JoinHarvestGuardCard({
   handleRegister
 }) {
   return (
-    <div className={`flex items-center justify-center w-full ${isInline ? 'py-4' : 'min-h-screen pt-24 pb-16 px-4'}`}>
-      <div className="bg-white/5 backdrop-blur-md border border-white/10 p-8 rounded-[32px] w-full max-w-md shadow-2xl hover:border-[#CCFF00]/25 transition-all duration-300">
+    <div className={`flex items-center justify-center w-full ${isInline ? 'py-4' : 'min-h-screen pt-12 pb-8 sm:pt-16 sm:pb-12 px-4'}`}>
+      <div className="bg-white/5 backdrop-blur-md border border-white/10 p-8 rounded-[32px] w-full max-w-md shadow-2xl hover:border-lime-400/25 transition-all duration-300">
         {isInline && onBack && (
           <Button
             variant="ghost"
@@ -54,7 +54,7 @@ export function JoinHarvestGuardCard({
               value={name}
               onChange={e => setName(e.target.value)}
               required
-              className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-white focus:outline-none focus:border-[#CCFF00] focus:ring-1 focus:ring-[#CCFF00]/50 transition-all"
+              className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-white focus:outline-none focus:border-lime-400 focus:ring-1 focus:ring-[#CCFF00]/50 transition-all"
             />
           </div>
           <div>
@@ -64,7 +64,7 @@ export function JoinHarvestGuardCard({
               value={phone}
               onChange={e => setPhone(e.target.value)}
               required
-              className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-white focus:outline-none focus:border-[#CCFF00] focus:ring-1 focus:ring-[#CCFF00]/50 transition-all"
+              className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-white focus:outline-none focus:border-lime-400 focus:ring-1 focus:ring-[#CCFF00]/50 transition-all"
             />
           </div>
           <div>
@@ -74,7 +74,7 @@ export function JoinHarvestGuardCard({
               value={password}
               onChange={e => setPassword(e.target.value)}
               required
-              className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-white focus:outline-none focus:border-[#CCFF00] focus:ring-1 focus:ring-[#CCFF00]/50 transition-all"
+              className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-white focus:outline-none focus:border-lime-400 focus:ring-1 focus:ring-[#CCFF00]/50 transition-all"
             />
           </div>
           <div>
@@ -82,7 +82,7 @@ export function JoinHarvestGuardCard({
             <select
               value={lang}
               onChange={e => setLang(e.target.value)}
-              className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-white focus:outline-none focus:border-[#CCFF00] transition-all"
+              className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-white focus:outline-none focus:border-lime-400 transition-all"
             >
               <option value="bn" className="bg-carbon text-white">বাংলা (Bangla)</option>
               <option value="en" className="bg-carbon text-white">English</option>

@@ -126,8 +126,8 @@ export const MarketplaceBrowse = () => {
 
   return (
     <div
-      className={`pt-28 pb-20 px-4 sm:px-6 lg:px-12 w-full min-h-screen transition-colors duration-300 ${
-        isLight ? 'bg-[#f2f3ee] text-[#181414]' : 'bg-[#040A06] text-white'
+      className={`pt-16 pb-12 px-4 sm:px-6 lg:px-12 w-full min-h-screen transition-colors duration-300 ${
+        isLight ? 'bg-bg-canvas text-fg-primary' : 'bg-bg-canvas text-white'
       }`}
     >
       {/* Toast Notification */}

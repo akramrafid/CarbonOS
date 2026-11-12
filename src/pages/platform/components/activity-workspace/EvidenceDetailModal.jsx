@@ -28,12 +28,12 @@ export function EvidenceDetailModal({
       }
     >
       <div className="space-y-4">
-        <div className="flex items-center space-x-2 text-[10px] font-mono uppercase tracking-widest text-[#00C853] font-bold">
+        <div className="flex items-center space-x-2 text-[10px] font-mono uppercase tracking-widest text-accent font-bold">
           <ShieldCheck className="w-4 h-4" />
           <span>Primary Evidence Audit Trail</span>
         </div>
 
-        <div className="grid grid-cols-2 gap-4 p-4 rounded-2xl bg-black/30 border border-[#152B1D] text-xs">
+        <div className="grid grid-cols-2 gap-4 p-4 rounded-2xl bg-black/30 border border-border-subtle text-xs">
           <div>
             <span className="text-gray-400 text-[10px] block">DOCUMENT IDENTIFIER</span>
             <span className="font-mono font-bold text-white text-sm">{selectedEvidence.id}</span>
@@ -52,7 +52,7 @@ export function EvidenceDetailModal({
           </div>
           <div>
             <span className="text-gray-400 text-[10px] block">VERIFIED MONETARY AMOUNT</span>
-            <span className="font-mono font-bold text-[#00C853] text-sm">
+            <span className="font-mono font-bold text-accent text-sm">
               {selectedEvidence.amountBdt > 0 ? `BDT ${fmt(selectedEvidence.amountBdt, 0)}` : 'Internal Census / Free'}
             </span>
           </div>
@@ -63,15 +63,15 @@ export function EvidenceDetailModal({
         </div>
 
         {/* Cryptographic SHA-256 Stamp */}
-        <div className="p-3.5 rounded-xl bg-black/40 border border-[#152B1D] font-mono text-[11px] space-y-1">
+        <div className="p-3.5 rounded-xl bg-black/40 border border-border-subtle font-mono text-[11px] space-y-1">
           <span className="text-gray-400 text-[10px] block">SHA-256 CRYPTOGRAPHIC PROVENANCE HASH</span>
-          <span className="text-[#00E676] break-all select-all font-mono">
+          <span className="text-accent-hover break-all select-all font-mono">
             {selectedEvidence.sha256}
           </span>
         </div>
 
         {/* Notes */}
-        <div className="p-3.5 rounded-xl bg-black/20 border border-[#152B1D] text-xs leading-relaxed text-gray-300">
+        <div className="p-3.5 rounded-xl bg-black/20 border border-border-subtle text-xs leading-relaxed text-gray-300">
           <span className="font-bold text-white block mb-0.5">Assurance Note:</span>
           {selectedEvidence.notes}
         </div>

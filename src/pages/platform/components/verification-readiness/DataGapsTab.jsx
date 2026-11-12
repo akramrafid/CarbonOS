@@ -11,7 +11,7 @@ export function DataGapsTab({
   return (
     <div
       className={`rounded-3xl p-6 sm:p-8 border shadow-xl space-y-6 ${
-        isLight ? 'bg-white border-[#E2E8E3]' : 'bg-[#08130C] border-[#152B1D]'
+        isLight ? 'bg-white border-border-subtle' : 'bg-bg-elevated border-border-subtle'
       }`}
     >
       <div>

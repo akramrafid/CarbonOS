@@ -28,7 +28,7 @@ export function AddSegmentModal({
             onChange={(e) => setNewSegment({ ...newSegment, name: e.target.value })}
             placeholder="e.g. Substation SF6 Gas Leakage or ETP COD Sludge"
             required
-            className="w-full p-2.5 rounded-xl bg-[#040A06] border border-white/10 text-white focus:outline-none focus:border-[#00C853]"
+            className="w-full p-2.5 rounded-xl bg-bg-canvas border border-white/10 text-white focus:outline-none focus:border-border-strong"
           />
         </div>
 
@@ -38,7 +38,7 @@ export function AddSegmentModal({
             <select
               value={newSegment.type}
               onChange={(e) => setNewSegment({ ...newSegment, type: e.target.value })}
-              className="w-full p-2.5 rounded-xl bg-[#040A06] border border-white/10 text-white focus:outline-none focus:border-[#00C853]"
+              className="w-full p-2.5 rounded-xl bg-bg-canvas border border-white/10 text-white focus:outline-none focus:border-border-strong"
             >
               <option value="Electricity">Electricity</option>
               <option value="Fossil Fuel">Fossil Fuel</option>
@@ -55,7 +55,7 @@ export function AddSegmentModal({
             <select
               value={newSegment.scope}
               onChange={(e) => setNewSegment({ ...newSegment, scope: e.target.value })}
-              className="w-full p-2.5 rounded-xl bg-[#040A06] border border-white/10 text-white focus:outline-none focus:border-[#00C853]"
+              className="w-full p-2.5 rounded-xl bg-bg-canvas border border-white/10 text-white focus:outline-none focus:border-border-strong"
             >
               <option value="Scope 1">Scope 1</option>
               <option value="Scope 2">Scope 2</option>
@@ -74,7 +74,7 @@ export function AddSegmentModal({
               onChange={(e) => setNewSegment({ ...newSegment, qty: e.target.value })}
               placeholder="e.g. 500"
               required
-              className="w-full p-2.5 rounded-xl bg-[#040A06] border border-white/10 text-white focus:outline-none focus:border-[#00C853]"
+              className="w-full p-2.5 rounded-xl bg-bg-canvas border border-white/10 text-white focus:outline-none focus:border-border-strong"
             />
           </div>
 
@@ -86,7 +86,7 @@ export function AddSegmentModal({
               onChange={(e) => setNewSegment({ ...newSegment, unit: e.target.value })}
               placeholder="kWh / Liters / m3"
               required
-              className="w-full p-2.5 rounded-xl bg-[#040A06] border border-white/10 text-white focus:outline-none focus:border-[#00C853]"
+              className="w-full p-2.5 rounded-xl bg-bg-canvas border border-white/10 text-white focus:outline-none focus:border-border-strong"
             />
           </div>
 
@@ -99,7 +99,7 @@ export function AddSegmentModal({
               onChange={(e) => setNewSegment({ ...newSegment, factor: e.target.value })}
               placeholder="Approved factor"
               required
-              className="w-full p-2.5 rounded-xl bg-[#040A06] border border-white/10 text-white focus:outline-none focus:border-[#00C853]"
+              className="w-full p-2.5 rounded-xl bg-bg-canvas border border-white/10 text-white focus:outline-none focus:border-border-strong"
             />
           </div>
         </div>
@@ -112,7 +112,7 @@ export function AddSegmentModal({
             value={newSegment.cost_bdt}
             onChange={(e) => setNewSegment({ ...newSegment, cost_bdt: e.target.value })}
             placeholder="e.g. 45000"
-            className="w-full p-2.5 rounded-xl bg-[#040A06] border border-white/10 text-white focus:outline-none focus:border-[#00C853]"
+            className="w-full p-2.5 rounded-xl bg-bg-canvas border border-white/10 text-white focus:outline-none focus:border-border-strong"
           />
         </div>
 

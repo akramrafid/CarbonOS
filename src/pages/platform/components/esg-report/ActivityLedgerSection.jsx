@@ -3,12 +3,12 @@ import React from 'react';
 export function ActivityLedgerSection({ activities, fmt }) {
   return (
     <section className="space-y-4">
-      <div className="flex items-center space-x-2 text-xs font-mono uppercase tracking-wider text-[#00C853] font-bold">
-        <span className="w-2 h-2 rounded-full bg-[#00C853]" />
+      <div className="flex items-center space-x-2 text-xs font-mono uppercase tracking-wider text-accent font-bold">
+        <span className="w-2 h-2 rounded-full bg-accent" />
         <span>Appendices • Complete Activity & Evidence Ledger</span>
       </div>
 
-      <div className="p-3 sm:p-5 rounded-2xl bg-black/30 border border-[#152B1D] space-y-3 w-full overflow-hidden">
+      <div className="p-3 sm:p-5 rounded-2xl bg-black/30 border border-border-subtle space-y-3 w-full overflow-hidden">
         <div className="text-[11px] font-mono text-gray-400 flex items-center justify-between pb-1 md:hidden">
           <span>← Scroll report table horizontally →</span>
           <span className="text-[10px]">700px</span>
@@ -16,7 +16,7 @@ export function ActivityLedgerSection({ activities, fmt }) {
         <div className="w-full overflow-x-auto touch-pan-x">
           <table className="w-full text-left font-sans text-xs min-w-[700px]">
             <thead>
-              <tr className="text-gray-400 border-b border-[#152B1D] pb-2 font-mono uppercase text-[10px]">
+              <tr className="text-gray-400 border-b border-border-subtle pb-2 font-mono uppercase text-[10px]">
                 <th className="py-2">Activity Ref</th>
                 <th>Source / Description</th>
                 <th>Scope</th>
@@ -41,7 +41,7 @@ export function ActivityLedgerSection({ activities, fmt }) {
                   <td className="font-mono text-[11px] text-gray-300 truncate max-w-[200px]">
                     {a.evidenceFileName || <span className="text-amber-400">Missing doc</span>}
                   </td>
-                  <td className="text-right font-mono font-bold text-[#00C853]">{fmt(a.tCO2e, 2)}</td>
+                  <td className="text-right font-mono font-bold text-accent">{fmt(a.tCO2e, 2)}</td>
                 </tr>
               ))}
             </tbody>

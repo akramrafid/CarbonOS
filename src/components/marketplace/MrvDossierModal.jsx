@@ -48,7 +48,7 @@ export function MrvDossierModal({
         {/* Telemetry Block */}
         <div
           className={`p-4 rounded-xl border space-y-2 ${
-            isLight ? 'bg-slate-50 border-slate-200' : 'bg-[#040A06] border-white/10'
+            isLight ? 'bg-slate-50 border-slate-200' : 'bg-bg-canvas border-white/10'
           }`}
         >
           <div className="flex items-center justify-between">
@@ -92,7 +92,7 @@ export function MrvDossierModal({
         {/* Financial Breakdown */}
         <div
           className={`p-3.5 rounded-xl border flex justify-between items-center ${
-            isLight ? 'bg-emerald/5 border-emerald/20' : 'bg-[#0D2B1A]/40 border-emerald/20'
+            isLight ? 'bg-emerald/5 border-emerald/20' : 'bg-bg-surface/40 border-emerald/20'
           }`}
         >
           <div>

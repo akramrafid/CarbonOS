@@ -23,7 +23,7 @@ export function MarketplaceHero({ isLight = false }) {
 
             <h1
               className={`serif-drama text-4xl sm:text-5xl lg:text-6xl font-bold tracking-tight leading-[1.08] ${
-                isLight ? 'text-[#181414]' : 'text-white'
+                isLight ? 'text-fg-primary' : 'text-white'
               }`}
             >
               Institutional Carbon Marketplace
@@ -31,7 +31,7 @@ export function MarketplaceHero({ isLight = false }) {
 
             <p
               className={`font-sans text-base sm:text-lg max-w-2xl leading-relaxed ${
-                isLight ? 'text-[#413f3f]' : 'text-slate-300'
+                isLight ? 'text-fg-secondary' : 'text-slate-300'
               }`}
             >
               Acquire carbon credits directly from Bangladesh's rural climate stewards. Full on-chain telemetry, zero double-counting, and{' '}
@@ -42,7 +42,7 @@ export function MarketplaceHero({ isLight = false }) {
           {/* Quick Guarantees Badge Group */}
           <div
             className={`p-4 rounded-2xl border flex flex-col space-y-2.5 shrink-0 text-xs ${
-              isLight ? 'bg-white border-[#dbf0ea] shadow-sm' : 'bg-[#080F0B] border-emerald/20 shadow-xl'
+              isLight ? 'bg-white border-border-strong shadow-sm' : 'bg-bg-canvas border-emerald/20 shadow-xl'
             }`}
           >
             <div className="flex items-center space-x-2 text-emerald font-semibold">
@@ -64,12 +64,12 @@ export function MarketplaceHero({ isLight = false }) {
       {/* Spot Ticker & Metric Strip */}
       <div
         className={`rounded-2xl border overflow-hidden transition-all ${
-          isLight ? 'bg-white border-[#dbf0ea]' : 'bg-[#080F0B] border-white/10'
+          isLight ? 'bg-white border-border-strong' : 'bg-bg-canvas border-white/10'
         }`}
       >
         <div
           className={`px-4 py-2 border-b flex items-center space-x-6 overflow-x-auto text-[11px] font-mono no-scrollbar ${
-            isLight ? 'bg-[#f2f3ee]/80 border-[#dbf0ea]' : 'bg-[#040A06] border-white/5'
+            isLight ? 'bg-bg-canvas/80 border-border-strong' : 'bg-bg-canvas border-white/5'
           }`}
         >
           <span className="font-bold text-emerald shrink-0 flex items-center space-x-1.5">

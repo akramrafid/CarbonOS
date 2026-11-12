@@ -15,15 +15,15 @@ export function EmptyState({
   className = ''
 }) {
   return (
-    <div className={`flex flex-col items-center justify-center text-center p-8 sm:p-12 rounded-2xl border border-dashed border-carbon-border dark:border-[#1E3326] bg-carbon-surface/30 dark:bg-[#0D1812]/30 ${className}`}>
-      <div className="w-12 h-12 rounded-xl bg-carbon-surface-raised flex items-center justify-center text-mist mb-4 border border-carbon-border/60 dark:bg-[#13241B] dark:border-[#2A4736] dark:text-[#7A9A85]" aria-hidden="true">
+    <div className={`flex flex-col items-center justify-center text-center p-8 sm:p-12 rounded-2xl border border-dashed border-carbon-border dark:border-border-subtle bg-carbon-surface/30 dark:bg-bg-surface/30 ${className}`}>
+      <div className="w-12 h-12 rounded-xl bg-carbon-surface-raised flex items-center justify-center text-mist mb-4 border border-carbon-border/60 dark:bg-bg-elevated dark:border-border-subtle dark:text-fg-secondary" aria-hidden="true">
         <Icon className="w-6 h-6" />
       </div>
-      <h3 className="text-base sm:text-lg font-sans font-semibold text-registry mb-1 dark:text-[#E2ECE5]">
+      <h3 className="text-base sm:text-lg font-sans font-semibold text-registry mb-1 dark:text-fg-primary">
         {title}
       </h3>
       {description && (
-        <p className="text-xs sm:text-sm text-mist max-w-sm mb-6 leading-relaxed dark:text-[#7A9A85]">
+        <p className="text-xs sm:text-sm text-mist max-w-sm mb-6 leading-relaxed dark:text-fg-secondary">
           {description}
         </p>
       )}

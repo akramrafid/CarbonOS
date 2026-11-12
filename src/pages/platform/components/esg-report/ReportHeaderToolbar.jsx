@@ -12,23 +12,23 @@ export function ReportHeaderToolbar({
 }) {
   return (
     <div className={`rounded-3xl p-6 sm:p-8 border shadow-xl transition-all relative overflow-hidden ${
-      isLight ? 'bg-white border-[#E2E8F0]' : 'bg-[#08130C] border-[#152B1D]'
+      isLight ? 'bg-white border-border-subtle' : 'bg-bg-elevated border-border-subtle'
     }`}>
       <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-6 relative z-10">
         <div>
-          <div className="flex items-center space-x-2 text-[10px] font-mono uppercase tracking-widest text-[#00C853] font-bold">
+          <div className="flex items-center space-x-2 text-[10px] font-mono uppercase tracking-widest text-accent font-bold">
             <Award className="w-4 h-4" />
             <span>Executive ESG Disclosure Suite</span>
           </div>
           <h2 className={`font-sans font-bold text-2xl sm:text-3xl mt-1 tracking-tight ${
-            isLight ? 'text-[#0F2417]' : 'text-white'
+            isLight ? 'text-fg-primary' : 'text-white'
           }`}>
             ISO 14064-1 GHG Inventory Report
           </h2>
           <p className={`text-xs sm:text-sm mt-1 max-w-2xl leading-relaxed ${
-            isLight ? 'text-slate-500' : 'text-[#7C9A88]'
+            isLight ? 'text-slate-500' : 'text-fg-secondary'
           }`}>
-            Formal corporate sustainability disclosure statement for <strong className="text-[#00C853]">{activeClient.legalName}</strong>. Ready for auditor assurance, board governance, and EU CBAM filing.
+            Formal corporate sustainability disclosure statement for <strong className="text-accent">{activeClient.legalName}</strong>. Ready for auditor assurance, board governance, and EU CBAM filing.
           </p>
         </div>
 
@@ -38,7 +38,7 @@ export function ReportHeaderToolbar({
             variant="secondary"
             size="sm"
             onClick={onCopyMarkdown}
-            leftIcon={copied ? <Check className="w-4 h-4 text-[#00C853]" /> : <Copy className="w-4 h-4 text-[#00C853]" />}
+            leftIcon={copied ? <Check className="w-4 h-4 text-accent" /> : <Copy className="w-4 h-4 text-accent" />}
           >
             {copied ? 'Copied Markdown' : 'Copy Markdown'}
           </Button>
@@ -47,7 +47,7 @@ export function ReportHeaderToolbar({
             variant="secondary"
             size="sm"
             onClick={onPrint}
-            leftIcon={<Printer className="w-4 h-4 text-[#00C853]" />}
+            leftIcon={<Printer className="w-4 h-4 text-accent" />}
           >
             Print / PDF
           </Button>

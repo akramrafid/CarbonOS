@@ -18,13 +18,13 @@ export const EsgAiRagSection = ({
   setSelectedCitation
 }) => {
   return (
-    <div className={`border-t pt-6 space-y-4 ${isLight ? 'border-carbon-border' : 'border-[#122418]'}`}>
+    <div className={`border-t pt-6 space-y-4 ${isLight ? 'border-carbon-border' : 'border-border-subtle'}`}>
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-2">
         <div className="flex items-center space-x-2">
           <div className="w-6 h-6 rounded-md border flex items-center justify-center bg-emerald/15 border-emerald/30">
             <Sparkles className="w-3.5 h-3.5 text-emerald" />
           </div>
-          <h4 className={`font-sans font-bold text-sm ${isLight ? 'text-[#0F2417]' : 'text-white'}`}>
+          <h4 className={`font-sans font-bold text-sm ${isLight ? 'text-fg-primary' : 'text-white'}`}>
             Carbon Zero BD ESG Regulatory & Auditor Copilot
           </h4>
         </div>
@@ -91,16 +91,16 @@ export const EsgAiRagSection = ({
       {/* RAG Grounded Answer Output */}
       {ragResponse && (
         <div className={`rounded-2xl p-5 space-y-4 border ${
-          isLight ? 'bg-[#F2FBF5] border-emerald/30' : 'bg-[#050C07] border-[#1B4D2E]'
+          isLight ? 'bg-bg-muted border-emerald/30' : 'bg-bg-canvas border-border-subtle'
         }`}>
           <div className={`flex justify-between items-center pb-2 border-b ${
-            isLight ? 'border-emerald/20' : 'border-[#122418]'
+            isLight ? 'border-emerald/20' : 'border-border-subtle'
           }`}>
             <div className="flex items-center space-x-2">
               <Badge variant="emerald" size="sm">
                 {ragResponse.model_used || "unknown"}
               </Badge>
-              <span className={`text-xs font-bold ${isLight ? 'text-[#0F2417]' : 'text-white'}`}>
+              <span className={`text-xs font-bold ${isLight ? 'text-fg-primary' : 'text-white'}`}>
                 Grounded ESG Synthesis
               </span>
             </div>
@@ -111,7 +111,7 @@ export const EsgAiRagSection = ({
             )}
           </div>
 
-          <p className={`text-xs font-sans leading-relaxed ${isLight ? 'text-[#0F2417]' : 'text-[#E2ECE5]'}`}>
+          <p className={`text-xs font-sans leading-relaxed ${isLight ? 'text-fg-primary' : 'text-fg-primary'}`}>
             {ragResponse.answer}
           </p>
 

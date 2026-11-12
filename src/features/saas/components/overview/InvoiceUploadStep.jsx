@@ -16,17 +16,17 @@ export const InvoiceUploadStep = ({
     <div className="space-y-5">
       {/* Sample Quick Loader Banner */}
       <div className={`rounded-2xl p-4 flex flex-col sm:flex-row justify-between items-center gap-3 border ${
-        isLight ? 'bg-[#F2FBF5] border-emerald/30' : 'bg-[#0A1D12] border-[#1B4D2E]'
+        isLight ? 'bg-bg-muted border-emerald/30' : 'bg-bg-elevated border-border-subtle'
       }`}>
         <div className="flex items-center space-x-3">
           <div className="w-8 h-8 rounded-lg border flex items-center justify-center shrink-0 bg-emerald/15 border-emerald/30">
             <Database className="w-4 h-4 text-emerald" />
           </div>
           <div className="text-left">
-            <div className={`text-xs font-bold ${isLight ? 'text-[#0F2417]' : 'text-white'}`}>
+            <div className={`text-xs font-bold ${isLight ? 'text-fg-primary' : 'text-white'}`}>
               Quick Test with Demo Sample
             </div>
-            <div className={`text-[11px] ${isLight ? 'text-[#41634E]' : 'text-mist'}`}>
+            <div className={`text-[11px] ${isLight ? 'text-fg-muted' : 'text-mist'}`}>
               Load Dexterity Textiles Ltd Q2 Audit Statement (DEPZ TX-8491)
             </div>
           </div>
@@ -48,8 +48,8 @@ export const InvoiceUploadStep = ({
         onDrop={handleFileDrop}
         className={`border-2 border-dashed rounded-2xl p-8 text-center transition-colors cursor-pointer relative ${
           isLight 
-            ? 'border-emerald/30 bg-[#F7FAF7] hover:bg-[#E8F8EE]' 
-            : 'border-[#1B3B26] bg-[#040906]/80 hover:bg-[#061009]'
+            ? 'border-emerald/30 bg-bg-muted hover:bg-accent-muted' 
+            : 'border-border-subtle bg-bg-canvas/80 hover:bg-bg-canvas'
         }`}
       >
         <input 
@@ -61,10 +61,10 @@ export const InvoiceUploadStep = ({
         />
         <div onClick={() => document.getElementById('drag-file-input').click()} className="space-y-3">
           <Upload className="w-10 h-10 text-emerald mx-auto animate-none" />
-          <div className={`text-xs font-bold ${isLight ? 'text-[#0F2417]' : 'text-white'}`}>
+          <div className={`text-xs font-bold ${isLight ? 'text-fg-primary' : 'text-white'}`}>
             {uploadedFile ? `Uploaded Document: ${uploadedFile}` : "Drag & Drop Financial spreadsheets, utility bills, or fuel invoices here"}
           </div>
-          <div className={`text-[10px] ${isLight ? 'text-[#41634E]' : 'text-mist'}`}>
+          <div className={`text-[10px] ${isLight ? 'text-fg-muted' : 'text-mist'}`}>
             Supports PDF, XLSX, CSV, TXT (Max 25MB) • Encrypted Per-Tenant Ingestion
           </div>
         </div>
@@ -94,14 +94,14 @@ export const InvoiceUploadStep = ({
 
         {extractionResult && (
           <div className={`flex items-center space-x-2.5 px-4 py-2.5 rounded-xl border ${
-            isLight ? 'bg-emerald-50 border-emerald/30 text-emerald' : 'bg-[#0D2B1A] border-[#1B4D2E] text-emerald'
+            isLight ? 'bg-emerald-50 border-emerald/30 text-emerald' : 'bg-bg-surface border-border-subtle text-emerald'
           }`}>
             <CheckCircle2 className="w-5 h-5 text-emerald" />
             <div className="text-left leading-none">
               <div className="font-mono text-[9px] uppercase tracking-wider font-bold text-mist">
                 Status
               </div>
-              <div className={`font-sans font-bold text-xs ${isLight ? 'text-[#0F2417]' : 'text-white'}`}>
+              <div className={`font-sans font-bold text-xs ${isLight ? 'text-fg-primary' : 'text-white'}`}>
                 {extractionResult.review_status === 'DEMO_SAMPLE' ? 'DEMO SAMPLE — NOT CUSTOMER DATA' : 'UNREVIEWED — REVIEW REQUIRED'}
               </div>
             </div>

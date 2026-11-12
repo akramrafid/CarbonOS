@@ -12,12 +12,12 @@ export function SignoffTab({
   return (
     <div
       className={`rounded-3xl p-6 sm:p-8 border shadow-xl space-y-6 ${
-        isLight ? 'bg-white border-[#E2E8E3]' : 'bg-[#08130C] border-[#152B1D]'
+        isLight ? 'bg-white border-border-subtle' : 'bg-bg-elevated border-border-subtle'
       }`}
     >
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
         <div>
-          <div className="flex items-center space-x-2 text-[10px] font-mono uppercase tracking-widest text-[#00C853] font-bold">
+          <div className="flex items-center space-x-2 text-[10px] font-mono uppercase tracking-widest text-accent font-bold">
             <Award className="w-4 h-4" />
             <span>Third-Party Verification Opinion Document</span>
           </div>

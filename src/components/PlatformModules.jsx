@@ -8,7 +8,7 @@ const PlatformModules = () => {
   const [hoveredNode, setHoveredNode] = useState(null);
 
   return (
-    <section className="w-full bg-[#040A06] py-24 relative overflow-hidden font-sans modules-section">
+    <section className="w-full bg-bg-canvas py-10 md:py-16 relative overflow-hidden font-sans modules-section">
       <style>{`
         @keyframes fadeInHeader {
           from {
@@ -121,7 +121,7 @@ const PlatformModules = () => {
             <Link
               key={node.id}
               to={node.to}
-              className="absolute left-pill-anim flex items-center bg-[#080F0B]/85 hover:bg-[#0d1c13] border border-emerald/25 hover:border-emerald/80 rounded-full px-4 py-3 cursor-pointer transition-all duration-300 z-20 backdrop-blur-sm shadow-[0_3px_12px_rgba(4,10,6,0.6)] group"
+              className="absolute left-pill-anim flex items-center bg-bg-canvas/85 hover:bg-bg-elevated border border-emerald/25 hover:border-emerald/80 rounded-full px-4 py-3 cursor-pointer transition-all duration-300 z-20 backdrop-blur-sm shadow-[0_3px_12px_rgba(4,10,6,0.6)] group"
               style={{
                 left: '6.666%',
                 top: `${(node.y / 800) * 100}%`,
@@ -134,11 +134,11 @@ const PlatformModules = () => {
               onMouseEnter={() => setHoveredNode({ type: 'left', id: node.id })}
               onMouseLeave={() => setHoveredNode(null)}
             >
-              <div className="w-2 h-2 rounded-full bg-[#10b981] mr-3 relative flex items-center justify-center">
-                <div className="absolute w-2.5 h-2.5 rounded-full bg-[#10b981]/50 animate-ping group-hover:duration-700"></div>
+              <div className="w-2 h-2 rounded-full bg-emerald-500 mr-3 relative flex items-center justify-center">
+                <div className="absolute w-2.5 h-2.5 rounded-full bg-emerald-500/50 animate-ping group-hover:duration-700"></div>
               </div>
               <span className="text-registry text-xs font-mono tracking-wide">{node.title}</span>
-              <div className="absolute right-[-4px] top-1/2 -translate-y-1/2 w-2 h-2 rounded-full bg-[#10b981] border border-[#040A06] z-30 shadow-[0_0_8px_rgba(16,185,129,0.8)] group-hover:scale-125 transition-transform duration-300"></div>
+              <div className="absolute right-[-4px] top-1/2 -translate-y-1/2 w-2 h-2 rounded-full bg-emerald-500 border border-border-subtle z-30 shadow-[0_0_8px_rgba(16,185,129,0.8)] group-hover:scale-125 transition-transform duration-300"></div>
             </Link>
           ))}
 
@@ -146,7 +146,7 @@ const PlatformModules = () => {
           {rightNodes.map((node, idx) => (
             <div
               key={node.id}
-              className="absolute right-pill-anim flex items-center bg-[#080F0B]/85 border border-cyan/25 hover:border-cyan/80 rounded-full px-4 py-3 transition-all duration-300 z-20 backdrop-blur-sm shadow-[0_3px_12px_rgba(4,10,6,0.6)] group"
+              className="absolute right-pill-anim flex items-center bg-bg-canvas/85 border border-cyan/25 hover:border-cyan/80 rounded-full px-4 py-3 transition-all duration-300 z-20 backdrop-blur-sm shadow-[0_3px_12px_rgba(4,10,6,0.6)] group"
               style={{
                 left: '80%',
                 top: `${(node.y / 800) * 100}%`,
@@ -159,11 +159,11 @@ const PlatformModules = () => {
               onMouseEnter={() => setHoveredNode({ type: 'right', id: node.id })}
               onMouseLeave={() => setHoveredNode(null)}
             >
-              <div className="w-2 h-2 rounded-full bg-[#06b6d4] mr-3 relative flex items-center justify-center">
-                <div className="absolute w-2.5 h-2.5 rounded-full bg-[#06b6d4]/50 animate-ping group-hover:duration-700"></div>
+              <div className="w-2 h-2 rounded-full bg-cyan-500 mr-3 relative flex items-center justify-center">
+                <div className="absolute w-2.5 h-2.5 rounded-full bg-cyan-500/50 animate-ping group-hover:duration-700"></div>
               </div>
               <span className="text-registry text-xs font-mono tracking-wide">{node.title}</span>
-              <div className="absolute left-[-4px] top-1/2 -translate-y-1/2 w-2 h-2 rounded-full bg-[#06b6d4] border border-[#040A06] z-30 shadow-[0_0_8px_rgba(6,182,212,0.8)] group-hover:scale-125 transition-transform duration-300"></div>
+              <div className="absolute left-[-4px] top-1/2 -translate-y-1/2 w-2 h-2 rounded-full bg-cyan-500 border border-border-subtle z-30 shadow-[0_0_8px_rgba(6,182,212,0.8)] group-hover:scale-125 transition-transform duration-300"></div>
             </div>
           ))}
 

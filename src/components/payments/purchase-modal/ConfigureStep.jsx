@@ -21,7 +21,7 @@ export function ConfigureStep({
       {/* Credit Summary Card */}
       <div
         className={`p-4 rounded-xl border ${
-          isLight ? 'bg-[#f2f3ee]/60 border-[#dbf0ea]' : 'bg-[#040A06] border-emerald/20'
+          isLight ? 'bg-bg-canvas/60 border-border-strong' : 'bg-bg-canvas border-emerald/20'
         }`}
       >
         <div className="flex justify-between items-start mb-2">
@@ -30,7 +30,7 @@ export function ConfigureStep({
               {activeCredit.verification}
             </span>
             <span className="font-mono text-[10px] text-slate-400">ID: {activeCredit.id}</span>
-            <h3 className={`text-base font-bold mt-1 ${isLight ? 'text-[#181414]' : 'text-white'}`}>
+            <h3 className={`text-base font-bold mt-1 ${isLight ? 'text-fg-primary' : 'text-white'}`}>
               {activeCredit.type}
             </h3>
           </div>
@@ -43,13 +43,13 @@ export function ConfigureStep({
         <div className="grid grid-cols-3 gap-2 mt-3 pt-3 border-t border-white/5 text-xs">
           <div>
             <span className="text-[10px] text-slate-400 block font-mono">VOLUME</span>
-            <span className={`font-semibold ${isLight ? 'text-[#181414]' : 'text-white'}`}>
+            <span className={`font-semibold ${isLight ? 'text-fg-primary' : 'text-white'}`}>
               {activeCredit.tonnage} tCO₂e
             </span>
           </div>
           <div>
             <span className="text-[10px] text-slate-400 block font-mono">ORIGIN & PRODUCER</span>
-            <span className={`font-semibold truncate block ${isLight ? 'text-[#181414]' : 'text-white'}`}>
+            <span className={`font-semibold truncate block ${isLight ? 'text-fg-primary' : 'text-white'}`}>
               {activeCredit.region}
             </span>
           </div>
@@ -66,7 +66,7 @@ export function ConfigureStep({
       <div className="space-y-3.5">
         <h4
           className={`text-xs font-mono font-bold tracking-wider uppercase ${
-            isLight ? 'text-[#181414]' : 'text-white/80'
+            isLight ? 'text-fg-primary' : 'text-white/80'
           }`}
         >
           Corporate Beneficiary Details
@@ -81,8 +81,8 @@ export function ConfigureStep({
               onChange={(e) => setCompanyName(e.target.value)}
               className={`w-full p-2.5 text-xs rounded-lg border font-medium focus:outline-none focus:border-emerald ${
                 isLight
-                  ? 'bg-white border-slate-300 text-[#181414]'
-                  : 'bg-[#040A06] border-white/10 text-white'
+                  ? 'bg-white border-slate-300 text-fg-primary'
+                  : 'bg-bg-canvas border-white/10 text-white'
               }`}
             />
           </div>
@@ -94,8 +94,8 @@ export function ConfigureStep({
               onChange={(e) => setTaxBin(e.target.value)}
               className={`w-full p-2.5 text-xs rounded-lg border font-mono focus:outline-none focus:border-emerald ${
                 isLight
-                  ? 'bg-white border-slate-300 text-[#181414]'
-                  : 'bg-[#040A06] border-white/10 text-white'
+                  ? 'bg-white border-slate-300 text-fg-primary'
+                  : 'bg-bg-canvas border-white/10 text-white'
               }`}
             />
           </div>
@@ -108,8 +108,8 @@ export function ConfigureStep({
             onChange={(e) => setScopeType(e.target.value)}
             className={`w-full p-2.5 text-xs rounded-lg border font-medium focus:outline-none focus:border-emerald ${
               isLight
-                ? 'bg-white border-slate-300 text-[#181414]'
-                : 'bg-[#040A06] border-white/10 text-white'
+                ? 'bg-white border-slate-300 text-fg-primary'
+                : 'bg-bg-canvas border-white/10 text-white'
             }`}
           >
             <option>Scope 1 (Direct Facility Fuel & Gas Combustion)</option>
@@ -124,7 +124,7 @@ export function ConfigureStep({
           className={`flex items-start space-x-3 p-3.5 rounded-xl border cursor-pointer transition-all ${
             retireImmediately
               ? isLight
-                ? 'bg-[#E8F8EE] border-[#00873E]/30'
+                ? 'bg-accent-muted border-border-strong/30'
                 : 'bg-emerald/10 border-emerald/30'
               : isLight
               ? 'bg-slate-50 border-slate-200'
@@ -142,10 +142,10 @@ export function ConfigureStep({
               className={`text-xs font-bold block ${
                 retireImmediately
                   ? isLight
-                    ? 'text-[#00873E]'
+                    ? 'text-accent'
                     : 'text-emerald'
                   : isLight
-                  ? 'text-[#181414]'
+                  ? 'text-fg-primary'
                   : 'text-white'
               }`}
             >

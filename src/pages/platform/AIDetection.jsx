@@ -6,7 +6,7 @@ import { Card } from '../../components/ui/Card';
 
 const AIDetection = () => {
   return (
-    <div className="pt-24 pb-16 min-h-[80vh] flex flex-col items-center noise-overlay">
+    <div className="pt-12 pb-8 sm:pt-16 sm:pb-12 min-h-[80vh] flex flex-col items-center noise-overlay">
       <div className="max-w-4xl w-full mx-auto px-6 lg:px-12">
         <PageHeader
           title="AI Fraud Detection"
@@ -23,7 +23,7 @@ const AIDetection = () => {
           <div className="space-y-6 font-sans text-mist text-base leading-relaxed">
             <p>Our proprietary machine learning models continuously analyze MRV streams against satellite baselines to identify false claims or overlapping project boundaries in real-time.</p>
             
-            <div className="mt-8 bg-[#040A06] border border-red-500/20 p-6 rounded-xl">
+            <div className="mt-8 bg-bg-canvas border border-red-500/20 p-6 rounded-xl">
               <div className="font-mono text-[11px] text-red-500 mb-4 border-b border-red-500/20 pb-2">&gt;&gt; FLAG REPORT: HIGH CONFIDENCE</div>
               <div className="flex flex-col space-y-3 font-mono text-xs text-mist">
                 <div className="flex justify-between">

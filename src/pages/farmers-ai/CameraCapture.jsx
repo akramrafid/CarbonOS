@@ -291,13 +291,13 @@ const CameraCapture = ({ isInline = false, onBack = null, onScanComplete = null 
   }, [processCanvas]);
 
   return (
-    <div className={`pb-16 px-4 max-w-xl mx-auto flex flex-col ${isInline ? 'pt-4' : 'pt-24 min-h-screen'}`}>
+    <div className={`pb-16 px-4 max-w-xl mx-auto flex flex-col ${isInline ? 'pt-4' : 'pt-16 min-h-screen'}`}>
       {isInline && onBack && (
         <Button
           variant="ghost"
           size="sm"
           onClick={onBack}
-          className="self-start text-white/50 hover:text-[#CCFF00] mb-6 font-semibold"
+          className="self-start text-white/50 hover:text-lime-400 mb-6 font-semibold"
         >
           &larr; Back to Landing
         </Button>
@@ -330,8 +330,8 @@ const CameraCapture = ({ isInline = false, onBack = null, onScanComplete = null 
             <p className="text-amber-200/80 text-xs mt-1 leading-relaxed">
               You selected{' '}
               <span className="font-bold capitalize text-white">{cropMismatch.selected}</span>, but our AI detected this image as{' '}
-              <span className="font-bold capitalize text-[#CCFF00]">{cropMismatch.detected}</span>.
-              {' '}Analyzing as <span className="font-bold capitalize text-[#CCFF00]">{cropMismatch.detected}</span> for accurate results.
+              <span className="font-bold capitalize text-lime-400">{cropMismatch.detected}</span>.
+              {' '}Analyzing as <span className="font-bold capitalize text-lime-400">{cropMismatch.detected}</span> for accurate results.
             </p>
           </div>
           <IconButton

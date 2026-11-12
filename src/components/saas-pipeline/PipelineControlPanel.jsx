@@ -85,7 +85,7 @@ export function PipelineControlPanel({
         </div>
 
         {/* Status display */}
-        <div className="bg-[#040A06] rounded-xl p-4 border border-white/5">
+        <div className="bg-bg-canvas rounded-xl p-4 border border-white/5">
           <p className="text-[10px] font-mono text-mist/40 uppercase tracking-widest font-bold">
             System Status
           </p>

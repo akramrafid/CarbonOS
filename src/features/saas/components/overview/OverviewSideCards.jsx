@@ -24,17 +24,17 @@ export const OverviewSideCards = ({
       {/* Offset Options Panel */}
       <div className={`p-6 rounded-3xl shadow-md flex flex-col justify-between h-[230px] border transition-all ${
         isLight
-          ? 'bg-gradient-to-br from-[#E8F8EE] via-[#D8F3E3] to-[#C7EED8] border-[#A3E2B8] text-[#0F2417]'
-          : 'bg-gradient-to-br from-[#0D2B1A] via-[#0A2215] to-[#07180F] border-[#1B4D2E] text-white'
+          ? 'bg-gradient-to-br from-accent-muted via-accent-muted to-accent-muted border-border-strong text-fg-primary'
+          : 'bg-gradient-to-br from-bg-surface via-bg-surface to-bg-canvas border-border-subtle text-white'
       }`}>
         <div className="space-y-2">
           <div className="font-mono text-[9px] uppercase tracking-wider font-bold text-emerald">
             EMISSIONS COMPENSATIONS
           </div>
-          <h3 className={`font-sans font-bold text-lg leading-tight ${isLight ? 'text-[#0F2417]' : 'text-white'}`}>
+          <h3 className={`font-sans font-bold text-lg leading-tight ${isLight ? 'text-fg-primary' : 'text-white'}`}>
             Offset Your Footprint
           </h3>
-          <p className={`text-xs leading-relaxed font-sans ${isLight ? 'text-[#3E5C49]' : 'text-white/70'}`}>
+          <p className={`text-xs leading-relaxed font-sans ${isLight ? 'text-fg-secondary' : 'text-white/70'}`}>
             Purchase certified Bangladeshi carbon credits directly on our registry to mitigate your calculated corporate emissions debt.
           </p>
         </div>
@@ -51,9 +51,9 @@ export const OverviewSideCards = ({
       {/* Verification Tasks */}
       <Card className="p-6">
         <div className={`flex justify-between items-center mb-4 pb-2 border-b ${
-          isLight ? 'border-carbon-border' : 'border-[#122418]'
+          isLight ? 'border-carbon-border' : 'border-border-subtle'
         }`}>
-          <h3 className={`font-sans font-bold text-sm ${isLight ? 'text-[#0F2417]' : 'text-white'}`}>
+          <h3 className={`font-sans font-bold text-sm ${isLight ? 'text-fg-primary' : 'text-white'}`}>
             Verification Tasks
           </h3>
           <Badge variant="emerald" size="sm">
@@ -73,7 +73,7 @@ export const OverviewSideCards = ({
                 />
                 <span className={task.completed 
                   ? "line-through text-mist" 
-                  : isLight ? "text-[#0F2417]" : "text-[#D8E8DF]"
+                  : isLight ? "text-fg-primary" : "text-fg-primary"
                 }>
                   {task.text}
                 </span>
@@ -103,9 +103,9 @@ export const OverviewSideCards = ({
       {/* Team Summary */}
       <Card className="p-6">
         <div className={`flex justify-between items-center mb-4 pb-2 border-b ${
-          isLight ? 'border-carbon-border' : 'border-[#122418]'
+          isLight ? 'border-carbon-border' : 'border-border-subtle'
         }`}>
-          <h3 className={`font-sans font-bold text-sm ${isLight ? 'text-[#0F2417]' : 'text-white'}`}>
+          <h3 className={`font-sans font-bold text-sm ${isLight ? 'text-fg-primary' : 'text-white'}`}>
             Audit Team
           </h3>
           <Button
@@ -128,7 +128,7 @@ export const OverviewSideCards = ({
                   className="w-7 h-7 rounded-full object-cover shrink-0" 
                 />
                 <div className="truncate">
-                  <div className={`text-xs font-bold truncate ${isLight ? 'text-[#0F2417]' : 'text-white'}`}>
+                  <div className={`text-xs font-bold truncate ${isLight ? 'text-fg-primary' : 'text-white'}`}>
                     {member.name}
                   </div>
                   <div className="text-[10px] text-mist truncate">

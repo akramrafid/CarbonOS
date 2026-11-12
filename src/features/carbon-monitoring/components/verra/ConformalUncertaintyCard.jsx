@@ -19,7 +19,7 @@ export function ConformalUncertaintyCard({
       <div className="flex items-center justify-between pb-3 border-b border-emerald-500/20 mb-3.5">
         <div className="flex items-center space-x-2">
           <Scale size={15} className="text-emerald" />
-          <h3 className={`font-bold text-xs uppercase tracking-wider ${isLight ? 'text-[#00873E]' : 'text-emerald'}`}>
+          <h3 className={`font-bold text-xs uppercase tracking-wider ${isLight ? 'text-accent' : 'text-emerald'}`}>
             4. Conformal Uncertainty & Conservativeness
           </h3>
         </div>
@@ -29,7 +29,7 @@ export function ConformalUncertaintyCard({
           }`}>
             VM0047 Sec 8.3
           </span>
-          <span className="hidden sm:inline-flex text-[10px] font-mono font-extrabold px-2 py-0.5 rounded-full bg-emerald text-[#040906]">
+          <span className="hidden sm:inline-flex text-[10px] font-mono font-extrabold px-2 py-0.5 rounded-full bg-emerald text-fg-primary">
             PASSED
           </span>
         </div>
@@ -37,8 +37,8 @@ export function ConformalUncertaintyCard({
 
       <div className="space-y-3 text-xs">
         <div className="flex items-center justify-between pb-1.5 border-b border-inherit">
-          <span className={isLight ? 'text-[#475569]' : 'text-mist'}>Conformal 90% Prediction Interval</span>
-          <span className={`font-mono font-bold tabular-nums ${isLight ? 'text-[#0F291B]' : 'text-white'}`}>
+          <span className={isLight ? 'text-fg-secondary' : 'text-mist'}>Conformal 90% Prediction Interval</span>
+          <span className={`font-mono font-bold tabular-nums ${isLight ? 'text-fg-primary' : 'text-white'}`}>
             [{lower90}, {upper90}] tC/ha
           </span>
         </div>
@@ -47,10 +47,10 @@ export function ConformalUncertaintyCard({
         <div className="pb-1.5 border-b border-inherit space-y-1.5">
           <div className="flex items-center justify-between">
             <div>
-              <span className={`block font-semibold ${isLight ? 'text-[#475569]' : 'text-mist'}`}>
+              <span className={`block font-semibold ${isLight ? 'text-fg-secondary' : 'text-mist'}`}>
                 Relative Margin of Error (RME)
               </span>
-              <span className={`text-[11px] ${isLight ? 'text-[#64748B]' : 'text-mist'}`}>
+              <span className={`text-[11px] ${isLight ? 'text-fg-secondary' : 'text-mist'}`}>
                 Verra VM0047 allowable threshold: ≤ 15.0%
               </span>
             </div>
@@ -74,7 +74,7 @@ export function ConformalUncertaintyCard({
         </div>
 
         <div className="flex items-center justify-between pb-1.5 border-b border-inherit">
-          <span className={isLight ? 'text-[#475569]' : 'text-mist'}>Verra Precision Deduction</span>
+          <span className={isLight ? 'text-fg-secondary' : 'text-mist'}>Verra Precision Deduction</span>
           <div className="flex items-center space-x-1.5">
             <CheckCircle size={13} className="text-emerald" />
             <span className="font-mono font-bold text-emerald tabular-nums">
@@ -88,14 +88,14 @@ export function ConformalUncertaintyCard({
           isLight ? 'bg-white border-emerald-300 shadow-xs' : 'bg-black/30 border-emerald/30'
         }`}>
           <div className="flex items-center justify-between">
-            <span className={`font-extrabold text-xs ${isLight ? 'text-[#00873E]' : 'text-emerald'}`}>
+            <span className={`font-extrabold text-xs ${isLight ? 'text-accent' : 'text-emerald'}`}>
               Conservative Creditable Volume
             </span>
             <span className="font-mono font-black text-lg text-emerald tabular-nums">
               {conservativeVolume.toLocaleString()} <span className="text-xs font-normal">tCO₂e</span>
             </span>
           </div>
-          <p className={`text-[11px] mt-1 leading-relaxed ${isLight ? 'text-[#2E7D32]' : 'text-emerald-300/90'}`}>
+          <p className={`text-[11px] mt-1 leading-relaxed ${isLight ? 'text-accent' : 'text-emerald-300/90'}`}>
             Modelled with the Verra conservativeness principle: no precision deduction applies at this uncertainty. Not audited.
           </p>
         </div>

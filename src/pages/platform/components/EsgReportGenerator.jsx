@@ -208,13 +208,13 @@ ${activeClient.assignedAuditor}
 
       {/* Main Report Document Sheet */}
       <div className={`rounded-3xl p-6 sm:p-10 border shadow-2xl space-y-10 max-w-5xl mx-auto ${
-        isLight ? 'bg-white border-slate-200 text-slate-900' : 'bg-[#08130C] border-[#152B1D] text-slate-100'
+        isLight ? 'bg-white border-slate-200 text-slate-900' : 'bg-bg-elevated border-border-subtle text-slate-100'
       }`}>
         {/* Document Header & Formal Masthead */}
-        <div className="border-b border-[#152B1D]/60 pb-8 flex flex-col md:flex-row justify-between items-start md:items-end gap-6">
+        <div className="border-b border-border-subtle/60 pb-8 flex flex-col md:flex-row justify-between items-start md:items-end gap-6">
           <div>
             <div className="flex items-center space-x-3 mb-3">
-              <span className="text-[10px] font-mono font-bold px-2 py-0.5 rounded bg-[#00C853]/15 text-[#00E676] border border-[#00C853]/30 uppercase">
+              <span className="text-[10px] font-mono font-bold px-2 py-0.5 rounded bg-accent/15 text-accent-hover border border-border-strong/30 uppercase">
                 Official Corporate Filing
               </span>
               <span className="text-xs font-mono text-gray-400">
@@ -230,7 +230,7 @@ ${activeClient.assignedAuditor}
           </div>
 
           <div className="text-right md:text-right font-mono text-xs space-y-1 text-gray-400">
-            <div>Reporting Period: <strong className="text-[#00C853]">FY 2026</strong></div>
+            <div>Reporting Period: <strong className="text-accent">FY 2026</strong></div>
             <div>Base Year: <strong className="text-white">2024</strong></div>
             <div>Verification: <strong className="text-emerald-400">ISAE 3410 Ready</strong></div>
           </div>

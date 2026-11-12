@@ -30,7 +30,7 @@ export function CryptographicLedgerCard({
 
   return (
     <Card className={`lg:col-span-2 rounded-2xl p-5 md:p-6 border transition-all ${
-      isLight ? 'bg-white border-[#CBD5E1] shadow-xs' : 'bg-[#08130C] border-[#152B1D]'
+      isLight ? 'bg-white border-border-subtle shadow-xs' : 'bg-bg-elevated border-border-subtle'
     }`}>
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-3 pb-3 border-b border-inherit mb-4">
         <div className="flex items-center space-x-2.5">
@@ -39,14 +39,14 @@ export function CryptographicLedgerCard({
           </div>
           <div>
             <div className="flex items-center space-x-2">
-              <h3 className={`font-bold text-sm uppercase tracking-wider ${isLight ? 'text-[#0F291B]' : 'text-white'}`}>
+              <h3 className={`font-bold text-sm uppercase tracking-wider ${isLight ? 'text-fg-primary' : 'text-white'}`}>
                 6. Multi-Validator Cryptographic Trust & Provenance Ledger
               </h3>
               <span className="text-[10px] font-mono font-bold px-2 py-0.5 rounded-full bg-emerald/15 text-emerald border border-emerald/30">
                 OFP Consensus Layer
               </span>
             </div>
-            <p className={`text-xs mt-0.5 ${isLight ? 'text-[#64748B]' : 'text-mist'}`}>
+            <p className={`text-xs mt-0.5 ${isLight ? 'text-fg-secondary' : 'text-mist'}`}>
               Strict separation of concerns: SHA-256 block hash chain enforces chronological immutability, while independent VVBs affix Ed25519 digital signatures.
             </p>
           </div>
@@ -81,12 +81,12 @@ export function CryptographicLedgerCard({
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
         {/* Card 1: SHA-256 Block Immutability */}
         <div className={`p-4 rounded-xl border space-y-3 ${
-          isLight ? 'bg-[#F8FAFC] border-[#E2E8F0]' : 'bg-white/[0.02] border-white/10'
+          isLight ? 'bg-bg-canvas border-border-subtle' : 'bg-white/[0.02] border-white/10'
         }`}>
           <div className="flex items-center justify-between">
             <div className="flex items-center space-x-2">
               <Database size={14} className="text-emerald" />
-              <span className={`text-xs font-bold uppercase tracking-wider ${isLight ? 'text-[#0F291B]' : 'text-white'}`}>
+              <span className={`text-xs font-bold uppercase tracking-wider ${isLight ? 'text-fg-primary' : 'text-white'}`}>
                 SHA-256 Ledger Immutability
               </span>
             </div>
@@ -101,7 +101,7 @@ export function CryptographicLedgerCard({
 
           <div>
             <div className="flex items-center justify-between mb-1">
-              <span className={`text-[11px] font-medium ${isLight ? 'text-[#64748B]' : 'text-mist'}`}>
+              <span className={`text-[11px] font-medium ${isLight ? 'text-fg-secondary' : 'text-mist'}`}>
                 Record SHA-256 Digest
               </span>
               <Button
@@ -123,7 +123,7 @@ export function CryptographicLedgerCard({
 
           <div className="grid grid-cols-2 gap-2 text-[11px]">
             <div>
-              <span className={`block text-[10px] font-medium ${isLight ? 'text-[#64748B]' : 'text-mist'}`}>
+              <span className={`block text-[10px] font-medium ${isLight ? 'text-fg-secondary' : 'text-mist'}`}>
                 Previous Block Hash
               </span>
               <span className="font-mono text-[10px] block mt-0.5 truncate text-slate-500">
@@ -131,7 +131,7 @@ export function CryptographicLedgerCard({
               </span>
             </div>
             <div>
-              <span className={`block text-[10px] font-medium ${isLight ? 'text-[#64748B]' : 'text-mist'}`}>
+              <span className={`block text-[10px] font-medium ${isLight ? 'text-fg-secondary' : 'text-mist'}`}>
                 Genesis Linkage
               </span>
               <span className="font-mono text-[10px] block mt-0.5 font-bold text-emerald">
@@ -143,12 +143,12 @@ export function CryptographicLedgerCard({
 
         {/* Card 2: Ed25519 Validator Co-Signatures */}
         <div className={`p-4 rounded-xl border space-y-3 ${
-          isLight ? 'bg-[#F8FAFC] border-[#E2E8F0]' : 'bg-white/[0.02] border-white/10'
+          isLight ? 'bg-bg-canvas border-border-subtle' : 'bg-white/[0.02] border-white/10'
         }`}>
           <div className="flex items-center justify-between">
             <div className="flex items-center space-x-2">
               <Key size={14} className="text-emerald" />
-              <span className={`text-xs font-bold uppercase tracking-wider ${isLight ? 'text-[#0F291B]' : 'text-white'}`}>
+              <span className={`text-xs font-bold uppercase tracking-wider ${isLight ? 'text-fg-primary' : 'text-white'}`}>
                 Ed25519 Multi-Validator Trust
               </span>
             </div>
@@ -163,10 +163,10 @@ export function CryptographicLedgerCard({
 
           <div className="flex items-center justify-between">
             <div>
-              <div className={`text-xl font-bold font-sans ${isLight ? 'text-[#0F291B]' : 'text-white'}`}>
+              <div className={`text-xl font-bold font-sans ${isLight ? 'text-fg-primary' : 'text-white'}`}>
                 {signatures.length} / 2+
               </div>
-              <span className={`text-[11px] ${isLight ? 'text-[#64748B]' : 'text-mist'}`}>
+              <span className={`text-[11px] ${isLight ? 'text-fg-secondary' : 'text-mist'}`}>
                 Institutional VVB Co-Signatures Affixed
               </span>
             </div>
@@ -175,7 +175,7 @@ export function CryptographicLedgerCard({
               variant="secondary"
               size="sm"
               onClick={() => setShowSignModal(true)}
-              className="text-xs font-medium px-3 py-2 bg-emerald text-[#040906] font-bold shadow-xs hover:bg-emerald/90 flex items-center space-x-1.5"
+              className="text-xs font-medium px-3 py-2 bg-emerald text-fg-primary font-bold shadow-xs hover:bg-emerald/90 flex items-center space-x-1.5"
             >
               <Key size={12} />
               <span>Sign with Ed25519</span>
@@ -193,7 +193,7 @@ export function CryptographicLedgerCard({
       {/* Co-Signatures Table */}
       <div className="space-y-2">
         <div className="flex items-center justify-between">
-          <span className={`text-xs font-bold uppercase tracking-wider ${isLight ? 'text-[#64748B]' : 'text-mist'}`}>
+          <span className={`text-xs font-bold uppercase tracking-wider ${isLight ? 'text-fg-secondary' : 'text-mist'}`}>
             Recorded Validator Signatures ({signatures.length})
           </span>
           <span className="text-[10px] font-mono text-slate-500">
@@ -205,7 +205,7 @@ export function CryptographicLedgerCard({
           <table className="w-full text-left text-xs border-collapse">
             <thead>
               <tr className={`border-b text-[11px] font-semibold ${
-                isLight ? 'border-[#E2E8F0] text-[#64748B]' : 'border-white/10 text-mist'
+                isLight ? 'border-border-subtle text-fg-secondary' : 'border-white/10 text-mist'
               }`}>
                 <th className="py-2 px-3">Validator Entity</th>
                 <th className="py-2 px-3">Organization</th>
@@ -218,7 +218,7 @@ export function CryptographicLedgerCard({
             <tbody className="divide-y divide-inherit">
               {signatures.map((sig, sIdx) => (
                 <tr key={sIdx} className={`hover:bg-black/[0.02] dark:hover:bg-white/[0.02] transition-colors ${
-                  isLight ? 'text-[#0F291B]' : 'text-white'
+                  isLight ? 'text-fg-primary' : 'text-white'
                 }`}>
                   <td className="py-2.5 px-3 font-medium flex items-center space-x-1.5">
                     <ShieldCheck size={13} className="text-emerald shrink-0" />

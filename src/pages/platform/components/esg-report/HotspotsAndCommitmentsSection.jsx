@@ -6,21 +6,21 @@ export function HotspotsAndCommitmentsSection({ activeClient, hotspots, fmt }) {
     <>
       {/* Section 4: Hotspots & Pareto Analysis */}
       <section className="space-y-4">
-        <div className="flex items-center space-x-2 text-xs font-mono uppercase tracking-wider text-[#00C853] font-bold">
-          <span className="w-2 h-2 rounded-full bg-[#00C853]" />
+        <div className="flex items-center space-x-2 text-xs font-mono uppercase tracking-wider text-accent font-bold">
+          <span className="w-2 h-2 rounded-full bg-accent" />
           <span>Section 4 • Pareto Hotspot Analysis (Significant Sources)</span>
         </div>
 
-        <div className="p-5 rounded-2xl bg-black/30 border border-[#152B1D] space-y-3">
+        <div className="p-5 rounded-2xl bg-black/30 border border-border-subtle space-y-3">
           <p className="text-xs text-gray-400">
             The top 5 emission drivers account for over <strong>85%</strong> of total corporate emissions, presenting prime targets for prioritized decarbonization intervention:
           </p>
 
           <div className="space-y-2 pt-2">
             {hotspots.map((h) => (
-              <div key={h.rank} className="p-3 rounded-xl bg-black/40 border border-[#152B1D] flex items-center justify-between text-xs">
+              <div key={h.rank} className="p-3 rounded-xl bg-black/40 border border-border-subtle flex items-center justify-between text-xs">
                 <div className="flex items-center space-x-3">
-                  <span className="w-6 h-6 rounded-full bg-[#00C853]/15 text-[#00E676] font-mono font-bold flex items-center justify-center text-xs">
+                  <span className="w-6 h-6 rounded-full bg-accent/15 text-accent-hover font-mono font-bold flex items-center justify-center text-xs">
                     {h.rank}
                   </span>
                   <div>
@@ -31,7 +31,7 @@ export function HotspotsAndCommitmentsSection({ activeClient, hotspots, fmt }) {
 
                 <div className="text-right font-mono">
                   <span className="font-bold text-white block">{fmt(h.tCO2e, 2)} tCO₂e</span>
-                  <span className="text-[10px] text-[#00C853] block">{h.percentage}% of footprint</span>
+                  <span className="text-[10px] text-accent block">{h.percentage}% of footprint</span>
                 </div>
               </div>
             ))}
@@ -41,13 +41,13 @@ export function HotspotsAndCommitmentsSection({ activeClient, hotspots, fmt }) {
 
       {/* Section 5: Decarbonization Targets & Insetting Roadmap */}
       <section className="space-y-4">
-        <div className="flex items-center space-x-2 text-xs font-mono uppercase tracking-wider text-[#00C853] font-bold">
-          <span className="w-2 h-2 rounded-full bg-[#00C853]" />
+        <div className="flex items-center space-x-2 text-xs font-mono uppercase tracking-wider text-accent font-bold">
+          <span className="w-2 h-2 rounded-full bg-accent" />
           <span>Section 5 • Decarbonization Commitments & Insetting</span>
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-          <div className="p-5 rounded-2xl bg-black/30 border border-[#152B1D] space-y-2">
+          <div className="p-5 rounded-2xl bg-black/30 border border-border-subtle space-y-2">
             <div className="flex items-center space-x-2 text-emerald-400 font-bold text-xs">
               <TrendingDown className="w-4 h-4" />
               <span>2030 Science-Based Target</span>
@@ -58,7 +58,7 @@ export function HotspotsAndCommitmentsSection({ activeClient, hotspots, fmt }) {
             </p>
           </div>
 
-          <div className="p-5 rounded-2xl bg-black/30 border border-[#152B1D] space-y-2">
+          <div className="p-5 rounded-2xl bg-black/30 border border-border-subtle space-y-2">
             <div className="flex items-center space-x-2 text-sky-400 font-bold text-xs">
               <Zap className="w-4 h-4" />
               <span>On-Site Rooftop Solar</span>
@@ -69,7 +69,7 @@ export function HotspotsAndCommitmentsSection({ activeClient, hotspots, fmt }) {
             </p>
           </div>
 
-          <div className="p-5 rounded-2xl bg-black/30 border border-[#152B1D] space-y-2">
+          <div className="p-5 rounded-2xl bg-black/30 border border-border-subtle space-y-2">
             <div className="flex items-center space-x-2 text-purple-400 font-bold text-xs">
               <Truck className="w-4 h-4" />
               <span>Fleet Electrification</span>
@@ -84,15 +84,15 @@ export function HotspotsAndCommitmentsSection({ activeClient, hotspots, fmt }) {
 
       {/* Section 6: Verification Readiness & Attestation */}
       <section className="space-y-4">
-        <div className="flex items-center space-x-2 text-xs font-mono uppercase tracking-wider text-[#00C853] font-bold">
-          <span className="w-2 h-2 rounded-full bg-[#00C853]" />
+        <div className="flex items-center space-x-2 text-xs font-mono uppercase tracking-wider text-accent font-bold">
+          <span className="w-2 h-2 rounded-full bg-accent" />
           <span>Section 6 • Assurance Readiness & Attestation Statement</span>
         </div>
 
-        <div className="p-6 rounded-2xl bg-black/40 border border-[#152B1D] space-y-6">
+        <div className="p-6 rounded-2xl bg-black/40 border border-border-subtle space-y-6">
           <div className="flex items-center justify-between flex-wrap gap-4">
             <div className="flex items-center space-x-3">
-              <div className="w-10 h-10 rounded-xl bg-[#00C853]/15 flex items-center justify-center text-[#00E676]">
+              <div className="w-10 h-10 rounded-xl bg-accent/15 flex items-center justify-center text-accent-hover">
                 <ShieldCheck className="w-6 h-6" />
               </div>
               <div>
@@ -107,11 +107,11 @@ export function HotspotsAndCommitmentsSection({ activeClient, hotspots, fmt }) {
           </div>
 
           {/* Signature Block */}
-          <div className="pt-6 border-t border-[#152B1D]/40 grid grid-cols-1 sm:grid-cols-2 gap-6 text-xs">
+          <div className="pt-6 border-t border-border-subtle/40 grid grid-cols-1 sm:grid-cols-2 gap-6 text-xs">
             <div>
               <span className="text-gray-400 text-[10px] uppercase font-mono block">ATTESTING LEAD ASSURANCE OFFICER</span>
               <span className="font-bold text-white text-sm mt-1 block">{activeClient.assignedAuditor}</span>
-              <span className="text-xs text-[#00C853] block mt-0.5">CarbonZero Bangladesh Audit & Assurance Directorate</span>
+              <span className="text-xs text-accent block mt-0.5">CarbonZero Bangladesh Audit & Assurance Directorate</span>
             </div>
 
             <div>

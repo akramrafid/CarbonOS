@@ -7,7 +7,7 @@ import { StatCard } from '../../components/ui/StatCard';
 
 const ProjectOnboarding = () => {
   return (
-    <div className="pt-24 pb-16 min-h-[80vh] flex flex-col items-center noise-overlay">
+    <div className="pt-12 pb-8 sm:pt-16 sm:pb-12 min-h-[80vh] flex flex-col items-center noise-overlay">
       <div className="max-w-4xl w-full mx-auto px-6 lg:px-12">
         <PageHeader
           title="Project Onboarding"
@@ -29,7 +29,7 @@ const ProjectOnboarding = () => {
                 value="142"
                 subtitle="Active Proposals"
               />
-              <div className="p-6 bg-[#0D2B1A]/50 border border-emerald/10 rounded-xl flex flex-col justify-center">
+              <div className="p-6 bg-bg-surface/50 border border-emerald/10 rounded-xl flex flex-col justify-center">
                 <Button variant="primary" size="lg" className="w-full">
                   Submit New PIN
                 </Button>

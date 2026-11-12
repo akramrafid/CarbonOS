@@ -106,7 +106,7 @@ export const Modal = ({
       <div
         ref={modalRef}
         tabIndex={-1}
-        className={`relative w-full ${sizeClasses} bg-white dark:bg-[#0A1F13] text-gray-900 dark:text-white border border-[#dbf0ea] dark:border-emerald/30 rounded-3xl shadow-[0_25px_70px_rgba(0,0,0,0.25)] dark:shadow-[0_25px_70px_rgba(0,0,0,0.65)] overflow-hidden flex flex-col max-h-[90vh] outline-none ${className}`}
+        className={`relative w-full ${sizeClasses} bg-white dark:bg-bg-elevated text-gray-900 dark:text-white border border-border-strong dark:border-emerald/30 rounded-3xl shadow-[0_25px_70px_rgba(0,0,0,0.25)] dark:shadow-[0_25px_70px_rgba(0,0,0,0.65)] overflow-hidden flex flex-col max-h-[90vh] outline-none ${className}`}
         onClick={(e) => e.stopPropagation()} // Prevent backdrop click from inner content
       >
         {/* Modal Header */}
@@ -187,7 +187,7 @@ export const ConfirmDialog = ({
             className={`px-5 py-2.5 rounded-xl font-sans font-bold text-xs sm:text-sm text-white transition-all shadow-md disabled:opacity-50 min-w-[44px] min-h-[44px] flex items-center justify-center ${
               isDestructive
                 ? 'bg-rose-600 hover:bg-rose-700 shadow-rose-600/30'
-                : 'bg-[#166534] hover:bg-[#14532d] dark:bg-emerald dark:hover:bg-emerald/90 dark:text-[#040A06] shadow-emerald/30'
+                : 'bg-accent hover:bg-accent-active dark:bg-emerald dark:hover:bg-emerald/90 dark:text-fg-primary shadow-emerald/30'
             }`}
           >
             {isLoading ? 'Processing...' : confirmText}

@@ -65,8 +65,8 @@ export const EmissionsTrendChart = ({ isLight = false, total = 2450 }) => {
         <div 
           className={`absolute -top-3 z-20 px-2.5 py-1 rounded-lg text-[10px] font-mono font-bold shadow-md border pointer-events-none transform -translate-x-1/2 transition-transform duration-150 ${
             isLight 
-              ? 'bg-white text-[#0F2417] border-[#E8ECE8]' 
-              : 'bg-[#0D2B1A] text-[#4ADE80] border-[#1B4D2E]'
+              ? 'bg-white text-fg-primary border-border-subtle' 
+              : 'bg-bg-surface text-emerald-400 border-border-subtle'
           }`}
           style={{ left: `${(hoveredPoint.x / 620) * 100}%` }}
         >

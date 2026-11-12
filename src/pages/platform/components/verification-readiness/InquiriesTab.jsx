@@ -15,7 +15,7 @@ export function InquiriesTab({
   return (
     <div
       className={`rounded-3xl p-6 sm:p-8 border shadow-xl space-y-6 ${
-        isLight ? 'bg-white border-[#E2E8E3]' : 'bg-[#08130C] border-[#152B1D]'
+        isLight ? 'bg-white border-border-subtle' : 'bg-bg-elevated border-border-subtle'
       }`}
     >
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3">
@@ -59,7 +59,7 @@ export function InquiriesTab({
                 <span>{inq.question}</span>
               </h4>
               <div className="pl-6 text-xs text-gray-300 leading-relaxed font-sans bg-white/[0.02] p-3 rounded-xl border border-white/5 mt-2">
-                <strong className="text-[#00E676] block mb-1 font-mono text-[10px] uppercase">Corporate Technical Answer:</strong>
+                <strong className="text-accent-hover block mb-1 font-mono text-[10px] uppercase">Corporate Technical Answer:</strong>
                 {inq.response}
               </div>
             </div>
@@ -76,14 +76,14 @@ export function InquiriesTab({
             placeholder="Verifier Institution (e.g. SGS, Bureau Veritas)"
             value={newInquiryVerifier}
             onChange={(e) => setNewInquiryVerifier(e.target.value)}
-            className="text-xs p-2.5 rounded-xl border border-white/10 bg-black/30 text-white focus:outline-none focus:border-[#00C853]"
+            className="text-xs p-2.5 rounded-xl border border-white/10 bg-black/30 text-white focus:outline-none focus:border-border-strong"
           />
           <input
             type="text"
             placeholder="Technical Question or Data Clarification"
             value={newInquiryQuestion}
             onChange={(e) => setNewInquiryQuestion(e.target.value)}
-            className="text-xs p-2.5 rounded-xl border border-white/10 bg-black/30 text-white sm:col-span-2 focus:outline-none focus:border-[#00C853]"
+            className="text-xs p-2.5 rounded-xl border border-white/10 bg-black/30 text-white sm:col-span-2 focus:outline-none focus:border-border-strong"
           />
         </div>
         <Button

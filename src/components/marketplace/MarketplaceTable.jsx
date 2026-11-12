@@ -17,7 +17,7 @@ export function MarketplaceTable({
   return (
     <div
       className={`rounded-2xl border overflow-hidden transition-colors ${
-        isLight ? 'bg-white border-[#dbf0ea] shadow-sm' : 'bg-[#080F0B] border-white/10'
+        isLight ? 'bg-white border-border-strong shadow-sm' : 'bg-bg-canvas border-white/10'
       }`}
     >
       <div className="overflow-x-auto">
@@ -25,7 +25,7 @@ export function MarketplaceTable({
           <thead>
             <tr
               className={`border-b font-mono text-[10px] text-slate-400 uppercase tracking-wider ${
-                isLight ? 'bg-[#f2f3ee]' : 'bg-[#040A06]'
+                isLight ? 'bg-bg-canvas' : 'bg-bg-canvas'
               }`}
             >
               <th className="p-4 w-10">
@@ -128,7 +128,7 @@ export function MarketplaceTable({
       {selectedBatchIds.length > 0 && (
         <div
           className={`p-4 border-t flex flex-col sm:flex-row items-center justify-between gap-4 sticky bottom-0 z-30 ${
-            isLight ? 'bg-white border-[#dbf0ea] shadow-lg' : 'bg-[#0D2B1A] border-emerald/30 shadow-2xl'
+            isLight ? 'bg-white border-border-strong shadow-lg' : 'bg-bg-surface border-emerald/30 shadow-2xl'
           }`}
         >
           <div className="flex items-center space-x-4">

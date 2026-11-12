@@ -21,7 +21,7 @@ export function CropSelector({ species, onSelectSpecies }) {
     <div className="mb-8 bg-white/5 border border-white/10 p-4 rounded-3xl relative overflow-hidden">
       <div className="text-white/50 text-xs font-bold mb-3 uppercase tracking-wider flex items-center justify-between px-1">
         <span>Target Crop / ফসল নির্বাচন করুন</span>
-        <span className="text-[#CCFF00] font-extrabold capitalize bg-[#CCFF00]/10 border border-[#CCFF00]/20 px-3 py-0.5 rounded-full text-[11px] tracking-wide">
+        <span className="text-lime-400 font-extrabold capitalize bg-lime-400/10 border border-lime-400/20 px-3 py-0.5 rounded-full text-[11px] tracking-wide">
           {species}
         </span>
       </div>
@@ -55,7 +55,7 @@ export function CropSelector({ species, onSelectSpecies }) {
                   variant={isSelected ? 'secondary' : 'ghost'}
                   size="sm"
                   onClick={() => onSelectSpecies(crop.id)}
-                  className={`shrink-0 ${isSelected ? '!border-[#CCFF00]/50 !bg-[#CCFF00]/15 !text-[#CCFF00]' : 'text-white/70'}`}
+                  className={`shrink-0 ${isSelected ? '!border-lime-400/50 !bg-lime-400/15 !text-lime-400' : 'text-white/70'}`}
                 >
                   <span className="text-base mr-1">{crop.icon}</span>
                   <span>{crop.name}</span>

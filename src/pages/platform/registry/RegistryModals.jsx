@@ -35,14 +35,14 @@ export function SubmissionModal({
       }
     >
       <div className="space-y-3 font-mono text-xs">
-        <div className="p-3 bg-[#040906] rounded-xl border border-[#152B1D] space-y-2">
+        <div className="p-3 bg-bg-canvas rounded-xl border border-border-subtle space-y-2">
           <div className="flex justify-between">
             <span className="text-white/50">Target Registry:</span>
             <span className="text-white">UNDP National Carbon Registry</span>
           </div>
           <div className="flex justify-between">
             <span className="text-white/50">Project ID:</span>
-            <span className="text-[#00C853]">{selectedProject.external_project_id}</span>
+            <span className="text-accent">{selectedProject.external_project_id}</span>
           </div>
           <div className="flex justify-between">
             <span className="text-white/50">Reported Volume:</span>
@@ -50,7 +50,7 @@ export function SubmissionModal({
           </div>
           <div className="flex justify-between">
             <span className="text-white/50">Provenance Hash:</span>
-            <span className="text-[#00C853] font-mono text-[11px] truncate max-w-[200px]">
+            <span className="text-accent font-mono text-[11px] truncate max-w-[200px]">
               {selectedProject.metrics?.provenance_hash}
             </span>
           </div>
@@ -87,14 +87,14 @@ export function JcmModal({
       }
     >
       <div className="overflow-y-auto max-h-[60vh] font-mono text-xs space-y-4 pr-1">
-        <div className="p-3 bg-[#040906] rounded-xl border border-[#152B1D] space-y-1.5">
-          <div className="text-[#00C853] font-bold">DOCUMENT METADATA</div>
+        <div className="p-3 bg-bg-canvas rounded-xl border border-border-subtle space-y-1.5">
+          <div className="text-accent font-bold">DOCUMENT METADATA</div>
           <div className="text-white/70">Type: {jcmData.document_metadata?.document_type}</div>
           <div className="text-white/70">Secretariat: {jcmData.document_metadata?.secretariat}</div>
         </div>
 
-        <div className="p-3 bg-[#040906] rounded-xl border border-[#152B1D] space-y-1.5">
-          <div className="text-[#00C853] font-bold">EMISSION REDUCTIONS (ER_p = RE_p - PE_p)</div>
+        <div className="p-3 bg-bg-canvas rounded-xl border border-border-subtle space-y-1.5">
+          <div className="text-accent font-bold">EMISSION REDUCTIONS (ER_p = RE_p - PE_p)</div>
           <div className="text-white/70">Formula: {jcmData.emission_reduction_calculation?.formula}</div>
           <div className="text-white/70">
             Reference Emissions: {jcmData.emission_reduction_calculation?.reference_emissions_re_p_tco2e} tCO2e
@@ -102,13 +102,13 @@ export function JcmModal({
           <div className="text-white/70">
             Project Emissions: {jcmData.emission_reduction_calculation?.project_emissions_pe_p_tco2e} tCO2e
           </div>
-          <div className="text-[#00C853] font-bold">
+          <div className="text-accent font-bold">
             Net Emission Reductions: {jcmData.emission_reduction_calculation?.net_emission_reductions_er_p_tco2e} tCO2e
           </div>
         </div>
 
-        <div className="p-3 bg-[#040906] rounded-xl border border-[#152B1D] space-y-1.5">
-          <div className="text-[#00C853] font-bold">BILATERAL ALLOCATION SPLIT</div>
+        <div className="p-3 bg-bg-canvas rounded-xl border border-border-subtle space-y-1.5">
+          <div className="text-accent font-bold">BILATERAL ALLOCATION SPLIT</div>
           <div className="text-white/70">
             Bangladesh NDC Retention (50%):{' '}
             {jcmData.emission_reduction_calculation?.bilateral_allocation_split?.bangladesh_retained_credits_tco2e} tCO2e
@@ -119,8 +119,8 @@ export function JcmModal({
           </div>
         </div>
 
-        <div className="p-3 bg-[#040906] rounded-xl border border-[#152B1D] space-y-1.5">
-          <div className="text-[#00C853] font-bold">PROVENANCE SEAL</div>
+        <div className="p-3 bg-bg-canvas rounded-xl border border-border-subtle space-y-1.5">
+          <div className="text-accent font-bold">PROVENANCE SEAL</div>
           <div className="text-white/70 break-all">
             {jcmData.cryptographic_verification?.provenance_hash_attached}
           </div>
@@ -169,7 +169,7 @@ export function BtrJsonModal({
         </div>
       }
     >
-      <div className="overflow-y-auto max-h-[60vh] font-mono text-xs bg-[#040906] p-4 rounded-xl border border-[#152B1D] text-[#00C853]">
+      <div className="overflow-y-auto max-h-[60vh] font-mono text-xs bg-bg-canvas p-4 rounded-xl border border-border-subtle text-accent">
         <pre className="whitespace-pre-wrap">{JSON.stringify(btrData, null, 2)}</pre>
       </div>
     </Modal>

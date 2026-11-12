@@ -21,9 +21,9 @@ export function StatCard({
   className = ''
 }) {
   const trendColor = {
-    up: 'text-emerald dark:text-[#38D37E]',
+    up: 'text-emerald dark:text-accent',
     down: 'text-red-500 dark:text-red-400',
-    neutral: 'text-mist dark:text-[#7A9A85]'
+    neutral: 'text-mist dark:text-fg-secondary'
   }[trend] || 'text-mist';
 
   const TrendIcon = {
@@ -38,22 +38,22 @@ export function StatCard({
       className={`flex flex-col justify-between ${className}`}
     >
       <div className="flex items-start justify-between gap-3 mb-2">
-        <span className="text-xs sm:text-sm font-sans font-medium text-mist dark:text-[#7A9A85]">
+        <span className="text-xs sm:text-sm font-sans font-medium text-mist dark:text-fg-secondary">
           {title}
         </span>
         {icon && (
-          <span className="p-1.5 rounded-md bg-carbon-surface-raised border border-carbon-border/50 text-mist dark:bg-[#13241B] dark:border-[#2A4736] shrink-0" aria-hidden="true">
+          <span className="p-1.5 rounded-md bg-carbon-surface-raised border border-carbon-border/50 text-mist dark:bg-bg-elevated dark:border-border-subtle shrink-0" aria-hidden="true">
             {icon}
           </span>
         )}
       </div>
 
       <div className="flex items-baseline gap-2 mb-1">
-        <span className="text-2xl sm:text-3xl font-mono font-bold text-registry tracking-tight tabular-nums dark:text-[#E2ECE5]">
+        <span className="text-2xl sm:text-3xl font-mono font-bold text-registry tracking-tight tabular-nums dark:text-fg-primary">
           {value}
         </span>
         {unit && (
-          <span className="text-xs sm:text-sm font-mono text-mist dark:text-[#7A9A85]">
+          <span className="text-xs sm:text-sm font-mono text-mist dark:text-fg-secondary">
             {unit}
           </span>
         )}
@@ -68,7 +68,7 @@ export function StatCard({
             </span>
           )}
           {subtitle && (
-            <span className="text-mist/70 truncate dark:text-[#7A9A85]/70">
+            <span className="text-mist/70 truncate dark:text-fg-secondary/70">
               {subtitle}
             </span>
           )}

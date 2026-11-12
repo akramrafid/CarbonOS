@@ -24,8 +24,8 @@ export function ExtractorHeader({
       <div className="flex flex-col lg:flex-row justify-between lg:items-center gap-6 pb-6 border-b border-white/10">
         <div>
           <div className="flex items-center space-x-2.5 mb-2">
-            <div className="w-8 h-8 rounded-xl bg-[#00C853]/20 border border-[#00C853]/40 flex items-center justify-center">
-              <FileCheck className="w-4 h-4 text-[#00C853]" />
+            <div className="w-8 h-8 rounded-xl bg-accent/20 border border-border-strong/40 flex items-center justify-center">
+              <FileCheck className="w-4 h-4 text-accent" />
             </div>
             <h2 className="font-sans font-bold text-xl lg:text-2xl tracking-tight">
               Universal Utility Segment Extractor &amp; Human-in-the-Loop Review
@@ -35,7 +35,7 @@ export function ExtractorHeader({
                 SANDBOX / PREVIEW MODE
               </span>
             ) : (
-              <span className="px-2.5 py-0.5 rounded-full text-[10px] font-mono font-bold bg-[#00C853]/20 text-[#00E676] border border-[#00C853]/40">
+              <span className="px-2.5 py-0.5 rounded-full text-[10px] font-mono font-bold bg-accent/20 text-accent-hover border border-border-strong/40">
                 LIVE PARSER ACTIVE
               </span>
             )}
@@ -54,26 +54,26 @@ export function ExtractorHeader({
             onClick={() => setShowAuditDrawer(!showAuditDrawer)}
             className="flex items-center space-x-1.5 font-mono text-xs"
           >
-            <History className="w-3.5 h-3.5 text-[#00C853]" />
+            <History className="w-3.5 h-3.5 text-accent" />
             <span>Audit Trail ({auditLogLength})</span>
           </Button>
 
           <div
             className={`flex items-center space-x-3 px-4 py-2.5 rounded-2xl border ${
-              isLight ? 'bg-[#F4F7F4] border-[#DCE4DE]' : 'bg-[#040A06] border-[#152B1D]'
+              isLight ? 'bg-bg-muted border-border-subtle' : 'bg-bg-canvas border-border-subtle'
             }`}
           >
             <div
               className={`h-9 px-2.5 rounded-xl flex items-center justify-center shrink-0 min-w-[65px] max-w-[85px] ${
                 activeClient.logoTheme === 'dark'
-                  ? 'bg-[#06140B] border border-[#163D22] ring-1 ring-emerald-500/20'
+                  ? 'bg-bg-surface border border-border-strong ring-1 ring-emerald-500/20'
                   : 'bg-white border border-slate-200'
               }`}
             >
               <img src={activeClient.logo} alt={activeClient.name} className="max-h-full max-w-full object-contain" />
             </div>
             <div>
-              <div className="text-[10px] font-mono text-[#00C853] uppercase font-bold tracking-wider">Active Client Ledger</div>
+              <div className="text-[10px] font-mono text-accent uppercase font-bold tracking-wider">Active Client Ledger</div>
               <div className="font-sans font-bold text-xs">{activeClient.name}</div>
             </div>
           </div>

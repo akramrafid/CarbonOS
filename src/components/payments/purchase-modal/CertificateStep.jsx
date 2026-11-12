@@ -23,8 +23,8 @@ export function CertificateStep({
       <div
         className={`p-6 rounded-2xl border-2 relative overflow-hidden ${
           isLight
-            ? 'bg-gradient-to-b from-white to-[#f2f3ee] border-emerald/40 shadow-xl'
-            : 'bg-gradient-to-b from-[#080F0B] to-[#040A06] border-emerald/50 shadow-[0_0_40px_rgba(0,200,83,0.2)]'
+            ? 'bg-gradient-to-b from-white to-bg-canvas border-emerald/40 shadow-xl'
+            : 'bg-gradient-to-b from-bg-canvas to-bg-canvas border-emerald/50 shadow-[0_0_40px_rgba(0,200,83,0.2)]'
         }`}
       >
         <div className="absolute top-0 right-0 w-32 h-32 bg-emerald/5 rounded-full blur-2xl pointer-events-none"></div>
@@ -60,7 +60,7 @@ export function CertificateStep({
 
           <div
             className={`p-3.5 rounded-xl border text-center my-3 ${
-              isLight ? 'bg-emerald/5 border-emerald/20' : 'bg-[#0D2B1A]/40 border-emerald/30'
+              isLight ? 'bg-emerald/5 border-emerald/20' : 'bg-bg-surface/40 border-emerald/30'
             }`}
           >
             <span className="font-mono text-3xl font-bold text-emerald block">

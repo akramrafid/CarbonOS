@@ -19,9 +19,9 @@ export function Badge({
 
   const variantClasses = {
     neutral:
-      'bg-carbon-surface-raised text-mist border border-carbon-border dark:bg-[#13241B] dark:text-[#7A9A85] dark:border-[#2A4736]',
+      'bg-carbon-surface-raised text-mist border border-carbon-border dark:bg-bg-elevated dark:text-fg-secondary dark:border-border-subtle',
     emerald:
-      'bg-emerald/10 text-emerald border border-emerald/20 dark:bg-emerald/15 dark:text-[#38D37E]',
+      'bg-emerald/10 text-emerald border border-emerald/20 dark:bg-emerald/15 dark:text-accent',
     success:
       'bg-green-500/10 text-green-600 border border-green-500/20 dark:bg-green-950/30 dark:text-green-400 dark:border-green-800/40',
     warning:

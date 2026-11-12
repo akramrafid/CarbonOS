@@ -52,16 +52,16 @@ export const CarbonDistributionDonut = ({ categories = [], totalKg = 0, totalTon
 
         <div className="absolute inset-0 flex flex-col items-center justify-center text-center pointer-events-none px-2">
           <span className={`text-[9px] font-mono uppercase tracking-wider font-bold ${
-            isLight ? 'text-[#41634E]' : 'text-[#9EBFAB]'
+            isLight ? 'text-fg-muted' : 'text-fg-secondary'
           }`}>
             Total Footprint
           </span>
           <span className={`font-mono font-black text-lg sm:text-xl leading-tight ${
-            isLight ? 'text-[#00873E]' : 'text-[#00E676]'
+            isLight ? 'text-accent' : 'text-accent-hover'
           }`}>
             {unitMode === 'tonnes' ? `${totalTonnes.toLocaleString()} t` : `${totalKg.toLocaleString()} kg`}
           </span>
-          <span className={`text-[9px] font-semibold ${isLight ? 'text-[#64748B]' : 'text-emerald-300/60'}`}>
+          <span className={`text-[9px] font-semibold ${isLight ? 'text-fg-secondary' : 'text-emerald-300/60'}`}>
             CO₂e Emissions
           </span>
         </div>
@@ -77,8 +77,8 @@ export const CarbonDistributionDonut = ({ categories = [], totalKg = 0, totalTon
               onMouseLeave={() => onHover(null)}
               className={`flex items-center space-x-2 p-1.5 rounded-xl cursor-pointer transition-all border ${
                 isHovered 
-                  ? (isLight ? 'bg-emerald-50/80 border-emerald-300 scale-[1.02]' : 'bg-[#0E2616] border-[#00C853]/40 scale-[1.02]') 
-                  : (isLight ? 'bg-[#F8FAFC] border-transparent hover:border-slate-200' : 'bg-[#061009]/60 border-transparent hover:border-[#152B1D]')
+                  ? (isLight ? 'bg-emerald-50/80 border-emerald-300 scale-[1.02]' : 'bg-bg-elevated border-border-strong/40 scale-[1.02]') 
+                  : (isLight ? 'bg-bg-canvas border-transparent hover:border-slate-200' : 'bg-bg-canvas/60 border-transparent hover:border-border-subtle')
               }`}
             >
               <div 
@@ -86,10 +86,10 @@ export const CarbonDistributionDonut = ({ categories = [], totalKg = 0, totalTon
                 style={{ backgroundColor: slice.color }}
               />
               <div className="truncate text-left leading-tight min-w-0">
-                <div className={`text-[11px] font-bold truncate ${isLight ? 'text-[#0F2417]' : 'text-white'}`}>
+                <div className={`text-[11px] font-bold truncate ${isLight ? 'text-fg-primary' : 'text-white'}`}>
                   {slice.name}
                 </div>
-                <div className={`text-[10px] font-mono ${isLight ? 'text-[#41634E]' : 'text-[#9EBFAB]'}`}>
+                <div className={`text-[10px] font-mono ${isLight ? 'text-fg-muted' : 'text-fg-secondary'}`}>
                   {slice.percentage}% • {unitMode === 'tonnes' ? `${slice.carbonTonnes} t` : `${slice.carbonKg.toLocaleString()} kg`}
                 </div>
               </div>

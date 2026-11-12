@@ -6,37 +6,37 @@ const TechStackDiagram = () => {
       level: "Layer 5",
       name: "Interface",
       tech: "Vite React dashboard, Farmer mobile app (PWA), Buyer marketplace, MoEFCC regulatory portal",
-      color: "bg-[#0F172A]",
+      color: "bg-slate-900",
       textColor: "text-white"
     },
     {
       level: "Layer 4",
       name: "Platform",
       tech: "Node.js REST API, WebSockets, Carbon Zero BD Credit Registry, Smart Contract Engine",
-      color: "bg-[#0A5C36]",
+      color: "bg-accent",
       textColor: "text-white"
     },
     {
       level: "Layer 3",
       name: "Processing",
       tech: "Background workers (MRV pipeline), Google Earth Engine, PyTorch models",
-      color: "bg-[#16A34A]",
+      color: "bg-accent",
       textColor: "text-white"
     },
     {
       level: "Layer 2",
       name: "Storage",
       tech: "TimescaleDB (time-series), PostGIS (geospatial), Redis (cache), MinIO (raw sensor files)",
-      color: "bg-[#22C55E]",
-      textColor: "text-[#0F172A]"
+      color: "bg-emerald-500",
+      textColor: "text-fg-primary"
     },
     {
       level: "Layer 1",
       name: "Data Ingestion",
       tech: "MQTT broker (EMQX), LoRaWAN network server (ChirpStack), Kafka streams",
-      color: "bg-[#F8FAFC]",
-      textColor: "text-[#475569]",
-      border: "border-2 border-dashed border-[#E2E8F0]"
+      color: "bg-bg-canvas",
+      textColor: "text-fg-secondary",
+      border: "border-2 border-dashed border-border-subtle"
     }
   ];
 

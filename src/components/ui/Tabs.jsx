@@ -39,7 +39,7 @@ export function Tabs({
     <div
       role="tablist"
       aria-orientation="horizontal"
-      className={`inline-flex items-center gap-1 p-1 rounded-xl bg-carbon-surface-raised/80 border border-carbon-border/60 dark:bg-[#0D1812] dark:border-[#1E3326] ${className}`}
+      className={`inline-flex items-center gap-1 p-1 rounded-xl bg-carbon-surface-raised/80 border border-carbon-border/60 dark:bg-bg-surface dark:border-border-subtle ${className}`}
     >
       {tabs.map((tab, idx) => {
         const isActive = activeTab === tab.id;
@@ -58,8 +58,8 @@ export function Tabs({
               focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald
               ${
                 isActive
-                  ? 'bg-carbon-surface text-registry shadow-sm border border-carbon-border/80 dark:bg-[#13241B] dark:text-[#E2ECE5] dark:border-[#2A4736]'
-                  : 'text-mist hover:text-registry hover:bg-carbon-surface/50 dark:text-[#7A9A85] dark:hover:text-[#E2ECE5]'
+                  ? 'bg-carbon-surface text-registry shadow-sm border border-carbon-border/80 dark:bg-bg-elevated dark:text-fg-primary dark:border-border-subtle'
+                  : 'text-mist hover:text-registry hover:bg-carbon-surface/50 dark:text-fg-secondary dark:hover:text-fg-primary'
               }
             `.trim()}
           >

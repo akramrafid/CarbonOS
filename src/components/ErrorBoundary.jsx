@@ -62,7 +62,7 @@ export class ErrorBoundary extends React.Component {
       return (
         <div
           className={`min-h-screen w-full flex items-center justify-center p-4 sm:p-6 font-sans transition-colors ${
-            isLight ? 'bg-[#f2f3ee] text-[#181414]' : 'bg-carbon text-registry'
+            isLight ? 'bg-bg-canvas text-fg-primary' : 'bg-carbon text-registry'
           }`}
           role="alert"
         >
@@ -70,7 +70,7 @@ export class ErrorBoundary extends React.Component {
             className={`max-w-xl w-full rounded-3xl p-6 sm:p-10 backdrop-blur-xl relative overflow-hidden transition-all shadow-2xl ${
               isLight
                 ? 'bg-white border border-slate-200/90 shadow-[0_20px_50px_rgba(0,0,0,0.06)]'
-                : 'bg-[#0D2B1A]/85 border border-emerald/30 shadow-[0_20px_60px_rgba(0,0,0,0.6)]'
+                : 'bg-bg-surface/85 border border-emerald/30 shadow-[0_20px_60px_rgba(0,0,0,0.6)]'
             }`}
           >
             {/* Ambient Corner Glow */}
@@ -101,7 +101,7 @@ export class ErrorBoundary extends React.Component {
                 </span>
                 <h1
                   className={`font-sans font-bold text-xl sm:text-2xl ${
-                    isLight ? 'text-[#181414]' : 'text-white'
+                    isLight ? 'text-fg-primary' : 'text-white'
                   }`}
                 >
                   Something went wrong
@@ -112,7 +112,7 @@ export class ErrorBoundary extends React.Component {
             {/* Message Body */}
             <p
               className={`font-sans text-xs sm:text-sm leading-relaxed mb-6 font-normal ${
-                isLight ? 'text-[#4b5563]' : 'text-white/80'
+                isLight ? 'text-fg-muted' : 'text-white/80'
               }`}
             >
               The sovereign platform encountered an unexpected runtime exception while processing this view.
@@ -124,7 +124,7 @@ export class ErrorBoundary extends React.Component {
               className={`border rounded-xl p-3.5 sm:p-4 mb-6 font-mono text-xs break-words max-h-36 overflow-y-auto ${
                 isLight
                   ? 'bg-slate-50 border-slate-200 text-rose-800'
-                  : 'bg-[#080F0B] border-white/10 text-rose-300'
+                  : 'bg-bg-canvas border-white/10 text-rose-300'
               }`}
             >
               <div className="flex items-center space-x-2 text-[10px] uppercase font-bold tracking-wider mb-1 opacity-70">
@@ -140,7 +140,7 @@ export class ErrorBoundary extends React.Component {
             <div className="flex flex-wrap gap-2.5 sm:gap-3 items-center relative z-10">
               <button
                 onClick={this.handleReset}
-                className="inline-flex items-center justify-center bg-[#166534] hover:bg-[#14532d] text-white dark:bg-emerald dark:hover:bg-emerald/90 dark:text-[#040A06] font-sans font-bold text-xs sm:text-sm px-5 py-2.5 rounded-xl transition-all shadow-[0_0_20px_rgba(0,200,83,0.3)] active:scale-95"
+                className="inline-flex items-center justify-center bg-accent hover:bg-accent-active text-white dark:bg-emerald dark:hover:bg-emerald/90 dark:text-fg-primary font-sans font-bold text-xs sm:text-sm px-5 py-2.5 rounded-xl transition-all shadow-[0_0_20px_rgba(0,200,83,0.3)] active:scale-95"
               >
                 <RotateCcw size={15} className="mr-2" />
                 <span>Try Again</span>
@@ -179,7 +179,7 @@ export class ErrorBoundary extends React.Component {
                 title="Copy error diagnostics for engineering review"
               >
                 {this.state.copied ? (
-                  <Check size={14} className="text-[#166534] dark:text-emerald mr-1" />
+                  <Check size={14} className="text-accent dark:text-emerald mr-1" />
                 ) : (
                   <Copy size={14} className="mr-1" />
                 )}

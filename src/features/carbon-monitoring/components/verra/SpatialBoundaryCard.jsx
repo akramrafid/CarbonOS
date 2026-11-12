@@ -13,12 +13,12 @@ export function SpatialBoundaryCard({
 }) {
   return (
     <Card className={`rounded-2xl p-5 border transition-all ${
-      isLight ? 'bg-white border-[#CBD5E1] shadow-xs' : 'bg-[#08130C] border-[#152B1D]'
+      isLight ? 'bg-white border-border-subtle shadow-xs' : 'bg-bg-elevated border-border-subtle'
     }`}>
       <div className="flex items-center justify-between pb-3 border-b border-inherit mb-3.5">
         <div className="flex items-center space-x-2">
           <MapPin size={15} className="text-emerald" />
-          <h3 className={`font-bold text-xs uppercase tracking-wider ${isLight ? 'text-[#0F291B]' : 'text-white'}`}>
+          <h3 className={`font-bold text-xs uppercase tracking-wider ${isLight ? 'text-fg-primary' : 'text-white'}`}>
             1. Project Identification & Geographic Boundary
           </h3>
         </div>
@@ -31,15 +31,15 @@ export function SpatialBoundaryCard({
 
       <div className="grid grid-cols-2 gap-3.5 text-xs">
         <div>
-          <span className={`block text-[11px] font-medium ${isLight ? 'text-[#64748B]' : 'text-mist'}`}>
+          <span className={`block text-[11px] font-medium ${isLight ? 'text-fg-secondary' : 'text-mist'}`}>
             Project Name
           </span>
-          <span className={`font-bold text-sm mt-0.5 block ${isLight ? 'text-[#0F291B]' : 'text-white'}`}>
+          <span className={`font-bold text-sm mt-0.5 block ${isLight ? 'text-fg-primary' : 'text-white'}`}>
             {currentJob?.project_name}
           </span>
         </div>
         <div>
-          <span className={`block text-[11px] font-medium ${isLight ? 'text-[#64748B]' : 'text-mist'}`}>
+          <span className={`block text-[11px] font-medium ${isLight ? 'text-fg-secondary' : 'text-mist'}`}>
             Job Identifier
           </span>
           <div className="flex items-center space-x-1.5 mt-0.5">
@@ -57,34 +57,34 @@ export function SpatialBoundaryCard({
           </div>
         </div>
         <div>
-          <span className={`block text-[11px] font-medium ${isLight ? 'text-[#64748B]' : 'text-mist'}`}>
+          <span className={`block text-[11px] font-medium ${isLight ? 'text-fg-secondary' : 'text-mist'}`}>
             Forest Stratum
           </span>
-          <span className={`font-bold mt-0.5 block ${isLight ? 'text-[#0F291B]' : 'text-white'}`}>
+          <span className={`font-bold mt-0.5 block ${isLight ? 'text-fg-primary' : 'text-white'}`}>
             {stratum}
           </span>
         </div>
         <div>
-          <span className={`block text-[11px] font-medium ${isLight ? 'text-[#64748B]' : 'text-mist'}`}>
+          <span className={`block text-[11px] font-medium ${isLight ? 'text-fg-secondary' : 'text-mist'}`}>
             Monitored Area
           </span>
-          <span className={`font-mono font-bold tabular-nums mt-0.5 block ${isLight ? 'text-[#0F291B]' : 'text-white'}`}>
+          <span className={`font-mono font-bold tabular-nums mt-0.5 block ${isLight ? 'text-fg-primary' : 'text-white'}`}>
             {(res?.forest_area_ha || 3800.5).toLocaleString()} ha
           </span>
         </div>
         <div>
-          <span className={`block text-[11px] font-medium ${isLight ? 'text-[#64748B]' : 'text-mist'}`}>
+          <span className={`block text-[11px] font-medium ${isLight ? 'text-fg-secondary' : 'text-mist'}`}>
             Monitoring Window
           </span>
-          <span className={`font-mono tabular-nums text-xs mt-0.5 block ${isLight ? 'text-[#0F291B]' : 'text-white'}`}>
+          <span className={`font-mono tabular-nums text-xs mt-0.5 block ${isLight ? 'text-fg-primary' : 'text-white'}`}>
             {currentJob?.start_date} → {currentJob?.end_date}
           </span>
         </div>
         <div>
-          <span className={`block text-[11px] font-medium ${isLight ? 'text-[#64748B]' : 'text-mist'}`}>
+          <span className={`block text-[11px] font-medium ${isLight ? 'text-fg-secondary' : 'text-mist'}`}>
             Jurisdiction Authority
           </span>
-          <span className={`font-semibold mt-0.5 block text-xs ${isLight ? 'text-[#0F291B]' : 'text-white'}`}>
+          <span className={`font-semibold mt-0.5 block text-xs ${isLight ? 'text-fg-primary' : 'text-white'}`}>
             Not authorized by any regulator
           </span>
         </div>

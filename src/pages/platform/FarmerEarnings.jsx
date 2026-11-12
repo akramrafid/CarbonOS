@@ -62,12 +62,12 @@ const FarmerEarnings = () => {
   ];
 
   return (
-    <div className="min-h-screen bg-[#040A06] font-sans relative overflow-hidden">
+    <div className="min-h-screen bg-bg-canvas font-sans relative overflow-hidden">
       {/* Background Graphic Effects */}
       <div className="absolute inset-0 bg-[linear-gradient(to_right,#00C85308_1px,transparent_1px),linear-gradient(to_bottom,#00C85308_1px,transparent_1px)] bg-[size:4rem_4rem] z-0 pointer-events-none"></div>
       <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[800px] h-[400px] bg-emerald/5 rounded-full blur-[120px] pointer-events-none z-0"></div>
 
-      <div className="pt-32 pb-16 px-4 sm:px-6 lg:px-8 relative z-10">
+      <div className="pt-16 pb-16 px-4 sm:px-6 lg:px-8 relative z-10">
         <div className="max-w-7xl mx-auto">
           <div className="mb-12">
             <PageHeader
@@ -104,7 +104,7 @@ const FarmerEarnings = () => {
           </div>
 
           {/* Transaction History Table */}
-          <div className="bg-[#080F0B]/80 rounded-2xl border border-white/10 shadow-2xl overflow-hidden backdrop-blur-xl">
+          <div className="bg-bg-canvas/80 rounded-2xl border border-white/10 shadow-2xl overflow-hidden backdrop-blur-xl">
             <div className="px-6 py-6 border-b border-white/5 flex justify-between items-center">
               <h3 className="text-xl font-bold text-white">Transaction History</h3>
               <Button variant="secondary" size="sm" className="font-mono text-xs">

@@ -71,7 +71,7 @@ export const Dropdown = ({
         <div 
           role="menu"
           tabIndex={-1}
-          className={`absolute z-50 mt-2 min-w-[12rem] rounded-2xl border border-carbon-border bg-carbon-surface-raised dark:bg-[#0C1910] dark:border-[#1E3A27] text-carbon-text p-1.5 shadow-2xl backdrop-blur-md animate-in fade-in zoom-in-95 duration-150 focus:outline-none ${alignClasses}`}
+          className={`absolute z-50 mt-2 min-w-[12rem] rounded-2xl border border-carbon-border bg-carbon-surface-raised dark:bg-bg-elevated dark:border-border-subtle text-carbon-text p-1.5 shadow-2xl backdrop-blur-md animate-in fade-in zoom-in-95 duration-150 focus:outline-none ${alignClasses}`}
         >
           {children}
         </div>
@@ -97,7 +97,7 @@ export const DropdownItem = ({
       className={`w-full flex items-center gap-2.5 px-3 py-2 rounded-xl text-xs font-sans font-medium text-left transition-colors cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed ${
         destructive
           ? 'text-red-500 hover:bg-red-500/10 dark:text-red-400'
-          : 'text-carbon-text hover:bg-carbon-surface dark:text-[#E2ECE5] dark:hover:bg-white/5'
+          : 'text-carbon-text hover:bg-carbon-surface dark:text-fg-primary dark:hover:bg-white/5'
       } ${className}`}
     >
       {icon && <span className="w-4 h-4 shrink-0 text-current">{icon}</span>}

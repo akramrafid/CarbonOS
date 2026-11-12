@@ -83,7 +83,7 @@ export const CarbonMonitoring = () => {
         <div 
           role="status" 
           aria-live="polite"
-          className="fixed bottom-6 right-6 z-[100] px-4 py-2.5 rounded-xl bg-carbon-surface-raised border border-emerald/40 text-registry text-sm shadow-2xl flex items-center gap-2 dark:bg-[#13241B] dark:text-[#E2ECE5]"
+          className="fixed bottom-6 right-6 z-[100] px-4 py-2.5 rounded-xl bg-carbon-surface-raised border border-emerald/40 text-registry text-sm shadow-2xl flex items-center gap-2 dark:bg-bg-elevated dark:text-fg-primary"
         >
           <span className="w-2 h-2 rounded-full bg-emerald" />
           <span>{toast.message}</span>

@@ -42,7 +42,7 @@ export const AddCustomItemModal = ({
               value={newCustomItem.categoryId}
               onChange={(e) => setNewCustomItem({ ...newCustomItem, categoryId: e.target.value })}
               className={`w-full text-xs p-2.5 rounded-xl border focus:outline-none focus:border-emerald ${
-                isLight ? 'bg-slate-50 border-carbon-border text-[#0F2417]' : 'bg-[#040906] border-[#152B1D] text-white'
+                isLight ? 'bg-slate-50 border-carbon-border text-fg-primary' : 'bg-bg-canvas border-border-subtle text-white'
               }`}
             >
               <option value="transport">Transport</option>
@@ -65,7 +65,7 @@ export const AddCustomItemModal = ({
               value={newCustomItem.scope}
               onChange={(e) => setNewCustomItem({ ...newCustomItem, scope: e.target.value })}
               className={`w-full text-xs p-2.5 rounded-xl border focus:outline-none focus:border-emerald ${
-                isLight ? 'bg-slate-50 border-carbon-border text-[#0F2417]' : 'bg-[#040906] border-[#152B1D] text-white'
+                isLight ? 'bg-slate-50 border-carbon-border text-fg-primary' : 'bg-bg-canvas border-border-subtle text-white'
               }`}
             >
               <option value="Scope 1">Scope 1 (Direct)</option>
@@ -126,7 +126,7 @@ export const AddCustomItemModal = ({
 
         {/* Calculated CO2 Preview */}
         <div className={`p-3 rounded-xl border flex justify-between items-center ${
-          isLight ? 'bg-emerald-50 border-emerald-200' : 'bg-[#0D2616] border-emerald/30'
+          isLight ? 'bg-emerald-50 border-emerald-200' : 'bg-bg-surface border-emerald/30'
         }`}>
           <span className="text-xs font-bold font-sans">Calculated Added Impact:</span>
           <span className="text-xs font-mono font-black text-emerald">

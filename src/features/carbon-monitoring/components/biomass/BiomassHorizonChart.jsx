@@ -77,8 +77,8 @@ export function BiomassHorizonChart({
     <div
       className={`col-span-1 md:col-span-2 lg:col-span-4 rounded-3xl p-6 md:p-8 border transition-all ${
         isLight
-          ? 'bg-white border-[#E2E8F0] shadow-xs'
-          : 'bg-[#08130C] border-[#152B1D]'
+          ? 'bg-white border-border-subtle shadow-xs'
+          : 'bg-bg-elevated border-border-subtle'
       }`}
     >
       {/* Chart Header Bar */}
@@ -88,7 +88,7 @@ export function BiomassHorizonChart({
             <div
               className={`p-1.5 rounded-lg border ${
                 isLight
-                  ? 'bg-[#E8F8EE] text-[#00873E] border-[#C2E9CF]'
+                  ? 'bg-accent-muted text-accent border-border-subtle'
                   : 'bg-emerald/10 text-emerald border-emerald/20'
               }`}
             >
@@ -96,7 +96,7 @@ export function BiomassHorizonChart({
             </div>
             <h3
               className={`font-extrabold text-lg md:text-xl font-sans tracking-tight ${
-                isLight ? 'text-[#0F291B]' : 'text-white'
+                isLight ? 'text-fg-primary' : 'text-white'
               }`}
             >
               Forest Health & Carbon Accumulation Trends
@@ -104,14 +104,14 @@ export function BiomassHorizonChart({
             <span
               className={`text-[11px] font-mono px-2 py-0.5 rounded-md border ${
                 isLight
-                  ? 'bg-[#F8FAFC] text-[#64748B] border-[#E2E8F0]'
-                  : 'bg-[#050C07] text-[#94A3B8] border-[#152B1D]'
+                  ? 'bg-bg-canvas text-fg-secondary border-border-subtle'
+                  : 'bg-bg-canvas text-fg-secondary border-border-subtle'
               }`}
             >
               Multi-Temporal SAR + S2
             </span>
           </div>
-          <p className={`text-xs ${isLight ? 'text-[#64748B]' : 'text-[#94A3B8]'}`}>
+          <p className={`text-xs ${isLight ? 'text-fg-secondary' : 'text-fg-secondary'}`}>
             Quarterly canopy telemetry against modelled pre-project baselines.
           </p>
         </div>
@@ -164,19 +164,19 @@ export function BiomassHorizonChart({
       {/* Chart Footer Legend & Real-time Metrics Strip */}
       <div
         className={`mt-6 pt-5 border-t flex flex-col md:flex-row items-center justify-between gap-4 text-xs ${
-          isLight ? 'border-[#E2E8F0]' : 'border-[#152B1D]'
+          isLight ? 'border-border-subtle' : 'border-border-subtle'
         }`}
       >
         <div className="flex flex-wrap items-center gap-6">
           <div className="flex items-center space-x-2">
-            <span className={`w-3 h-3 rounded-xs shrink-0 ${isLight ? 'bg-[#00873E]' : 'bg-[#00C853]'}`}></span>
-            <span className={`font-semibold ${isLight ? 'text-[#0F291B]' : 'text-white'}`}>
+            <span className={`w-3 h-3 rounded-xs shrink-0 ${isLight ? 'bg-accent' : 'bg-accent'}`}></span>
+            <span className={`font-semibold ${isLight ? 'text-fg-primary' : 'text-white'}`}>
               Active Measured Telemetry ({metricConfig.title})
             </span>
           </div>
           <div className="flex items-center space-x-2">
-            <span className="w-4 h-0.5 border-t-2 border-dashed border-[#F59E0B]"></span>
-            <span className={`font-semibold ${isLight ? 'text-[#0F291B]' : 'text-white'}`}>
+            <span className="w-4 h-0.5 border-t-2 border-dashed border-amber-500"></span>
+            <span className={`font-semibold ${isLight ? 'text-fg-primary' : 'text-white'}`}>
               Modelled Baseline Trajectory (Pre-Project Level)
             </span>
           </div>
@@ -186,7 +186,7 @@ export function BiomassHorizonChart({
           <span
             className={`px-2.5 py-1 rounded-full font-mono text-[11px] font-bold border ${
               isLight
-                ? 'bg-[#E8F8EE] text-[#00873E] border-[#C2E9CF]'
+                ? 'bg-accent-muted text-accent border-border-subtle'
                 : 'bg-emerald/10 text-emerald border-emerald/20'
             }`}
           >
@@ -195,8 +195,8 @@ export function BiomassHorizonChart({
           <span
             className={`px-2.5 py-1 rounded-full font-mono text-[11px] font-bold border ${
               isLight
-                ? 'bg-[#F8FAFC] text-[#475569] border-[#E2E8F0]'
-                : 'bg-[#050C07] text-[#94A3B8] border-[#152B1D]'
+                ? 'bg-bg-canvas text-fg-secondary border-border-subtle'
+                : 'bg-bg-canvas text-fg-secondary border-border-subtle'
             }`}
           >
             Reserve: 18.5%

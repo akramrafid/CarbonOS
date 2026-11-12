@@ -36,12 +36,12 @@ export function GisSidebarControls(props) {
       {/* Coordinate Search box */}
       <div
         className={`border rounded-2xl p-5 transition-all ${
-          isLight ? 'bg-white border-[#E2E8F0] shadow-xs' : 'bg-[#08130C] border-[#152B1D]'
+          isLight ? 'bg-white border-border-subtle shadow-xs' : 'bg-bg-elevated border-border-subtle'
         }`}
       >
         <h3
           className={`font-bold text-sm mb-3 uppercase tracking-wider flex items-center space-x-2 ${
-            isLight ? 'text-[#0F291B]' : 'text-mist'
+            isLight ? 'text-fg-primary' : 'text-mist'
           }`}
         >
           <MapPin size={16} className="text-emerald" />
@@ -55,7 +55,7 @@ export function GisSidebarControls(props) {
             placeholder="Lat, Lng (e.g. 22.3, 89.6)"
             className={`flex-1 border rounded-xl px-3 py-2 text-sm focus:outline-none focus:border-emerald/50 transition-colors ${
               isLight
-                ? 'bg-[#F8FAFC] border-[#CBD5E1] text-[#0F291B] placeholder-[#94A3B8]'
+                ? 'bg-bg-canvas border-border-subtle text-fg-primary placeholder-[#94A3B8]'
                 : 'bg-white/5 border-white/10 text-white placeholder-mist/60'
             }`}
           />
@@ -87,12 +87,12 @@ export function GisSidebarControls(props) {
       {/* Layers toggle */}
       <div
         className={`border rounded-2xl p-5 transition-all ${
-          isLight ? 'bg-white border-[#E2E8F0] shadow-xs' : 'bg-[#08130C] border-[#152B1D]'
+          isLight ? 'bg-white border-border-subtle shadow-xs' : 'bg-bg-elevated border-border-subtle'
         }`}
       >
         <h3
           className={`font-bold text-sm mb-4 uppercase tracking-wider flex items-center space-x-2 ${
-            isLight ? 'text-[#0F291B]' : 'text-mist'
+            isLight ? 'text-fg-primary' : 'text-mist'
           }`}
         >
           <Layers size={16} className="text-emerald" />
@@ -115,7 +115,7 @@ export function GisSidebarControls(props) {
               className={`w-full !flex !items-center !justify-between text-xs !p-3 ${
                 activeLayer === layer.id
                   ? isLight
-                    ? '!border-[#00873E] !bg-[#E8F8EE] !text-[#00873E] font-bold shadow-xs'
+                    ? '!border-border-strong !bg-accent-muted !text-accent font-bold shadow-xs'
                     : '!border-emerald/45 !bg-emerald/10 !text-white font-bold'
                   : ''
               }`}
@@ -130,13 +130,13 @@ export function GisSidebarControls(props) {
       {/* Basemap Selection */}
       <div
         className={`border rounded-2xl p-5 transition-all ${
-          isLight ? 'bg-white border-[#E2E8F0] shadow-xs' : 'bg-[#08130C] border-[#152B1D]'
+          isLight ? 'bg-white border-border-subtle shadow-xs' : 'bg-bg-elevated border-border-subtle'
         }`}
       >
         <div className="flex items-center justify-between mb-3">
           <h3
             className={`font-bold text-sm uppercase tracking-wider flex items-center space-x-2 ${
-              isLight ? 'text-[#0F291B]' : 'text-mist'
+              isLight ? 'text-fg-primary' : 'text-mist'
             }`}
           >
             <MapIcon size={16} className="text-emerald" />

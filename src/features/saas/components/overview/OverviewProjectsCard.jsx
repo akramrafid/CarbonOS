@@ -13,10 +13,10 @@ export const OverviewProjectsCard = ({
     <Card className="p-6">
       <div className="flex justify-between items-center mb-4">
         <div>
-          <h3 className={`font-sans font-bold text-lg ${isLight ? 'text-[#0F2417]' : 'text-white'}`}>
+          <h3 className={`font-sans font-bold text-lg ${isLight ? 'text-fg-primary' : 'text-white'}`}>
             Active Corporate Projects
           </h3>
-          <p className={`text-xs mt-0.5 ${isLight ? 'text-[#41634E]' : 'text-mist'}`}>
+          <p className={`text-xs mt-0.5 ${isLight ? 'text-fg-muted' : 'text-mist'}`}>
             District specific offsetting initiatives under CarbonZero monitoring.
           </p>
         </div>
@@ -34,7 +34,7 @@ export const OverviewProjectsCard = ({
         <table className="w-full text-left font-sans text-xs">
           <thead>
             <tr className={`font-bold border-b pb-2 text-[10px] uppercase font-mono ${
-              isLight ? 'text-[#557361] border-carbon-border' : 'text-mist border-[#122418]'
+              isLight ? 'text-fg-muted border-carbon-border' : 'text-mist border-border-subtle'
             }`}>
               <th className="py-2.5">Project Name</th>
               <th>Sector</th>
@@ -44,10 +44,10 @@ export const OverviewProjectsCard = ({
           </thead>
           <tbody className={`divide-y ${isLight ? 'divide-carbon-border' : 'divide-[#122418]'}`}>
             {projects.map(p => (
-              <tr key={p.id} className={`transition-colors ${isLight ? 'hover:bg-[#F7FAF7]' : 'hover:bg-[#040906]'}`}>
-                <td className={`py-3 font-bold ${isLight ? 'text-[#0F2417]' : 'text-white'}`}>{p.name}</td>
-                <td className={isLight ? 'text-[#557361]' : 'text-mist'}>{p.sector}</td>
-                <td className={`font-mono font-semibold ${isLight ? 'text-emerald' : 'text-[#4ADE80]'}`}>{p.target} tCO2e</td>
+              <tr key={p.id} className={`transition-colors ${isLight ? 'hover:bg-bg-muted' : 'hover:bg-bg-canvas'}`}>
+                <td className={`py-3 font-bold ${isLight ? 'text-fg-primary' : 'text-white'}`}>{p.name}</td>
+                <td className={isLight ? 'text-fg-muted' : 'text-mist'}>{p.sector}</td>
+                <td className={`font-mono font-semibold ${isLight ? 'text-emerald' : 'text-emerald-400'}`}>{p.target} tCO2e</td>
                 <td>
                   <Badge 
                     variant={p.status === 'Verified' ? 'emerald' : p.status === 'In Progress' ? 'warning' : 'neutral'}

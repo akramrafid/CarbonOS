@@ -31,8 +31,8 @@ export const Forbidden = () => {
 
   return (
     <main
-      className={`min-h-[85vh] flex items-center justify-center px-4 sm:px-6 py-28 relative overflow-hidden font-sans transition-colors duration-300 ${
-        isLight ? 'bg-[#f2f3ee] text-[#181414]' : 'bg-carbon text-registry'
+      className={`min-h-[85vh] flex items-center justify-center px-4 sm:px-6 py-10 md:py-16 relative overflow-hidden font-sans transition-colors duration-300 ${
+        isLight ? 'bg-bg-canvas text-fg-primary' : 'bg-carbon text-registry'
       }`}
     >
       {/* Ambient Radial Mesh Gradients */}
@@ -64,11 +64,11 @@ export const Forbidden = () => {
 
         {/* Big 403 Numerals */}
         <div className="flex items-center justify-center font-sans font-extrabold text-7xl sm:text-9xl tracking-tight mb-4 select-none">
-          <span className={isLight ? 'text-[#181414]' : 'text-white'}>4</span>
+          <span className={isLight ? 'text-fg-primary' : 'text-white'}>4</span>
           <span className={`serif-drama italic px-2 ${isLight ? 'text-amber-600' : 'text-amber'}`}>
             0
           </span>
-          <span className={isLight ? 'text-[#181414]' : 'text-white'}>3</span>
+          <span className={isLight ? 'text-fg-primary' : 'text-white'}>3</span>
         </div>
 
         <PageHeader
@@ -87,7 +87,7 @@ export const Forbidden = () => {
           }`}
         >
           <span className={`font-bold ${isLight ? 'text-amber-700' : 'text-amber'}`}>PATH:</span>
-          <span className={`font-medium ${isLight ? 'text-[#181414]' : 'text-white/90'}`}>
+          <span className={`font-medium ${isLight ? 'text-fg-primary' : 'text-white/90'}`}>
             {location.pathname}
           </span>
           {requiredRole && (
@@ -110,7 +110,7 @@ export const Forbidden = () => {
 
           <Link
             to="/"
-            className="keep-white inline-flex items-center space-x-2 px-6 py-3 rounded-full bg-[#166534] hover:bg-[#14532d] dark:bg-emerald dark:hover:bg-emerald/90 text-white dark:text-[#040A06] text-sm font-bold shadow-[0_0_25px_rgba(0,200,83,0.3)] transition-all hover:scale-[1.02] active:scale-[0.98]"
+            className="keep-white inline-flex items-center space-x-2 px-6 py-3 rounded-full bg-accent hover:bg-accent-active dark:bg-emerald dark:hover:bg-emerald/90 text-white dark:text-fg-primary text-sm font-bold shadow-[0_0_25px_rgba(0,200,83,0.3)] transition-all hover:scale-[1.02] active:scale-[0.98]"
           >
             <Home size={16} />
             <span>Return to Home</span>
@@ -124,7 +124,7 @@ export const Forbidden = () => {
                 : 'bg-white/[0.06] hover:bg-white/[0.12] text-white border border-white/15'
             }`}
           >
-            <KeyRound size={16} className={isLight ? 'text-[#166534]' : 'text-emerald'} />
+            <KeyRound size={16} className={isLight ? 'text-accent' : 'text-emerald'} />
             <span>Switch Persona</span>
           </Link>
         </div>
@@ -145,13 +145,13 @@ export const Forbidden = () => {
           >
             <div
               className={`p-2.5 rounded-xl transition-transform group-hover:scale-110 shrink-0 ${
-                isLight ? 'bg-emerald-50 text-[#166534]' : 'bg-emerald/10 text-emerald'
+                isLight ? 'bg-emerald-50 text-accent' : 'bg-emerald/10 text-emerald'
               }`}
             >
               <Building2 size={18} />
             </div>
             <div>
-              <div className={`font-sans font-semibold text-xs ${isLight ? 'text-[#181414]' : 'text-white'}`}>
+              <div className={`font-sans font-semibold text-xs ${isLight ? 'text-fg-primary' : 'text-white'}`}>
                 Enterprise Overview
               </div>
               <div className={`font-mono text-[11px] ${isLight ? 'text-slate-600' : 'text-mist'}`}>
@@ -170,13 +170,13 @@ export const Forbidden = () => {
           >
             <div
               className={`p-2.5 rounded-xl transition-transform group-hover:scale-110 shrink-0 ${
-                isLight ? 'bg-emerald-50 text-[#166534]' : 'bg-emerald/10 text-emerald'
+                isLight ? 'bg-emerald-50 text-accent' : 'bg-emerald/10 text-emerald'
               }`}
             >
               <Terminal size={18} />
             </div>
             <div>
-              <div className={`font-sans font-semibold text-xs ${isLight ? 'text-[#181414]' : 'text-white'}`}>
+              <div className={`font-sans font-semibold text-xs ${isLight ? 'text-fg-primary' : 'text-white'}`}>
                 Public Registry Terminal
               </div>
               <div className={`font-mono text-[11px] ${isLight ? 'text-slate-600' : 'text-mist'}`}>

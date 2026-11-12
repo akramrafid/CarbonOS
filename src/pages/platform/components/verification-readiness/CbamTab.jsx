@@ -16,11 +16,11 @@ export function CbamTab({
   return (
     <div
       className={`rounded-3xl p-6 sm:p-8 border shadow-xl space-y-6 ${
-        isLight ? 'bg-white border-[#E2E8E3]' : 'bg-[#08130C] border-[#152B1D]'
+        isLight ? 'bg-white border-border-subtle' : 'bg-bg-elevated border-border-subtle'
       }`}
     >
       <div>
-        <div className="flex items-center space-x-2 text-[10px] font-mono uppercase tracking-widest text-[#00C853] font-bold">
+        <div className="flex items-center space-x-2 text-[10px] font-mono uppercase tracking-widest text-accent font-bold">
           <span>EU Regulation 2023/956 Compliance</span>
         </div>
         <h3 className="font-bold text-lg mt-0.5">Carbon Border Adjustment Mechanism (CBAM) Customs Declarator</h3>
@@ -37,7 +37,7 @@ export function CbamTab({
             <select
               value={cbamSector}
               onChange={(e) => setCbamSector(e.target.value)}
-              className="w-full text-xs font-mono p-2.5 rounded-xl border border-white/10 bg-black/30 text-white focus:outline-none focus:border-[#00C853] cursor-pointer"
+              className="w-full text-xs font-mono p-2.5 rounded-xl border border-white/10 bg-black/30 text-white focus:outline-none focus:border-border-strong cursor-pointer"
             >
               <option value="Jute & Polymer Composites">Jute, Geotextiles &amp; Bio-Polymer Blends (HS 5307)</option>
               <option value="Steel & Industrial Metals">Steel, Rebar &amp; Fabricated Structural Steel (HS 7208)</option>
@@ -53,7 +53,7 @@ export function CbamTab({
               type="number"
               value={cbamExportTons}
               onChange={(e) => setCbamExportTons(parseFloat(e.target.value) || 0)}
-              className="w-full text-xs font-mono p-2.5 rounded-xl border border-white/10 bg-black/30 text-white focus:outline-none focus:border-[#00C853]"
+              className="w-full text-xs font-mono p-2.5 rounded-xl border border-white/10 bg-black/30 text-white focus:outline-none focus:border-border-strong"
             />
           </div>
 

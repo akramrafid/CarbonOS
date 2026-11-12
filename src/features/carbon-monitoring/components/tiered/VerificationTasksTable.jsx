@@ -19,14 +19,14 @@ export function VerificationTasksTable({
 
   return (
     <Card className={`rounded-3xl border overflow-hidden transition-all ${
-      isLight ? 'bg-white border-[#E2E8F0] shadow-xs' : 'bg-[#08130C] border-[#152B1D]'
+      isLight ? 'bg-white border-border-subtle shadow-xs' : 'bg-bg-elevated border-border-subtle'
     }`}>
       <div className="p-5 md:p-6 border-b border-inherit flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
-          <h3 className={`text-lg font-bold font-sans ${isLight ? 'text-[#0F291B]' : 'text-white'}`}>
+          <h3 className={`text-lg font-bold font-sans ${isLight ? 'text-fg-primary' : 'text-white'}`}>
             Verification Mission Queue & Recalibration Ledger
           </h3>
-          <p className={`text-xs mt-0.5 ${isLight ? 'text-[#64748B]' : 'text-mist'}`}>
+          <p className={`text-xs mt-0.5 ${isLight ? 'text-fg-secondary' : 'text-mist'}`}>
             Parcels requiring high-tier drone LiDAR validation and model recalibration.
           </p>
         </div>
@@ -55,7 +55,7 @@ export function VerificationTasksTable({
         <table className="w-full text-left text-xs border-collapse">
           <thead>
             <tr className={`border-b text-[11px] font-semibold uppercase tracking-wider ${
-              isLight ? 'bg-[#F8FAFC] border-[#E2E8F0] text-[#64748B]' : 'bg-white/[0.02] border-white/10 text-mist'
+              isLight ? 'bg-bg-canvas border-border-subtle text-fg-secondary' : 'bg-white/[0.02] border-white/10 text-mist'
             }`}>
               <th className="py-3 px-4">Task ID & Parcel</th>
               <th className="py-3 px-4">Carbon Estimate</th>
@@ -89,7 +89,7 @@ export function VerificationTasksTable({
                 const isCompleted = task.status === 'completed';
                 return (
                   <tr key={task.id} className={`hover:bg-black/[0.02] dark:hover:bg-white/[0.02] transition-colors ${
-                    isLight ? 'text-[#0F291B]' : 'text-white'
+                    isLight ? 'text-fg-primary' : 'text-white'
                   }`}>
                     <td className="py-3.5 px-4 font-mono">
                       <div className="font-bold flex items-center space-x-1.5">
@@ -163,7 +163,7 @@ export function VerificationTasksTable({
                           variant="secondary"
                           size="sm"
                           onClick={() => setSelectedTaskForDrone(task)}
-                          className="text-xs font-sans font-bold px-3 py-1.5 bg-emerald text-[#040906] shadow-xs hover:bg-emerald/90 inline-flex items-center space-x-1.5"
+                          className="text-xs font-sans font-bold px-3 py-1.5 bg-emerald text-fg-primary shadow-xs hover:bg-emerald/90 inline-flex items-center space-x-1.5"
                         >
                           <Plane size={13} />
                           <span>Dispatch UAV</span>

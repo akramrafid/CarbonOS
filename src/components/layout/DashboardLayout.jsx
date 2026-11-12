@@ -83,15 +83,15 @@ export function DashboardLayout() {
         <aside
           aria-label="Sidebar navigation"
           className={`
-            hidden md:flex flex-col border-r border-carbon-border dark:border-[#1E3326] bg-carbon-surface dark:bg-[#080F0B]
+            hidden md:flex flex-col border-r border-carbon-border dark:border-border-subtle bg-carbon-surface dark:bg-bg-canvas
             transition-all duration-200 select-none shrink-0 sticky top-0 h-screen z-40
             ${collapsed ? 'w-16' : 'w-64'}
           `.trim()}
         >
           {/* Logo & Toggle */}
-          <div className="h-16 flex items-center justify-between px-4 border-b border-carbon-border/60 dark:border-[#1E3326]/60">
+          <div className="h-16 flex items-center justify-between px-4 border-b border-carbon-border/60 dark:border-border-subtle/60">
             {!collapsed ? (
-              <Link to="/" className="flex items-center gap-2.5 font-bold tracking-tight text-registry dark:text-[#E2ECE5]">
+              <Link to="/" className="flex items-center gap-2.5 font-bold tracking-tight text-registry dark:text-fg-primary">
                 <div className="w-8 h-8 rounded-lg bg-emerald flex items-center justify-center text-carbon font-mono font-bold text-base shadow-sm">
                   C
                 </div>
@@ -112,7 +112,7 @@ export function DashboardLayout() {
               type="button"
               onClick={toggleCollapsed}
               aria-label={collapsed ? 'Expand sidebar' : 'Collapse sidebar'}
-              className="hidden lg:flex p-1.5 rounded-lg text-mist hover:text-registry hover:bg-carbon-surface-raised dark:text-[#7A9A85] dark:hover:text-[#E2ECE5]"
+              className="hidden lg:flex p-1.5 rounded-lg text-mist hover:text-registry hover:bg-carbon-surface-raised dark:text-fg-secondary dark:hover:text-fg-primary"
             >
               {collapsed ? <ChevronRight className="w-4 h-4" /> : <ChevronLeft className="w-4 h-4" />}
             </button>
@@ -123,7 +123,7 @@ export function DashboardLayout() {
             {navConfig.groups.map((group) => (
               <div key={group.id} className="space-y-1">
                 {!collapsed && (
-                  <h3 className="px-3 text-[11px] font-mono font-semibold uppercase tracking-wider text-mist/70 dark:text-[#7A9A85]/70 mb-2">
+                  <h3 className="px-3 text-[11px] font-mono font-semibold uppercase tracking-wider text-mist/70 dark:text-fg-secondary/70 mb-2">
                     {group.title}
                   </h3>
                 )}
@@ -140,7 +140,7 @@ export function DashboardLayout() {
                         ${
                           isActive
                             ? 'bg-emerald text-carbon font-semibold shadow-sm dark:bg-emerald dark:text-carbon'
-                            : 'text-mist hover:text-registry hover:bg-carbon-surface-raised dark:text-[#7A9A85] dark:hover:text-[#E2ECE5] dark:hover:bg-[#13241B]'
+                            : 'text-mist hover:text-registry hover:bg-carbon-surface-raised dark:text-fg-secondary dark:hover:text-fg-primary dark:hover:bg-bg-elevated'
                         }
                         ${collapsed ? 'justify-center px-0' : ''}
                       `.trim()}
@@ -161,7 +161,7 @@ export function DashboardLayout() {
 
           {/* Footer of Sidebar */}
           {!collapsed && (
-            <div className="p-3 border-t border-carbon-border/60 dark:border-[#1E3326]/60 text-xs text-mist flex items-center justify-between">
+            <div className="p-3 border-t border-carbon-border/60 dark:border-border-subtle/60 text-xs text-mist flex items-center justify-between">
               <span className="font-mono text-[11px]">v2.4.0 • Dhaka MRV</span>
               <Link to="/" className="hover:text-emerald flex items-center gap-1">
                 Exit <ExternalLink className="w-3 h-3" />
@@ -173,7 +173,7 @@ export function DashboardLayout() {
         {/* Main Content Area */}
         <div className="flex-1 flex flex-col min-w-0">
           {/* Top Bar */}
-          <header className="h-16 px-4 sm:px-6 border-b border-carbon-border dark:border-[#1E3326] bg-carbon-surface/90 dark:bg-[#080F0B]/90 backdrop-blur-md sticky top-0 z-30 flex items-center justify-between gap-4">
+          <header className="h-16 px-4 sm:px-6 border-b border-carbon-border dark:border-border-subtle bg-carbon-surface/90 dark:bg-bg-canvas/90 backdrop-blur-md sticky top-0 z-30 flex items-center justify-between gap-4">
             <div className="flex items-center gap-3">
               {/* Mobile Drawer Trigger */}
               <button
@@ -185,7 +185,7 @@ export function DashboardLayout() {
                 <Menu className="w-5 h-5" />
               </button>
 
-              <span className="text-xs font-mono text-mist hidden sm:inline-block dark:text-[#7A9A85]">
+              <span className="text-xs font-mono text-mist hidden sm:inline-block dark:text-fg-secondary">
                 NATIONAL CARBON REGISTRY & ESG ENGINE
               </span>
             </div>
@@ -196,7 +196,7 @@ export function DashboardLayout() {
                 type="button"
                 onClick={toggleLanguage}
                 aria-label="Switch Language"
-                className="px-2.5 py-1.5 rounded-lg border border-carbon-border dark:border-[#1E3326] text-xs font-mono font-medium hover:bg-carbon-surface-raised min-w-[44px] min-h-[44px] flex items-center justify-center"
+                className="px-2.5 py-1.5 rounded-lg border border-carbon-border dark:border-border-subtle text-xs font-mono font-medium hover:bg-carbon-surface-raised min-w-[44px] min-h-[44px] flex items-center justify-center"
               >
                 {i18n.language === 'en' ? 'বাংলা' : 'EN'}
               </button>
@@ -205,7 +205,7 @@ export function DashboardLayout() {
                 type="button"
                 onClick={toggleTheme}
                 aria-label={`Switch to ${theme === 'dark' ? 'light' : 'dark'} mode`}
-                className="p-2 rounded-lg border border-carbon-border dark:border-[#1E3326] text-mist hover:text-registry hover:bg-carbon-surface-raised min-w-[44px] min-h-[44px] flex items-center justify-center"
+                className="p-2 rounded-lg border border-carbon-border dark:border-border-subtle text-mist hover:text-registry hover:bg-carbon-surface-raised min-w-[44px] min-h-[44px] flex items-center justify-center"
               >
                 {theme === 'dark' ? <Sun className="w-4 h-4 text-amber-400" /> : <Moon className="w-4 h-4 text-slate-700" />}
               </button>
@@ -226,11 +226,11 @@ export function DashboardLayout() {
           onClick={() => setMobileDrawerOpen(false)}
         >
           <div
-            className="w-72 bg-carbon-surface dark:bg-[#080F0B] h-full flex flex-col p-4 shadow-2xl border-r border-carbon-border dark:border-[#1E3326]"
+            className="w-72 bg-carbon-surface dark:bg-bg-canvas h-full flex flex-col p-4 shadow-2xl border-r border-carbon-border dark:border-border-subtle"
             onClick={(e) => e.stopPropagation()}
           >
-            <div className="flex items-center justify-between pb-4 mb-4 border-b border-carbon-border dark:border-[#1E3326]">
-              <span className="font-serif font-bold text-lg text-registry dark:text-[#E2ECE5]">
+            <div className="flex items-center justify-between pb-4 mb-4 border-b border-carbon-border dark:border-border-subtle">
+              <span className="font-serif font-bold text-lg text-registry dark:text-fg-primary">
                 CarbonOS
               </span>
               <button

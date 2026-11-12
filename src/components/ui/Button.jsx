@@ -37,9 +37,9 @@ export const Button = React.forwardRef(function Button(
     primary:
       'bg-emerald text-carbon font-semibold shadow-sm hover:bg-emerald-glow active:scale-[0.98] border border-emerald/20 focus-visible:ring-emerald dark:bg-emerald dark:text-carbon dark:hover:bg-emerald-glow',
     secondary:
-      'bg-carbon-surface text-registry border border-carbon-border hover:bg-carbon-surface-raised active:scale-[0.98] focus-visible:ring-emerald dark:bg-[#0D1812] dark:text-[#E2ECE5] dark:border-[#1E3326] dark:hover:bg-[#13241B]',
+      'bg-carbon-surface text-registry border border-carbon-border hover:bg-carbon-surface-raised active:scale-[0.98] focus-visible:ring-emerald dark:bg-bg-surface dark:text-fg-primary dark:border-border-subtle dark:hover:bg-bg-elevated',
     ghost:
-      'bg-transparent text-mist hover:text-registry hover:bg-carbon-surface active:scale-[0.98] focus-visible:ring-emerald dark:text-[#7A9A85] dark:hover:text-[#E2ECE5] dark:hover:bg-[#0D1812]',
+      'bg-transparent text-mist hover:text-registry hover:bg-carbon-surface active:scale-[0.98] focus-visible:ring-emerald dark:text-fg-secondary dark:hover:text-fg-primary dark:hover:bg-bg-surface',
     destructive:
       'bg-red-500/10 text-red-500 border border-red-500/20 hover:bg-red-500/20 active:scale-[0.98] focus-visible:ring-red-500 dark:bg-red-950/30 dark:text-red-400 dark:border-red-800/40',
     link:

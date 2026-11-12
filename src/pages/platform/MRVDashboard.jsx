@@ -311,7 +311,7 @@ const MRVDashboard = () => {
   const hasAlerts = allAlerts.length > 0;
 
   return (
-    <div className="pt-24 pb-16 min-h-[80vh] flex flex-col items-center noise-overlay">
+    <div className="pt-12 pb-8 sm:pt-16 sm:pb-12 min-h-[80vh] flex flex-col items-center noise-overlay">
       <div className="max-w-5xl w-full mx-auto px-6 lg:px-12 relative z-10 space-y-8">
         <PageHeader
           title="MRV Dashboard"

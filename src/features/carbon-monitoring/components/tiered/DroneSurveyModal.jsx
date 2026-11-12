@@ -46,7 +46,7 @@ export function DroneSurveyModal({
         <form onSubmit={handleCompleteDroneSurvey} className="space-y-4 text-xs">
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div className="space-y-1.5">
-              <label htmlFor="drone_chm_path" className={`font-bold block ${isLight ? 'text-[#0F291B]' : 'text-white'}`}>
+              <label htmlFor="drone_chm_path" className={`font-bold block ${isLight ? 'text-fg-primary' : 'text-white'}`}>
                 Drone CHM GeoTIFF Path / S3 URI
               </label>
               <Input
@@ -61,7 +61,7 @@ export function DroneSurveyModal({
             </div>
 
             <div className="space-y-1.5">
-              <label htmlFor="surveyed_biomass" className={`font-bold block ${isLight ? 'text-[#0F291B]' : 'text-white'}`}>
+              <label htmlFor="surveyed_biomass" className={`font-bold block ${isLight ? 'text-fg-primary' : 'text-white'}`}>
                 Surveyed Biomass (AGB t/ha)
               </label>
               <Input
@@ -76,7 +76,7 @@ export function DroneSurveyModal({
             </div>
 
             <div className="space-y-1.5">
-              <label htmlFor="sensor_model" className={`font-bold block ${isLight ? 'text-[#0F291B]' : 'text-white'}`}>
+              <label htmlFor="sensor_model" className={`font-bold block ${isLight ? 'text-fg-primary' : 'text-white'}`}>
                 Sensor Model & Payload
               </label>
               <Input
@@ -90,7 +90,7 @@ export function DroneSurveyModal({
             </div>
 
             <div className="space-y-1.5">
-              <label htmlFor="resolution_cm" className={`font-bold block ${isLight ? 'text-[#0F291B]' : 'text-white'}`}>
+              <label htmlFor="resolution_cm" className={`font-bold block ${isLight ? 'text-fg-primary' : 'text-white'}`}>
                 Resolution GSD (cm/pixel)
               </label>
               <Input
@@ -105,7 +105,7 @@ export function DroneSurveyModal({
             </div>
 
             <div className="space-y-1.5">
-              <label htmlFor="operator_id" className={`font-bold block ${isLight ? 'text-[#0F291B]' : 'text-white'}`}>
+              <label htmlFor="operator_id" className={`font-bold block ${isLight ? 'text-fg-primary' : 'text-white'}`}>
                 Certified Operator / Pilot ID
               </label>
               <Input
@@ -120,7 +120,7 @@ export function DroneSurveyModal({
             </div>
 
             <div className="space-y-1.5">
-              <label htmlFor="survey_notes" className={`font-bold block ${isLight ? 'text-[#0F291B]' : 'text-white'}`}>
+              <label htmlFor="survey_notes" className={`font-bold block ${isLight ? 'text-fg-primary' : 'text-white'}`}>
                 Ground Calibration Notes
               </label>
               <Input

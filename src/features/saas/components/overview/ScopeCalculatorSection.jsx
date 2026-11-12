@@ -13,13 +13,13 @@ export const ScopeCalculatorSection = ({
   return (
     <Card className="p-6 lg:p-8 space-y-6">
       <div className={`flex justify-between items-center border-b pb-4 ${
-        isLight ? 'border-carbon-border' : 'border-[#122418]'
+        isLight ? 'border-carbon-border' : 'border-border-subtle'
       }`}>
         <div>
-          <h3 className={`font-sans font-bold text-lg ${isLight ? 'text-[#0F2417]' : 'text-white'}`}>
+          <h3 className={`font-sans font-bold text-lg ${isLight ? 'text-fg-primary' : 'text-white'}`}>
             Protocol Emissions Calculator
           </h3>
-          <p className={`text-xs mt-0.5 font-sans ${isLight ? 'text-[#557361]' : 'text-mist'}`}>
+          <p className={`text-xs mt-0.5 font-sans ${isLight ? 'text-fg-muted' : 'text-mist'}`}>
             Input raw values or upload utility invoices to extract footprint.
           </p>
         </div>
@@ -37,7 +37,7 @@ export const ScopeCalculatorSection = ({
         {/* Scope 1 Column */}
         <div className="space-y-4">
           <div className={`font-mono text-[10px] uppercase tracking-wider font-bold pb-2 border-b ${
-            isLight ? 'text-emerald border-carbon-border' : 'text-[#A7F3D0] border-[#122418]'
+            isLight ? 'text-emerald border-carbon-border' : 'text-emerald-200 border-border-subtle'
           }`}>
             Scope 1 (Direct)
           </div>
@@ -45,7 +45,7 @@ export const ScopeCalculatorSection = ({
           <div className="space-y-3">
             <div>
               <label className={`block text-[10px] font-bold font-sans uppercase mb-1 ${
-                isLight ? 'text-[#557361]' : 'text-mist'
+                isLight ? 'text-fg-muted' : 'text-mist'
               }`}>Diesel (Liters)</label>
               <Input 
                 type="number"
@@ -59,7 +59,7 @@ export const ScopeCalculatorSection = ({
             </div>
             <div>
               <label className={`block text-[10px] font-bold font-sans uppercase mb-1 ${
-                isLight ? 'text-[#557361]' : 'text-mist'
+                isLight ? 'text-fg-muted' : 'text-mist'
               }`}>Petrol (Liters)</label>
               <Input 
                 type="number"
@@ -73,7 +73,7 @@ export const ScopeCalculatorSection = ({
             </div>
             <div>
               <label className={`block text-[10px] font-bold font-sans uppercase mb-1 ${
-                isLight ? 'text-[#557361]' : 'text-mist'
+                isLight ? 'text-fg-muted' : 'text-mist'
               }`}>LPG (Kg)</label>
               <Input 
                 type="number"
@@ -91,7 +91,7 @@ export const ScopeCalculatorSection = ({
         {/* Scope 2 Column */}
         <div className="space-y-4">
           <div className={`font-mono text-[10px] uppercase tracking-wider font-bold pb-2 border-b ${
-            isLight ? 'text-emerald border-carbon-border' : 'text-[#A7F3D0] border-[#122418]'
+            isLight ? 'text-emerald border-carbon-border' : 'text-emerald-200 border-border-subtle'
           }`}>
             Scope 2 (Indirect)
           </div>
@@ -99,7 +99,7 @@ export const ScopeCalculatorSection = ({
           <div className="space-y-3">
             <div>
               <label className={`block text-[10px] font-bold font-sans uppercase mb-1 ${
-                isLight ? 'text-[#557361]' : 'text-mist'
+                isLight ? 'text-fg-muted' : 'text-mist'
               }`}>Grid Power (kWh)</label>
               <Input 
                 type="number"
@@ -117,7 +117,7 @@ export const ScopeCalculatorSection = ({
         {/* Scope 3 Column */}
         <div className="space-y-4">
           <div className={`font-mono text-[10px] uppercase tracking-wider font-bold pb-2 border-b ${
-            isLight ? 'text-emerald border-carbon-border' : 'text-[#A7F3D0] border-[#122418]'
+            isLight ? 'text-emerald border-carbon-border' : 'text-emerald-200 border-border-subtle'
           }`}>
             Scope 3 (Value Chain)
           </div>
@@ -125,7 +125,7 @@ export const ScopeCalculatorSection = ({
           <div className="space-y-3">
             <div>
               <label className={`block text-[10px] font-bold font-sans uppercase mb-1 ${
-                isLight ? 'text-[#557361]' : 'text-mist'
+                isLight ? 'text-fg-muted' : 'text-mist'
               }`}>Employees (Commute)</label>
               <Input 
                 type="number"
@@ -139,7 +139,7 @@ export const ScopeCalculatorSection = ({
             </div>
             <div>
               <label className={`block text-[10px] font-bold font-sans uppercase mb-1 ${
-                isLight ? 'text-[#557361]' : 'text-mist'
+                isLight ? 'text-fg-muted' : 'text-mist'
               }`}>Air Travel (Km)</label>
               <Input 
                 type="number"
@@ -153,7 +153,7 @@ export const ScopeCalculatorSection = ({
             </div>
             <div>
               <label className={`block text-[10px] font-bold font-sans uppercase mb-1 ${
-                isLight ? 'text-[#557361]' : 'text-mist'
+                isLight ? 'text-fg-muted' : 'text-mist'
               }`}>Truck Freight (T-Km)</label>
               <Input 
                 type="number"
@@ -167,7 +167,7 @@ export const ScopeCalculatorSection = ({
             </div>
             <div>
               <label className={`block text-[10px] font-bold font-sans uppercase mb-1 ${
-                isLight ? 'text-[#557361]' : 'text-mist'
+                isLight ? 'text-fg-muted' : 'text-mist'
               }`}>Raw Materials (Tons)</label>
               <Input 
                 type="number"

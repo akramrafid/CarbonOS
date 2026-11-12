@@ -9,7 +9,7 @@ export const TREATMENT_DB = {
 };
 
 export const URGENCY_CONFIG = {
-  low:      { label: 'Low Risk',      color: 'text-[#CCFF00]', bg: 'bg-[#CCFF00]/10', border: 'border-[#CCFF00]/20', dot: 'bg-[#CCFF00]' },
+  low:      { label: 'Low Risk',      color: 'text-lime-400', bg: 'bg-lime-400/10', border: 'border-lime-400/20', dot: 'bg-lime-400' },
   medium:   { label: 'Act Soon',      color: 'text-yellow-400', bg: 'bg-yellow-400/10', border: 'border-yellow-400/20', dot: 'bg-yellow-400' },
   high:     { label: 'Act Quickly',   color: 'text-orange-400', bg: 'bg-orange-400/10', border: 'border-orange-400/20', dot: 'bg-orange-400' },
   critical: { label: 'Urgent Action', color: 'text-red-400',    bg: 'bg-red-400/10',    border: 'border-red-400/20',    dot: 'bg-red-400'    }

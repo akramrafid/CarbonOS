@@ -103,10 +103,10 @@ export function PlatformModulesMobile() {
             <Link
               key={node.id}
               to={node.to}
-              className="flex items-center bg-[#080F0B]/80 border border-emerald/20 hover:border-emerald/50 rounded-full px-4 py-3 transition-colors group"
+              className="flex items-center bg-bg-canvas/80 border border-emerald/20 hover:border-emerald/50 rounded-full px-4 py-3 transition-colors group"
             >
-              <div className="w-2 h-2 rounded-full bg-[#10b981] mr-3 relative flex items-center justify-center">
-                <div className="absolute w-2 h-2 rounded-full bg-[#10b981]/50 animate-ping"></div>
+              <div className="w-2 h-2 rounded-full bg-emerald-500 mr-3 relative flex items-center justify-center">
+                <div className="absolute w-2 h-2 rounded-full bg-emerald-500/50 animate-ping"></div>
               </div>
               <span className="text-registry text-xs font-mono group-hover:text-emerald transition-colors">{node.title}</span>
             </Link>
@@ -123,10 +123,10 @@ export function PlatformModulesMobile() {
           {rightNodes.map((node) => (
             <div
               key={node.id}
-              className="flex items-center bg-[#080F0B]/80 border border-cyan/20 rounded-full px-4 py-3"
+              className="flex items-center bg-bg-canvas/80 border border-cyan/20 rounded-full px-4 py-3"
             >
-              <div className="w-2 h-2 rounded-full bg-[#06b6d4] mr-3 relative flex items-center justify-center">
-                <div className="absolute w-2 h-2 rounded-full bg-[#06b6d4]/50 animate-ping"></div>
+              <div className="w-2 h-2 rounded-full bg-cyan-500 mr-3 relative flex items-center justify-center">
+                <div className="absolute w-2 h-2 rounded-full bg-cyan-500/50 animate-ping"></div>
               </div>
               <span className="text-registry text-xs font-mono">{node.title}</span>
             </div>

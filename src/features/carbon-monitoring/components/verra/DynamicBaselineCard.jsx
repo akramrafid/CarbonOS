@@ -15,12 +15,12 @@ export function DynamicBaselineCard({
 }) {
   return (
     <Card className={`rounded-2xl p-5 border transition-all ${
-      isLight ? 'bg-white border-[#CBD5E1] shadow-xs' : 'bg-[#08130C] border-[#152B1D]'
+      isLight ? 'bg-white border-border-subtle shadow-xs' : 'bg-bg-elevated border-border-subtle'
     }`}>
       <div className="flex items-center justify-between pb-3 border-b border-inherit mb-3.5">
         <div className="flex items-center space-x-2">
           <Activity size={15} className="text-emerald" />
-          <h3 className={`font-bold text-xs uppercase tracking-wider ${isLight ? 'text-[#0F291B]' : 'text-white'}`}>
+          <h3 className={`font-bold text-xs uppercase tracking-wider ${isLight ? 'text-fg-primary' : 'text-white'}`}>
             3. Dynamic Baseline & Additionality (VM0048)
           </h3>
         </div>
@@ -33,23 +33,23 @@ export function DynamicBaselineCard({
 
       <div className="space-y-2.5 text-xs">
         <div className="flex items-center justify-between pb-1.5 border-b border-inherit">
-          <span className={isLight ? 'text-[#475569]' : 'text-mist'}>Synthetic Control Counterfactual</span>
-          <span className={`font-mono font-bold tabular-nums ${isLight ? 'text-[#0F291B]' : 'text-white'}`}>
+          <span className={isLight ? 'text-fg-secondary' : 'text-mist'}>Synthetic Control Counterfactual</span>
+          <span className={`font-mono font-bold tabular-nums ${isLight ? 'text-fg-primary' : 'text-white'}`}>
             {counterfactual} tC/ha
           </span>
         </div>
         <div className="flex items-center justify-between pb-1.5 border-b border-inherit">
-          <span className={isLight ? 'text-[#475569]' : 'text-mist'}>Gross Additionality (Actual - Baseline)</span>
+          <span className={isLight ? 'text-fg-secondary' : 'text-mist'}>Gross Additionality (Actual - Baseline)</span>
           <span className="font-mono font-bold tabular-nums text-emerald">
             +{grossAdditionality.toLocaleString()} tCO₂e
           </span>
         </div>
         <div className="flex items-center justify-between pb-1.5 border-b border-inherit">
           <div>
-            <span className={`block font-semibold ${isLight ? 'text-[#475569]' : 'text-mist'}`}>
+            <span className={`block font-semibold ${isLight ? 'text-fg-secondary' : 'text-mist'}`}>
               10 km Leakage Belt Area
             </span>
-            <span className={`text-[11px] ${isLight ? 'text-[#64748B]' : 'text-mist'}`}>
+            <span className={`text-[11px] ${isLight ? 'text-fg-secondary' : 'text-mist'}`}>
               {leakageBelt.toLocaleString()} ha monitored · Activity displacement: {leakageRisk}
             </span>
           </div>
@@ -58,7 +58,7 @@ export function DynamicBaselineCard({
           </span>
         </div>
         <div className="flex items-center justify-between pb-1.5 border-b border-inherit">
-          <span className={isLight ? 'text-[#475569]' : 'text-mist'}>
+          <span className={isLight ? 'text-fg-secondary' : 'text-mist'}>
             Verra AFOLU Risk Buffer Withholding ({bufferPct}%)
           </span>
           <span className="font-mono font-bold tabular-nums text-amber-500 dark:text-amber-400">
@@ -66,9 +66,9 @@ export function DynamicBaselineCard({
           </span>
         </div>
         <div className={`flex items-center justify-between p-2.5 rounded-xl border mt-2 ${
-          isLight ? 'bg-[#F8FAFC] border-[#CBD5E1]' : 'bg-white/5 border-white/10'
+          isLight ? 'bg-bg-canvas border-border-subtle' : 'bg-white/5 border-white/10'
         }`}>
-          <span className={`font-extrabold ${isLight ? 'text-[#0F291B]' : 'text-white'}`}>
+          <span className={`font-extrabold ${isLight ? 'text-fg-primary' : 'text-white'}`}>
             Net Creditable Carbon Volume
           </span>
           <span className="font-mono font-extrabold text-base text-emerald tabular-nums">

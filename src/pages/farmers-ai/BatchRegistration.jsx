@@ -103,7 +103,7 @@ const BatchRegistration = ({ isInline = false, onBack = null, onSaveBatch = null
   };
 
   const formContent = (
-    <div className="bg-white/5 backdrop-blur-md border border-white/10 p-8 rounded-[32px] w-full max-w-lg shadow-2xl relative hover:border-[#CCFF00]/25 transition-all duration-300">
+    <div className="bg-white/5 backdrop-blur-md border border-white/10 p-8 rounded-[32px] w-full max-w-lg shadow-2xl relative hover:border-lime-400/25 transition-all duration-300">
       {!isInline && (
         <IconButton
           icon={<ArrowLeft size={24} />}
@@ -135,7 +135,7 @@ const BatchRegistration = ({ isInline = false, onBack = null, onSaveBatch = null
       <form onSubmit={handleSubmit} className="space-y-5">
         <div>
           <label className="block text-white/80 text-sm font-bold mb-1.5">Crop Type / ফসল</label>
-          <select value={cropType} onChange={e => setCropType(e.target.value)} className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-white focus:outline-none focus:border-[#CCFF00] focus:ring-1 focus:ring-[#CCFF00]/50 transition-all">
+          <select value={cropType} onChange={e => setCropType(e.target.value)} className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-white focus:outline-none focus:border-lime-400 focus:ring-1 focus:ring-[#CCFF00]/50 transition-all">
             <option value="rice" className="bg-carbon text-white">Paddy/Rice (ধান)</option>
             <option value="potato" className="bg-carbon text-white">Potato (আলু)</option>
             <option value="tomato" className="bg-carbon text-white">Tomato (টমেটো)</option>
@@ -149,12 +149,12 @@ const BatchRegistration = ({ isInline = false, onBack = null, onSaveBatch = null
 
         <div>
           <label className="block text-white/80 text-sm font-bold mb-1.5">Weight / ওজন (kg)</label>
-          <input type="number" min="1" value={weight} onChange={e => setWeight(e.target.value)} required className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-white focus:outline-none focus:border-[#CCFF00] focus:ring-1 focus:ring-[#CCFF00]/50 transition-all" placeholder="e.g., 500" />
+          <input type="number" min="1" value={weight} onChange={e => setWeight(e.target.value)} required className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-white focus:outline-none focus:border-lime-400 focus:ring-1 focus:ring-[#CCFF00]/50 transition-all" placeholder="e.g., 500" />
         </div>
 
         <div>
           <label className="block text-white/80 text-sm font-bold mb-1.5">Harvest Date / কাটার তারিখ</label>
-          <input type="date" value={date} onChange={e => setDate(e.target.value)} required className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-white focus:outline-none focus:border-[#CCFF00] focus:ring-1 focus:ring-[#CCFF00]/50 transition-all" style={{ colorScheme: 'dark' }} />
+          <input type="date" value={date} onChange={e => setDate(e.target.value)} required className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-white focus:outline-none focus:border-lime-400 focus:ring-1 focus:ring-[#CCFF00]/50 transition-all" style={{ colorScheme: 'dark' }} />
         </div>
 
         <div>
@@ -166,11 +166,11 @@ const BatchRegistration = ({ isInline = false, onBack = null, onSaveBatch = null
               size="sm"
               onClick={detectLocation} 
               disabled={detectingLocation}
-              className="text-xs text-[#CCFF00] hover:text-[#bce500] hover:underline flex items-center space-x-1 p-0 h-auto"
+              className="text-xs text-lime-400 hover:text-lime-500 hover:underline flex items-center space-x-1 p-0 h-auto"
             >
               {detectingLocation ? (
                 <>
-                  <div className="w-2.5 h-2.5 border-2 border-[#CCFF00] border-t-transparent rounded-full animate-spin mr-1"></div>
+                  <div className="w-2.5 h-2.5 border-2 border-lime-400 border-t-transparent rounded-full animate-spin mr-1"></div>
                   <span>Detecting...</span>
                 </>
               ) : locationError ? (
@@ -180,14 +180,14 @@ const BatchRegistration = ({ isInline = false, onBack = null, onSaveBatch = null
               )}
             </Button>
           </div>
-          <select value={district} onChange={e => setDistrict(e.target.value)} className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-white focus:outline-none focus:border-[#CCFF00] focus:ring-1 focus:ring-[#CCFF00]/50 transition-all">
+          <select value={district} onChange={e => setDistrict(e.target.value)} className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-white focus:outline-none focus:border-lime-400 focus:ring-1 focus:ring-[#CCFF00]/50 transition-all">
             {districts.map(d => <option key={d} value={d} className="bg-carbon text-white">{d}</option>)}
           </select>
         </div>
 
         <div>
           <label className="block text-white/80 text-sm font-bold mb-1.5">Storage Type / সংরক্ষণের ধরন</label>
-          <select value={storageType} onChange={e => setStorageType(e.target.value)} className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-white focus:outline-none focus:border-[#CCFF00] focus:ring-1 focus:ring-[#CCFF00]/50 transition-all">
+          <select value={storageType} onChange={e => setStorageType(e.target.value)} className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-white focus:outline-none focus:border-lime-400 focus:ring-1 focus:ring-[#CCFF00]/50 transition-all">
             <option value="jute_bag" className="bg-carbon text-white">Jute Bag Stack (চটের বস্তা)</option>
             <option value="silo" className="bg-carbon text-white">Silo / Sealed (সাইলো)</option>
             <option value="open_area" className="bg-carbon text-white">Open Area Drying (উন্মুক্ত স্থানে)</option>
@@ -212,7 +212,7 @@ const BatchRegistration = ({ isInline = false, onBack = null, onSaveBatch = null
   }
 
   return (
-    <div className="min-h-screen bg-carbon pt-24 pb-16 px-4 flex items-center justify-center">
+    <div className="min-h-screen bg-carbon pt-12 pb-8 sm:pt-16 sm:pb-12 px-4 flex items-center justify-center">
       {formContent}
     </div>
   );

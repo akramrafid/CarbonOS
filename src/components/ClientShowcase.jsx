@@ -46,8 +46,8 @@ const ClientShowcase = () => {
         key={client.id}
         className={`group relative rounded-3xl p-7 sm:p-8 xl:p-8 2xl:p-9 transition-all duration-300 flex flex-col justify-between h-full min-h-[440px] sm:min-h-[460px] overflow-hidden ${
           isLight
-            ? 'bg-white border border-[#dbf0ea] shadow-[0_4px_25px_rgba(4,18,38,0.06)] hover:shadow-[0_12px_35px_rgba(4,18,38,0.12)] hover:border-[#15803d]/40'
-            : 'bg-gradient-to-b from-[#091A10]/95 via-[#06130B]/95 to-[#030805] hover:bg-[#0C2416] border border-[#184227]/75 hover:border-[#00E676]/80 shadow-[0_12px_40px_rgba(0,0,0,0.6)] hover:shadow-[0_20px_60px_rgba(0,200,83,0.18)]'
+            ? 'bg-white border border-border-strong shadow-[0_4px_25px_rgba(4,18,38,0.06)] hover:shadow-[0_12px_35px_rgba(4,18,38,0.12)] hover:border-border-strong/40'
+            : 'bg-gradient-to-b from-bg-surface/95 via-bg-surface/95 to-bg-canvas hover:bg-bg-elevated border border-border-subtle/75 hover:border-border-strong/80 shadow-[0_12px_40px_rgba(0,0,0,0.6)] hover:shadow-[0_20px_60px_rgba(0,200,83,0.18)]'
         } hover:-translate-y-2`}
       >
         {/* Ambient Card Hover Glow */}
@@ -66,7 +66,7 @@ const ClientShowcase = () => {
                 isLowerRow ? 'w-32 sm:w-36 xl:w-36 2xl:w-40' : 'w-36 sm:w-42 xl:w-44'
               } px-3.5 py-2 rounded-2xl flex items-center justify-center shrink-0 transition-all duration-300 group-hover:scale-105 ${
                 isDarkLogo
-                  ? 'bg-[#06160C] border-2 border-[#1B4D2B] shadow-[0_0_24px_rgba(0,200,83,0.2)] ring-1 ring-emerald-500/30'
+                  ? 'bg-bg-elevated border-2 border-border-strong shadow-[0_0_24px_rgba(0,200,83,0.2)] ring-1 ring-emerald-500/30'
                   : 'bg-white border-2 border-slate-200 shadow-md ring-1 ring-black/5'
               }`}
             >
@@ -82,13 +82,13 @@ const ClientShowcase = () => {
             <div className="flex flex-col items-end shrink-0 gap-2">
               <div className={`inline-flex items-center space-x-2 px-3.5 py-1.5 rounded-full transition-all shadow-xs ${
                 isLight
-                  ? 'bg-[#dbf0ea] border border-[#15803d]/30 text-[#15803d]'
-                  : 'bg-[#00C853]/12 group-hover:bg-[#00C853]/20 border border-[#00C853]/35 text-[#00E676]'
+                  ? 'bg-accent-muted border border-border-strong/30 text-accent'
+                  : 'bg-accent/12 group-hover:bg-accent/20 border border-border-strong/35 text-accent-hover'
               }`}>
-                <span className={`w-1.5 h-1.5 rounded-full animate-pulse shrink-0 ${isLight ? 'bg-[#15803d]' : 'bg-[#00E676]'}`} />
-                <ShieldCheck className={`w-3.5 h-3.5 shrink-0 ${isLight ? 'text-[#15803d]' : 'text-[#00C853]'}`} />
+                <span className={`w-1.5 h-1.5 rounded-full animate-pulse shrink-0 ${isLight ? 'bg-accent' : 'bg-accent-hover'}`} />
+                <ShieldCheck className={`w-3.5 h-3.5 shrink-0 ${isLight ? 'text-accent' : 'text-accent'}`} />
                 <span className={`text-[11px] sm:text-xs font-mono font-semibold tracking-wide whitespace-nowrap ${
-                  isLight ? 'text-[#15803d]' : 'text-[#34D399]'
+                  isLight ? 'text-accent' : 'text-emerald-400'
                 }`}>
                   Verified Client
                 </span>
@@ -98,13 +98,13 @@ const ClientShowcase = () => {
                 target="_blank"
                 rel="noopener noreferrer"
                 className={`text-[11px] sm:text-xs font-mono flex items-center space-x-1.5 transition-colors group/link px-1 py-0.5 ${
-                  isLight ? 'text-slate-600 hover:text-[#15803d]' : 'text-gray-400 hover:text-[#00E676]'
+                  isLight ? 'text-slate-600 hover:text-accent' : 'text-gray-400 hover:text-accent-hover'
                 }`}
                 title={`Visit ${client.name} official website`}
               >
                 <span className="truncate max-w-[120px] sm:max-w-[150px] xl:max-w-[170px]">{cleanUrl}</span>
                 <ArrowUpRight className={`w-3.5 h-3.5 group-hover/link:translate-x-0.5 group-hover/link:-translate-y-0.5 transition-transform shrink-0 ${
-                  isLight ? 'text-[#15803d]' : 'text-[#00C853]'
+                  isLight ? 'text-accent' : 'text-accent'
                 }`} />
               </a>
             </div>
@@ -114,13 +114,13 @@ const ClientShowcase = () => {
           <div className="mb-4">
             <h3 className={`font-sans font-extrabold text-2xl sm:text-[26px] tracking-tight leading-snug transition-colors ${
               isLight
-                ? 'text-[#181414] group-hover:text-[#15803d]'
-                : 'text-white group-hover:text-[#00E676]'
+                ? 'text-fg-primary group-hover:text-accent'
+                : 'text-white group-hover:text-accent-hover'
             }`}>
               {client.name}
             </h3>
             <span className={`text-xs sm:text-[13px] font-mono font-bold uppercase tracking-wider block mt-1.5 ${
-              isLight ? 'text-[#15803d]' : 'text-[#00E676]'
+              isLight ? 'text-accent' : 'text-accent-hover'
             }`}>
               {client.sector}
             </span>
@@ -130,23 +130,23 @@ const ClientShowcase = () => {
           <div className={`text-xs sm:text-[13px] mb-5 flex items-center space-x-2 font-sans ${
             isLight ? 'text-slate-600' : 'text-gray-400'
           }`}>
-            <Building2 className={`w-4 h-4 shrink-0 ${isLight ? 'text-[#15803d]' : 'text-emerald-400/80'}`} />
+            <Building2 className={`w-4 h-4 shrink-0 ${isLight ? 'text-accent' : 'text-emerald-400/80'}`} />
             <span className="truncate" title={client.headquarters}>{client.headquarters}</span>
           </div>
 
           {/* Sustainability Highlight with Left Accent Bar */}
           <div className={`relative p-4 sm:p-5 rounded-2xl mb-6 overflow-hidden transition-colors ${
             isLight
-              ? 'bg-[#f4f8f5] border border-[#dbf0ea] group-hover:border-[#15803d]/40'
-              : 'bg-[#030A05]/90 border border-[#163822] group-hover:border-[#00C853]/40 shadow-inner'
+              ? 'bg-bg-muted border border-border-strong group-hover:border-border-strong/40'
+              : 'bg-bg-canvas/90 border border-border-subtle group-hover:border-border-strong/40 shadow-inner'
           }`}>
             <div className={`absolute left-0 top-0 bottom-0 w-1 rounded-l-2xl ${
-              isLight ? 'bg-[#15803d]' : 'bg-gradient-to-b from-[#00E676] to-[#10B981]'
+              isLight ? 'bg-accent' : 'bg-gradient-to-b from-accent-hover to-accent'
             }`} />
             <div className="flex items-start space-x-3 pl-1">
-              <Leaf className={`w-4 h-4 shrink-0 mt-0.5 ${isLight ? 'text-[#15803d]' : 'text-[#00E676]'}`} />
+              <Leaf className={`w-4 h-4 shrink-0 mt-0.5 ${isLight ? 'text-accent' : 'text-accent-hover'}`} />
               <p className={`text-xs sm:text-[13.5px] font-sans leading-relaxed font-normal min-h-[46px] ${
-                isLight ? 'text-[#413f3f]' : 'text-gray-200'
+                isLight ? 'text-fg-secondary' : 'text-gray-200'
               }`}>
                 {client.sustainabilityHighlight}
               </p>
@@ -161,10 +161,10 @@ const ClientShowcase = () => {
           <div className="flex items-center space-x-2">
             <span className="relative flex h-2.5 w-2.5">
               <span className={`animate-ping absolute inline-flex h-full w-full rounded-full opacity-75 ${
-                isLight ? 'bg-[#15803d]' : 'bg-[#00E676]'
+                isLight ? 'bg-accent' : 'bg-accent-hover'
               }`} />
               <span className={`relative inline-flex rounded-full h-2.5 w-2.5 ${
-                isLight ? 'bg-[#15803d]' : 'bg-[#00C853]'
+                isLight ? 'bg-accent' : 'bg-accent'
               }`} />
             </span>
             <span className={`font-medium text-xs sm:text-[13px] ${isLight ? 'text-slate-700' : 'text-gray-300'}`}>
@@ -172,7 +172,7 @@ const ClientShowcase = () => {
             </span>
           </div>
           <div className="text-right">
-            <span className={`font-extrabold font-mono text-base sm:text-lg ${isLight ? 'text-[#15803d]' : 'text-[#00E676]'}`}>
+            <span className={`font-extrabold font-mono text-base sm:text-lg ${isLight ? 'text-accent' : 'text-accent-hover'}`}>
               {client.activeInsets.toLocaleString()} tCO₂e
             </span>
             <span className={`text-xs ml-1.5 font-sans ${isLight ? 'text-slate-500' : 'text-gray-400'}`}>
@@ -185,12 +185,12 @@ const ClientShowcase = () => {
   };
 
   return (
-    <section className={`w-full py-24 sm:py-32 relative overflow-hidden font-sans border-b transition-colors duration-300 ${
-      isLight ? 'bg-[#f2f3ee] border-[#dbf0ea]' : 'bg-[#040A06] border-white/5'
+    <section className={`w-full py-10 md:py-16 relative overflow-hidden font-sans border-b transition-colors duration-300 ${
+      isLight ? 'bg-bg-canvas border-border-strong' : 'bg-bg-canvas border-white/5'
     }`}>
       {/* Ambient background glows */}
       <div className={`absolute top-1/4 left-1/2 -translate-x-1/2 w-[900px] h-[450px] rounded-full blur-[180px] pointer-events-none ${
-        isLight ? 'bg-emerald-500/5' : 'bg-[#00C853]/10'
+        isLight ? 'bg-emerald-500/5' : 'bg-accent/10'
       }`} />
       <div className={`absolute bottom-10 right-10 w-[600px] h-[400px] rounded-full blur-[160px] pointer-events-none ${
         isLight ? 'bg-teal-500/5' : 'bg-emerald-500/5'
@@ -217,8 +217,8 @@ const ClientShowcase = () => {
         <div className="flex justify-center mb-16 px-2">
           <div className={`inline-flex flex-wrap items-center justify-center p-1.5 sm:p-2 rounded-2xl sm:rounded-full backdrop-blur-xl border gap-1.5 sm:gap-2 max-w-full ${
             isLight
-              ? 'bg-white border-[#dbf0ea] shadow-[0_4px_20px_rgba(4,18,38,0.06)]'
-              : 'bg-[#051108]/90 border-[#143B22] shadow-[0_12px_40px_rgba(0,0,0,0.6)]'
+              ? 'bg-white border-border-strong shadow-[0_4px_20px_rgba(4,18,38,0.06)]'
+              : 'bg-bg-elevated/90 border-border-subtle shadow-[0_12px_40px_rgba(0,0,0,0.6)]'
           }`}>
             {CLIENT_SECTORS.map((sec) => {
               const IconComponent = getSectorIcon(sec.id);
@@ -231,20 +231,20 @@ const ClientShowcase = () => {
                   className={`group px-4 sm:px-5 py-2 sm:py-2.5 rounded-xl sm:rounded-full text-xs sm:text-[13px] font-sans font-semibold transition-all duration-200 cursor-pointer flex items-center space-x-2.5 border ${
                     isActive
                       ? isLight
-                        ? 'bg-[#15803d] text-white font-extrabold border-[#15803d] shadow-md scale-[1.02]'
-                        : 'bg-gradient-to-r from-[#00C853] via-[#00E676] to-[#00C853] text-[#031508] font-extrabold border-[#00E676] shadow-[0_0_24px_rgba(0,200,83,0.35)] scale-[1.02]'
+                        ? 'bg-accent text-white font-extrabold border-border-strong shadow-md scale-[1.02]'
+                        : 'bg-gradient-to-r from-accent via-accent-hover to-accent text-fg-primary font-extrabold border-border-strong shadow-[0_0_24px_rgba(0,200,83,0.35)] scale-[1.02]'
                       : isLight
-                        ? 'bg-transparent hover:bg-slate-100 text-[#413f3f] border-transparent hover:border-slate-200'
-                        : 'bg-[#08180E]/60 hover:bg-[#0D2616] text-gray-300 hover:text-white border-[#13331E] hover:border-emerald-500/40'
+                        ? 'bg-transparent hover:bg-slate-100 text-fg-secondary border-transparent hover:border-slate-200'
+                        : 'bg-bg-surface/60 hover:bg-bg-surface text-gray-300 hover:text-white border-border-subtle hover:border-emerald-500/40'
                   }`}
                 >
                   <IconComponent className={`w-3.5 h-3.5 sm:w-4 sm:h-4 shrink-0 transition-transform group-hover:scale-110 ${
-                    isActive ? (isLight ? 'text-white' : 'text-[#031508]') : (isLight ? 'text-[#15803d]' : 'text-emerald-400/90')
+                    isActive ? (isLight ? 'text-white' : 'text-fg-primary') : (isLight ? 'text-accent' : 'text-emerald-400/90')
                   }`} />
                   <span className="tracking-tight">{sec.label}</span>
                   <span className={`text-[11px] font-mono font-bold px-2.5 py-0.5 rounded-full transition-colors ${
                     isActive 
-                      ? (isLight ? 'bg-white/20 text-white' : 'bg-[#031508]/20 text-[#031508]')
+                      ? (isLight ? 'bg-white/20 text-white' : 'bg-bg-canvas/20 text-fg-primary')
                       : (isLight ? 'bg-slate-100 text-slate-700' : 'bg-white/[0.06] text-gray-300')
                   }`}>
                     {sec.count}
@@ -278,20 +278,20 @@ const ClientShowcase = () => {
         {/* Enterprise Bottom Strip */}
         <div className={`mt-16 sm:mt-20 p-6 sm:p-8 rounded-3xl border flex flex-col md:flex-row items-center justify-between gap-6 ${
           isLight
-            ? 'bg-white border-[#dbf0ea] shadow-[0_10px_35px_rgba(4,18,38,0.06)]'
-            : 'bg-gradient-to-r from-[#081A0F] via-[#0E2618] to-[#081A0F] border-[#1B4D2E] shadow-2xl'
+            ? 'bg-white border-border-strong shadow-[0_10px_35px_rgba(4,18,38,0.06)]'
+            : 'bg-gradient-to-r from-bg-surface via-bg-surface to-bg-canvas border-border-subtle shadow-2xl'
         }`}>
           <div className="flex items-center space-x-4">
             <div className={`w-14 h-14 rounded-2xl flex items-center justify-center shrink-0 ${
-              isLight ? 'bg-[#dbf0ea] border border-[#15803d]/30' : 'bg-[#00C853]/20 border border-[#00C853]/40'
+              isLight ? 'bg-accent-muted border border-border-strong/30' : 'bg-accent/20 border border-border-strong/40'
             }`}>
-              <Sparkles className={`w-7 h-7 ${isLight ? 'text-[#15803d]' : 'text-[#00C853]'}`} />
+              <Sparkles className={`w-7 h-7 ${isLight ? 'text-accent' : 'text-accent'}`} />
             </div>
             <div>
-              <h4 className={`font-sans font-bold text-lg ${isLight ? 'text-[#181414]' : 'text-white'}`}>
+              <h4 className={`font-sans font-bold text-lg ${isLight ? 'text-fg-primary' : 'text-white'}`}>
                 Join Bangladesh's Premier Sustainability Leaders
               </h4>
-              <p className={`text-xs sm:text-sm font-sans mt-0.5 ${isLight ? 'text-[#413f3f]' : 'text-gray-300'}`}>
+              <p className={`text-xs sm:text-sm font-sans mt-0.5 ${isLight ? 'text-fg-secondary' : 'text-gray-300'}`}>
                 Onboard your enterprise in 24 hours with automated PDF utility invoice extraction and DoE gazette compliance.
               </p>
             </div>
@@ -300,7 +300,7 @@ const ClientShowcase = () => {
           <div className="flex items-center space-x-3 shrink-0">
             <a
               href="/platform"
-              className="keep-white bg-[#15803d] hover:bg-[#166534] dark:bg-[#00C853] dark:hover:bg-[#00E676] text-white dark:text-[#050C07] font-sans font-extrabold text-sm px-7 py-3.5 rounded-full transition-all shadow-lg flex items-center space-x-2 cursor-pointer"
+              className="keep-white bg-accent hover:bg-accent dark:bg-accent dark:hover:bg-accent-hover text-white dark:text-fg-primary font-sans font-extrabold text-sm px-7 py-3.5 rounded-full transition-all shadow-lg flex items-center space-x-2 cursor-pointer"
             >
               <span>Explore Client Dashboard</span>
               <ArrowUpRight className="w-4 h-4" />

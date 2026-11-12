@@ -23,12 +23,12 @@ export function ActivitiesTableTab({
       {/* Filter Toolbar */}
       <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 pt-4">
         <div>
-          <label className="block text-[10px] font-mono uppercase text-[#7C9A88] mb-1 font-bold">Scope</label>
+          <label className="block text-[10px] font-mono uppercase text-fg-secondary mb-1 font-bold">Scope</label>
           <select
             value={scopeFilter}
             onChange={(e) => setScopeFilter(e.target.value)}
-            className={`w-full text-xs font-sans p-2 rounded-xl border focus:outline-none focus:border-[#00C853] cursor-pointer ${
-              isLight ? 'bg-slate-50 border-slate-200 text-slate-800' : 'bg-[#040906] border-[#152B1D] text-white'
+            className={`w-full text-xs font-sans p-2 rounded-xl border focus:outline-none focus:border-border-strong cursor-pointer ${
+              isLight ? 'bg-slate-50 border-slate-200 text-slate-800' : 'bg-bg-canvas border-border-subtle text-white'
             }`}
           >
             <option value="all">All Scopes (1, 2, 3)</option>
@@ -39,12 +39,12 @@ export function ActivitiesTableTab({
         </div>
 
         <div>
-          <label className="block text-[10px] font-mono uppercase text-[#7C9A88] mb-1 font-bold">Facility / Site</label>
+          <label className="block text-[10px] font-mono uppercase text-fg-secondary mb-1 font-bold">Facility / Site</label>
           <select
             value={facilityFilter}
             onChange={(e) => setFacilityFilter(e.target.value)}
-            className={`w-full text-xs font-sans p-2 rounded-xl border focus:outline-none focus:border-[#00C853] cursor-pointer ${
-              isLight ? 'bg-slate-50 border-slate-200 text-slate-800' : 'bg-[#040906] border-[#152B1D] text-white'
+            className={`w-full text-xs font-sans p-2 rounded-xl border focus:outline-none focus:border-border-strong cursor-pointer ${
+              isLight ? 'bg-slate-50 border-slate-200 text-slate-800' : 'bg-bg-canvas border-border-subtle text-white'
             }`}
           >
             <option value="all">All Facilities ({activeClient.facilities?.length || 1})</option>
@@ -55,12 +55,12 @@ export function ActivitiesTableTab({
         </div>
 
         <div>
-          <label className="block text-[10px] font-mono uppercase text-[#7C9A88] mb-1 font-bold">Data Quality</label>
+          <label className="block text-[10px] font-mono uppercase text-fg-secondary mb-1 font-bold">Data Quality</label>
           <select
             value={qualityFilter}
             onChange={(e) => setQualityFilter(e.target.value)}
-            className={`w-full text-xs font-sans p-2 rounded-xl border focus:outline-none focus:border-[#00C853] cursor-pointer ${
-              isLight ? 'bg-slate-50 border-slate-200 text-slate-800' : 'bg-[#040906] border-[#152B1D] text-white'
+            className={`w-full text-xs font-sans p-2 rounded-xl border focus:outline-none focus:border-border-strong cursor-pointer ${
+              isLight ? 'bg-slate-50 border-slate-200 text-slate-800' : 'bg-bg-canvas border-border-subtle text-white'
             }`}
           >
             <option value="all">All Data Qualities</option>
@@ -71,12 +71,12 @@ export function ActivitiesTableTab({
         </div>
 
         <div>
-          <label className="block text-[10px] font-mono uppercase text-[#7C9A88] mb-1 font-bold">Audit Status</label>
+          <label className="block text-[10px] font-mono uppercase text-fg-secondary mb-1 font-bold">Audit Status</label>
           <select
             value={statusFilter}
             onChange={(e) => setStatusFilter(e.target.value)}
-            className={`w-full text-xs font-sans p-2 rounded-xl border focus:outline-none focus:border-[#00C853] cursor-pointer ${
-              isLight ? 'bg-slate-50 border-slate-200 text-slate-800' : 'bg-[#040906] border-[#152B1D] text-white'
+            className={`w-full text-xs font-sans p-2 rounded-xl border focus:outline-none focus:border-border-strong cursor-pointer ${
+              isLight ? 'bg-slate-50 border-slate-200 text-slate-800' : 'bg-bg-canvas border-border-subtle text-white'
             }`}
           >
             <option value="all">All Audit Statuses</option>
@@ -94,12 +94,12 @@ export function ActivitiesTableTab({
           <span className="flex items-center gap-1">← Scroll table horizontally →</span>
           <span className="text-[10px]">1,100px wide</span>
         </div>
-        <div className="w-full overflow-x-auto touch-pan-x rounded-xl border border-gray-200 dark:border-[#152B1D]">
+        <div className="w-full overflow-x-auto touch-pan-x rounded-xl border border-gray-200 dark:border-border-subtle">
           <table className="w-full text-left font-sans text-xs border-collapse min-w-[1100px]">
             <thead>
               <tr
                 className={`border-b text-[10px] font-mono uppercase tracking-wider ${
-                  isLight ? 'text-slate-500 border-slate-200 bg-slate-50/50' : 'text-[#7C9A88] border-[#152B1D] bg-[#040906]/60'
+                  isLight ? 'text-slate-500 border-slate-200 bg-slate-50/50' : 'text-fg-secondary border-border-subtle bg-bg-canvas/60'
                 }`}
               >
                 <th className="py-3 px-3">Activity &amp; Scope</th>
@@ -132,7 +132,7 @@ export function ActivitiesTableTab({
                     <tr
                       key={row.id}
                       className={`transition-colors group ${
-                        isLight ? 'hover:bg-slate-50' : 'hover:bg-[#00C853]/5'
+                        isLight ? 'hover:bg-slate-50' : 'hover:bg-accent/5'
                       }`}
                     >
                       {/* Activity & Scope */}
@@ -143,7 +143,7 @@ export function ActivitiesTableTab({
                               row.scopeGroup === 'Scope 1'
                                 ? 'bg-amber-500/10 text-amber-400 border-amber-500/30'
                                 : row.scopeGroup === 'Scope 2'
-                                ? 'bg-[#00C853]/10 text-[#00E676] border-[#00C853]/30'
+                                ? 'bg-accent/10 text-accent-hover border-border-strong/30'
                                 : 'bg-purple-500/10 text-purple-400 border-purple-500/30'
                             }`}
                           >
@@ -180,7 +180,7 @@ export function ActivitiesTableTab({
 
                       {/* Factor Lineage */}
                       <td className="py-3.5 px-3 font-mono text-[11px]">
-                        <span className="text-[#00C853] font-bold block">{row.kgCO2ePerUnit} kg/unit</span>
+                        <span className="text-accent font-bold block">{row.kgCO2ePerUnit} kg/unit</span>
                         <span className="text-[9px] text-gray-400 block truncate max-w-[170px]" title={row.emissionFactorVersion}>
                           {row.emissionFactorId} ({row.emissionFactorVersion})
                         </span>
@@ -188,7 +188,7 @@ export function ActivitiesTableTab({
 
                       {/* Total Footprint */}
                       <td className="py-3.5 px-3 text-right font-mono">
-                        <span className="font-bold text-sm text-[#00C853] block">
+                        <span className="font-bold text-sm text-accent block">
                           {fmt(row.tCO2e, 2)}
                         </span>
                         <span className="text-[9px] text-gray-400 block">tCO₂e</span>
@@ -204,7 +204,7 @@ export function ActivitiesTableTab({
                             onClick={() => {
                               if (linkedEvidence) onSelectEvidence(linkedEvidence);
                             }}
-                            leftIcon={<FileText className="w-3.5 h-3.5 text-[#00C853] shrink-0" />}
+                            leftIcon={<FileText className="w-3.5 h-3.5 text-accent shrink-0" />}
                             className="font-mono text-[11px] truncate max-w-[150px] p-0"
                           >
                             {row.evidenceFileName}
@@ -222,7 +222,7 @@ export function ActivitiesTableTab({
                         <span
                           className={`text-[10px] font-mono font-bold px-2 py-0.5 rounded-full border ${
                             row.dataQualityRating === 'High'
-                              ? 'bg-[#00C853]/15 text-[#00E676] border-[#00C853]/30'
+                              ? 'bg-accent/15 text-accent-hover border-border-strong/30'
                               : row.dataQualityRating === 'Medium'
                               ? 'bg-amber-500/15 text-amber-400 border-amber-500/30'
                               : 'bg-red-500/15 text-red-400 border-red-500/30'

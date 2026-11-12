@@ -70,10 +70,10 @@ export const ActivityEvidenceWorkspace = ({
       {/* Main Tabs & Search Toolbar */}
       <div
         className={`rounded-3xl p-5 border shadow-xl ${
-          isLight ? 'bg-white border-[#E2E8F0]' : 'bg-[#08130C] border-[#152B1D]'
+          isLight ? 'bg-white border-border-subtle' : 'bg-bg-elevated border-border-subtle'
         }`}
       >
-        <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 pb-4 border-b border-[#152B1D]/40">
+        <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 pb-4 border-b border-border-subtle/40">
           {/* Tab Switcher */}
           <Tabs
             tabs={[
@@ -82,7 +82,7 @@ export const ActivityEvidenceWorkspace = ({
             ]}
             activeTab={activeTab}
             onChange={setActiveTab}
-            className="bg-black/20 border-[#152B1D]"
+            className="bg-black/20 border-border-subtle"
           />
 
           {/* Search Bar */}
@@ -93,8 +93,8 @@ export const ActivityEvidenceWorkspace = ({
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
               placeholder={activeTab === 'activities' ? 'Search activity, department, or owner...' : 'Search document name, issuer, hash...'}
-              className={`w-full pl-10 pr-10 py-2 rounded-xl text-xs font-sans border focus:outline-none focus:border-[#00C853] ${
-                isLight ? 'bg-slate-50 border-slate-300 text-slate-800' : 'bg-[#040906] border-[#152B1D] text-white'
+              className={`w-full pl-10 pr-10 py-2 rounded-xl text-xs font-sans border focus:outline-none focus:border-border-strong ${
+                isLight ? 'bg-slate-50 border-slate-300 text-slate-800' : 'bg-bg-canvas border-border-subtle text-white'
               }`}
             />
             {searchQuery && (

@@ -41,16 +41,16 @@ export const InvoiceFootprintSection = ({
     <Card className="p-6 lg:p-8 space-y-6">
       {/* Header & Badges */}
       <div className={`flex flex-col sm:flex-row justify-between items-start sm:items-center gap-2 border-b pb-4 ${
-        isLight ? 'border-carbon-border' : 'border-[#122418]'
+        isLight ? 'border-carbon-border' : 'border-border-subtle'
       }`}>
         <div>
           <div className="flex items-center space-x-2">
             <FileText className="w-5 h-5 text-emerald" />
-            <h3 className={`font-sans font-bold text-lg ${isLight ? 'text-[#0F2417]' : 'text-white'}`}>
+            <h3 className={`font-sans font-bold text-lg ${isLight ? 'text-fg-primary' : 'text-white'}`}>
               ESG SaaS Footprint Intake
             </h3>
           </div>
-          <p className={`text-xs mt-0.5 font-sans ${isLight ? 'text-[#41634E]' : 'text-mist'}`}>
+          <p className={`text-xs mt-0.5 font-sans ${isLight ? 'text-fg-muted' : 'text-mist'}`}>
             Upload corporate bills, utility statements, or fuel spreadsheets. Carbon Zero BD RAG scans documents, matches national DoE emission factors, and calculates multi-category carbon metrics.
           </p>
         </div>
@@ -66,7 +66,7 @@ export const InvoiceFootprintSection = ({
 
       {/* 3-Step Interactive Process Navigation Bar */}
       <div className={`p-1.5 rounded-2xl border ${
-        isLight ? 'bg-[#F4F6F4] border-carbon-border' : 'bg-[#040906] border-[#152B1D]'
+        isLight ? 'bg-bg-muted border-carbon-border' : 'bg-bg-canvas border-border-subtle'
       }`}>
         <Tabs
           tabs={[

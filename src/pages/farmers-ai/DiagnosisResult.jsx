@@ -26,7 +26,7 @@ const DiagnosisResult = ({ isInline = false, onBack = null, inlineResult = null,
 
   if (!result) {
     return (
-      <div className="pt-24 pb-16 px-4 max-w-lg mx-auto text-center">
+      <div className="pt-12 pb-8 sm:pt-16 sm:pb-12 px-4 max-w-lg mx-auto text-center">
         <h2 className="text-xl font-bold text-red-500 mb-4">No result found</h2>
         <Button variant="link" onClick={() => navigate('/farmers-ai/camera')}>
           Go back to camera
@@ -144,7 +144,7 @@ const DiagnosisResult = ({ isInline = false, onBack = null, inlineResult = null,
 
       {/* Disease Header Card */}
       <div className="fade-in-up bg-white/5 border border-white/10 rounded-[24px] p-5 relative overflow-hidden">
-        <div className="absolute top-0 right-0 w-32 h-32 bg-[#CCFF00]/5 blur-3xl rounded-full pointer-events-none" />
+        <div className="absolute top-0 right-0 w-32 h-32 bg-lime-400/5 blur-3xl rounded-full pointer-events-none" />
         
         <div className="flex items-start justify-between relative z-10">
           <div className="flex-1">
@@ -153,7 +153,7 @@ const DiagnosisResult = ({ isInline = false, onBack = null, inlineResult = null,
               {treatment.name || disease?.replace(/_/g, ' ')}
             </h2>
             {treatment.nameBn && (
-              <p className="text-[#CCFF00]/80 text-sm font-semibold mt-0.5">{treatment.nameBn}</p>
+              <p className="text-lime-400/80 text-sm font-semibold mt-0.5">{treatment.nameBn}</p>
             )}
           </div>
           <div className={`ml-4 px-3 py-1.5 rounded-xl ${urgency.bg} border ${urgency.border} text-center`}>
@@ -171,11 +171,11 @@ const DiagnosisResult = ({ isInline = false, onBack = null, inlineResult = null,
         <div className="mt-4 relative z-10">
           <div className="flex justify-between items-center mb-1.5">
             <span className="text-white/40 text-xs font-medium">Diagnostic Confidence</span>
-            <span className={`text-sm font-extrabold ${pct >= 75 ? 'text-[#CCFF00]' : pct >= 50 ? 'text-yellow-400' : 'text-orange-400'}`}>{pct}%</span>
+            <span className={`text-sm font-extrabold ${pct >= 75 ? 'text-lime-400' : pct >= 50 ? 'text-yellow-400' : 'text-orange-400'}`}>{pct}%</span>
           </div>
           <div className="h-2 bg-white/10 rounded-full overflow-hidden">
             <div
-              className={`h-full rounded-full bar-fill ${pct >= 75 ? 'bg-gradient-to-r from-[#CCFF00] to-[#a0d000]' : pct >= 50 ? 'bg-gradient-to-r from-yellow-400 to-amber-400' : 'bg-gradient-to-r from-orange-400 to-red-400'}`}
+              className={`h-full rounded-full bar-fill ${pct >= 75 ? 'bg-gradient-to-r from-lime-400 to-lime-500' : pct >= 50 ? 'bg-gradient-to-r from-yellow-400 to-amber-400' : 'bg-gradient-to-r from-orange-400 to-red-400'}`}
               style={{ '--target-width': `${pct}%`, width: `${pct}%` }}
             />
           </div>
@@ -216,14 +216,14 @@ const DiagnosisResult = ({ isInline = false, onBack = null, inlineResult = null,
 
       {/* Treatment Plan Card */}
       <div className="fade-in-up bg-white/5 border border-white/10 rounded-[24px] p-5 relative overflow-hidden" style={{ animationDelay: '0.1s' }}>
-        <div className="absolute top-0 left-0 w-24 h-24 bg-[#CCFF00]/5 blur-2xl rounded-full pointer-events-none" />
+        <div className="absolute top-0 left-0 w-24 h-24 bg-lime-400/5 blur-2xl rounded-full pointer-events-none" />
         
         {/* Header */}
         <div className="flex items-center justify-between mb-5 relative z-10">
           <div>
             <div className="flex items-center gap-2 mb-0.5">
-              <ClipboardList className="w-4.5 h-4.5 text-[#CCFF00]" size={16} />
-              <h3 className="text-lg font-extrabold text-[#CCFF00] tracking-tight">Treatment Plan / চিকিৎসা পরিকল্পনা</h3>
+              <ClipboardList className="w-4.5 h-4.5 text-lime-400" size={16} />
+              <h3 className="text-lg font-extrabold text-lime-400 tracking-tight">Treatment Plan / চিকিৎসা পরিকল্পনা</h3>
             </div>
             <p className="text-white/40 text-[11px] ml-6">Follow these steps in order for best results</p>
           </div>
@@ -231,7 +231,7 @@ const DiagnosisResult = ({ isInline = false, onBack = null, inlineResult = null,
             icon={isPlaying ? <VolumeX size={18} /> : <Volume2 size={18} />}
             aria-label="Play voice instructions"
             onClick={() => playBanglaVoice(voiceText)}
-            className="text-[#CCFF00]"
+            className="text-lime-400"
           />
         </div>
 
@@ -255,7 +255,7 @@ const DiagnosisResult = ({ isInline = false, onBack = null, inlineResult = null,
             <div key={idx} className="flex items-start gap-3 bg-white/[0.03] border border-white/[0.06] rounded-2xl p-3.5">
               <div className={`w-6 h-6 rounded-full flex items-center justify-center text-[11px] font-extrabold shrink-0 mt-0.5 ${
                 activeTab === 'immediate' ? 'bg-red-400/20 text-red-400' :
-                activeTab === 'organic' ? 'bg-[#CCFF00]/15 text-[#CCFF00]' :
+                activeTab === 'organic' ? 'bg-lime-400/15 text-lime-400' :
                 activeTab === 'chemical' ? 'bg-blue-400/15 text-blue-400' :
                 'bg-purple-400/15 text-purple-400'
               }`}>
@@ -268,10 +268,10 @@ const DiagnosisResult = ({ isInline = false, onBack = null, inlineResult = null,
 
         {/* DAE Disclaimer */}
         <div className="mt-5 flex items-start gap-2.5 bg-white/[0.03] border border-white/[0.07] rounded-xl p-3.5 relative z-10">
-          <ShieldCheck className="w-4 h-4 text-[#CCFF00]/70 shrink-0 mt-0.5" />
+          <ShieldCheck className="w-4 h-4 text-lime-400/70 shrink-0 mt-0.5" />
           <p className="text-white/40 text-[11px] leading-relaxed">
             For chemical applications, always follow label instructions and consult your nearest{' '}
-            <span className="text-[#CCFF00]/70 font-semibold">Department of Agricultural Extension (DAE)</span>{' '}
+            <span className="text-lime-400/70 font-semibold">Department of Agricultural Extension (DAE)</span>{' '}
             office. Doses may vary by crop variety and regional conditions.
           </p>
         </div>
@@ -303,7 +303,7 @@ const DiagnosisResult = ({ isInline = false, onBack = null, inlineResult = null,
   }
 
   return (
-    <div className="pt-24 pb-20 px-4 max-w-lg mx-auto min-h-screen flex flex-col space-y-5">
+    <div className="pt-16 pb-12 px-4 max-w-lg mx-auto min-h-screen flex flex-col space-y-5">
       {mainResultContent}
     </div>
   );

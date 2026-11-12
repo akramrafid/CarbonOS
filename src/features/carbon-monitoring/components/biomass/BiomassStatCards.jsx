@@ -20,12 +20,12 @@ export function BiomassStatCards({ isLight, loadingDashboard, dashboardData }) {
           <div
             key={i}
             className={`rounded-2xl p-6 h-36 animate-pulse flex flex-col justify-between border ${
-              isLight ? 'bg-white border-[#E2E8F0]' : 'bg-[#08130C] border-[#152B1D]'
+              isLight ? 'bg-white border-border-subtle' : 'bg-bg-elevated border-border-subtle'
             }`}
           >
-            <div className={`h-4 rounded w-2/3 ${isLight ? 'bg-[#E2E8F0]' : 'bg-white/10'}`}></div>
-            <div className={`h-8 rounded w-1/2 ${isLight ? 'bg-[#E2E8F0]' : 'bg-white/10'}`}></div>
-            <div className={`h-3 rounded w-3/4 ${isLight ? 'bg-[#E2E8F0]' : 'bg-white/10'}`}></div>
+            <div className={`h-4 rounded w-2/3 ${isLight ? 'bg-bg-muted' : 'bg-white/10'}`}></div>
+            <div className={`h-8 rounded w-1/2 ${isLight ? 'bg-bg-muted' : 'bg-white/10'}`}></div>
+            <div className={`h-3 rounded w-3/4 ${isLight ? 'bg-bg-muted' : 'bg-white/10'}`}></div>
           </div>
         ))}
       </>
@@ -38,14 +38,14 @@ export function BiomassStatCards({ isLight, loadingDashboard, dashboardData }) {
       <div
         className={`rounded-2xl p-6 relative border transition-all duration-200 hover:border-emerald/40 hover:-translate-y-0.5 ${
           isLight
-            ? 'bg-white border-[#E2E8F0] shadow-xs'
-            : 'bg-[#08130C] border-[#152B1D]'
+            ? 'bg-white border-border-subtle shadow-xs'
+            : 'bg-bg-elevated border-border-subtle'
         }`}
       >
         <div className="flex items-center justify-between">
           <span
             className={`text-[11px] font-mono font-bold uppercase tracking-wider ${
-              isLight ? 'text-[#64748B]' : 'text-[#94A3B8]'
+              isLight ? 'text-fg-secondary' : 'text-fg-secondary'
             }`}
           >
             Current Carbon Estimate
@@ -53,7 +53,7 @@ export function BiomassStatCards({ isLight, loadingDashboard, dashboardData }) {
           <div
             className={`p-2 rounded-lg border ${
               isLight
-                ? 'bg-[#E8F8EE] text-[#00873E] border-[#C2E9CF]'
+                ? 'bg-accent-muted text-accent border-border-subtle'
                 : 'bg-emerald/10 text-emerald border-emerald/20'
             }`}
           >
@@ -62,11 +62,11 @@ export function BiomassStatCards({ isLight, loadingDashboard, dashboardData }) {
         </div>
         <div
           className={`text-3xl font-extrabold font-mono tabular-nums tracking-tight mt-3 ${
-            isLight ? 'text-[#0F291B]' : 'text-white'
+            isLight ? 'text-fg-primary' : 'text-white'
           }`}
         >
           {dashboardData.current_carbon_estimate_tC_ha}{' '}
-          <span className={`text-xs font-normal font-sans ${isLight ? 'text-[#64748B]' : 'text-[#94A3B8]'}`}>
+          <span className={`text-xs font-normal font-sans ${isLight ? 'text-fg-secondary' : 'text-fg-secondary'}`}>
             tC/ha
           </span>
         </div>
@@ -80,14 +80,14 @@ export function BiomassStatCards({ isLight, loadingDashboard, dashboardData }) {
       <div
         className={`rounded-2xl p-6 relative border transition-all duration-200 hover:border-emerald/40 hover:-translate-y-0.5 ${
           isLight
-            ? 'bg-white border-[#E2E8F0] shadow-xs'
-            : 'bg-[#08130C] border-[#152B1D]'
+            ? 'bg-white border-border-subtle shadow-xs'
+            : 'bg-bg-elevated border-border-subtle'
         }`}
       >
         <div className="flex items-center justify-between">
           <span
             className={`text-[11px] font-mono font-bold uppercase tracking-wider ${
-              isLight ? 'text-[#64748B]' : 'text-[#94A3B8]'
+              isLight ? 'text-fg-secondary' : 'text-fg-secondary'
             }`}
           >
             Estimated CO₂ Storage
@@ -95,7 +95,7 @@ export function BiomassStatCards({ isLight, loadingDashboard, dashboardData }) {
           <div
             className={`p-2 rounded-lg border ${
               isLight
-                ? 'bg-[#E8F8EE] text-[#00873E] border-[#C2E9CF]'
+                ? 'bg-accent-muted text-accent border-border-subtle'
                 : 'bg-emerald/10 text-emerald border-emerald/20'
             }`}
           >
@@ -104,15 +104,15 @@ export function BiomassStatCards({ isLight, loadingDashboard, dashboardData }) {
         </div>
         <div
           className={`text-3xl font-extrabold font-mono tabular-nums tracking-tight mt-3 ${
-            isLight ? 'text-[#0F291B]' : 'text-white'
+            isLight ? 'text-fg-primary' : 'text-white'
           }`}
         >
           {dashboardData.estimated_co2_storage_tCO2e.toLocaleString()}{' '}
-          <span className={`text-xs font-normal font-sans ${isLight ? 'text-[#64748B]' : 'text-[#94A3B8]'}`}>
+          <span className={`text-xs font-normal font-sans ${isLight ? 'text-fg-secondary' : 'text-fg-secondary'}`}>
             tCO₂e
           </span>
         </div>
-        <div className={`text-xs mt-3 font-medium ${isLight ? 'text-[#64748B]' : 'text-[#94A3B8]'}`}>
+        <div className={`text-xs mt-3 font-medium ${isLight ? 'text-fg-secondary' : 'text-fg-secondary'}`}>
           Total mitigated climate footprint
         </div>
       </div>
@@ -121,14 +121,14 @@ export function BiomassStatCards({ isLight, loadingDashboard, dashboardData }) {
       <div
         className={`rounded-2xl p-6 relative border transition-all duration-200 hover:border-emerald/40 hover:-translate-y-0.5 ${
           isLight
-            ? 'bg-white border-[#E2E8F0] shadow-xs'
-            : 'bg-[#08130C] border-[#152B1D]'
+            ? 'bg-white border-border-subtle shadow-xs'
+            : 'bg-bg-elevated border-border-subtle'
         }`}
       >
         <div className="flex items-center justify-between">
           <span
             className={`text-[11px] font-mono font-bold uppercase tracking-wider ${
-              isLight ? 'text-[#64748B]' : 'text-[#94A3B8]'
+              isLight ? 'text-fg-secondary' : 'text-fg-secondary'
             }`}
           >
             Forest Health Score
@@ -136,7 +136,7 @@ export function BiomassStatCards({ isLight, loadingDashboard, dashboardData }) {
           <div
             className={`p-2 rounded-lg border ${
               isLight
-                ? 'bg-[#E8F8EE] text-[#00873E] border-[#C2E9CF]'
+                ? 'bg-accent-muted text-accent border-border-subtle'
                 : 'bg-emerald/10 text-emerald border-emerald/20'
             }`}
           >
@@ -145,7 +145,7 @@ export function BiomassStatCards({ isLight, loadingDashboard, dashboardData }) {
         </div>
         <div
           className={`text-3xl font-extrabold font-mono tabular-nums tracking-tight mt-3 ${
-            isLight ? 'text-[#0F291B]' : 'text-white'
+            isLight ? 'text-fg-primary' : 'text-white'
           }`}
         >
           {dashboardData.forest_health_score}%
@@ -160,14 +160,14 @@ export function BiomassStatCards({ isLight, loadingDashboard, dashboardData }) {
       <div
         className={`rounded-2xl p-6 relative border transition-all duration-200 hover:border-emerald/40 hover:-translate-y-0.5 ${
           isLight
-            ? 'bg-white border-[#E2E8F0] shadow-xs'
-            : 'bg-[#08130C] border-[#152B1D]'
+            ? 'bg-white border-border-subtle shadow-xs'
+            : 'bg-bg-elevated border-border-subtle'
         }`}
       >
         <div className="flex items-center justify-between">
           <span
             className={`text-[11px] font-mono font-bold uppercase tracking-wider ${
-              isLight ? 'text-[#64748B]' : 'text-[#94A3B8]'
+              isLight ? 'text-fg-secondary' : 'text-fg-secondary'
             }`}
           >
             Vegetation Index (NDVI)
@@ -175,7 +175,7 @@ export function BiomassStatCards({ isLight, loadingDashboard, dashboardData }) {
           <div
             className={`p-2 rounded-lg border ${
               isLight
-                ? 'bg-[#E8F8EE] text-[#00873E] border-[#C2E9CF]'
+                ? 'bg-accent-muted text-accent border-border-subtle'
                 : 'bg-emerald/10 text-emerald border-emerald/20'
             }`}
           >
@@ -184,7 +184,7 @@ export function BiomassStatCards({ isLight, loadingDashboard, dashboardData }) {
         </div>
         <div
           className={`text-3xl font-extrabold font-mono tabular-nums tracking-tight mt-3 ${
-            isLight ? 'text-[#0F291B]' : 'text-white'
+            isLight ? 'text-fg-primary' : 'text-white'
           }`}
         >
           {dashboardData.vegetation_index_ndvi}
@@ -198,14 +198,14 @@ export function BiomassStatCards({ isLight, loadingDashboard, dashboardData }) {
       <div
         className={`rounded-2xl p-6 relative border transition-all duration-200 hover:border-emerald/40 hover:-translate-y-0.5 ${
           isLight
-            ? 'bg-white border-[#E2E8F0] shadow-xs'
-            : 'bg-[#08130C] border-[#152B1D]'
+            ? 'bg-white border-border-subtle shadow-xs'
+            : 'bg-bg-elevated border-border-subtle'
         }`}
       >
         <div className="flex items-center justify-between">
           <span
             className={`text-[11px] font-mono font-bold uppercase tracking-wider ${
-              isLight ? 'text-[#64748B]' : 'text-[#94A3B8]'
+              isLight ? 'text-fg-secondary' : 'text-fg-secondary'
             }`}
           >
             Estimated Biomass
@@ -213,7 +213,7 @@ export function BiomassStatCards({ isLight, loadingDashboard, dashboardData }) {
           <div
             className={`p-2 rounded-lg border ${
               isLight
-                ? 'bg-[#E8F8EE] text-[#00873E] border-[#C2E9CF]'
+                ? 'bg-accent-muted text-accent border-border-subtle'
                 : 'bg-emerald/10 text-emerald border-emerald/20'
             }`}
           >
@@ -222,15 +222,15 @@ export function BiomassStatCards({ isLight, loadingDashboard, dashboardData }) {
         </div>
         <div
           className={`text-3xl font-extrabold font-mono tabular-nums tracking-tight mt-3 ${
-            isLight ? 'text-[#0F291B]' : 'text-white'
+            isLight ? 'text-fg-primary' : 'text-white'
           }`}
         >
           {dashboardData.estimated_biomass_Mg_ha}{' '}
-          <span className={`text-xs font-normal font-sans ${isLight ? 'text-[#64748B]' : 'text-[#94A3B8]'}`}>
+          <span className={`text-xs font-normal font-sans ${isLight ? 'text-fg-secondary' : 'text-fg-secondary'}`}>
             Mg/ha
           </span>
         </div>
-        <div className={`text-xs mt-3 font-medium ${isLight ? 'text-[#64748B]' : 'text-[#94A3B8]'}`}>
+        <div className={`text-xs mt-3 font-medium ${isLight ? 'text-fg-secondary' : 'text-fg-secondary'}`}>
           Above-ground organic dry mass
         </div>
       </div>
@@ -239,14 +239,14 @@ export function BiomassStatCards({ isLight, loadingDashboard, dashboardData }) {
       <div
         className={`rounded-2xl p-6 relative border transition-all duration-200 hover:border-emerald/40 hover:-translate-y-0.5 ${
           isLight
-            ? 'bg-white border-[#E2E8F0] shadow-xs'
-            : 'bg-[#08130C] border-[#152B1D]'
+            ? 'bg-white border-border-subtle shadow-xs'
+            : 'bg-bg-elevated border-border-subtle'
         }`}
       >
         <div className="flex items-center justify-between">
           <span
             className={`text-[11px] font-mono font-bold uppercase tracking-wider ${
-              isLight ? 'text-[#64748B]' : 'text-[#94A3B8]'
+              isLight ? 'text-fg-secondary' : 'text-fg-secondary'
             }`}
           >
             Total Monitored Area
@@ -254,7 +254,7 @@ export function BiomassStatCards({ isLight, loadingDashboard, dashboardData }) {
           <div
             className={`p-2 rounded-lg border ${
               isLight
-                ? 'bg-[#E8F8EE] text-[#00873E] border-[#C2E9CF]'
+                ? 'bg-accent-muted text-accent border-border-subtle'
                 : 'bg-emerald/10 text-emerald border-emerald/20'
             }`}
           >
@@ -263,15 +263,15 @@ export function BiomassStatCards({ isLight, loadingDashboard, dashboardData }) {
         </div>
         <div
           className={`text-3xl font-extrabold font-mono tabular-nums tracking-tight mt-3 ${
-            isLight ? 'text-[#0F291B]' : 'text-white'
+            isLight ? 'text-fg-primary' : 'text-white'
           }`}
         >
           {dashboardData.total_area_size_ha.toLocaleString()}{' '}
-          <span className={`text-xs font-normal font-sans ${isLight ? 'text-[#64748B]' : 'text-[#94A3B8]'}`}>
+          <span className={`text-xs font-normal font-sans ${isLight ? 'text-fg-secondary' : 'text-fg-secondary'}`}>
             ha
           </span>
         </div>
-        <div className={`text-xs mt-3 font-medium ${isLight ? 'text-[#64748B]' : 'text-[#94A3B8]'}`}>
+        <div className={`text-xs mt-3 font-medium ${isLight ? 'text-fg-secondary' : 'text-fg-secondary'}`}>
           Aggregated boundary polygon size
         </div>
       </div>
@@ -280,14 +280,14 @@ export function BiomassStatCards({ isLight, loadingDashboard, dashboardData }) {
       <div
         className={`rounded-2xl p-6 relative border transition-all duration-200 hover:border-emerald/40 hover:-translate-y-0.5 ${
           isLight
-            ? 'bg-white border-[#E2E8F0] shadow-xs'
-            : 'bg-[#08130C] border-[#152B1D]'
+            ? 'bg-white border-border-subtle shadow-xs'
+            : 'bg-bg-elevated border-border-subtle'
         }`}
       >
         <div className="flex items-center justify-between">
           <span
             className={`text-[11px] font-mono font-bold uppercase tracking-wider ${
-              isLight ? 'text-[#64748B]' : 'text-[#94A3B8]'
+              isLight ? 'text-fg-secondary' : 'text-fg-secondary'
             }`}
           >
             Model Confidence
@@ -295,7 +295,7 @@ export function BiomassStatCards({ isLight, loadingDashboard, dashboardData }) {
           <div
             className={`p-2 rounded-lg border ${
               isLight
-                ? 'bg-[#E8F8EE] text-[#00873E] border-[#C2E9CF]'
+                ? 'bg-accent-muted text-accent border-border-subtle'
                 : 'bg-emerald/10 text-emerald border-emerald/20'
             }`}
           >
@@ -304,7 +304,7 @@ export function BiomassStatCards({ isLight, loadingDashboard, dashboardData }) {
         </div>
         <div
           className={`text-3xl font-extrabold font-mono tabular-nums tracking-tight mt-3 ${
-            isLight ? 'text-[#0F291B]' : 'text-white'
+            isLight ? 'text-fg-primary' : 'text-white'
           }`}
         >
           {(dashboardData.confidence_score * 100).toFixed(0)}%
@@ -319,14 +319,14 @@ export function BiomassStatCards({ isLight, loadingDashboard, dashboardData }) {
       <div
         className={`rounded-2xl p-6 relative border transition-all duration-200 hover:border-emerald/40 hover:-translate-y-0.5 ${
           isLight
-            ? 'bg-white border-[#E2E8F0] shadow-xs'
-            : 'bg-[#08130C] border-[#152B1D]'
+            ? 'bg-white border-border-subtle shadow-xs'
+            : 'bg-bg-elevated border-border-subtle'
         }`}
       >
         <div className="flex items-center justify-between">
           <span
             className={`text-[11px] font-mono font-bold uppercase tracking-wider ${
-              isLight ? 'text-[#64748B]' : 'text-[#94A3B8]'
+              isLight ? 'text-fg-secondary' : 'text-fg-secondary'
             }`}
           >
             Last Analysis Run
@@ -334,7 +334,7 @@ export function BiomassStatCards({ isLight, loadingDashboard, dashboardData }) {
           <div
             className={`p-2 rounded-lg border ${
               isLight
-                ? 'bg-[#E8F8EE] text-[#00873E] border-[#C2E9CF]'
+                ? 'bg-accent-muted text-accent border-border-subtle'
                 : 'bg-emerald/10 text-emerald border-emerald/20'
             }`}
           >
@@ -343,12 +343,12 @@ export function BiomassStatCards({ isLight, loadingDashboard, dashboardData }) {
         </div>
         <div
           className={`text-2xl font-bold font-mono tabular-nums tracking-tight mt-3.5 ${
-            isLight ? 'text-[#0F291B]' : 'text-white'
+            isLight ? 'text-fg-primary' : 'text-white'
           }`}
         >
           {dashboardData.last_analysis_date || '2026-06-25'}
         </div>
-        <div className={`text-xs mt-3 font-mono ${isLight ? 'text-[#64748B]' : 'text-[#94A3B8]'}`}>
+        <div className={`text-xs mt-3 font-mono ${isLight ? 'text-fg-secondary' : 'text-fg-secondary'}`}>
           Pass: {dashboardData.latest_satellite_date || '2026-06-25'}
         </div>
       </div>

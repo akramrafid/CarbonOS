@@ -12,13 +12,13 @@ const Footer = () => {
       style={{ backgroundImage: 'url("/footer_landscape.png")' }}
     >
       {/* Gradient fade to blend with the dark section above it */}
-      <div className="absolute top-0 left-0 w-full h-64 bg-gradient-to-b from-[#040A06] via-[#040A06]/80 to-transparent z-0 pointer-events-none"></div>
+      <div className="absolute top-0 left-0 w-full h-64 bg-gradient-to-b from-bg-canvas via-bg-canvas/80 to-transparent z-0 pointer-events-none"></div>
 
       {/* Light overlay for text readability if needed */}
       <div className="absolute inset-0 bg-black/10 z-0 pointer-events-none"></div>
 
       {/* CTA Section (Top part of the landscape) */}
-      <div className="relative z-10 w-full flex-grow flex flex-col items-center justify-center text-center px-6 py-24">
+      <div className="relative z-10 w-full flex-grow flex flex-col items-center justify-center text-center px-6 py-10 md:py-16">
         <h2 className="font-sans font-bold text-4xl lg:text-6xl text-white max-w-4xl tracking-tight leading-[1.1] mb-6 drop-shadow-lg">
           {t('footer.ctaTitle')}
         </h2>

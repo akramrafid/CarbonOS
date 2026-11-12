@@ -28,9 +28,9 @@ export const IconButton = React.forwardRef(function IconButton(
     primary:
       'bg-emerald text-carbon hover:bg-emerald-glow active:scale-95 border border-emerald/20 focus-visible:ring-emerald dark:bg-emerald dark:text-carbon',
     secondary:
-      'bg-carbon-surface text-registry border border-carbon-border hover:bg-carbon-surface-raised active:scale-95 focus-visible:ring-emerald dark:bg-[#0D1812] dark:text-[#E2ECE5] dark:border-[#1E3326]',
+      'bg-carbon-surface text-registry border border-carbon-border hover:bg-carbon-surface-raised active:scale-95 focus-visible:ring-emerald dark:bg-bg-surface dark:text-fg-primary dark:border-border-subtle',
     ghost:
-      'bg-transparent text-mist hover:text-registry hover:bg-carbon-surface active:scale-95 focus-visible:ring-emerald dark:text-[#7A9A85] dark:hover:text-[#E2ECE5] dark:hover:bg-[#0D1812]',
+      'bg-transparent text-mist hover:text-registry hover:bg-carbon-surface active:scale-95 focus-visible:ring-emerald dark:text-fg-secondary dark:hover:text-fg-primary dark:hover:bg-bg-surface',
     destructive:
       'bg-red-500/10 text-red-500 border border-red-500/20 hover:bg-red-500/20 active:scale-95 focus-visible:ring-red-500'
   }[variant] || '';

@@ -9,7 +9,7 @@ export function ChecklistTab({
   return (
     <div
       className={`rounded-3xl p-6 sm:p-8 border shadow-xl space-y-6 ${
-        isLight ? 'bg-white border-[#E2E8E3]' : 'bg-[#08130C] border-[#152B1D]'
+        isLight ? 'bg-white border-border-subtle' : 'bg-bg-elevated border-border-subtle'
       }`}
     >
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3">
@@ -30,7 +30,7 @@ export function ChecklistTab({
           >
             <div className="space-y-1 max-w-3xl">
               <div className="flex items-center space-x-2">
-                <span className="text-[10px] font-mono px-2 py-0.5 rounded bg-[#00C853]/15 text-[#00E676] border border-[#00C853]/30 font-bold">
+                <span className="text-[10px] font-mono px-2 py-0.5 rounded bg-accent/15 text-accent-hover border border-border-strong/30 font-bold">
                   {item.code}
                 </span>
                 <h4 className="font-bold text-sm text-white">{item.title}</h4>

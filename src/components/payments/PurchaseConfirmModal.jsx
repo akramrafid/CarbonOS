@@ -181,7 +181,7 @@ export const PurchaseConfirmModal = ({ credit, creditId, onClose, onPurchaseComp
             <span className="font-mono text-xs text-emerald tracking-widest uppercase">
               SMART CONTRACT EXECUTION PIPELINE
             </span>
-            <h3 className={`text-xl font-bold mt-1 ${isLight ? 'text-[#181414]' : 'text-white'}`}>
+            <h3 className={`text-xl font-bold mt-1 ${isLight ? 'text-fg-primary' : 'text-white'}`}>
               Settling 97% to Farmer Wallet
             </h3>
             <p className="text-xs text-slate-400 mt-1">

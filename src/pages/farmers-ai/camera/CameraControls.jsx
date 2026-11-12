@@ -30,7 +30,7 @@ export function CameraControls({
         size="lg"
         onClick={showActiveCamera ? onFileSelectClick : onRetryCamera}
         disabled={isProcessing}
-        leftIcon={showActiveCamera ? <Upload className="w-5 h-5 text-[#CCFF00]" /> : <Camera className="w-5 h-5 text-[#CCFF00]" />}
+        leftIcon={showActiveCamera ? <Upload className="w-5 h-5 text-lime-400" /> : <Camera className="w-5 h-5 text-lime-400" />}
       >
         {showActiveCamera ? 'Upload / আপলোড' : 'Retry Camera'}
       </Button>

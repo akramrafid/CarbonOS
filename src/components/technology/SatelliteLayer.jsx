@@ -44,14 +44,14 @@ const SatelliteLayer = () => {
     <div className="overflow-x-auto pb-4">
       <div className="flex space-x-6 min-w-max">
         {satellites.map((sat, idx) => (
-          <div key={idx} className="w-80 bg-white border border-[#E2E8F0] rounded-xl overflow-hidden shadow-sm flex flex-col shrink-0">
+          <div key={idx} className="w-80 bg-white border border-border-subtle rounded-xl overflow-hidden shadow-sm flex flex-col shrink-0">
             <div className="h-32 bg-slate-900 relative p-4 flex flex-col justify-between">
               <div className="absolute inset-0 opacity-20 bg-[radial-gradient(ellipse_at_center,_var(--tw-gradient-stops))] from-white via-transparent to-transparent"></div>
               <div className="relative z-10 flex justify-between items-start">
                 <div className="font-mono font-bold text-white tracking-widest">{sat.logoText}</div>
                 <span className={`text-[10px] uppercase font-bold tracking-wider px-2 py-1 rounded-full ${
-                  sat.status === 'Live' ? 'bg-[#16A34A] text-white' : 
-                  sat.status === 'Integrated' ? 'bg-[#0A5C36] text-white' : 
+                  sat.status === 'Live' ? 'bg-accent text-white' : 
+                  sat.status === 'Integrated' ? 'bg-accent text-white' : 
                   'bg-white/20 text-white backdrop-blur-sm'
                 }`}>
                   {sat.status}
@@ -62,22 +62,22 @@ const SatelliteLayer = () => {
             
             <div className="p-5 flex-1 flex flex-col space-y-4">
               <div>
-                <p className="text-[10px] uppercase font-semibold text-[#475569] mb-1">Primary Use</p>
-                <p className="text-sm text-[#0F172A]">{sat.use}</p>
+                <p className="text-[10px] uppercase font-semibold text-fg-secondary mb-1">Primary Use</p>
+                <p className="text-sm text-fg-primary">{sat.use}</p>
               </div>
-              <div className="grid grid-cols-2 gap-4 pt-4 border-t border-[#E2E8F0] mt-auto">
+              <div className="grid grid-cols-2 gap-4 pt-4 border-t border-border-subtle mt-auto">
                 <div>
-                  <p className="text-[10px] uppercase font-semibold text-[#475569] mb-1">Resolution</p>
-                  <p className="text-xs font-mono text-[#0A5C36]">{sat.resolution}</p>
+                  <p className="text-[10px] uppercase font-semibold text-fg-secondary mb-1">Resolution</p>
+                  <p className="text-xs font-mono text-accent">{sat.resolution}</p>
                 </div>
                 <div>
-                  <p className="text-[10px] uppercase font-semibold text-[#475569] mb-1">Revisit</p>
-                  <p className="text-xs font-mono text-[#0A5C36]">{sat.revisit}</p>
+                  <p className="text-[10px] uppercase font-semibold text-fg-secondary mb-1">Revisit</p>
+                  <p className="text-xs font-mono text-accent">{sat.revisit}</p>
                 </div>
               </div>
-              <div className="pt-4 border-t border-[#E2E8F0]">
-                <p className="text-[10px] uppercase font-semibold text-[#475569] mb-1">Integration</p>
-                <p className="text-xs font-mono text-[#475569] bg-slate-100 p-2 rounded">{sat.integration}</p>
+              <div className="pt-4 border-t border-border-subtle">
+                <p className="text-[10px] uppercase font-semibold text-fg-secondary mb-1">Integration</p>
+                <p className="text-xs font-mono text-fg-secondary bg-slate-100 p-2 rounded">{sat.integration}</p>
               </div>
             </div>
           </div>

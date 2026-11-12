@@ -32,8 +32,8 @@ export function MarketplaceFilterBar({
                 isSelected
                   ? 'bg-emerald text-carbon border-emerald shadow-[0_0_15px_rgba(0,200,83,0.3)] font-bold'
                   : isLight
-                  ? 'bg-white border-[#dbf0ea] text-[#413f3f] hover:border-emerald/40 hover:bg-slate-50'
-                  : 'bg-[#080F0B] border-white/10 text-slate-300 hover:border-emerald/30 hover:bg-white/5'
+                  ? 'bg-white border-border-strong text-fg-secondary hover:border-emerald/40 hover:bg-slate-50'
+                  : 'bg-bg-canvas border-white/10 text-slate-300 hover:border-emerald/30 hover:bg-white/5'
               }`}
             >
               <span>{sec.label}</span>
@@ -45,7 +45,7 @@ export function MarketplaceFilterBar({
       {/* Search, Filter Bar & View Toggle */}
       <div
         className={`p-4 rounded-2xl border flex flex-col md:flex-row items-stretch md:items-center justify-between gap-3 ${
-          isLight ? 'bg-white border-[#dbf0ea]' : 'bg-[#080F0B] border-white/10'
+          isLight ? 'bg-white border-border-strong' : 'bg-bg-canvas border-white/10'
         }`}
       >
         {/* Search Input */}
@@ -58,8 +58,8 @@ export function MarketplaceFilterBar({
             placeholder="Search by project title, farmer name, region, or serial ID (e.g. BD-2026-CR-000142)..."
             className={`w-full pl-10 pr-8 py-2.5 rounded-xl text-xs font-medium border transition-colors focus:outline-none focus:border-emerald ${
               isLight
-                ? 'bg-[#f2f3ee] border-slate-200 text-[#181414] placeholder:text-slate-400'
-                : 'bg-[#040A06] border-white/10 text-white placeholder:text-slate-500'
+                ? 'bg-bg-canvas border-slate-200 text-fg-primary placeholder:text-slate-400'
+                : 'bg-bg-canvas border-white/10 text-white placeholder:text-slate-500'
             }`}
           />
           {searchQuery && (
@@ -80,7 +80,7 @@ export function MarketplaceFilterBar({
             value={selectedStandard}
             onChange={(e) => setSelectedStandard(e.target.value)}
             className={`text-xs px-3 py-2.5 rounded-xl border focus:outline-none focus:border-emerald cursor-pointer ${
-              isLight ? 'bg-[#f2f3ee] border-slate-200 text-[#181414]' : 'bg-[#040A06] border-white/10 text-slate-200'
+              isLight ? 'bg-bg-canvas border-slate-200 text-fg-primary' : 'bg-bg-canvas border-white/10 text-slate-200'
             }`}
           >
             <option value="ALL">All Standards</option>
@@ -93,7 +93,7 @@ export function MarketplaceFilterBar({
             value={selectedRegion}
             onChange={(e) => setSelectedRegion(e.target.value)}
             className={`text-xs px-3 py-2.5 rounded-xl border focus:outline-none focus:border-emerald cursor-pointer ${
-              isLight ? 'bg-[#f2f3ee] border-slate-200 text-[#181414]' : 'bg-[#040A06] border-white/10 text-slate-200'
+              isLight ? 'bg-bg-canvas border-slate-200 text-fg-primary' : 'bg-bg-canvas border-white/10 text-slate-200'
             }`}
           >
             <option value="ALL">All Divisions</option>
@@ -112,7 +112,7 @@ export function MarketplaceFilterBar({
             value={sortBy}
             onChange={(e) => setSortBy(e.target.value)}
             className={`text-xs px-3 py-2.5 rounded-xl border focus:outline-none focus:border-emerald cursor-pointer ${
-              isLight ? 'bg-[#f2f3ee] border-slate-200 text-[#181414]' : 'bg-[#040A06] border-white/10 text-slate-200'
+              isLight ? 'bg-bg-canvas border-slate-200 text-fg-primary' : 'bg-bg-canvas border-white/10 text-slate-200'
             }`}
           >
             <option value="FEATURED">Featured Offsets</option>
@@ -125,7 +125,7 @@ export function MarketplaceFilterBar({
           {/* View Mode Toggle */}
           <div
             className={`flex items-center p-1 rounded-xl border ${
-              isLight ? 'bg-[#f2f3ee] border-slate-200' : 'bg-[#040A06] border-white/10'
+              isLight ? 'bg-bg-canvas border-slate-200' : 'bg-bg-canvas border-white/10'
             }`}
           >
             <button

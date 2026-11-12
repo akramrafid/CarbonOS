@@ -7,9 +7,9 @@ export function AuditTrailDrawer({
   onClose
 }) {
   return (
-    <div className="p-4 rounded-2xl border border-white/10 bg-[#050D07] space-y-3">
+    <div className="p-4 rounded-2xl border border-white/10 bg-bg-surface space-y-3">
       <div className="flex justify-between items-center pb-2 border-b border-white/10">
-        <span className="text-xs font-mono font-bold uppercase text-[#00E676] flex items-center gap-1.5">
+        <span className="text-xs font-mono font-bold uppercase text-accent-hover flex items-center gap-1.5">
           <History className="w-3.5 h-3.5" />
           Human-in-the-Loop Auditor Action Log (Immutable History)
         </span>
@@ -36,7 +36,7 @@ export function AuditTrailDrawer({
               className="p-2 rounded-xl bg-white/5 border border-white/5 flex flex-col md:flex-row justify-between gap-1"
             >
               <div>
-                <span className="text-[#00E676] font-bold">[{log.segmentName}]</span> {log.reason}
+                <span className="text-accent-hover font-bold">[{log.segmentName}]</span> {log.reason}
                 <div className="text-gray-400 text-[10px]">
                   Changed {log.field}: <span className="line-through text-red-400">{log.oldValue}</span> →{' '}
                   <span className="text-emerald-300 font-bold">{log.newValue}</span>

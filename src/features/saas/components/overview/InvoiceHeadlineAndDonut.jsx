@@ -24,7 +24,7 @@ export const InvoiceHeadlineAndDonut = ({
           <div className="space-y-1">
             <div className="flex items-center space-x-2">
               <span className={`font-mono text-[10px] uppercase tracking-wider font-bold ${
-                isLight ? 'text-[#41634E]' : 'text-mist'
+                isLight ? 'text-fg-muted' : 'text-mist'
               }`}>
                 Total Invoiced Carbon Footprint
               </span>
@@ -35,7 +35,7 @@ export const InvoiceHeadlineAndDonut = ({
             </div>
             <div className="flex items-baseline space-x-3">
               <div className={`font-sans font-extrabold text-3xl sm:text-4xl tracking-tight tabular-nums ${
-                isLight ? 'text-[#0F2417]' : 'text-white'
+                isLight ? 'text-fg-primary' : 'text-white'
               }`}>
                 {unitMode === 'tonnes' 
                   ? `${activeMatrix.totalFootprintTonnes?.toLocaleString() || 0}` 
@@ -54,18 +54,18 @@ export const InvoiceHeadlineAndDonut = ({
           {/* Right: Quick Stats & Unit Mode Toggle */}
           <div className="flex flex-wrap items-center gap-4">
             <div className={`px-4 py-2.5 rounded-xl border text-left ${
-              isLight ? 'bg-white border-carbon-border' : 'bg-[#08130C] border-[#173020]'
+              isLight ? 'bg-white border-carbon-border' : 'bg-bg-elevated border-border-subtle'
             }`}>
               <div className="text-[10px] uppercase font-mono font-bold text-mist">
                 Invoiced Spend
               </div>
-              <div className={`text-sm font-bold font-mono tabular-nums ${isLight ? 'text-[#0F2417]' : 'text-white'}`}>
+              <div className={`text-sm font-bold font-mono tabular-nums ${isLight ? 'text-fg-primary' : 'text-white'}`}>
                 ৳ {activeMatrix.totalSpendBdt?.toLocaleString() || 0} <span className="text-[10px] font-normal text-mist">BDT</span>
               </div>
             </div>
 
             <div className={`px-4 py-2.5 rounded-xl border text-left ${
-              isLight ? 'bg-white border-carbon-border' : 'bg-[#08130C] border-[#173020]'
+              isLight ? 'bg-white border-carbon-border' : 'bg-bg-elevated border-border-subtle'
             }`}>
               <div className="text-[10px] uppercase font-mono font-bold text-mist">
                 Carbon Intensity
@@ -109,7 +109,7 @@ export const InvoiceHeadlineAndDonut = ({
             <div className="flex items-center space-x-2">
               <PieChart className="w-4 h-4 text-emerald" />
               <h4 className={`text-xs font-bold uppercase font-mono tracking-wider ${
-                isLight ? 'text-[#0F2417]' : 'text-white'
+                isLight ? 'text-fg-primary' : 'text-white'
               }`}>
                 Emission Distribution by Category
               </h4>
@@ -137,7 +137,7 @@ export const InvoiceHeadlineAndDonut = ({
               <div className="flex items-center space-x-2">
                 <Activity className="w-4 h-4 text-emerald" />
                 <h4 className={`text-xs font-bold uppercase font-mono tracking-wider ${
-                  isLight ? 'text-[#0F2417]' : 'text-white'
+                  isLight ? 'text-fg-primary' : 'text-white'
                 }`}>
                   Top Impact Drivers
                 </h4>
@@ -153,8 +153,8 @@ export const InvoiceHeadlineAndDonut = ({
                   key={top.id}
                   className={`p-3 rounded-xl border transition-all ${
                     isLight 
-                      ? 'bg-[#F8FAF8] border-carbon-border hover:border-emerald' 
-                      : 'bg-[#08130C] border-[#173020] hover:border-emerald/40'
+                      ? 'bg-bg-muted border-carbon-border hover:border-emerald' 
+                      : 'bg-bg-elevated border-border-subtle hover:border-emerald/40'
                   }`}
                 >
                   <div className="flex justify-between items-center mb-1.5">
@@ -165,7 +165,7 @@ export const InvoiceHeadlineAndDonut = ({
                       >
                         {top.rank}
                       </span>
-                      <span className={`text-xs font-bold ${isLight ? 'text-[#0F2417]' : 'text-white'}`}>
+                      <span className={`text-xs font-bold ${isLight ? 'text-fg-primary' : 'text-white'}`}>
                         {top.name}
                       </span>
                     </div>
@@ -195,16 +195,16 @@ export const InvoiceHeadlineAndDonut = ({
 
           {/* AI Decarbonization Recommendation Card */}
           <div className={`p-4 rounded-2xl border flex items-start space-x-3 ${
-            isLight ? 'bg-emerald-50/60 border-emerald/30' : 'bg-[#06180E] border-[#184828]'
+            isLight ? 'bg-emerald-50/60 border-emerald/30' : 'bg-bg-surface border-border-subtle'
           }`}>
             <div className="p-2 rounded-xl shrink-0 bg-emerald/15 text-emerald">
               <Lightbulb className="w-4 h-4 text-emerald" />
             </div>
             <div className="space-y-1">
-              <div className={`text-xs font-bold font-sans ${isLight ? 'text-[#0F2417]' : 'text-white'}`}>
+              <div className={`text-xs font-bold font-sans ${isLight ? 'text-fg-primary' : 'text-white'}`}>
                 AI Decarbonization Action Plan
               </div>
-              <p className={`text-[11px] leading-relaxed ${isLight ? 'text-[#2E543C]' : 'text-[#A7F3D0]'}`}>
+              <p className={`text-[11px] leading-relaxed ${isLight ? 'text-fg-secondary' : 'text-emerald-200'}`}>
                 {activeMatrix.quickTip}
               </p>
             </div>

@@ -139,7 +139,7 @@ export function GisLeafletViewer(props) {
             <Marker position={[parseFloat(inspectedPixel.lat), parseFloat(inspectedPixel.lng)]}>
               <Popup>
                 <div className="text-xs p-1 max-w-xs leading-tight">
-                  <div className="font-bold text-[#00873E]">
+                  <div className="font-bold text-accent">
                     {inspectedPixel.forestType || 'Inspected Pixel'}
                   </div>
                   <div className="text-gray-500 font-mono text-[10px] mt-0.5">

@@ -14,12 +14,12 @@ export function MultiPoolStockCard({
 }) {
   return (
     <Card className={`rounded-2xl p-5 border transition-all ${
-      isLight ? 'bg-white border-[#CBD5E1] shadow-xs' : 'bg-[#08130C] border-[#152B1D]'
+      isLight ? 'bg-white border-border-subtle shadow-xs' : 'bg-bg-elevated border-border-subtle'
     }`}>
       <div className="flex items-center justify-between pb-3 border-b border-inherit mb-3.5">
         <div className="flex items-center space-x-2">
           <Trees size={15} className="text-emerald" />
-          <h3 className={`font-bold text-xs uppercase tracking-wider ${isLight ? 'text-[#0F291B]' : 'text-white'}`}>
+          <h3 className={`font-bold text-xs uppercase tracking-wider ${isLight ? 'text-fg-primary' : 'text-white'}`}>
             2. IPCC Tier-3 Multi-Pool Carbon Stocks
           </h3>
         </div>
@@ -33,10 +33,10 @@ export function MultiPoolStockCard({
       <div className="space-y-2 text-xs">
         <div className="flex items-center justify-between p-2 rounded-xl bg-inherit border border-inherit">
           <div>
-            <span className={`font-bold block ${isLight ? 'text-[#0F291B]' : 'text-white'}`}>
+            <span className={`font-bold block ${isLight ? 'text-fg-primary' : 'text-white'}`}>
               Above-Ground Biomass (AGB)
             </span>
-            <span className={`text-[11px] ${isLight ? 'text-[#64748B]' : 'text-mist'}`}>
+            <span className={`text-[11px] ${isLight ? 'text-fg-secondary' : 'text-mist'}`}>
               Sentinel-2 MSI + GEDI LiDAR spaceborne model
             </span>
           </div>
@@ -47,10 +47,10 @@ export function MultiPoolStockCard({
 
         <div className="flex items-center justify-between p-2 rounded-xl bg-inherit border border-inherit">
           <div>
-            <span className={`font-bold block ${isLight ? 'text-[#0F291B]' : 'text-white'}`}>
+            <span className={`font-bold block ${isLight ? 'text-fg-primary' : 'text-white'}`}>
               Below-Ground Biomass (BGB)
             </span>
-            <span className={`text-[11px] ${isLight ? 'text-[#64748B]' : 'text-mist'}`}>
+            <span className={`text-[11px] ${isLight ? 'text-fg-secondary' : 'text-mist'}`}>
               IPCC Tier-3 root-to-shoot ratio (R = 0.49 mangrove allometry)
             </span>
           </div>
@@ -61,10 +61,10 @@ export function MultiPoolStockCard({
 
         <div className="flex items-center justify-between p-2 rounded-xl bg-inherit border border-inherit">
           <div>
-            <span className={`font-bold block ${isLight ? 'text-[#0F291B]' : 'text-white'}`}>
+            <span className={`font-bold block ${isLight ? 'text-fg-primary' : 'text-white'}`}>
               Soil Organic Carbon (SOC)
             </span>
-            <span className={`text-[11px] ${isLight ? 'text-[#64748B]' : 'text-mist'}`}>
+            <span className={`text-[11px] ${isLight ? 'text-fg-secondary' : 'text-mist'}`}>
               Coastal delta sediment core: 100cm depth, bulk density 0.82 g/cm³
             </span>
           </div>
@@ -87,9 +87,9 @@ export function MultiPoolStockCard({
         </div>
 
         <div className={`flex items-center justify-between p-2.5 rounded-xl border mt-2.5 ${
-          isLight ? 'bg-[#E8F8EE] border-[#C2E9CF]' : 'bg-emerald/10 border-emerald/20'
+          isLight ? 'bg-accent-muted border-border-subtle' : 'bg-emerald/10 border-emerald/20'
         }`}>
-          <span className={`font-extrabold text-xs ${isLight ? 'text-[#00873E]' : 'text-emerald'}`}>
+          <span className={`font-extrabold text-xs ${isLight ? 'text-accent' : 'text-emerald'}`}>
             Total Multi-Pool Carbon Density
           </span>
           <span className="font-mono font-extrabold text-base text-emerald tabular-nums">

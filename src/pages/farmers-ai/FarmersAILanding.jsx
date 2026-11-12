@@ -26,7 +26,7 @@ const FarmersAILanding = () => {
   const itemVariants = createItemVariants(16);
 
   return (
-    <div className="min-h-screen bg-carbon pt-24 pb-24 px-4 lg:px-12 font-sans selection:bg-emerald selection:text-carbon overflow-hidden">
+    <div className="min-h-screen bg-carbon pt-16 pb-12 px-4 lg:px-12 font-sans selection:bg-emerald selection:text-carbon overflow-hidden">
       {/* Language Toggle */}
       <div className="max-w-7xl mx-auto flex justify-end mb-8 relative z-20">
         <Tabs
@@ -52,7 +52,7 @@ const FarmersAILanding = () => {
 
         {/* AI Scanner Section */}
         <div id="ai-scanner" className="mb-32 relative z-10 scroll-mt-28">
-          <div className="bg-gradient-to-b from-white/5 to-transparent border border-white/10 p-6 md:p-8 rounded-3xl shadow-xl hover:border-[#CCFF00]/20 transition-all duration-300">
+          <div className="bg-gradient-to-b from-white/5 to-transparent border border-white/10 p-6 md:p-8 rounded-3xl shadow-xl hover:border-lime-400/20 transition-all duration-300">
             {scanResult === null ? (
               <CameraCapture 
                 isInline={true} 
@@ -86,7 +86,7 @@ const FarmersAILanding = () => {
 
         {/* HarvestGuard Dashboard Section */}
         <div id="harvestguard-dashboard" className="mb-32 relative z-10 scroll-mt-28">
-          <div className="bg-[#0A1F13]/90 border border-[#CCFF00]/20 p-6 md:p-8 rounded-3xl shadow-xl">
+          <div className="bg-bg-elevated/90 border border-lime-400/20 p-6 md:p-8 rounded-3xl shadow-xl">
             {dashboardSection === 'inventory' && (
               <HarvestGuardDashboard 
                 isInline={true}

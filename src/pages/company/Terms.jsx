@@ -4,7 +4,7 @@ import { Badge } from '../../components/ui/Badge';
 
 const Terms = () => {
   return (
-    <div className="pt-24 pb-16 min-h-[80vh] flex flex-col items-center noise-overlay">
+    <div className="pt-12 pb-8 sm:pt-16 sm:pb-12 min-h-[80vh] flex flex-col items-center noise-overlay">
       <div className="max-w-4xl w-full mx-auto px-6 lg:px-12">
         <PageHeader
           title="Terms of Service"
@@ -13,7 +13,7 @@ const Terms = () => {
           align="center"
         />
 
-        <div className="bg-[#080F0B] registry-border p-8 md:p-12 rounded-[2rem] shadow-[0_0_30px_rgba(0,200,83,0.05)] mt-12">
+        <div className="bg-bg-canvas registry-border p-8 md:p-12 rounded-[2rem] shadow-[0_0_30px_rgba(0,200,83,0.05)] mt-12">
           <div className="space-y-6 font-sans text-mist text-base leading-relaxed">
             <h2 className="text-registry font-bold text-lg mt-6">1. Acceptance of Terms</h2>
             <p>By accessing Carbon Zero BD, you agree to comply with these terms and all applicable laws of Bangladesh, including the National Carbon Market Framework guidelines.</p>
