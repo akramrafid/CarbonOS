@@ -482,12 +482,9 @@ def create_factor(db, principal, data, platform_wide=False):
     if data["unit"] not in units:
         raise DomainError(422, f"Factor unit must be kgCO2e per {' or per '.join(u for u in units if u)}")
     # Natural gas outside TEST must be on an energy basis (GJ)
+    provenance = str(data.get("provenance_class") or "").upper()
     if data["activity_type"] == "natural_gas" and data["unit"] in ("m3", "cft"):
-        provenance = (data.get("provenance_class") or "").upper()
-        all_text = " ".join(str(data.get(k) or "") for k in (
-            "source_publisher", "source_document", "source_table_ref", "licence_note", "family"
-        )).upper()
-        if provenance != "TEST" and "TEST" not in all_text:
+        if provenance != "TEST":
             raise DomainError(422, "Natural gas emission factors must use an energy basis (GJ) outside TEST fixtures.")
     scope = accounting.ACTIVITY_TYPES[data["activity_type"]][0]
     if (scope == "1") != (data["method"] == "direct"):
@@ -495,12 +492,11 @@ def create_factor(db, principal, data, platform_wide=False):
     _check_factor_kind(data)
     data = _factor_values(dict(data))
 
-    # Detect synthetic provenance: any factor with a SYNTHETIC-labelled input is SYNTHETIC
-    declared_provenance = data.get("provenance_class")
-    all_text = " ".join(str(data.get(k) or "") for k in (
-        "source_publisher", "source_document", "source_table_ref", "licence_note", "family"
-    )).upper()
-    if "SYNTHETIC" in all_text or declared_provenance == "SYNTHETIC":
+    # Structural provenance validation: decide only on structural provenance_class
+    declared_provenance = str(data.get("provenance_class") or "").upper()
+    if declared_provenance == "TEST":
+        provenance = "TEST"
+    elif declared_provenance == "SYNTHETIC":
         provenance = "SYNTHETIC"
     elif declared_provenance in ("PUBLISHED", "DERIVED_FROM_PUBLISHED"):
         provenance = declared_provenance
@@ -936,7 +932,20 @@ def calculate_period(db, principal, period_id):
         period.boundary_method, gwp_basis=period.gwp_basis,
         instruments=[_accounting_instrument(i) for i in instruments],
     )
+    org = db.get(ESGOrganization, principal.organization_id)
+    is_demo = bool(getattr(org, "is_demo", False) or getattr(principal, "is_demo", False))
+    if not is_demo:
+        for f in factors:
+            if getattr(f, "provenance_class", None) in ("TEST", "SYNTHETIC"):
+                code = "TEST_FACTOR_NOT_ALLOWED" if f.provenance_class == "TEST" else "SYNTHETIC_FACTOR_NOT_ALLOWED"
+                register_exceptions.append({
+                    "code": code,
+                    "factor_id": f.id,
+                    "blocking": True,
+                    "detail": f"Factor '{f.family}' v{f.version} has provenance '{f.provenance_class}' and cannot be used in audit-grade calculations outside demo tenants."
+                })
     result.exceptions.extend(register_exceptions)
+    is_blocking = result.blocking or any(e.get("blocking") for e in register_exceptions)
     run = CalculationRun(
         organization_id=principal.organization_id, period_id=period.id, period_revision=period.revision,
         methodology_version=result.methodology_version, boundary_method=result.boundary_method,
@@ -944,7 +953,7 @@ def calculate_period(db, principal, period_id):
                                  certificates, instruments),
         scope1_kg=result.scope1_kg,
         scope2_location_kg=result.scope2_location_kg, scope2_market_kg=result.scope2_market_kg,
-        blocking=result.blocking, exceptions=result.exceptions, excluded=result.excluded,
+        blocking=is_blocking, exceptions=result.exceptions, excluded=result.excluded,
         memo=_jsonable(result.memo), by_facility=_jsonable(result.by_facility), created_by=principal.sub,
         gwp_basis=result.gwp_basis, uncertainty=_jsonable(result.uncertainty),
     )

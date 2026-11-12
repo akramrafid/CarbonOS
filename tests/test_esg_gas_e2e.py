@@ -45,8 +45,8 @@ class TestGasEndToEndRealDetection(unittest.TestCase):
         self.Session = sessionmaker(bind=self.engine)
         self.db = self.Session()
 
-        # Org and users
-        self.org = ESGOrganization(name="Apex Spinning Ltd", is_demo=False, created_by_sub="user-preparer")
+        # Org and users (Demo org so test fixture TEST factors can be processed in lifecycle trace)
+        self.org = ESGOrganization(name="Apex Spinning Ltd", is_demo=True, created_by_sub="user-preparer")
         self.db.add(self.org)
         self.db.commit()
 
@@ -54,8 +54,8 @@ class TestGasEndToEndRealDetection(unittest.TestCase):
         self.db.add(ESGMembership(organization_id=self.org.id, user_sub="user-approver", role="esg_admin"))
         self.db.commit()
 
-        self.p_preparer = Principal("user-preparer", self.org.id, "esg_admin", False, False)
-        self.p_approver = Principal("user-approver", self.org.id, "esg_admin", False, False)
+        self.p_preparer = Principal("user-preparer", self.org.id, "esg_admin", True, False)
+        self.p_approver = Principal("user-approver", self.org.id, "esg_admin", True, False)
 
         # Facility and reporting period
         self.le = LegalEntity(organization_id=self.org.id, name="Apex Spinning Mills", country="BD")
@@ -333,7 +333,7 @@ class TestGasEndToEndRealDetection(unittest.TestCase):
 
     def test_per_volume_gas_factor_fails_outside_test(self):
         """Assert that per-volume natural gas factors (m3 or cft) are strictly rejected outside TEST."""
-        # 1. Attempt to create per-volume factor with PUBLISHED provenance without TEST
+        # 1. Attempt to create per-volume factor with source containing "Latest IPCC table"
         with self.assertRaises(ledger.DomainError) as ctx1:
             ledger.create_factor(self.db, self.p_preparer, {
                 "family": "published-gas-volume",
@@ -342,7 +342,7 @@ class TestGasEndToEndRealDetection(unittest.TestCase):
                 "kgco2e_per_unit": D("1.915000"),
                 "region": "BD-NATIONAL",
                 "source_publisher": "Official Gazette",
-                "source_document": "National Energy Report",
+                "source_document": "Latest IPCC table for stationary combustion",
                 "source_year": 2024,
                 "source_table_ref": "Table 1",
                 "gwp_basis": "AR6",
@@ -354,38 +354,38 @@ class TestGasEndToEndRealDetection(unittest.TestCase):
         self.assertEqual(ctx1.exception.status, 422)
         self.assertIn("energy basis (GJ)", ctx1.exception.message)
 
-        # 2. Attempt via load_published_factor with m3
+        # 2. Attempt where publisher text contains "TEST" but provenance_class is not TEST
         with self.assertRaises(ledger.DomainError) as ctx2:
-            ledger.load_published_factor(
-                self.db, self.p_preparer,
-                family="published-gas-volume-loader",
-                activity_type="natural_gas",
-                unit="m3",
-                kgco2e_per_unit=D("1.915000"),
-                region="BD-NATIONAL",
-                source_publisher="Official Gazette",
-                source_document="National Energy Report",
-                source_year=2024,
-                source_page="1",
-                gwp_basis="AR6",
-                valid_from=dt.date(2025, 1, 1),
-                valid_to=dt.date(2025, 12, 31),
-                method="direct"
-            )
+            ledger.create_factor(self.db, self.p_preparer, {
+                "family": "tricky-gas-volume",
+                "activity_type": "natural_gas",
+                "unit": "m3",
+                "kgco2e_per_unit": D("1.915000"),
+                "region": "BD-NATIONAL",
+                "source_publisher": "TEST laboratory verification report",
+                "source_document": "Gas analysis report",
+                "source_year": 2024,
+                "source_table_ref": "Table 2",
+                "gwp_basis": "AR6",
+                "valid_from": dt.date(2025, 1, 1),
+                "valid_to": dt.date(2025, 12, 31),
+                "method": "direct",
+                "provenance_class": "PUBLISHED"
+            })
         self.assertEqual(ctx2.exception.status, 422)
         self.assertIn("energy basis (GJ)", ctx2.exception.message)
 
-        # 3. Permitted when explicitly marked TEST
+        # 3. Permitted ONLY when structurally declared provenance_class == "TEST"
         test_factor = ledger.create_factor(self.db, self.p_preparer, {
             "family": "test-gas-volume",
             "activity_type": "natural_gas",
             "unit": "m3",
             "kgco2e_per_unit": D("1.915000"),
             "region": "BD-NATIONAL",
-            "source_publisher": "TEST suite only",
-            "source_document": "TEST mock document",
+            "source_publisher": "Testing environment fixture",
+            "source_document": "Mock document",
             "source_year": 2024,
-            "source_table_ref": "TEST Table",
+            "source_table_ref": "Table",
             "gwp_basis": "AR6",
             "valid_from": dt.date(2025, 1, 1),
             "valid_to": dt.date(2025, 12, 31),
@@ -393,6 +393,202 @@ class TestGasEndToEndRealDetection(unittest.TestCase):
             "provenance_class": "TEST"
         })
         self.assertEqual(test_factor.unit, "m3")
+
+    def test_test_factor_refused_for_non_demo_tenant(self):
+        """TEST factors cannot be used in /estimate or ledger runs outside demo tenants."""
+        # Setup non-demo organization
+        non_demo_org = ESGOrganization(name="Non-Demo Corp", is_demo=False, created_by_sub="nd-user")
+        self.db.add(non_demo_org)
+        self.db.commit()
+        self.db.add(ESGMembership(organization_id=non_demo_org.id, user_sub="nd-user", role="esg_admin"))
+        self.db.add(ESGMembership(organization_id=non_demo_org.id, user_sub="nd-approver", role="esg_admin"))
+        self.db.commit()
+        p_nd = Principal("nd-user", non_demo_org.id, "esg_admin", False, False)
+        p_nd_approver = Principal("nd-approver", non_demo_org.id, "esg_admin", False, False)
+
+        le_nd = LegalEntity(organization_id=non_demo_org.id, name="ND Entity", country="BD")
+        self.db.add(le_nd)
+        self.db.commit()
+        fac_nd = Facility(organization_id=non_demo_org.id, legal_entity_id=le_nd.id, name="ND Fac", country="BD",
+                          grid_region="BD-NATIONAL", operational_control=True, financial_control=True, equity_share_pct=D(100))
+        self.db.add(fac_nd)
+        period_nd = ReportingPeriod(organization_id=non_demo_org.id, name="FY2025", start_date=dt.date(2025, 1, 1),
+                                    end_date=dt.date(2025, 12, 31), boundary_method="operational_control", status="OPEN",
+                                    created_by="nd-user")
+        self.db.add(period_nd)
+        self.db.commit()
+
+        # Create gas certificate and TEST factor for non-demo org
+        cert_nd = ledger.create_gas_certificate(self.db, p_nd, {
+            "facility_id": fac_nd.id,
+            "distributor": "Titas Gas",
+            "certificate_ref": "ND-CERT-2025",
+            "gcv": D("38.0"),
+            "gcv_unit": "MJ/m3",
+            "ncv_to_gcv": D("0.90"),
+            "reference_conditions": "15 C, 101.325 kPa",
+            "valid_from": dt.date(2025, 1, 1),
+            "valid_to": dt.date(2025, 12, 31),
+            "evidence_snippet": "Lab report"
+        })
+        ledger.approve_gas_certificate(self.db, p_nd_approver, cert_nd.id)
+
+        factor_nd = ledger.create_factor(self.db, p_nd, {
+            "family": "nd-test-factor",
+            "activity_type": "natural_gas",
+            "unit": "GJ",
+            "kgco2e_per_unit": D("56.157100"),
+            "region": "BD-NATIONAL",
+            "source_publisher": "TEST Lab",
+            "source_document": "Test Doc",
+            "source_year": 2025,
+            "source_table_ref": "Table 1",
+            "gwp_basis": "AR6",
+            "valid_from": dt.date(2025, 1, 1),
+            "valid_to": dt.date(2025, 12, 31),
+            "method": "direct",
+            "provenance_class": "TEST"
+        })
+        ledger.approve_factor(self.db, p_nd_approver, factor_nd.id)
+
+        # Create a bill with consumption in the non-demo org
+        bill_nd = Bill(organization_id=non_demo_org.id, facility_id=fac_nd.id, filename="bill.pdf",
+                       document_sha256="h", document={"pages": []}, profile_id=self.profile.id, profile_key=self.profile.profile_key,
+                       profile_version=1, source="pdf_text", status="EXTRACTED", created_by="nd-user")
+        self.db.add(bill_nd)
+        self.db.commit()
+        self.db.add(BillValue(organization_id=non_demo_org.id, bill_id=bill_nd.id, parameter_key="account.number",
+                              value_text="ACC-1", source="manual", status="confirmed", confirmed_by="nd-user", group_index=""))
+        self.db.add(BillValue(organization_id=non_demo_org.id, bill_id=bill_nd.id, parameter_key="period.start",
+                              value_text="2025-05-01", source="manual", status="confirmed", confirmed_by="nd-user", group_index=""))
+        self.db.add(BillValue(organization_id=non_demo_org.id, bill_id=bill_nd.id, parameter_key="period.end",
+                              value_text="2025-05-31", source="manual", status="confirmed", confirmed_by="nd-user", group_index=""))
+        self.db.add(BillValue(organization_id=non_demo_org.id, bill_id=bill_nd.id, parameter_key="gas.volume.measured",
+                              value_text="1000", unit="m3", source="manual", status="confirmed", confirmed_by="nd-user", group_index=""))
+        self.db.add(BillValue(organization_id=non_demo_org.id, bill_id=bill_nd.id, parameter_key="gas.volume.corrected",
+                              value_text="1000", unit="m3", source="manual", status="confirmed", confirmed_by="nd-user", group_index=""))
+        self.db.commit()
+
+        # In non-demo org, estimate returns TEST_FACTOR_INPUTS blocker because self.factor is TEST
+        est = bill_service.estimate_bill(self.db, p_nd, bill_nd.id)
+        self.assertIn("TEST_FACTOR_INPUTS", est["calc_blockers"])
+
+        # Create approved activity and run calculate_period in non-demo org
+        act_nd = ActivityRecord(
+            organization_id=non_demo_org.id, facility_id=fac_nd.id, period_id=period_nd.id,
+            activity_type="natural_gas", quantity_raw=D(1000), unit_raw="m3", quantity=D(1000), unit="m3",
+            activity_start=dt.date(2025, 5, 1), activity_end=dt.date(2025, 5, 31), data_quality="billed",
+            status="APPROVED", created_by="nd-user", reviewed_by="nd-approver", reviewed_at=dt.datetime.utcnow(),
+            source_type="document", source_ref="ref", evidence_snippet="snip"
+        )
+        self.db.add(act_nd)
+        self.db.commit()
+
+        calc_run = ledger.calculate_period(self.db, p_nd, period_nd.id)
+        self.assertTrue(calc_run.blocking)
+        self.assertIn("TEST_FACTOR_NOT_ALLOWED", [e["code"] for e in calc_run.exceptions])
+
+    def test_estimate_bill_missing_period_blocks(self):
+        """estimate_bill must return a blocker when bill period start/end is missing, and not select certificates."""
+        bill = Bill(organization_id=self.org.id, facility_id=self.fac.id, filename="missing_dates.pdf",
+                    document_sha256="h2", document={"pages": []}, profile_id=self.profile.id, profile_key=self.profile.profile_key,
+                    profile_version=1, source="pdf_text", status="EXTRACTED", created_by="user-preparer")
+        self.db.add(bill)
+        self.db.commit()
+        self.db.add(BillValue(organization_id=self.org.id, bill_id=bill.id, parameter_key="account.number",
+                              value_text="TITAS-1", source="manual", status="confirmed", confirmed_by="user-preparer", group_index=""))
+        self.db.add(BillValue(organization_id=self.org.id, bill_id=bill.id, parameter_key="gas.volume.measured",
+                              value_text="1000", unit="m3", source="manual", status="confirmed", confirmed_by="user-preparer", group_index=""))
+        self.db.add(BillValue(organization_id=self.org.id, bill_id=bill.id, parameter_key="gas.volume.corrected",
+                              value_text="1000", unit="m3", source="manual", status="confirmed", confirmed_by="user-preparer", group_index=""))
+        self.db.commit()
+
+        est = bill_service.estimate_bill(self.db, self.p_preparer, bill.id)
+        self.assertIn("MISSING_BILL_PERIOD", est["calc_blockers"])
+
+    def test_estimate_bill_expired_certificate_blocks(self):
+        """estimate_bill must return EXPIRED_GAS_CERTIFICATE when all certificates are expired."""
+        # Create facility with expired gas certificate only
+        fac_exp = Facility(organization_id=self.org.id, legal_entity_id=self.le.id, name="Expired Unit", country="BD",
+                           grid_region="BD-NATIONAL", operational_control=True, financial_control=True, equity_share_pct=D(100))
+        self.db.add(fac_exp)
+        self.db.commit()
+
+        expired_cert = ledger.create_gas_certificate(self.db, self.p_preparer, {
+            "facility_id": fac_exp.id,
+            "distributor": "Titas Gas",
+            "certificate_ref": "OLD-CERT",
+            "gcv": D("38.0"),
+            "gcv_unit": "MJ/m3",
+            "ncv_to_gcv": D("0.90"),
+            "reference_conditions": "15 C, 101.325 kPa",
+            "valid_from": dt.date(2023, 1, 1),
+            "valid_to": dt.date(2023, 12, 31),
+            "evidence_snippet": "Old report"
+        })
+        ledger.approve_gas_certificate(self.db, self.p_approver, expired_cert.id)
+
+        bill = Bill(organization_id=self.org.id, facility_id=fac_exp.id, filename="b_exp.pdf",
+                    document_sha256="hexp", document={"pages": []}, profile_id=self.profile.id, profile_key=self.profile.profile_key,
+                    profile_version=1, source="pdf_text", status="EXTRACTED", created_by="user-preparer")
+        self.db.add(bill)
+        self.db.commit()
+        self.db.add(BillValue(organization_id=self.org.id, bill_id=bill.id, parameter_key="account.number",
+                              value_text="ACC-EXP", source="manual", status="confirmed", confirmed_by="user-preparer", group_index=""))
+        self.db.add(BillValue(organization_id=self.org.id, bill_id=bill.id, parameter_key="period.start",
+                              value_text="2025-05-01", source="manual", status="confirmed", confirmed_by="user-preparer", group_index=""))
+        self.db.add(BillValue(organization_id=self.org.id, bill_id=bill.id, parameter_key="period.end",
+                              value_text="2025-05-31", source="manual", status="confirmed", confirmed_by="user-preparer", group_index=""))
+        self.db.add(BillValue(organization_id=self.org.id, bill_id=bill.id, parameter_key="gas.volume.measured",
+                              value_text="1000", unit="m3", source="manual", status="confirmed", confirmed_by="user-preparer", group_index=""))
+        self.db.add(BillValue(organization_id=self.org.id, bill_id=bill.id, parameter_key="gas.volume.corrected",
+                              value_text="1000", unit="m3", source="manual", status="confirmed", confirmed_by="user-preparer", group_index=""))
+        self.db.commit()
+
+        est = bill_service.estimate_bill(self.db, self.p_preparer, bill.id)
+        self.assertIn("EXPIRED_GAS_CERTIFICATE", est["calc_blockers"])
+
+    def test_estimate_bill_partial_certificate_coverage_blocks(self):
+        """estimate_bill must return PARTIAL_GAS_CERTIFICATE_COVERAGE when certificate does not cover entire period."""
+        fac_part = Facility(organization_id=self.org.id, legal_entity_id=self.le.id, name="Partial Unit", country="BD",
+                            grid_region="BD-NATIONAL", operational_control=True, financial_control=True, equity_share_pct=D(100))
+        self.db.add(fac_part)
+        self.db.commit()
+
+        # Certificate starts mid-month: 2025-05-15 to 2025-12-31
+        part_cert = ledger.create_gas_certificate(self.db, self.p_preparer, {
+            "facility_id": fac_part.id,
+            "distributor": "Titas Gas",
+            "certificate_ref": "PART-CERT",
+            "gcv": D("38.0"),
+            "gcv_unit": "MJ/m3",
+            "ncv_to_gcv": D("0.90"),
+            "reference_conditions": "15 C, 101.325 kPa",
+            "valid_from": dt.date(2025, 5, 15),
+            "valid_to": dt.date(2025, 12, 31),
+            "evidence_snippet": "Mid month cert"
+        })
+        ledger.approve_gas_certificate(self.db, self.p_approver, part_cert.id)
+
+        bill = Bill(organization_id=self.org.id, facility_id=fac_part.id, filename="b_part.pdf",
+                    document_sha256="hpart", document={"pages": []}, profile_id=self.profile.id, profile_key=self.profile.profile_key,
+                    profile_version=1, source="pdf_text", status="EXTRACTED", created_by="user-preparer")
+        self.db.add(bill)
+        self.db.commit()
+        self.db.add(BillValue(organization_id=self.org.id, bill_id=bill.id, parameter_key="account.number",
+                              value_text="ACC-PART", source="manual", status="confirmed", confirmed_by="user-preparer", group_index=""))
+        self.db.add(BillValue(organization_id=self.org.id, bill_id=bill.id, parameter_key="period.start",
+                              value_text="2025-05-01", source="manual", status="confirmed", confirmed_by="user-preparer", group_index=""))
+        self.db.add(BillValue(organization_id=self.org.id, bill_id=bill.id, parameter_key="period.end",
+                              value_text="2025-05-31", source="manual", status="confirmed", confirmed_by="user-preparer", group_index=""))
+        self.db.add(BillValue(organization_id=self.org.id, bill_id=bill.id, parameter_key="gas.volume.measured",
+                              value_text="1000", unit="m3", source="manual", status="confirmed", confirmed_by="user-preparer", group_index=""))
+        self.db.add(BillValue(organization_id=self.org.id, bill_id=bill.id, parameter_key="gas.volume.corrected",
+                              value_text="1000", unit="m3", source="manual", status="confirmed", confirmed_by="user-preparer", group_index=""))
+        self.db.commit()
+
+        est = bill_service.estimate_bill(self.db, self.p_preparer, bill.id)
+        self.assertIn("PARTIAL_GAS_CERTIFICATE_COVERAGE", est["calc_blockers"])
 
 
 if __name__ == "__main__":

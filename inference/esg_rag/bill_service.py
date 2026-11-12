@@ -24,6 +24,7 @@ from . import accounting
 
 from .grid_factor_service import wire_bd_grid_proposal
 
+from .models import ESGOrganization
 from .ledger_models import Bill, BillParameter, BillProfile, BillValue, Facility, EmissionFactor, GasCertificate, ReportingPeriod, _now
 
 MAX_PAGES, MAX_WORDS = 20, 20000
@@ -954,14 +955,34 @@ def estimate_bill(db, principal, bill_id: str, allow_provisional: bool = False,
                     vol_corr = Decimal(str(vc_val))
             except Exception:
                 pass
-            cert = next((c for c in gas_certs if (start is None or c.valid_from <= start) and (end is None or end <= c.valid_to)), None) if gas_certs else None
-            if cert:
-                hv_act = accounting.HeatingValue(
-                    Decimal(str(cert.gcv_mj_per_m3)), Decimal(str(cert.ncv_to_gcv)),
-                    cert.reference_conditions,
-                    f"gas certificate {cert.certificate_ref} ({cert.distributor})",
-                    False, Decimal(str(cert.uncertainty_pct)) if cert.uncertainty_pct is not None else None
+            if not isinstance(start, dt.date) or not isinstance(end, dt.date):
+                cert = None
+                if "MISSING_BILL_PERIOD" not in calc_blockers:
+                    calc_blockers.append("MISSING_BILL_PERIOD")
+            else:
+                covering_cert = next(
+                    (c for c in gas_certs if c.valid_from <= start and end <= c.valid_to),
+                    None
                 )
+                if covering_cert:
+                    cert = covering_cert
+                    hv_act = accounting.HeatingValue(
+                        Decimal(str(cert.gcv_mj_per_m3)), Decimal(str(cert.ncv_to_gcv)),
+                        cert.reference_conditions,
+                        f"gas certificate {cert.certificate_ref} ({cert.distributor})",
+                        False, Decimal(str(cert.uncertainty_pct)) if cert.uncertainty_pct is not None else None
+                    )
+                else:
+                    cert = None
+                    if any(c.valid_to < start for c in gas_certs):
+                        if "EXPIRED_GAS_CERTIFICATE" not in calc_blockers:
+                            calc_blockers.append("EXPIRED_GAS_CERTIFICATE")
+                    elif any(c.valid_from <= end and c.valid_to >= start for c in gas_certs):
+                        if "PARTIAL_GAS_CERTIFICATE_COVERAGE" not in calc_blockers:
+                            calc_blockers.append("PARTIAL_GAS_CERTIFICATE_COVERAGE")
+                    else:
+                        if "MISSING_GAS_CERTIFICATE" not in calc_blockers:
+                            calc_blockers.append("MISSING_GAS_CERTIFICATE")
         activities.append(accounting.Activity(
             id=f"est:{bill.id}:{v.id}",
             facility_id=bill.facility_id,
@@ -1033,19 +1054,33 @@ def estimate_bill(db, principal, bill_id: str, allow_provisional: bool = False,
                 )
                 factors_for_calc.append(prov_f)
 
-    # Check synthetic factor gate: refuse synthetic factors outside demo tenants
-    is_demo = bool(getattr(principal, "is_demo", False))
-    synthetic_factors = [
+    # Check synthetic and test factor gate: refuse synthetic/test factors outside demo tenants
+    org = db.get(ESGOrganization, principal.organization_id) if getattr(principal, "organization_id", None) else None
+    is_demo = bool(getattr(org, "is_demo", False) or getattr(principal, "is_demo", False))
+    disallowed_factors = [
         f for f in approved_factors
+        if getattr(f, "provenance_class", None) in ("SYNTHETIC", "TEST")
+    ]
+    if used_provisional and provisional_factor_record and getattr(provisional_factor_record, "provenance_class", None) in ("SYNTHETIC", "TEST"):
+        disallowed_factors.append(provisional_factor_record)
+
+    synthetic_factors = [
+        f for f in disallowed_factors
         if getattr(f, "provenance_class", None) == "SYNTHETIC"
     ]
-    if used_provisional and provisional_factor_record and getattr(provisional_factor_record, "provenance_class", None) == "SYNTHETIC":
-        synthetic_factors.append(provisional_factor_record)
+    test_factors = [
+        f for f in disallowed_factors
+        if getattr(f, "provenance_class", None) == "TEST"
+    ]
 
-    if synthetic_factors:
+    if disallowed_factors:
         if not is_demo:
-            if "SYNTHETIC_FACTOR_INPUTS" not in calc_blockers:
-                calc_blockers.append("SYNTHETIC_FACTOR_INPUTS")
+            for df in disallowed_factors:
+                p_cls = getattr(df, "provenance_class", None)
+                if p_cls == "TEST" and "TEST_FACTOR_INPUTS" not in calc_blockers:
+                    calc_blockers.append("TEST_FACTOR_INPUTS")
+                elif p_cls == "SYNTHETIC" and "SYNTHETIC_FACTOR_INPUTS" not in calc_blockers:
+                    calc_blockers.append("SYNTHETIC_FACTOR_INPUTS")
 
     # Check gap analysis
     gaps = bill_gaps(db, principal, bill_id)
