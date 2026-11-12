@@ -1,5 +1,6 @@
 import React from 'react';
 import { RefreshCw } from 'lucide-react';
+import { Button } from '../../../components/ui/Button';
 
 export const EsgSettingsPanel = (props) => {
   const {
@@ -25,7 +26,7 @@ export const EsgSettingsPanel = (props) => {
   return (
           <div className="bg-white border border-[#E2E8F0] rounded-3xl p-6 lg:p-8 shadow-sm space-y-6">
             <div>
-              <h1 className="font-sans font-bold text-3xl text-[#0F291B]">ESG Parameter Settings</h1>
+              <h2 className="font-sans font-bold text-3xl text-[#0F291B]">ESG Parameter Settings</h2>
               <p className="text-sm text-[#64748B] mt-1 font-sans">Configure GHG Protocol emission factors and reduction targets.</p>
             </div>
 
@@ -50,15 +51,16 @@ export const EsgSettingsPanel = (props) => {
               <div className="space-y-4">
                 <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-2 border-b border-[#F1F5F9] pb-2">
                   <h3 className="font-sans font-bold text-base text-[#0F291B]">GHG Emission Factors (EF)</h3>
-                  <button
+                  <Button
                     type="button"
+                    variant="secondary"
+                    size="sm"
                     onClick={syncOfficialFactors}
                     disabled={isSyncingFactors}
-                    className="text-xs font-mono font-bold px-3.5 py-2 rounded-xl bg-[#00C853] text-white hover:bg-[#00E676] flex items-center space-x-1.5 transition-all shadow-sm cursor-pointer"
+                    leftIcon={<RefreshCw className={`w-3.5 h-3.5 ${isSyncingFactors ? 'animate-spin' : ''}`} />}
                   >
-                    <RefreshCw className={`w-3.5 h-3.5 text-white ${isSyncingFactors ? 'animate-spin' : ''}`} />
-                    <span className="text-white font-mono font-bold">Load legacy factor table (unverified, no grid factor)</span>
-                  </button>
+                    Load legacy factor table (unverified, no grid factor)
+                  </Button>
                 </div>
                 <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
                   <div>
@@ -127,12 +129,13 @@ export const EsgSettingsPanel = (props) => {
                 </div>
               </div>
 
-              <button 
+              <Button 
                 type="submit"
-                className="bg-[#0F291B] hover:bg-[#1A4B31] text-white font-sans font-bold text-xs px-6 py-3 rounded-xl transition-all shadow-md inline-block"
+                variant="primary"
+                size="md"
               >
                 Save Settings
-              </button>
+              </Button>
 
             </form>
           </div>

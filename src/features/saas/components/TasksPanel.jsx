@@ -1,5 +1,7 @@
 import React from 'react';
 import { Plus, Check, Trash2 } from 'lucide-react';
+import { Button } from '../../../components/ui/Button';
+import { IconButton } from '../../../components/ui/IconButton';
 
 export const TasksPanel = (props) => {
   const {
@@ -14,7 +16,7 @@ export const TasksPanel = (props) => {
   return (
           <div className="bg-white border border-[#E2E8F0] rounded-3xl p-6 lg:p-8 shadow-sm space-y-6">
             <div>
-              <h1 className="font-sans font-bold text-3xl text-[#0F291B]">Verification Tasks</h1>
+              <h2 className="font-sans font-bold text-3xl text-[#0F291B]">Verification Tasks</h2>
               <p className="text-sm text-[#64748B] mt-1 font-sans">Verify, audit, and log compliance steps to confirm climate metrics.</p>
             </div>
 
@@ -27,12 +29,13 @@ export const TasksPanel = (props) => {
                 placeholder="Type a new corporate ESG verification task..." 
                 className="flex-1 px-4 py-3 border border-[#E2E8F0] rounded-xl text-xs font-sans placeholder-[#94A3B8] focus:outline-none focus:border-[#0F291B] bg-[#F8F9FA]"
               />
-              <button 
-                type="submit" 
-                className="bg-[#00C853] hover:bg-[#00E676] text-white px-5 py-3 rounded-xl text-xs font-mono font-bold transition-all shadow-sm cursor-pointer"
+              <Button 
+                type="submit"
+                variant="primary"
+                size="md"
               >
                 Add Task
-              </button>
+              </Button>
             </form>
 
             {/* Tasks list */}
@@ -53,12 +56,12 @@ export const TasksPanel = (props) => {
                         {task.text}
                       </span>
                     </div>
-                    <button 
+                    <IconButton 
+                      icon={<Trash2 className="w-4 h-4" />}
+                      aria-label="Delete task"
                       onClick={() => deleteTask(task.id)}
-                      className="text-[#94A3B8] hover:text-[#EF4444] p-1 rounded-lg hover:bg-red-50 transition-colors"
-                    >
-                      <Trash2 className="w-4 h-4" />
-                    </button>
+                      className="text-[#94A3B8] hover:text-[#EF4444] min-h-[32px] min-w-[32px] p-1"
+                    />
                   </div>
                 ))
               )}

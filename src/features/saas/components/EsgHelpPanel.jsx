@@ -1,5 +1,6 @@
 import React from 'react';
 import { ChevronDown, ChevronUp } from 'lucide-react';
+import { Button } from '../../../components/ui/Button';
 
 export const EsgHelpPanel = (props) => {
   const {
@@ -11,7 +12,7 @@ export const EsgHelpPanel = (props) => {
   return (
           <div className="bg-white border border-[#E2E8F0] rounded-3xl p-6 lg:p-8 shadow-sm space-y-6">
             <div>
-              <h1 className="font-sans font-bold text-3xl text-[#0F291B]">FAQ & GHG Guidelines</h1>
+              <h2 className="font-sans font-bold text-3xl text-[#0F291B]">FAQ & GHG Guidelines</h2>
               <p className="text-sm text-[#64748B] mt-1 font-sans">Understand Scope definitions and carbon tracking calculations.</p>
             </div>
 
@@ -32,13 +33,15 @@ export const EsgHelpPanel = (props) => {
                 }
               ].map((item, idx) => (
                 <div key={idx} className="border border-[#E2E8F0] rounded-xl overflow-hidden">
-                  <button
+                  <Button
+                    variant="ghost"
+                    size="sm"
                     onClick={() => toggleFaq(idx)}
-                    className="w-full flex justify-between items-center p-4 bg-[#F8F9FA] text-left text-xs font-sans font-bold text-[#0F291B]"
+                    className="w-full flex justify-between items-center p-4 bg-[#F8F9FA] text-left text-xs font-sans font-bold text-[#0F291B] rounded-none h-auto min-h-0"
+                    rightIcon={faqOpen[idx] ? <ChevronUp className="w-4 h-4 text-[#94A3B8]" /> : <ChevronDown className="w-4 h-4 text-[#94A3B8]" />}
                   >
                     <span>{item.q}</span>
-                    {faqOpen[idx] ? <ChevronUp className="w-4 h-4 text-[#94A3B8]" /> : <ChevronDown className="w-4 h-4 text-[#94A3B8]" />}
-                  </button>
+                  </Button>
                   {faqOpen[idx] && (
                     <div className="p-4 bg-white border-t border-[#E2E8F0] text-xs font-sans text-[#64748B] leading-relaxed">
                       {item.a}
@@ -52,12 +55,13 @@ export const EsgHelpPanel = (props) => {
             <div className="border-t border-[#F1F5F9] pt-6 space-y-4">
               <h3 className="font-sans font-bold text-sm text-[#0F291B]">Need help with auditing?</h3>
               <p className="text-xs text-[#64748B] font-sans">Our certified ESG specialists are available to review your corporate data streams.</p>
-              <button 
+              <Button 
+                variant="primary"
+                size="sm"
                 onClick={() => showToast("A support request has been sent. An ESG auditor will reach out soon.", "success")}
-                className="bg-[#00C853] hover:bg-[#00E676] text-white font-mono font-bold text-xs py-2 px-4 rounded-xl transition-all shadow-sm cursor-pointer"
               >
                 Consult Carbon Zero BD Specialists
-              </button>
+              </Button>
             </div>
 
           </div>

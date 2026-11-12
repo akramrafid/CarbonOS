@@ -53,6 +53,7 @@ export const Button = React.forwardRef(function Button(
       ref={ref}
       type={type}
       disabled={isDisabled}
+      data-variant={variant}
       className={`
         relative inline-flex items-center justify-center gap-2 rounded-lg font-sans transition-all duration-150 select-none
         focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-offset-carbon
@@ -78,4 +79,6 @@ export const Button = React.forwardRef(function Button(
   );
 });
 
+export { IconButton } from './IconButton';
 export default Button;
+
