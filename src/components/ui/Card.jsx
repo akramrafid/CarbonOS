@@ -26,24 +26,24 @@ export const Card = React.forwardRef(function Card(
 
   const variantClasses = {
     default:
-      'bg-carbon-surface border border-carbon-border text-registry dark:bg-bg-surface dark:border-border-subtle dark:text-fg-primary',
+      'bg-bg-surface border border-border-subtle text-fg-primary',
     raised:
-      'bg-carbon-surface-raised border border-carbon-border/80 shadow-md text-registry dark:bg-bg-elevated dark:border-border-subtle dark:text-fg-primary',
+      'bg-bg-elevated border border-border-subtle shadow-md text-fg-primary',
     subtle:
-      'bg-carbon-surface/50 border border-carbon-border/40 text-registry dark:bg-bg-muted dark:border-border-subtle dark:text-fg-primary',
+      'bg-bg-muted border border-border-subtle text-fg-primary',
     featured:
-      'bg-gradient-to-b from-carbon-surface to-carbon-surface-raised border border-emerald/30 shadow-lg text-registry dark:from-bg-surface dark:to-bg-elevated dark:border-emerald/40'
-  }[variant] || '';
+      'bg-bg-surface border border-accent/40 shadow-lg text-fg-primary'
+  }[variant] || 'bg-bg-surface border border-border-subtle text-fg-primary';
 
   const interactiveClasses = interactive
-    ? 'cursor-pointer transition-all duration-200 hover:-translate-y-0.5 hover:shadow-lg hover:border-emerald/40 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald'
+    ? 'cursor-pointer transition-all duration-200 hover:-translate-y-0.5 hover:shadow-lg hover:border-accent/50 card-glow-hover focus-ring-standard'
     : '';
 
   return (
     <Component
       ref={ref}
       className={`
-        relative rounded-xl
+        relative rounded-xl min-w-0 @container break-words [overflow-wrap:anywhere]
         ${variantClasses}
         ${paddingClasses}
         ${interactiveClasses}

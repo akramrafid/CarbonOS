@@ -11,10 +11,10 @@ import DevGridOverlay from '../ui/DevGridOverlay';
  */
 export function MarketingLayout() {
   return (
-    <div className="bg-carbon min-h-screen text-registry font-sans selection:bg-emerald selection:text-carbon flex flex-col justify-between">
+    <div className="bg-bg-canvas min-h-screen text-fg-primary font-sans selection:bg-accent selection:text-bg-canvas flex flex-col justify-between min-w-0 overflow-x-clip">
       <OfflineBanner />
       <Navbar />
-      <main className="flex-1 w-full flex flex-col" id="main-content">
+      <main className="flex-1 w-full flex flex-col min-w-0" id="main-content">
         <Outlet />
       </main>
       <Footer />

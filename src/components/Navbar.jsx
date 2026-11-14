@@ -106,8 +106,8 @@ const Navbar = () => {
           </Link>
         </div>
 
-        {/* Center: Desktop Navigation Links */}
-        <div className="hidden lg:flex items-center space-x-1 bg-white/[0.03] border border-white/5 rounded-full p-1.5 backdrop-blur-sm shrink-0">
+        {/* Center: Desktop Navigation Links (xl+ only to prevent 1024px overflow) */}
+        <div className="hidden xl:flex items-center space-x-1 bg-white/[0.03] border border-white/5 rounded-full p-1.5 backdrop-blur-sm shrink-0">
           {navLinks.map((item) => {
             const isActive = item.path && location.pathname === item.path;
             const hash = item.id.toLowerCase();
@@ -193,7 +193,7 @@ const Navbar = () => {
 
           {/* Mobile Menu Toggle - Accessible Animated Morphing Hamburger */}
           <button 
-            className="lg:hidden min-w-[44px] min-h-[44px] p-2 flex flex-col items-center justify-center text-white/80 hover:text-white transition-colors focus-visible:ring-2 focus-visible:ring-emerald/60 focus:outline-none rounded-lg cursor-pointer space-y-1.5"
+            className="xl:hidden min-w-[44px] min-h-[44px] p-2 flex flex-col items-center justify-center text-white/80 hover:text-white transition-colors focus-visible:ring-2 focus-visible:ring-emerald/60 focus:outline-none rounded-lg cursor-pointer space-y-1.5"
             onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
             aria-label={isMobileMenuOpen ? "Close navigation menu" : "Open navigation menu"}
             aria-expanded={isMobileMenuOpen}
@@ -222,8 +222,10 @@ const Navbar = () => {
       {/* Mobile Menu Drawer - Responsive with Vertical Scrolling & Scroll-Lock */}
       <div 
         id="mobile-menu-drawer"
-        className={`fixed inset-0 top-0 pt-16 bg-bg-canvas/98 backdrop-blur-3xl transition-transform duration-300 z-40 flex flex-col items-center lg:hidden overflow-y-auto max-h-[100dvh] pb-12 ${
-          isMobileMenuOpen ? 'translate-x-0' : 'translate-x-full'
+        className={`fixed inset-0 top-0 pt-16 bg-bg-canvas/98 backdrop-blur-3xl transition-all duration-300 z-40 flex flex-col items-center xl:hidden overflow-y-auto max-h-[100dvh] pb-12 ${
+          isMobileMenuOpen 
+            ? 'translate-x-0 opacity-100 visible pointer-events-auto' 
+            : 'translate-x-full opacity-0 invisible pointer-events-none'
         }`}
         aria-hidden={!isMobileMenuOpen}
       >

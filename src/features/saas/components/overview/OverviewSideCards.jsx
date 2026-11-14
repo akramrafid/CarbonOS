@@ -22,7 +22,7 @@ export const OverviewSideCards = ({
   return (
     <div className="space-y-8">
       {/* Offset Options Panel */}
-      <div className={`p-6 rounded-3xl shadow-md flex flex-col justify-between h-[230px] border transition-all ${
+      <div className={`p-6 rounded-3xl shadow-md flex flex-col justify-between min-h-[230px] border transition-all ${
         isLight
           ? 'bg-gradient-to-br from-accent-muted via-accent-muted to-accent-muted border-border-strong text-fg-primary'
           : 'bg-gradient-to-br from-bg-surface via-bg-surface to-bg-canvas border-border-subtle text-white'

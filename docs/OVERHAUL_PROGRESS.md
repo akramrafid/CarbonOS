@@ -191,9 +191,75 @@ Extended `tests/js/design_system_enforcement.test.mjs` with comprehensive rule c
 
 ---
 
-### 4. Next Step: Phase 3 (Layout, Navigation & Responsive Polish)
+### 4. Next Step: Handed off to Phase 3
 
-- **3.1 Navbar & Navigation Architecture**: Scalable, optimized navigation system with clean dropdowns, mobile drawer, search integration, and active route indicators.
-- **3.2 Persistent Layout Polish**: Seamless page-to-page transitions with zero content jump or remount flicker.
-- **3.3 Card & Layout Clipping Remediation**: Fix card cut-off/clipping bugs identified in baseline checklist by replacing destructive `overflow-hidden` with contained layout structures.
-- **3.4 Footer Redesign**: Modern, comprehensive, and premium footer system with clear IA, language switcher, and live network status.
+---
+
+## Phase 3: Fix Clipped Cards, Overlays & Layout Overflow (Root Cause Remediation)
+
+### 1. Root Cause Architectural Remediation
+Rather than applying ad-hoc `overflow-x-scroll` or bandage classes to individual pages, Phase 3 addressed clipping and overflow systematically at the foundational primitives:
+1. **Fluid Responsive Grid Primitive (`src/components/ui/Grid.jsx`)**:
+   - Implemented CSS grid with `repeat(auto-fit, minmax(min(100%, var(--min-col, 280px)), 1fr))`.
+   - Integrated `@container` queries, `min-w-0` on cells, and variable gap tokens.
+   - Prevents multi-column blowout on mobile and narrow viewports.
+2. **Container-Aware Card (`src/components/ui/Card.jsx`)**:
+   - Added `@container`, `min-w-0`, and `break-words [overflow-wrap:anywhere]`.
+   - Eliminated destructive `overflow-hidden` by default; replaced with clean rounded borders and subtle hover glow effects (`hover:border-emerald-500/40`, `hover:shadow-lg`).
+3. **Adaptive StatCard (`src/components/ui/StatCard.jsx`)**:
+   - Enforced `min-w-0`, `tabular-nums`, and fluid font clamps (`text-2xl sm:text-3xl`).
+   - Removed aggressive `line-clamp` on telemetry values, preventing cut-off of vital numbers and units.
+4. **Portaled Overlays (`src/components/ui/Tooltip.jsx`, `src/components/ui/Dropdown.jsx`, `src/components/Modal.jsx`)**:
+   - Upgraded all interactive overlays to render into `createPortal(..., document.body)`.
+   - Overlays are physically detached from parent stacking contexts and ancestor `overflow-hidden` containers, permanently preventing clipping.
+   - Added viewport collision detection and boundary clamping.
+5. **Table Cell Isolation (`src/components/ui/DataTable.jsx`)**:
+   - Applied `min-w-0` to table wrappers and inner containers.
+   - Preserves `touch-pan-x` scrolling while preventing grid blowout of parent dashboard cards.
+
+### 2. Component-Level Root Cause Fixes
+1. **Offscreen Drawer Layout Expansion (`src/components/Navbar.jsx`)**:
+   - Root Cause: Mobile drawer used `translate-x-full` while remaining in the render tree without `invisible`, causing browser layout engines to expand `document.scrollWidth` beyond `clientWidth`.
+   - Fix: Added `invisible opacity-0 pointer-events-none` when closed.
+   - Fixed tablet collision: Shifted desktop navigation pill from `lg:` (1024px) to `xl:` (1280px), preventing 1220px nav bar blowout on 1024px tablet landscape screens.
+2. **GSAP Mobile Entrance Animation Blowout (`src/components/Hero.jsx`)**:
+   - Root Cause: Mobile GSAP animation initialized with `x: 40`, pushing the hero terminal card 21px outside the viewport during entrance.
+   - Fix: Shifted mobile animation to pure vertical `y: 25, x: 0`, and added responsive typography clamps and container-fluid padding (`p-3.5 sm:p-6 lg:p-7`).
+3. **Hardcoded Container Height Clipping (`src/features/saas/components/overview/OverviewSideCards.jsx`)**:
+   - Root Cause: Fixed `h-[230px]` clipped card bottom content by 36px when localized or wrapped.
+   - Fix: Converted to fluid `min-h-[230px]` with flex column layout.
+4. **Card Clipping in Live Payout Ledger (`src/pages/platform/impact/LivePayoutLedger.jsx`)**:
+   - Root Cause: Inner item had destructive `overflow-hidden` with fixed text widths, cutting off district names by 29px.
+   - Fix: Removed `overflow-hidden`, applied `min-w-0`, `truncate` on labels, and flexible `p-4 sm:p-6` padding.
+5. **Modernized Footer (`src/components/Footer.jsx`)**:
+   - Replaced basic footer with a premium 4-column information architecture: Solutions, Protocol & MRV, Company & Governance, and Developer Resources.
+   - Added live protocol operational status indicator ("Mainnet Subgraph v2.4 Active").
+   - Added mobile accordion navigation, smooth back-to-top button, dynamic copyright year, and localized quick-links.
+6. **Persistent Shell Containment (`src/components/layout/MarketingLayout.jsx`, `DashboardLayout.jsx`)**:
+   - Added `overflow-x-clip` and `min-w-0` to root viewports.
+   - Set tablet sidebar to default to collapsed icon rail (<1280px) to maximize workspace breathing room.
+
+### 3. Verification & Metrics
+- **Automated Card Clipping & Horizontal Overflow Audit (`scripts/run_card_clipping_audit.mjs`)**:
+  - Tested **120 viewport/theme combinations** (320px, 375px, 768px, 1024px, 1440px, 1920px $\times$ dark/light across 10 core routes).
+  - **Horizontal Overflows Detected: 0**.
+  - **Clipped Cards Detected: 0**.
+- **Playwright Card Clipping Test Suite (`tests/e2e/card-clipping.spec.ts`)**:
+  - Implemented automated bounding-box clipping and viewport overflow assertions.
+- **Color Token Compliance (`npm run check:colors`)**: **PASSED: 0 raw hex violations**.
+- **TypeScript Typecheck (`npx tsc --noEmit`)**: **PASSED: 0 errors**.
+- **JavaScript Unit & Enforcement Suite (`npm run test`)**: **44 / 44 tests passed (0 failures)**.
+- **Production Build (`npm run build`)**: **PASSED: 2,505 modules compiled in 8.53s**.
+- **Python Test Suites**:
+  - Orchestrator tests: **34 / 34 tests passed** (`python -m unittest tests.test_orchestrator`).
+  - dMRV tests: **16 / 16 tests passed** (`python -m unittest tests.test_dmrv_allometry tests.test_dmrv_baseline tests.test_dmrv_provenance`).
+  - ESG E2E tests: **6 / 6 tests passed** (`python -m unittest tests.test_esg_gas_e2e`).
+- **Visual Verification Capture**: **48 verification screenshots captured** across 375px, 768px, 1024px, 1440px in both dark and light modes, stored in [`qa/phase-3/`](file:///c:/projects/CarbonOS/qa/phase-3/).
+
+---
+
+### 4. Next Step: Phase 4 (Dashboard Navigation System & Scalability)
+- Scalable hierarchical navigation system with nested active state indicators.
+- Quick search command palette (`Ctrl+K` / `Cmd+K`) for direct routing across all 36 pages.
+- Collapsible sidebar with persisted collapse state in `localStorage`.
+- Mobile navigation drawer with gesture/touch dismissal and keyboard focus trapping.

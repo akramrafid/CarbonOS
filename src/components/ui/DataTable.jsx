@@ -16,11 +16,11 @@ export function DataTable({
   className = ''
 }) {
   return (
-    <div className={`w-full overflow-hidden rounded-xl border border-carbon-border dark:border-border-subtle bg-carbon-surface dark:bg-bg-surface ${className}`}>
-      <div className="w-full overflow-x-auto touch-pan-x scrollbar-thin">
-        <table className="w-full text-left text-sm border-collapse">
+    <div className={`w-full min-w-0 rounded-xl border border-border-subtle bg-bg-surface ${className}`}>
+      <div className="w-full min-w-0 overflow-x-auto touch-pan-x scrollbar-thin">
+        <table className="w-full text-left text-sm border-collapse min-w-0">
           <thead>
-            <tr className="border-b border-carbon-border/80 dark:border-border-subtle bg-carbon-surface-raised/50 dark:bg-bg-elevated/50">
+            <tr className="border-b border-border-subtle bg-bg-elevated/50">
               {columns.map((col) => (
                 <th
                   key={col.key || col.header}

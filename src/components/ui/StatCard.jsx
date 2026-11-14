@@ -21,10 +21,10 @@ export function StatCard({
   className = ''
 }) {
   const trendColor = {
-    up: 'text-emerald dark:text-accent',
+    up: 'text-accent',
     down: 'text-red-500 dark:text-red-400',
-    neutral: 'text-mist dark:text-fg-secondary'
-  }[trend] || 'text-mist';
+    neutral: 'text-fg-secondary'
+  }[trend] || 'text-fg-secondary';
 
   const TrendIcon = {
     up: ArrowUpRight,
@@ -35,40 +35,40 @@ export function StatCard({
   return (
     <Card
       variant={featured ? 'featured' : 'default'}
-      className={`flex flex-col justify-between ${className}`}
+      className={`flex flex-col justify-between min-w-0 ${className}`}
     >
-      <div className="flex items-start justify-between gap-3 mb-2">
-        <span className="text-xs sm:text-sm font-sans font-medium text-mist dark:text-fg-secondary">
+      <div className="flex items-start justify-between gap-3 mb-2 min-w-0">
+        <span className="text-xs sm:text-sm font-sans font-medium text-fg-secondary truncate">
           {title}
         </span>
         {icon && (
-          <span className="p-1.5 rounded-md bg-carbon-surface-raised border border-carbon-border/50 text-mist dark:bg-bg-elevated dark:border-border-subtle shrink-0" aria-hidden="true">
+          <span className="p-1.5 rounded-md bg-bg-elevated border border-border-subtle text-fg-secondary shrink-0" aria-hidden="true">
             {icon}
           </span>
         )}
       </div>
 
-      <div className="flex items-baseline gap-2 mb-1">
-        <span className="text-2xl sm:text-3xl font-mono font-bold text-registry tracking-tight tabular-nums dark:text-fg-primary">
+      <div className="flex items-baseline gap-2 mb-1 min-w-0 flex-wrap">
+        <span className="text-2xl sm:text-3xl font-mono font-bold text-fg-primary tracking-tight tabular-nums truncate">
           {value}
         </span>
         {unit && (
-          <span className="text-xs sm:text-sm font-mono text-mist dark:text-fg-secondary">
+          <span className="text-xs sm:text-sm font-mono text-fg-secondary shrink-0">
             {unit}
           </span>
         )}
       </div>
 
       {(change || subtitle) && (
-        <div className="flex items-center gap-2 text-xs">
+        <div className="flex items-center gap-2 text-xs min-w-0">
           {change && (
-            <span className={`inline-flex items-center gap-0.5 font-mono font-semibold ${trendColor}`}>
+            <span className={`inline-flex items-center gap-0.5 font-mono font-semibold shrink-0 ${trendColor}`}>
               <TrendIcon className="w-3.5 h-3.5" aria-hidden="true" />
               {change}
             </span>
           )}
           {subtitle && (
-            <span className="text-mist/70 truncate dark:text-fg-secondary/70">
+            <span className="text-fg-muted truncate" title={subtitle}>
               {subtitle}
             </span>
           )}

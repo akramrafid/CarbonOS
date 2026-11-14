@@ -13,6 +13,7 @@ export { Modal } from './Modal';
 export { Drawer } from './Drawer';
 export { Skeleton } from './Skeleton';
 export { DevGridOverlay } from './DevGridOverlay';
+export { Grid } from './Grid';
 export { Dropdown, DropdownItem } from './Dropdown';
 export { Tooltip } from './Tooltip';
 export { Toast } from './Toast';

@@ -88,11 +88,13 @@ const Hero = () => {
         0.75
       );
 
-      // Terminal Card
+      const isMobile = typeof window !== 'undefined' && window.innerWidth < 768;
+
+      // Terminal Card (pure vertical entrance on mobile to prevent clipping)
       tl.fromTo('.hero-terminal-card', 
-        { x: 40, opacity: 0, scale: 0.96 }, 
-        { x: 0, opacity: 1, scale: 1, duration: 1, ease: 'power3.out' }, 
-        0.8
+        { x: isMobile ? 0 : 30, y: isMobile ? 25 : 0, opacity: 0, scale: 0.98 }, 
+        { x: 0, y: 0, opacity: 1, scale: 1, duration: 0.8, ease: 'power3.out' }, 
+        0.6
       );
 
       // Trust Badges
@@ -132,12 +134,12 @@ const Hero = () => {
         </span>
       </div>
 
-      <div className="relative z-10 container mx-auto px-4 sm:px-6 lg:px-12 pt-12 sm:pt-16 pb-16 w-full flex flex-col justify-between min-h-[100dvh]">
+      <div className="relative z-10 container mx-auto px-3 sm:px-6 lg:px-12 pt-12 sm:pt-16 pb-16 w-full flex flex-col justify-between min-h-[100dvh] min-w-0">
         
-        <div className="grid grid-cols-1 lg:grid-cols-12 gap-12 lg:gap-8 items-center my-auto">
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-8 items-center my-auto min-w-0">
           
           {/* Left Column: Brand Statement & Primary Actions */}
-          <div className="lg:col-span-7 flex flex-col items-start text-left pt-6 lg:pt-0">
+          <div className="lg:col-span-7 flex flex-col items-start text-left pt-6 lg:pt-0 min-w-0">
             
             {/* Live Protocol Status Pill */}
             <div className="hero-pill inline-flex flex-wrap items-center gap-2 sm:gap-2.5 bg-black/40 hover:bg-black/60 backdrop-blur-xl border border-emerald/30 hover:border-emerald/60 rounded-full py-1.5 px-3 sm:px-4 mb-6 max-w-full shadow-[0_0_20px_rgba(0,200,83,0.15)] transition-all duration-300">
@@ -158,7 +160,7 @@ const Hero = () => {
             </div>
 
             {/* Headline with High-Impact Contrast & Fluid Responsiveness */}
-            <h1 className="flex flex-col mb-6 w-full tracking-tight">
+            <h1 className="flex flex-col mb-6 w-full tracking-tight min-w-0">
               <span className="hero-h1 font-sans font-extrabold text-3xl sm:text-5xl lg:text-[68px] leading-[1.08] text-white">
                 Bangladesh's
               </span>
@@ -171,12 +173,12 @@ const Hero = () => {
             </h1>
 
             {/* Precision Subtitle */}
-            <p className="hero-body font-sans text-base sm:text-lg lg:text-xl text-white/80 max-w-[620px] leading-relaxed mb-8 font-normal">
+            <p className="hero-body font-sans text-base sm:text-lg lg:text-xl text-white/80 max-w-[620px] leading-relaxed mb-8 font-normal min-w-0">
               Digitizing, tracing and securing Bangladesh's carbon asset pipeline from 1M+ smallholder rural farmers directly to global ESG institutional registries.
             </p>
 
             {/* Action Buttons & Fast Proof */}
-            <div className="hero-cta flex flex-wrap gap-4 items-center mb-10 w-full">
+            <div className="hero-cta flex flex-wrap gap-4 items-center mb-10 w-full min-w-0">
               <Link 
                 to="/platform/marketplace" 
                 className="group relative inline-flex items-center justify-center bg-accent hover:bg-accent-hover text-fg-primary font-sans font-bold text-sm sm:text-base px-7 py-4 rounded-full transition-all duration-300 shadow-[0_0_30px_rgba(0,200,83,0.35)] hover:shadow-[0_0_45px_rgba(0,200,83,0.55)] hover:scale-[1.02] active:scale-[0.98]"
@@ -203,7 +205,7 @@ const Hero = () => {
             </div>
 
             {/* Regulatory Alignment Micro-Badges */}
-            <div className="flex flex-wrap gap-6 pt-6 border-t border-white/10 w-full">
+            <div className="flex flex-wrap gap-6 pt-6 border-t border-white/10 w-full min-w-0">
               <div className="hero-trust-badge flex items-center space-x-2 text-xs text-white/70">
                 <CheckCircle2 size={16} className="text-emerald" />
                 <span>Cited, second-person-approved factors only</span>
@@ -221,89 +223,89 @@ const Hero = () => {
           </div>
 
           {/* Right Column: Sovereign Exchange Terminal Card */}
-          <div className="lg:col-span-5 w-full">
-            <div className="hero-terminal-card bg-bg-canvas/90 backdrop-blur-2xl border border-white/15 rounded-[2rem] p-6 lg:p-7 shadow-[0_20px_60px_rgba(0,0,0,0.7)] relative overflow-hidden">
+          <div className="lg:col-span-5 w-full min-w-0">
+            <div className="hero-terminal-card bg-bg-canvas/90 backdrop-blur-2xl border border-white/15 rounded-[2rem] p-3.5 sm:p-6 lg:p-7 shadow-[0_20px_60px_rgba(0,0,0,0.7)] relative min-w-0">
               
               {/* Corner Accent Glow */}
               <div className="absolute top-0 right-0 w-48 h-48 bg-emerald/10 rounded-full blur-3xl pointer-events-none"></div>
               
               {/* Terminal Header */}
-              <div className="flex items-center justify-between border-b border-white/10 pb-4 mb-5">
-                <div className="flex items-center space-x-2.5">
-                  <div className="w-2.5 h-2.5 rounded-full bg-emerald animate-pulse"></div>
-                  <span className="font-mono text-[11px] uppercase tracking-widest text-white/80 font-semibold">
-                    Live Clearing Terminal // Dhaka
+              <div className="flex items-center justify-between border-b border-white/10 pb-4 mb-5 min-w-0 gap-2">
+                <div className="flex items-center space-x-2 min-w-0">
+                  <div className="w-2.5 h-2.5 rounded-full bg-emerald animate-pulse shrink-0"></div>
+                  <span className="font-mono text-[10px] sm:text-[11px] uppercase tracking-widest text-white/80 font-semibold truncate">
+                    Live Clearing // Dhaka
                   </span>
                 </div>
-                <div className="flex items-center space-x-1.5 font-mono text-[10px] text-emerald bg-emerald/10 border border-emerald/20 px-2 py-0.5 rounded">
+                <div className="flex items-center space-x-1 font-mono text-[10px] text-emerald bg-emerald/10 border border-emerald/20 px-2 py-0.5 rounded shrink-0">
                   <Activity size={12} />
-                  <span>42ms Consensus</span>
+                  <span>42ms</span>
                 </div>
               </div>
 
               {/* 4 Core Metrics Grid */}
-              <div className="grid grid-cols-2 gap-3.5 mb-5">
+              <div className="grid grid-cols-2 gap-2.5 sm:gap-3 mb-5 min-w-0">
                 
                 {/* Metric 1 */}
-                <div className="bg-white/[0.03] border border-white/10 rounded-2xl p-4 flex flex-col justify-between">
-                  <div className="flex items-center justify-between text-white/50 text-[11px] font-mono">
-                    <span>TOTAL REDUCTION</span>
-                    <TrendingUp size={14} className="text-emerald" />
+                <div className="bg-white/[0.03] border border-white/10 rounded-2xl p-2.5 sm:p-4 flex flex-col justify-between min-w-0">
+                  <div className="flex items-center justify-between text-white/50 text-[10px] sm:text-[11px] font-mono">
+                    <span className="truncate">TOTAL REDUCTION</span>
+                    <TrendingUp size={14} className="text-emerald shrink-0 ml-1" />
                   </div>
-                  <div className="mt-2">
-                    <span className="font-mono font-bold text-2xl lg:text-3xl text-white">10.42M</span>
+                  <div className="mt-2 truncate">
+                    <span className="font-mono font-bold text-lg sm:text-2xl lg:text-3xl text-white">10.42M</span>
                     <span className="font-mono text-xs text-emerald ml-1 font-semibold">tCO₂e</span>
                   </div>
-                  <span className="font-sans text-[10px] text-emerald/80 mt-1 font-medium">+18.4% YoY</span>
+                  <span className="font-sans text-[10px] text-emerald/80 mt-1 font-medium truncate">+18.4% YoY</span>
                 </div>
 
                 {/* Metric 2 */}
-                <div className="bg-white/[0.03] border border-white/10 rounded-2xl p-4 flex flex-col justify-between">
-                  <div className="flex items-center justify-between text-white/50 text-[11px] font-mono">
-                    <span>FARMER REMITTANCE</span>
-                    <span className="text-[10px] text-emerald font-mono font-bold">97.0%</span>
+                <div className="bg-white/[0.03] border border-white/10 rounded-2xl p-2.5 sm:p-4 flex flex-col justify-between min-w-0">
+                  <div className="flex items-center justify-between text-white/50 text-[10px] sm:text-[11px] font-mono">
+                    <span className="truncate">FARMER PAYOUT</span>
+                    <span className="text-[10px] text-emerald font-mono font-bold shrink-0 ml-1">97%</span>
                   </div>
-                  <div className="mt-2">
-                    <span className="font-mono font-bold text-2xl lg:text-3xl text-emerald">৳412.8M</span>
+                  <div className="mt-2 truncate">
+                    <span className="font-mono font-bold text-lg sm:text-2xl lg:text-3xl text-emerald">৳412.8M</span>
                   </div>
-                  <span className="font-sans text-[10px] text-white/60 mt-1">bKash / Nagad Direct Wallets</span>
+                  <span className="font-sans text-[10px] text-white/60 mt-1 truncate">bKash / Nagad</span>
                 </div>
 
                 {/* Metric 3 */}
-                <div className="bg-white/[0.03] border border-white/10 rounded-2xl p-4 flex flex-col justify-between">
-                  <div className="flex items-center justify-between text-white/50 text-[11px] font-mono">
-                    <span>LIVE LIQUIDITY</span>
-                    <Layers size={14} className="text-cyan-400" />
+                <div className="bg-white/[0.03] border border-white/10 rounded-2xl p-2.5 sm:p-4 flex flex-col justify-between min-w-0">
+                  <div className="flex items-center justify-between text-white/50 text-[10px] sm:text-[11px] font-mono">
+                    <span className="truncate">LIVE LIQUIDITY</span>
+                    <Layers size={14} className="text-cyan-400 shrink-0 ml-1" />
                   </div>
-                  <div className="mt-2">
-                    <span className="font-mono font-bold text-2xl lg:text-3xl text-white">42,850</span>
+                  <div className="mt-2 truncate">
+                    <span className="font-mono font-bold text-lg sm:text-2xl lg:text-3xl text-white">42,850</span>
                     <span className="font-mono text-xs text-white/50 ml-1">tCO₂e</span>
                   </div>
-                  <span className="font-sans text-[10px] text-cyan-400 mt-1">Available for Settlement</span>
+                  <span className="font-sans text-[10px] text-cyan-400 mt-1 truncate">For Settlement</span>
                 </div>
 
                 {/* Metric 4 */}
-                <div className="bg-white/[0.03] border border-white/10 rounded-2xl p-4 flex flex-col justify-between">
-                  <div className="flex items-center justify-between text-white/50 text-[11px] font-mono">
-                    <span>AVG CLEARING</span>
-                    <span className="font-mono text-[10px] text-white/40">BDT / t</span>
+                <div className="bg-white/[0.03] border border-white/10 rounded-2xl p-2.5 sm:p-4 flex flex-col justify-between min-w-0">
+                  <div className="flex items-center justify-between text-white/50 text-[10px] sm:text-[11px] font-mono">
+                    <span className="truncate">AVG CLEARING</span>
+                    <span className="font-mono text-[10px] text-white/40 shrink-0 ml-1">BDT/t</span>
                   </div>
-                  <div className="mt-2">
-                    <span className="font-mono font-bold text-2xl lg:text-3xl text-white">৳14,920</span>
+                  <div className="mt-2 truncate">
+                    <span className="font-mono font-bold text-lg sm:text-2xl lg:text-3xl text-white">৳14,920</span>
                   </div>
-                  <span className="font-sans text-[10px] text-white/60 mt-1">Indicative spot reference</span>
+                  <span className="font-sans text-[10px] text-white/60 mt-1 truncate">Spot reference</span>
                 </div>
 
               </div>
 
               {/* Streaming Real-Time Transaction Ribbon */}
-              <div className="bg-black/50 border border-white/10 rounded-xl p-3.5 mb-5 relative">
-                <div className="flex items-center justify-between mb-1.5">
-                  <span className="font-mono text-[10px] text-emerald uppercase tracking-wider font-semibold flex items-center gap-1.5">
-                    <Radio size={12} className="text-emerald animate-pulse" />
-                    <span>Real-Time Settlement Feed</span>
+              <div className="bg-black/50 border border-white/10 rounded-xl p-3 sm:p-3.5 mb-5 relative min-w-0">
+                <div className="flex items-center justify-between mb-1.5 min-w-0 gap-2">
+                  <span className="font-mono text-[10px] text-emerald uppercase tracking-wider font-semibold flex items-center gap-1.5 min-w-0 truncate">
+                    <Radio size={12} className="text-emerald animate-pulse shrink-0" />
+                    <span className="truncate">Settlement Feed</span>
                   </span>
-                  <span className="font-mono text-[10px] text-white/40">
+                  <span className="font-mono text-[10px] text-white/40 shrink-0">
                     {tradeStreams[activeStreamIndex].time}
                   </span>
                 </div>
