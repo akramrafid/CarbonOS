@@ -564,7 +564,7 @@ def get_uncertainty_assessment(
 
 @router.post("/uncertainty/assess", dependencies=[Depends(rate_limit_standard)])
 def assess_uncertainty_direct(
-    current_user: CarbonUser = Depends(get_current_user),
+    current_user: CarbonUser = Depends(require_permission("write")),
     net_creditable_tco2e: float = Form(...),
     carbon_lower_90: float = Form(...),
     carbon_upper_90: float = Form(...),
@@ -616,6 +616,8 @@ def get_report(
     }
 
     if format in ["dossier", "vvb-pdf", "audit-pdf"]:
+        if not current_user.can("review"):
+            raise HTTPException(status_code=403, detail="Forbidden: dossier export requires 'review' permission")
         provenance = db.query(EstimateProvenance).filter(EstimateProvenance.result_id == job.result.id).first()
         dossier = ReportGenerator.build_vvb_audit_dossier(job, job.result, job.baseline, provenance, db=db)
         return Response(
@@ -657,7 +659,7 @@ def get_report(
 def get_audit_dossier(
     job_id: str,
     format: str = "json",
-    current_user: CarbonUser = Depends(get_current_user),
+    current_user: CarbonUser = Depends(require_permission("review")),
     db: Session = Depends(get_db)
 ):
     """

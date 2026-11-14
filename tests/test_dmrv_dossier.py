@@ -18,6 +18,7 @@ from inference.carbon_monitoring.models import AnalysisJob, CarbonResult, Baseli
 from inference.carbon_monitoring.router import router as carbon_router
 from inference.carbon_monitoring.report_generator import ReportGenerator
 from inference.carbon_monitoring import provenance as provenance_utils
+from inference.carbon_monitoring.auth import mint_carbon_token
 
 
 class TestDMRVAuditDossier(unittest.TestCase):
@@ -31,8 +32,15 @@ class TestDMRVAuditDossier(unittest.TestCase):
     def setUp(self):
         self.db: Session = SessionLocal()
 
+        self.token_owner = mint_carbon_token(sub="owner-1", organization_id="org-dossier", role="org_owner")
+        self.token_viewer = mint_carbon_token(sub="viewer-1", organization_id="org-dossier", role="viewer")
+        self.auth_headers = {"Authorization": f"Bearer {self.token_owner}"}
+        self.viewer_headers = {"Authorization": f"Bearer {self.token_viewer}"}
+
         # Seed realistic analysis job, result, baseline, and provenance
         self.job = AnalysisJob(
+            organization_id="org-dossier",
+            user_id="owner-1",
             status="completed",
             polygon_geojson=json.dumps([[22.25, 89.50], [22.35, 89.50], [22.35, 89.60], [22.25, 89.60]]),
             analysis_type="ndvi",
@@ -211,28 +219,43 @@ class TestDMRVAuditDossier(unittest.TestCase):
         self.assertIn(b"SUNDARBANS_MANGROVE", pdf_bytes)
 
     def test_04_fastapi_audit_dossier_endpoints(self):
-        """Verify GET /api/carbon/report/audit-dossier/{job_id} across JSON, Markdown, and PDF."""
-        # 1. JSON output
-        res_json = self.client.get(f"/api/carbon/report/audit-dossier/{self.job.id}?format=json")
+        """Verify GET /api/carbon/report/audit-dossier/{job_id} across JSON, Markdown, and PDF.
+        
+        Endpoint requires 'review' permission (held by org_owner, auditor, validator, platform_operator).
+        Role 'viewer' lacks 'review' permission and receives 403 Forbidden.
+        """
+        # 0. Unauthenticated access receives 401
+        res_noauth = self.client.get(f"/api/carbon/report/audit-dossier/{self.job.id}?format=json")
+        self.assertEqual(res_noauth.status_code, 401)
+
+        # 0b. Read-only viewer role receives 403 Forbidden
+        res_viewer = self.client.get(f"/api/carbon/report/audit-dossier/{self.job.id}?format=json", headers=self.viewer_headers)
+        self.assertEqual(res_viewer.status_code, 403)
+
+        # 1. JSON output with authorized role
+        res_json = self.client.get(f"/api/carbon/report/audit-dossier/{self.job.id}?format=json", headers=self.auth_headers)
         self.assertEqual(res_json.status_code, 200)
         data = res_json.json()
         self.assertEqual(data["certification_standard"], "Verra VM0047 v1.0 & VCS Standard v4.5")
         self.assertIn("ipcc_tier3_multipool_inventory", data)
 
         # 2. Markdown output
-        res_md = self.client.get(f"/api/carbon/report/audit-dossier/{self.job.id}?format=markdown")
+        res_md = self.client.get(f"/api/carbon/report/audit-dossier/{self.job.id}?format=markdown", headers=self.auth_headers)
         self.assertEqual(res_md.status_code, 200)
         self.assertEqual(res_md.headers["content-type"], "text/markdown; charset=utf-8")
         self.assertIn("Verra VM0047", res_md.text)
 
         # 3. PDF output
-        res_pdf = self.client.get(f"/api/carbon/report/audit-dossier/{self.job.id}?format=pdf")
+        res_pdf = self.client.get(f"/api/carbon/report/audit-dossier/{self.job.id}?format=pdf", headers=self.auth_headers)
         self.assertEqual(res_pdf.status_code, 200)
         self.assertEqual(res_pdf.headers["content-type"], "application/pdf")
         self.assertTrue(res_pdf.content.startswith(b"%PDF-1.4"))
 
         # 4. Standard /report/{job_id}?format=dossier endpoint integration
-        res_dos = self.client.get(f"/api/carbon/report/{self.job.id}?format=dossier")
+        res_dos_viewer = self.client.get(f"/api/carbon/report/{self.job.id}?format=dossier", headers=self.viewer_headers)
+        self.assertEqual(res_dos_viewer.status_code, 403)
+
+        res_dos = self.client.get(f"/api/carbon/report/{self.job.id}?format=dossier", headers=self.auth_headers)
         self.assertEqual(res_dos.status_code, 200)
         self.assertEqual(res_dos.headers["content-type"], "application/pdf")
 

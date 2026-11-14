@@ -20,6 +20,7 @@ from inference.carbon_monitoring.uncertainty import (
     VerraPrecisionDeductionEngine,
     compute_conformal_verra_assessment
 )
+from inference.carbon_monitoring.auth import mint_carbon_token
 
 
 class TestDMRVUncertaintyEngine(unittest.TestCase):
@@ -32,6 +33,10 @@ class TestDMRVUncertaintyEngine(unittest.TestCase):
 
     def setUp(self):
         self.db: Session = SessionLocal()
+        self.token_owner = mint_carbon_token(sub="owner-uncert", organization_id="org-uncert", role="org_owner")
+        self.token_viewer = mint_carbon_token(sub="viewer-uncert", organization_id="org-uncert", role="viewer")
+        self.auth_headers = {"Authorization": f"Bearer {self.token_owner}"}
+        self.viewer_headers = {"Authorization": f"Bearer {self.token_viewer}"}
 
     def tearDown(self):
         self.db.close()
@@ -134,7 +139,12 @@ class TestDMRVUncertaintyEngine(unittest.TestCase):
         self.assertLessEqual(eval_res["conservative_creditable_tco2e"], 5000.0)
 
     def test_05_fastapi_uncertainty_endpoints(self):
-        """Verify GET /api/carbon/uncertainty/{result_id} and POST /api/carbon/uncertainty/assess."""
+        """Verify GET /api/carbon/uncertainty/{result_id} and POST /api/carbon/uncertainty/assess.
+        
+        POST /uncertainty/assess requires 'write' permission (held by org_owner, project_developer, platform_operator).
+        Role 'viewer' lacks 'write' permission and receives 403 Forbidden.
+        GET /uncertainty/{result_id} requires valid authentication and tenant ownership.
+        """
         # 1. Direct simulation endpoint
         payload = {
             "net_creditable_tco2e": 4200.0,
@@ -143,7 +153,16 @@ class TestDMRVUncertaintyEngine(unittest.TestCase):
             "estimated_carbon_tc_ha": 180.0,
             "allowable_error": 0.15
         }
-        res_post = self.client.post("/api/carbon/uncertainty/assess", data=payload)
+        # 1a. Unauthenticated access receives 401
+        res_noauth = self.client.post("/api/carbon/uncertainty/assess", data=payload)
+        self.assertEqual(res_noauth.status_code, 401)
+
+        # 1b. Read-only viewer role receives 403 Forbidden
+        res_forbidden = self.client.post("/api/carbon/uncertainty/assess", data=payload, headers=self.viewer_headers)
+        self.assertEqual(res_forbidden.status_code, 403)
+
+        # 1c. Authorized role with 'write' permission receives 200
+        res_post = self.client.post("/api/carbon/uncertainty/assess", data=payload, headers=self.auth_headers)
         self.assertEqual(res_post.status_code, 200)
         data_post = res_post.json()
         self.assertEqual(data_post["net_creditable_point_tco2e"], 4200.0)
@@ -154,6 +173,8 @@ class TestDMRVUncertaintyEngine(unittest.TestCase):
         # 2. Database result lookup
         # Create a test job and result
         job = AnalysisJob(
+            organization_id="org-uncert",
+            user_id="owner-uncert",
             status="completed",
             polygon_geojson="[[22.2, 89.5], [22.3, 89.6]]",
             analysis_type="ndvi",
@@ -182,7 +203,12 @@ class TestDMRVUncertaintyEngine(unittest.TestCase):
         self.db.add(result)
         self.db.commit()
 
-        res_get = self.client.get(f"/api/carbon/uncertainty/{result.id}")
+        # 2a. Unauthenticated GET receives 401
+        res_get_noauth = self.client.get(f"/api/carbon/uncertainty/{result.id}")
+        self.assertEqual(res_get_noauth.status_code, 401)
+
+        # 2b. Authenticated GET receives 200
+        res_get = self.client.get(f"/api/carbon/uncertainty/{result.id}", headers=self.auth_headers)
         self.assertEqual(res_get.status_code, 200)
         data_get = res_get.json()
         self.assertEqual(data_get["result_id"], result.id)
