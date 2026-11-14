@@ -1,0 +1,22 @@
+schema: carbonos.bill_profile/1
+profile_key: titas-gas
+issuer: Titas Gas Transmission and Distribution Company Limited
+document_type: gas
+layout_version: fixture-1
+languages: [en, bn]
+effective_from: 2000-01-01
+detect:
+  all_of: ["TITAS GAS"]
+fields:
+  - {key: account.number, required: true, hints: [{anchor: ["Customer Code", "Account No"], take: value}]}
+  - {key: bill.number, hints: [{anchor: ["Bill No"], take: value}]}
+  - {key: period.start, required: true, hints: [{anchor: ["Period From"]}]}
+  - {key: period.end, required: true, hints: [{anchor: ["Period To"]}]}
+  - {key: tariff.category, hints: [{anchor: ["Tariff"]}]}
+  - {key: meter.serial, required: true, hints: [{anchor: ["Meter No"], take: value}]}
+  - {key: gas.volume.measured, required: true, unit: m3, hints: [{anchor: ["Measured Volume", "Measured Consumption"]}]}
+  - {key: gas.volume.correction_factor, hints: [{anchor: ["Correction Factor"]}]}
+  - {key: gas.volume.corrected, required: true, unit: m3, hints: [{anchor: ["Corrected Volume"]}]}
+  - {key: cost.total, unit: BDT, hints: [{anchor: ["Total Amount", "Total BDT"]}]}
+rulesets: [period, gas_volume]
+notes: "TEST-ONLY FIXTURE: Synthetic Titas Gas profile with detection anchors and field hints"

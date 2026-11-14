@@ -78,9 +78,13 @@ class TestGasEndToEndRealDetection(unittest.TestCase):
         self.db.add(self.period)
         self.db.commit()
 
-        # Load approved titas-gas profile into database
-        profiles = bp.repo_profiles()
-        titas_doc = next(p for p in profiles if p["profile_key"] == "titas-gas")
+        # Load test-only synthetic titas profile from test fixture
+        params, groups, rulesets = bp.repo_catalog()
+        fixture_path = os.path.join(os.path.dirname(__file__), "fixtures", "synthetic_titas_profile.yaml")
+        with open(fixture_path, "r", encoding="utf-8") as f:
+            raw_doc = bp.load_yaml(f.read())
+        validated = bp.validate_profile(raw_doc, params, groups, rulesets)
+        titas_doc = json.loads(bp.canonical_json(validated))
         self.profile = BillProfile(
             profile_key="titas-gas", version=1, issuer=titas_doc["issuer"],
             document_type="gas", layout_version="fixture-1", effective_from=dt.date(2020, 1, 1),
