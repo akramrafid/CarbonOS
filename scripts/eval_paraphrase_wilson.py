@@ -45,13 +45,14 @@ def mrr_confidence_interval(reciprocal_ranks: List[float], confidence: float = 0
     return mean, lower, upper
 
 
-def run_paraphrase_eval(allow_fallback: bool = False, output_file: str = "scratch/paraphrase_eval_report.json"):
+def run_paraphrase_eval(allow_fallback: bool = False, output_file: str = "scratch/paraphrase_eval_report.json", demo_corpus: bool = True):
     emb_info = get_embedding_info()
     print("=" * 70)
     print("EMBEDDING DISCLOSURE & MODEL CONFIGURATION")
     print(f"Embedding Mode: {emb_info['mode']}")
     print(f"Model Name:     {emb_info['model_name']}")
     print(f"Dimension:      {emb_info['dimension']}")
+    print(f"Corpus Mode:    {'DEMO CORPUS' if demo_corpus else 'PRODUCTION MODE'}")
     print("=" * 70)
 
     if emb_info["is_fallback"]:
@@ -67,13 +68,14 @@ def run_paraphrase_eval(allow_fallback: bool = False, output_file: str = "scratc
     print(f"\nLoaded {len(pairs)} paraphrase query pairs from {fixture_path}")
 
     groups = {"en": [], "bn": [], "all": []}
+    tenant_id = "demo_tenant" if demo_corpus else "prod_tenant"
 
     for item in pairs:
         q = item["query"]
         expected = item["expected_doc"]
         lang = item["language"]
 
-        res = hybrid_retrieve(q, corpus="all", tenant_id="demo_tenant", top_k=5)
+        res = hybrid_retrieve(q, corpus="all", tenant_id=tenant_id, top_k=5)
         chunks = res.get("chunks", [])
         retrieved_docs = [getattr(c, "filename", "") or "" for c in chunks]
 
@@ -98,6 +100,7 @@ def run_paraphrase_eval(allow_fallback: bool = False, output_file: str = "scratc
 
     report = {
         "embedding": emb_info,
+        "corpus_mode": "DEMO CORPUS" if demo_corpus else "PRODUCTION MODE",
         "evaluation_label": "FALLBACK EMBEDDING - NOT PRODUCTION" if emb_info["is_fallback"] else "PRODUCTION EMBEDDING",
         "fixture": "tests/fixtures/rag_eval_paraphrase_review.json",
         "fixture_status": "needs_human_review",
@@ -124,7 +127,7 @@ def run_paraphrase_eval(allow_fallback: bool = False, output_file: str = "scratc
             "mrr": {"point": round(m_mrr, 4), "ci_95": (round(l_mrr, 4), round(u_mrr, 4))}
         }
 
-    print("\n================ RAG PARAPHRASE RETRIEVAL REPORT (needs_human_review) ================")
+    print(f"\n================ RAG PARAPHRASE RETRIEVAL REPORT ({'DEMO CORPUS' if demo_corpus else 'PRODUCTION MODE'}) ================")
     for g, data in report["results"].items():
         title = "English (n=40)" if g == "en" else ("Bengali (n=40)" if g == "bn" else "Combined (n=80)")
         print(f"\n--- {title} ---")
@@ -143,6 +146,8 @@ def run_paraphrase_eval(allow_fallback: bool = False, output_file: str = "scratc
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description="Evaluate RAG retrieval with Wilson CIs")
     parser.add_argument("--allow-fallback", action="store_true", help="Allow running with fallback hash embeddings")
+    parser.add_argument("--demo-corpus", dest="demo_corpus", action="store_true", default=True, help="Run with demo corpus")
+    parser.add_argument("--prod", dest="demo_corpus", action="store_false", help="Run in production mode")
     parser.add_argument("--output", default="scratch/paraphrase_eval_report.json", help="Path to write JSON report")
     args = parser.parse_args()
-    run_paraphrase_eval(allow_fallback=args.allow_fallback, output_file=args.output)
+    run_paraphrase_eval(allow_fallback=args.allow_fallback, output_file=args.output, demo_corpus=args.demo_corpus)
