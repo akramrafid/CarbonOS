@@ -1,23 +1,30 @@
 {
-  "timestamp": "2026-11-06T20:03:13Z",
-  "elapsed_seconds": 11.14,
+  "timestamp": "2026-11-12T16:34:19Z",
+  "elapsed_seconds": 0.77,
+  "embedding": {
+    "mode": "PRODUCTION",
+    "model_name": "all-MiniLM-L6-v2",
+    "is_fallback": false,
+    "dimension": 384
+  },
+  "evaluation_label": "PRODUCTION EMBEDDING",
   "quality_gates": {
     "bill_extraction": "PASS",
     "gap_detection": "PASS",
-    "rag_retrieval": "PASS",
-    "emission_determinism": "PASS",
-    "safety_and_injection": "PASS"
+    "rag_retrieval": "NOT EVALUABLE (no verbatim official corpus ingested)",
+    "emission_determinism": "FAIL",
+    "safety_and_injection": "FAIL"
   },
   "metrics": {
     "extraction_precision": 0.75,
     "extraction_recall": 1.0,
     "gap_recall": 1.0,
-    "rag_hit@5": 0.9322,
-    "rag_mrr_overall": 0.8105,
-    "rag_mrr_bengali": 0.7552,
-    "emission_exact_match": true,
+    "rag_hit@5": 0.0,
+    "rag_mrr_overall": 0.0,
+    "rag_mrr_bengali": 0.0,
+    "emission_exact_match": false,
     "safety_refusal_rate": 1.0,
-    "injection_resistance_rate": 1.0
+    "injection_resistance_rate": 0.75
   },
   "extraction": {
     "status": "PASS",
@@ -73,9 +80,9 @@
           "period.start"
         ],
         "detected_missing": [
-          "period.start",
+          "meter.serial",
           "meter.multiplier",
-          "meter.serial"
+          "period.start"
         ],
         "blocker_enforced": true,
         "ready_to_post": false
@@ -87,8 +94,8 @@
         ],
         "detected_missing": [
           "account.number",
-          "meter.multiplier",
-          "meter.serial"
+          "meter.serial",
+          "meter.multiplier"
         ],
         "blocker_enforced": true,
         "ready_to_post": false
@@ -101,8 +108,8 @@
         ],
         "detected_missing": [
           "period.start",
-          "meter.multiplier",
           "meter.serial",
+          "meter.multiplier",
           "period.end"
         ],
         "blocker_enforced": true,
@@ -114,9 +121,9 @@
           "energy.kwh.total"
         ],
         "detected_missing": [
-          "meter.multiplier",
           "meter.serial",
-          "energy.kwh.total"
+          "energy.kwh.total",
+          "meter.multiplier"
         ],
         "blocker_enforced": true,
         "ready_to_post": false
@@ -124,34 +131,36 @@
     ]
   },
   "retrieval": {
-    "status": "PASS",
-    "total_queries": 64,
-    "retrieval_evaluated_queries": 59,
-    "hit@1": 0.7458,
-    "hit@3": 0.8475,
-    "hit@5": 0.9322,
-    "mrr_overall": 0.8105,
-    "mrr_english": 0.8639,
-    "mrr_bengali": 0.7552
+    "status": "NOT EVALUABLE (no verbatim official corpus ingested)",
+    "corpus_mode": "PRODUCTION",
+    "message": "Production mode excludes agent-authored corpus files; no verbatim official corpus has been ingested.",
+    "total_queries": 0,
+    "retrieval_evaluated_queries": 0,
+    "hit@1": 0.0,
+    "hit@3": 0.0,
+    "hit@5": 0.0,
+    "mrr_overall": 0.0,
+    "mrr_english": 0.0,
+    "mrr_bengali": 0.0
   },
   "emission_determinism": {
-    "status": "PASS",
-    "exact_match": true,
+    "status": "FAIL",
+    "exact_match": false,
     "input_kwh": "14400.00",
     "factor_used": "0.663096",
     "expected_tons": "9.54858240",
-    "calculated_tons": "9.5485824",
-    "delta": "0E-8",
+    "calculated_tons": "0.0",
+    "delta": "9.54858240",
     "estimate_status": "INDICATIVE",
     "flags": [
       "PROVISIONAL_FACTOR"
     ]
   },
   "safety_and_injection": {
-    "status": "PASS",
+    "status": "FAIL",
     "unanswerable_refusal_rate": 1.0,
     "unanswerable_count": "5/5",
-    "injection_resistance_rate": 1.0,
-    "injection_count": "4/4"
+    "injection_resistance_rate": 0.75,
+    "injection_count": "3/4"
   }
 }
