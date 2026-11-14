@@ -55,6 +55,65 @@ class BillEstimateTest(ESGApiTestCase):
         }, headers=auth("user-a"))
         self.facility_id = fac_res.json()["id"]
 
+        # Create demo org and facility for demo-tenant testing
+        self.org_demo = self.client.post(f"{API}/organizations", json={"name": "Demo Textile Org", "is_demo": True},
+                                          headers=auth("user-demo")).json()["id"]
+        self.add_member(self.org_demo, "admin-demo", "esg_admin")
+
+        param_rows_demo = self.client.post(f"{API}/bill-parameters", json={"yaml": PARAMS_YAML},
+                                           headers=auth("user-demo", self.org_demo)).json()
+        for r in param_rows_demo:
+            self.client.post(f"{API}/bill-parameters/{r['id']}/approve", headers=auth("admin-demo", self.org_demo))
+
+        prof_rows_demo = self.client.post(f"{API}/bill-profiles", json={"yaml": GRID_YAML},
+                                          headers=auth("user-demo", self.org_demo)).json()
+        self.profile_demo = prof_rows_demo[0]
+        self.client.post(f"{API}/bill-profiles/{self.profile_demo['id']}/approve", headers=auth("admin-demo", self.org_demo))
+
+        le_demo = self.client.post(f"{API}/legal-entities", json={"name": "Demo Mills Ltd", "country": "BD"},
+                                   headers=auth("user-demo", self.org_demo)).json()["id"]
+        self.facility_demo_id = self.client.post(f"{API}/facilities", json={
+            "legal_entity_id": le_demo,
+            "name": "Dhaka Demo Facility",
+            "country": "BD",
+            "grid_region": "BD-NATIONAL"
+        }, headers=auth("user-demo", self.org_demo)).json()["id"]
+
+    def _create_and_fill_demo_bill(self, kwh="1000", start="2022-07-01", end="2022-07-31"):
+        doc = {
+            "source": "manual",
+            "pages": [{
+                "lines": [
+                    "ELECTRICITY BILL",
+                    "Account: ACC-BD-12345",
+                    f"Consumption: {kwh} kWh"
+                ]
+            }]
+        }
+        res = self.client.post(f"{API}/bills", json={
+            "facility_id": self.facility_demo_id,
+            "filename": "demo_bill_2022_07.pdf",
+            "profile_id": self.profile_demo["id"],
+            "document": doc
+        }, headers=auth("user-demo", self.org_demo))
+        self.assertEqual(res.status_code, 201)
+        bill_id = res.json()["id"]
+
+        self.client.post(f"{API}/bills/{bill_id}/values", json={
+            "parameter_key": "period.start", "value": start, "unit": None
+        }, headers=auth("user-demo", self.org_demo))
+        self.client.post(f"{API}/bills/{bill_id}/values", json={
+            "parameter_key": "period.end", "value": end, "unit": None
+        }, headers=auth("user-demo", self.org_demo))
+        self.client.post(f"{API}/bills/{bill_id}/values", json={
+            "parameter_key": "account.number", "value": "ACC-BD-12345", "unit": None
+        }, headers=auth("user-demo", self.org_demo))
+        self.client.post(f"{API}/bills/{bill_id}/values", json={
+            "parameter_key": "energy.kwh.total", "value": kwh, "unit": "kWh"
+        }, headers=auth("user-demo", self.org_demo))
+
+        return bill_id
+
     def _create_and_fill_bill(self, kwh="1000", start="2022-07-01", end="2022-07-31"):
         doc = {
             "source": "manual",
@@ -111,15 +170,28 @@ class BillEstimateTest(ESGApiTestCase):
         self.assertIn("kgco2e_per_unit", prov)
 
     def test_estimate_with_provisional_factor_computes_exact_emissions(self):
-        bill_id = self._create_and_fill_bill(kwh="1000")
+        # 1. Non-demo tenant: synthetic provisional factor is rejected with SYNTHETIC_FACTOR_INPUTS
+        bill_id_nondemo = self._create_and_fill_bill(kwh="1000")
+        res_nondemo = self.client.post(f"{API}/bills/{bill_id_nondemo}/estimate", json={"allow_provisional": True},
+                                       headers=auth("user-a"))
+        self.assertEqual(res_nondemo.status_code, 200)
+        data_nondemo = res_nondemo.json()
+        self.assertEqual(data_nondemo["status"], "INDICATIVE")
+        self.assertIn("SYNTHETIC_FACTOR_INPUTS", data_nondemo["calc_blockers"])
+        self.assertIsNone(data_nondemo["emissions"])
+
+        # 2. Demo tenant: synthetic provisional factor is permitted with DEMO label
+        bill_id = self._create_and_fill_demo_bill(kwh="1000")
         res = self.client.post(f"{API}/bills/{bill_id}/estimate", json={"allow_provisional": True},
-                               headers=auth("user-a"))
+                               headers=auth("user-demo", self.org_demo))
         self.assertEqual(res.status_code, 200)
         data = res.json()
 
         # Contract checks
         self.assertEqual(data["status"], "INDICATIVE")
         self.assertIn("PROVISIONAL_FACTOR", data["flags"])
+        self.assertIn("DEMO - SYNTHETIC FACTOR", data["flags"])
+        self.assertEqual(data["label"], "DEMO - SYNTHETIC FACTOR")
         self.assertFalse(data["audit_grade"])
         self.assertFalse(data["registry_eligible"])
         self.assertEqual(data["calc_blockers"], [])
