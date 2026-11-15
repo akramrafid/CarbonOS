@@ -44,43 +44,41 @@ const ClientShowcase = () => {
     return (
       <div
         key={client.id}
-        className={`group relative rounded-3xl p-7 sm:p-8 xl:p-8 2xl:p-9 transition-all duration-300 flex flex-col justify-between h-full min-h-[440px] sm:min-h-[460px] overflow-hidden ${
+        className={`group relative rounded-2xl sm:rounded-3xl p-5 sm:p-6 xl:p-6 2xl:p-7 transition-all duration-300 flex flex-col justify-between h-full min-h-[440px] sm:min-h-[460px] overflow-hidden ${
           isLight
             ? 'bg-white border border-border-strong shadow-[0_4px_25px_rgba(4,18,38,0.06)] hover:shadow-[0_12px_35px_rgba(4,18,38,0.12)] hover:border-border-strong/40'
             : 'bg-gradient-to-b from-bg-surface/95 via-bg-surface/95 to-bg-canvas hover:bg-bg-elevated border border-border-subtle/75 hover:border-border-strong/80 shadow-[0_12px_40px_rgba(0,0,0,0.6)] hover:shadow-[0_20px_60px_rgba(0,200,83,0.18)]'
         } hover:-translate-y-2`}
       >
         {/* Ambient Card Hover Glow */}
-        <div className={`absolute inset-0 rounded-3xl opacity-0 group-hover:opacity-100 transition-opacity duration-500 pointer-events-none ${
+        <div className={`absolute inset-0 rounded-2xl sm:rounded-3xl opacity-0 group-hover:opacity-100 transition-opacity duration-500 pointer-events-none ${
           isLight 
             ? 'bg-[radial-gradient(ellipse_at_top,_rgba(21,128,61,0.08),_transparent_70%)]' 
             : 'bg-[radial-gradient(ellipse_at_top,_var(--tw-gradient-stops))] from-emerald-500/[0.08] via-transparent to-transparent'
         }`} />
 
-        <div className="relative z-10">
-          {/* Top Row: Logo Badge & Live Site Link */}
-          <div className="flex items-center justify-between gap-4 mb-7">
-            {/* Enhanced Logo Container for Maximum Contrast & Visibility */}
+        <div className="relative z-10 flex flex-col flex-1">
+          {/* Top Row: Logo Badge & Live Site Link - Aligned Fixed Height Slot */}
+          <div className="flex items-center justify-between gap-3 mb-5 h-14">
+            {/* Enhanced Logo Container with fluid width */}
             <div 
-              className={`h-16 sm:h-17 ${
-                isLowerRow ? 'w-32 sm:w-36 xl:w-36 2xl:w-40' : 'w-36 sm:w-42 xl:w-44'
-              } px-3.5 py-2 rounded-2xl flex items-center justify-center shrink-0 transition-all duration-300 group-hover:scale-105 ${
+              className={`h-12 sm:h-13.5 max-w-[115px] sm:max-w-[135px] xl:max-w-[130px] 2xl:max-w-[145px] px-3 py-1.5 rounded-xl sm:rounded-2xl flex items-center justify-center shrink-0 transition-all duration-300 group-hover:scale-105 ${
                 isDarkLogo
-                  ? 'bg-bg-elevated border-2 border-border-strong shadow-[0_0_24px_rgba(0,200,83,0.2)] ring-1 ring-emerald-500/30'
-                  : 'bg-white border-2 border-slate-200 shadow-md ring-1 ring-black/5'
+                  ? 'bg-bg-elevated border border-border-strong shadow-[0_0_20px_rgba(0,200,83,0.2)] ring-1 ring-emerald-500/30'
+                  : 'bg-white border border-slate-200 shadow-xs ring-1 ring-black/5'
               }`}
             >
               <img 
                 src={client.logo} 
                 alt={`${client.name} official logo`}
-                className="max-h-11 sm:max-h-12 max-w-full w-auto object-contain transition-transform duration-300"
+                className="max-h-9 sm:max-h-10 max-w-full w-auto object-contain transition-transform duration-300"
                 loading="lazy"
               />
             </div>
 
-            {/* Verified Badge & Live Domain: Generously spaced from card border */}
-            <div className="flex flex-col items-end shrink-0 gap-2">
-              <div className={`inline-flex items-center space-x-2 px-3.5 py-1.5 rounded-full transition-all shadow-xs ${
+            {/* Verified Badge & Live Domain: compact, zero horizontal overflow */}
+            <div className="flex flex-col items-end shrink-0 gap-1.5 min-w-0">
+              <div className={`inline-flex items-center space-x-1.5 px-2.5 py-1 rounded-full transition-all shadow-xs ${
                 isLight
                   ? 'bg-accent-muted border border-border-strong/30 text-accent'
                   : 'bg-accent/12 group-hover:bg-accent/20 border border-border-strong/35 text-accent-hover'
@@ -97,12 +95,12 @@ const ClientShowcase = () => {
                 href={client.website}
                 target="_blank"
                 rel="noopener noreferrer"
-                className={`text-[11px] sm:text-xs font-mono flex items-center space-x-1.5 transition-colors group/link px-1 py-0.5 ${
+                className={`text-[11px] sm:text-xs font-mono flex items-center space-x-1 transition-colors group/link px-1 py-0.5 ${
                   isLight ? 'text-slate-600 hover:text-accent' : 'text-gray-400 hover:text-accent-hover'
                 }`}
                 title={`Visit ${client.name} official website`}
               >
-                <span className="truncate max-w-[120px] sm:max-w-[150px] xl:max-w-[170px]">{cleanUrl}</span>
+                <span className="truncate max-w-[105px] sm:max-w-[125px] xl:max-w-[115px] 2xl:max-w-[140px]">{cleanUrl}</span>
                 <ArrowUpRight className={`w-3.5 h-3.5 group-hover/link:translate-x-0.5 group-hover/link:-translate-y-0.5 transition-transform shrink-0 ${
                   isLight ? 'text-accent' : 'text-accent'
                 }`} />
@@ -110,42 +108,45 @@ const ClientShowcase = () => {
             </div>
           </div>
 
-          {/* Company Name & Sector */}
-          <div className="mb-4">
-            <h3 className={`font-sans font-extrabold text-2xl sm:text-[26px] tracking-tight leading-snug transition-colors ${
-              isLight
-                ? 'text-fg-primary group-hover:text-accent'
-                : 'text-white group-hover:text-accent-hover'
-            }`}>
+          {/* Company Name & Sector - Deterministic Height Slot */}
+          <div className="mb-3.5 min-h-[66px] sm:min-h-[72px] flex flex-col justify-start">
+            <h3 
+              className={`font-sans font-extrabold text-xl sm:text-[22px] tracking-tight leading-snug line-clamp-1 transition-colors ${
+                isLight
+                  ? 'text-fg-primary group-hover:text-accent'
+                  : 'text-white group-hover:text-accent-hover'
+              }`}
+              title={client.name}
+            >
               {client.name}
             </h3>
-            <span className={`text-xs sm:text-[13px] font-mono font-bold uppercase tracking-wider block mt-1.5 ${
+            <span className={`text-[11px] sm:text-xs font-mono font-bold uppercase tracking-wider line-clamp-2 mt-1 ${
               isLight ? 'text-accent' : 'text-accent-hover'
             }`}>
               {client.sector}
             </span>
           </div>
 
-          {/* Legal Entity / Location */}
-          <div className={`text-xs sm:text-[13px] mb-5 flex items-center space-x-2 font-sans ${
+          {/* Legal Entity / Location - Deterministic Height Slot */}
+          <div className={`h-6 mb-4 flex items-center space-x-2 font-sans text-xs sm:text-[13px] ${
             isLight ? 'text-slate-600' : 'text-gray-400'
           }`}>
-            <Building2 className={`w-4 h-4 shrink-0 ${isLight ? 'text-accent' : 'text-emerald-400/80'}`} />
+            <Building2 className={`w-3.5 h-3.5 shrink-0 ${isLight ? 'text-accent' : 'text-emerald-400/80'}`} />
             <span className="truncate" title={client.headquarters}>{client.headquarters}</span>
           </div>
 
-          {/* Sustainability Highlight with Left Accent Bar */}
-          <div className={`relative p-4 sm:p-5 rounded-2xl mb-6 overflow-hidden transition-colors ${
+          {/* Sustainability Highlight with Left Accent Bar - Equalized Flex Box */}
+          <div className={`relative p-3.5 sm:p-4 rounded-xl sm:rounded-2xl mb-5 flex-1 min-h-[84px] sm:min-h-[92px] flex items-center overflow-hidden transition-colors ${
             isLight
               ? 'bg-bg-muted border border-border-strong group-hover:border-border-strong/40'
               : 'bg-bg-canvas/90 border border-border-subtle group-hover:border-border-strong/40 shadow-inner'
           }`}>
-            <div className={`absolute left-0 top-0 bottom-0 w-1 rounded-l-2xl ${
+            <div className={`absolute left-0 top-0 bottom-0 w-1 rounded-l-xl sm:rounded-l-2xl ${
               isLight ? 'bg-accent' : 'bg-gradient-to-b from-accent-hover to-accent'
             }`} />
-            <div className="flex items-start space-x-3 pl-1">
+            <div className="flex items-start space-x-2.5 pl-1 w-full">
               <Leaf className={`w-4 h-4 shrink-0 mt-0.5 ${isLight ? 'text-accent' : 'text-accent-hover'}`} />
-              <p className={`text-xs sm:text-[13.5px] font-sans leading-relaxed font-normal min-h-[46px] ${
+              <p className={`text-xs sm:text-[13px] font-sans leading-relaxed font-normal line-clamp-3 ${
                 isLight ? 'text-fg-secondary' : 'text-gray-200'
               }`}>
                 {client.sustainabilityHighlight}
@@ -154,8 +155,8 @@ const ClientShowcase = () => {
           </div>
         </div>
 
-        {/* Bottom Card Footer: Facilities & Audit Info */}
-        <div className={`relative z-10 pt-5 border-t flex items-center justify-between text-xs font-mono ${
+        {/* Bottom Card Footer: Facilities & Audit Info - Strict Baseline Alignment */}
+        <div className={`relative z-10 pt-4 border-t flex items-center justify-between text-xs font-mono mt-auto ${
           isLight ? 'border-slate-200 text-slate-600' : 'border-white/[0.08] text-gray-400'
         }`}>
           <div className="flex items-center space-x-2">
@@ -175,7 +176,7 @@ const ClientShowcase = () => {
             <span className={`font-extrabold font-mono text-base sm:text-lg ${isLight ? 'text-accent' : 'text-accent-hover'}`}>
               {client.activeInsets.toLocaleString()} tCO₂e
             </span>
-            <span className={`text-xs ml-1.5 font-sans ${isLight ? 'text-slate-500' : 'text-gray-400'}`}>
+            <span className={`text-[11px] sm:text-xs ml-1.5 font-sans ${isLight ? 'text-slate-500' : 'text-gray-400'}`}>
               Verified Offset
             </span>
           </div>
@@ -197,7 +198,7 @@ const ClientShowcase = () => {
       }`} />
 
       {/* Expanded Container Width to utilize high-resolution canvas generously */}
-      <div className="max-w-[2100px] 2xl:max-w-[2300px] w-full mx-auto px-6 sm:px-10 lg:px-14 xl:px-18 2xl:px-24 relative z-10">
+      <div className="w-full max-w-[1720px] 2xl:max-w-[1920px] mx-auto px-4 sm:px-6 lg:px-8 xl:px-10 2xl:px-12 relative z-10">
         
         {/* Section Header */}
         <SectionHeader
@@ -259,18 +260,18 @@ const ClientShowcase = () => {
         {selectedCategory === 'all' ? (
           <div className="space-y-8 xl:space-y-10">
             {/* Upper Row: 3 Clients (Clean Mobility & Aviation Pioneers) */}
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 xl:gap-8">
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5 xl:gap-6">
               {filteredClients.slice(0, 3).map((client) => renderClientCard(client, false))}
             </div>
 
             {/* Lower Row: 4 Clients (Higher Ed, Transit, Logistics, Circular Packaging) */}
-            <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-6 xl:gap-8">
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-2 xl:grid-cols-4 gap-5 xl:gap-6">
               {filteredClients.slice(3, 7).map((client) => renderClientCard(client, true))}
             </div>
           </div>
         ) : (
           /* Filtered category view */
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6 xl:gap-8">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-5 xl:gap-6">
             {filteredClients.map((client) => renderClientCard(client, true))}
           </div>
         )}
