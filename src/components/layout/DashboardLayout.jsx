@@ -7,6 +7,7 @@ import TopBar from './TopBar';
 import MobileDrawer from './MobileDrawer';
 import MobileTabBar from './MobileTabBar';
 import CommandPalette from './CommandPalette';
+import Footer from '../Footer';
 
 /**
  * Persistent Dashboard Layout Shell (Phase 4)
@@ -97,6 +98,11 @@ export function DashboardLayout() {
           >
             <Outlet />
           </main>
+
+          {/* Slim Workspace Footer (Product Mode) */}
+          <div className="hidden md:block">
+            <Footer variant="slim" />
+          </div>
         </div>
       </div>
 

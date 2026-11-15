@@ -90,11 +90,46 @@ const resources = {
         award3: "Not externally assured"
       },
       footer: {
+        ctaBadge: "CLIMATE INFRASTRUCTURE & DMRV",
         ctaTitle: "Ready to Scale Bangladesh's Green Infrastructure?",
-        ctaSubtext: "Explore how Carbon Zero BD helps organizations plan, manage, and verify green projects across the country.",
+        ctaSubtext: "Explore how Carbon Zero BD helps organizations plan, manage, and verify emission reduction projects across the country.",
         ctaButton: "Explore Platform",
+        mission: "Digital Measurement, Reporting, and Verification (dMRV), corporate ESG accounting, and agricultural risk intelligence for Bangladesh.",
+        copyrightEntity: "Carbon Zero BD (CarbonOS)",
         copyright: "Copyright 2026 Carbon Zero BD",
-        rights: "All Rights Reserved"
+        rights: "All rights reserved.",
+        backToTop: "Back to top",
+        switchLanguage: "Switch language",
+        toggleTheme: "Toggle theme",
+        lightMode: "Light",
+        darkMode: "Dark",
+        columns: {
+          platform: "Platform",
+          resources: "Resources",
+          company: "Company",
+          legal: "Legal"
+        },
+        links: {
+          mrvDashboard: "MRV Dashboard",
+          carbonMonitoring: "GIS Biomass Heatmap",
+          carbonRegistry: "Carbon Registry",
+          esgWorkspace: "ESG Bill Intake",
+          saasDashboard: "SaaS Accounting",
+          marketplace: "Credit Marketplace",
+          howItWorks: "How It Works",
+          technology: "Technology & Telemetry",
+          frameworkDocs: "Framework & Methodology",
+          apiDocs: "Developer API Docs",
+          farmersAi: "Farmers AI & HarvestGuard",
+          sectorMethodologies: "Sector Methodologies",
+          about: "About Carbon Zero BD",
+          impact: "SDG Impact & Co-Benefits",
+          projectOnboarding: "Project Onboarding",
+          careers: "Careers",
+          privacy: "Privacy Policy",
+          terms: "Terms of Service",
+          verificationWorkflow: "Verification & Audit Rules"
+        }
       }
     }
   },
@@ -181,16 +216,51 @@ const resources = {
         stat1Label: "tCO₂e হ্রাস করা হয়েছে",
         stat2Value: "~০ মি.সে.",
         stat2Label: "ডেটা সমন্বয় বিলম্ব",
-        award1: "সরকারী ফ্রেমওয়ার্ক ২০২৬",
-        award2: "ভিভিবি স্বীকৃত",
-        award3: "আর্টিকেল ৬ সামঞ্জস্যপূর্ণ"
+        award1: "GHG প্রোটোকল পদ্ধতি",
+        award2: "দ্বৈত নিয়ন্ত্রণ",
+        award3: "বাহ্যিকভাবে নিরীক্ষিত নয়"
       },
       footer: {
+        ctaBadge: "জলবায়ু অবকাঠামো ও ডিএমআরভি",
         ctaTitle: "বাংলাদেশের সবুজ অবকাঠামো সম্প্রসারণ করতে প্রস্তুত?",
-        ctaSubtext: "কার্বন জিরো বিডি কীভাবে সংস্থাগুলোকে সারা দেশে সবুজ প্রকল্পগুলির পরিকল্পনা, পরিচালনা এবং যাচাই করতে সহায়তা করে তা জানুন।",
+        ctaSubtext: "কার্বন জিরো বিডি কীভাবে সংস্থাগুলোকে সারা দেশে কার্বন নিঃসরণ হ্রাস প্রকল্পের পরিকল্পনা, পরিচালনা এবং যাচাই করতে সহায়তা করে তা জানুন।",
         ctaButton: "প্ল্যাটফর্ম এক্সপ্লোর করুন",
+        mission: "বাংলাদেশের জন্য ডিজিটাল পরিমাপ, প্রতিবেদন ও যাচাইকরণ (dMRV), কর্পোরেট ইএসজি (ESG) হিসাবরক্ষণ এবং কৃষি ঝুঁকি বুদ্ধিমত্তা।",
+        copyrightEntity: "কার্বন জিরো বিডি (CarbonOS)",
         copyright: "কপিরাইট ২০২৬ কার্বন জিরো বিডি",
-        rights: "সর্বস্বত্ব সংরক্ষিত"
+        rights: "সর্বস্বত্ব সংরক্ষিত।",
+        backToTop: "উপরে ফিরে যান",
+        switchLanguage: "ভাষা পরিবর্তন করুন",
+        toggleTheme: "থিম পরিবর্তন করুন",
+        lightMode: "লাইট",
+        darkMode: "ডার্ক",
+        columns: {
+          platform: "প্ল্যাটফর্ম",
+          resources: "রিসোর্স ও ডকুমেন্টেশন",
+          company: "প্রতিষ্ঠান",
+          legal: "আইনি ও নীতিমালা"
+        },
+        links: {
+          mrvDashboard: "এমআরভি ড্যাশবোর্ড",
+          carbonMonitoring: "জিআইএস বায়োমাস হিটম্যাপ",
+          carbonRegistry: "কার্বন রেজিস্ট্রি",
+          esgWorkspace: "ইএসজি বিল ইনটেক",
+          saasDashboard: "সাস অ্যাকাউন্টিং",
+          marketplace: "ক্রেডিট মার্কেটপ্লেস",
+          howItWorks: "কিভাবে কাজ করে",
+          technology: "প্রযুক্তি ও টেলিমেট্রি",
+          frameworkDocs: "ফ্রেমওয়ার্ক ও পদ্ধতি",
+          apiDocs: "ডেভেলপার এপিআই ডকস",
+          farmersAi: "ফার্মার্স এআই ও হার্ভেস্টগার্ড",
+          sectorMethodologies: "খাতভিত্তিক পদ্ধতিসমূহ",
+          about: "কার্বন জিরো বিডি সম্পর্কে",
+          impact: "এসডিজি ইমপ্যাক্ট ও সুফল",
+          projectOnboarding: "প্রকল্প নিবন্ধন",
+          careers: "ক্যারিয়ার",
+          privacy: "গোপনীয়তা নীতি",
+          terms: "ব্যবহারের শর্তাবলী",
+          verificationWorkflow: "যাচাইকরণ ও অডিট নিয়মাবলী"
+        }
       }
     }
   }
