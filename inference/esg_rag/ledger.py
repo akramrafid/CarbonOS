@@ -492,11 +492,23 @@ def create_factor(db, principal, data, platform_wide=False):
     _check_factor_kind(data)
     data = _factor_values(dict(data))
 
-    # Structural provenance validation: decide only on structural provenance_class
+    # Structural provenance validation: decide on structural provenance_class or synthetic input labeling
     declared_provenance = str(data.get("provenance_class") or "").upper()
+    inputs_to_check = [
+        declared_provenance,
+        str(data.get("source_publisher") or ""),
+        str(data.get("source_document") or ""),
+        str(data.get("notes") or ""),
+        str(data.get("family") or "")
+    ]
+    for inp in data.get("source_inputs") or []:
+        inputs_to_check.append(str(inp))
+
+    has_synthetic_input = any("SYNTHETIC" in s.upper() for s in inputs_to_check)
+
     if declared_provenance == "TEST":
         provenance = "TEST"
-    elif declared_provenance == "SYNTHETIC":
+    elif has_synthetic_input:
         provenance = "SYNTHETIC"
     elif declared_provenance in ("PUBLISHED", "DERIVED_FROM_PUBLISHED"):
         provenance = declared_provenance
