@@ -932,3 +932,67 @@ The workflow defines three jobs: `backend`, `mutation`, and `frontend`:
   2. `backend.steps.alembic.check`: `command.check(alembic_config('postgresql+psycopg2://...'))` validating that database schema matches Alembic migration head.
   3. `mutation`: `mutmut==3.8.0` mutation testing of `inference/esg_rag/accounting.py` (requires Linux `fork()`; fails below 80% mutation score).
   4. `frontend.playwright`: Chromium browser matrix across 4 responsive viewports with live Python API backend running on port 8000.
+
+
+---
+
+## 6. Architecture Proposals for Decision (Do Not Implement)
+
+The following two architectural proposals are submitted for stakeholder review and determination:
+
+### Proposal 1: Global Reference Factor Registry vs. Tenant-Scoped Factor Registry
+
+#### Context & Problem
+Currently, emission factors in `EmissionFactor` (`inference/esg_rag/ledger_models.py`) are scoped by `organization_id`. Each tenant creates, approves, or wires provisional factors independently under dual control. While this isolates tenants, it leads to:
+1. Fragmented, duplicated emission factor entries across organizations for national reference data (e.g., national grid electricity, IPCC stationary fuel factors).
+2. Risk of conflicting factors being used for identical regional activities by different tenants.
+3. Administrative overhead requiring every new organization to create and dual-approve standard published factors before running calculations.
+
+#### Architectural Options for Decision:
+
+- **Option A: Global Reference Factor Registry (Managed by Platform Authority)**
+  - *Mechanism*: Create a global factor registry table (`is_global=True`, `organization_id=None`) managed exclusively by certified platform operators or national registry administrators. All tenants have read-only access to published reference factors. Custom tenant factors (`is_global=False`) remain tenant-scoped.
+  - *Pros*: Guarantees cross-tenant consistency and auditability; zero onboarding friction for new tenants; single point of authoritative update when government gazettes or IPCC tables update.
+  - *Cons*: Centralized dependency; requires dedicated platform administrator roles and audit governance; changes to global factors could affect historical recalculation policies if versioning is not strictly immutable.
+
+- **Option B: Hybrid Registry with Seed Subscriptions & Local Overrides**
+  - *Mechanism*: Reference factors are published globally as versioned immutable seeds. Tenants subscribe to a reference factor catalog, which copies or links the factors into their organization under dual-control review before activation.
+  - *Pros*: Preserves complete tenant sovereignty and independent dual-control verification; complies with strict internal enterprise compliance requiring tenant sign-off on all used parameters.
+  - *Cons*: Tenants may fail to update to newer published standards; redundant storage and dual-approval steps for standard national numbers.
+
+- **Option C: Pure Global Registry with Effective Date Freezes (Recommended)**
+  - *Mechanism*: All standard published factors (IPCC, BERC, BPDB) are strictly global and immutable. Once published, a factor version can never be edited; corrections are issued under a new version with non-overlapping `valid_from`/`valid_to`. Calculation runs lock the exact factor ID, version, and snapshot hash permanently.
+  - *Tenant Scope*: Only supplier-specific Scope 2 (market-based contractual instruments) and facility-specific Scope 1 factors are tenant-scoped.
+
+---
+
+### Proposal 2: Hardened Dual-Control Separation (Preventing Multi-Account Self-Approval)
+
+#### Context & Problem
+As proven in `tests/test_esg_authorization.py:test_multi_account_self_approval_vulnerability`, the existing dual-control check enforces:
+$$\text{rec.created\_by} \neq \text{principal.sub}$$
+However, an individual human administrator (`user-alice`) can use `POST /api/esg/invitations` to invite a second account under their control (`alice-alt@example.com` or personal alias) with role `esg_admin`. Logging in with that secondary account (`sub="alice-second-id"`), the user can approve their own activity records and factors, defeating dual control.
+
+#### Architectural Controls for Decision:
+
+- **Option A: Cryptographic Invitation Ancestry Enforcement (Application Level)**
+  - *Mechanism*: In `ESGMembership` / `ESGInvitation`, track `invited_by_sub`. Enforce in `ledger.py` that an approval is rejected if:
+    $$\text{approver.sub} == \text{creator.sub} \quad\lor\quad \text{approver.invited\_by} == \text{creator.sub} \quad\lor\quad \text{creator.invited\_by} == \text{approver.sub}$$
+  - *Pros*: Zero external dependencies; blocks direct invitation loops within the application.
+  - *Cons*: Does not prevent collusion if a third account is invited in a chain; does not detect separate accounts created independently by the same human.
+
+- **Option B: Mandatory Enterprise SSO / SCIM Integration (Enterprise Identity Gate)**
+  - *Mechanism*: For non-demo tenants in production, disable in-app invitation tokens and self-registration entirely. Enforce identity provisioning through corporate SAML 2.0 / OIDC with SCIM directory sync.
+  - *Pros*: Identity is bound to vetted corporate Active Directory / Okta identities; impossible for an employee to generate arbitrary secondary accounts without HR/IT provisioning; multi-factor authentication (MFA) enforced by enterprise IdP.
+  - *Cons*: Requires enterprise customers to connect an IdP; increases onboarding complexity for smaller organizations lacking corporate SSO.
+
+- **Option C: Separation of Duties Matrix + Multi-Party Quorum (Recommended)**
+  - *Mechanism*: Separate author and approver roles at the schema level:
+    - `data_entry_specialist`: Can draft activities and bill values, cannot approve.
+    - `sustainability_controller`: Can approve records, cannot create draft records.
+    - In addition, enforce corporate email domain matching (`*@company.com`) and log IP/device TLS fingerprint telemetry to flag approvals originating from the same client session within 24 hours.
+  - *Audit Trail*: Any approval with shared IP/device or invitation ancestry is flagged as `DUAL_CONTROL_HIGH_RISK` on the audit dossier export.
+
+
+
+
