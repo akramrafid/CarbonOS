@@ -226,7 +226,8 @@ select option {
   box-shadow: 0 4px 25px rgba(4, 18, 38, 0.06) !important;
 }
 
-[data-theme="light"] nav a[class*="bg-[#0A1F13]"] {
+[data-theme="light"] nav a[class*="bg-[#0A1F13]"],
+[data-theme="light"] nav button[class*="bg-[#0A1F13]"] {
   background-color: #15803d !important; /* Forest Emerald CTA */
   color: #ffffff !important; /* White tertiary text */
   border-color: #dbf0ea !important;
@@ -718,9 +719,14 @@ select option {
 
 [data-theme="dark"] .platform-saas-dashboard .text-\[\#64748B\],
 [data-theme="dark"] .platform-saas-dashboard .text-\[\#94A3B8\],
-[data-theme="dark"] .platform-saas-dashboard p:not(button *),
-[data-theme="dark"] .platform-saas-dashboard span:not(.text-emerald):not(.text-\[\#EF4444\]):not(.text-rose-500):not(.text-white):not([class*="text-white"]):not(button *):not([class*="text-[#00C853]"]):not([class*="text-[#00E676]"]) {
+[data-theme="dark"] .platform-saas-dashboard p:not(button *):not([role="note"]),
+[data-theme="dark"] .platform-saas-dashboard span:not(.text-emerald):not(.text-\[\#EF4444\]):not(.text-rose-500):not(.text-white):not([class*="text-white"]):not(button *):not([class*="text-[#00C853]"]):not([class*="text-[#00E676]"]):not([role="note"] *) {
   color: #B2C4B8 !important;
+}
+
+.platform-saas-dashboard p[role="note"],
+.platform-saas-dashboard p[role="note"] a {
+  color: #111827 !important;
 }
 
 /* High-Contrast Action Buttons matching Reference Image 2: #00C853 background with pure #FFFFFF text */
@@ -1011,6 +1017,27 @@ select option {
 .force-white,
 .force-white * {
   color: #ffffff !important;
+}
+
+/* Light theme demo banner safeguard */
+[data-theme="light"] .platform-saas-dashboard p[role="note"],
+[data-theme="light"] .platform-saas-dashboard p[role="note"] a {
+  color: #111827 !important;
+}
+
+/* ===== SAFE AREA & TOUCH / POINTER ADAPTATION ===== */
+@media (pointer: coarse) {
+  .touch-target-min {
+    min-height: 44px;
+    min-width: 44px;
+  }
+}
+
+@media (hover: none) {
+  .btn-magnetic:hover,
+  .theme-toggle:hover {
+    transform: none;
+  }
 }
 
 /* ===== ACCESSIBLE REDUCED MOTION ===== */

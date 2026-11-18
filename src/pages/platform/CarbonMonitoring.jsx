@@ -2758,7 +2758,7 @@ const CarbonMonitoring = () => {
                   </span>
                 </div>
 
-                <div className="grid grid-cols-2 gap-3.5 text-xs">
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3.5 text-xs">
                   <div>
                     <span className={`block text-[11px] font-medium ${isLight ? 'text-[#64748B]' : 'text-mist'}`}>
                       Project Name
@@ -3257,7 +3257,7 @@ const CarbonMonitoring = () => {
                       </span>
                     </div>
 
-                    <div className="flex items-center justify-between">
+                    <div className="flex flex-wrap items-center justify-between gap-2.5">
                       <div>
                         <div className={`text-xl font-bold font-sans ${isLight ? 'text-[#0F291B]' : 'text-white'}`}>
                           {provenanceSignatures.length} / 2+
@@ -3794,7 +3794,7 @@ const CarbonMonitoring = () => {
                   }`}>
                     Quick Boundary Presets
                   </label>
-                  <div className="grid grid-cols-2 gap-2">
+                  <div className="grid grid-cols-1 min-[360px]:grid-cols-2 gap-2">
                     <button
                       onClick={() => {
                         setDrawPoints(SUNDARBANS_RESERVE);
@@ -3830,7 +3830,7 @@ const CarbonMonitoring = () => {
                   </div>
                 </div>
 
-                <div className={`flex items-center justify-between p-3 rounded-xl border ${
+                <div className={`flex flex-wrap items-center justify-between gap-2.5 p-3 rounded-xl border ${
                   isLight ? 'bg-[#F8FAFC] border-[#E2E8F0]' : 'bg-white/5 border-white/5'
                 }`}>
                   <div>
@@ -3875,7 +3875,7 @@ const CarbonMonitoring = () => {
                         </span>
                       </div>
 
-                      <div className="grid grid-cols-2 gap-2 pt-1 border-t border-emerald/15 text-xs">
+                      <div className="grid grid-cols-1 min-[360px]:grid-cols-2 gap-2 pt-1 border-t border-emerald/15 text-xs">
                         <div>
                           <span className={`text-[10px] block ${isLight ? 'text-[#64748B]' : 'text-mist'}`}>Geodesic Area</span>
                           <span className={`font-extrabold font-mono text-sm block ${isLight ? 'text-[#0F291B]' : 'text-white'}`}>
@@ -4005,7 +4005,7 @@ const CarbonMonitoring = () => {
                   {basemap === 'terrain' ? 'Terrain (Active)' : basemap}
                 </span>
               </div>
-              <div className="grid grid-cols-3 gap-2">
+              <div className="grid grid-cols-1 min-[360px]:grid-cols-3 gap-2">
                 <button 
                   onClick={() => setBasemap('terrain')}
                   className={`text-xs py-2 rounded-xl font-bold transition-all border text-center cursor-pointer ${
@@ -4164,7 +4164,7 @@ const CarbonMonitoring = () => {
               )}
 
               {/* Map Legend Overlay (Top Right) - Fully dynamic based on LAYER_CONFIG */}
-              <div className="absolute top-4 right-4 bg-carbon/90 backdrop-blur-md border border-white/15 p-3.5 rounded-2xl max-w-[210px] z-20 space-y-2.5 shadow-xl">
+              <div className="absolute top-2.5 right-2.5 sm:top-4 sm:right-4 bg-carbon/90 backdrop-blur-md border border-white/15 p-2.5 sm:p-3.5 rounded-2xl max-w-[165px] sm:max-w-[210px] z-20 space-y-2 sm:space-y-2.5 shadow-xl">
                 <div className="flex items-center justify-between gap-2">
                   <h4 className="text-[10px] font-bold uppercase tracking-wider text-mist truncate">
                     {LAYER_CONFIG[activeLayer]?.title || 'INDEX RANGE'}
@@ -4222,7 +4222,7 @@ const CarbonMonitoring = () => {
                     <p className={`text-[11px] mt-1 font-mono ${isLight ? 'text-[#64748B]' : 'text-mist'}`}>{inspectedPixel.region} • <span className="text-emerald font-bold">{inspectedPixel.forestType}</span></p>
                   </div>
 
-                  <div className="grid grid-cols-2 md:grid-cols-5 gap-4">
+                  <div className="grid grid-cols-1 min-[360px]:grid-cols-2 md:grid-cols-5 gap-3 sm:gap-4">
                     <div className={`p-4 rounded-xl border ${isLight ? 'bg-[#F8FAFC] border-[#E2E8F0]' : 'bg-white/5 border-white/5'}`}>
                       <span className={`text-[10px] block ${isLight ? 'text-[#64748B]' : 'text-mist'}`}>Target Coordinates</span>
                       <span className={`text-xs font-mono font-bold mt-1 block ${isLight ? 'text-[#0F291B]' : 'text-white'}`}>

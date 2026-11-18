@@ -80,15 +80,15 @@ const Roadmap = () => {
   }, []);
 
   return (
-    <section className="w-full bg-[#040A06] py-24 px-6 lg:px-12 relative overflow-hidden noise-overlay">
+    <section className="w-full bg-[#040A06] py-16 sm:py-24 px-4 sm:px-6 lg:px-12 relative overflow-hidden noise-overlay">
       <div className="max-w-7xl mx-auto relative z-10" ref={containerRef}>
         
         {/* Header */}
-        <div className="text-center mb-20">
+        <div className="text-center mb-12 sm:mb-20">
           <span className="font-mono text-xs text-emerald tracking-widest px-3 py-1 bg-[#0D2B1A]/40 border border-[#00C853]/20 rounded-full mb-6 inline-block">
             PROCESS OVERVIEW
           </span>
-          <h2 className="serif-drama text-[48px] lg:text-[64px] text-white leading-tight mb-4">
+          <h2 className="serif-drama text-4xl sm:text-[48px] lg:text-[64px] text-white leading-tight mb-4">
             How Carbon Zero BD Works
           </h2>
           <p className="font-sans text-lg text-mist max-w-2xl mx-auto">
@@ -123,12 +123,12 @@ const Roadmap = () => {
 
                   {/* Content Card */}
                   <div className={`w-full md:w-1/2 ${isEven ? 'md:pr-16 text-left md:text-right' : 'md:pl-16 text-left'}`}>
-                    <div className="bg-[#080F0B]/80 backdrop-blur-md registry-border p-8 rounded-[2rem] hover:bg-[#0D2B1A]/60 transition-colors group">
-                      <div className={`flex items-center space-x-3 mb-4 ${isEven ? 'md:justify-end' : 'justify-start'}`}>
-                        <span className="font-mono text-xs text-emerald bg-emerald/10 px-2 py-1 rounded">
+                    <div className="bg-[#080F0B]/80 backdrop-blur-md registry-border p-5 sm:p-8 rounded-2xl sm:rounded-[2rem] hover:bg-[#0D2B1A]/60 transition-colors group">
+                      <div className={`flex flex-wrap items-center gap-2 sm:gap-3 mb-4 ${isEven ? 'md:justify-end' : 'justify-start'}`}>
+                        <span className="font-mono text-xs text-emerald bg-emerald/10 px-2 py-1 rounded shrink-0">
                           STEP {step.icon}
                         </span>
-                        <h3 className="font-sans font-bold text-2xl text-registry group-hover:text-emerald transition-colors">
+                        <h3 className="font-sans font-bold text-xl sm:text-2xl text-registry group-hover:text-emerald transition-colors">
                           {step.title}
                         </h3>
                       </div>

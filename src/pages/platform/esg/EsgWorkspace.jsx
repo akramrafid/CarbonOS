@@ -252,7 +252,7 @@ export default function EsgWorkspace() {
 
       <div className="flex flex-wrap items-end gap-4">
         {orgs.length > 1
-          ? <div className="w-72"><Select label="Organization" value={orgId} onChange={(e) => switchOrg(e.target.value)} options={orgs.map((o) => [o.id, o.name])} /></div>
+          ? <div className="w-full sm:w-72"><Select label="Organization" value={orgId} onChange={(e) => switchOrg(e.target.value)} options={orgs.map((o) => [o.id, o.name])} /></div>
           : <p className="text-lg text-registry">{org.name}</p>}
         <span className="rounded bg-mist/15 px-2 py-1 font-mono text-[11px] text-mist">Role: {org.role}</span>
         {org.is_demo && !user?.isDemo && (

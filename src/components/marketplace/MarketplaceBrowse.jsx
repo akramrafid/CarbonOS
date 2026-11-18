@@ -948,7 +948,7 @@ export const MarketplaceBrowse = () => {
                       ? 'bg-[#f2f3ee]/80 border-[#dbf0ea]' 
                       : 'bg-[#0D2B1A]/30 border-white/5'
                   }`}>
-                    <div className="grid grid-cols-2 gap-3 mb-2.5">
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 mb-2.5">
                       <div>
                         <span className="font-mono text-[10px] text-slate-400 block mb-0.5">VOLUME</span>
                         <span className={`font-mono text-xl font-bold ${isLight ? 'text-[#181414]' : 'text-white'}`}>
@@ -1204,14 +1204,14 @@ export const MarketplaceBrowse = () => {
                   <span className="text-[10px] font-mono text-emerald">Not audited</span>
                 </div>
                 <p className="text-slate-300">{inspectCredit.mrvTelemetry}</p>
-                <div className="grid grid-cols-2 gap-2 pt-2 text-[11px] font-mono text-slate-400">
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 pt-2 text-[11px] font-mono text-slate-400">
                   <div>GPS Coordinates: <span className="text-white">{inspectCredit.coordinates}</span></div>
                   <div>Auditor: <span className="text-white">{inspectCredit.auditor}</span></div>
                 </div>
               </div>
 
               {/* Additionality & Co-benefits */}
-              <div className="grid grid-cols-2 gap-3">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                 <div className={`p-3.5 rounded-xl border ${
                   isLight ? 'bg-slate-50 border-slate-200' : 'bg-white/5 border-white/5'
                 }`}>
@@ -1231,7 +1231,7 @@ export const MarketplaceBrowse = () => {
               </div>
 
               {/* Financial Breakdown */}
-              <div className={`p-3.5 rounded-xl border flex justify-between items-center ${
+              <div className={`p-3.5 rounded-xl border flex flex-col sm:flex-row sm:justify-between sm:items-center gap-2 ${
                 isLight ? 'bg-emerald/5 border-emerald/20' : 'bg-[#0D2B1A]/40 border-emerald/20'
               }`}>
                 <div>
@@ -1240,7 +1240,7 @@ export const MarketplaceBrowse = () => {
                     ৳{inspectCredit.price.toLocaleString()} ({inspectCredit.tonnage} tCO₂e)
                   </span>
                 </div>
-                <div className="text-right">
+                <div className="text-left sm:text-right">
                   <span className="text-[10px] font-mono text-slate-400 block">DIRECT FARMER WALLET</span>
                   <span className="text-xs font-mono font-bold text-white">{inspectCredit.farmerWallet}</span>
                 </div>
@@ -1248,10 +1248,10 @@ export const MarketplaceBrowse = () => {
             </div>
 
             {/* Modal Actions */}
-            <div className="mt-6 flex items-center space-x-3">
+            <div className="mt-6 flex flex-col-reverse sm:flex-row sm:items-center gap-2.5 sm:gap-3">
               <button
                 onClick={() => setInspectCredit(null)}
-                className="px-4 py-2.5 rounded-xl border border-white/10 text-xs font-medium text-slate-400 hover:text-white"
+                className="w-full sm:w-auto px-4 py-2.5 min-h-[44px] sm:min-h-0 rounded-xl border border-white/10 text-xs font-medium text-slate-400 hover:text-white"
               >
                 Close Dossier
               </button>

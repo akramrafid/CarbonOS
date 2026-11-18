@@ -723,7 +723,7 @@ export const UniversalUtilityExtractor = ({
                 />
               </div>
 
-              <div className="grid grid-cols-3 gap-3">
+              <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
                 <div>
                   <label className="block text-gray-400 mb-1">Quantity</label>
                   <input 
@@ -828,7 +828,7 @@ export const UniversalUtilityExtractor = ({
                 />
               </div>
 
-              <div className="grid grid-cols-2 gap-3">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                 <div>
                   <label className="block text-gray-400 mb-1">Utility Type</label>
                   <select 
@@ -860,7 +860,7 @@ export const UniversalUtilityExtractor = ({
                 </div>
               </div>
 
-              <div className="grid grid-cols-3 gap-3">
+              <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
                 <div>
                   <label className="block text-gray-400 mb-1">Quantity</label>
                   <input 

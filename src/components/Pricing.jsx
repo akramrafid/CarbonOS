@@ -6,7 +6,7 @@ const Pricing = () => {
   const [isAnnual, setIsAnnual] = useState(true);
 
   return (
-    <section id="pricing" className="w-full bg-[#040A06] text-white py-28 px-6 lg:px-12 relative overflow-hidden border-t border-white/10">
+    <section id="pricing" className="w-full bg-[#040A06] text-white py-20 sm:py-28 px-4 sm:px-6 lg:px-12 relative overflow-hidden border-t border-white/10">
       {/* Background ambient lighting */}
       <div className="absolute top-1/3 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[850px] h-[550px] bg-emerald-950/20 blur-[150px] pointer-events-none rounded-full" />
 
@@ -29,11 +29,11 @@ const Pricing = () => {
           </p>
 
           {/* Billing Interval Toggle Switch */}
-          <div className="mt-8 inline-flex items-center p-1.5 rounded-2xl bg-[#08150D] border border-[#183822] shadow-lg backdrop-blur-xl">
+          <div className="mt-8 inline-flex flex-wrap items-center justify-center p-1.5 rounded-2xl bg-[#08150D] border border-[#183822] shadow-lg backdrop-blur-xl gap-1 max-w-full">
             <button
               type="button"
               onClick={() => setIsAnnual(false)}
-              className={`px-5 py-2.5 rounded-xl text-xs font-sans font-semibold transition-all duration-200 cursor-pointer ${
+              className={`px-3.5 sm:px-5 py-2.5 rounded-xl text-xs font-sans font-semibold transition-all duration-200 cursor-pointer min-h-[40px] ${
                 !isAnnual 
                   ? 'bg-white text-black shadow-md font-bold' 
                   : 'text-gray-300 hover:text-white'
@@ -44,7 +44,7 @@ const Pricing = () => {
             <button
               type="button"
               onClick={() => setIsAnnual(true)}
-              className={`px-5 py-2.5 rounded-xl text-xs font-sans font-semibold flex items-center gap-2 transition-all duration-200 cursor-pointer ${
+              className={`px-3.5 sm:px-5 py-2.5 rounded-xl text-xs font-sans font-semibold flex items-center gap-2 transition-all duration-200 cursor-pointer min-h-[40px] ${
                 isAnnual 
                   ? 'bg-[#00C853] text-[#050C07] font-bold shadow-[0_0_20px_rgba(0,200,83,0.35)]' 
                   : 'text-gray-300 hover:text-white'

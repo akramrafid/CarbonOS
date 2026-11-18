@@ -375,7 +375,7 @@ const FarmersAILanding = () => {
             {text.cropsSubtitle}
           </motion.p>
 
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-6 mb-8">
+          <div className="grid grid-cols-1 min-[360px]:grid-cols-2 md:grid-cols-4 gap-3 sm:gap-6 mb-8">
             {cropsData.map((crop) => (
               <motion.button
                 key={crop.id}
@@ -500,7 +500,7 @@ const FarmersAILanding = () => {
         </div>
 
         {/* Bottom CTA */}
-        <div className="relative border border-white/10 rounded-3xl p-12 text-center overflow-hidden bg-cover bg-center min-h-[300px] flex flex-col justify-center items-center shadow-2xl" style={{ backgroundImage: 'url(/farmers_hero_banner.png)' }}>
+        <div className="relative border border-white/10 rounded-3xl p-6 sm:p-12 text-center overflow-hidden bg-cover bg-center min-h-[300px] flex flex-col justify-center items-center shadow-2xl" style={{ backgroundImage: 'url(/farmers_hero_banner.png)' }}>
           <div className="absolute inset-0 bg-black/80 backdrop-blur-[2px]" />
           <div className="absolute inset-0 bg-gradient-to-t from-carbon via-transparent to-transparent" />
           <h2 className="text-3xl md:text-5xl font-sans font-extrabold text-white mb-8 relative z-10 tracking-tight leading-tight max-w-2xl">

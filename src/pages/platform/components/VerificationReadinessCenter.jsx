@@ -335,7 +335,7 @@ export const VerificationReadinessCenter = ({
         </div>
 
         {/* Dynamic Metric Stats Strip */}
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mt-6 pt-6 border-t border-white/10">
+        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-4 mt-6 pt-6 border-t border-white/10">
           <div className="p-3.5 rounded-2xl bg-black/20 border border-white/5">
             <span className="text-[10px] text-gray-400 font-mono uppercase tracking-wider block">Assurance Level Target</span>
             <span className="text-base font-bold font-mono text-white mt-0.5 block">Reasonable Assurance</span>
@@ -667,7 +667,7 @@ export const VerificationReadinessCenter = ({
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
             {/* Input Controls */}
             <div className="space-y-4 p-5 rounded-2xl bg-black/20 border border-white/5">
-              <div className="grid grid-cols-2 gap-4">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div>
                   <label className="block text-[10px] font-bold text-gray-400 uppercase font-mono mb-1">Baseline Year</label>
                   <input

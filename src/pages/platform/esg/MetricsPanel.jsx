@@ -40,8 +40,8 @@ export default function MetricsPanel({ me, can, periods, facilities }) {
       <Notice error={action.error} message={action.message} />
       <Panel title="E/S/G metrics" description="Aggregated figures only — never records about individual people. Self-reported values are not external certification."
         actions={<div className="flex flex-wrap gap-3">
-          <div className="w-48"><Select label="Reporting period" value={periodId} onChange={(e) => setPeriodId(e.target.value)} options={periods.map((p) => [p.id, p.name])} /></div>
-          <div className="w-44"><Select label="Pillar" value={pillar} onChange={(e) => { setPillar(e.target.value); setMetricKey(''); }} options={PILLARS} /></div>
+          <div className="w-full sm:w-48"><Select label="Reporting period" value={periodId} onChange={(e) => setPeriodId(e.target.value)} options={periods.map((p) => [p.id, p.name])} /></div>
+          <div className="w-full sm:w-44"><Select label="Pillar" value={pillar} onChange={(e) => { setPillar(e.target.value); setMetricKey(''); }} options={PILLARS} /></div>
         </div>}>
         <Loading state={obs} empty="No observations for this pillar and period yet.">
           <Table caption="Metric observations" rows={obs.data?.items || []} columns={[

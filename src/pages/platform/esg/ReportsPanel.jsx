@@ -72,7 +72,7 @@ export default function ReportsPanel({ can, me, periods, facilities, onPeriodsCh
       <Notice error={action.error} message={action.message} />
       <Panel title="Calculation" description="Scope 1 and Scope 2 from APPROVED records only. Every line shows its formula and factor version."
         actions={<div className="flex flex-wrap items-end gap-3">
-          <div className="w-56"><Select label="Reporting period" value={periodId} onChange={(e) => { setPeriodId(e.target.value); setRun(null); }}
+          <div className="w-full sm:w-56"><Select label="Reporting period" value={periodId} onChange={(e) => { setPeriodId(e.target.value); setRun(null); }}
             options={periods.map((p) => [p.id, `${p.name} (${p.status})`])} /></div>
           {can.write && period?.status === 'OPEN' && <Button onClick={calculate} disabled={action.busy}>Run calculation</Button>}
         </div>}>

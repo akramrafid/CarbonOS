@@ -98,19 +98,19 @@ const FrameworkAlignment = () => {
       {/* Card 1 */}
       <section 
         ref={el => cardsRef.current[0] = el}
-        className="w-full h-screen sticky top-0 flex items-center bg-[#0D2B1A] overflow-hidden"
+        className="w-full min-h-screen lg:h-screen py-16 lg:py-0 sticky top-0 flex items-center bg-[#0D2B1A] overflow-hidden"
       >
-        <div className="max-w-7xl mx-auto px-6 lg:px-12 w-full grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-12 w-full grid grid-cols-1 lg:grid-cols-2 gap-8 lg:gap-12 items-center">
           <div className="flex justify-center lg:justify-start">
             <SealSVG />
           </div>
           <div className="relative">
-            <div className="absolute -top-16 -left-8 font-mono text-[120px] text-emerald opacity-10 leading-none">01</div>
-            <h3 className="font-sans font-bold text-3xl lg:text-4xl text-white mb-6 relative z-10">Built Around Published Rules</h3>
-            <p className="font-sans text-lg text-mist leading-relaxed mb-8 relative z-10">
+            <div className="absolute -top-8 sm:-top-14 left-0 sm:-left-6 font-mono text-[64px] sm:text-[100px] lg:text-[120px] text-emerald opacity-10 leading-none pointer-events-none select-none">01</div>
+            <h3 className="font-sans font-bold text-2xl sm:text-3xl lg:text-4xl text-white mb-4 sm:mb-6 relative z-10">Built Around Published Rules</h3>
+            <p className="font-sans text-base sm:text-lg text-mist leading-relaxed mb-6 sm:mb-8 relative z-10">
               Designed around Bangladesh's climate rules as they are published. A rule enters the product only with its primary document cited; nothing here is approved or endorsed by a regulator.
             </p>
-            <div className="flex space-x-3 relative z-10">
+            <div className="flex flex-wrap gap-2.5 sm:gap-3 relative z-10">
               <span className="font-mono text-xs text-registry bg-black/40 border border-emerald/20 px-3 py-1.5 rounded">[GHG Protocol]</span>
               <span className="font-mono text-xs text-registry bg-black/40 border border-emerald/20 px-3 py-1.5 rounded">[ISO 14064-1]</span>
               <span className="font-mono text-xs text-registry bg-black/40 border border-emerald/20 px-3 py-1.5 rounded">[IPCC 2006]</span>
@@ -122,19 +122,19 @@ const FrameworkAlignment = () => {
       {/* Card 2 */}
       <section 
         ref={el => cardsRef.current[1] = el}
-        className="w-full h-screen sticky top-0 flex items-center bg-[#080F0B] noise-overlay overflow-hidden shadow-[0_-20px_50px_rgba(0,0,0,0.5)]"
+        className="w-full min-h-screen lg:h-screen py-16 lg:py-0 sticky top-0 flex items-center bg-[#080F0B] noise-overlay overflow-hidden shadow-[0_-20px_50px_rgba(0,0,0,0.5)]"
       >
-        <div className="max-w-7xl mx-auto px-6 lg:px-12 w-full grid grid-cols-1 lg:grid-cols-2 gap-12 items-center relative z-10">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-12 w-full grid grid-cols-1 lg:grid-cols-2 gap-8 lg:gap-12 items-center relative z-10">
           <div className="flex justify-center lg:justify-start">
             <ScannerGrid />
           </div>
           <div className="relative">
-            <div className="absolute -top-16 -left-8 font-mono text-[120px] text-emerald opacity-10 leading-none">02</div>
-            <h3 className="font-sans font-bold text-3xl lg:text-4xl text-white mb-6 relative z-10">MRV That Works in the Field</h3>
-            <p className="font-sans text-lg text-mist leading-relaxed mb-8 relative z-10">
+            <div className="absolute -top-8 sm:-top-14 left-0 sm:-left-6 font-mono text-[64px] sm:text-[100px] lg:text-[120px] text-emerald opacity-10 leading-none pointer-events-none select-none">02</div>
+            <h3 className="font-sans font-bold text-2xl sm:text-3xl lg:text-4xl text-white mb-4 sm:mb-6 relative z-10">MRV That Works in the Field</h3>
+            <p className="font-sans text-base sm:text-lg text-mist leading-relaxed mb-6 sm:mb-8 relative z-10">
               Google Earth Engine satellite integration. GPS field tagging. IoT sensor data ingestion. Mobile farmer reporting app. AI-powered anomaly detection comparing satellite data against project reports. MRV that works in Khulna, not just in Dhaka conference rooms.
             </p>
-            <div className="flex flex-wrap gap-3 relative z-10">
+            <div className="flex flex-wrap gap-2.5 sm:gap-3 relative z-10">
               <span className="font-mono text-xs text-registry bg-black/40 border border-emerald/20 px-3 py-1.5 rounded">[Google Earth Engine]</span>
               <span className="font-mono text-xs text-registry bg-black/40 border border-emerald/20 px-3 py-1.5 rounded">[PostGIS]</span>
               <span className="font-mono text-xs text-registry bg-black/40 border border-emerald/20 px-3 py-1.5 rounded">[TensorFlow]</span>
@@ -146,19 +146,19 @@ const FrameworkAlignment = () => {
       {/* Card 3 */}
       <section 
         ref={el => cardsRef.current[2] = el}
-        className="w-full h-screen sticky top-0 flex items-center bg-[#0D2B1A] overflow-hidden shadow-[0_-20px_50px_rgba(0,0,0,0.5)]"
+        className="w-full min-h-screen lg:h-screen py-16 lg:py-0 sticky top-0 flex items-center bg-[#0D2B1A] overflow-hidden shadow-[0_-20px_50px_rgba(0,0,0,0.5)]"
       >
-        <div className="max-w-7xl mx-auto px-6 lg:px-12 w-full grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
-          <div className="flex justify-center lg:justify-start w-full pr-12">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-12 w-full grid grid-cols-1 lg:grid-cols-2 gap-8 lg:gap-12 items-center">
+          <div className="flex justify-center lg:justify-start w-full lg:pr-12">
             <EKGWave />
           </div>
           <div className="relative">
-            <div className="absolute -top-16 -left-8 font-mono text-[120px] text-emerald opacity-10 leading-none">03</div>
-            <h3 className="font-sans font-bold text-3xl lg:text-4xl text-white mb-6 relative z-10">International Standards, Local Execution</h3>
-            <p className="font-sans text-lg text-mist leading-relaxed mb-8 relative z-10">
+            <div className="absolute -top-8 sm:-top-14 left-0 sm:-left-6 font-mono text-[64px] sm:text-[100px] lg:text-[120px] text-emerald opacity-10 leading-none pointer-events-none select-none">03</div>
+            <h3 className="font-sans font-bold text-2xl sm:text-3xl lg:text-4xl text-white mb-4 sm:mb-6 relative z-10">International Standards, Local Execution</h3>
+            <p className="font-sans text-base sm:text-lg text-mist leading-relaxed mb-6 sm:mb-8 relative z-10">
               Verra VCS, Gold Standard, Article 6 and CDM methodologies are referenced, not integrated: CarbonOS has no registry connection or certification. Your Bangladesh projects speak the language of international carbon buyers in London, Singapore, and Tokyo.
             </p>
-            <div className="flex flex-wrap gap-3 relative z-10">
+            <div className="flex flex-wrap gap-2.5 sm:gap-3 relative z-10">
               <span className="font-mono text-xs text-registry bg-black/40 border border-emerald/20 px-3 py-1.5 rounded">[Verra VCS]</span>
               <span className="font-mono text-xs text-registry bg-black/40 border border-emerald/20 px-3 py-1.5 rounded">[Gold Standard]</span>
               <span className="font-mono text-xs text-registry bg-black/40 border border-emerald/20 px-3 py-1.5 rounded">[Article 6]</span>

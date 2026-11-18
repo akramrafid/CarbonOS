@@ -60,7 +60,8 @@ import {
   Sliders,
   Edit3,
   Lightbulb,
-  PieChart
+  PieChart,
+  Menu
 } from 'lucide-react';
 import { useTheme } from '../../context/ThemeContext';
 import { SaaSLocales } from './SaaSLocalization';
@@ -700,6 +701,16 @@ const SaaSDashboard = () => {
 
   // Active Menu / Tabs state
   const [activeMenu, setActiveMenu] = useState('Dashboard');
+  const [isSidebarOpen, setIsSidebarOpen] = useState(false);
+
+  useEffect(() => {
+    if (!isSidebarOpen) return;
+    const onKeyDown = (e) => {
+      if (e.key === 'Escape') setIsSidebarOpen(false);
+    };
+    window.addEventListener('keydown', onKeyDown);
+    return () => window.removeEventListener('keydown', onKeyDown);
+  }, [isSidebarOpen]);
 
   // Bilingual Localization & Reporting Currency state
   const [lang, setLang] = useState('en');
@@ -1302,6 +1313,193 @@ const SaaSDashboard = () => {
   const activeParams = extractionResult ? (extractionResult.parameters || inputs) : inputs;
   const activeMatrix = computeCategoryMatrix(activeParams, customItems, categoryAdjustments, ef.electricity);
 
+  const menuGroups = [
+    {
+      title: lang === 'bn' ? 'প্রধান মেনু' : 'Menu',
+      badgeClass: 'bg-amber-500/15 text-amber-400 border border-amber-500/30 text-[10px] font-mono font-semibold px-2 py-0.5 rounded-md shrink-0 whitespace-nowrap leading-none',
+      items: [
+        { name: 'Dashboard', label: lang === 'bn' ? 'ড্যাশবোর্ড' : 'Dashboard', icon: Grid },
+        { name: 'Materiality', label: lang === 'bn' ? 'ম্যাটেরিয়ালিটি' : 'Materiality', icon: Compass },
+        { name: 'Audit & Compliance', label: lang === 'bn' ? 'অডিট ও কমপ্লায়েন্স' : 'Audit & Compliance', icon: CheckCircle2, badge: 'ISO 14064' },
+        { name: 'Tasks', label: lang === 'bn' ? 'টাস্ক তালিকা' : 'Tasks', icon: CheckCircle, badge: openTasksCount > 0 ? `${openTasksCount} left` : null },
+        { name: 'Calendar', label: lang === 'bn' ? 'ক্যালেন্ডার' : 'Calendar', icon: CalendarIcon },
+        { name: 'Analytics', label: lang === 'bn' ? 'অ্যানালিটিক্স' : 'Analytics', icon: BarChart2 },
+        { name: 'Team', label: lang === 'bn' ? 'টিম ম্যানেজমেন্ট' : 'Team', icon: Users }
+      ]
+    },
+    {
+      title: lang === 'bn' ? 'কোর ইঞ্জিন ও এমআরভি' : 'Engines & MRV',
+      badgeClass: 'bg-[#00C853]/10 text-[#00E676] text-[10px] font-mono font-medium px-2 py-0.5 rounded-md border border-[#00C853]/25 shrink-0 whitespace-nowrap leading-none',
+      items: [
+        { name: 'Activity & Evidence', label: lang === 'bn' ? 'অ্যাক্টিভিটি ও এভিডেন্স' : 'Activity & Evidence', icon: Layers, badge: 'ISO 14064' },
+        { name: 'ESG Reports', label: lang === 'bn' ? 'ইএসজি রিপোর্ট' : 'ESG Reports', icon: FileText, badge: 'Audit-Ready' },
+        { name: 'DuckDB Engine', label: lang === 'bn' ? 'ডাকডিবি ইঞ্জিন' : 'DuckDB Engine', icon: Zap, badge: 'Sub-25ms' },
+        { name: 'Utility Invoices', label: lang === 'bn' ? 'ইউটিলিটি ইনভয়েস' : 'Utility Invoices', icon: FileText, badge: 'Universal' },
+        { name: 'Satellite MRV', label: lang === 'bn' ? 'স্যাটেলাইট এমআরভি' : 'Satellite MRV', icon: Globe, badge: 'GEDI' },
+        { name: 'Factor Registry', label: lang === 'bn' ? 'ফ্যাক্টর রেজিস্ট্রি' : 'Factor Registry', icon: Database, badge: 'DoE' },
+        { name: 'ATLAS Benchmark', label: lang === 'bn' ? 'অ্যাটলাস বেঞ্চমার্ক' : 'ATLAS Benchmark', icon: CheckCircle2, badge: '10 Bills' },
+        { name: 'Entity Tree', label: lang === 'bn' ? 'কর্পোরেট হায়ারার্কি' : 'Entity Tree', icon: Building, badge: 'Sweep' }
+      ]
+    },
+    {
+      title: lang === 'bn' ? 'সাধারণ' : 'General',
+      badgeClass: '',
+      items: [
+        { name: 'Settings', label: lang === 'bn' ? 'সেটিংস' : 'Settings', icon: Settings },
+        { name: 'Help', label: lang === 'bn' ? 'সহায়তা' : 'Help', icon: HelpCircle },
+        { name: 'Logout', label: lang === 'bn' ? 'লগআউট' : 'Logout', icon: LogOut }
+      ]
+    }
+  ];
+
+  const handleSelectMenu = (name) => {
+    setIsSidebarOpen(false);
+    if (name === 'Logout') {
+      navigate('/');
+    } else {
+      setActiveMenu(name);
+    }
+  };
+
+  const renderSidebarContent = (showCloseButton = false) => (
+    <>
+      {/* Header / Brand */}
+      <div className={`px-5 pt-5 lg:pt-4 pb-4 border-b shrink-0 flex items-center justify-between gap-2 ${isLight ? 'border-[#E3EAE5]' : 'border-[#132318]'}`}>
+        <Link to="/" onClick={() => setIsSidebarOpen(false)} className="flex items-center space-x-3 group min-w-0">
+          <div className="w-8 h-8 rounded-xl bg-gradient-to-tr from-[#00C853] to-[#00E676] flex items-center justify-center shadow-[0_0_16px_rgba(0,200,83,0.25)] text-[#050C07] shrink-0 transition-transform duration-200 group-hover:scale-105">
+            <Leaf className="w-4 h-4 text-[#050C07] stroke-[2.5]" />
+          </div>
+          <div className="flex-1 min-w-0">
+            <div className="flex items-center space-x-1.5">
+              <span className={`font-sans font-bold text-sm tracking-tight truncate ${
+                isLight ? 'text-[#0F2417]' : 'text-white'
+              }`}>
+                CarbonZero
+              </span>
+              <span className="text-[9px] font-mono font-bold px-1.5 py-0.5 rounded bg-[#00C853]/15 text-[#00E676] border border-[#00C853]/30 shrink-0 leading-none">
+                BD
+              </span>
+            </div>
+            <span className={`text-[10px] font-sans font-semibold tracking-wider uppercase block truncate mt-0.5 ${
+              isLight ? 'text-[#557361]' : 'text-[#6E8F7A]'
+            }`}>
+              Sovereign Registry OS
+            </span>
+          </div>
+        </Link>
+        {showCloseButton && (
+          <button
+            type="button"
+            onClick={() => setIsSidebarOpen(false)}
+            aria-label="Close dashboard navigation"
+            className={`min-w-[44px] min-h-[44px] rounded-xl flex items-center justify-center transition-colors cursor-pointer ${
+              isLight ? 'text-slate-600 hover:bg-slate-100' : 'text-[#8FA899] hover:bg-white/10 hover:text-white'
+            }`}
+          >
+            <X className="w-5 h-5" />
+          </button>
+        )}
+      </div>
+
+      {/* Scrollable Menu Sections */}
+      <div className="flex-1 overflow-y-auto px-3.5 py-4 space-y-6 custom-scrollbar">
+        {menuGroups.map((group) => (
+          <div key={group.title}>
+            <span className={`font-sans text-[10px] uppercase tracking-wider block px-2.5 mb-1.5 font-bold ${
+              isLight ? 'text-[#7C9A88]' : 'text-[#557361]'
+            }`}>
+              {group.title}
+            </span>
+            <nav className="space-y-1">
+              {group.items.map((item) => {
+                const Icon = item.icon;
+                const isActive = activeMenu === item.name;
+                return (
+                  <button
+                    key={item.name}
+                    type="button"
+                    onClick={() => handleSelectMenu(item.name)}
+                    className={`w-full flex items-center justify-between px-2.5 py-2.5 lg:py-2 min-h-[44px] lg:min-h-0 rounded-xl text-xs font-sans transition-all duration-150 cursor-pointer relative group ${
+                      isActive 
+                        ? (isLight 
+                            ? 'bg-[#EEF7F1] text-[#0A2E19] font-bold border border-[#CCE2D3] shadow-sm' 
+                            : 'bg-[#0B2114] text-white font-bold border border-[#174D2B] shadow-[0_2px_10px_rgba(0,200,83,0.08)]')
+                        : (isLight 
+                            ? 'text-slate-600 hover:bg-slate-100/70 hover:text-slate-950 font-medium border border-transparent' 
+                            : 'text-[#8FA899] hover:bg-white/[0.04] hover:text-white font-medium border border-transparent')
+                    }`}
+                  >
+                    {isActive && (
+                      <span className={`absolute left-0 top-1.5 bottom-1.5 w-1 rounded-r-full ${
+                        isLight ? 'bg-[#00C853]' : 'bg-[#00E676] shadow-[0_0_8px_rgba(0,230,118,0.5)]'
+                      }`} />
+                    )}
+                    <div className="flex items-center space-x-2.5 min-w-0 pr-1">
+                      <div className={`w-6 h-6 rounded-lg flex items-center justify-center shrink-0 transition-colors ${
+                        isActive 
+                          ? (isLight ? 'bg-[#00C853]/15 text-[#00A844]' : 'bg-[#00C853]/20 text-[#00E676]') 
+                          : (isLight ? 'text-[#64748B] group-hover:text-slate-900' : 'text-[#6E8F7A] group-hover:text-emerald-300')
+                      }`}>
+                        <Icon className="w-3.5 h-3.5" />
+                      </div>
+                      <span className="text-xs tracking-tight truncate">{item.label || item.name}</span>
+                    </div>
+                    {item.badge && (
+                      <span className={group.badgeClass}>
+                        {item.badge}
+                      </span>
+                    )}
+                  </button>
+                );
+              })}
+            </nav>
+          </div>
+        ))}
+      </div>
+
+      {/* Telemetry Status & Mobile App Card */}
+      <div className={`p-3 pb-[max(0.75rem,env(safe-area-inset-bottom))] border-t shrink-0 ${isLight ? 'border-[#E3EAE5]' : 'border-[#132318]'}`}>
+        <div className={`p-3 rounded-2xl border transition-all ${
+          isLight 
+            ? 'bg-[#F2F8F4] border-[#CCE2D3] text-[#0F2417]' 
+            : 'bg-[#07150D] border-[#132A1C] text-white'
+        }`}>
+          <div className="flex items-center justify-between mb-1.5">
+            <div className="flex items-center space-x-2">
+              <span className="relative flex h-2 w-2">
+                <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-[#00C853] opacity-75"></span>
+                <span className="relative inline-flex rounded-full h-2 w-2 bg-[#00C853]"></span>
+              </span>
+              <span className="font-sans font-bold text-[11px] tracking-tight">
+                Live MRV Telemetry
+              </span>
+            </div>
+            <span className="text-[9px] font-mono font-bold text-emerald-400 bg-[#00C853]/15 border border-[#00C853]/30 px-1.5 py-0.5 rounded leading-none">
+              SYNC
+            </span>
+          </div>
+          <p className={`text-[10px] mb-2.5 leading-tight font-sans ${isLight ? 'text-[#557361]' : 'text-[#7C9A88]'}`}>
+            Mobile satellite sync & live emissions stream telemetry.
+          </p>
+          <button 
+            disabled={downloadingApp}
+            onClick={handleDownloadApp}
+            className="w-full min-h-[40px] bg-[#00C853] hover:bg-[#00E676] text-white font-mono font-bold text-xs py-2.5 px-3 rounded-xl transition-all flex items-center justify-center space-x-1.5 shadow-sm cursor-pointer disabled:opacity-50"
+          >
+            {downloadingApp ? (
+              <>
+                <Loader2 className="w-3.5 h-3.5 animate-spin text-white" />
+                <span className="text-white font-mono font-bold">Connecting...</span>
+              </>
+            ) : (
+              <span className="text-white font-mono font-bold tracking-tight">Download Mobile App</span>
+            )}
+          </button>
+        </div>
+      </div>
+    </>
+  );
+
   return (
     <div className={`min-h-screen flex relative platform-saas-dashboard transition-colors duration-300 ${
       isLight ? 'bg-[#F4F6F4] text-[#0F2417]' : 'bg-[#040906] text-[#E0EFE7]'
@@ -1333,257 +1531,56 @@ const SaaSDashboard = () => {
       )}
 
       {/* 1. Left Sidebar Navigation Panel — Executive Enterprise Architecture */}
-      <aside className={`w-[272px] min-w-[272px] border-r h-screen sticky top-0 hidden lg:flex flex-col justify-between shrink-0 transition-colors duration-200 z-30 select-none ${
+      <aside className={`w-[272px] min-w-[272px] border-r h-screen sticky top-0 hidden lg:flex lg:pt-20 lg:pb-10 flex-col justify-between shrink-0 transition-colors duration-200 z-30 select-none ${
         isLight ? 'bg-[#FAFCFA] border-[#E3EAE5]' : 'bg-[#060D08] border-[#132318]'
       }`}>
-        {/* Header / Brand */}
-        <div className={`px-5 pt-6 pb-4 border-b shrink-0 ${isLight ? 'border-[#E3EAE5]' : 'border-[#132318]'}`}>
-          <Link to="/" className="flex items-center space-x-3 group">
-            <div className="w-8 h-8 rounded-xl bg-gradient-to-tr from-[#00C853] to-[#00E676] flex items-center justify-center shadow-[0_0_16px_rgba(0,200,83,0.25)] text-[#050C07] shrink-0 transition-transform duration-200 group-hover:scale-105">
-              <Leaf className="w-4 h-4 text-[#050C07] stroke-[2.5]" />
-            </div>
-            <div className="flex-1 min-w-0">
-              <div className="flex items-center space-x-1.5">
-                <span className={`font-sans font-bold text-sm tracking-tight truncate ${
-                  isLight ? 'text-[#0F2417]' : 'text-white'
-                }`}>
-                  CarbonZero
-                </span>
-                <span className="text-[9px] font-mono font-bold px-1.5 py-0.5 rounded bg-[#00C853]/15 text-[#00E676] border border-[#00C853]/30 shrink-0 leading-none">
-                  BD
-                </span>
-              </div>
-              <span className={`text-[10px] font-sans font-semibold tracking-wider uppercase block truncate mt-0.5 ${
-                isLight ? 'text-[#557361]' : 'text-[#6E8F7A]'
-              }`}>
-                Sovereign Registry OS
-              </span>
-            </div>
-          </Link>
-        </div>
-
-        {/* Scrollable Menu Sections */}
-        <div className="flex-1 overflow-y-auto px-3.5 py-4 space-y-6 custom-scrollbar">
-          {/* Main Menu */}
-          <div>
-            <span className={`font-sans text-[10px] uppercase tracking-wider block px-2.5 mb-1.5 font-bold ${
-              isLight ? 'text-[#7C9A88]' : 'text-[#557361]'
-            }`}>
-              {lang === 'bn' ? 'প্রধান মেনু' : 'Menu'}
-            </span>
-            <nav className="space-y-1">
-              {[
-                { name: 'Dashboard', label: lang === 'bn' ? 'ড্যাশবোর্ড' : 'Dashboard', icon: Grid },
-                { name: 'Materiality', label: lang === 'bn' ? 'ম্যাটেরিয়ালিটি' : 'Materiality', icon: Compass },
-                { name: 'Audit & Compliance', label: lang === 'bn' ? 'অডিট ও কমপ্লায়েন্স' : 'Audit & Compliance', icon: CheckCircle2, badge: 'ISO 14064' },
-                { name: 'Tasks', label: lang === 'bn' ? 'টাস্ক তালিকা' : 'Tasks', icon: CheckCircle, badge: openTasksCount > 0 ? `${openTasksCount} left` : null },
-                { name: 'Calendar', label: lang === 'bn' ? 'ক্যালেন্ডার' : 'Calendar', icon: CalendarIcon },
-                { name: 'Analytics', label: lang === 'bn' ? 'অ্যানালিটিক্স' : 'Analytics', icon: BarChart2 },
-                { name: 'Team', label: lang === 'bn' ? 'টিম ম্যানেজমেন্ট' : 'Team', icon: Users }
-              ].map((item) => {
-                const Icon = item.icon;
-                const isActive = activeMenu === item.name;
-                return (
-                  <button
-                    key={item.name}
-                    onClick={() => setActiveMenu(item.name)}
-                    className={`w-full flex items-center justify-between px-2.5 py-2 rounded-xl text-xs font-sans transition-all duration-150 cursor-pointer relative group ${
-                      isActive 
-                        ? (isLight 
-                            ? 'bg-[#EEF7F1] text-[#0A2E19] font-bold border border-[#CCE2D3] shadow-sm' 
-                            : 'bg-[#0B2114] text-white font-bold border border-[#174D2B] shadow-[0_2px_10px_rgba(0,200,83,0.08)]')
-                        : (isLight 
-                            ? 'text-slate-600 hover:bg-slate-100/70 hover:text-slate-950 font-medium border border-transparent' 
-                            : 'text-[#8FA899] hover:bg-white/[0.04] hover:text-white font-medium border border-transparent')
-                    }`}
-                  >
-                    {isActive && (
-                      <span className={`absolute left-0 top-1.5 bottom-1.5 w-1 rounded-r-full ${
-                        isLight ? 'bg-[#00C853]' : 'bg-[#00E676] shadow-[0_0_8px_rgba(0,230,118,0.5)]'
-                      }`} />
-                    )}
-                    <div className="flex items-center space-x-2.5 min-w-0 pr-1">
-                      <div className={`w-6 h-6 rounded-lg flex items-center justify-center shrink-0 transition-colors ${
-                        isActive 
-                          ? (isLight ? 'bg-[#00C853]/15 text-[#00A844]' : 'bg-[#00C853]/20 text-[#00E676]') 
-                          : (isLight ? 'text-[#64748B] group-hover:text-slate-900' : 'text-[#6E8F7A] group-hover:text-emerald-300')
-                      }`}>
-                        <Icon className="w-3.5 h-3.5" />
-                      </div>
-                      <span className="text-xs tracking-tight truncate">{item.label || item.name}</span>
-                    </div>
-                    {item.badge && (
-                      <span className="bg-amber-500/15 text-amber-400 border border-amber-500/30 text-[10px] font-mono font-semibold px-2 py-0.5 rounded-md shrink-0 whitespace-nowrap leading-none">
-                        {item.badge}
-                      </span>
-                    )}
-                  </button>
-                );
-              })}
-            </nav>
-          </div>
-
-          {/* Enterprise Core & Satellite MRV Engines */}
-          <div>
-            <span className={`font-sans text-[10px] uppercase tracking-wider block px-2.5 mb-1.5 font-bold ${
-              isLight ? 'text-[#7C9A88]' : 'text-[#557361]'
-            }`}>
-              {lang === 'bn' ? 'কোর ইঞ্জিন ও এমআরভি' : 'Engines & MRV'}
-            </span>
-            <nav className="space-y-1">
-              {[
-                { name: 'Activity & Evidence', label: lang === 'bn' ? 'অ্যাক্টিভিটি ও এভিডেন্স' : 'Activity & Evidence', icon: Layers, badge: 'ISO 14064' },
-                { name: 'ESG Reports', label: lang === 'bn' ? 'ইএসজি রিপোর্ট' : 'ESG Reports', icon: FileText, badge: 'Audit-Ready' },
-                { name: 'DuckDB Engine', label: lang === 'bn' ? 'ডাকডিবি ইঞ্জিন' : 'DuckDB Engine', icon: Zap, badge: 'Sub-25ms' },
-                { name: 'Utility Invoices', label: lang === 'bn' ? 'ইউটিলিটি ইনভয়েস' : 'Utility Invoices', icon: FileText, badge: 'Universal' },
-                { name: 'Satellite MRV', label: lang === 'bn' ? 'স্যাটেলাইট এমআরভি' : 'Satellite MRV', icon: Globe, badge: 'GEDI' },
-                { name: 'Factor Registry', label: lang === 'bn' ? 'ফ্যাক্টর রেজিস্ট্রি' : 'Factor Registry', icon: Database, badge: 'DoE' },
-                { name: 'ATLAS Benchmark', label: lang === 'bn' ? 'অ্যাটলাস বেঞ্চমার্ক' : 'ATLAS Benchmark', icon: CheckCircle2, badge: '10 Bills' },
-                { name: 'Entity Tree', label: lang === 'bn' ? 'কর্পোরেট হায়ারার্কি' : 'Entity Tree', icon: Building, badge: 'Sweep' },
-              ].map((item) => {
-                const Icon = item.icon;
-                const isActive = activeMenu === item.name;
-                return (
-                  <button
-                    key={item.name}
-                    onClick={() => setActiveMenu(item.name)}
-                    className={`w-full flex items-center justify-between px-2.5 py-2 rounded-xl text-xs font-sans transition-all duration-150 cursor-pointer relative group ${
-                      isActive 
-                        ? (isLight 
-                            ? 'bg-[#EEF7F1] text-[#0A2E19] font-bold border border-[#CCE2D3] shadow-sm' 
-                            : 'bg-[#0B2114] text-white font-bold border border-[#174D2B] shadow-[0_2px_10px_rgba(0,200,83,0.08)]')
-                        : (isLight 
-                            ? 'text-slate-600 hover:bg-slate-100/70 hover:text-slate-950 font-medium border border-transparent' 
-                            : 'text-[#8FA899] hover:bg-white/[0.04] hover:text-white font-medium border border-transparent')
-                    }`}
-                  >
-                    {isActive && (
-                      <span className={`absolute left-0 top-1.5 bottom-1.5 w-1 rounded-r-full ${
-                        isLight ? 'bg-[#00C853]' : 'bg-[#00E676] shadow-[0_0_8px_rgba(0,230,118,0.5)]'
-                      }`} />
-                    )}
-                    <div className="flex items-center space-x-2.5 min-w-0 pr-1">
-                      <div className={`w-6 h-6 rounded-lg flex items-center justify-center shrink-0 transition-colors ${
-                        isActive 
-                          ? (isLight ? 'bg-[#00C853]/15 text-[#00A844]' : 'bg-[#00C853]/20 text-[#00E676]') 
-                          : (isLight ? 'text-[#64748B] group-hover:text-slate-900' : 'text-[#6E8F7A] group-hover:text-emerald-300')
-                      }`}>
-                        <Icon className="w-3.5 h-3.5" />
-                      </div>
-                      <span className="text-xs tracking-tight truncate">{item.label}</span>
-                    </div>
-                    {item.badge && (
-                      <span className="bg-[#00C853]/10 text-[#00E676] text-[10px] font-mono font-medium px-2 py-0.5 rounded-md border border-[#00C853]/25 shrink-0 whitespace-nowrap leading-none">
-                        {item.badge}
-                      </span>
-                    )}
-                  </button>
-                );
-              })}
-            </nav>
-          </div>
-
-          {/* General Section */}
-          <div>
-            <span className={`font-sans text-[10px] uppercase tracking-wider block px-2.5 mb-1.5 font-bold ${
-              isLight ? 'text-[#7C9A88]' : 'text-[#557361]'
-            }`}>
-              {lang === 'bn' ? 'সাধারণ' : 'General'}
-            </span>
-            <nav className="space-y-1">
-              {[
-                { name: 'Settings', label: lang === 'bn' ? 'সেটিংস' : 'Settings', icon: Settings },
-                { name: 'Help', label: lang === 'bn' ? 'সহায়তা' : 'Help', icon: HelpCircle },
-                { name: 'Logout', label: lang === 'bn' ? 'লগআউট' : 'Logout', icon: LogOut }
-              ].map((item) => {
-                const Icon = item.icon;
-                const isActive = activeMenu === item.name;
-                return (
-                  <button
-                    key={item.name}
-                    onClick={() => {
-                      if (item.name === 'Logout') {
-                        navigate('/');
-                      } else {
-                        setActiveMenu(item.name);
-                      }
-                    }}
-                    className={`w-full flex items-center justify-between px-2.5 py-2 rounded-xl text-xs font-sans transition-all duration-150 cursor-pointer relative group ${
-                      isActive 
-                        ? (isLight 
-                            ? 'bg-[#EEF7F1] text-[#0A2E19] font-bold border border-[#CCE2D3] shadow-sm' 
-                            : 'bg-[#0B2114] text-white font-bold border border-[#174D2B] shadow-[0_2px_10px_rgba(0,200,83,0.08)]')
-                        : (isLight 
-                            ? 'text-slate-600 hover:bg-slate-100/70 hover:text-slate-950 font-medium border border-transparent' 
-                            : 'text-[#8FA899] hover:bg-white/[0.04] hover:text-white font-medium border border-transparent')
-                    }`}
-                  >
-                    {isActive && (
-                      <span className={`absolute left-0 top-1.5 bottom-1.5 w-1 rounded-r-full ${
-                        isLight ? 'bg-[#00C853]' : 'bg-[#00E676] shadow-[0_0_8px_rgba(0,230,118,0.5)]'
-                      }`} />
-                    )}
-                    <div className="flex items-center space-x-2.5 min-w-0 pr-1">
-                      <div className={`w-6 h-6 rounded-lg flex items-center justify-center shrink-0 transition-colors ${
-                        isActive 
-                          ? (isLight ? 'bg-[#00C853]/15 text-[#00A844]' : 'bg-[#00C853]/20 text-[#00E676]') 
-                          : (isLight ? 'text-[#64748B] group-hover:text-slate-900' : 'text-[#6E8F7A] group-hover:text-emerald-300')
-                      }`}>
-                        <Icon className="w-3.5 h-3.5" />
-                      </div>
-                      <span className="text-xs tracking-tight truncate">{item.label || item.name}</span>
-                    </div>
-                  </button>
-                );
-              })}
-            </nav>
-          </div>
-        </div>
-
-        {/* Telemetry Status & Mobile App Card */}
-        <div className={`p-3 border-t shrink-0 ${isLight ? 'border-[#E3EAE5]' : 'border-[#132318]'}`}>
-          <div className={`p-3 rounded-2xl border transition-all ${
-            isLight 
-              ? 'bg-[#F2F8F4] border-[#CCE2D3] text-[#0F2417]' 
-              : 'bg-[#07150D] border-[#132A1C] text-white'
-          }`}>
-            <div className="flex items-center justify-between mb-1.5">
-              <div className="flex items-center space-x-2">
-                <span className="relative flex h-2 w-2">
-                  <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-[#00C853] opacity-75"></span>
-                  <span className="relative inline-flex rounded-full h-2 w-2 bg-[#00C853]"></span>
-                </span>
-                <span className="font-sans font-bold text-[11px] tracking-tight">
-                  Live MRV Telemetry
-                </span>
-              </div>
-              <span className="text-[9px] font-mono font-bold text-emerald-400 bg-[#00C853]/15 border border-[#00C853]/30 px-1.5 py-0.5 rounded leading-none">
-                SYNC
-              </span>
-            </div>
-            <p className={`text-[10px] mb-2.5 leading-tight font-sans ${isLight ? 'text-[#557361]' : 'text-[#7C9A88]'}`}>
-              Mobile satellite sync & live emissions stream telemetry.
-            </p>
-            <button 
-              disabled={downloadingApp}
-              onClick={handleDownloadApp}
-              className="w-full bg-[#00C853] hover:bg-[#00E676] text-white font-mono font-bold text-xs py-2.5 px-3 rounded-xl transition-all flex items-center justify-center space-x-1.5 shadow-sm cursor-pointer disabled:opacity-50"
-            >
-              {downloadingApp ? (
-                <>
-                  <Loader2 className="w-3.5 h-3.5 animate-spin text-white" />
-                  <span className="text-white font-mono font-bold">Connecting...</span>
-                </>
-              ) : (
-                <span className="text-white font-mono font-bold tracking-tight">Download Mobile App</span>
-              )}
-            </button>
-          </div>
-        </div>
+        {renderSidebarContent(false)}
       </aside>
 
+      {/* Mobile & Tablet Slide-Over Navigation Drawer (< lg) */}
+      {isSidebarOpen && (
+        <div className="fixed inset-0 z-50 lg:hidden flex" role="dialog" aria-modal="true" aria-label="ESG dashboard navigation">
+          <div
+            className="fixed inset-0 bg-black/70 backdrop-blur-sm"
+            onClick={() => setIsSidebarOpen(false)}
+            aria-hidden="true"
+          />
+          <aside className={`relative z-10 w-[min(86vw,300px)] max-w-full h-full border-r flex flex-col justify-between shadow-2xl pt-[env(safe-area-inset-top)] ${
+            isLight ? 'bg-[#FAFCFA] border-[#E3EAE5]' : 'bg-[#060D08] border-[#132318]'
+          }`}>
+            {renderSidebarContent(true)}
+          </aside>
+        </div>
+      )}
+
       {/* 2. Main Content Area */}
-      <main className="flex-1 pt-24 lg:pt-28 px-6 lg:px-10 overflow-y-auto max-w-7xl mx-auto space-y-8 pb-20 relative">
+      <main className="flex-1 min-w-0 pt-20 sm:pt-24 lg:pt-28 px-3.5 sm:px-6 lg:px-10 overflow-y-auto overflow-x-hidden max-w-7xl mx-auto space-y-6 sm:space-y-8 pb-24 sm:pb-20 relative">
+
+        {/* Compact Mobile & Tablet Dashboard Bar (< lg) */}
+        <div className={`lg:hidden flex items-center justify-between gap-2.5 p-2.5 rounded-2xl border shadow-sm ${
+          isLight ? 'bg-white border-[#DCE4DE]' : 'bg-[#08130C] border-[#152B1D]'
+        }`}>
+          <button
+            type="button"
+            onClick={() => setIsSidebarOpen(true)}
+            className={`min-h-[44px] px-3.5 py-2 rounded-xl border flex items-center space-x-2 text-xs font-sans font-bold transition-colors cursor-pointer shrink-0 ${
+              isLight
+                ? 'bg-[#EEF7F1] border-[#CCE2D3] text-[#0A2E19]'
+                : 'bg-[#0B2114] border-[#174D2B] text-white'
+            }`}
+            aria-label="Open dashboard menu and engines"
+          >
+            <Menu className="w-4 h-4 text-[#00C853] shrink-0" />
+            <span>Menu &amp; Engines</span>
+          </button>
+          <span className={`px-2.5 py-1 rounded-full text-[11px] font-mono font-bold truncate border ${
+            isLight
+              ? 'bg-[#F4F6F4] text-[#0F2417] border-[#DCE4DE]'
+              : 'bg-[#040906] text-[#4ADE80] border-[#1B4D2E]'
+          }`}>
+            {activeMenu}
+          </span>
+        </div>
         
         {/* Auditor Read-only Active Watermark Banner */}
         {isAuditorMode && (
@@ -1601,12 +1598,12 @@ const SaaSDashboard = () => {
         )}
 
         {/* Top Header — Elegant Search Pill, Action Buttons, Theme Switch & Profile */}
-        <header className={`flex flex-col sm:flex-row justify-between sm:items-center gap-4 border-b pb-6 relative z-30 transition-colors ${
+        <header className={`flex flex-col lg:flex-row justify-between lg:items-center gap-3.5 sm:gap-4 border-b pb-5 sm:pb-6 relative z-30 transition-colors ${
           isLight ? 'border-[#E8ECE8]' : 'border-[#122418]'
         }`}>
           
           {/* Rounded-full Search pill */}
-          <div className="relative w-full max-w-sm">
+          <div className="relative w-full lg:max-w-sm">
             <Search className={`w-4 h-4 absolute left-3.5 top-1/2 transform -translate-y-1/2 ${
               isLight ? 'text-[#7D9A8A]' : 'text-[#7C9A88]'
             }`} />
@@ -1615,7 +1612,7 @@ const SaaSDashboard = () => {
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
               placeholder="Search reports, team, projects... (Ctrl + F)" 
-              className={`w-full pl-10 pr-9 py-2.5 rounded-full text-xs font-sans transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-[#00C853]/40 ${
+              className={`w-full min-h-[40px] pl-10 pr-12 py-2.5 rounded-full text-xs font-sans transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-[#00C853]/40 ${
                 isLight 
                   ? 'bg-white border border-[#DCE4DE] text-[#0F2417] placeholder-[#8FA899] shadow-sm' 
                   : 'bg-[#08130C] border border-[#152B1D] text-white placeholder-[#557361]'
@@ -1624,7 +1621,7 @@ const SaaSDashboard = () => {
             {searchQuery && (
               <button 
                 onClick={() => setSearchQuery('')}
-                className="absolute right-3 top-1/2 transform -translate-y-1/2 text-xs text-[#7C9A88] hover:text-[#00C853]"
+                className="absolute right-3 top-1/2 transform -translate-y-1/2 text-xs text-[#7C9A88] hover:text-[#00C853] min-h-[32px] px-1"
               >
                 Clear
               </button>
@@ -1632,12 +1629,12 @@ const SaaSDashboard = () => {
           </div>
 
           {/* User Profile & Actions */}
-          <div className="flex items-center justify-between sm:justify-end gap-3 flex-wrap">
+          <div className="flex items-center justify-between lg:justify-end gap-2.5 sm:gap-3 flex-wrap w-full lg:w-auto">
             
             {/* Corporate Client Profile Switcher Button */}
             <button
               onClick={() => setIsClientModalOpen(true)}
-              className={`flex items-center space-x-2 px-3 py-1.5 rounded-full border transition-all cursor-pointer shadow-sm ${
+              className={`flex items-center space-x-2 px-3 py-1.5 min-h-[40px] rounded-full border transition-all cursor-pointer shadow-sm max-w-full min-w-0 ${
                 isLight 
                   ? 'bg-white border-[#DCE4DE] hover:border-[#00C853] text-[#0F2417]' 
                   : 'bg-[#08130C] border-[#152B1D] hover:border-[#00C853] text-white'
@@ -1649,20 +1646,20 @@ const SaaSDashboard = () => {
               }`}>
                 <img src={activeClient.logo} alt={activeClient.name} className="max-h-full max-w-full object-contain" />
               </div>
-              <div className="text-left leading-none flex items-center gap-1.5">
-                <span className="font-sans font-bold text-xs">{activeClient.name}</span>
-                <span className="text-[9px] px-1.5 py-0.5 rounded bg-[#00C853]/15 text-[#00C853] font-mono font-bold hidden sm:inline-block">
+              <div className="text-left leading-none flex items-center gap-1.5 min-w-0">
+                <span className="font-sans font-bold text-xs truncate">{activeClient.name}</span>
+                <span className="text-[9px] px-1.5 py-0.5 rounded bg-[#00C853]/15 text-[#00C853] font-mono font-bold hidden xl:inline-block shrink-0">
                   {activeClient.sector}
                 </span>
               </div>
-              <ChevronDown className="w-3.5 h-3.5 text-[#7C9A88]" />
+              <ChevronDown className="w-3.5 h-3.5 text-[#7C9A88] shrink-0" />
             </button>
 
             {/* Top Action Pills */}
-            <div className="flex items-center space-x-2">
+            <div className="flex items-center gap-2 flex-wrap">
               <button 
                 onClick={() => setIsAddProjectOpen(true)}
-                className="bg-[#00C853] hover:bg-[#00E676] text-white font-mono font-bold text-xs px-4 py-2 rounded-xl transition-all shadow-sm flex items-center space-x-1.5 cursor-pointer"
+                className="min-h-[40px] bg-[#00C853] hover:bg-[#00E676] text-white font-mono font-bold text-xs px-3.5 sm:px-4 py-2 rounded-xl transition-all shadow-sm flex items-center space-x-1.5 cursor-pointer whitespace-nowrap"
               >
                 <Plus className="w-3.5 h-3.5 text-white stroke-[2.5]" />
                 <span className="text-white font-mono font-bold">Add Project</span>
@@ -1672,7 +1669,7 @@ const SaaSDashboard = () => {
                   const inputEl = document.getElementById('drag-file-input');
                   if (inputEl) inputEl.click();
                 }}
-                className="bg-[#00C853] hover:bg-[#00E676] text-white font-mono font-bold text-xs px-4 py-2 rounded-xl transition-all shadow-sm flex items-center space-x-1.5 cursor-pointer"
+                className="min-h-[40px] bg-[#00C853] hover:bg-[#00E676] text-white font-mono font-bold text-xs px-3.5 sm:px-4 py-2 rounded-xl transition-all shadow-sm flex items-center space-x-1.5 cursor-pointer whitespace-nowrap"
               >
                 <Upload className="w-3.5 h-3.5 text-white stroke-[2.5]" />
                 <span className="text-white font-mono font-bold">Import Data</span>
@@ -1680,7 +1677,7 @@ const SaaSDashboard = () => {
             </div>
 
             {/* Profile, Theme Toggle & Notifications Bell */}
-            <div className={`flex items-center space-x-2.5 pl-3 border-l relative ${
+            <div className={`flex items-center gap-2 sm:pl-3 sm:border-l relative flex-wrap ${
               isLight ? 'border-[#E8ECE8]' : 'border-[#122418]'
             }`}>
               
@@ -1691,7 +1688,7 @@ const SaaSDashboard = () => {
                   setLang(nextLang);
                   showToast(nextLang === 'bn' ? "ভাষা পরিবর্তন: বাংলা (Bilingual ESG Active)" : "Language switched: English", "info");
                 }}
-                className={`flex items-center space-x-1.5 px-3 py-1.5 rounded-full text-xs font-bold transition-all cursor-pointer border ${
+                className={`min-h-[40px] flex items-center space-x-1.5 px-3 py-1.5 rounded-full text-xs font-bold transition-all cursor-pointer border whitespace-nowrap shrink-0 ${
                   isLight 
                     ? 'bg-white border-[#E8ECE8] text-[#0F2417] hover:bg-[#F2F7F3]' 
                     : 'bg-[#08130C] border-[#152B1D] text-white hover:bg-[#0D2B1A]'
@@ -1709,7 +1706,7 @@ const SaaSDashboard = () => {
                   setCurrency(nextCur);
                   showToast(`Reporting currency: ${nextCur}`, "info");
                 }}
-                className={`flex items-center space-x-1 px-2.5 py-1.5 rounded-full text-xs font-mono font-bold transition-all cursor-pointer border ${
+                className={`min-h-[40px] flex items-center space-x-1 px-2.5 py-1.5 rounded-full text-xs font-mono font-bold transition-all cursor-pointer border whitespace-nowrap shrink-0 ${
                   isLight 
                     ? 'bg-white border-[#E8ECE8] text-[#0F2417] hover:bg-[#F2F7F3]' 
                     : 'bg-[#08130C] border-[#152B1D] text-[#00C853] hover:bg-[#0D2B1A]'
@@ -1723,7 +1720,7 @@ const SaaSDashboard = () => {
               <button
                 id="dashboard-theme-toggle"
                 onClick={toggleTheme}
-                className="theme-toggle cursor-pointer"
+                className="theme-toggle cursor-pointer min-w-[40px] min-h-[40px] shrink-0"
                 aria-label={theme === 'dark' ? 'Switch to light mode' : 'Switch to dark mode'}
                 title={theme === 'dark' ? 'Switch to light mode' : 'Switch to dark mode'}
               >
@@ -1734,7 +1731,8 @@ const SaaSDashboard = () => {
               {/* Notification Bell */}
               <button 
                 onClick={() => setIsNotificationsOpen(!isNotificationsOpen)}
-                className={`relative p-2 rounded-full transition-colors cursor-pointer ${
+                aria-label="Toggle notifications"
+                className={`relative min-w-[40px] min-h-[40px] p-2 rounded-full transition-colors cursor-pointer flex items-center justify-center shrink-0 ${
                   isLight 
                     ? 'bg-white border border-[#E8ECE8] text-[#557361] hover:text-[#00C853] shadow-sm' 
                     : 'bg-[#08130C] border border-[#152B1D] text-[#7C9A88] hover:text-[#00C853]'
@@ -1748,12 +1746,12 @@ const SaaSDashboard = () => {
 
               {/* Notifications Dropdown Panel */}
               {isNotificationsOpen && (
-                <div className={`absolute right-0 top-12 w-80 rounded-2xl shadow-2xl p-4 space-y-3 z-50 text-left border ${
+                <div className={`absolute right-0 top-12 w-[min(88vw,20rem)] rounded-2xl shadow-2xl p-4 space-y-3 z-50 text-left border ${
                   isLight 
                     ? 'bg-white border-[#E2E8E3] text-[#0F2417]' 
                     : 'bg-[#08130C] border-[#152B1D] text-white'
                 }`}>
-                  <div className={`flex justify-between items-center pb-2 border-b ${
+                  <div className={`flex flex-col sm:flex-row sm:items-center justify-between gap-2 pb-2 border-b ${
                     isLight ? 'border-[#E8ECE8]' : 'border-[#122418]'
                   }`}>
                     <span className="font-sans font-bold text-sm">Notifications</span>
@@ -2208,7 +2206,7 @@ const SaaSDashboard = () => {
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
               
               {/* Card 1: Total Emissions */}
-              <div className={`p-6 rounded-3xl border shadow-md relative overflow-hidden flex flex-col justify-between aspect-[1.5] transition-all ${
+              <div className={`p-5 sm:p-6 rounded-3xl border shadow-md relative overflow-hidden flex flex-col justify-between min-h-[190px] sm:min-h-[210px] transition-all ${
                 isLight 
                   ? 'bg-gradient-to-br from-[#EAF5ED] via-[#DFEFE3] to-[#D4E9DA] border-[#CCE2D3] text-[#0F2417]' 
                   : 'bg-gradient-to-br from-[#0D2B1A] via-[#0A2215] to-[#07180F] border-[#1B4D2E] text-white'
@@ -2242,7 +2240,7 @@ const SaaSDashboard = () => {
               </div>
 
               {/* Card 2: Scope 1 (Direct) */}
-              <div className={`p-6 rounded-3xl border flex flex-col justify-between aspect-[1.5] transition-all ${
+              <div className={`p-5 sm:p-6 rounded-3xl border flex flex-col justify-between min-h-[190px] sm:min-h-[210px] transition-all ${
                 isLight 
                   ? 'bg-white border-[#E8ECE8] text-[#0F2417] shadow-sm' 
                   : 'bg-[#08130C] border-[#152B1D] text-white'
@@ -2266,7 +2264,7 @@ const SaaSDashboard = () => {
               </div>
 
               {/* Card 3: Scope 2 (Electricity) */}
-              <div className={`p-6 rounded-3xl border flex flex-col justify-between aspect-[1.5] transition-all ${
+              <div className={`p-5 sm:p-6 rounded-3xl border flex flex-col justify-between min-h-[190px] sm:min-h-[210px] transition-all ${
                 isLight 
                   ? 'bg-white border-[#E8ECE8] text-[#0F2417] shadow-sm' 
                   : 'bg-[#08130C] border-[#152B1D] text-white'
@@ -2284,7 +2282,7 @@ const SaaSDashboard = () => {
                       Dual Reporting
                     </span>
                   </div>
-                  <div className="grid grid-cols-2 gap-2">
+                  <div className="grid grid-cols-1 min-[360px]:grid-cols-2 gap-2">
                     <div>
                       <span className={`text-[9px] font-semibold uppercase block ${isLight ? 'text-[#7D9A8A]' : 'text-[#557361]'}`}>Location</span>
                       <span className={`font-sans font-bold text-xl ${isLight ? 'text-[#0F2417]' : 'text-white'}`}>
@@ -2312,7 +2310,7 @@ const SaaSDashboard = () => {
               </div>
 
               {/* Card 4: Scope 3 (Value Chain) */}
-              <div className={`p-6 rounded-3xl border flex flex-col justify-between aspect-[1.5] transition-all ${
+              <div className={`p-5 sm:p-6 rounded-3xl border flex flex-col justify-between min-h-[190px] sm:min-h-[210px] transition-all ${
                 isLight 
                   ? 'bg-white border-[#E8ECE8] text-[#0F2417] shadow-sm' 
                   : 'bg-[#08130C] border-[#152B1D] text-white'
@@ -2350,7 +2348,7 @@ const SaaSDashboard = () => {
                     : 'bg-[#08130C] border-[#152B1D] text-white'
                 }`}>
                   
-                  <div className={`flex justify-between items-center border-b pb-4 ${
+                  <div className={`flex flex-wrap justify-between items-center gap-2 border-b pb-4 ${
                     isLight ? 'border-[#E8ECE8]' : 'border-[#122418]'
                   }`}>
                     <div>
@@ -2575,7 +2573,7 @@ const SaaSDashboard = () => {
                       </p>
                     </div>
                     
-                    <div className="flex items-center space-x-2 shrink-0">
+                    <div className="flex flex-wrap items-center gap-2">
                       <span className={`inline-flex items-center px-2.5 py-1 rounded-full text-[10px] font-mono font-bold ${
                         isLight ? 'bg-[#E8F8EE] text-[#00873E] border border-[#C2E9CF]' : 'bg-[#0D2B1A] text-[#4ADE80] border border-[#1B4D2E]'
                       }`}>
@@ -2591,7 +2589,7 @@ const SaaSDashboard = () => {
                   </div>
 
                   {/* 3-Step Interactive Process Navigation Bar */}
-                  <div className={`p-1.5 rounded-2xl border grid grid-cols-3 gap-1 ${
+                  <div className={`p-1.5 rounded-2xl border grid grid-cols-1 min-[420px]:grid-cols-3 gap-1 ${
                     isLight ? 'bg-[#F4F6F4] border-[#E8ECE8]' : 'bg-[#040906] border-[#152B1D]'
                   }`}>
                     {[
@@ -2682,7 +2680,7 @@ const SaaSDashboard = () => {
 
                     {/* Controls & Action Buttons */}
                     <div className="flex flex-col sm:flex-row justify-between items-center gap-4">
-                      <div className="flex items-center space-x-3 w-full sm:w-auto">
+                      <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2.5 w-full sm:w-auto">
                         <button
                           onClick={() => executeAIExtraction(uploadedFileObj || uploadedFile || "ESG_Statement_Q2_2026.xlsx")}
                           disabled={isUploading}
@@ -2978,7 +2976,7 @@ const SaaSDashboard = () => {
 
                     {/* 9 Standard Categories Grid */}
                     <div className="space-y-3">
-                      <div className="flex justify-between items-center">
+                      <div className="flex flex-wrap justify-between items-center gap-2.5">
                         <div>
                           <h4 className={`text-sm font-bold font-sans ${isLight ? 'text-[#0F2417]' : 'text-white'}`}>
                             All 9 Activity & Invoiced Expense Categories
@@ -3100,7 +3098,7 @@ const SaaSDashboard = () => {
                       <div className={`p-4 rounded-2xl border space-y-3 ${
                         isLight ? 'bg-[#F9FBFA] border-[#DCE4DE]' : 'bg-[#040906] border-[#152B1D]'
                       }`}>
-                        <div className="flex justify-between items-center">
+                        <div className="flex flex-wrap justify-between items-center gap-2.5">
                           <div className="flex items-center space-x-2">
                             <Package className="w-4 h-4 text-[#00C853]" />
                             <h4 className={`text-xs font-bold uppercase font-mono tracking-wider ${
@@ -3180,7 +3178,7 @@ const SaaSDashboard = () => {
                           ? 'bg-[#F7FAF7] border-[#E8ECE8]' 
                           : 'bg-[#040906] border-[#152B1D]'
                       }`}>
-                        <div className={`flex justify-between items-center pb-2 border-b ${
+                        <div className={`flex flex-col sm:flex-row sm:items-center justify-between gap-2 pb-2 border-b ${
                           isLight ? 'border-[#E8ECE8]' : 'border-[#122418]'
                         }`}>
                           <div className="flex items-center space-x-2">
@@ -3274,7 +3272,7 @@ const SaaSDashboard = () => {
                   {/* MODAL: ADD CUSTOM INVOICE ITEM */}
                   {isAddCustomModalOpen && (
                     <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/70 backdrop-blur-sm animate-fade-in">
-                      <div className={`w-full max-w-lg rounded-3xl p-6 border shadow-2xl space-y-5 ${
+                      <div className={`w-full max-w-lg max-h-[90dvh] overflow-y-auto rounded-3xl p-6 border shadow-2xl space-y-5 ${
                         isLight ? 'bg-white border-slate-200 text-[#0F2417]' : 'bg-[#08130C] border-[#1B3B26] text-white'
                       }`}>
                         <div className="flex justify-between items-center border-b pb-3">
@@ -3308,7 +3306,7 @@ const SaaSDashboard = () => {
                             />
                           </div>
 
-                          <div className="grid grid-cols-2 gap-3">
+                          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                             <div>
                               <label className="block text-xs font-bold uppercase font-mono mb-1 text-slate-400">
                                 Category
@@ -3344,7 +3342,7 @@ const SaaSDashboard = () => {
                             </div>
                           </div>
 
-                          <div className="grid grid-cols-2 gap-3">
+                          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                             <div>
                               <label className="block text-xs font-bold uppercase font-mono mb-1 text-slate-400">
                                 Invoiced Spend (BDT)
@@ -3442,7 +3440,7 @@ const SaaSDashboard = () => {
                   {/* MODAL: REFINE CATEGORY ADJUSTMENT */}
                   {editingCategory && (
                     <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/70 backdrop-blur-sm animate-fade-in">
-                      <div className={`w-full max-w-md rounded-3xl p-6 border shadow-2xl space-y-5 ${
+                      <div className={`w-full max-w-md max-h-[90dvh] overflow-y-auto rounded-3xl p-6 border shadow-2xl space-y-5 ${
                         isLight ? 'bg-white border-slate-200 text-[#0F2417]' : 'bg-[#08130C] border-[#1B3B26] text-white'
                       }`}>
                         <div className="flex justify-between items-center border-b pb-3">
@@ -3549,7 +3547,7 @@ const SaaSDashboard = () => {
                       </div>
                       
                       {/* Corpus Filter Tabs */}
-                      <div className={`flex items-center space-x-1 p-1 rounded-xl border ${
+                      <div className={`flex flex-wrap sm:flex-nowrap items-center gap-1 p-1 rounded-xl border max-w-full overflow-x-auto ${
                         isLight ? 'bg-[#F4F6F4] border-[#E8ECE8]' : 'bg-[#040906] border-[#1A3824]'
                       }`}>
                         {[
@@ -3603,7 +3601,7 @@ const SaaSDashboard = () => {
                     </div>
 
                     {/* Search / Ask AI Input */}
-                    <div className="flex gap-2">
+                    <div className="flex flex-col sm:flex-row gap-2">
                       <div className="relative flex-1">
                         <input
                           type="text"
@@ -3643,7 +3641,7 @@ const SaaSDashboard = () => {
                           ? 'bg-[#F2FBF5] border-[#BCE7CB]' 
                           : 'bg-[#050C07] border-[#1B4D2E]'
                       }`}>
-                        <div className={`flex justify-between items-center pb-2 border-b ${
+                        <div className={`flex flex-col sm:flex-row sm:items-center justify-between gap-2 pb-2 border-b ${
                           isLight ? 'border-[#C2E9CF]' : 'border-[#122418]'
                         }`}>
                           <div className="flex items-center space-x-2">
@@ -3784,7 +3782,7 @@ const SaaSDashboard = () => {
               <div className="space-y-8">
                 
                 {/* Offset Options Panel */}
-                <div className={`p-6 rounded-3xl shadow-md flex flex-col justify-between h-[230px] border transition-all ${
+                <div className={`p-6 rounded-3xl shadow-md flex flex-col justify-between min-h-[210px] border transition-all ${
                   isLight
                     ? 'bg-gradient-to-br from-[#E8F8EE] via-[#D8F3E3] to-[#C7EED8] border-[#A3E2B8] text-[#0F2417]'
                     : 'bg-gradient-to-br from-[#0D2B1A] via-[#0A2215] to-[#07180F] border-[#1B4D2E] text-white'
@@ -3935,10 +3933,11 @@ const SaaSDashboard = () => {
               <div className="xl:col-span-1 bg-[#040906] rounded-2xl p-6 border border-[#152B1D] flex flex-col justify-between">
                 <div>
                   <h3 className="font-sans font-bold text-sm text-white mb-4">Double Materiality Matrix</h3>
-                  <div className="relative w-full aspect-square bg-carbon border-l border-b border-forest grid grid-cols-5 grid-rows-5">
-                    {/* Matrix Labels */}
-                    <div className="absolute left-1/2 -bottom-6 transform -translate-x-1/2 text-[9px] font-mono uppercase text-[#7C9A88] font-bold">Impact Materiality →</div>
-                    <div className="absolute -left-14 top-1/2 transform -translate-y-1/2 rotate-90 text-[9px] font-mono uppercase text-[#7C9A88] font-bold">Financial Materiality →</div>
+                  <div className="relative pl-6 pb-6 sm:pl-7">
+                    <div className="relative w-full aspect-square bg-carbon border-l border-b border-forest grid grid-cols-5 grid-rows-5">
+                      {/* Matrix Labels */}
+                      <div className="absolute left-1/2 -bottom-6 transform -translate-x-1/2 text-[9px] font-mono uppercase text-[#7C9A88] font-bold whitespace-nowrap">Impact Materiality →</div>
+                      <div className="absolute -left-12 sm:-left-14 top-1/2 transform -translate-y-1/2 rotate-90 text-[9px] font-mono uppercase text-[#7C9A88] font-bold whitespace-nowrap">Financial Materiality →</div>
                     
                     {/* Materiality threshold line (dashed red) */}
                     <div className="absolute inset-0 border-t border-r border-dashed border-red-400 pointer-events-none" style={{ left: '40%', top: '40%' }}>
@@ -3967,6 +3966,7 @@ const SaaSDashboard = () => {
                         </div>
                       );
                     })}
+                  </div>
                   </div>
                 </div>
                 <div className="text-[10px] text-[#7C9A88] mt-10 leading-relaxed font-sans">
@@ -4065,7 +4065,7 @@ const SaaSDashboard = () => {
             </div>
 
             {/* Task Add Form */}
-            <form onSubmit={handleAddTask} className="flex gap-2 relative">
+            <form onSubmit={handleAddTask} className="flex flex-col sm:flex-row gap-2 relative">
               <input 
                 type="text" 
                 value={taskInput}
@@ -4124,7 +4124,7 @@ const SaaSDashboard = () => {
               
               {/* Calendar Grid */}
               <div className="lg:col-span-2 space-y-4">
-                <div className="flex justify-between items-center">
+                <div className="flex flex-wrap justify-between items-center gap-2.5">
                   <h3 className="font-sans font-bold text-sm text-[#0F291B]">June 2026</h3>
                   <div className="flex items-center space-x-1 text-xs text-[#64748B]">
                     <span className="w-2.5 h-2.5 rounded-full bg-emerald inline-block"></span>
@@ -4132,7 +4132,7 @@ const SaaSDashboard = () => {
                   </div>
                 </div>
 
-                <div className="grid grid-cols-7 gap-2 text-center text-xs font-mono font-bold">
+                <div className="grid grid-cols-7 gap-1 sm:gap-2 text-center text-xs font-mono font-bold">
                   {/* Days of week */}
                   {["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"].map(day => (
                     <div key={day} className="text-[#94A3B8] py-1">{day}</div>
@@ -4312,7 +4312,7 @@ const SaaSDashboard = () => {
         {/* -------------------- TAB CONTENT: TEAM -------------------- */}
         {activeMenu === 'Team' && (
           <div className="bg-white border border-[#E2E8F0] rounded-3xl p-6 lg:p-8 shadow-sm space-y-6">
-            <div className="flex justify-between items-center">
+            <div className="flex flex-wrap justify-between items-center gap-2.5">
               <div>
                 <h1 className="font-sans font-bold text-3xl text-[#0F291B]">ESG Audit Team</h1>
                 <p className="text-sm text-[#64748B] mt-1 font-sans">Manage corporate accounts, permissions, and verifiers.</p>
@@ -4355,7 +4355,7 @@ const SaaSDashboard = () => {
                       <span className="text-[#64748B]">Access:</span>
                       <span className="font-bold text-[#0F291B]">{member.permission}</span>
                     </div>
-                    <div className="flex justify-between items-center">
+                    <div className="flex flex-wrap justify-between items-center gap-2.5">
                       <span className="text-[#64748B]">Status:</span>
                       <button 
                         onClick={() => toggleMemberStatus(member.name)}
@@ -4729,7 +4729,7 @@ const SaaSDashboard = () => {
       {/* -------------------- ADD PROJECT MODAL DIALOG -------------------- */}
       {isAddProjectOpen && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 backdrop-blur-sm bg-black/40">
-          <div className="bg-white rounded-3xl max-w-md w-full p-6 shadow-2xl space-y-6 relative border border-[#E2E8F0]">
+          <div className="bg-white rounded-3xl max-w-md w-full max-h-[90dvh] overflow-y-auto p-5 sm:p-6 shadow-2xl space-y-6 relative border border-[#E2E8F0]">
             <button 
               onClick={() => setIsAddProjectOpen(false)}
               className="absolute top-4 right-4 text-[#94A3B8] hover:text-[#0F291B]"
@@ -4808,7 +4808,7 @@ const SaaSDashboard = () => {
       {/* -------------------- ADD MEMBER MODAL DIALOG -------------------- */}
       {isAddMemberOpen && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 backdrop-blur-sm bg-black/40">
-          <div className="bg-white rounded-3xl max-w-md w-full p-6 shadow-2xl space-y-6 relative border border-[#E2E8F0]">
+          <div className="bg-white rounded-3xl max-w-md w-full max-h-[90dvh] overflow-y-auto p-5 sm:p-6 shadow-2xl space-y-6 relative border border-[#E2E8F0]">
             <button 
               onClick={() => setIsAddMemberOpen(false)}
               className="absolute top-4 right-4 text-[#94A3B8] hover:text-[#0F291B]"

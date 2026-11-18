@@ -100,7 +100,7 @@ export function Button({ variant = 'primary', className = '', ...props }) {
   return (
     <button
       type="button"
-      className={`min-h-[40px] rounded-lg px-4 py-2 font-mono text-xs font-bold transition-colors disabled:cursor-not-allowed disabled:opacity-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald ${styles} ${className}`}
+      className={`min-h-[44px] sm:min-h-[40px] rounded-lg px-4 py-2 font-mono text-xs font-bold transition-colors disabled:cursor-not-allowed disabled:opacity-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald ${styles} ${className}`}
       {...props}
     />
   );

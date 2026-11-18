@@ -229,7 +229,7 @@ export const SatelliteMRVStudio = ({
               Carbon insets from this ecosystem are certified under {selectedProject.standard} with an audit rating of {selectedProject.rating}.
             </p>
 
-            <div className="grid grid-cols-3 gap-3 pt-2">
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 pt-2">
               <div className={`p-3 rounded-2xl border ${isLight ? 'bg-gray-50 border-gray-200' : 'bg-[#040A06] border-[#1B4D2E]'}`}>
                 <span className="text-[10px] font-mono text-gray-500 block">Additionality</span>
                 <span className="text-sm font-bold font-mono text-emerald-500">{selectedProject.additionality}%</span>

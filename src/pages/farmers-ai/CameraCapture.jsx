@@ -466,7 +466,7 @@ const CameraCapture = ({ isInline = false, onBack = null, onScanComplete = null 
           </button>
 
           {/* Swipeable List Wrapper */}
-          <div className="relative w-full overflow-hidden mx-8">
+          <div className="relative w-full overflow-hidden mx-7 sm:mx-8">
             {/* Left fade gradient */}
             <div className="absolute left-0 top-0 bottom-0 w-8 bg-gradient-to-r from-carbon to-transparent pointer-events-none z-10" />
             {/* Right fade gradient */}

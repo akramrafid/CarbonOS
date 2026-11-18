@@ -193,7 +193,7 @@ const LiveMetrics = () => {
   return (
     <section 
       ref={containerRef} 
-      className="w-full bg-[#050C07] text-white py-24 px-6 lg:px-12 relative overflow-hidden border-t border-white/10"
+      className="w-full bg-[#050C07] text-white py-16 sm:py-24 px-4 sm:px-6 lg:px-12 relative overflow-hidden border-t border-white/10"
     >
       {/* Background ambient radial illumination */}
       <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[800px] h-[500px] bg-emerald-950/20 blur-[140px] pointer-events-none rounded-full" />
@@ -243,53 +243,53 @@ const LiveMetrics = () => {
         </div>
 
         {/* Station Navigation Selector Bar */}
-        <div className="mb-8 p-1.5 rounded-2xl bg-black/40 border border-white/10 backdrop-blur-xl flex flex-wrap gap-1.5">
+        <div className="mb-8 p-1.5 rounded-2xl bg-black/40 border border-white/10 backdrop-blur-xl grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-1.5">
           {STATIONS.map((station) => {
             const isActive = activeStation.id === station.id;
             return (
               <button
                 key={station.id}
                 onClick={() => handleStationChange(station)}
-                className={`flex-1 min-w-[200px] px-4 py-3 rounded-xl text-left transition-all duration-200 flex items-center justify-between gap-3 ${
+                className={`w-full px-3.5 sm:px-4 py-3 rounded-xl text-left transition-all duration-200 flex items-center justify-between gap-3 min-w-0 ${
                   isActive 
                     ? 'bg-gradient-to-r from-emerald-950/80 to-emerald-900/40 border border-emerald-500/40 shadow-lg text-white' 
                     : 'bg-transparent hover:bg-white/[0.04] text-white/60 hover:text-white border border-transparent'
                 }`}
               >
-                <div>
-                  <div className="flex items-center gap-2">
-                    <span className="font-sans font-semibold text-xs tracking-tight">{station.name}</span>
+                <div className="min-w-0">
+                  <div className="flex items-center gap-2 flex-wrap">
+                    <span className="font-sans font-semibold text-xs tracking-tight truncate">{station.name}</span>
                     {station.isLiveFeed && (
-                      <span className="text-[9px] font-mono font-bold uppercase tracking-wider px-1.5 py-0.5 rounded bg-emerald-500/20 text-emerald-300 border border-emerald-500/30">
+                      <span className="text-[9px] font-mono font-bold uppercase tracking-wider px-1.5 py-0.5 rounded bg-emerald-500/20 text-emerald-300 border border-emerald-500/30 shrink-0">
                         LIVE IoT
                       </span>
                     )}
                   </div>
-                  <div className="text-[10px] font-mono text-white/40 truncate max-w-[210px] mt-0.5">
+                  <div className="text-[10px] font-mono text-white/40 truncate mt-0.5">
                     {station.location.split('(')[0]}
                   </div>
                 </div>
-                <div className={`w-2 h-2 rounded-full ${isActive ? 'bg-emerald-400 shadow-[0_0_8px_#10B981]' : 'bg-white/20'}`} />
+                <div className={`w-2 h-2 rounded-full shrink-0 ${isActive ? 'bg-emerald-400 shadow-[0_0_8px_#10B981]' : 'bg-white/20'}`} />
               </button>
             );
           })}
         </div>
 
         {/* Selected Station Meta Bar */}
-        <div className="mb-8 px-5 py-3 rounded-xl bg-white/[0.02] border border-white/5 flex flex-wrap items-center justify-between gap-4 text-xs font-mono text-white/60">
-          <div className="flex flex-wrap items-center gap-4">
+        <div className="mb-8 px-4 sm:px-5 py-3 rounded-xl bg-white/[0.02] border border-white/5 flex flex-wrap items-center justify-between gap-3 sm:gap-4 text-xs font-mono text-white/60">
+          <div className="flex flex-wrap items-center gap-2 sm:gap-4">
             <span className="flex items-center gap-1.5 text-white/90">
-              <MapPin size={13} className="text-emerald-400" />
+              <MapPin size={13} className="text-emerald-400 shrink-0" />
               <span>{activeStation.location}</span>
             </span>
-            <span className="text-white/20">•</span>
+            <span className="text-white/20 hidden sm:inline">•</span>
             <span className="flex items-center gap-1.5">
-              <Cpu size={13} className="text-cyan-400" />
+              <Cpu size={13} className="text-cyan-400 shrink-0" />
               <span>{activeStation.hardware}</span>
             </span>
           </div>
 
-          <div className="flex items-center gap-3">
+          <div className="flex flex-wrap items-center gap-3">
             <span className="px-2.5 py-1 rounded bg-white/5 border border-white/10 text-emerald-400 font-semibold">
               {activeStation.protocol}
             </span>
@@ -303,7 +303,7 @@ const LiveMetrics = () => {
 
         {/* Error Notification Bar if Blynk has connection lag */}
         {error && (
-          <div className="mb-8 bg-amber-500/10 border border-amber-500/30 rounded-2xl p-4 flex items-center justify-between gap-4 text-amber-300 text-xs font-mono">
+          <div className="mb-8 bg-amber-500/10 border border-amber-500/30 rounded-2xl p-4 flex flex-col sm:flex-row sm:items-center justify-between gap-2 sm:gap-4 text-amber-300 text-xs font-mono">
             <div className="flex items-center gap-2.5">
               <AlertCircle size={16} className="shrink-0 text-amber-400" />
               <span>{error}</span>

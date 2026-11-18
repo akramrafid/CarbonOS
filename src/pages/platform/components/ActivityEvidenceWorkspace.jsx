@@ -620,7 +620,7 @@ export const ActivityEvidenceWorkspace = ({
         </div>
 
         {/* Metric Summary Cards */}
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mt-8 pt-6 border-t border-[#152B1D]/40">
+        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-4 mt-8 pt-6 border-t border-[#152B1D]/40">
           <div className={`p-4 rounded-2xl border ${
             isLight ? 'bg-slate-50/70 border-slate-200' : 'bg-[#040906] border-[#152B1D]'
           }`}>
@@ -739,7 +739,7 @@ export const ActivityEvidenceWorkspace = ({
 
         {/* Filter Toolbar (For Activities Tab) */}
         {activeTab === 'activities' && (
-          <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 pt-4">
+          <div className="grid grid-cols-1 sm:grid-cols-2 sm:grid-cols-4 gap-3 pt-4">
             <div>
               <label className="block text-[10px] font-mono uppercase text-[#7C9A88] mb-1 font-bold">Scope</label>
               <select
@@ -998,7 +998,7 @@ export const ActivityEvidenceWorkspace = ({
                         </span>
                       </div>
 
-                      <div className="grid grid-cols-2 gap-2 mt-4 text-[11px] font-sans">
+                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 mt-4 text-[11px] font-sans">
                         <div>
                           <span className="text-gray-400 block text-[10px]">Issuer / Authority</span>
                           <span className="font-semibold block truncate">{doc.issuer}</span>
@@ -1066,7 +1066,7 @@ export const ActivityEvidenceWorkspace = ({
               Official verification record under ISAE 3410 assurance for {activeClient.name}.
             </p>
 
-            <div className="grid grid-cols-2 gap-4 mt-6 p-4 rounded-2xl bg-black/30 border border-[#152B1D] text-xs">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mt-6 p-4 rounded-2xl bg-black/30 border border-[#152B1D] text-xs">
               <div>
                 <span className="text-gray-400 text-[10px] block">DOCUMENT IDENTIFIER</span>
                 <span className="font-mono font-bold text-white text-sm">{selectedEvidence.id}</span>
@@ -1161,7 +1161,7 @@ export const ActivityEvidenceWorkspace = ({
                 />
               </div>
 
-              <div className="grid grid-cols-2 gap-4">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div>
                   <label className="block text-xs font-bold text-gray-300 mb-1">GHG Protocol Scope</label>
                   <select
@@ -1205,7 +1205,7 @@ export const ActivityEvidenceWorkspace = ({
                 </div>
               </div>
 
-              <div className="grid grid-cols-3 gap-3">
+              <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
                 <div>
                   <label className="block text-xs font-bold text-gray-300 mb-1">Quantity</label>
                   <input
@@ -1262,7 +1262,7 @@ export const ActivityEvidenceWorkspace = ({
                 </span>
               </div>
 
-              <div className="grid grid-cols-2 gap-4">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div>
                   <label className="block text-xs font-bold text-gray-300 mb-1">Responsible Data Owner</label>
                   <input

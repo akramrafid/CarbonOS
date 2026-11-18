@@ -183,16 +183,16 @@ const HowItWorks = () => {
       <div className="absolute inset-0 bg-[linear-gradient(to_right,#00C85305_1px,transparent_1px),linear-gradient(to_bottom,#00C85305_1px,transparent_1px)] bg-[size:4rem_4rem] z-0 pointer-events-none"></div>
 
       {/* Hero Section */}
-      <header className="relative pt-40 pb-20 px-6 lg:px-12 z-10 border-b border-white/5">
+      <header className="relative pt-24 sm:pt-36 lg:pt-40 pb-14 sm:pb-20 px-4 sm:px-6 lg:px-12 z-10 border-b border-white/5">
         <div className="max-w-4xl mx-auto text-center">
-          <span className="font-mono text-xs text-emerald tracking-widest px-3 py-1 bg-[#0D2B1A]/40 border border-[#00C853]/20 rounded-full mb-6 inline-block">
+          <span className="font-mono text-xs text-emerald tracking-widest px-3 py-1 bg-[#0D2B1A]/40 border border-[#00C853]/20 rounded-full mb-5 sm:mb-6 inline-block">
             DATA TO BDT PIPELINE
           </span>
-          <h1 className="serif-drama text-5xl md:text-7xl text-white leading-tight mb-6 tracking-tight">
+          <h1 className="serif-drama text-4xl sm:text-5xl md:text-7xl text-white leading-tight mb-5 sm:mb-6 tracking-tight">
             The Lifecycle of a <br/>
             <span className="text-emerald italic">Verified Credit</span>
           </h1>
-          <p className="text-lg md:text-xl text-mist font-sans font-light max-w-2xl mx-auto">
+          <p className="text-base sm:text-lg md:text-xl text-mist font-sans font-light max-w-2xl mx-auto">
             Carbon Zero BD is the first end-to-end registry in South Asia with zero payment friction. See how we move value from the farm directly to the farmer.
           </p>
         </div>

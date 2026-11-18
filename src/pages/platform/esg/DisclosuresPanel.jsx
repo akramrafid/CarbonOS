@@ -37,8 +37,8 @@ export default function DisclosuresPanel({ me, can, periods }) {
       <Notice error={action.error} message={action.message} />
       <Panel title="Disclosure coverage" description="Which requirements have supporting data and reviewed responses. This is not a compliance determination and does not replace external assurance."
         actions={<div className="flex flex-wrap items-end gap-3">
-          <div className="w-44"><Select label="Reporting period" value={periodId} onChange={(e) => setPeriodId(e.target.value)} options={periods.map((p) => [p.id, p.name])} /></div>
-          <div className="w-64"><Select label="Framework" value={framework} onChange={(e) => setFramework(e.target.value)}
+          <div className="w-full sm:w-44"><Select label="Reporting period" value={periodId} onChange={(e) => setPeriodId(e.target.value)} options={periods.map((p) => [p.id, p.name])} /></div>
+          <div className="w-full sm:w-64"><Select label="Framework" value={framework} onChange={(e) => setFramework(e.target.value)}
             options={(frameworks.data || [{ framework: 'GRI', name: 'GRI' }]).map((f) => [f.framework, f.name])} /></div>
           <Button variant="secondary" onClick={downloadGap}>Gap report (CSV)</Button>
         </div>}>

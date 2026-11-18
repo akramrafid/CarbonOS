@@ -18,14 +18,14 @@ const Footer = () => {
       <div className="absolute inset-0 bg-black/10 z-0 pointer-events-none"></div>
 
       {/* CTA Section (Top part of the landscape) */}
-      <div className="relative z-10 w-full flex-grow flex flex-col items-center justify-center text-center px-6 py-24">
-        <h2 className="font-sans font-bold text-4xl lg:text-6xl text-white max-w-4xl tracking-tight leading-[1.1] mb-6 drop-shadow-lg">
+      <div className="relative z-10 w-full flex-grow flex flex-col items-center justify-center text-center px-4 sm:px-6 py-16 sm:py-24">
+        <h2 className="font-sans font-bold text-3xl sm:text-4xl lg:text-6xl text-white max-w-4xl tracking-tight leading-[1.1] mb-4 sm:mb-6 drop-shadow-lg">
           {t('footer.ctaTitle')}
         </h2>
-        <p className="font-sans text-lg text-white/90 max-w-2xl mb-10 drop-shadow-md">
+        <p className="font-sans text-base sm:text-lg text-white/90 max-w-2xl mb-8 sm:mb-10 drop-shadow-md">
           {t('footer.ctaSubtext')}
         </p>
-        <Link to="/platform/saas-dashboard" className="bg-white text-carbon font-sans font-bold text-sm px-8 py-4 rounded-full flex items-center space-x-3 hover:bg-gray-100 transition-colors shadow-2xl">
+        <Link to="/platform/saas-dashboard" className="bg-white text-carbon font-sans font-bold text-sm px-7 sm:px-8 py-3.5 sm:py-4 rounded-full flex items-center space-x-3 hover:bg-gray-100 transition-colors shadow-2xl min-h-[44px]">
           <span>{t('footer.ctaButton')}</span>
           <div className="bg-carbon text-white rounded-full p-1">
             <ArrowRight size={14} />
@@ -34,17 +34,17 @@ const Footer = () => {
       </div>
 
       {/* Glassmorphic Footer (Bottom part) */}
-      <footer className="relative z-10 w-full bg-white/10 backdrop-blur-2xl border-t border-white/20 pt-8 rounded-t-[2.5rem]">
-        <div className="w-full px-6 lg:px-12 mx-auto">
+      <footer className="relative z-10 w-full bg-white/10 backdrop-blur-2xl border-t border-white/20 pt-8 pb-[env(safe-area-inset-bottom)] rounded-t-[2rem] sm:rounded-t-[2.5rem]">
+        <div className="w-full px-4 sm:px-6 lg:px-12 mx-auto">
           
           {/* Top Line */}
-          <div className="flex items-center justify-between border-b border-white/10 pb-6 mb-12">
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 border-b border-white/10 pb-6 mb-10 sm:mb-12">
             <span className="font-sans text-xs text-white/70">{t('footer.copyright')}</span>
             <span className="font-sans text-xs text-white/70">{t('footer.rights')}</span>
           </div>
 
           {/* Links Grid - 6 Columns */}
-          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-8 mb-16">
+          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-x-6 gap-y-8 mb-12 sm:mb-16">
             
             {/* Col 1 */}
             <div className="flex flex-col space-y-4">

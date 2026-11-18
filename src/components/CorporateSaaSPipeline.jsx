@@ -188,23 +188,23 @@ const CorporateSaaSPipeline = () => {
       <div className="absolute bottom-1/4 right-1/4 w-[500px] h-[500px] bg-cyan/5 rounded-full blur-[120px] pointer-events-none z-0"></div>
 
       {/* Increased max-width of the section container to 90rem (1440px) for a grander look */}
-      <div className="max-w-[90rem] mx-auto px-6 lg:px-12 relative z-10">
+      <div className="max-w-[90rem] mx-auto px-4 sm:px-6 lg:px-12 relative z-10">
         
         {/* Header Block (Scaled up title and subtitle sizes) */}
-        <div className="text-center mb-20 max-w-4xl mx-auto">
+        <div className="text-center mb-12 sm:mb-20 max-w-4xl mx-auto">
           <span className="font-mono text-xs text-emerald tracking-[0.25em] px-4 py-1.5 bg-emerald/10 border border-emerald/20 rounded-full mb-5 inline-block uppercase font-bold">
             Workflow & System Integration
           </span>
-          <h2 className="text-5xl md:text-6xl font-bold text-white tracking-tight leading-tight">
+          <h2 className="text-3xl sm:text-5xl md:text-6xl font-bold text-white tracking-tight leading-tight">
             Corporate  SaaS  Pipeline
           </h2>
-          <p className="text-base md:text-lg text-mist/85 mt-4 font-light">
+          <p className="text-sm sm:text-base md:text-lg text-mist/85 mt-4 font-light">
             Automating emissions tracking, verification, and compliance inside a single unified pipeline.
           </p>
         </div>
 
         {/* Outer Visual Panel (Matches Video Layout, using 12-column grid to give text more space) */}
-        <div className="grid grid-cols-1 lg:grid-cols-12 gap-10 bg-[#080F0B] border border-white/5 rounded-[3rem] p-10 lg:p-14 shadow-[0_0_100px_rgba(0,0,0,0.5)] backdrop-blur-md">
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-10 bg-[#080F0B] border border-white/5 rounded-3xl lg:rounded-[3rem] p-5 sm:p-8 lg:p-14 shadow-[0_0_100px_rgba(0,0,0,0.5)] backdrop-blur-md">
           
           {/* Left Column: Controls, Info & Status (Takes 4 columns, wider typography) */}
           <div className="lg:col-span-4 flex flex-col justify-between border-b lg:border-b-0 lg:border-r border-white/10 pb-8 lg:pb-0 lg:pr-10">
@@ -341,7 +341,7 @@ const CorporateSaaSPipeline = () => {
               </div>
 
               {/* Labels Row (Decoupled from circles height to preserve correct line vertical alignment) */}
-              <div className="flex justify-between items-center w-full mt-4 relative h-6">
+              <div className="flex justify-between items-center w-full mt-3 sm:mt-4 relative h-6">
                 {steps.map((step, idx) => {
                   const isActive = activeStep === idx;
                   return (
@@ -349,7 +349,7 @@ const CorporateSaaSPipeline = () => {
                       key={idx} 
                       className="w-11 flex items-center justify-center relative"
                     >
-                      <span className={`absolute text-xs font-mono tracking-wider whitespace-nowrap transition-colors duration-300 uppercase ${
+                      <span className={`absolute text-[9px] sm:text-xs font-mono tracking-wider whitespace-nowrap transition-colors duration-300 uppercase ${
                         isActive ? 'text-emerald font-bold' : 'text-mist/40'
                       }`}>
                         {step.title}
@@ -360,8 +360,8 @@ const CorporateSaaSPipeline = () => {
               </div>
             </div>
 
-            {/* Main Visual Display Canvas (Scaled height to h-[420px] for massive visual impact) */}
-            <div className="relative bg-[#040A06] rounded-[2rem] border border-white/5 h-[420px] flex items-center justify-center overflow-hidden shadow-inner group">
+            {/* Main Visual Display Canvas (Responsive height & scaled inner SVG stage on narrow viewports) */}
+            <div className="relative bg-[#040A06] rounded-2xl sm:rounded-[2rem] border border-white/5 min-h-[320px] sm:h-[420px] py-6 sm:py-0 flex items-center justify-center overflow-hidden shadow-inner group">
               
               {/* Grid Overlay inside the canvas */}
               <div className="absolute inset-0 bg-[linear-gradient(to_right,#00c85302_1px,transparent_1px),linear-gradient(to_bottom,#00c85302_1px,transparent_1px)] bg-[size:2.5rem_2.5rem] z-0 pointer-events-none"></div>
@@ -410,12 +410,12 @@ const CorporateSaaSPipeline = () => {
 
               {/* Stage 2: AI OCR & Scope Extraction */}
               {activeStep === 1 && (
-                <div className={`w-full max-w-xl px-6 flex flex-col items-center justify-center z-10 transition-all duration-500 ${
+                <div className={`w-full max-w-xl px-2 sm:px-6 flex flex-col items-center justify-center z-10 transition-all duration-500 ${
                   transitionState === 'transitioning' ? 'opacity-0 scale-95' : 'opacity-100 scale-100'
                 }`}>
                   
-                  {/* Custom SVG flow network showing document OCR to Scopes */}
-                  <div className="relative w-full h-[280px]">
+                  {/* Custom SVG flow network showing document OCR to Scopes (scales smoothly below sm) */}
+                  <div className="relative w-[450px] h-[280px] origin-center scale-[0.60] min-[375px]:scale-[0.72] sm:scale-100 -my-12 min-[375px]:-my-8 sm:my-0 shrink-0">
                     <svg className="w-full h-full overflow-visible" viewBox="0 0 450 280" fill="none">
                       
                       {/* Flows to Scope 1 */}
@@ -508,11 +508,11 @@ const CorporateSaaSPipeline = () => {
 
               {/* Stage 3: Audit-Ready Dashboard & Verification Trace (Increased spacing and sizes) */}
               {activeStep === 2 && (
-                <div className={`w-full max-w-lg px-6 z-10 transition-all duration-500 ${
+                <div className={`w-full max-w-lg px-2 sm:px-6 flex flex-col items-center z-10 transition-all duration-500 ${
                   transitionState === 'transitioning' ? 'opacity-0 scale-95' : 'opacity-100 scale-100'
                 }`}>
                   
-                  <div className="relative h-[300px] w-full flex items-end justify-center pb-8">
+                  <div className="relative h-[300px] w-[450px] flex items-end justify-center pb-8 origin-center scale-[0.60] min-[375px]:scale-[0.72] sm:scale-100 -my-12 min-[375px]:-my-8 sm:my-0 shrink-0">
                     
                     {/* SVG Connector Lines (Proof links connecting chart to source document) */}
                     <svg className="absolute inset-0 w-full h-full pointer-events-none overflow-visible" viewBox="0 0 450 300" fill="none">
@@ -576,11 +576,11 @@ const CorporateSaaSPipeline = () => {
 
               {/* Stage 4: Seamless Export to Compliance Standards (Enlarged) */}
               {activeStep === 3 && (
-                <div className={`w-full max-w-xl px-6 z-10 transition-all duration-500 ${
+                <div className={`w-full max-w-xl px-2 sm:px-6 flex flex-col items-center z-10 transition-all duration-500 ${
                   transitionState === 'transitioning' ? 'opacity-0 scale-95' : 'opacity-100 scale-100'
                 }`}>
                   
-                  <div className="relative h-[280px] w-full">
+                  <div className="relative h-[280px] w-[460px] origin-center scale-[0.60] min-[375px]:scale-[0.72] sm:scale-100 -my-12 min-[375px]:-my-8 sm:my-0 shrink-0">
                     
                     {/* SVG Flow Arrows pointing from center outward */}
                     <svg className="absolute inset-0 w-full h-full pointer-events-none overflow-visible" viewBox="0 0 460 280" fill="none">

@@ -880,7 +880,7 @@ const CarbonRegistry = () => {
                       <div style={{ width: '30%' }} className="bg-[#15803d] h-full" title="Soil Organic Carbon (SOC)"></div>
                     </div>
 
-                    <div className="grid grid-cols-3 gap-2 font-mono text-xs">
+                    <div className="grid grid-cols-1 sm:grid-cols-3 gap-2 font-mono text-xs">
                       <div className="flex items-center space-x-1.5">
                         <span className="w-2 h-2 rounded-full bg-[#00C853]"></span>
                         <span className="text-white/60">AGB:</span>

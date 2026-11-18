@@ -204,7 +204,7 @@ export const ConglomerateTreeStudio = ({ isLight, locale }) => {
                 {selectedEntity.name}
               </h3>
             </div>
-            <div className="text-right">
+            <div className="text-left sm:text-right">
               <span className="text-[10px] font-mono text-gray-500 block uppercase">Entity Total</span>
               <span className="text-xl font-bold font-mono text-emerald-500">
                 {selectedEntity.emissions.total.toFixed(2)} tCO₂e
@@ -213,7 +213,7 @@ export const ConglomerateTreeStudio = ({ isLight, locale }) => {
           </div>
 
           {/* Scope Breakdown */}
-          <div className="grid grid-cols-3 gap-3">
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
             <div className={`p-4 rounded-2xl border ${isLight ? 'bg-gray-50 border-gray-200' : 'bg-[#040A06] border-[#1B4D2E]'}`}>
               <span className="text-[10px] font-mono text-amber-500 uppercase block">Scope 1 Direct</span>
               <span className="text-lg font-bold font-mono text-amber-500 mt-1 block">
@@ -244,7 +244,7 @@ export const ConglomerateTreeStudio = ({ isLight, locale }) => {
             <h4 className="text-xs font-mono font-bold uppercase tracking-wider text-gray-500">
               Subsidiary Operational Benchmarks
             </h4>
-            <div className="grid grid-cols-2 gap-4 text-xs font-mono">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 text-xs font-mono">
               <div>
                 <span className="text-gray-500 block">Carbon Intensity / Turnover:</span>
                 <span className="font-bold text-sm text-gray-800 dark:text-gray-200">

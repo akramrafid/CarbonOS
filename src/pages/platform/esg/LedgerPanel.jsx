@@ -63,7 +63,7 @@ export default function LedgerPanel({ me, can, types, periods, facilities }) {
     <div className="space-y-6">
       <Notice error={action.error} message={action.message} />
       <Panel title="Activity ledger" description="Approved records feed the calculation. Approved records never change: corrections supersede them, keeping the history."
-        actions={<div className="w-56"><Select label="Reporting period" value={periodId} onChange={(e) => setPeriodId(e.target.value)}
+        actions={<div className="w-full sm:w-56"><Select label="Reporting period" value={periodId} onChange={(e) => setPeriodId(e.target.value)}
           options={periods.map((p) => [p.id, `${p.name} (${p.status})`])} /></div>}>
         <Loading state={activities} empty="No activity records in this period yet.">
           <Table caption="Activity records" rows={activities.data?.items || []} columns={[
@@ -123,7 +123,7 @@ export default function LedgerPanel({ me, can, types, periods, facilities }) {
             <Select label="Activity" name="activity_type" defaultValue={draft.activity_type}
               onChange={(e) => setDraft({ ...draft, activity_type: e.target.value, unit: '' })}
               options={allTypes.map((t) => [t.activity_type, t.scope ? `${t.activity_type} (Scope ${t.scope})` : `${t.activity_type} (memo, not in totals)`])} />
-            <div className="grid grid-cols-2 gap-2">
+            <div className="grid grid-cols-1 min-[360px]:grid-cols-2 gap-2">
               <Input label="Quantity" name="quantity" type="number" min="0" step="any" required defaultValue={draft.quantity} />
               <Select label="Unit" name="unit" defaultValue={draft.unit || typeInfo?.canonical_unit} options={(typeInfo?.accepted_units || []).map((u) => [u, u])} />
             </div>
