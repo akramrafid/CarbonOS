@@ -216,6 +216,14 @@ const Navbar = () => {
         }`}
         aria-hidden={!isMobileMenuOpen}
       >
+        <button
+          type="button"
+          onClick={closeMenu}
+          aria-label="Close navigation menu"
+          className="fixed top-5 right-5 min-w-[44px] min-h-[44px] rounded-full flex items-center justify-center border border-white/20 bg-white/10 text-white hover:border-emerald transition-colors cursor-pointer"
+        >
+          <X size={20} />
+        </button>
         <div className="flex flex-col items-center space-y-3 sm:space-y-5 w-full max-w-md px-5 my-auto">
           {navLinks.map((item) => {
             const isHash = ['Platform', 'Sectors'].includes(item.id);

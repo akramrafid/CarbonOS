@@ -203,7 +203,7 @@ export default function EsgWorkspace() {
         <aside aria-label="Demo notice" className="rounded-xl border border-amber-500/30 bg-amber-950/20 p-4 text-xs">
           <div className="flex flex-wrap items-center justify-between gap-3">
             <div className="space-y-1">
-              <div className="flex items-center gap-2">
+              <div className="flex flex-wrap items-center gap-2">
                 <span className="inline-block rounded bg-amber-400/20 px-2 py-0.5 font-mono text-[11px] font-semibold uppercase tracking-wider text-amber-300">
                   DEMO WORKSPACE — SAMPLE DATA / NOT ASSURED
                 </span>
@@ -222,11 +222,11 @@ export default function EsgWorkspace() {
             </div>
             <div className="flex flex-wrap items-center gap-2">
               <span className="text-[11px] text-mist">Dual-control persona:</span>
-              <div className="inline-flex rounded-lg border border-mist/20 p-0.5">
+              <div className="inline-flex flex-wrap rounded-lg border border-mist/20 p-0.5 gap-0.5">
                 <button
                   type="button"
                   onClick={() => handlePersonaChange('owner')}
-                  className={`rounded-md px-2.5 py-1 font-mono text-[11px] transition-colors ${
+                  className={`min-h-[38px] sm:min-h-[30px] rounded-md px-2.5 py-1.5 font-mono text-[11px] transition-colors ${
                     user?.activePersona !== 'reviewer' ? 'bg-emerald text-carbon font-semibold' : 'text-mist hover:text-registry'
                   }`}
                 >
@@ -235,7 +235,7 @@ export default function EsgWorkspace() {
                 <button
                   type="button"
                   onClick={() => handlePersonaChange('reviewer')}
-                  className={`rounded-md px-2.5 py-1 font-mono text-[11px] transition-colors ${
+                  className={`min-h-[38px] sm:min-h-[30px] rounded-md px-2.5 py-1.5 font-mono text-[11px] transition-colors ${
                     user?.activePersona === 'reviewer' ? 'bg-emerald text-carbon font-semibold' : 'text-mist hover:text-registry'
                   }`}
                 >
@@ -260,10 +260,10 @@ export default function EsgWorkspace() {
         )}
       </div>
 
-      <nav aria-label="ESG workspace sections" className="flex gap-2 overflow-x-auto pb-1">
+      <nav aria-label="ESG workspace sections" className="flex flex-wrap gap-2 pb-1">
         {tabs.map(([key, label]) => (
           <button key={key} type="button" onClick={() => setTab(key)} aria-current={tab === key ? 'page' : undefined}
-            className={`whitespace-nowrap rounded-lg px-4 py-2 font-mono text-xs focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald ${tab === key ? 'bg-emerald text-carbon' : 'border border-mist/30 text-registry'}`}>
+            className={`min-h-[42px] sm:min-h-[38px] whitespace-nowrap rounded-lg px-3.5 sm:px-4 py-2 font-mono text-xs focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald ${tab === key ? 'bg-emerald text-carbon' : 'border border-mist/30 text-registry'}`}>
             {label}
           </button>
         ))}

@@ -1402,7 +1402,7 @@ const SaaSDashboard = () => {
       </div>
 
       {/* Scrollable Menu Sections */}
-      <div className="flex-1 overflow-y-auto px-3.5 py-4 space-y-6 custom-scrollbar">
+      <div className="flex-1 overflow-y-auto px-3.5 py-3 space-y-4 custom-scrollbar">
         {menuGroups.map((group) => (
           <div key={group.title}>
             <span className={`font-sans text-[10px] uppercase tracking-wider block px-2.5 mb-1.5 font-bold ${
@@ -1531,7 +1531,7 @@ const SaaSDashboard = () => {
       )}
 
       {/* 1. Left Sidebar Navigation Panel — Executive Enterprise Architecture */}
-      <aside className={`w-[272px] min-w-[272px] border-r h-screen sticky top-0 hidden lg:flex lg:pt-20 lg:pb-10 flex-col justify-between shrink-0 transition-colors duration-200 z-30 select-none ${
+      <aside className={`w-[272px] min-w-[272px] border-r h-screen sticky top-0 hidden lg:flex lg:pt-24 lg:pb-12 flex-col justify-between shrink-0 transition-colors duration-200 z-30 select-none ${
         isLight ? 'bg-[#FAFCFA] border-[#E3EAE5]' : 'bg-[#060D08] border-[#132318]'
       }`}>
         {renderSidebarContent(false)}
@@ -1568,7 +1568,7 @@ const SaaSDashboard = () => {
                 ? 'bg-[#EEF7F1] border-[#CCE2D3] text-[#0A2E19]'
                 : 'bg-[#0B2114] border-[#174D2B] text-white'
             }`}
-            aria-label="Open dashboard menu and engines"
+            aria-label="Menu & Engines"
           >
             <Menu className="w-4 h-4 text-[#00C853] shrink-0" />
             <span>Menu &amp; Engines</span>
@@ -1833,10 +1833,10 @@ const SaaSDashboard = () => {
               </div>
 
               {/* Bangladesh Geolocation Selector Pill */}
-              <div className={`flex items-center space-x-2 px-3 py-1.5 rounded-full border self-start md:self-auto shadow-sm ${
+              <div className={`flex flex-wrap items-center gap-2 px-3 py-1.5 rounded-2xl sm:rounded-full border self-start md:self-auto shadow-sm max-w-full ${
                 isLight ? 'bg-white border-[#E8ECE8]' : 'bg-[#08130C] border-[#152B1D]'
               }`}>
-                <MapPin className="w-3.5 h-3.5 text-[#00C853]" />
+                <MapPin className="w-3.5 h-3.5 text-[#00C853] shrink-0" />
                 <span className={`text-[11px] font-sans ${isLight ? 'text-[#557361]' : 'text-[#7C9A88]'}`}>District:</span>
                 <select 
                   value={selectedDistrict}
@@ -1844,7 +1844,7 @@ const SaaSDashboard = () => {
                     setSelectedDistrict(e.target.value);
                     showToast(`District branch updated to ${e.target.value}.`, "info");
                   }}
-                  className={`text-xs font-sans font-bold border-none bg-transparent focus:ring-0 cursor-pointer ${
+                  className={`min-h-[36px] py-1 text-xs font-sans font-bold border-none bg-transparent focus:ring-0 cursor-pointer ${
                     isLight ? 'text-[#0F2417]' : 'text-white'
                   }`}
                 >
@@ -1856,7 +1856,7 @@ const SaaSDashboard = () => {
                 </select>
                 <button 
                   onClick={detectLocation}
-                  className="bg-[#00C853] hover:bg-[#00E676] text-white font-mono font-bold text-[10px] px-3 py-1.5 rounded-lg transition-all shadow-sm cursor-pointer"
+                  className="min-h-[36px] bg-[#00C853] hover:bg-[#00E676] text-white font-mono font-bold text-[10px] px-3 py-1.5 rounded-lg transition-all shadow-sm cursor-pointer"
                 >
                   Auto Select
                 </button>
