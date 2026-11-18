@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
+import BrandLogo from './BrandLogo';
 import { 
   X, 
   CheckCircle2, 
@@ -181,6 +182,7 @@ export const RequestDemoModal = ({ isOpen, onClose }) => {
           <div>
             {/* Modal Header */}
             <div className="mb-6 space-y-2 pr-8">
+              <BrandLogo variant="dark" heightClass="h-6" showBdBadge={true} className="mb-1" />
               <div className="inline-flex items-center space-x-1.5 font-mono text-[11px] text-emerald bg-emerald/10 border border-emerald/20 px-2.5 py-0.5 rounded-full uppercase tracking-wider">
                 <Sparkles size={12} />
                 <span>Enterprise & Project Partnership</span>

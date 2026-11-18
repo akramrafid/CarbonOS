@@ -18,6 +18,7 @@ import {
 } from 'lucide-react';
 import PaymentStatusTracker from './PaymentStatusTracker';
 import { useTheme } from '../../context/ThemeContext';
+import BrandLogo from '../BrandLogo';
 
 const PurchaseConfirmModal = ({ credit, creditId, onClose, onPurchaseComplete }) => {
   const { theme } = useTheme();
@@ -136,12 +137,9 @@ const PurchaseConfirmModal = ({ credit, creditId, onClose, onPurchaseComplete })
           isLight ? 'bg-[#f2f3ee] border-[#dbf0ea]' : 'bg-[#0D2B1A]/40 border-white/10'
         }`}>
           <div className="flex items-center space-x-2.5">
-            <span className="w-2.5 h-2.5 rounded-full bg-emerald animate-pulse"></span>
             <div>
-              <div className="flex items-center space-x-2">
-                <span className="font-mono text-[10px] tracking-wider uppercase font-bold text-emerald">
-                  CARBON ZERO BD
-                </span>
+              <div className="flex flex-wrap items-center gap-2 mb-1">
+                <BrandLogo variant={isLight ? 'light' : 'dark'} heightClass="h-5 sm:h-6" showBdBadge={true} />
                 <span className={`text-[10px] font-mono px-1.5 py-0.5 rounded ${
                   isLight ? 'bg-emerald/10 text-emerald-800' : 'bg-emerald/20 text-emerald'
                 }`}>

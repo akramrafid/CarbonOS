@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
+import BrandLogo from '../../components/BrandLogo';
 import { 
   Upload, 
   Check, 
@@ -1365,27 +1366,17 @@ const SaaSDashboard = () => {
     <>
       {/* Header / Brand */}
       <div className={`px-5 pt-5 lg:pt-4 pb-4 border-b shrink-0 flex items-center justify-between gap-2 ${isLight ? 'border-[#E3EAE5]' : 'border-[#132318]'}`}>
-        <Link to="/" onClick={() => setIsSidebarOpen(false)} className="flex items-center space-x-3 group min-w-0">
-          <div className="w-8 h-8 rounded-xl bg-gradient-to-tr from-[#00C853] to-[#00E676] flex items-center justify-center shadow-[0_0_16px_rgba(0,200,83,0.25)] text-[#050C07] shrink-0 transition-transform duration-200 group-hover:scale-105">
-            <Leaf className="w-4 h-4 text-[#050C07] stroke-[2.5]" />
-          </div>
-          <div className="flex-1 min-w-0">
-            <div className="flex items-center space-x-1.5">
-              <span className={`font-sans font-bold text-sm tracking-tight truncate ${
-                isLight ? 'text-[#0F2417]' : 'text-white'
-              }`}>
-                CarbonZero
-              </span>
-              <span className="text-[9px] font-mono font-bold px-1.5 py-0.5 rounded bg-[#00C853]/15 text-[#00E676] border border-[#00C853]/30 shrink-0 leading-none">
-                BD
-              </span>
-            </div>
-            <span className={`text-[10px] font-sans font-semibold tracking-wider uppercase block truncate mt-0.5 ${
-              isLight ? 'text-[#557361]' : 'text-[#6E8F7A]'
-            }`}>
-              Sovereign Registry OS
-            </span>
-          </div>
+        <Link to="/" onClick={() => setIsSidebarOpen(false)} aria-label="CarbonZero BD Home" className="flex flex-col items-start gap-1 group min-w-0">
+          <BrandLogo
+            variant={isLight ? 'light' : 'dark'}
+            heightClass="h-6"
+            showBdBadge={true}
+          />
+          <span className={`text-[10px] font-sans font-semibold tracking-wider uppercase block truncate ${
+            isLight ? 'text-[#557361]' : 'text-[#6E8F7A]'
+          }`}>
+            Sovereign Registry OS
+          </span>
         </Link>
         {showCloseButton && (
           <button

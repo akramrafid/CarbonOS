@@ -23,7 +23,7 @@ export default {
         mist: 'var(--color-mist)',
       },
       fontFamily: {
-        sans: ['"Instrument Sans"', 'sans-serif'],
+        sans: ['"Poppins"', 'sans-serif'],
         serif: ['"Cormorant Garamond"', 'serif'],
         mono: ['"JetBrains Mono"', 'monospace'],
       },

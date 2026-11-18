@@ -35,8 +35,8 @@
 /* ===== LIGHT THEME (Clean, Functional, Implementation-Oriented) ===== */
 [data-theme="light"] {
   /* Style Foundations - Typography Tokens */
-  --font-family-primary: Helvetica, Arial, sans-serif;
-  --font-family-stack: Helvetica, Arial, sans-serif;
+  --font-family-primary: 'Poppins', sans-serif;
+  --font-family-stack: 'Poppins', sans-serif;
   --font-size-base: 16px;
   --font-weight-base: 400;
   --font-lineHeight-base: 22.4px;
@@ -110,7 +110,7 @@
 body {
   background-color: var(--color-carbon);
   color: var(--color-registry);
-  font-family: 'Instrument Sans', sans-serif; /* impeccable-disable-line overused-font -- intentional primary brand typography */
+  font-family: 'Poppins', sans-serif;
   overflow-x: hidden;
   transition: background-color var(--motion-duration-normal, 0.4s) ease, color var(--motion-duration-normal, 0.4s) ease;
 }
@@ -118,7 +118,7 @@ body {
 /* Light Theme Font Family and Base Typography Override */
 [data-theme="light"],
 [data-theme="light"] body {
-  font-family: Helvetica, Arial, sans-serif !important;
+  font-family: 'Poppins', sans-serif !important;
   background-color: #f2f3ee !important;
   color: #413f3f !important;
   font-size: 16px;
@@ -131,7 +131,7 @@ body {
 [data-theme="light"] h4,
 [data-theme="light"] h5,
 [data-theme="light"] h6 {
-  font-family: Helvetica, Arial, sans-serif !important;
+  font-family: 'Poppins', sans-serif !important;
   color: #181414 !important;
 }
 
@@ -806,7 +806,7 @@ select option {
 [data-theme="light"] .platform-saas-dashboard {
   background-color: #f2f3ee !important; /* Linen canvas */
   color: #413f3f !important; /* Charcoal primary text */
-  font-family: Helvetica, Arial, sans-serif !important;
+  font-family: 'Poppins', sans-serif !important;
 }
 
 /* Sidebar and Main Cards */

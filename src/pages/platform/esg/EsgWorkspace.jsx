@@ -13,6 +13,7 @@ import MetricsPanel from './MetricsPanel';
 import DisclosuresPanel from './DisclosuresPanel';
 import BillAnalysisPanel from './BillAnalysisPanel';
 import { AuditPanel, MembersPanel } from './PeoplePanel';
+import BrandLogo from '../../../components/BrandLogo';
 
 const PERMS = {
   org_owner: ['read', 'write', 'review', 'admin'], esg_admin: ['read', 'write', 'review', 'admin'],
@@ -132,6 +133,7 @@ export default function EsgWorkspace() {
     <main className="mx-auto max-w-6xl space-y-6 px-4 pb-16 pt-28 sm:px-6">
       <header className="flex flex-wrap items-end justify-between gap-4">
         <div>
+          <BrandLogo variant="auto" heightClass="h-5 sm:h-6" showBdBadge={true} className="mb-2" />
           <p className="font-mono text-[11px] uppercase tracking-wider text-emerald">CarbonOS ESG</p>
           <h1 className="font-serif text-4xl text-registry">GHG accounting workspace</h1>
         </div>

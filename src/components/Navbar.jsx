@@ -3,6 +3,7 @@ import { Link, useNavigate, useLocation } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { LogIn, Menu, X, Sun, Moon } from 'lucide-react';
 import { useTheme } from '../context/ThemeContext';
+import BrandLogo from './BrandLogo';
 import RequestDemoModal from './RequestDemoModal';
 
 const Navbar = () => {
@@ -98,13 +99,12 @@ const Navbar = () => {
       >
         {/* Left Side: Brand Logo */}
         <div className="flex items-center shrink-0 min-w-0">
-          <Link to="/" className="flex items-center space-x-1.5 sm:space-x-2 group min-h-[40px] sm:min-h-[44px]">
-            <span className="serif-drama text-lg sm:text-2xl font-bold tracking-wider text-white group-hover:text-emerald transition-colors whitespace-nowrap">
-              Carbon<span className="text-emerald">Zero</span>
-            </span>
-            <span className="font-mono text-[9px] bg-emerald/10 border border-emerald/20 text-emerald px-1.5 py-0.5 rounded tracking-widest uppercase whitespace-nowrap">
-              BD
-            </span>
+          <Link to="/" aria-label="CarbonZero BD Home" className="flex items-center group min-h-[40px] sm:min-h-[44px]">
+            <BrandLogo
+              variant="auto"
+              heightClass="h-[22px] min-[375px]:h-6 sm:h-7"
+              showBdBadge={true}
+            />
           </Link>
         </div>
 
@@ -225,6 +225,7 @@ const Navbar = () => {
           <X size={20} />
         </button>
         <div className="flex flex-col items-center space-y-3 sm:space-y-5 w-full max-w-md px-5 my-auto">
+          <BrandLogo variant="auto" heightClass="h-7" showBdBadge={true} className="mb-2" />
           {navLinks.map((item) => {
             const isHash = ['Platform', 'Sectors'].includes(item.id);
             const hash = item.id.toLowerCase();

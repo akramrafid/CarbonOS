@@ -2,6 +2,7 @@ import React from 'react';
 import { Link } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { ArrowRight } from 'lucide-react';
+import BrandLogo from './BrandLogo';
 
 const Footer = () => {
   const { t } = useTranslation();
@@ -38,8 +39,11 @@ const Footer = () => {
         <div className="w-full px-4 sm:px-6 lg:px-12 mx-auto">
           
           {/* Top Line */}
-          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 border-b border-white/10 pb-6 mb-10 sm:mb-12">
-            <span className="font-sans text-xs text-white/70">{t('footer.copyright')}</span>
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-white/10 pb-6 mb-10 sm:mb-12">
+            <div className="flex flex-wrap items-center gap-3 sm:gap-4">
+              <BrandLogo variant="dark" heightClass="h-6 sm:h-7" showBdBadge={true} />
+              <span className="font-sans text-xs text-white/70">{t('footer.copyright')}</span>
+            </div>
             <span className="font-sans text-xs text-white/70">{t('footer.rights')}</span>
           </div>
 
