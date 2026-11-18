@@ -1,10 +1,17 @@
 import json
 import math
+from typing import Any, Dict, Optional
 import numpy as np
 import scipy.optimize as opt
 from shapely.geometry import shape, mapping, Polygon
 from shapely.ops import transform
 import datetime
+
+from .osm_intelligence import (
+    compute_leakage_belt_geometry,
+    extract_osm_context,
+    resolve_local_pbf_path,
+)
 
 class SyntheticControlEngine:
     """
@@ -166,39 +173,58 @@ class LeakageMonitoringEngine:
     @staticmethod
     def calculate_leakage_belt_geometry(polygon_geojson: str, buffer_km: float = 10.0) -> dict:
         """
-        Computes 10 km outer buffer geometry and estimated area (ha).
-        Approximate 10 km buffer = ~0.090 degrees in Bengal delta latitudes.
+        Computes the 10 km outer leakage belt geometry, GeoJSON ring, and estimated area (ha).
         """
-        try:
-            poly_data = json.loads(polygon_geojson)
-            if isinstance(poly_data, list):
-                # Format: [[lat, lng], ...]
-                coords = [(pt[1], pt[0]) for pt in poly_data]  # convert to (lng, lat)
-                project_poly = Polygon(coords)
-            elif isinstance(poly_data, dict):
-                if poly_data.get("type") == "Polygon":
-                    project_poly = Polygon(poly_data["coordinates"][0])
-                else:
-                    project_poly = shape(poly_data)
-            else:
-                project_poly = Polygon([(89.5, 22.2), (89.6, 22.2), (89.6, 22.3), (89.5, 22.3)])
-        except Exception:
-            project_poly = Polygon([(89.5, 22.2), (89.6, 22.2), (89.6, 22.3), (89.5, 22.3)])
-
-        # Buffer approx 0.09 degrees (~10 km)
-        buffer_deg = buffer_km / 111.0
-        buffered_poly = project_poly.buffer(buffer_deg)
-        belt_poly = buffered_poly.difference(project_poly)
-
-        # Estimate area in hectares (1 deg approx 111km x 103km at 22N)
-        deg_area = belt_poly.area
-        ha_per_deg2 = 111.0 * 103.0 * 100.0  # ~1,143,300 ha per sq degree
-        leakage_belt_ha = max(500.0, deg_area * ha_per_deg2)
-
+        belt = compute_leakage_belt_geometry(polygon_geojson, buffer_km=buffer_km)
         return {
-            "leakage_belt_area_ha": round(leakage_belt_ha, 2),
-            "buffer_km": buffer_km
+            "leakage_belt_area_ha": belt["leakage_belt_area_ha"],
+            "buffer_km": belt["buffer_km"],
+            "leakage_belt_geojson": belt["leakage_belt_geojson"],
         }
+
+    @staticmethod
+    def assess_osm_leakage(
+        polygon_geojson: Any,
+        gross_additionality_tco2e: float,
+        osm_context: Optional[Dict[str, Any]] = None,
+        regional_control_loss_rate: float = 0.018,
+        fallback_loss_rate: float = 0.015,
+        allow_overpass: bool = False,
+        buffer_km: float = 10.0,
+    ) -> dict:
+        """
+        Evaluates VM0047 leakage displacement using real OSM belt feature densities
+        (QuackOSM local PBF or Overpass fallback) and falls back honestly when unavailable.
+        """
+        ctx = osm_context
+        if ctx is None:
+            ctx = extract_osm_context(
+                polygon_geojson=polygon_geojson,
+                buffer_km=buffer_km,
+                allow_overpass=allow_overpass,
+            )
+
+        belt_metrics = (ctx.get("leakage_belt") or {}).get("metrics") or {}
+        osm_available = bool(ctx.get("osm_available"))
+        derived_rate = belt_metrics.get("derived_leakage_loss_rate")
+
+        if osm_available and isinstance(derived_rate, (int, float)):
+            effective_loss_rate = float(derived_rate)
+            leakage_source = "osm_vector_analysis"
+        else:
+            effective_loss_rate = float(fallback_loss_rate)
+            leakage_source = "fallback_default_no_osm"
+
+        assessed = LeakageMonitoringEngine.assess_leakage(
+            leakage_belt_loss_rate=effective_loss_rate,
+            regional_control_loss_rate=regional_control_loss_rate,
+            gross_additionality_tco2e=gross_additionality_tco2e,
+        )
+        assessed["leakage_source"] = leakage_source
+        assessed["source_used"] = ctx.get("source_used", "unavailable")
+        assessed["osm_available"] = osm_available
+        assessed["osm_leakage_metrics"] = belt_metrics
+        return assessed
 
     @staticmethod
     def assess_leakage(
@@ -291,8 +317,10 @@ def run_dynamic_baseline_assessment(
     forest_area_ha: float,
     project_carbon_tc_ha: float,
     stratum: str = "SUNDARBANS_MANGROVE",
-    leakage_belt_loss_rate: float = 0.015,
-    regional_control_loss_rate: float = 0.018
+    leakage_belt_loss_rate: Optional[float] = None,
+    regional_control_loss_rate: float = 0.018,
+    osm_context: Optional[Dict[str, Any]] = None,
+    allow_live_overpass: bool = False,
 ) -> dict:
     """
     Executes end-to-end Verra VM0047 dynamic baseline workflow:
@@ -338,11 +366,37 @@ def run_dynamic_baseline_assessment(
         polygon_geojson=polygon_geojson,
         buffer_km=10.0
     )
-    leakage_assessment = LeakageMonitoringEngine.assess_leakage(
-        leakage_belt_loss_rate=leakage_belt_loss_rate,
-        regional_control_loss_rate=regional_control_loss_rate,
-        gross_additionality_tco2e=gross_additionality_tco2e
-    )
+    if leakage_belt_loss_rate is not None:
+        leakage_assessment = LeakageMonitoringEngine.assess_leakage(
+            leakage_belt_loss_rate=leakage_belt_loss_rate,
+            regional_control_loss_rate=regional_control_loss_rate,
+            gross_additionality_tco2e=gross_additionality_tco2e,
+        )
+        leakage_assessment["leakage_source"] = "explicit_override"
+        leakage_assessment["source_used"] = "explicit_parameter"
+        leakage_assessment["osm_available"] = False
+        leakage_assessment["osm_leakage_metrics"] = {}
+    elif osm_context is not None or resolve_local_pbf_path() is not None or allow_live_overpass:
+        leakage_assessment = LeakageMonitoringEngine.assess_osm_leakage(
+            polygon_geojson=polygon_geojson,
+            gross_additionality_tco2e=gross_additionality_tco2e,
+            osm_context=osm_context,
+            regional_control_loss_rate=regional_control_loss_rate,
+            fallback_loss_rate=0.015,
+            allow_overpass=allow_live_overpass,
+            buffer_km=10.0,
+        )
+    else:
+        leakage_assessment = LeakageMonitoringEngine.assess_leakage(
+            leakage_belt_loss_rate=0.015,
+            regional_control_loss_rate=regional_control_loss_rate,
+            gross_additionality_tco2e=gross_additionality_tco2e,
+        )
+        leakage_assessment["leakage_source"] = "fallback_default_no_osm"
+        leakage_assessment["source_used"] = "unavailable"
+        leakage_assessment["osm_available"] = False
+        leakage_assessment["osm_leakage_metrics"] = {}
+
     leakage_deduction_tco2e = leakage_assessment["leakage_deduction_tco2e"]
 
     # 3. Non-Permanence Risk Buffer Pool Allocation
@@ -380,8 +434,11 @@ def run_dynamic_baseline_assessment(
         "forest_area_ha": round(forest_area_ha, 2),
         "gross_additionality_tco2e": gross_additionality_tco2e,
         "leakage_belt_area_ha": leakage_belt["leakage_belt_area_ha"],
+        "leakage_belt_geojson": leakage_belt["leakage_belt_geojson"],
         "leakage_deduction_tco2e": leakage_deduction_tco2e,
         "leakage_risk_rating": leakage_assessment["leakage_risk_rating"],
+        "leakage_source": leakage_assessment["leakage_source"],
+        "osm_leakage_metrics": leakage_assessment["osm_leakage_metrics"],
         "buffer_deduction_pct": buffer_pct,
         "buffer_withheld_tco2e": buffer_withheld_tco2e,
         "net_creditable_tco2e": net_creditable_tco2e,

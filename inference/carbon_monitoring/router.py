@@ -4,7 +4,7 @@ import datetime
 from fastapi import APIRouter, Depends, HTTPException, BackgroundTasks, UploadFile, File, Form
 from fastapi.responses import Response, StreamingResponse
 from sqlalchemy.orm import Session
-from typing import List, Optional
+from typing import Any, List, Optional
 
 from pydantic import BaseModel, Field
 
@@ -18,10 +18,20 @@ from .report_generator import ReportGenerator
 from . import provenance as provenance_utils
 from .calibration import run_recalibration
 from .baseline import run_dynamic_baseline_assessment, LeakageMonitoringEngine, RiskBufferCalculator
+from .osm_intelligence import extract_osm_context
 from .uncertainty import (compute_conformal_verra_assessment, ConformalUncertaintyEngine,
                           VerraPrecisionDeductionEngine)
 from .tiering import flag_for_verification, complete_verification_task, list_verification_tasks
 from .registry_export import export_vm0047_stocking_index
+
+
+class OsmLayersRequest(BaseModel):
+    polygon_geojson: Any
+    buffer_km: float = Field(default=10.0, ge=1.0, le=25.0)
+    gross_additionality_tco2e: Optional[float] = Field(default=None, ge=0.0)
+    regional_control_loss_rate: float = Field(default=0.018, ge=0.0, le=1.0)
+    allow_overpass: bool = True
+    ignore_cache: bool = False
 
 class CompleteTaskRequest(BaseModel):
     measured_biomass_mg_ha: float
@@ -448,6 +458,13 @@ def get_baseline_assessment(job_id: str, db: Session = Depends(get_db)):
         )
         return baseline_data
 
+    job_row = db.query(AnalysisJob).filter(AnalysisJob.id == job_id).first()
+    belt_geo = (
+        LeakageMonitoringEngine.calculate_leakage_belt_geometry(job_row.polygon_geojson, buffer_km=10.0)
+        if job_row
+        else None
+    )
+
     return {
         "id": baseline.id,
         "job_id": baseline.job_id,
@@ -459,12 +476,40 @@ def get_baseline_assessment(job_id: str, db: Session = Depends(get_db)):
         "counterfactual_carbon_tc_ha": baseline.counterfactual_carbon_tc_ha,
         "gross_additionality_tco2e": baseline.gross_additionality_tco2e,
         "leakage_belt_area_ha": baseline.leakage_belt_area_ha,
+        "leakage_belt_geojson": belt_geo["leakage_belt_geojson"] if belt_geo else None,
         "leakage_deduction_tco2e": baseline.leakage_deduction_tco2e,
         "leakage_risk_rating": baseline.leakage_risk_rating,
         "buffer_deduction_pct": baseline.buffer_deduction_pct,
         "buffer_withheld_tco2e": baseline.buffer_withheld_tco2e,
         "net_creditable_tco2e": baseline.net_creditable_tco2e,
         "created_at": baseline.created_at.isoformat() if baseline.created_at else None
+    }
+
+
+@router.post("/osm/layers")
+def get_osm_vector_layers(payload: OsmLayersRequest):
+    """
+    Extracts OpenStreetMap vector overlays (forest, water, roads, industrial) and computes
+    Verra VM0047 10 km leakage belt spatial pressure metrics via QuackOSM (local Bangladesh PBF)
+    with Overpass API fallback when no local PBF extract is mounted.
+    """
+    osm_ctx = extract_osm_context(
+        polygon_geojson=payload.polygon_geojson,
+        buffer_km=payload.buffer_km,
+        allow_overpass=payload.allow_overpass,
+        ignore_cache=payload.ignore_cache,
+    )
+    leakage_assessment = LeakageMonitoringEngine.assess_osm_leakage(
+        polygon_geojson=payload.polygon_geojson,
+        gross_additionality_tco2e=payload.gross_additionality_tco2e if payload.gross_additionality_tco2e is not None else 0.0,
+        osm_context=osm_ctx,
+        regional_control_loss_rate=payload.regional_control_loss_rate,
+        allow_overpass=payload.allow_overpass,
+        buffer_km=payload.buffer_km,
+    )
+    return {
+        **osm_ctx,
+        "leakage_assessment": leakage_assessment,
     }
 
 @router.post("/baseline/assess")

@@ -6,6 +6,7 @@ import {
   TileLayer, 
   ImageOverlay, 
   Polygon, 
+  GeoJSON,
   Marker, 
   useMap, 
   useMapEvents, 
@@ -71,6 +72,104 @@ L.Icon.Default.mergeOptions({
 });
 
 const FASTAPI_API_URL = import.meta.env.VITE_FASTAPI_API_URL || 'http://localhost:8000';
+
+const OSM_VECTOR_LAYER_STYLES = {
+  forest: {
+    label: 'Forest & Protected Areas',
+    color: '#10B981',
+    fillColor: '#10B981',
+    weight: 1.5,
+    fillOpacity: 0.22,
+    dotClass: 'bg-emerald-500',
+  },
+  water: {
+    label: 'Rivers & Canals',
+    color: '#38BDF8',
+    fillColor: '#38BDF8',
+    weight: 2,
+    fillOpacity: 0.18,
+    dotClass: 'bg-sky-400',
+  },
+  roads: {
+    label: 'Access & Logging Roads',
+    color: '#FB923C',
+    fillColor: '#FB923C',
+    weight: 2,
+    fillOpacity: 0,
+    dotClass: 'bg-orange-400',
+  },
+  industrial: {
+    label: 'Industrial & Brick Kilns',
+    color: '#F43F5E',
+    fillColor: '#F43F5E',
+    weight: 2,
+    fillOpacity: 0.7,
+    dotClass: 'bg-rose-500',
+  },
+};
+
+const bindOsmFeaturePopup = (feature, layer) => {
+  const props = feature?.properties || {};
+  const wrapper = document.createElement('div');
+  wrapper.className = 'text-xs p-1 leading-snug max-w-[220px]';
+
+  const title = document.createElement('div');
+  title.className = 'font-bold text-slate-900';
+  title.textContent = props.name || props.category || 'OSM Feature';
+  wrapper.appendChild(title);
+
+  const meta = document.createElement('div');
+  meta.className = 'text-[10px] font-mono text-slate-600 mt-0.5 uppercase';
+  meta.textContent = `${props.category || 'vector'} • ${props.osm_id || ''}`;
+  wrapper.appendChild(meta);
+
+  if (props.tags && typeof props.tags === 'object') {
+    const entries = Object.entries(props.tags).filter(([k]) => k !== 'name').slice(0, 4);
+    if (entries.length > 0) {
+      const tagsEl = document.createElement('div');
+      tagsEl.className = 'text-[10px] text-slate-700 mt-1 border-t border-slate-200 pt-1';
+      tagsEl.textContent = entries.map(([k, v]) => `${k}=${v}`).join(' · ');
+      wrapper.appendChild(tagsEl);
+    }
+  }
+  layer.bindPopup(wrapper);
+};
+
+const buildLocalLeakageRingFallback = (points, bufferKm = 10) => {
+  if (!points || points.length < 3) return null;
+  let sumLat = 0;
+  let sumLng = 0;
+  for (const pt of points) {
+    sumLat += pt[0];
+    sumLng += pt[1];
+  }
+  const cLat = sumLat / points.length;
+  const cLng = sumLng / points.length;
+  const kmPerDegLat = 111.132;
+  const kmPerDegLng = 111.320 * Math.max(0.2, Math.abs(Math.cos((cLat * Math.PI) / 180)));
+
+  let maxDistKm = 1;
+  for (const pt of points) {
+    const dKm = Math.hypot((pt[0] - cLat) * kmPerDegLat, (pt[1] - cLng) * kmPerDegLng);
+    if (dKm > maxDistKm) maxDistKm = dKm;
+  }
+
+  const radiusKm = maxDistKm + bufferKm;
+  const outer = [];
+  const steps = 32;
+  for (let i = 0; i <= steps; i++) {
+    const a = (i / steps) * Math.PI * 2;
+    outer.push([
+      cLng + (radiusKm * Math.cos(a)) / kmPerDegLng,
+      cLat + (radiusKm * Math.sin(a)) / kmPerDegLat,
+    ]);
+  }
+  const inner = [...points, points[0]].map((p) => [p[1], p[0]]).reverse();
+  return {
+    type: 'Polygon',
+    coordinates: [outer, inner],
+  };
+};
 
 // Geodesic Area & Perimeter calculation on WGS84 ellipsoid
 const calculateGeodesicMetrics = (coords) => {
@@ -654,6 +753,16 @@ const CarbonMonitoring = () => {
   const [mapBounds, setMapBounds] = useState([[21.65, 89.02], [22.50, 89.85]]);
   const [basemap, setBasemap] = useState('terrain'); // terrain default!
   const [activeLayer, setActiveLayer] = useState('ndvi'); // ndvi, evi, ndwi, forest_cover, carbon_heatmap
+  const [osmOverlays, setOsmOverlays] = useState({
+    forest: true,
+    water: true,
+    roads: true,
+    industrial: true,
+    leakageBelt: true,
+  });
+  const [osmContext, setOsmContext] = useState(null);
+  const [osmLoading, setOsmLoading] = useState(false);
+  const [osmRevision, setOsmRevision] = useState(0);
   
   // Stored click coordinates log
   const [storedLocations, setStoredLocations] = useState(() => {
@@ -728,6 +837,96 @@ const CarbonMonitoring = () => {
   const triggerDossierDownload = (jobId, format = 'pdf') => {
     window.open(`${FASTAPI_API_URL}/api/carbon/report/audit-dossier/${jobId}?format=${format}`);
     showToast(`Downloading Verra VM0047 Audit Dossier (${format.toUpperCase()})...`, 'info');
+  };
+
+  const loadOsmLayers = async (pointsInput = null, grossAdditionality = null, silentOffline = false) => {
+    const activePts = pointsInput && pointsInput.length >= 3 ? pointsInput : (drawPoints.length >= 3 ? drawPoints : SUNDARBANS_RESERVE);
+    const geojsonCoords = [...activePts, activePts[0]].map((c) => [c[1], c[0]]);
+    const geojsonPolygon = { type: 'Polygon', coordinates: [geojsonCoords] };
+
+    setOsmLoading(true);
+    const controller = new AbortController();
+    const timeoutId = setTimeout(() => controller.abort(), 12000);
+
+    try {
+      const res = await fetch(`${FASTAPI_API_URL}/api/carbon/osm/layers`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          polygon_geojson: geojsonPolygon,
+          buffer_km: 10.0,
+          gross_additionality_tco2e: grossAdditionality ?? dashboardData.gross_additionality_tco2e ?? 278500,
+          allow_overpass: true,
+        }),
+        signal: controller.signal,
+      });
+      clearTimeout(timeoutId);
+
+      if (!res.ok) {
+        throw new Error(`HTTP ${res.status}`);
+      }
+      const data = await res.json();
+      setOsmContext(data);
+      setOsmRevision((r) => r + 1);
+
+      const beltMetrics = data?.leakage_belt?.metrics || {};
+      const assessed = data?.leakage_assessment || {};
+      if (data?.osm_available) {
+        setDashboardData((prev) => {
+          const nextLeakage = assessed.leakage_deduction_tco2e ?? prev.leakage_deduction_tco2e ?? 0;
+          const gross = prev.gross_additionality_tco2e ?? 0;
+          const bufferPctRatio = (prev.buffer_deduction_pct ?? 18.0) / 100.0;
+          const netPreBuffer = Math.max(0, gross - nextLeakage);
+          const nextBuffer = Number((netPreBuffer * bufferPctRatio).toFixed(2));
+          const nextNet = Number((netPreBuffer - nextBuffer).toFixed(2));
+          const discRatio = (prev.verra_precision_discount_pct ?? 0) / 100.0;
+          return {
+            ...prev,
+            leakage_belt_area_ha: data.leakage_belt?.leakage_belt_area_ha || prev.leakage_belt_area_ha,
+            leakage_risk_rating: assessed.leakage_risk_rating || prev.leakage_risk_rating,
+            leakage_deduction_tco2e: nextLeakage,
+            buffer_withheld_tco2e: nextBuffer,
+            net_creditable_tco2e: nextNet,
+            conservative_creditable_tco2e: Number((nextNet * (1 - discRatio)).toFixed(2)),
+            osm_leakage_metrics: beltMetrics,
+            osm_source_used: data.source_used,
+          };
+        });
+        const totalVec = Object.values(data.layer_counts || {}).reduce((a, b) => a + b, 0);
+        const engineLabel = data.source_used === 'quackosm_pbf' ? 'QuackOSM Local PBF' : 'Overpass Fallback';
+        if (!silentOffline) {
+          showToast(`Loaded ${totalVec} OSM vectors via ${engineLabel} (10 km belt analyzed).`, 'success');
+        }
+      } else if (!silentOffline) {
+        showToast('OSM servers unavailable — rendered 10 km geometric leakage belt only.', 'info');
+      }
+    } catch {
+      clearTimeout(timeoutId);
+      const fallbackRing = buildLocalLeakageRingFallback(activePts, 10.0);
+      setOsmContext({
+        osm_available: false,
+        source_used: 'offline_ring_only',
+        layer_counts: { forest: 0, water: 0, roads: 0, industrial: 0 },
+        layers: {
+          forest: { type: 'FeatureCollection', features: [] },
+          water: { type: 'FeatureCollection', features: [] },
+          roads: { type: 'FeatureCollection', features: [] },
+          industrial: { type: 'FeatureCollection', features: [] },
+        },
+        leakage_belt: {
+          buffer_km: 10.0,
+          leakage_belt_area_ha: dashboardData.leakage_belt_area_ha,
+          geojson: fallbackRing,
+          metrics: { leakage_source: 'fallback_default_no_osm' },
+        },
+      });
+      setOsmRevision((r) => r + 1);
+      if (!silentOffline) {
+        showToast('OSM backend offline — displaying 10 km boundary ring preview only.', 'info');
+      }
+    } finally {
+      setOsmLoading(false);
+    }
   };
 
   const handleVerifyChain = async () => {
@@ -1369,6 +1568,9 @@ const CarbonMonitoring = () => {
     } catch {
       // Ignored
     }
+
+    // Trigger QuackOSM / Overpass 10 km leakage belt vector context cleanly in background
+    loadOsmLayers(activePoints, grossAdditionalityCo2, true);
   };
 
   // Handle spatial GeoJSON / KML boundary upload
@@ -2147,9 +2349,16 @@ const CarbonMonitoring = () => {
                       </span>
                     </div>
                     <div className={`flex items-center justify-between pb-1.5 border-b ${isLight ? 'border-[#E2E8F0]' : 'border-[#152B1D]'}`}>
-                      <span className={isLight ? 'text-[#475569]' : 'text-[#94A3B8]'}>10km Leakage Belt Deduction</span>
+                      <div>
+                        <span className={isLight ? 'text-[#475569]' : 'text-[#94A3B8]'}>10km Leakage Belt Deduction</span>
+                        {dashboardData.osm_leakage_metrics?.road_density_km_per_km2 !== undefined && (
+                          <span className="block text-[10px] font-mono text-[#64748B] dark:text-[#94A3B8]">
+                            Roads {dashboardData.osm_leakage_metrics.road_density_km_per_km2} km/km² · Crop {dashboardData.osm_leakage_metrics.cropland_share_pct}% ({dashboardData.osm_source_used === 'quackosm_pbf' ? 'QuackOSM PBF' : 'Overpass'})
+                          </span>
+                        )}
+                      </div>
                       <span className="font-mono font-bold text-emerald">
-                        0.0 tCO₂e (Risk: {dashboardData.leakage_risk_rating || 'LOW'})
+                        {Number(dashboardData.leakage_deduction_tco2e || 0).toFixed(1)} tCO₂e (Risk: {dashboardData.leakage_risk_rating || 'LOW'})
                       </span>
                     </div>
                     <div className={`flex items-center justify-between pb-1.5 border-b ${isLight ? 'border-[#E2E8F0]' : 'border-[#152B1D]'}`}>
@@ -2945,6 +3154,11 @@ const CarbonMonitoring = () => {
                       <span className={`text-[11px] ${isLight ? 'text-[#64748B]' : 'text-mist'}`}>
                         {leakageBelt.toLocaleString()} ha monitored · Activity displacement: {leakageRisk}
                       </span>
+                      {dashboardData.osm_leakage_metrics?.road_density_km_per_km2 !== undefined && (
+                        <span className="block text-[10px] font-mono text-emerald mt-0.5">
+                          OSM Density: {dashboardData.osm_leakage_metrics.road_density_km_per_km2} km roads/km² · {dashboardData.osm_leakage_metrics.cropland_share_pct}% cropland · {dashboardData.osm_leakage_metrics.industrial_count} industrial ({dashboardData.osm_source_used === 'quackosm_pbf' ? 'QuackOSM PBF' : 'Overpass API'})
+                        </span>
+                      )}
                     </div>
                     <span className="font-mono font-bold tabular-nums text-emerald">
                       {leakageDeduction.toFixed(1)} tCO₂e deduction
@@ -4039,6 +4253,109 @@ const CarbonMonitoring = () => {
               </div>
             </div>
 
+            {/* OSM Vector Overlays & 10 km Leakage Belt (QuackOSM / Overpass) */}
+            <div className={`border rounded-2xl p-5 transition-all space-y-3.5 ${
+              isLight ? 'bg-white border-[#E2E8F0] shadow-xs' : 'bg-[#08130C] border-[#152B1D]'
+            }`}>
+              <div className="flex flex-wrap items-center justify-between gap-2">
+                <h3 className={`font-bold text-xs uppercase tracking-wider flex items-center space-x-2 ${
+                  isLight ? 'text-[#0F291B]' : 'text-mist'
+                }`}>
+                  <Navigation size={15} className="text-emerald" />
+                  <span>OSM Vector Intelligence</span>
+                </h3>
+                <span className={`text-[10px] font-mono px-2 py-0.5 rounded font-bold ${
+                  osmContext?.osm_available
+                    ? 'bg-emerald/15 text-emerald'
+                    : (isLight ? 'bg-slate-100 text-slate-600' : 'bg-white/10 text-mist')
+                }`}>
+                  {osmContext?.source_used === 'quackosm_pbf'
+                    ? (osmContext.cached ? 'QuackOSM PBF (Cached)' : 'QuackOSM PBF')
+                    : osmContext?.source_used === 'overpass_api'
+                      ? (osmContext.cached ? 'Overpass (Cached)' : 'Overpass Fallback')
+                      : osmContext?.source_used === 'offline_ring_only'
+                        ? 'Belt Preview Only'
+                        : osmContext?.source_used === 'unavailable'
+                          ? 'OSM Unavailable'
+                          : 'Not Loaded'}
+                </span>
+              </div>
+
+              <button
+                type="button"
+                onClick={() => loadOsmLayers()}
+                disabled={osmLoading}
+                className={`w-full min-h-[44px] py-2.5 px-3 rounded-xl font-bold text-xs flex items-center justify-center gap-2 transition-all cursor-pointer disabled:opacity-50 ${
+                  isLight
+                    ? 'bg-[#0F291B] hover:bg-[#19402B] text-white'
+                    : 'bg-emerald/15 hover:bg-emerald/25 text-emerald border border-emerald/40'
+                }`}
+              >
+                <RefreshCw size={14} className={osmLoading ? 'animate-spin' : ''} />
+                <span>{osmLoading ? 'Querying QuackOSM / Overpass...' : 'Load OSM Vectors & 10 km Belt'}</span>
+              </button>
+
+              <div className="space-y-1.5">
+                {[
+                  { id: 'leakageBelt', label: '10 km Leakage Belt Ring', dotClass: 'bg-amber-400', count: osmContext?.leakage_belt?.geojson ? 1 : 0 },
+                  ...Object.entries(OSM_VECTOR_LAYER_STYLES).map(([id, cfg]) => ({
+                    id,
+                    label: cfg.label,
+                    dotClass: cfg.dotClass,
+                    count: osmContext?.layer_counts?.[id] ?? 0,
+                  })),
+                ].map((ov) => (
+                  <button
+                    key={ov.id}
+                    type="button"
+                    onClick={() => setOsmOverlays((prev) => ({ ...prev, [ov.id]: !prev[ov.id] }))}
+                    className={`w-full flex items-center justify-between text-xs px-3 py-2 rounded-xl border transition-all cursor-pointer ${
+                      osmOverlays[ov.id]
+                        ? (isLight ? 'bg-slate-50 border-slate-300 text-slate-900 font-semibold' : 'bg-white/5 border-white/20 text-white font-semibold')
+                        : (isLight ? 'bg-transparent border-slate-200 text-slate-400' : 'bg-transparent border-white/10 text-mist/50')
+                    }`}
+                  >
+                    <span className="flex items-center gap-2 min-w-0 truncate">
+                      <span className={`w-2.5 h-2.5 rounded-full shrink-0 ${ov.dotClass} ${osmOverlays[ov.id] ? 'opacity-100' : 'opacity-30'}`} />
+                      <span className="truncate">{ov.label}</span>
+                    </span>
+                    <span className="text-[10px] font-mono shrink-0 ml-2">
+                      {osmContext ? `${ov.count}` : (osmOverlays[ov.id] ? 'ON' : 'OFF')}
+                    </span>
+                  </button>
+                ))}
+              </div>
+
+              {osmContext?.osm_available && osmContext?.leakage_belt?.metrics && (
+                <div className="grid grid-cols-1 min-[360px]:grid-cols-2 gap-2 pt-2 border-t border-white/10 text-[11px]">
+                  <div className={`p-2 rounded-lg border ${isLight ? 'bg-slate-50 border-slate-200' : 'bg-white/[0.03] border-white/10'}`}>
+                    <span className="text-[10px] text-slate-500 block">Belt Road Density</span>
+                    <span className={`font-mono font-bold ${isLight ? 'text-slate-900' : 'text-white'}`}>
+                      {osmContext.leakage_belt.metrics.road_density_km_per_km2} km/km²
+                    </span>
+                  </div>
+                  <div className={`p-2 rounded-lg border ${isLight ? 'bg-slate-50 border-slate-200' : 'bg-white/[0.03] border-white/10'}`}>
+                    <span className="text-[10px] text-slate-500 block">Cropland Share</span>
+                    <span className={`font-mono font-bold ${isLight ? 'text-slate-900' : 'text-white'}`}>
+                      {osmContext.leakage_belt.metrics.cropland_share_pct}%
+                    </span>
+                  </div>
+                  <div className={`p-2 rounded-lg border ${isLight ? 'bg-slate-50 border-slate-200' : 'bg-white/[0.03] border-white/10'}`}>
+                    <span className="text-[10px] text-slate-500 block">Kilns &amp; Industry</span>
+                    <span className={`font-mono font-bold ${isLight ? 'text-slate-900' : 'text-white'}`}>
+                      {osmContext.leakage_belt.metrics.industrial_count} sites
+                    </span>
+                  </div>
+                  <div className={`p-2 rounded-lg border ${isLight ? 'bg-slate-50 border-slate-200' : 'bg-white/[0.03] border-white/10'}`}>
+                    <span className="text-[10px] text-slate-500 block">Displacement Loss</span>
+                    <span className="font-mono font-bold text-amber-500">
+                      {(Number(osmContext.leakage_belt.metrics.derived_leakage_loss_rate || 0) * 100).toFixed(2)}%/yr
+                    </span>
+                  </div>
+                </div>
+              )}
+            </div>
+
           </div>
 
           {/* Interactive Leaflet Map Container */}
@@ -4079,6 +4396,48 @@ const CarbonMonitoring = () => {
                     maxZoom={19}
                   />
                 )}
+
+                {/* 10 km VM0047 Leakage Belt Ring + OSM Vector Overlays */}
+                {osmOverlays.leakageBelt && osmContext?.leakage_belt?.geojson && (
+                  <GeoJSON
+                    key={`belt-${osmRevision}`}
+                    data={osmContext.leakage_belt.geojson}
+                    style={{
+                      color: '#F59E0B',
+                      weight: 2,
+                      dashArray: '6 4',
+                      fillColor: '#F59E0B',
+                      fillOpacity: 0.08,
+                    }}
+                  />
+                )}
+
+                {Object.entries(OSM_VECTOR_LAYER_STYLES).map(([layerKey, styleCfg]) => {
+                  const fc = osmContext?.layers?.[layerKey];
+                  if (!osmOverlays[layerKey] || !fc?.features?.length) return null;
+                  return (
+                    <GeoJSON
+                      key={`${layerKey}-${osmRevision}`}
+                      data={fc}
+                      style={{
+                        color: styleCfg.color,
+                        fillColor: styleCfg.fillColor,
+                        weight: styleCfg.weight,
+                        fillOpacity: styleCfg.fillOpacity,
+                      }}
+                      pointToLayer={(_, latlng) =>
+                        L.circleMarker(latlng, {
+                          radius: 5,
+                          color: styleCfg.color,
+                          fillColor: styleCfg.fillColor,
+                          weight: 1.5,
+                          fillOpacity: 0.85,
+                        })
+                      }
+                      onEachFeature={bindOsmFeaturePopup}
+                    />
+                  );
+                })}
 
                 {/* Draw polygon coordinates visual styled dynamically by LAYER_CONFIG */}
                 {drawPoints.length > 0 && (

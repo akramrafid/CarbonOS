@@ -48,3 +48,9 @@ inference/.e2e_store/
 
 # Hypothesis caches (unicode tables, temp files; the example database is disabled in tests/test_esg_properties.py)
 .hypothesis/
+
+# OpenStreetMap PBF extracts and DuckDB/QuackOSM vector cache
+*.osm.pbf
+*.parquet
+*.geoparquet
+inference/data/osm_cache/
