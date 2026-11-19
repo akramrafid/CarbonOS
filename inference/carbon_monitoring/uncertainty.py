@@ -108,7 +108,8 @@ class VerraPrecisionDeductionEngine:
                 "precision_discount_pct": 0.0,
                 "conservative_estimate": 0.0,
                 "is_discount_applied": False,
-                "status": "ZERO_INPUT"
+                "status": "ZERO_INPUT",
+                "rationale": "Zero or non-positive estimate; no precision discount required.",
             }
 
         half_width = (interval_upper - interval_lower) / 2.0
@@ -229,5 +230,5 @@ def compute_conformal_verra_assessment(
         "verra_precision_discount_pct": verra_eval["precision_discount_pct"],
         "conservative_creditable_tco2e": verra_eval["conservative_estimate"],
         "is_discount_applied": verra_eval["is_discount_applied"],
-        "rationale": verra_eval["rationale"]
+        "rationale": verra_eval.get("rationale", ""),
     }

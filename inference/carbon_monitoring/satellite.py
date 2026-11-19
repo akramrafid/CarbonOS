@@ -331,12 +331,20 @@ class SatelliteEngine:
             vv, vh, s1_ratio,
             canopy_height, terrain
         ])
-        # Cap GEE RPC deadline cleanly for lightweight single-pixel inspection so UI never hangs
+        lat_span_m = max(100.0, (bounds[1][0] - bounds[0][0]) * 111132.0)
+        lng_span_m = max(
+            100.0,
+            (bounds[1][1] - bounds[0][1]) * 111320.0 * max(0.2, math.cos(math.radians(sum(lats) / len(lats))))
+        )
+        max_span_m = max(lat_span_m, lng_span_m)
+        # Keep 10m native resolution for pixel/parcel inspection, scaling dynamically on reserve-wide AOIs to avoid 1e9 maxPixels error
+        reduce_scale = 10 if max_span_m <= 8000.0 else max(20, int(max_span_m / 900.0))
+
+        # Cap GEE RPC deadline cleanly so UI never hangs
         deadline_applied = False
-        if (not include_grid and not include_tile
-                and hasattr(ee, 'data') and hasattr(ee.data, 'setDeadline')):
+        if hasattr(ee, 'data') and hasattr(ee.data, 'setDeadline'):
             try:
-                ee.data.setDeadline(18000)
+                ee.data.setDeadline(45000 if (include_grid or include_tile) else 18000)
                 deadline_applied = True
             except Exception:
                 deadline_applied = False
@@ -346,8 +354,9 @@ class SatelliteEngine:
                 'stats': stacked.reduceRegion(
                     reducer=ee.Reducer.mean(),
                     geometry=aoi,
-                    scale=10,
-                    maxPixels=1e9
+                    scale=reduce_scale,
+                    maxPixels=1e9,
+                    bestEffort=True,
                 ),
                 's2_ids': s2_collection.limit(25).aggregate_array('system:index'),
                 's1_ids': s1_collection.limit(15).aggregate_array('system:index'),
@@ -423,9 +432,7 @@ class SatelliteEngine:
                     ndvi, evi, ndwi, savi, ndbi,
                     vv, vh
                 ]).unmask(-9999)
-                lat_span_m = max(100.0, (bounds[1][0] - bounds[0][0]) * 111132.0)
-                lng_span_m = max(100.0, (bounds[1][1] - bounds[0][1]) * 111320.0 * max(0.2, math.cos(math.radians(sum(lats) / len(lats)))))
-                target_scale = max(20, int(max(lat_span_m, lng_span_m) / 24.0))
+                target_scale = max(20, int(max_span_m / 24.0))
                 rect = grid_img.reproject(crs='EPSG:4326', scale=target_scale).sampleRectangle(
                     region=aoi.bounds(),
                     defaultValue=-9999

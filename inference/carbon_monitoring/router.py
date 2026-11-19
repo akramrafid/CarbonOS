@@ -360,7 +360,7 @@ def random_trigger_fire_alert(coords):
 # Endpoints
 
 @router.post("/analyze")
-async def analyze_carbon(
+def analyze_carbon(
     background_tasks: BackgroundTasks,
     polygon_geojson: str = Form(...),
     start_date: str = Form(...),
@@ -1085,17 +1085,24 @@ def get_dashboard_summary(
         avg_ndvi = sum([r.avg_ndvi for r in results]) / len(results)
         avg_confidence = sum([r.confidence for r in results]) / len(results)
         avg_biomass = sum([r.estimated_biomass for r in results]) / len(results)
+        avg_carbon = sum([r.estimated_carbon for r in results]) / len(results)
+        latest_res = results[-1]
+        latest_base = latest_res.job.baseline if getattr(latest_res, "job", None) else None
     else:
         avg_ndvi = 0.0
         avg_confidence = 0.0
         avg_biomass = 0.0
+        avg_carbon = 0.0
+        latest_res = None
+        latest_base = None
 
     forest_change_pct = None
     if len(results) >= 2 and results[0].avg_ndvi > 0:
         forest_change_pct = round(((results[-1].avg_ndvi - results[0].avg_ndvi) / results[0].avg_ndvi) * 100.0, 2)
 
-    return {
-        "current_carbon_estimate_tC_ha": round(avg_biomass * 0.475, 2) if len(results) > 0 else 0.0,
+    payload = {
+        "jobs_count": len(results),
+        "current_carbon_estimate_tC_ha": round(avg_carbon, 2),
         "estimated_co2_storage_tCO2e": round(total_co2e, 2),
         "forest_health_score": round(avg_ndvi * 100, 1),
         "vegetation_index_ndvi": round(avg_ndvi, 3),
@@ -1103,10 +1110,29 @@ def get_dashboard_summary(
         "estimated_biomass_Mg_ha": round(avg_biomass, 2),
         "confidence_score": round(avg_confidence, 2),
         "latest_satellite_date": datetime.date.today().strftime("%Y-%m-%d"),
-        "last_analysis_date": results[-1].created_at.date().strftime("%Y-%m-%d") if len(results) > 0 else None,
+        "last_analysis_date": latest_res.created_at.date().strftime("%Y-%m-%d") if latest_res else None,
         "total_area_size_ha": round(total_area, 2),
-        "active_alerts_count": alerts_count
+        "active_alerts_count": alerts_count,
+        "forest_stratum": latest_res.forest_stratum if latest_res else "UNANALYZED_AOI",
+        "carbon_agb_tc_ha": latest_res.carbon_agb_tc_ha if (latest_res and latest_res.carbon_agb_tc_ha is not None) else 0.0,
+        "carbon_bgb_tc_ha": latest_res.carbon_bgb_tc_ha if (latest_res and latest_res.carbon_bgb_tc_ha is not None) else 0.0,
+        "carbon_soc_tc_ha": latest_res.carbon_soc_tc_ha if (latest_res and latest_res.carbon_soc_tc_ha is not None) else 0.0,
+        "carbon_total_tc_ha": round(latest_res.estimated_carbon, 2) if latest_res else 0.0,
+        "carbon_lower_90": latest_res.carbon_lower_90 if (latest_res and latest_res.carbon_lower_90 is not None) else 0.0,
+        "carbon_upper_90": latest_res.carbon_upper_90 if (latest_res and latest_res.carbon_upper_90 is not None) else 0.0,
+        "relative_margin_of_error": latest_res.relative_margin_of_error if (latest_res and latest_res.relative_margin_of_error is not None) else 0.0,
+        "verra_precision_discount_pct": latest_res.verra_precision_discount_pct if (latest_res and latest_res.verra_precision_discount_pct is not None) else 0.0,
+        "conservative_creditable_tco2e": latest_res.conservative_creditable_tco2e if (latest_res and latest_res.conservative_creditable_tco2e is not None) else 0.0,
+        "counterfactual_carbon_tc_ha": latest_base.counterfactual_carbon_tc_ha if latest_base else 0.0,
+        "gross_additionality_tco2e": latest_base.gross_additionality_tco2e if latest_base else 0.0,
+        "leakage_belt_area_ha": latest_base.leakage_belt_area_ha if latest_base else 0.0,
+        "leakage_risk_rating": latest_base.leakage_risk_rating if latest_base else "NONE",
+        "leakage_deduction_tco2e": latest_base.leakage_deduction_tco2e if latest_base else 0.0,
+        "buffer_deduction_pct": latest_base.buffer_deduction_pct if latest_base else 0.0,
+        "buffer_withheld_tco2e": latest_base.buffer_withheld_tco2e if latest_base else 0.0,
+        "net_creditable_tco2e": latest_base.net_creditable_tco2e if latest_base else 0.0,
     }
+    return payload
 
 @router.get("/alerts", response_model=List[dict])
 def get_alerts(

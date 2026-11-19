@@ -1,5 +1,5 @@
 import os
-from sqlalchemy import create_engine
+from sqlalchemy import create_engine, event
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import sessionmaker
 
@@ -19,9 +19,17 @@ DATABASE_URL = os.getenv("DATABASE_URL", SQLITE_URL)
 # For PostgreSQL, use a standard pool; for SQLite, use a single-threaded connection pool or similar
 if DATABASE_URL.startswith("sqlite"):
     engine = create_engine(
-        DATABASE_URL, 
-        connect_args={"check_same_thread": False}
+        DATABASE_URL,
+        connect_args={"check_same_thread": False, "timeout": 20},
     )
+
+    @event.listens_for(engine, "connect")
+    def _configure_sqlite(dbapi_connection, _connection_record):
+        cursor = dbapi_connection.cursor()
+        cursor.execute("PRAGMA busy_timeout = 20000")
+        if DATABASE_URL != "sqlite:///:memory:":
+            cursor.execute("PRAGMA journal_mode = WAL")
+        cursor.close()
 else:
     engine = create_engine(
         DATABASE_URL,
