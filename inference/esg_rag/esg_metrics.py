@@ -137,30 +137,34 @@ def coverage(db, principal, period_id, framework):
     rows = []
     for req in fw["requirements"]:
         missing, evidence = [], {}
+        def _miss(msg):
+            if msg not in missing:
+                missing.append(msg)
+
         for kind, key in req["data"]:
             if kind == "unsupported":
-                missing.append(key)
+                _miss(key)
             elif kind == "metric":
                 if key in metrics:
                     evidence[key] = metrics[key]
                 else:
-                    missing.append(f"No approved '{METRICS[key]['name']}' observation for this period")
+                    _miss(f"No approved '{METRICS[key]['name']}' observation for this period")
             elif kind == "ghg":
                 if snap is None:
-                    missing.append("No locked GHG inventory for this period")
+                    _miss("No locked GHG inventory for this period")
                 elif key == "methodology":
                     evidence["ghg_snapshot"] = {"snapshot_id": snap.id, "revision": snap.revision, "sha256": snap.content_sha256}
                 elif key == "energy_consumption":
                     if energy_summary is None:
-                        missing.append("Locked snapshot does not include energy consumption (re-lock period after NCV upgrade)")
+                        _miss("Locked snapshot does not include energy consumption (re-lock period after NCV upgrade)")
                     else:
                         evidence["energy_consumption"] = energy_summary
                         evidence["ghg_snapshot"] = {"snapshot_id": snap.id, "revision": snap.revision, "sha256": snap.content_sha256}
                 elif key == "scope2_market" and totals["scope2_market_based"] is None:
-                    missing.append("Market-based Scope 2 inputs are incomplete")
+                    _miss("Market-based Scope 2 inputs are incomplete")
                 elif key == "scope3":
                     if totals.get("scope3") is None:
-                        missing.append("Scope 3 inventory is not included in locked snapshot")
+                        _miss("Scope 3 inventory is not included in locked snapshot")
                     else:
                         evidence["scope3_tco2e"] = totals["scope3"]
                         evidence["scope3_by_category"] = snap_content.get("scope3_by_category") or {}
