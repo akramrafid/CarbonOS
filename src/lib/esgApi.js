@@ -18,6 +18,14 @@ export function resolveApiBase() {
   return configured || 'http://localhost:8000';
 }
 
+export function isRemoteBackendMissing() {
+  const configured = typeof import.meta !== 'undefined' ? import.meta.env?.VITE_FASTAPI_API_URL : undefined;
+  const isDev = typeof import.meta !== 'undefined' && Boolean(import.meta.env?.DEV);
+  if (isDev || configured) return false;
+  if (typeof window === 'undefined') return false;
+  return !['localhost', '127.0.0.1', '[::1]'].includes(window.location.hostname);
+}
+
 const BASE_URL = resolveApiBase();
 
 let session = { token: null, organizationId: null };

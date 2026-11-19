@@ -2,7 +2,14 @@ import React, { useState, useEffect, useMemo, useRef } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useTheme } from '../../context/ThemeContext';
 import DmrvMapStudio from '../../components/DmrvMapStudio';
-import { clearEsgSession, getEsgAuthHeaders, hasEsgToken, resolveApiBase } from '../../lib/esgApi';
+import {
+  calculateGeodesicMetrics,
+  estimateExpectedPixel,
+  estimateExpectedPolygonAnalysis,
+  getBangladeshEcoZone,
+  parseLocalBoundaryFileText,
+} from '../../lib/carbonFallbackEstimator';
+import { clearEsgSession, getEsgAuthHeaders, hasEsgToken, isRemoteBackendMissing, resolveApiBase } from '../../lib/esgApi';
 import { clearStoredDemoSession, getStoredDemoSession, loadSession } from '../../lib/esgAuth';
 import { 
   Activity, 
@@ -341,124 +348,6 @@ out geom qt 450;`;
     }
   }
   return null;
-};
-
-// Geodesic Area & Perimeter calculation on WGS84 ellipsoid
-const calculateGeodesicMetrics = (coords) => {
-  if (!coords || coords.length < 3) {
-    return { areaHa: 0, areaAcres: 0, perimeterKm: 0, centroid: [0, 0] };
-  }
-  const R = 6378137; // Earth's mean equatorial radius in meters
-  let total = 0;
-  let perimeterMeters = 0;
-  let sumLat = 0;
-  let sumLng = 0;
-  const len = coords.length;
-
-  for (let i = 0; i < len; i++) {
-    const p1 = coords[i];
-    const p2 = coords[(i + 1) % len];
-    sumLat += p1[0];
-    sumLng += p1[1];
-
-    const lat1 = (p1[0] * Math.PI) / 180;
-    const lat2 = (p2[0] * Math.PI) / 180;
-    const lng1 = (p1[1] * Math.PI) / 180;
-    const lng2 = (p2[1] * Math.PI) / 180;
-
-    let dLng = lng2 - lng1;
-    if (dLng > Math.PI) dLng -= 2 * Math.PI;
-    if (dLng < -Math.PI) dLng += 2 * Math.PI;
-
-    total += dLng * (Math.sin(lat1) + Math.sin(lat2));
-
-    // Haversine perimeter distance
-    const dLat = lat2 - lat1;
-    const a = Math.sin(dLat / 2) * Math.sin(dLat / 2) +
-              Math.cos(lat1) * Math.cos(lat2) *
-              Math.sin(dLng / 2) * Math.sin(dLng / 2);
-    const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
-    perimeterMeters += R * c;
-  }
-
-  const areaSqM = Math.abs((total * R * R) / 2.0);
-  const areaHa = areaSqM / 10000;
-  const areaAcres = areaHa * 2.47105;
-  const perimeterKm = perimeterMeters / 1000;
-  const centroid = [sumLat / len, sumLng / len];
-
-  return {
-    areaSqM,
-    areaHa: Number(areaHa.toFixed(2)),
-    areaAcres: Number(areaAcres.toFixed(2)),
-    perimeterKm: Number(perimeterKm.toFixed(2)),
-    centroid
-  };
-};
-
-// Helper to determine ecological zone based on Bangladesh coordinates
-const getBangladeshEcoZone = (lat, lng) => {
-  if (lat >= 21.5 && lat <= 22.8 && lng >= 88.9 && lng <= 90.1) {
-    return {
-      zone: 'Sundarbans Mangrove Reserve',
-      biomassMin: 220,
-      biomassMax: 310,
-      carbonMin: 104,
-      carbonMax: 147,
-      baseNdvi: 0.76,
-      forestType: 'Dense Coastal Mangrove'
-    };
-  } else if (lat >= 21.4 && lat <= 24.0 && lng >= 91.5 && lng <= 92.8) {
-    return {
-      zone: 'Chittagong Hill Tracts (CHT)',
-      biomassMin: 240,
-      biomassMax: 340,
-      carbonMin: 114,
-      carbonMax: 161,
-      baseNdvi: 0.81,
-      forestType: 'Tropical Evergreen Rainforest'
-    };
-  } else if (lat >= 24.1 && lat <= 25.3 && lng >= 91.4 && lng <= 92.6) {
-    return {
-      zone: 'Sylhet Semi-Evergreen Forest',
-      biomassMin: 180,
-      biomassMax: 260,
-      carbonMin: 85,
-      carbonMax: 123,
-      baseNdvi: 0.74,
-      forestType: 'Broadleaf Mixed Rainforest'
-    };
-  } else if (lat >= 23.9 && lat <= 25.1 && lng >= 90.0 && lng <= 90.8) {
-    return {
-      zone: 'Central Sal Moist Deciduous Forest',
-      biomassMin: 110,
-      biomassMax: 160,
-      carbonMin: 52,
-      carbonMax: 76,
-      baseNdvi: 0.62,
-      forestType: 'Shorea robusta (Sal) Canopy'
-    };
-  } else if (lat >= 21.8 && lat <= 22.8 && lng >= 90.1 && lng <= 91.5) {
-    return {
-      zone: 'Coastal Afforestation Belt',
-      biomassMin: 130,
-      biomassMax: 210,
-      carbonMin: 61,
-      carbonMax: 99,
-      baseNdvi: 0.68,
-      forestType: 'Coastal Plantation / Estuary'
-    };
-  } else {
-    return {
-      zone: 'Inland Agroforestry / Village Woodlot',
-      biomassMin: 45,
-      biomassMax: 95,
-      carbonMin: 21,
-      carbonMax: 45,
-      baseNdvi: 0.48,
-      forestType: 'Open Agroforestry / Agricultural Canopy'
-    };
-  }
 };
 
 // Predefined forest reserve polygons in Bangladesh
@@ -1023,58 +912,61 @@ const CarbonMonitoring = () => {
 
     setOsmLoading(true);
     try {
-      const controller = new AbortController();
-      // Allow sufficient headroom for first-run QuackOSM DuckDB PBF extraction before osm_cache warms
-      const timeoutId = setTimeout(() => controller.abort(), 45000);
       let backendReachable = false;
 
-      try {
-        const res = await carbonFetch(`${FASTAPI_API_URL}/api/carbon/osm/layers`, {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            polygon_geojson: geojsonPolygon,
-            buffer_km: 10.0,
-            gross_additionality_tco2e: grossAdditionality ?? dashboardData.gross_additionality_tco2e ?? 278500,
-            allow_overpass: true,
-          }),
-          signal: controller.signal,
-        });
-        clearTimeout(timeoutId);
-        backendReachable = true;
+      if (!isRemoteBackendMissing()) {
+        const controller = new AbortController();
+        // Allow sufficient headroom for first-run QuackOSM DuckDB PBF extraction before osm_cache warms
+        const timeoutId = setTimeout(() => controller.abort(new Error('OSM backend request timed out')), 45000);
 
-        if (!res.ok) {
-          throw new Error(`HTTP ${res.status}`);
-        }
-        const data = await res.json();
-        if (data?.osm_available) {
-          const engineLabel = applyOsmPayload(data);
-          const totalVec = Object.values(data.layer_counts || {}).reduce((a, b) => a + b, 0);
+        try {
+          const res = await carbonFetch(`${FASTAPI_API_URL}/api/carbon/osm/layers`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              polygon_geojson: geojsonPolygon,
+              buffer_km: 10.0,
+              gross_additionality_tco2e: grossAdditionality ?? dashboardData.gross_additionality_tco2e ?? 278500,
+              allow_overpass: true,
+            }),
+            signal: controller.signal,
+          });
+          clearTimeout(timeoutId);
+          backendReachable = true;
 
-          // Fetch VT0007 spatial donor control plots for active AOI in background
-          try {
-            const bForm = new FormData();
-            bForm.append('polygon_geojson', JSON.stringify(geojsonPolygon));
-            bForm.append('forest_area_ha', String(dashboardData.total_area_size_ha || 3800));
-            bForm.append('project_carbon_tc_ha', String(dashboardData.current_carbon_estimate_tC_ha || 135));
-            const bRes = await carbonFetch(`${FASTAPI_API_URL}/api/carbon/baseline/assess`, { method: 'POST', body: bForm });
-            if (bRes.ok) {
-              const bData = await bRes.json();
-              if (bData?.donor_plots_geojson) {
-                setDonorPlotsGeoJson(bData.donor_plots_geojson);
+          if (!res.ok) {
+            throw new Error(`HTTP ${res.status}`);
+          }
+          const data = await res.json();
+          if (data?.osm_available) {
+            const engineLabel = applyOsmPayload(data);
+            const totalVec = Object.values(data.layer_counts || {}).reduce((a, b) => a + b, 0);
+
+            // Fetch VT0007 spatial donor control plots for active AOI in background
+            try {
+              const bForm = new FormData();
+              bForm.append('polygon_geojson', JSON.stringify(geojsonPolygon));
+              bForm.append('forest_area_ha', String(dashboardData.total_area_size_ha || 3800));
+              bForm.append('project_carbon_tc_ha', String(dashboardData.current_carbon_estimate_tC_ha || 135));
+              const bRes = await carbonFetch(`${FASTAPI_API_URL}/api/carbon/baseline/assess`, { method: 'POST', body: bForm });
+              if (bRes.ok) {
+                const bData = await bRes.json();
+                if (bData?.donor_plots_geojson) {
+                  setDonorPlotsGeoJson(bData.donor_plots_geojson);
+                }
               }
+            } catch {
+              // Non-blocking donor map pins
             }
-          } catch {
-            // Non-blocking donor map pins
-          }
 
-          if (!silentOffline) {
-            showToast(`Loaded ${totalVec} OSM vectors via ${engineLabel} (10 km belt analyzed).`, 'success');
+            if (!silentOffline) {
+              showToast(`Loaded ${totalVec} OSM vectors via ${engineLabel} (10 km belt analyzed).`, 'success');
+            }
+            return;
           }
-          return;
+        } catch {
+          clearTimeout(timeoutId);
         }
-      } catch {
-        clearTimeout(timeoutId);
       }
 
       // Secondary fallback: query Overpass directly from browser when backend is offline or returned unavailable
@@ -1234,6 +1126,7 @@ const CarbonMonitoring = () => {
 
   // Fetch verification tasks from backend
   const fetchVerificationTasks = async () => {
+    if (isRemoteBackendMissing()) return;
     setLoadingTasks(true);
     try {
       const res = await carbonFetch(`${FASTAPI_API_URL}/api/carbon/verification-tasks`);
@@ -1252,9 +1145,13 @@ const CarbonMonitoring = () => {
 
   // Fetch model architecture settings
   const fetchModelSettings = async () => {
+    if (isRemoteBackendMissing()) {
+      setModelSettings(prev => ({ ...prev, satellite_engine_mode: 'offline' }));
+      return;
+    }
     try {
       const controller = new AbortController();
-      const tId = setTimeout(() => controller.abort(), 10000);
+      const tId = setTimeout(() => controller.abort(new Error('Settings request timed out')), 10000);
       const res = await carbonFetch(`${FASTAPI_API_URL}/api/carbon/settings`, { signal: controller.signal })
         .finally(() => clearTimeout(tId));
       if (res.ok) {
@@ -1270,6 +1167,7 @@ const CarbonMonitoring = () => {
 
   // Fetch provenance trust and validator signatures
   const fetchProvenanceTrust = async (resultId) => {
+    if (isRemoteBackendMissing()) return;
     const rId = resultId || selectedJob?.result?.id || selectedJob?.id;
     if (!rId || String(rId).startsWith('mrv-')) return;
     try {
@@ -1519,24 +1417,26 @@ const CarbonMonitoring = () => {
   }, []);
 
   const fetchDashboardStats = async () => {
+    if (isRemoteBackendMissing()) return;
     try {
       const controller = new AbortController();
-      const tId = setTimeout(() => controller.abort(), 8000);
+      const tId = setTimeout(() => controller.abort(new Error('Dashboard request timed out')), 8000);
       const res = await carbonFetch(`${FASTAPI_API_URL}/api/carbon/dashboard`, { signal: controller.signal });
       clearTimeout(tId);
       if (res.ok) {
         const data = await res.json();
         setDashboardData((prev) => ({ ...prev, ...data }));
       }
-    } catch (e) {
+    } catch {
       // Retain DEFAULT_DASHBOARD_DATA smoothly
     }
   };
 
   const fetchHistory = async () => {
+    if (isRemoteBackendMissing()) return;
     try {
       const controller = new AbortController();
-      const tId = setTimeout(() => controller.abort(), 8000);
+      const tId = setTimeout(() => controller.abort(new Error('History request timed out')), 8000);
       const res = await carbonFetch(`${FASTAPI_API_URL}/api/carbon/history`, { signal: controller.signal });
       clearTimeout(tId);
       if (res.ok) {
@@ -1549,27 +1449,76 @@ const CarbonMonitoring = () => {
           fetchProvenanceTrust(first.result?.id || first.id);
         }
       }
-    } catch (e) {
+    } catch {
       // Retain DEFAULT_ANALYSIS_HISTORY
     }
   };
 
   const fetchAlerts = async () => {
+    if (isRemoteBackendMissing()) return;
     try {
       const controller = new AbortController();
-      const tId = setTimeout(() => controller.abort(), 8000);
+      const tId = setTimeout(() => controller.abort(new Error('Alerts request timed out')), 8000);
       const res = await carbonFetch(`${FASTAPI_API_URL}/api/carbon/alerts`, { signal: controller.signal });
       clearTimeout(tId);
       if (res.ok) {
         const data = await res.json();
         setActiveAlerts(data);
       }
-    } catch (e) {
+    } catch {
       // Retain DEFAULT_ALERTS
     }
   };
 
-  // Run live backend Satellite (GEE / STAC COG) & ML analysis for the drawn AOI polygon
+  // Hydrate dMRV dashboards, map grid, ledger charts, and OSM layers from a completed analysis job
+  const applyCompletedAnalysisJob = (hydratedJob, activePoints, calculatedBounds, geoMetrics, toastMessage, toastType = 'success') => {
+    const r = hydratedJob.result || {};
+    const b = hydratedJob.baseline || {};
+
+    setIsDrawing(false);
+    setAnalysisHistory((prev) => [hydratedJob, ...prev.filter((j) => j.id !== hydratedJob.id)]);
+    setSelectedJob(hydratedJob);
+    setDashboardData((prev) => ({
+      ...prev,
+      current_carbon_estimate_tC_ha: Number((r.estimated_carbon ?? 0).toFixed(2)),
+      estimated_biomass_Mg_ha: Number((r.estimated_biomass ?? 0).toFixed(2)),
+      estimated_co2_storage_tCO2e: Number((r.tonnes_co2e ?? 0).toFixed(2)),
+      vegetation_index_ndvi: Number((r.avg_ndvi ?? 0).toFixed(3)),
+      total_area_size_ha: Number((r.forest_area_ha ?? geoMetrics.areaHa ?? 0).toFixed(2)),
+      last_analysis_date: hydratedJob.created_at?.split('T')[0] || new Date().toISOString().split('T')[0],
+      forest_stratum: r.forest_stratum || prev.forest_stratum,
+      carbon_agb_tc_ha: r.carbon_agb_tc_ha ?? prev.carbon_agb_tc_ha,
+      carbon_bgb_tc_ha: r.carbon_bgb_tc_ha ?? prev.carbon_bgb_tc_ha,
+      carbon_soc_tc_ha: r.carbon_soc_tc_ha ?? prev.carbon_soc_tc_ha,
+      carbon_total_tc_ha: r.estimated_carbon ?? prev.carbon_total_tc_ha,
+      counterfactual_carbon_tc_ha: b.counterfactual_carbon_tc_ha ?? prev.counterfactual_carbon_tc_ha,
+      gross_additionality_tco2e: b.gross_additionality_tco2e ?? prev.gross_additionality_tco2e,
+      leakage_belt_area_ha: b.leakage_belt_area_ha ?? prev.leakage_belt_area_ha,
+      leakage_risk_rating: b.leakage_risk_rating ?? prev.leakage_risk_rating,
+      leakage_deduction_tco2e: b.leakage_deduction_tco2e ?? prev.leakage_deduction_tco2e,
+      buffer_deduction_pct: b.buffer_deduction_pct ?? prev.buffer_deduction_pct,
+      buffer_withheld_tco2e: b.buffer_withheld_tco2e ?? prev.buffer_withheld_tco2e,
+      net_creditable_tco2e: b.net_creditable_tco2e ?? prev.net_creditable_tco2e,
+      carbon_lower_90: r.carbon_lower_90 ?? prev.carbon_lower_90,
+      carbon_upper_90: r.carbon_upper_90 ?? prev.carbon_upper_90,
+      relative_margin_of_error: r.relative_margin_of_error ?? prev.relative_margin_of_error,
+      verra_precision_discount_pct: r.verra_precision_discount_pct ?? prev.verra_precision_discount_pct,
+      conservative_creditable_tco2e: r.conservative_creditable_tco2e ?? prev.conservative_creditable_tco2e,
+      sha256_ledger_hash: hydratedJob.provenance?.record_hash ?? prev.sha256_ledger_hash,
+    }));
+    setMapBounds(calculatedBounds);
+    setActiveTab('map');
+
+    if (!hydratedJob.is_expected_fallback) {
+      fetchProvenanceTrust(r.id || hydratedJob.id);
+      fetchVerificationTasks();
+    }
+    loadOsmLayers(activePoints, b.gross_additionality_tco2e ?? null, true);
+    showToast(toastMessage, toastType);
+  };
+
+  // Run live backend Satellite (GEE / STAC COG) & ML analysis for the drawn AOI polygon,
+  // falling back to an explicit unverified Bangladesh stratum Expected Baseline when offline.
   const handleRunAnalysis = async () => {
     let activePoints = drawPoints;
 
@@ -1597,8 +1546,37 @@ const CarbonMonitoring = () => {
       [Math.max(...lats), Math.max(...lngs)],
     ];
 
+    const runExpectedFallback = (reasonLabel) => {
+      const expectedJob = estimateExpectedPolygonAnalysis({
+        points: activePoints,
+        projectName,
+        startDate,
+        endDate,
+        activeLayer,
+      });
+      if (!expectedJob) {
+        showToast('Draw at least 3 polygon vertices to estimate polygon carbon.', 'error');
+        return;
+      }
+      const r = expectedJob.result;
+      const reasonSuffix = reasonLabel ? ` — ${reasonLabel}` : '';
+      applyCompletedAnalysisJob(
+        expectedJob,
+        activePoints,
+        calculatedBounds,
+        geoMetrics,
+        `Expected Baseline (${r.forest_area_ha} ha · ${Number(r.estimated_carbon).toFixed(1)} tC/ha · ${Math.round(r.tonnes_co2e).toLocaleString()} tCO₂e — offline unverified fallback${reasonSuffix}).`,
+        'info'
+      );
+    };
+
     setAnalyzing(true);
     try {
+      if (isRemoteBackendMissing()) {
+        runExpectedFallback('static deployment without backend');
+        return;
+      }
+
       const submitCtrl = new AbortController();
       const submitTimer = setTimeout(
         () => submitCtrl.abort(new Error('Satellite analysis request timed out after 45s')),
@@ -1658,7 +1636,6 @@ const CarbonMonitoring = () => {
       }
 
       const r = completedJob.result || {};
-      const b = completedJob.baseline || {};
       const eoSummary = r.eo_summary || {};
       const hydratedJob = {
         ...completedJob,
@@ -1666,98 +1643,77 @@ const CarbonMonitoring = () => {
         bounds: calculatedBounds,
       };
 
-      setIsDrawing(false);
-      setAnalysisHistory((prev) => [hydratedJob, ...prev.filter((j) => j.id !== hydratedJob.id)]);
-      setSelectedJob(hydratedJob);
-      setDashboardData((prev) => ({
-        ...prev,
-        current_carbon_estimate_tC_ha: Number((r.estimated_carbon ?? 0).toFixed(2)),
-        estimated_biomass_Mg_ha: Number((r.estimated_biomass ?? 0).toFixed(2)),
-        estimated_co2_storage_tCO2e: Number((r.tonnes_co2e ?? 0).toFixed(2)),
-        vegetation_index_ndvi: Number((r.avg_ndvi ?? 0).toFixed(3)),
-        total_area_size_ha: Number((r.forest_area_ha ?? geoMetrics.areaHa ?? 0).toFixed(2)),
-        last_analysis_date: hydratedJob.created_at?.split('T')[0] || new Date().toISOString().split('T')[0],
-        forest_stratum: r.forest_stratum || prev.forest_stratum,
-        carbon_agb_tc_ha: r.carbon_agb_tc_ha ?? prev.carbon_agb_tc_ha,
-        carbon_bgb_tc_ha: r.carbon_bgb_tc_ha ?? prev.carbon_bgb_tc_ha,
-        carbon_soc_tc_ha: r.carbon_soc_tc_ha ?? prev.carbon_soc_tc_ha,
-        carbon_total_tc_ha: r.estimated_carbon ?? prev.carbon_total_tc_ha,
-        counterfactual_carbon_tc_ha: b.counterfactual_carbon_tc_ha ?? prev.counterfactual_carbon_tc_ha,
-        gross_additionality_tco2e: b.gross_additionality_tco2e ?? prev.gross_additionality_tco2e,
-        leakage_belt_area_ha: b.leakage_belt_area_ha ?? prev.leakage_belt_area_ha,
-        leakage_risk_rating: b.leakage_risk_rating ?? prev.leakage_risk_rating,
-        leakage_deduction_tco2e: b.leakage_deduction_tco2e ?? prev.leakage_deduction_tco2e,
-        buffer_deduction_pct: b.buffer_deduction_pct ?? prev.buffer_deduction_pct,
-        buffer_withheld_tco2e: b.buffer_withheld_tco2e ?? prev.buffer_withheld_tco2e,
-        net_creditable_tco2e: b.net_creditable_tco2e ?? prev.net_creditable_tco2e,
-        carbon_lower_90: r.carbon_lower_90 ?? prev.carbon_lower_90,
-        carbon_upper_90: r.carbon_upper_90 ?? prev.carbon_upper_90,
-        relative_margin_of_error: r.relative_margin_of_error ?? prev.relative_margin_of_error,
-        verra_precision_discount_pct: r.verra_precision_discount_pct ?? prev.verra_precision_discount_pct,
-        conservative_creditable_tco2e: r.conservative_creditable_tco2e ?? prev.conservative_creditable_tco2e,
-        sha256_ledger_hash: hydratedJob.provenance?.record_hash ?? prev.sha256_ledger_hash,
-      }));
-      setMapBounds(calculatedBounds);
-      setActiveTab('map');
-
-      fetchProvenanceTrust(r.id || hydratedJob.id);
-      fetchVerificationTasks();
-      loadOsmLayers(activePoints, b.gross_additionality_tco2e ?? null, true);
-
       const modeTag = eoSummary.pixel_extraction_mode || hydratedJob.provenance?.data_source || 'backend';
-      showToast(
+      applyCompletedAnalysisJob(
+        hydratedJob,
+        activePoints,
+        calculatedBounds,
+        geoMetrics,
         `Live EO Analysis Complete (${modeTag}): ${r.forest_area_ha ?? geoMetrics.areaHa} ha · NDVI ${Number(r.avg_ndvi ?? 0).toFixed(3)} · ${Number(r.estimated_carbon ?? 0).toFixed(1)} tC/ha`,
         'success'
       );
     } catch (err) {
-      showToast(
-        `Satellite analysis failed (${err?.message || 'FastAPI backend unreachable on :8000'}). No synthetic client estimate generated.`,
-        'error'
-      );
+      setModelSettings((prev) => ({ ...prev, satellite_engine_mode: 'offline' }));
+      runExpectedFallback(err?.message || 'FastAPI :8000 unreachable');
     } finally {
       setAnalyzing(false);
     }
   };
 
-  // Handle spatial GeoJSON / KML boundary upload
+  // Handle spatial GeoJSON / KML boundary upload (with local browser parser fallback)
   const handleBoundaryUpload = async (e) => {
     const file = e.target.files[0];
     if (!file) return;
 
-    const formData = new FormData();
-    formData.append("file", file);
+    const loadBoundaryCoords = (coords) => {
+      setDrawPoints(coords);
+      setIsDrawing(false);
+      setActiveTab('map');
+      const lats = coords.map((c) => c[0]);
+      const lngs = coords.map((c) => c[1]);
+      setMapBounds([[Math.min(...lats), Math.min(...lngs)], [Math.max(...lats), Math.max(...lngs)]]);
+      showToast(`Boundary '${file.name}' loaded successfully! Click 'Run AI Satellite Analysis' to calculate metrics.`, 'success');
+    };
 
     try {
-      const res = await carbonFetch(`${FASTAPI_API_URL}/api/carbon/boundary/upload`, {
-        method: 'POST',
-        body: formData
-      });
-
-      if (res.ok) {
-        const data = await res.json();
-        const polygon = data.polygon;
-        // Load polygon into map draw points
-        // GeoJSON uses [[lng, lat]], we need [[lat, lng]]
-        const coords = polygon.coordinates[0].map(c => [c[1], c[0]]);
-        // Slice out last duplicate coordinate if closed
-        if (coords[0][0] === coords[coords.length-1][0] && coords[0][1] === coords[coords.length-1][1]) {
-          coords.pop();
+      const rawText = await file.text();
+      if (!isRemoteBackendMissing()) {
+        const formData = new FormData();
+        formData.append('file', file);
+        const res = await carbonFetch(`${FASTAPI_API_URL}/api/carbon/boundary/upload`, {
+          method: 'POST',
+          body: formData,
+        });
+        if (res.ok) {
+          const data = await res.json();
+          const coords = data.polygon.coordinates[0].map((c) => [c[1], c[0]]);
+          if (coords.length > 1 && coords[0][0] === coords[coords.length - 1][0] && coords[0][1] === coords[coords.length - 1][1]) {
+            coords.pop();
+          }
+          if (coords.length >= 3) {
+            loadBoundaryCoords(coords);
+            return;
+          }
         }
-        setDrawPoints(coords);
-        setIsDrawing(false);
-        setActiveTab('map');
-        
-        // Calculate bounds of coordinates
-        const lats = coords.map(c => c[0]);
-        const lngs = coords.map(c => c[1]);
-        setMapBounds([[min(lats), min(lngs)], [max(lats), max(lngs)]]);
-        showToast(`Boundary '${file.name}' loaded successfully! Click 'Run AI Satellite Analysis' to calculate metrics.`, 'success');
-      } else {
-        showToast("Failed to parse uploaded spatial boundary. Please check GeoJSON/KML format.", "error");
       }
-    } catch (e) {
-      console.error(e);
-      showToast("Error reading spatial boundary file.", "error");
+
+      const parsedLocal = parseLocalBoundaryFileText(file.name, rawText);
+      if (parsedLocal && parsedLocal.length >= 3) {
+        loadBoundaryCoords(parsedLocal);
+      } else {
+        showToast('Failed to parse uploaded spatial boundary. Please check GeoJSON/KML format.', 'error');
+      }
+    } catch {
+      try {
+        const parsedLocal = parseLocalBoundaryFileText(file.name, await file.text());
+        if (parsedLocal && parsedLocal.length >= 3) {
+          loadBoundaryCoords(parsedLocal);
+          return;
+        }
+      } catch {
+        // Fall through to error toast below
+      }
+      showToast('Error reading spatial boundary file.', 'error');
     }
   };
 
@@ -1872,12 +1828,38 @@ const CarbonMonitoring = () => {
 
     const ecoZone = getBangladeshEcoZone(parsedLat, parsedLng);
 
-    const pixelController = new AbortController();
-    pixelAbortRef.current = pixelController;
-    const pixelTimeout = setTimeout(
-      () => pixelController.abort(new Error('Satellite pixel request timed out after 40s')),
-      40000
-    );
+    let pixelController = null;
+    let pixelTimeout = null;
+    const pixelPromise = isRemoteBackendMissing()
+      ? Promise.resolve(null)
+      : (() => {
+          pixelController = new AbortController();
+          pixelAbortRef.current = pixelController;
+          pixelTimeout = setTimeout(
+            () => pixelController.abort(new Error('Satellite pixel request timed out after 40s')),
+            40000
+          );
+          return carbonFetch(`${FASTAPI_API_URL}/api/carbon/pixel-inspect`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              lat: parsedLat,
+              lng: parsedLng,
+              job_id: selectedJob?.id || null,
+              start_date: startDate,
+              end_date: endDate,
+            }),
+            signal: pixelController.signal,
+          }).then(async (res) => {
+            clearTimeout(pixelTimeout);
+            if (!res.ok) {
+              const errBody = await res.json().catch(() => ({}));
+              throw new Error(errBody.detail || `HTTP ${res.status}`);
+            }
+            return res.json();
+          });
+        })();
+
     const geoController = new AbortController();
     const geoTimeout = setTimeout(
       () => geoController.abort(new Error('Geocoder lookup timed out')),
@@ -1885,25 +1867,7 @@ const CarbonMonitoring = () => {
     );
 
     const [pixelOutcome, geoOutcome] = await Promise.allSettled([
-      carbonFetch(`${FASTAPI_API_URL}/api/carbon/pixel-inspect`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          lat: parsedLat,
-          lng: parsedLng,
-          job_id: selectedJob?.id || null,
-          start_date: startDate,
-          end_date: endDate,
-        }),
-        signal: pixelController.signal,
-      }).then(async (res) => {
-        clearTimeout(pixelTimeout);
-        if (!res.ok) {
-          const errBody = await res.json().catch(() => ({}));
-          throw new Error(errBody.detail || `HTTP ${res.status}`);
-        }
-        return res.json();
-      }),
+      pixelPromise,
       fetch(
         `https://nominatim.openstreetmap.org/reverse?format=json&lat=${parsedLat}&lon=${parsedLng}&zoom=10&addressdetails=1`,
         {
@@ -1915,7 +1879,7 @@ const CarbonMonitoring = () => {
         return res.ok ? res.json() : null;
       }),
     ]);
-    clearTimeout(pixelTimeout);
+    if (pixelTimeout) clearTimeout(pixelTimeout);
     clearTimeout(geoTimeout);
 
     // Ignore response if superseded by a newer click
@@ -1968,22 +1932,24 @@ const CarbonMonitoring = () => {
         forestType: `${p.forest_stratum || ecoZone.forestType} • ${p.data_source || 'backend'}`
       };
     } else {
-      const reason = pixelOutcome.status === 'rejected' ? (pixelOutcome.reason?.message || 'unreachable') : 'no payload';
+      const expected = estimateExpectedPixel({ lat: parsedLat, lng: parsedLng, startDate, endDate });
+      const reason = pixelOutcome.status === 'rejected' ? (pixelOutcome.reason?.message || 'offline') : null;
       newPixel = {
+        ...expected,
         lat: latStr,
         lng: lngStr,
         name: locationName,
         region: districtInfo,
-        ndvi: "Unavailable",
-        biomass: "Unavailable",
-        carbon: "Unavailable",
-        confidence: `Backend pixel telemetry unavailable (${reason})`,
-        dataSource: "backend_offline",
-        eoPixelVerified: false,
+        confidence: reason
+          ? `Expected Baseline Estimate (offline fallback — ${reason}; unverified)`
+          : expected.confidence,
         timestamp: new Date().toLocaleTimeString(),
-        forestType: `${ecoZone.zone} (Backend Offline)`
+        forestType: expected.forestType
       };
-      showToast(`Pixel telemetry unavailable (${reason}) — start FastAPI (:8000) to inspect live satellite pixels.`, 'error');
+      if (!isRemoteBackendMissing() && reason) {
+        setModelSettings((prev) => ({ ...prev, satellite_engine_mode: 'offline' }));
+        showToast(`Backend offline (${reason}) — showing Expected Baseline for ${latStr}, ${lngStr} (unverified).`, 'info');
+      }
     }
 
     setInspectedPixel(newPixel);
@@ -2098,7 +2064,7 @@ const CarbonMonitoring = () => {
                 : modelSettings.satellite_engine_mode === 'simulation_fallback'
                 ? 'Sim Fallback'
                 : modelSettings.satellite_engine_mode === 'offline'
-                ? 'Backend Offline'
+                ? 'Expected Baseline (Offline)'
                 : 'Connecting...'}
             </span>
           </div>
@@ -2823,14 +2789,20 @@ const CarbonMonitoring = () => {
                       VVB Audit Package
                     </span>
                     <span className={`text-[11px] font-mono px-2.5 py-0.5 rounded-full border flex items-center space-x-1.5 ${
-                      ledgerStatus.chain_valid 
+                      currentJob?.is_expected_fallback
+                        ? 'bg-amber-500/15 text-amber-500 border-amber-500/30'
+                        : ledgerStatus.chain_valid 
                         ? (isLight ? 'bg-emerald-50 text-emerald-800 border-emerald-200' : 'bg-emerald/10 text-emerald border-emerald/20')
                         : 'bg-red-500/10 text-red-400 border-red-500/20'
                     }`}
-                    aria-label={`Cryptographic chain validity: ${ledgerStatus.chain_valid ? 'Verified Intact' : 'Warning'}`}
+                    aria-label={currentJob?.is_expected_fallback ? 'Expected Baseline offline unverified' : `Cryptographic chain validity: ${ledgerStatus.chain_valid ? 'Verified Intact' : 'Warning'}`}
                     >
                       <Lock size={11} />
-                      <span>SHA-256 Ledger: {ledgerStatus.chain_valid ? 'Verified Intact' : 'Warning'}</span>
+                      <span>
+                        {currentJob?.is_expected_fallback
+                          ? 'Expected Baseline (Offline · Unverified)'
+                          : `SHA-256 Ledger: ${ledgerStatus.chain_valid ? 'Verified Intact' : 'Warning'}`}
+                      </span>
                     </span>
                   </div>
                   <h2 className={`text-xl md:text-2xl font-extrabold font-sans tracking-tight ${
@@ -4054,6 +4026,15 @@ const CarbonMonitoring = () => {
                 {drawPoints.length >= 3 ? (() => {
                   const currentMetrics = calculateGeodesicMetrics(drawPoints);
                   const currentZone = getBangladeshEcoZone(currentMetrics.centroid[0], currentMetrics.centroid[1]);
+                  const expectedPreview = estimateExpectedPixel({
+                    lat: currentMetrics.centroid[0],
+                    lng: currentMetrics.centroid[1],
+                    startDate,
+                    endDate,
+                  });
+                  const expectedTotalStockTco2e = Math.round(
+                    currentMetrics.areaHa * Number(expectedPreview.co2eHa || 0)
+                  );
                   return (
                     <div className={`p-3.5 rounded-xl border space-y-2.5 ${
                       isLight ? 'bg-[#E8F8EE]/60 border-[#C2E9CF]' : 'bg-emerald/10 border-emerald/20'
@@ -4100,6 +4081,26 @@ const CarbonMonitoring = () => {
                           </span>
                           <span className={`block text-[10px] truncate ${isLight ? 'text-[#00873E]' : 'text-emerald'}`} title={currentZone.zone}>
                             {currentZone.zone.split(' ')[0]} {currentZone.zone.split(' ')[1] || ''}
+                          </span>
+                        </div>
+                      </div>
+
+                      <div className={`grid grid-cols-1 min-[360px]:grid-cols-2 gap-2 pt-2 border-t border-emerald/15 text-xs ${
+                        isLight ? 'text-[#1E3A2F]' : 'text-slate-200'
+                      }`}>
+                        <div>
+                          <span className={`text-[10px] block ${isLight ? 'text-[#64748B]' : 'text-mist'}`}>Expected AGB (~unverified)</span>
+                          <span className="font-bold font-mono text-xs block">
+                            {Number(expectedPreview.carbon).toFixed(1)} <span className="text-[10px] font-normal">tC/ha</span>
+                          </span>
+                        </div>
+                        <div>
+                          <span className={`text-[10px] block ${isLight ? 'text-[#64748B]' : 'text-mist'}`}>Expected All-Pool CO₂e</span>
+                          <span className="font-bold font-mono text-xs block">
+                            {expectedTotalStockTco2e >= 1000000
+                              ? `${(expectedTotalStockTco2e / 1000000).toFixed(2)}M`
+                              : expectedTotalStockTco2e.toLocaleString()}{' '}
+                            <span className="text-[10px] font-normal">tCO₂e</span>
                           </span>
                         </div>
                       </div>
@@ -4421,7 +4422,11 @@ const CarbonMonitoring = () => {
                             ? (isLight ? 'bg-white text-[#15803d] border-[#15803d]/30' : 'bg-emerald/15 text-emerald border-emerald/30')
                             : 'bg-amber-500/15 text-amber-500 border-amber-500/30'
                         }`}>
-                          {inspectedPixel.eoPixelVerified ? 'EO Pixel Live' : 'Unverified Source'} · {inspectedPixel.pixelExtractionMode}
+                          {inspectedPixel.eoPixelVerified
+                            ? 'EO Pixel Live'
+                            : inspectedPixel.dataSource === 'expected_offline_baseline'
+                            ? 'Expected Baseline (Offline)'
+                            : 'Unverified Source'} · {inspectedPixel.pixelExtractionMode}
                         </span>
                       )}
                     </div>
@@ -4473,7 +4478,11 @@ const CarbonMonitoring = () => {
                     </div>
                     <div className={`p-4 rounded-xl border ${isLight ? 'bg-[#F8FAFC] border-[#E2E8F0]' : 'bg-white/5 border-white/5'}`}>
                       <span className={`text-[10px] block ${isLight ? 'text-[#64748B]' : 'text-mist'}`}>Model Confidence &amp; Basis</span>
-                      <span className={`text-xs font-bold mt-1 block ${inspectedPixel.dataSource === 'backend_offline' ? 'text-amber-500' : 'text-emerald'}`}>
+                      <span className={`text-xs font-bold mt-1 block ${
+                        inspectedPixel.dataSource === 'backend_offline' || inspectedPixel.dataSource === 'expected_offline_baseline'
+                          ? 'text-amber-500'
+                          : 'text-emerald'
+                      }`}>
                         {inspectedPixel.confidence}
                       </span>
                     </div>
@@ -5462,7 +5471,7 @@ const CarbonMonitoring = () => {
                         : modelSettings.satellite_engine_mode === 'simulation_fallback'
                         ? 'Simulation Fallback Active (No GEE or STAC COG connection)'
                         : modelSettings.satellite_engine_mode === 'offline'
-                        ? 'FastAPI Satellite Engine Offline (:8000 unreachable)'
+                        ? 'Expected Baseline Active (FastAPI :8000 offline — unverified stratum fallback)'
                         : 'Connecting to FastAPI Satellite Engine (:8000)...'}
                     </span>
                   </div>

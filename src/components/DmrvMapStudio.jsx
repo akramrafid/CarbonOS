@@ -3,24 +3,12 @@ import { Map as MapLibreMap, ScaleControl, Popup, setWorkerUrl } from 'maplibre-
 import maplibreWorkerUrl from 'maplibre-gl/dist/maplibre-gl-worker.mjs?url';
 import 'maplibre-gl/dist/maplibre-gl.css';
 import { Layers, Mountain, SplitSquareHorizontal, Compass, Maximize2, Crosshair } from 'lucide-react';
+import { pointInRing } from '../lib/carbonFallbackEstimator';
 
 // Ensure MapLibre v6 resolves its standalone module worker cleanly in Vite dev and production builds
 setWorkerUrl(maplibreWorkerUrl);
 
 const EMPTY_FC = { type: 'FeatureCollection', features: [] };
-
-const pointInRing = (lng, lat, ring) => {
-  let inside = false;
-  for (let i = 0, j = ring.length - 1; i < ring.length; j = i++) {
-    const xi = ring[i][1];
-    const yi = ring[i][0];
-    const xj = ring[j][1];
-    const yj = ring[j][0];
-    const intersect = yi > lat !== yj > lat && lng < ((xj - xi) * (lat - yi)) / (yj - yi + 1e-12) + xi;
-    if (intersect) inside = !inside;
-  }
-  return inside;
-};
 
 // Build spatial grid cells directly from backend EO satellite pixels clipped inside the project polygon
 const buildCanopyGridGeoJSON = (drawPoints, activeLayer, selectedJob, baselineData) => {
