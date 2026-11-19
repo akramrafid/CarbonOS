@@ -278,12 +278,6 @@ export default function OverviewPanel({ periods, facilities, onNavigateTab, isDe
               options={periods.map((p) => [p.id, `${p.name} (${p.status})`])}
             />
           </div>
-          <Link
-            to="/demo-showcase"
-            className="inline-flex min-h-[40px] items-center rounded-lg border border-emerald/40 bg-emerald/10 px-3.5 py-2 font-mono text-xs font-bold text-emerald hover:bg-emerald/20 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald"
-          >
-            Visual Demo Showcase ↗
-          </Link>
         </div>
       </section>
 
@@ -438,7 +432,7 @@ export default function OverviewPanel({ periods, facilities, onNavigateTab, isDe
                     metricPillars[key].slice(0, 3).map((m) => (
                       <div key={m.id} className="border-t border-mist/10 pt-2 first:border-t-0 first:pt-0">
                         <div className="text-xs text-registry">{m.name}</div>
-                        <div className="mt-0.5 flex items-center justify-between gap-1">
+                        <div className="mt-1 flex flex-wrap items-center justify-between gap-1.5">
                           <span className="font-mono text-xs font-bold text-emerald-300">
                             {m.value != null ? m.value.toLocaleString() : '—'} {m.unit}
                           </span>
