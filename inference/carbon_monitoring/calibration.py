@@ -16,13 +16,14 @@ What it does, in order:
      and leave the live model untouched.
 """
 import datetime
+import json
 import pandas as pd
 from sqlalchemy.orm import Session
 
 from .database import SessionLocal
 from .models import GroundTruthPlot, DroneSurveyResult, VerificationTask
 from .satellite import SatelliteEngine
-from .estimator import CarbonEstimator
+from .estimator import CarbonEstimator, extract_feature_vector
 
 PLOT_BUFFER_DEGREES = 0.00135  # ~150m at the equator; matches a ~15m-radius field plot loosely
 
@@ -82,6 +83,39 @@ def _extract_features_for_drone_survey(satellite_engine: SatelliteEngine, survey
     return sat_res, (lat, lng)
 
 
+def _sat_result_to_training_row(
+    sat_result: dict,
+    measured_biomass: float,
+    measured_carbon: float,
+    feature_names: list[str],
+    *,
+    label: str = "record",
+) -> dict | None:
+    """
+    Validates that EO features came from real pixel rasters (never simulated or metadata-heuristic)
+    and extracts the canonical feature dictionary alongside target biomass/carbon labels.
+    """
+    if not sat_result or sat_result.get("data_source") == "simulated":
+        print(f"[Calibration] Skipping {label}: satellite data unavailable or simulated.")
+        return None
+
+    meta = sat_result.get("analysis_metadata") or {}
+    if meta.get("pixel_extraction_mode") == "stac_metadata_heuristic" or meta.get("simulation") is True:
+        print(f"[Calibration] Skipping {label}: pixel_extraction_mode is heuristic/simulated, not real EO COG/GEE rasters.")
+        return None
+
+    try:
+        vec, _ = extract_feature_vector(sat_result, feature_names, allow_spectral_fallback=False)
+    except ValueError as err:
+        print(f"[Calibration] Skipping {label}: {err}")
+        return None
+
+    row = dict(zip(feature_names, vec))
+    row["biomass"] = float(measured_biomass)
+    row["carbon"] = float(measured_carbon)
+    return row
+
+
 def run_recalibration(min_samples: int = 30) -> dict:
     db: Session = SessionLocal()
     satellite_engine = SatelliteEngine()
@@ -104,75 +138,37 @@ def run_recalibration(min_samples: int = 30) -> dict:
         used_plots = []
         used_surveys = []
 
-        # Process field plots
+        # Process field plots through unified real-EO validator
         for plot in plots:
             try:
                 sat_result = _extract_features_for_plot(satellite_engine, plot)
-                if sat_result.get("data_source") == "simulated":
-                    print(f"[Calibration] Skipping plot {plot.id}: satellite data was simulated, not live.")
-                    continue
-
-                feature_row = {name: sat_result.get(f"average_{name}", sat_result.get(name, 0.0))
-                                for name in estimator.feature_names}
-                ndvi = sat_result.get("average_ndvi", 0.6)
-                b4_red = max(0.01, 0.10 - (ndvi * 0.09))
-                b8_nir = max(0.12, b4_red + ndvi * 0.65)
-                feature_row.update({
-                    "B4_red": b4_red, "B8_nir": b8_nir,
-                    "B2_blue": max(0.01, b4_red * 0.75), "B3_green": max(0.02, b4_red * 1.3),
-                    "B5_re1": b4_red + (b8_nir - b4_red) * 0.22,
-                    "B6_re2": b4_red + (b8_nir - b4_red) * 0.68,
-                    "B11_swir1": max(0.03, 0.26 - ndvi * 0.19),
-                    "B12_swir2": max(0.03, 0.26 - ndvi * 0.19) * 0.55,
-                    "S1_vv": sat_result.get("average_vv"), "S1_vh": sat_result.get("average_vh"),
-                    "S1_ratio": sat_result.get("average_ratio"),
-                    "tree_height": sat_result.get("average_tree_height"),
-                    "ndvi": ndvi, "evi": sat_result.get("average_evi"),
-                    "ndwi": sat_result.get("average_ndwi"), "savi": sat_result.get("average_savi"),
-                    "ndbi": sat_result.get("average_ndbi"),
-                })
-                rows.append({
-                    **{k: feature_row[k] for k in estimator.feature_names},
-                    "biomass": plot.measured_biomass_mg_ha,
-                    "carbon": plot.measured_carbon_tc_ha,
-                })
-                used_plots.append(plot)
+                row = _sat_result_to_training_row(
+                    sat_result,
+                    plot.measured_biomass_mg_ha,
+                    plot.measured_carbon_tc_ha,
+                    estimator.feature_names,
+                    label=f"plot {plot.id}",
+                )
+                if row is not None:
+                    rows.append(row)
+                    used_plots.append(plot)
             except Exception as e:
                 print(f"[Calibration] Failed to extract features for plot {plot.id}: {e}")
 
-        # Process drone surveys
+        # Process drone surveys through unified real-EO validator
         for survey in drone_surveys:
             try:
-                sat_result, coords = _extract_features_for_drone_survey(satellite_engine, survey)
-                if not sat_result or sat_result.get("data_source") == "simulated":
-                    print(f"[Calibration] Skipping drone survey {survey.id}: satellite data unavailable or simulated.")
-                    continue
-
-                feature_row = {name: sat_result.get(f"average_{name}", sat_result.get(name, 0.0))
-                                for name in estimator.feature_names}
-                ndvi = sat_result.get("average_ndvi", 0.6)
-                b4_red = max(0.01, 0.10 - (ndvi * 0.09))
-                b8_nir = max(0.12, b4_red + ndvi * 0.65)
-                feature_row.update({
-                    "B4_red": b4_red, "B8_nir": b8_nir,
-                    "B2_blue": max(0.01, b4_red * 0.75), "B3_green": max(0.02, b4_red * 1.3),
-                    "B5_re1": b4_red + (b8_nir - b4_red) * 0.22,
-                    "B6_re2": b4_red + (b8_nir - b4_red) * 0.68,
-                    "B11_swir1": max(0.03, 0.26 - ndvi * 0.19),
-                    "B12_swir2": max(0.03, 0.26 - ndvi * 0.19) * 0.55,
-                    "S1_vv": sat_result.get("average_vv"), "S1_vh": sat_result.get("average_vh"),
-                    "S1_ratio": sat_result.get("average_ratio"),
-                    "tree_height": sat_result.get("average_tree_height"),
-                    "ndvi": ndvi, "evi": sat_result.get("average_evi"),
-                    "ndwi": sat_result.get("average_ndwi"), "savi": sat_result.get("average_savi"),
-                    "ndbi": sat_result.get("average_ndbi"),
-                })
-                rows.append({
-                    **{k: feature_row[k] for k in estimator.feature_names},
-                    "biomass": survey.measured_biomass_mg_ha,
-                    "carbon": survey.measured_carbon_tc_ha,
-                })
-                used_surveys.append(survey)
+                sat_result, _coords = _extract_features_for_drone_survey(satellite_engine, survey)
+                row = _sat_result_to_training_row(
+                    sat_result,
+                    survey.measured_biomass_mg_ha,
+                    survey.measured_carbon_tc_ha,
+                    estimator.feature_names,
+                    label=f"drone survey {survey.id}",
+                )
+                if row is not None:
+                    rows.append(row)
+                    used_surveys.append(survey)
             except Exception as e:
                 print(f"[Calibration] Failed to extract features for drone survey {survey.id}: {e}")
 

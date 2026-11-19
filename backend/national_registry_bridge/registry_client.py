@@ -294,7 +294,7 @@ class NationalRegistryClient:
                     "assignedExternalId": registry_project.external_project_id or f"SANDBOX-BD-DOE-{str(registry_project.id)[:6].upper()}",
                     "message": "MRV monitoring report validated in SANDBOX mode.",
                     "provenanceHashVerified": True,
-                    "acknowledgedTco2e": round(total_tco2e * 0.95, 2),
+                    "acknowledgedTco2e": round(conservative_creditable, 2),
                     "dnaStatus": "SANDBOX_SIMULATED_REVIEW"
                 }
                 submission_status = "accepted"

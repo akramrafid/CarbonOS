@@ -16,6 +16,7 @@ sys.path.append(BASE_DIR)
 sys.path.append(os.path.join(BASE_DIR, "inference"))
 
 import _isolated_db  # noqa: F401,E402
+from dmrv_harness import setup_dmrv_test_tenants  # noqa: E402
 from inference.carbon_monitoring.baseline import (
     LeakageMonitoringEngine,
     run_dynamic_baseline_assessment,
@@ -43,6 +44,8 @@ class TestDMRVOsmQuackOSM(unittest.TestCase):
     @classmethod
     def setUpClass(cls):
         init_db()
+        cls.tenants = setup_dmrv_test_tenants("osm")
+        cls.headers = cls.tenants["owner_a"]
         cls.app = FastAPI(title="dMRV OSM QuackOSM Test Harness")
         cls.app.include_router(carbon_router)
         cls.client = TestClient(cls.app)
@@ -217,6 +220,7 @@ class TestDMRVOsmQuackOSM(unittest.TestCase):
                         "allow_overpass": False,
                         "ignore_cache": True,
                     },
+                    headers=self.headers,
                 )
 
         self.assertEqual(resp.status_code, 200)
@@ -242,6 +246,7 @@ class TestDMRVOsmQuackOSM(unittest.TestCase):
             resp = self.client.post(
                 "/api/carbon/pixel-inspect",
                 json={"lat": 22.25, "lng": 89.50},
+                headers=self.headers,
             )
         self.assertEqual(resp.status_code, 200)
         body = resp.json()

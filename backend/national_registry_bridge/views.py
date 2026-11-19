@@ -2,9 +2,20 @@ from django.http import HttpResponse
 from django.utils import timezone
 from rest_framework import permissions, status, viewsets
 from rest_framework.decorators import action
+from rest_framework.exceptions import ValidationError
 from rest_framework.response import Response
 from rest_framework.views import APIView
 
+from .article6_cad_trust import (
+    AoiOverlapError,
+    CadTrustSyncAdapter,
+    LoaStateError,
+    check_aoi_polygon_overlap,
+    export_aef_csv,
+    generate_unfccc_aef_export,
+    record_letter_of_authorization,
+    revoke_letter_of_authorization,
+)
 from .btr_export import export_btr_csv, generate_btr_structured_summary
 from .jcm_connector import map_to_jcm_format
 from .models import (
@@ -57,6 +68,12 @@ class RegistryProjectViewSet(viewsets.ModelViewSet):
 
     def perform_create(self, serializer):
         org_id = _resolve_user_org_id(self.request)
+        poly = serializer.validated_data.get("polygon_geojson", "")
+        if poly:
+            try:
+                check_aoi_polygon_overlap(poly, RegistryProject.objects.all())
+            except AoiOverlapError as err:
+                raise ValidationError({"polygon_geojson": str(err)})
         project = serializer.save(organization_id=org_id, owner=self.request.user)
         evaluate_and_update_project(project)
 
@@ -76,6 +93,11 @@ class RegistryProjectViewSet(viewsets.ModelViewSet):
     @action(detail=True, methods=["post"], url_path="submit-monitoring-report")
     def submit_monitoring_report(self, request, pk=None):
         project = self.get_object()
+        if project.article62_loa_status == "REVOKED":
+            return Response(
+                {"error": "LoARevoked", "detail": "Article 6.2 Letter of Authorization was revoked; new transfers blocked."},
+                status=status.HTTP_409_CONFLICT,
+            )
         serializer = SubmitMonitoringReportRequestSerializer(data=request.data)
         serializer.is_valid(raise_exception=True)
 
@@ -200,6 +222,44 @@ class RegistryProjectViewSet(viewsets.ModelViewSet):
         doc = generate_btr_structured_summary(registry_project=project)
         return Response(doc)
 
+    @action(detail=True, methods=["post"], url_path="record-loa")
+    def record_loa(self, request, pk=None):
+        project = self.get_object()
+        try:
+            record_letter_of_authorization(
+                project,
+                loa_reference=request.data.get("loa_reference", ""),
+                loa_sha256=request.data.get("loa_sha256"),
+            )
+        except LoaStateError as err:
+            return Response({"error": str(err)}, status=status.HTTP_400_BAD_REQUEST)
+        return Response({
+            "project_id": str(project.id),
+            "article62_loa_reference": project.article62_loa_reference,
+            "article62_loa_sha256": project.article62_loa_sha256,
+            "article62_loa_status": project.article62_loa_status,
+        })
+
+    @action(detail=True, methods=["post"], url_path="revoke-loa")
+    def revoke_loa(self, request, pk=None):
+        project = self.get_object()
+        try:
+            revoke_letter_of_authorization(project, reason=request.data.get("reason", "Host party revocation"))
+        except LoaStateError as err:
+            return Response({"error": str(err)}, status=status.HTTP_400_BAD_REQUEST)
+        return Response({
+            "project_id": str(project.id),
+            "article62_loa_status": project.article62_loa_status,
+            "revoked_at": project.article62_loa_revoked_at.isoformat() if project.article62_loa_revoked_at else None,
+        })
+
+    @action(detail=True, methods=["post"], url_path="cad-trust-sync")
+    def cad_trust_sync(self, request, pk=None):
+        project = self.get_object()
+        res = CadTrustSyncAdapter().sync_project(project)
+        http_code = status.HTTP_200_OK if res.get("synced") else status.HTTP_503_SERVICE_UNAVAILABLE
+        return Response(res, status=http_code)
+
 
 class PositiveNegativeRuleViewSet(viewsets.ModelViewSet):
     """
@@ -310,3 +370,36 @@ class NationalBTRSummaryView(APIView):
             return response
 
         return Response(summary)
+
+
+class NationalAEFExportView(APIView):
+    """
+    UNFCCC Decision 2/CMA.3 & 6/CMA.6 Agreed Electronic Format (AEF) Tables 1-3 Export.
+    """
+    permission_classes = [permissions.IsAuthenticated]
+
+    def perform_content_negotiation(self, request, force=False):
+        try:
+            return super().perform_content_negotiation(request, force=force)
+        except Exception:
+            renderers = self.get_renderers()
+            return (renderers[0], renderers[0].media_type)
+
+    def get(self, request):
+        fmt = request.query_params.get("format", "json").lower()
+        user = request.user
+        if user.is_staff or user.is_superuser:
+            projs = RegistryProject.objects.all()
+            adjs = CorrespondingAdjustment.objects.select_related("monitoring_report_submission__registry_project").all()
+        else:
+            org_id = _resolve_user_org_id(request)
+            projs = RegistryProject.objects.filter(organization_id=org_id)
+            adjs = CorrespondingAdjustment.objects.select_related("monitoring_report_submission__registry_project").filter(
+                monitoring_report_submission__registry_project__organization_id=org_id
+            )
+        aef = generate_unfccc_aef_export(projs, adjs)
+        if fmt == "csv":
+            resp = HttpResponse(export_aef_csv(aef), content_type="text/csv")
+            resp["Content-Disposition"] = 'attachment; filename="Bangladesh_UNFCCC_Art62_AEF.csv"'
+            return resp
+        return Response(aef)

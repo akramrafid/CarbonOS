@@ -56,23 +56,45 @@ def map_to_jcm_format(
         f"BD-JCM-{str(registry_project.id)[:8].upper()}"
     )
 
-    # 2. Emissions & Stock Quantification
-    # JCM terminology: Reference Emissions / Reference Stocks (RE) vs Project (PE)
-    # Emission Reductions / Net Removals: ER_p = RE_p - PE_p (or for removals: PC_p - RC_p)
+    # 2. Emissions & Stock Quantification (Epoch-over-Epoch Removals & Project Emissions PE_p)
+    # JCM terminology: ER_p = (Delta C_proj - Delta C_base) - PE_p - Uncertainty - Buffer
     gross_tco2e = float(carbon_pools.get("gross_tco2e_ha", 0.0) or carbon_pools.get("total_carbon_tc_ha", 0.0) * 3.667)
-    
-    # Baseline counterfactual reference emissions/stocks
-    reference_emissions_tco2e = float(monitoring_data.get("baseline_reference_tco2e", gross_tco2e * 0.20))
-    project_removals_gross_tco2e = gross_tco2e
-    
-    # Net raw reduction / removal
-    net_er_raw = max(0.0, project_removals_gross_tco2e - reference_emissions_tco2e)
+
+    # Project Emissions (PE_p): nursery fertilizer N2O, site-prep diesel, prescribed/wildfire CH4/N2O
+    pe_data = monitoring_data.get("project_emissions") or {}
+    pe_diesel_tco2e = float(pe_data.get("diesel_liters", 0.0) or 0.0) * 2.68 / 1000.0
+    pe_fert_n2o_tco2e = float(pe_data.get("fertilizer_kg_n", 0.0) or 0.0) * 0.01 * (44.0 / 28.0) * 265.0 / 1000.0
+    pe_fire_tco2e = float(pe_data.get("biomass_burning_tco2e", 0.0) or 0.0)
+    project_emissions_pe_p = float(pe_data.get("total_pe_tco2e", pe_diesel_tco2e + pe_fert_n2o_tco2e + pe_fire_tco2e))
+
+    # Require explicit removal delta (prior_epoch_tco2e OR delta_project_tco2e OR explicit baseline_reference_tco2e)
+    # Never fabricate a 0.20 * gross standing-stock baseline proxy for crediting.
+    has_prior_epoch = "prior_epoch_tco2e" in monitoring_data and monitoring_data.get("prior_epoch_tco2e") is not None
+    has_explicit_delta = "delta_project_tco2e" in monitoring_data and monitoring_data.get("delta_project_tco2e") is not None
+    has_explicit_baseline = "baseline_reference_tco2e" in monitoring_data and monitoring_data.get("baseline_reference_tco2e") is not None
+
+    if has_explicit_delta:
+        crediting_basis = "EPOCH_REMOVAL_DELTA"
+        project_removals_gross_tco2e = float(monitoring_data["delta_project_tco2e"])
+        reference_emissions_tco2e = float(monitoring_data.get("baseline_delta_tco2e", 0.0) or 0.0)
+        net_er_raw = max(0.0, project_removals_gross_tco2e - reference_emissions_tco2e - project_emissions_pe_p)
+    elif has_prior_epoch or has_explicit_baseline:
+        crediting_basis = "EXPLICIT_BASELINE_OR_PRIOR_EPOCH"
+        prior_tco2e = float(monitoring_data.get("prior_epoch_tco2e", 0.0) or 0.0)
+        reference_emissions_tco2e = float(monitoring_data.get("baseline_reference_tco2e", prior_tco2e) or prior_tco2e)
+        project_removals_gross_tco2e = max(0.0, gross_tco2e - prior_tco2e) if has_prior_epoch else gross_tco2e
+        net_er_raw = max(0.0, gross_tco2e - reference_emissions_tco2e - project_emissions_pe_p)
+    else:
+        crediting_basis = "STANDING_STOCK_ONLY_NOT_CREDITABLE_WITHOUT_EPOCH_DELTA"
+        reference_emissions_tco2e = None
+        project_removals_gross_tco2e = gross_tco2e
+        net_er_raw = 0.0
 
     # Conservative deductions & risk buffer withholding
     uncertainty_deduction_tco2e = float(uncertainty.get("uncertainty_deduction_tco2e_ha", 0.0))
     buffer_withholding_tco2e = float(uncertainty.get("buffer_pool_withholding_tco2e_ha", 0.0))
-    
-    net_creditable_tco2e = max(0.0, net_er_raw - uncertainty_deduction_tco2e - buffer_withholding_tco2e)
+
+    net_creditable_tco2e = max(0.0, net_er_raw - uncertainty_deduction_tco2e - buffer_withholding_tco2e) if net_er_raw > 0 else 0.0
 
     # Allocation of credits between partner countries (Article 6.2 bilateral transfer)
     allocation_ratio_jp_pct = 100.0 - allocation_ratio_bd_pct
@@ -183,10 +205,17 @@ def map_to_jcm_format(
             "crediting_period_type": "Renewable 5-year period (Article 6.2 bilateral)",
         },
         "section_d_calculation_of_emission_reductions": {
-            "formula": "ER_p = RE_p - PE_p - Deductions_uncertainty - Withholding_buffer",
-            "reference_emissions_re_p_tco2e": round(reference_emissions_tco2e, 2),
-            "project_emissions_pe_p_tco2e": 0.0,
+            "formula": "ER_p = (Delta C_proj - Delta C_base) - PE_p - Deductions_uncertainty - Withholding_buffer",
+            "crediting_basis": crediting_basis,
+            "reference_emissions_re_p_tco2e": round(reference_emissions_tco2e, 2) if reference_emissions_tco2e is not None else None,
+            "project_emissions_pe_p_tco2e": round(project_emissions_pe_p, 4),
+            "project_emissions_breakdown": {
+                "diesel_site_prep_tco2e": round(pe_diesel_tco2e, 4),
+                "fertilizer_n2o_tco2e": round(pe_fert_n2o_tco2e, 4),
+                "biomass_burning_tco2e": round(pe_fire_tco2e, 4),
+            },
             "gross_removals_tco2e": round(project_removals_gross_tco2e, 2),
+            "standing_stock_total_tco2e": round(gross_tco2e, 2),
             "raw_emission_reduction_tco2e": round(net_er_raw, 2),
             "conservativeness_discount_tco2e": round(uncertainty_deduction_tco2e, 2),
             "risk_buffer_withholding_tco2e": round(buffer_withholding_tco2e, 2),

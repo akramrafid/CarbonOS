@@ -12,6 +12,7 @@ sys.path.append(BASE_DIR)
 sys.path.append(os.path.join(BASE_DIR, "inference"))
 
 import _isolated_db  # noqa: F401,E402  (temporary database, never backend/db.sqlite3)
+from dmrv_harness import setup_dmrv_test_tenants  # noqa: E402
 from inference.carbon_monitoring.database import init_db, SessionLocal
 from inference.carbon_monitoring.models import AnalysisJob, CarbonResult
 from inference.carbon_monitoring.router import router as carbon_router
@@ -26,6 +27,9 @@ class TestDMRVUncertaintyEngine(unittest.TestCase):
     @classmethod
     def setUpClass(cls):
         init_db()
+        cls.tenants = setup_dmrv_test_tenants("unc")
+        cls.headers = cls.tenants["owner_a"]
+        cls.org_a = cls.tenants["org_a"]
         cls.app = FastAPI(title="dMRV Uncertainty Test Harness")
         cls.app.include_router(carbon_router)
         cls.client = TestClient(cls.app)
@@ -143,7 +147,7 @@ class TestDMRVUncertaintyEngine(unittest.TestCase):
             "estimated_carbon_tc_ha": 180.0,
             "allowable_error": 0.15
         }
-        res_post = self.client.post("/api/carbon/uncertainty/assess", data=payload)
+        res_post = self.client.post("/api/carbon/uncertainty/assess", data=payload, headers=self.headers)
         self.assertEqual(res_post.status_code, 200)
         data_post = res_post.json()
         self.assertEqual(data_post["net_creditable_point_tco2e"], 4200.0)
@@ -154,6 +158,7 @@ class TestDMRVUncertaintyEngine(unittest.TestCase):
         # 2. Database result lookup
         # Create a test job and result
         job = AnalysisJob(
+            organization_id=self.org_a,
             status="completed",
             polygon_geojson="[[22.2, 89.5], [22.3, 89.6]]",
             analysis_type="ndvi",
@@ -182,7 +187,7 @@ class TestDMRVUncertaintyEngine(unittest.TestCase):
         self.db.add(result)
         self.db.commit()
 
-        res_get = self.client.get(f"/api/carbon/uncertainty/{result.id}")
+        res_get = self.client.get(f"/api/carbon/uncertainty/{result.id}", headers=self.headers)
         self.assertEqual(res_get.status_code, 200)
         data_get = res_get.json()
         self.assertEqual(data_get["result_id"], result.id)

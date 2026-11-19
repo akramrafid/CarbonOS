@@ -88,11 +88,15 @@ class RagAuthenticityTest(ESGApiTestCase):
 
 class DemoSegregationTest(ESGApiTestCase):
     def test_sample_payloads_only_in_demo_workspaces(self):
-        for path in ("/api/esg/entity-tree", "/api/esg/satellite-insets"):
+        for path in ("/api/esg/entity-tree", "/api/esg/satellite-insets", "/api/esg/emission-factors/registry"):
             self.assertEqual(self.client.get(path, headers=auth("user-a")).status_code, 404)
+        self.assertEqual(
+            self.client.post("/api/esg/duckdb-calculate", json={"activities": {"diesel": 10}}, headers=auth("user-a")).status_code,
+            404,
+        )
         demo = self.client.post("/api/esg/organizations", json={"name": "Demo", "is_demo": True},
                                 headers=auth("demo-user")).json()["id"]
-        for path in ("/api/esg/entity-tree", "/api/esg/satellite-insets"):
+        for path in ("/api/esg/entity-tree", "/api/esg/satellite-insets", "/api/esg/emission-factors/registry"):
             res = self.client.get(path, headers=auth("demo-user", demo))
             self.assertEqual(res.status_code, 200)
             self.assertEqual(res.json()["data_classification"], "DEMO_SAMPLE")

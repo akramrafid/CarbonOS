@@ -22,9 +22,9 @@ from sqlalchemy.orm import Session
 from . import accounting, gwp
 from .auth import Principal
 from .ledger_models import (
-    ActivityRecord, AuditEvent, CalculationLine, CalculationRun, EmissionFactor, Equipment, EquipmentEvent, Facility,
-    ContractualInstrument, GasCertificate, LegalEntity,
-    MetricObservation, ReportingPeriod, ReportSnapshot, _now,
+    ActivityRecord, AuditEvent, BaseYearPolicy, CalculationLine, CalculationRun, ContractualInstrument,
+    EmissionFactor, Equipment, EquipmentEvent, Facility, FacilityOwnership, GasCertificate, LegalEntity,
+    MetricObservation, ReportingPeriod, ReportSnapshot, Scope3Record, _now,
 )
 from .models import ESGOrganization
 
@@ -122,6 +122,140 @@ def create_period(db, principal, data):
     audit(db, principal, "period.create", "reporting_period", period.id, data)
     db.commit()
     return period
+
+
+# --- dated facility ownership, Scope 3 (Cat 1-15), and Ch. 5 base-year policy ----------
+
+def create_facility_ownership(db, principal, facility_id, data):
+    _need(principal, "admin")
+    _get(db, Facility, principal, facility_id)
+    if data.get("effective_to") and data["effective_to"] < data["effective_from"]:
+        raise DomainError(422, "effective_to must be on or after effective_from")
+    row = FacilityOwnership(
+        organization_id=principal.organization_id,
+        facility_id=facility_id,
+        created_by=principal.sub,
+        **data,
+    )
+    db.add(row)
+    db.flush()
+    audit(db, principal, "facility_ownership.create", "facility_ownership", row.id,
+          {"facility_id": facility_id, **data})
+    db.commit()
+    return row
+
+
+def create_scope3_record(db, principal, data):
+    _need(principal, "write")
+    _open_period(db, principal, data["period_id"])
+    if data.get("facility_id"):
+        _get(db, Facility, principal, data["facility_id"])
+    if data["category"] not in accounting.SCOPE3_CATEGORIES:
+        raise DomainError(422, f"Unknown Scope 3 category '{data['category']}'")
+    if data["calculation_method"] not in accounting.SCOPE3_METHODS:
+        raise DomainError(422, f"Unknown Scope 3 calculation method '{data['calculation_method']}'")
+    qty = Decimal(str(data["quantity"]))
+    factor = Decimal(str(data["factor_kgco2e_per_unit"]))
+    emissions_kg = (qty * factor).quantize(accounting.KG_PRECISION, rounding=ROUND_HALF_UP)
+    rec = Scope3Record(
+        organization_id=principal.organization_id,
+        emissions_kg=emissions_kg,
+        status="DRAFT",
+        created_by=principal.sub,
+        **data,
+    )
+    db.add(rec)
+    db.flush()
+    audit(db, principal, "scope3.create", "scope3_record", rec.id, data)
+    db.commit()
+    return rec
+
+
+def submit_scope3_record(db, principal, rec_id):
+    _need(principal, "write")
+    rec = _get(db, Scope3Record, principal, rec_id)
+    _open_period(db, principal, rec.period_id)
+    if rec.status not in ("DRAFT", "REJECTED"):
+        raise DomainError(409, f"Cannot submit a {rec.status} Scope 3 record")
+    _transition(db, principal, rec, rec.status, {"status": "SUBMITTED", "submitted_at": _now()}, "scope3.submit")
+    db.commit()
+    db.refresh(rec)
+    return rec
+
+
+def review_scope3_record(db, principal, rec_id, approve: bool, comment: Optional[str]):
+    _need(principal, "review")
+    rec = _get(db, Scope3Record, principal, rec_id)
+    _open_period(db, principal, rec.period_id)
+    if rec.created_by == principal.sub:
+        raise DomainError(403, "Separation of duties: reviewer must differ from creator")
+    if not approve and not (comment or "").strip():
+        raise DomainError(422, "A rejection needs a comment")
+    _transition(
+        db,
+        principal,
+        rec,
+        "SUBMITTED",
+        {"status": "APPROVED" if approve else "REJECTED", "reviewed_by": principal.sub, "reviewed_at": _now(),
+         "review_comment": comment},
+        "scope3.approve" if approve else "scope3.reject",
+        {"comment": comment},
+    )
+    db.commit()
+    db.refresh(rec)
+    return rec
+
+
+def set_base_year_policy(db, principal, data):
+    _need(principal, "admin")
+    _get(db, ReportingPeriod, principal, data["base_year_period_id"])
+    policy = db.query(BaseYearPolicy).filter(BaseYearPolicy.organization_id == principal.organization_id).first()
+    if policy is None:
+        policy = BaseYearPolicy(organization_id=principal.organization_id, updated_by=principal.sub, **data)
+        db.add(policy)
+    else:
+        for k, v in data.items():
+            setattr(policy, k, v)
+        policy.updated_by = principal.sub
+        policy.updated_at = _now()
+    db.flush()
+    audit(db, principal, "base_year_policy.upsert", "base_year_policy", policy.id, data)
+    db.commit()
+    db.refresh(policy)
+    return policy
+
+
+def evaluate_base_year_trigger(db, principal, delta_tco2e: Decimal, reason: str, apply_restatement: bool = False):
+    _need(principal, "admin" if apply_restatement else "read")
+    policy = db.query(BaseYearPolicy).filter(BaseYearPolicy.organization_id == principal.organization_id).first()
+    if policy is None:
+        raise DomainError(404, "No base year policy configured for organization")
+    base_total = (
+        Decimal(policy.base_year_scope1_tco2e)
+        + Decimal(policy.base_year_scope2_tco2e)
+        + Decimal(policy.base_year_scope3_tco2e)
+    )
+    eval_res = accounting.evaluate_base_year_recalculation(
+        base_year_tco2e=base_total,
+        structural_change_delta_tco2e=Decimal(str(delta_tco2e)),
+        reason=reason,
+        significance_threshold_pct=Decimal(policy.significance_threshold_pct),
+    )
+    if apply_restatement and eval_res["recalculation_required"]:
+        hist = list(policy.restatement_history or [])
+        hist.append({
+            "evaluated_at": _now().isoformat(),
+            "actor_sub": principal.sub,
+            "delta_tco2e": str(delta_tco2e),
+            "reason": reason,
+            "recalculated_base_year_tco2e": str(eval_res["recalculated_base_year_tco2e"]),
+        })
+        policy.restatement_history = hist
+        policy.updated_by = principal.sub
+        policy.updated_at = _now()
+        audit(db, principal, "base_year_policy.restate", "base_year_policy", policy.id, eval_res)
+        db.commit()
+    return eval_res
 
 
 # --- facility equipment register --------------------------------------------------------
@@ -787,7 +921,16 @@ def _approved_metric_ids(db, principal, period):
         MetricObservation.status == "APPROVED").order_by(MetricObservation.id)]
 
 
-def _input_hash(period, acts, facs, factors, metric_ids=(), register=(), certificates=(), instruments=()) -> str:
+def _approved_scope3_records(db, principal, period):
+    return db.query(Scope3Record).filter(
+        Scope3Record.organization_id == principal.organization_id,
+        Scope3Record.period_id == period.id,
+        Scope3Record.status == "APPROVED",
+    ).order_by(Scope3Record.category, Scope3Record.id).all()
+
+
+def _input_hash(period, acts, facs, factors, metric_ids=(), register=(), certificates=(), instruments=(),
+                scope3_ids=()) -> str:
     payload = {
         "methodology": accounting.METHODOLOGY_VERSION,
         "boundary": period.boundary_method,
@@ -799,6 +942,7 @@ def _input_hash(period, acts, facs, factors, metric_ids=(), register=(), certifi
         "facilities": [[f.id, f.grid_region, f.operational_control, f.financial_control, f.equity_share_pct] for f in facs],
         "factors": [[f.id, f.version, f.kgco2e_per_unit, f.status] for f in factors],
         "metrics": list(metric_ids),  # approved E/S/G observations are immutable, so ids identify them
+        "scope3_records": list(scope3_ids),
         # A voided or new register event changes refrigerant equipment charges, so it invalidates a run.
         "equipment_register": [[e.id, e.equipment_id, e.event_type, e.event_date, e.refrigerant, e.charge_kg]
                                for e, _ in register],
@@ -868,11 +1012,34 @@ def calculate_period(db, principal, period_id):
                             "activity_type": a.activity_type, "blocking": True,
                             "detail": "Recorded before methodology 1.2 (opening/closing terms): supersede it with "
                                       "stored start/end, purchased and returned/sold kg"} for a in acts if a.id in legacy]
+    scope3_ids = [r.id for r in _approved_scope3_records(db, principal, period)]
+    ownership_rows = db.query(FacilityOwnership).filter(FacilityOwnership.organization_id == principal.organization_id).all()
+    ownership_spans = [
+        accounting.FacilityOwnershipPeriod(
+            facility_id=r.facility_id, effective_from=r.effective_from, effective_to=r.effective_to,
+            operational_control=r.operational_control, financial_control=r.financial_control,
+            equity_share_pct=Decimal(r.equity_share_pct),
+        )
+        for r in ownership_rows
+    ]
+    calc_facilities = {}
+    for f in facs:
+        base_fac = accounting.Facility(f.id, f.grid_region, f.operational_control, f.financial_control,
+                                       Decimal(f.equity_share_pct), f.legal_entity_id)
+        if any(s.facility_id == f.id for s in ownership_spans):
+            eff_share = accounting.time_weighted_inclusion_share(
+                base_fac, period.boundary_method, period.start_date, period.end_date, ownership_spans
+            )
+            if period.boundary_method == "equity_share":
+                base_fac = replace(base_fac, equity_share_pct=eff_share * Decimal(100))
+            elif eff_share == 0:
+                base_fac = replace(base_fac, operational_control=False, financial_control=False)
+        calc_facilities[f.id] = base_fac
+
     result = accounting.calculate(
         [_with_certificate(_with_register(_accounting_activity(a), a, register, register_exceptions), a, certificates)
          for a in acts if a.id not in legacy],
-        {f.id: accounting.Facility(f.id, f.grid_region, f.operational_control, f.financial_control,
-                                   Decimal(f.equity_share_pct), f.legal_entity_id) for f in facs},
+        calc_facilities,
         [_accounting_factor(f) for f in factors],
         period.boundary_method, gwp_basis=period.gwp_basis,
         instruments=[_accounting_instrument(i) for i in instruments],
@@ -882,7 +1049,7 @@ def calculate_period(db, principal, period_id):
         organization_id=principal.organization_id, period_id=period.id, period_revision=period.revision,
         methodology_version=result.methodology_version, boundary_method=result.boundary_method,
         input_sha256=_input_hash(period, acts, facs, factors, _approved_metric_ids(db, principal, period), register,
-                                 certificates, instruments),
+                                 certificates, instruments, scope3_ids),
         scope1_kg=result.scope1_kg,
         scope2_location_kg=result.scope2_location_kg, scope2_market_kg=result.scope2_market_kg,
         blocking=result.blocking, exceptions=result.exceptions, excluded=result.excluded,
@@ -912,13 +1079,17 @@ def lock_period(db, principal, period_id, run_id):
     pending += db.query(MetricObservation).filter(MetricObservation.organization_id == principal.organization_id,
                                                   MetricObservation.period_id == period.id,
                                                   MetricObservation.status.in_(("DRAFT", "SUBMITTED"))).count()
+    pending += db.query(Scope3Record).filter(Scope3Record.organization_id == principal.organization_id,
+                                             Scope3Record.period_id == period.id,
+                                             Scope3Record.status.in_(("DRAFT", "SUBMITTED"))).count()
     if pending:
-        raise DomainError(409, f"{pending} activity record(s) or metric observation(s) are still DRAFT or SUBMITTED")
+        raise DomainError(409, f"{pending} activity record(s), metric observation(s), or Scope 3 record(s) are still DRAFT or SUBMITTED")
     if run.blocking:
         raise DomainError(409, "Calculation has blocking data-quality exceptions")
+    scope3_ids = [r.id for r in _approved_scope3_records(db, principal, period)]
     if _input_hash(period, *_calc_inputs(db, principal, period), _approved_metric_ids(db, principal, period),
                    _load_register(db, principal), _approved_certificates(db, principal),
-                   _approved_instruments(db, principal, period)) != run.input_sha256:
+                   _approved_instruments(db, principal, period), scope3_ids) != run.input_sha256:
         raise DomainError(409, "Data or factors changed since this calculation; recalculate before locking")
     if run.created_by == principal.sub:
         raise DomainError(403, "Separation of duties: the approver must differ from the preparer of the calculation")
@@ -1020,6 +1191,40 @@ def _report_content(db, principal, period, run):
     factors = db.query(EmissionFactor).filter(EmissionFactor.id.in_(factor_ids)).order_by(EmissionFactor.id).all() if factor_ids else []
     facilities = {f.id: f for f in db.query(Facility).filter(Facility.organization_id == principal.organization_id)}
     market = _market_disclosure(db, principal, period, lines, facilities)
+    acts_raw, facs_raw, _ = _calc_inputs(db, principal, period)
+    certs = _approved_certificates(db, principal)
+    calc_acts = [_with_certificate(_accounting_activity(a), a, certs) for a in acts_raw]
+    calc_facs = {f.id: accounting.Facility(f.id, f.grid_region, f.operational_control, f.financial_control,
+                                           Decimal(f.equity_share_pct), f.legal_entity_id) for f in facs_raw}
+    energy = _jsonable(accounting.energy_consumption_summary(calc_acts, calc_facs, period.boundary_method))
+    s3_rows = _approved_scope3_records(db, principal, period)
+    if s3_rows:
+        s3_res = accounting.calculate_scope3([
+            accounting.Scope3Activity(
+                id=r.id, category=r.category, method=r.calculation_method,
+                quantity=Decimal(r.quantity), unit=r.unit,
+                factor_kgco2e_per_unit=Decimal(r.factor_kgco2e_per_unit),
+                factor_source=r.factor_source, facility_id=r.facility_id,
+                uncertainty_pct=_dec(r.uncertainty_pct),
+            )
+            for r in s3_rows
+        ])
+        scope3_total_t = _jsonable(s3_res["total_tco2e"])
+        scope3_status = "INCLUDED"
+        scope3_by_cat = _jsonable(s3_res["by_category_tco2e"])
+        scope3_unc = _jsonable(s3_res["uncertainty_pct"])
+        combined_unc = _jsonable(accounting.combine_scope123_uncertainty(
+            Decimal(run.scope1_kg), _dec((run.uncertainty or {}).get("scope1", {}).get("uncertainty_pct")),
+            Decimal(run.scope2_location_kg), _dec((run.uncertainty or {}).get("scope2_location", {}).get("uncertainty_pct")),
+            s3_res["total_kg"], s3_res["uncertainty_pct"],
+        ))
+    else:
+        scope3_total_t = None
+        scope3_status = "NOT_INCLUDED"
+        scope3_by_cat = {}
+        scope3_unc = None
+        combined_unc = None
+
     return {
         "schema": REPORT_SCHEMA,
         "organization": {"id": org.id, "name": org.name},
@@ -1039,9 +1244,13 @@ def _report_content(db, principal, period, run):
                                            "GRID_AVERAGE_FALLBACK" if market["grid_average_fallback_kwh"] else
                                            "LOCATION_RATE_FALLBACK" if market["steam_gj_by_level"]["location_rate"]
                                            else "COMPLETE"),
-            "scope3": None,
-            "scope3_status": "NOT_INCLUDED",
+            "scope3": scope3_total_t,
+            "scope3_status": scope3_status,
         },
+        "scope3_by_category": scope3_by_cat,
+        "scope3_uncertainty_pct": scope3_unc,
+        "combined_uncertainty_scope123": combined_unc,
+        "energy_consumption": energy,
         "scope2_market_based_disclosure": market,
         "by_facility": [{"facility_id": fid, "facility_name": facilities[fid].name if fid in facilities else None,
                          **{k: _t(v) for k, v in vals.items()}} for fid, vals in sorted(run.by_facility.items())],

@@ -12,6 +12,7 @@ sys.path.append(BASE_DIR)
 sys.path.append(os.path.join(BASE_DIR, "inference"))
 
 import _isolated_db  # noqa: F401,E402  (temporary database, never backend/db.sqlite3)
+from dmrv_harness import setup_dmrv_test_tenants  # noqa: E402
 from inference.carbon_monitoring.database import init_db, SessionLocal
 from inference.carbon_monitoring.models import CarbonResult, AnalysisJob
 from inference.carbon_monitoring.router import router as carbon_router
@@ -27,6 +28,8 @@ class TestDMRVAllometryMultiPool(unittest.TestCase):
     @classmethod
     def setUpClass(cls):
         init_db()
+        cls.tenants = setup_dmrv_test_tenants("allom")
+        cls.headers = cls.tenants["owner_a"]
         cls.app = FastAPI(title="dMRV Allometry Test Harness")
         cls.app.include_router(carbon_router)
         cls.client = TestClient(cls.app)
@@ -146,7 +149,7 @@ class TestDMRVAllometryMultiPool(unittest.TestCase):
             "analysis_type": "carbon_heatmap",
             "project_name": "Sundarbans Tier-3 Multi-Pool Test"
         }
-        resp = self.client.post("/api/carbon/analyze", data=payload)
+        resp = self.client.post("/api/carbon/analyze", data=payload, headers=self.headers)
         self.assertEqual(resp.status_code, 200)
         job_id = resp.json()["job_id"]
 
@@ -159,7 +162,7 @@ class TestDMRVAllometryMultiPool(unittest.TestCase):
         self.assertIsNotNone(result_row.carbon_soc_tc_ha)
 
         # Fetch via API endpoint
-        res_resp = self.client.get(f"/api/carbon/results/{result_row.id}")
+        res_resp = self.client.get(f"/api/carbon/results/{result_row.id}", headers=self.headers)
         self.assertEqual(res_resp.status_code, 200)
         res_data = res_resp.json()
 

@@ -187,3 +187,22 @@ if not DEBUG:
     SECURE_HSTS_INCLUDE_SUBDOMAINS = True
     SECURE_HSTS_PRELOAD = True
     SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
+
+# Distributed Channel Layer & Durable Job Queue Configuration (env-driven)
+REDIS_URL = os.getenv('REDIS_URL', '')
+if REDIS_URL:
+    CHANNEL_LAYERS = {
+        'default': {
+            'BACKEND': 'channels_redis.core.RedisChannelLayer',
+            'CONFIG': {'hosts': [REDIS_URL]},
+        }
+    }
+else:
+    CHANNEL_LAYERS = {
+        'default': {
+            'BACKEND': 'channels.layers.InMemoryChannelLayer',
+        }
+    }
+
+CELERY_BROKER_URL = os.getenv('CELERY_BROKER_URL', REDIS_URL or 'memory://')
+CELERY_RESULT_BACKEND = os.getenv('CELERY_RESULT_BACKEND', REDIS_URL or '')

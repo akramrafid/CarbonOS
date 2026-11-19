@@ -13,6 +13,7 @@ sys.path.append(BASE_DIR)
 sys.path.append(os.path.join(BASE_DIR, "inference"))
 
 import _isolated_db  # noqa: F401,E402  (temporary database, never backend/db.sqlite3)
+from dmrv_harness import setup_dmrv_test_tenants  # noqa: E402
 from inference.carbon_monitoring.database import init_db, SessionLocal
 from inference.carbon_monitoring.models import AnalysisJob, CarbonResult, BaselineAssessment
 from inference.carbon_monitoring.router import router as carbon_router
@@ -28,6 +29,8 @@ class TestDMRVDynamicBaseline(unittest.TestCase):
     @classmethod
     def setUpClass(cls):
         init_db()
+        cls.tenants = setup_dmrv_test_tenants("base")
+        cls.headers = cls.tenants["owner_a"]
         cls.app = FastAPI(title="dMRV Baseline Test Harness")
         cls.app.include_router(carbon_router)
         cls.client = TestClient(cls.app)
@@ -139,7 +142,7 @@ class TestDMRVDynamicBaseline(unittest.TestCase):
             "leakage_belt_loss_rate": 0.015,
             "regional_control_loss_rate": 0.018
         }
-        direct_resp = self.client.post("/api/carbon/baseline/assess", data=direct_payload)
+        direct_resp = self.client.post("/api/carbon/baseline/assess", data=direct_payload, headers=self.headers)
         self.assertEqual(direct_resp.status_code, 200)
         direct_data = direct_resp.json()
         self.assertIn("donor_weights", direct_data)
@@ -153,12 +156,12 @@ class TestDMRVDynamicBaseline(unittest.TestCase):
             "analysis_type": "carbon_heatmap",
             "project_name": "Sundarbans Baseline Pipeline Test"
         }
-        analyze_resp = self.client.post("/api/carbon/analyze", data=analyze_payload)
+        analyze_resp = self.client.post("/api/carbon/analyze", data=analyze_payload, headers=self.headers)
         self.assertEqual(analyze_resp.status_code, 200)
         job_id = analyze_resp.json()["job_id"]
 
         # Fetch baseline via API
-        base_resp = self.client.get(f"/api/carbon/baseline/{job_id}")
+        base_resp = self.client.get(f"/api/carbon/baseline/{job_id}", headers=self.headers)
         self.assertEqual(base_resp.status_code, 200)
         base_data = base_resp.json()
 

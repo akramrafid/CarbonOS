@@ -13,7 +13,7 @@ from .models import (AnalysisJob, CarbonResult, SatelliteLayer, UploadedBoundary
                       CarbonAlert, GroundTruthPlot, EstimateProvenance, BaselineAssessment,
                       VerificationTask, DroneSurveyResult, ValidatorSignature, AccreditedValidator)
 from esg_rag.auth import Principal, require
-from .satellite import SatelliteEngine
+from .satellite import SatelliteEngine, RASTERIO_AVAILABLE
 from .estimator import CarbonEstimator, XGB_AVAILABLE
 from .report_generator import ReportGenerator
 from . import provenance as provenance_utils
@@ -161,15 +161,32 @@ def run_async_analysis(job_id: str):
 
         # Save result
         interval = estimator_result.get("interval") or {}
-        
+        c_low_90 = interval.get("carbon_lower_90") if interval.get("carbon_lower_90") is not None else (carbon_per_ha * 0.85)
+        c_high_90 = interval.get("carbon_upper_90") if interval.get("carbon_upper_90") is not None else (carbon_per_ha * 1.15)
+
         # Conformal uncertainty & Verra precision discount evaluation on gross stock
         initial_uncert = compute_conformal_verra_assessment(
             net_creditable_tco2e=round(total_co2e, 2),
-            carbon_lower_90=interval.get("carbon_lower_90") or (carbon_per_ha * 0.85),
-            carbon_upper_90=interval.get("carbon_upper_90") or (carbon_per_ha * 1.15),
+            carbon_lower_90=c_low_90,
+            carbon_upper_90=c_high_90,
             estimated_carbon_tc_ha=carbon_per_ha,
             db=db
         )
+
+        sat_meta = sat_result.get("analysis_metadata", {}) or {}
+        eo_summary = {
+            "average_ndvi": sat_result.get("average_ndvi"),
+            "average_evi": sat_result.get("average_evi"),
+            "average_ndwi": sat_result.get("average_ndwi"),
+            "average_tree_height_m": sat_result.get("average_tree_height"),
+            "elevation_m": (sat_meta.get("terrain") or {}).get("elevation_m"),
+            "data_source": sat_result.get("data_source", "unknown"),
+            "pixel_extraction_mode": sat_result.get("pixel_extraction_mode", sat_result.get("data_source", "unknown")),
+            "eo_pixel_verified": bool(sat_result.get("eo_pixel_verified", False)),
+            "gedi_tree_height_source": sat_meta.get("gedi_tree_height_source", sat_result.get("gedi_tree_height_source")),
+            "s2_scene_ids": sat_meta.get("s2_scene_ids", []),
+            "s1_scene_ids": sat_meta.get("s1_scene_ids", []),
+        }
 
         result = CarbonResult(
             job_id=job.id,
@@ -191,7 +208,8 @@ def run_async_analysis(job_id: str):
             carbon_soc_tc_ha=estimator_result.get("carbon_soc_tc_ha"),
             relative_margin_of_error=initial_uncert["relative_margin_of_error"],
             verra_precision_discount_pct=initial_uncert["verra_precision_discount_pct"],
-            conservative_creditable_tco2e=initial_uncert["conservative_creditable_tco2e"]
+            conservative_creditable_tco2e=initial_uncert["conservative_creditable_tco2e"],
+            indices_json=json.dumps(eo_summary),
         )
         db.add(result)
         db.flush()  # populate result.id
@@ -208,6 +226,14 @@ def run_async_analysis(job_id: str):
         )
         db.add(layer)
 
+        grid_cells = carbon_estimator.predict_grid_cells(sat_result.get("grid_pixels"), max_dim=28)
+        if grid_cells:
+            db.add(SatelliteLayer(
+                job_id=job.id,
+                layer_type="canopy_grid_json",
+                layer_url=json.dumps(grid_cells),
+            ))
+
         # Verra VM0047 Dynamic Synthetic Control Baseline & 10km Leakage Belt
         baseline_rec = None
         try:
@@ -216,7 +242,8 @@ def run_async_analysis(job_id: str):
                 polygon_geojson=job.polygon_geojson,
                 forest_area_ha=forest_area_ha,
                 project_carbon_tc_ha=carbon_per_ha,
-                stratum=estimator_result.get("forest_stratum", "SUNDARBANS_MANGROVE")
+                stratum=estimator_result.get("forest_stratum", "SUNDARBANS_MANGROVE"),
+                satellite_engine=sat_engine if sat_result.get("eo_pixel_verified") else None,
             )
             baseline_rec = BaselineAssessment(
                 job_id=job.id,
@@ -239,8 +266,8 @@ def run_async_analysis(job_id: str):
             # Re-evaluate conformal uncertainty and Verra discount on net additionality credits
             net_uncert = compute_conformal_verra_assessment(
                 net_creditable_tco2e=baseline_data["net_creditable_tco2e"],
-                carbon_lower_90=interval.get("carbon_lower_90") or (carbon_per_ha * 0.85),
-                carbon_upper_90=interval.get("carbon_upper_90") or (carbon_per_ha * 1.15),
+                carbon_lower_90=c_low_90,
+                carbon_upper_90=c_high_90,
                 estimated_carbon_tc_ha=carbon_per_ha,
                 db=db
             )
@@ -366,16 +393,119 @@ async def analyze_carbon(
     db.commit()
     db.refresh(job)
 
-    # Launch background processing task (async queue)
-    background_tasks.add_task(run_async_analysis, job.id)
+    # Launch background processing task via Celery or durable in-process queue
+    from .job_queue import dispatch_analysis_job
+    queue_backend = dispatch_analysis_job(background_tasks, job.id, run_async_analysis)
 
     # Create a quick response indicating job submission
     return {
         "job_id": job.id,
         "status": "pending",
+        "queue_backend": queue_backend,
         "message": "Forest carbon stock analysis queued successfully.",
         "project_name": project_name
     }
+
+def _serialize_job(job: AnalysisJob) -> dict:
+    res_data = None
+    prov_summary = None
+    if job.result:
+        indices_meta = {}
+        if getattr(job.result, "indices_json", None):
+            try:
+                indices_meta = json.loads(job.result.indices_json) or {}
+            except Exception:
+                indices_meta = {}
+
+        if getattr(job.result, "provenance", None):
+            p = job.result.provenance
+            try:
+                scene_ids = json.loads(p.satellite_scene_ids) if p.satellite_scene_ids else []
+            except Exception:
+                scene_ids = []
+            prov_summary = {
+                "data_source": p.data_source,
+                "gedi_tree_height_source": p.gedi_tree_height_source,
+                "model_type": p.model_type,
+                "model_version": p.model_version,
+                "model_trained_on": p.model_trained_on,
+                "satellite_scene_ids": scene_ids,
+                "record_hash": p.record_hash,
+                "chain_index": p.chain_index,
+            }
+
+        res_data = {
+            "id": job.result.id,
+            "estimated_biomass": job.result.estimated_biomass,
+            "estimated_carbon": job.result.estimated_carbon,
+            "tonnes_co2e": job.result.tonnes_co2e,
+            "avg_ndvi": job.result.avg_ndvi,
+            "forest_area_ha": job.result.forest_area_ha,
+            "confidence": job.result.confidence,
+            "satellite_sources": job.result.satellite_sources,
+            "biomass_lower_90": job.result.biomass_lower_90,
+            "biomass_upper_90": job.result.biomass_upper_90,
+            "carbon_lower_90": job.result.carbon_lower_90,
+            "carbon_upper_90": job.result.carbon_upper_90,
+            "interval_method": job.result.interval_method,
+            "forest_stratum": job.result.forest_stratum,
+            "carbon_agb_tc_ha": job.result.carbon_agb_tc_ha,
+            "carbon_bgb_tc_ha": job.result.carbon_bgb_tc_ha,
+            "carbon_soc_tc_ha": job.result.carbon_soc_tc_ha,
+            "relative_margin_of_error": job.result.relative_margin_of_error,
+            "verra_precision_discount_pct": job.result.verra_precision_discount_pct,
+            "conservative_creditable_tco2e": job.result.conservative_creditable_tco2e,
+            "eo_summary": indices_meta,
+        }
+
+    layers_data = []
+    grid_cells = []
+    for l in job.layers:
+        if l.layer_type == "canopy_grid_json":
+            try:
+                parsed = json.loads(l.layer_url)
+                if isinstance(parsed, list):
+                    grid_cells = parsed
+            except Exception:
+                pass
+        else:
+            layers_data.append({
+                "layer_type": l.layer_type,
+                "layer_url": l.layer_url
+            })
+
+    base_data = None
+    if job.baseline:
+        base_data = {
+            "baseline_method": job.baseline.baseline_method,
+            "donor_pool_count": job.baseline.donor_pool_count,
+            "pre_treatment_rmse": job.baseline.pre_treatment_rmse,
+            "counterfactual_carbon_tc_ha": job.baseline.counterfactual_carbon_tc_ha,
+            "gross_additionality_tco2e": job.baseline.gross_additionality_tco2e,
+            "leakage_belt_area_ha": job.baseline.leakage_belt_area_ha,
+            "leakage_deduction_tco2e": job.baseline.leakage_deduction_tco2e,
+            "leakage_risk_rating": job.baseline.leakage_risk_rating,
+            "buffer_deduction_pct": job.baseline.buffer_deduction_pct,
+            "buffer_withheld_tco2e": job.baseline.buffer_withheld_tco2e,
+            "net_creditable_tco2e": job.baseline.net_creditable_tco2e
+        }
+
+    return {
+        "id": job.id,
+        "status": job.status,
+        "analysis_type": job.analysis_type,
+        "start_date": job.start_date.isoformat(),
+        "end_date": job.end_date.isoformat(),
+        "processing_time": job.processing_time,
+        "created_at": job.created_at.isoformat(),
+        "polygon_geojson": job.polygon_geojson,
+        "result": res_data,
+        "baseline": base_data,
+        "provenance": prov_summary,
+        "layers": layers_data,
+        "grid_cells": grid_cells,
+    }
+
 
 @router.get("/history")
 def get_analysis_history(
@@ -392,76 +522,31 @@ def get_analysis_history(
     jobs = base_q.order_by(AnalysisJob.created_at.desc()).offset(offset).limit(limit).all()
     total = base_q.count()
 
-    results = []
-    for job in jobs:
-        res_data = None
-        if job.result:
-            res_data = {
-                "id": job.result.id,
-                "estimated_biomass": job.result.estimated_biomass,
-                "estimated_carbon": job.result.estimated_carbon,
-                "tonnes_co2e": job.result.tonnes_co2e,
-                "avg_ndvi": job.result.avg_ndvi,
-                "forest_area_ha": job.result.forest_area_ha,
-                "confidence": job.result.confidence,
-                "satellite_sources": job.result.satellite_sources,
-                "biomass_lower_90": job.result.biomass_lower_90,
-                "biomass_upper_90": job.result.biomass_upper_90,
-                "carbon_lower_90": job.result.carbon_lower_90,
-                "carbon_upper_90": job.result.carbon_upper_90,
-                "interval_method": job.result.interval_method,
-                "forest_stratum": job.result.forest_stratum,
-                "carbon_agb_tc_ha": job.result.carbon_agb_tc_ha,
-                "carbon_bgb_tc_ha": job.result.carbon_bgb_tc_ha,
-                "carbon_soc_tc_ha": job.result.carbon_soc_tc_ha,
-                "relative_margin_of_error": job.result.relative_margin_of_error,
-                "verra_precision_discount_pct": job.result.verra_precision_discount_pct,
-                "conservative_creditable_tco2e": job.result.conservative_creditable_tco2e
-            }
-        
-        layers_data = []
-        for l in job.layers:
-            layers_data.append({
-                "layer_type": l.layer_type,
-                "layer_url": l.layer_url
-            })
-
-        base_data = None
-        if job.baseline:
-            base_data = {
-                "baseline_method": job.baseline.baseline_method,
-                "donor_pool_count": job.baseline.donor_pool_count,
-                "pre_treatment_rmse": job.baseline.pre_treatment_rmse,
-                "counterfactual_carbon_tc_ha": job.baseline.counterfactual_carbon_tc_ha,
-                "gross_additionality_tco2e": job.baseline.gross_additionality_tco2e,
-                "leakage_belt_area_ha": job.baseline.leakage_belt_area_ha,
-                "leakage_deduction_tco2e": job.baseline.leakage_deduction_tco2e,
-                "leakage_risk_rating": job.baseline.leakage_risk_rating,
-                "buffer_deduction_pct": job.baseline.buffer_deduction_pct,
-                "buffer_withheld_tco2e": job.baseline.buffer_withheld_tco2e,
-                "net_creditable_tco2e": job.baseline.net_creditable_tco2e
-            }
-
-        results.append({
-            "id": job.id,
-            "status": job.status,
-            "analysis_type": job.analysis_type,
-            "start_date": job.start_date.isoformat(),
-            "end_date": job.end_date.isoformat(),
-            "processing_time": job.processing_time,
-            "created_at": job.created_at.isoformat(),
-            "polygon_geojson": job.polygon_geojson,
-            "result": res_data,
-            "baseline": base_data,
-            "layers": layers_data
-        })
-
     return {
         "total": total,
         "page": page,
         "limit": limit,
-        "items": results
+        "items": [_serialize_job(job) for job in jobs],
     }
+
+
+@router.get("/jobs/{job_id}")
+def get_analysis_job(
+    job_id: str,
+    principal: Principal = Depends(require("read")),
+    db: Session = Depends(get_db),
+):
+    """
+    Retrieves a single analysis job with its result, baseline, layers, provenance, and EO pixel grid cells.
+    """
+    job = (
+        db.query(AnalysisJob)
+        .filter(AnalysisJob.id == job_id, AnalysisJob.organization_id == principal.organization_id)
+        .first()
+    )
+    if not job:
+        raise HTTPException(status_code=404, detail="Analysis job not found.")
+    return _serialize_job(job)
 
 @router.get("/results/{result_id}")
 def get_result(
@@ -604,26 +689,44 @@ def inspect_pixel_carbon(
         [payload.lat - delta, payload.lng + delta],
     ]
 
-    sat_result = satellite_engine.run_analysis(patch_coords, s_date, e_date, "ndvi")
+    sat_result = satellite_engine.run_analysis(
+        patch_coords,
+        s_date,
+        e_date,
+        "ndvi",
+        include_grid=False,
+        include_tile=False,
+    )
+
+    sanitized_ndvi = float(sat_result.get("average_ndvi") if sat_result.get("average_ndvi") is not None else 0.0)
+    sanitized_ndwi = float(sat_result.get("average_ndwi") if sat_result.get("average_ndwi") is not None else 0.0)
+    raw_h = sat_result.get("average_tree_height")
+    default_h = (
+        0.0
+        if (sanitized_ndvi < 0.15 or (sanitized_ndwi > 0.10 and sanitized_ndvi < 0.28))
+        else max(1.0, (sanitized_ndvi - 0.12) * 24.0)
+    )
+    sanitized_h = float(raw_h if raw_h is not None else default_h)
 
     # Guard against None band reductions over open water or 100%-clouded patches
     sanitized_sat = {
         **sat_result,
-        "average_ndvi": float(sat_result.get("average_ndvi") if sat_result.get("average_ndvi") is not None else 0.0),
+        "average_ndvi": sanitized_ndvi,
         "average_evi": float(sat_result.get("average_evi") if sat_result.get("average_evi") is not None else 0.0),
-        "average_ndwi": float(sat_result.get("average_ndwi") if sat_result.get("average_ndwi") is not None else 0.0),
+        "average_ndwi": sanitized_ndwi,
         "average_savi": float(sat_result.get("average_savi") if sat_result.get("average_savi") is not None else 0.0),
         "average_ndbi": float(sat_result.get("average_ndbi") if sat_result.get("average_ndbi") is not None else 0.0),
         "average_vv": float(sat_result.get("average_vv") if sat_result.get("average_vv") is not None else -16.0),
         "average_vh": float(sat_result.get("average_vh") if sat_result.get("average_vh") is not None else -22.0),
         "average_ratio": float(sat_result.get("average_ratio") if sat_result.get("average_ratio") is not None else 6.0),
-        "average_tree_height": float(sat_result.get("average_tree_height") if sat_result.get("average_tree_height") is not None else 3.0),
+        "average_tree_height": sanitized_h,
     }
 
     est = carbon_estimator.estimate_carbon_stock(sanitized_sat, lat=payload.lat, lng=payload.lng)
 
     # Honest provenance and verification label derived strictly from live engine metadata
-    cloud_max = sat_result.get("analysis_metadata", {}).get("cloud_cover_max", 20)
+    sat_meta = sat_result.get("analysis_metadata", {}) or {}
+    cloud_max = sat_meta.get("cloud_cover_max", 20)
     confidence = min(0.98, max(0.50, 0.88 - (0.01 * cloud_max / 10.0)))
     trained_on = est.get("model_trained_on") or "unknown"
     model_used = est.get("model_used") or "random_forest"
@@ -662,12 +765,20 @@ def inspect_pixel_carbon(
         "carbon_bgb_tc_ha": round(float(est.get("carbon_bgb_tc_ha", 0.0)), 2),
         "carbon_soc_tc_ha": round(float(est.get("carbon_soc_tc_ha", 0.0)), 2),
         "tonnes_co2e_ha": round(carbon_total * co2_mult, 2),
-        "forest_stratum": est.get("forest_stratum", "INLAND_AGROFORESTRY"),
+        "forest_stratum": est.get("forest_stratum", "COASTAL_AGROFORESTRY"),
         "confidence": round(confidence, 2),
         "confidence_label": confidence_label,
         "data_source": sat_result.get("data_source", "unknown"),
+        "pixel_extraction_mode": sat_result.get("pixel_extraction_mode", sat_result.get("data_source", "unknown")),
+        "eo_pixel_verified": bool(sat_result.get("eo_pixel_verified", True)),
+        "gedi_tree_height_source": sat_result.get("gedi_tree_height_source")
+            or sat_meta.get("gedi_tree_height_source", "formula_estimate_not_gedi_l2b"),
+        "average_tree_height_m": round(sanitized_h, 2),
+        "elevation_m": (sat_meta.get("terrain") or {}).get("elevation_m"),
         "satellite_sources": sat_result.get("satellite_sources", "Unknown"),
-        "s2_scene_ids": sat_result.get("analysis_metadata", {}).get("s2_scene_ids", []),
+        "s2_scene_ids": sat_meta.get("s2_scene_ids", []),
+        "s1_scene_ids": sat_meta.get("s1_scene_ids", []),
+        "date_range": {"start_date": s_date, "end_date": e_date},
         "model_used": model_used,
         "model_version": est.get("model_version"),
         "model_trained_on": trained_on,
@@ -1048,6 +1159,11 @@ def get_settings(principal: Principal = Depends(require("read"))):
     """
     Retrieves active model settings including multi-modal fusion model gate status.
     """
+    sat_mode = (
+        "gee_live"
+        if satellite_engine.ee_initialized
+        else ("stac_cog" if RASTERIO_AVAILABLE else "simulation_fallback")
+    )
     return {
         "active_model": carbon_estimator.model_type,
         "xgboost_available": XGB_AVAILABLE,
@@ -1057,7 +1173,10 @@ def get_settings(principal: Principal = Depends(require("read"))):
         "fusion_gate_threshold": 150,
         "feature_names": carbon_estimator.feature_names,
         "model_version": carbon_estimator.model_meta.get("version"),
-        "model_trained_on": carbon_estimator.model_meta.get("trained_on")
+        "model_trained_on": carbon_estimator.model_meta.get("trained_on"),
+        "ee_initialized": bool(satellite_engine.ee_initialized),
+        "rasterio_available": bool(RASTERIO_AVAILABLE),
+        "satellite_engine_mode": sat_mode,
     }
 
 

@@ -669,3 +669,104 @@ class BillValue(EsgBase):
     confirmed_at = Column(DateTime(timezone=True))
     activity_id = Column(String(36), ForeignKey("esg_activity_record.id"))  # ledger record this value created
     created_at = Column(DateTime(timezone=True), default=_now, nullable=False)
+
+
+class FacilityOwnership(EsgBase):
+    """Dated organizational boundary & equity ownership spans for GHG Protocol Ch. 5 time-weighting."""
+    __tablename__ = "esg_facility_ownership"
+    __table_args__ = (
+        ForeignKeyConstraint(["organization_id", "facility_id"], ["esg_facility.organization_id", "esg_facility.id"],
+                             name="fk_esg_fac_ownership_facility"),
+        CheckConstraint("equity_share_pct >= 0 AND equity_share_pct <= 100", name="ck_esg_fac_ownership_equity"),
+        CheckConstraint("effective_to IS NULL OR effective_to >= effective_from", name="ck_esg_fac_ownership_dates"),
+        Index("ix_esg_fac_ownership_facility_date", "organization_id", "facility_id", "effective_from"),
+    )
+
+    id = Column(String(36), primary_key=True, default=_id)
+    organization_id = _org_fk()
+    facility_id = Column(String(36), nullable=False)
+    effective_from = Column(Date, nullable=False)
+    effective_to = Column(Date)
+    operational_control = Column(Boolean, nullable=False, default=True)
+    financial_control = Column(Boolean, nullable=False, default=True)
+    equity_share_pct = Column(Numeric(7, 4), nullable=False, default=100)
+    change_reason = Column(Text)
+    created_by = Column(String(255), nullable=False)
+    created_at = Column(DateTime(timezone=True), default=_now, nullable=False)
+
+
+class BaseYearPolicy(EsgBase):
+    """Organization-level GHG Protocol Chapter 5 base-year inventory & structural change trigger policy."""
+    __tablename__ = "esg_base_year_policy"
+    __table_args__ = (
+        UniqueConstraint("organization_id", name="uq_esg_base_year_org"),
+        ForeignKeyConstraint(["organization_id", "base_year_period_id"],
+                             ["esg_reporting_period.organization_id", "esg_reporting_period.id"],
+                             name="fk_esg_base_year_period"),
+        CheckConstraint("significance_threshold_pct > 0 AND significance_threshold_pct <= 100",
+                        name="ck_esg_base_year_threshold"),
+    )
+
+    id = Column(String(36), primary_key=True, default=_id)
+    organization_id = _org_fk()
+    base_year_period_id = Column(String(36), nullable=False)
+    significance_threshold_pct = Column(Numeric(6, 2), nullable=False, default=5)
+    base_year_scope1_tco2e = Column(KG, nullable=False, default=0)
+    base_year_scope2_tco2e = Column(KG, nullable=False, default=0)
+    base_year_scope3_tco2e = Column(KG, nullable=False, default=0)
+    restatement_history = Column(JSON, nullable=False, default=list)
+    updated_by = Column(String(255), nullable=False)
+    updated_at = Column(DateTime(timezone=True), default=_now, nullable=False)
+
+
+SCOPE3_CATEGORIES_ENUM = tuple(f"cat_{i}_{suffix}" for i, suffix in (
+    (1, "purchased_goods"), (2, "capital_goods"), (3, "fuel_energy_related"),
+    (4, "upstream_transport"), (5, "waste_generated"), (6, "business_travel"),
+    (7, "employee_commuting"), (8, "upstream_leased_assets"), (9, "downstream_transport"),
+    (10, "processing_sold_products"), (11, "use_sold_products"), (12, "eol_sold_products"),
+    (13, "downstream_leased_assets"), (14, "franchises"), (15, "investments"),
+))
+SCOPE3_METHODS_ENUM = ("supplier_specific", "hybrid", "average_data", "spend_based")
+
+
+class Scope3Record(EsgBase):
+    """Approved value-chain activity across GHG Protocol Scope 3 Categories 1–15 with dual control."""
+    __tablename__ = "esg_scope3_record"
+    __table_args__ = (
+        ForeignKeyConstraint(["organization_id", "period_id"],
+                             ["esg_reporting_period.organization_id", "esg_reporting_period.id"],
+                             name="fk_esg_scope3_period"),
+        ForeignKeyConstraint(["organization_id", "facility_id"],
+                             ["esg_facility.organization_id", "esg_facility.id"],
+                             name="fk_esg_scope3_facility"),
+        CheckConstraint(_in("category", SCOPE3_CATEGORIES_ENUM), name="ck_esg_scope3_category"),
+        CheckConstraint(_in("calculation_method", SCOPE3_METHODS_ENUM), name="ck_esg_scope3_method"),
+        CheckConstraint(_in("status", ACTIVITY_STATUSES), name="ck_esg_scope3_status"),
+        CheckConstraint("quantity >= 0 AND factor_kgco2e_per_unit >= 0 AND emissions_kg >= 0",
+                        name="ck_esg_scope3_nonnegative"),
+        CheckConstraint("reviewed_by IS NULL OR reviewed_by <> created_by", name="ck_esg_scope3_dual_control"),
+        Index("ix_esg_scope3_period_cat", "organization_id", "period_id", "category"),
+    )
+
+    id = Column(String(36), primary_key=True, default=_id)
+    organization_id = _org_fk()
+    period_id = Column(String(36), nullable=False)
+    facility_id = Column(String(36))
+    category = Column(String(40), nullable=False)
+    calculation_method = Column(String(20), nullable=False)
+    supplier_name = Column(String(200))
+    activity_description = Column(String(500), nullable=False)
+    quantity = Column(QTY, nullable=False)
+    unit = Column(String(30), nullable=False)
+    factor_kgco2e_per_unit = Column(QTY, nullable=False)
+    factor_source = Column(String(400), nullable=False)
+    emissions_kg = Column(KG, nullable=False)
+    data_quality = Column(String(12))
+    uncertainty_pct = Column(Numeric(12, 6))
+    status = Column(String(12), nullable=False, default="DRAFT")
+    created_by = Column(String(255), nullable=False)
+    created_at = Column(DateTime(timezone=True), default=_now, nullable=False)
+    submitted_at = Column(DateTime(timezone=True))
+    reviewed_by = Column(String(255))
+    reviewed_at = Column(DateTime(timezone=True))
+    review_comment = Column(Text)

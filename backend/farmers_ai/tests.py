@@ -1,3 +1,4 @@
+from django.contrib.auth import get_user_model
 from django.test import TestCase
 from rest_framework.test import APIClient
 from rest_framework import status
@@ -6,10 +7,19 @@ from io import BytesIO
 from django.core.files.uploadedfile import SimpleUploadedFile
 from .models import Diagnosis, WeatherRiskSnapshot
 
+User = get_user_model()
+
 class FarmersAITests(TestCase):
     def setUp(self):
+        self.user = User.objects.create_user(username="farmer_test", password="pw")
+        self.unauth_client = APIClient()
         self.client = APIClient()
+        self.client.force_authenticate(user=self.user)
         Diagnosis.objects.all().delete()
+
+    def test_unauthenticated_requests_rejected(self):
+        self.assertIn(self.unauth_client.get('/api/farmers-ai/journal/').status_code, (401, 403))
+        self.assertIn(self.unauth_client.post('/api/farmers-ai/diagnose/', {}).status_code, (401, 403))
 
     def test_diagnose_missing_parameters_returns_400(self):
         resp = self.client.post('/api/farmers-ai/diagnose/', {})

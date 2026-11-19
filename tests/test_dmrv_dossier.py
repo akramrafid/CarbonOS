@@ -13,6 +13,7 @@ sys.path.append(BASE_DIR)
 sys.path.append(os.path.join(BASE_DIR, "inference"))
 
 import _isolated_db  # noqa: F401,E402  (temporary database, never backend/db.sqlite3)
+from dmrv_harness import setup_dmrv_test_tenants  # noqa: E402
 from inference.carbon_monitoring.database import init_db, SessionLocal
 from inference.carbon_monitoring.models import AnalysisJob, CarbonResult, BaselineAssessment, EstimateProvenance
 from inference.carbon_monitoring.router import router as carbon_router
@@ -24,6 +25,9 @@ class TestDMRVAuditDossier(unittest.TestCase):
     @classmethod
     def setUpClass(cls):
         init_db()
+        cls.tenants = setup_dmrv_test_tenants("dos")
+        cls.headers = cls.tenants["owner_a"]
+        cls.org_a = cls.tenants["org_a"]
         cls.app = FastAPI(title="dMRV Audit Dossier Test Harness")
         cls.app.include_router(carbon_router)
         cls.client = TestClient(cls.app)
@@ -33,6 +37,7 @@ class TestDMRVAuditDossier(unittest.TestCase):
 
         # Seed realistic analysis job, result, baseline, and provenance
         self.job = AnalysisJob(
+            organization_id=self.org_a,
             status="completed",
             polygon_geojson=json.dumps([[22.25, 89.50], [22.35, 89.50], [22.35, 89.60], [22.25, 89.60]]),
             analysis_type="ndvi",
@@ -213,26 +218,26 @@ class TestDMRVAuditDossier(unittest.TestCase):
     def test_04_fastapi_audit_dossier_endpoints(self):
         """Verify GET /api/carbon/report/audit-dossier/{job_id} across JSON, Markdown, and PDF."""
         # 1. JSON output
-        res_json = self.client.get(f"/api/carbon/report/audit-dossier/{self.job.id}?format=json")
+        res_json = self.client.get(f"/api/carbon/report/audit-dossier/{self.job.id}?format=json", headers=self.headers)
         self.assertEqual(res_json.status_code, 200)
         data = res_json.json()
         self.assertEqual(data["certification_standard"], "Verra VM0047 v1.0 & VCS Standard v4.5")
         self.assertIn("ipcc_tier3_multipool_inventory", data)
 
         # 2. Markdown output
-        res_md = self.client.get(f"/api/carbon/report/audit-dossier/{self.job.id}?format=markdown")
+        res_md = self.client.get(f"/api/carbon/report/audit-dossier/{self.job.id}?format=markdown", headers=self.headers)
         self.assertEqual(res_md.status_code, 200)
         self.assertEqual(res_md.headers["content-type"], "text/markdown; charset=utf-8")
         self.assertIn("Verra VM0047", res_md.text)
 
         # 3. PDF output
-        res_pdf = self.client.get(f"/api/carbon/report/audit-dossier/{self.job.id}?format=pdf")
+        res_pdf = self.client.get(f"/api/carbon/report/audit-dossier/{self.job.id}?format=pdf", headers=self.headers)
         self.assertEqual(res_pdf.status_code, 200)
         self.assertEqual(res_pdf.headers["content-type"], "application/pdf")
         self.assertTrue(res_pdf.content.startswith(b"%PDF-1.4"))
 
         # 4. Standard /report/{job_id}?format=dossier endpoint integration
-        res_dos = self.client.get(f"/api/carbon/report/{self.job.id}?format=dossier")
+        res_dos = self.client.get(f"/api/carbon/report/{self.job.id}?format=dossier", headers=self.headers)
         self.assertEqual(res_dos.status_code, 200)
         self.assertEqual(res_dos.headers["content-type"], "application/pdf")
 

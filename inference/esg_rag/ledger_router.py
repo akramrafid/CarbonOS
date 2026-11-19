@@ -16,8 +16,8 @@ from .auth import Principal, require
 from .database import get_db
 from .ledger import DomainError
 from .ledger_models import (
-    ActivityRecord, AuditEvent, CalculationLine, CalculationRun, Equipment, Facility, LegalEntity, ReportingPeriod,
-    ReportSnapshot,
+    ActivityRecord, AuditEvent, BaseYearPolicy, CalculationLine, CalculationRun, Equipment, Facility,
+    FacilityOwnership, LegalEntity, ReportingPeriod, ReportSnapshot, Scope3Record,
 )
 
 router = APIRouter(tags=["ESG Ledger"])
@@ -607,3 +607,174 @@ def approve_disclosure(period_id: str, framework: str, ref: str, p: Principal = 
 def publish_disclosure(period_id: str, framework: str, ref: str, p: Principal = Depends(require("read")),
                        db: Session = Depends(get_db)):
     return out(run(esg_metrics.approve_response, db, p, period_id, framework, ref, True))
+
+
+# --- Scope 3 (Cat 1-15), dated ownership, Ch. 5 base year, CBAM & EUDR/TNFD -------------------
+
+class FacilityOwnershipIn(BaseModel):
+    effective_from: dt.date
+    effective_to: Optional[dt.date] = None
+    operational_control: bool = True
+    financial_control: bool = True
+    equity_share_pct: condecimal(ge=0, le=100, max_digits=7, decimal_places=4) = Decimal(100)
+    change_reason: Optional[str] = Field(None, max_length=1000)
+
+
+class Scope3In(BaseModel):
+    period_id: str
+    facility_id: Optional[str] = None
+    category: str
+    calculation_method: Literal["supplier_specific", "hybrid", "average_data", "spend_based"]
+    supplier_name: Optional[str] = Field(None, max_length=200)
+    activity_description: str = Field(..., min_length=1, max_length=500)
+    quantity: NonNeg
+    unit: str = Field(..., min_length=1, max_length=30)
+    factor_kgco2e_per_unit: NonNeg
+    factor_source: str = Field(..., min_length=1, max_length=400)
+    data_quality: Optional[Grade] = None
+    uncertainty_pct: Optional[Pct] = None
+
+
+class BaseYearPolicyIn(BaseModel):
+    base_year_period_id: str
+    significance_threshold_pct: condecimal(gt=0, le=100, max_digits=6, decimal_places=2) = Decimal("5.0")
+    base_year_scope1_tco2e: NonNeg = Decimal("0")
+    base_year_scope2_tco2e: NonNeg = Decimal("0")
+    base_year_scope3_tco2e: NonNeg = Decimal("0")
+
+
+class BaseYearEvaluateIn(BaseModel):
+    structural_change_delta_tco2e: Decimal
+    reason: str = Field(..., min_length=1, max_length=1000)
+    apply_restatement: bool = False
+
+
+class CbamGoodIn(BaseModel):
+    cn_code: str = Field(..., min_length=4, max_length=12)
+    good_name: str = Field(..., min_length=1, max_length=200)
+    facility_id: str
+    produced_tonnes: condecimal(gt=0, max_digits=20, decimal_places=4)
+
+
+class CbamExportIn(BaseModel):
+    goods_declarations: List[CbamGoodIn] = Field(..., min_length=1, max_length=100)
+
+
+class EudrTnfdIn(BaseModel):
+    polygon_geojson: dict
+    cutoff_date: str = "2020-12-31"
+
+
+@router.post("/facilities/{facility_id}/ownership", status_code=201)
+def add_facility_ownership(facility_id: str, body: FacilityOwnershipIn, p: Principal = Depends(require("read")),
+                           db: Session = Depends(get_db)):
+    return out(run(ledger.create_facility_ownership, db, p, facility_id, body.model_dump()))
+
+
+@router.get("/facilities/{facility_id}/ownership")
+def list_facility_ownership(facility_id: str, limit: int = Limit, offset: int = Offset,
+                            p: Principal = Depends(require("read")), db: Session = Depends(get_db)):
+    return _list(db, FacilityOwnership, p, limit, offset, FacilityOwnership.facility_id == facility_id,
+                 order=FacilityOwnership.effective_from)
+
+
+@router.get("/scope3/categories")
+def list_scope3_categories(p: Principal = Depends(require("read"))):
+    from .accounting import SCOPE3_CATEGORIES, SCOPE3_METHODS
+    return {
+        "categories": [{"key": k, "name": v} for k, v in SCOPE3_CATEGORIES.items()],
+        "methods": list(SCOPE3_METHODS),
+    }
+
+
+@router.post("/scope3-records", status_code=201)
+def create_scope3_record(body: Scope3In, p: Principal = Depends(require("read")), db: Session = Depends(get_db)):
+    return out(run(ledger.create_scope3_record, db, p, body.model_dump()))
+
+
+@router.get("/scope3-records")
+def list_scope3_records(period_id: Optional[str] = None, category: Optional[str] = None,
+                        limit: int = Limit, offset: int = Offset,
+                        p: Principal = Depends(require("read")), db: Session = Depends(get_db)):
+    filters = ([Scope3Record.period_id == period_id] if period_id else []) + \
+        ([Scope3Record.category == category] if category else [])
+    return _list(db, Scope3Record, p, limit, offset, *filters, order=Scope3Record.created_at)
+
+
+@router.post("/scope3-records/{rec_id}/submit")
+def submit_scope3_record(rec_id: str, p: Principal = Depends(require("read")), db: Session = Depends(get_db)):
+    return out(run(ledger.submit_scope3_record, db, p, rec_id))
+
+
+@router.post("/scope3-records/{rec_id}/approve")
+def approve_scope3_record(rec_id: str, body: ReviewIn = ReviewIn(), p: Principal = Depends(require("read")),
+                          db: Session = Depends(get_db)):
+    return out(run(ledger.review_scope3_record, db, p, rec_id, True, body.comment))
+
+
+@router.post("/scope3-records/{rec_id}/reject")
+def reject_scope3_record(rec_id: str, body: ReviewIn, p: Principal = Depends(require("read")),
+                         db: Session = Depends(get_db)):
+    return out(run(ledger.review_scope3_record, db, p, rec_id, False, body.comment))
+
+
+@router.put("/base-year-policy")
+def upsert_base_year_policy(body: BaseYearPolicyIn, p: Principal = Depends(require("read")),
+                            db: Session = Depends(get_db)):
+    return out(run(ledger.set_base_year_policy, db, p, body.model_dump()))
+
+
+@router.get("/base-year-policy")
+def get_base_year_policy(p: Principal = Depends(require("read")), db: Session = Depends(get_db)):
+    row = db.query(BaseYearPolicy).filter(BaseYearPolicy.organization_id == p.organization_id).first()
+    if row is None:
+        raise HTTPException(404, "No base year policy configured")
+    return out(row)
+
+
+@router.post("/base-year-policy/evaluate")
+def evaluate_base_year(body: BaseYearEvaluateIn, p: Principal = Depends(require("read")), db: Session = Depends(get_db)):
+    return run(ledger.evaluate_base_year_trigger, db, p, body.structural_change_delta_tco2e,
+               body.reason, body.apply_restatement)
+
+
+@router.post("/periods/{period_id}/export/cbam")
+def export_cbam_report(period_id: str, body: CbamExportIn, format: Literal["json", "xml"] = "json",
+                       p: Principal = Depends(require("read")), db: Session = Depends(get_db)):
+    from . import regulatory_exports
+    period = run(ledger._get, db, ReportingPeriod, p, period_id)
+    calc = db.query(CalculationRun).filter(
+        CalculationRun.organization_id == p.organization_id,
+        CalculationRun.period_id == period.id,
+        CalculationRun.period_revision == period.revision,
+    ).order_by(CalculationRun.created_at.desc()).first()
+    if calc is None:
+        raise HTTPException(409, "No calculation run found for period")
+    org = db.get(ledger.ESGOrganization, p.organization_id)
+    facs = db.query(Facility).filter(Facility.organization_id == p.organization_id).all()
+    by_fac = {}
+    for fid, vals in (calc.by_facility or {}).items():
+        by_fac[fid] = {
+            "scope1": str(ledger._t(vals.get("scope1_kg")) or Decimal(0)),
+            "scope2_location_based": str(ledger._t(vals.get("scope2_location_kg")) or Decimal(0)),
+        }
+    payload = regulatory_exports.build_cbam_payload(
+        organization={"id": org.id, "name": org.name},
+        period=out(period),
+        calculation_run={**out(calc), "by_facility": by_fac},
+        facilities=[out(f) for f in facs],
+        goods_declarations=[g.model_dump() for g in body.goods_declarations],
+    )
+    if format == "xml":
+        return PlainTextResponse(regulatory_exports.render_cbam_xml(payload), media_type="application/xml")
+    return payload
+
+
+@router.post("/periods/{period_id}/eudr-tnfd-check")
+def check_eudr_tnfd(period_id: str, body: EudrTnfdIn, p: Principal = Depends(require("read")),
+                    db: Session = Depends(get_db)):
+    run(ledger._get, db, ReportingPeriod, p, period_id)
+    from carbon_monitoring.eudr_tnfd import evaluate_eudr_tnfd_compliance
+    from carbon_monitoring.satellite import SatelliteEngine
+    sat = SatelliteEngine()
+    return evaluate_eudr_tnfd_compliance(body.polygon_geojson, satellite_engine=sat, cutoff_date=body.cutoff_date)

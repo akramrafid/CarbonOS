@@ -18,77 +18,87 @@ const pointInRing = (lng, lat, ring) => {
   return inside;
 };
 
-// Build crisp spatial grid cells clipped strictly inside the project polygon for 2D choropleth or 3D canopy extrusion
+// Build spatial grid cells directly from backend EO satellite pixels clipped inside the project polygon
 const buildCanopyGridGeoJSON = (drawPoints, activeLayer, selectedJob, baselineData) => {
   if (!drawPoints || drawPoints.length < 3) return EMPTY_FC;
-  const lats = drawPoints.map((p) => p[0]);
-  const lngs = drawPoints.map((p) => p[1]);
-  const minLat = Math.min(...lats);
-  const maxLat = Math.max(...lats);
-  const minLng = Math.min(...lngs);
-  const maxLng = Math.max(...lngs);
-  if (maxLat <= minLat || maxLng <= minLng) return EMPTY_FC;
+  const gridCells = selectedJob?.grid_cells;
+  if (!Array.isArray(gridCells) || gridCells.length === 0) return EMPTY_FC;
 
-  const avgNdvi = Number(selectedJob?.result?.avg_ndvi ?? 0.72);
-  const avgBiomass = Number(selectedJob?.result?.estimated_biomass ?? 220);
-  const avgCarbon = Number(selectedJob?.result?.estimated_carbon ?? avgBiomass * 0.475);
-  const steps = 22;
-  const dLat = (maxLat - minLat) / steps;
-  const dLng = (maxLng - minLng) / steps;
   const features = [];
+  for (let i = 0; i < gridCells.length; i++) {
+    const cell = gridCells[i];
+    const cLat = Number(cell.lat);
+    const cLng = Number(cell.lng);
+    if (!Number.isFinite(cLat) || !Number.isFinite(cLng)) continue;
+    if (!pointInRing(cLng, cLat, drawPoints)) continue;
 
-  for (let r = 0; r < steps; r++) {
-    for (let c = 0; c < steps; c++) {
-      const cLat = minLat + (r + 0.5) * dLat;
-      const cLng = minLng + (c + 0.5) * dLng;
-      if (!pointInRing(cLng, cLat, drawPoints)) continue;
+    const cellNdvi = Number(cell.ndvi ?? 0);
+    const cellEvi = Number(cell.evi ?? 0);
+    const cellNdwi = Number(cell.ndwi ?? 0);
+    const cellBiomass = Number(cell.biomass ?? 0);
+    const cellCarbon = Number(cell.carbon ?? 0);
+    const cellCarbonTotal = Number(cell.carbon_total ?? cellCarbon);
+    const cellHeight = Number(cell.height ?? 0);
 
-      // Smooth deterministic spatial heterogeneity inside canopy bounds
-      const wave =
-        0.5 +
-        0.28 * Math.sin((r / steps) * Math.PI * 2.5 + (c / steps) * 1.4) * Math.cos((c / steps) * Math.PI * 2.1);
-      const cellNdvi = Math.max(0.08, Math.min(0.93, avgNdvi * (0.82 + wave * 0.34)));
-      const cellBiomass = Math.max(15, avgBiomass * (0.72 + wave * 0.52));
-      const cellCarbon = Math.max(8, avgCarbon * (0.72 + wave * 0.52));
-      const cellHeight = Math.max(4, (cellBiomass / 14.0) * (0.85 + cellNdvi * 0.3));
-
-      let fillColor = '#00C853';
-      if (activeLayer === 'carbon_heatmap') {
-        const t = Math.min(1, cellCarbon / 190);
-        fillColor = t > 0.72 ? '#7C3AED' : t > 0.48 ? '#EC4899' : t > 0.28 ? '#F59E0B' : '#F97316';
-      } else if (activeLayer === 'ndwi') {
-        fillColor = wave > 0.65 ? '#0284C7' : wave > 0.45 ? '#38BDF8' : '#7DD3FC';
-      } else if (activeLayer === 'evi') {
-        fillColor = cellNdvi > 0.72 ? '#059669' : cellNdvi > 0.55 ? '#10B981' : '#34D399';
-      } else if (activeLayer === 'forest_cover') {
-        fillColor = cellNdvi > 0.48 ? '#15803D' : '#65A30D';
+    let fillColor = '#00C853';
+    if (activeLayer === 'carbon_heatmap') {
+      if (cell.stratum === 'OPEN_WATER') {
+        fillColor = '#0284C7';
       } else {
-        fillColor = cellNdvi > 0.74 ? '#00C853' : cellNdvi > 0.58 ? '#22C55E' : cellNdvi > 0.42 ? '#84CC16' : '#F59E0B';
+        const t = Math.min(1, Math.max(0, cellCarbonTotal / 250));
+        fillColor = t > 0.72 ? '#7C3AED' : t > 0.48 ? '#EC4899' : t > 0.22 ? '#F59E0B' : '#94A3B8';
       }
-
-      const pad = 0.04;
-      const x0 = minLng + (c + pad) * dLng;
-      const x1 = minLng + (c + 1 - pad) * dLng;
-      const y0 = minLat + (r + pad) * dLat;
-      const y1 = minLat + (r + 1 - pad) * dLat;
-
-      features.push({
-        type: 'Feature',
-        properties: {
-          ndvi: Number(cellNdvi.toFixed(3)),
-          biomass_mg_ha: Number(cellBiomass.toFixed(1)),
-          carbon_tc_ha: Number(cellCarbon.toFixed(1)),
-          height_m: Number(cellHeight.toFixed(1)),
-          extrude_height: Math.round(cellHeight * 45), // meters visual extrusion scale
-          color: fillColor,
-          counterfactual_tc_ha: Number(((baselineData?.counterfactual_carbon_tc_ha ?? cellCarbon * 0.76)).toFixed(1)),
-        },
-        geometry: {
-          type: 'Polygon',
-          coordinates: [[[x0, y0], [x1, y0], [x1, y1], [x0, y1], [x0, y0]]],
-        },
-      });
+    } else if (activeLayer === 'ndwi') {
+      fillColor = cellNdwi > 0.1 ? '#0284C7' : cellNdwi > -0.15 ? '#38BDF8' : '#7DD3FC';
+    } else if (activeLayer === 'evi') {
+      fillColor = cellEvi > 0.55 ? '#059669' : cellEvi > 0.3 ? '#10B981' : '#94A3B8';
+    } else if (activeLayer === 'forest_cover') {
+      fillColor = cellNdvi > 0.45 && cellBiomass > 60 ? '#15803D' : cellNdvi > 0.2 ? '#65A30D' : '#94A3B8';
+    } else {
+      fillColor =
+        cellNdvi < 0.12 && cellNdwi > 0.05
+          ? '#0284C7'
+          : cellNdvi > 0.72
+          ? '#00C853'
+          : cellNdvi > 0.52
+          ? '#22C55E'
+          : cellNdvi > 0.30
+          ? '#84CC16'
+          : cellNdvi > 0.15
+          ? '#F59E0B'
+          : '#94A3B8';
     }
+
+    const halfLat = Math.max(0.0001, Number(cell.step_lat ?? 0.0005) * 0.46);
+    const halfLng = Math.max(0.0001, Number(cell.step_lng ?? 0.0005) * 0.46);
+    const x0 = cLng - halfLng;
+    const x1 = cLng + halfLng;
+    const y0 = cLat - halfLat;
+    const y1 = cLat + halfLat;
+
+    features.push({
+      type: 'Feature',
+      properties: {
+        ndvi: Number(cellNdvi.toFixed(3)),
+        evi: Number(cellEvi.toFixed(3)),
+        ndwi: Number(cellNdwi.toFixed(3)),
+        biomass_mg_ha: Number(cellBiomass.toFixed(1)),
+        carbon_tc_ha: Number(cellCarbonTotal.toFixed(1)),
+        carbon_agb_tc_ha: Number(cellCarbon.toFixed(1)),
+        height_m: Number(cellHeight.toFixed(1)),
+        extrude_height: Math.round(Math.max(0, cellHeight) * 45),
+        color: fillColor,
+        stratum: cell.stratum || null,
+        counterfactual_tc_ha:
+          baselineData?.counterfactual_carbon_tc_ha != null
+            ? Number(Number(baselineData.counterfactual_carbon_tc_ha).toFixed(1))
+            : null,
+      },
+      geometry: {
+        type: 'Polygon',
+        coordinates: [[[x0, y0], [x1, y0], [x1, y1], [x0, y1], [x0, y0]]],
+      },
+    });
   }
   return { type: 'FeatureCollection', features };
 };

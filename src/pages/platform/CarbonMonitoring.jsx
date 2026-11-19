@@ -2,8 +2,8 @@ import React, { useState, useEffect, useMemo, useRef } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useTheme } from '../../context/ThemeContext';
 import DmrvMapStudio from '../../components/DmrvMapStudio';
-import { getEsgAuthHeaders, hasEsgToken } from '../../lib/esgApi';
-import { loadSession } from '../../lib/esgAuth';
+import { clearEsgSession, getEsgAuthHeaders, hasEsgToken } from '../../lib/esgApi';
+import { clearStoredDemoSession, getStoredDemoSession, loadSession } from '../../lib/esgAuth';
 import { 
   Activity, 
   AlertTriangle, 
@@ -55,9 +55,15 @@ import {
 const FASTAPI_API_URL = import.meta.env.VITE_FASTAPI_API_URL || 'http://localhost:8000';
 
 let _carbonSessionPromise = null;
-async function ensureCarbonSession() {
-  if (hasEsgToken()) return;
+async function ensureCarbonSession(forceRefresh = false) {
+  const demo = getStoredDemoSession();
+  const isStaleOffline = Boolean(demo?.isOfflineDemo);
+  if (!forceRefresh && !isStaleOffline && hasEsgToken()) return;
   if (!_carbonSessionPromise) {
+    if (forceRefresh || isStaleOffline) {
+      clearStoredDemoSession();
+      clearEsgSession();
+    }
     _carbonSessionPromise = loadSession().catch(() => null).finally(() => {
       _carbonSessionPromise = null;
     });
@@ -66,10 +72,19 @@ async function ensureCarbonSession() {
 }
 
 async function carbonFetch(url, options = {}) {
-  await ensureCarbonSession();
-  const authHeaders = getEsgAuthHeaders();
-  const mergedHeaders = { ...authHeaders, ...(options.headers || {}) };
-  return fetch(url, { ...options, headers: mergedHeaders });
+  await ensureCarbonSession(false);
+  const res = await fetch(url, {
+    ...options,
+    headers: { ...getEsgAuthHeaders(), ...(options.headers || {}) },
+  });
+  if (res.status === 401 && !options._retriedAuth) {
+    await ensureCarbonSession(true);
+    return fetch(url, {
+      ...options,
+      headers: { ...getEsgAuthHeaders(), ...(options.headers || {}) },
+    });
+  }
+  return res;
 }
 
 const OSM_VECTOR_LAYER_STYLES = {
@@ -661,8 +676,11 @@ const DEFAULT_MODEL_SETTINGS = {
     "B11_swir1", "B12_swir2", "ndvi", "evi", "ndwi", "savi", "ndbi", 
     "S1_vv", "S1_vh", "S1_ratio", "tree_height"
   ],
-  model_version: "2.0.0-dmrv",
-  model_trained_on: "NFI-Sovereign-Ground-Truth"
+  model_version: "0.2.0-synthetic",
+  model_trained_on: "synthetic-v1",
+  ee_initialized: null,
+  rasterio_available: null,
+  satellite_engine_mode: "connecting"
 };
 
 // Default sovereign MRV dashboard telemetry datasets
@@ -870,11 +888,20 @@ const CarbonMonitoring = () => {
   const [osmLoading, setOsmLoading] = useState(false);
   const [osmRevision, setOsmRevision] = useState(0);
   
-  // Stored click coordinates log
+  // Stored click coordinates log (purge legacy pre-API / offline / un-sourced entries on load)
   const [storedLocations, setStoredLocations] = useState(() => {
     try {
       const saved = localStorage.getItem('carbonzero_stored_locations') || localStorage.getItem('carbonos_stored_locations');
-      return saved ? JSON.parse(saved) : [];
+      if (!saved) return [];
+      const parsed = JSON.parse(saved);
+      if (!Array.isArray(parsed)) return [];
+      return parsed.filter((p) => (
+        p &&
+        p.dataSource &&
+        p.dataSource !== 'backend_offline' &&
+        !String(p.confidence || '').includes('NFI Tier-2 Calibrated') &&
+        !String(p.confidence || '').includes('model estimate, unverified')
+      ));
     } catch {
       return [];
     }
@@ -1158,9 +1185,6 @@ const CarbonMonitoring = () => {
     signature_hex: ""
   });
   const [signingLedger, setSigningLedger] = useState(false);
-  const [generatingKeys, setGeneratingKeys] = useState(false);
-  const [showPrivateKey, setShowPrivateKey] = useState(false);
-  const [generatedPublicKey, setGeneratedPublicKey] = useState(null);
   const [taskFilter, setTaskFilter] = useState('all');
 
   // Accessible keyboard navigation: Dismiss modals on Escape key
@@ -1239,7 +1263,7 @@ const CarbonMonitoring = () => {
 
   // Fetch provenance trust and validator signatures
   const fetchProvenanceTrust = async (resultId) => {
-    const rId = resultId || selectedJob?.id;
+    const rId = resultId || selectedJob?.result?.id || selectedJob?.id;
     if (!rId) return;
     try {
       const res = await carbonFetch(`${FASTAPI_API_URL}/api/carbon/provenance/${rId}`);
@@ -1368,7 +1392,7 @@ const CarbonMonitoring = () => {
       return;
     }
     setSigningLedger(true);
-    const rId = selectedJob?.id;
+    const rId = selectedJob?.result?.id || selectedJob?.id;
     if (!rId) {
       setSigningLedger(false);
       showToast('Select an analyzed result before submitting a VVB co-signature.', 'error');
@@ -1490,7 +1514,7 @@ const CarbonMonitoring = () => {
   const fetchDashboardStats = async () => {
     try {
       const controller = new AbortController();
-      const tId = setTimeout(() => controller.abort(), 1200);
+      const tId = setTimeout(() => controller.abort(), 5000);
       const res = await carbonFetch(`${FASTAPI_API_URL}/api/carbon/dashboard`, { signal: controller.signal });
       clearTimeout(tId);
       if (res.ok) {
@@ -1505,7 +1529,7 @@ const CarbonMonitoring = () => {
   const fetchHistory = async () => {
     try {
       const controller = new AbortController();
-      const tId = setTimeout(() => controller.abort(), 1200);
+      const tId = setTimeout(() => controller.abort(), 5000);
       const res = await carbonFetch(`${FASTAPI_API_URL}/api/carbon/history`, { signal: controller.signal });
       clearTimeout(tId);
       if (res.ok) {
@@ -1524,7 +1548,7 @@ const CarbonMonitoring = () => {
   const fetchAlerts = async () => {
     try {
       const controller = new AbortController();
-      const tId = setTimeout(() => controller.abort(), 1200);
+      const tId = setTimeout(() => controller.abort(), 5000);
       const res = await carbonFetch(`${FASTAPI_API_URL}/api/carbon/alerts`, { signal: controller.signal });
       clearTimeout(tId);
       if (res.ok) {
@@ -1536,7 +1560,7 @@ const CarbonMonitoring = () => {
     }
   };
 
-  // Ultra-low latency (<120ms) Run Satellite & ML analysis
+  // Run live backend Satellite (GEE / STAC COG) & ML analysis for the drawn AOI polygon
   const handleRunAnalysis = async () => {
     let activePoints = drawPoints;
 
@@ -1550,172 +1574,137 @@ const CarbonMonitoring = () => {
       setDrawPoints(activePoints);
     }
 
-    // Geodesic area & perimeter calculation in <5ms
     const geoMetrics = calculateGeodesicMetrics(activePoints);
-    const avgLat = geoMetrics.centroid[0];
-    const avgLng = geoMetrics.centroid[1];
-    const ecoZone = getBangladeshEcoZone(avgLat, avgLng);
-
-    // Format drawn coordinates to GeoJSON Polygon format
-    const geojsonCoords = [...activePoints, activePoints[0]].map(c => [c[1], c[0]]);
+    const geojsonCoords = [...activePoints, activePoints[0]].map((c) => [c[1], c[0]]);
     const geojsonPolygon = {
-      type: "Polygon",
-      coordinates: [geojsonCoords]
+      type: 'Polygon',
+      coordinates: [geojsonCoords],
     };
 
-    const lats = activePoints.map(c => c[0]);
-    const lngs = activePoints.map(c => c[1]);
+    const lats = activePoints.map((c) => c[0]);
+    const lngs = activePoints.map((c) => c[1]);
     const calculatedBounds = [
       [Math.min(...lats), Math.min(...lngs)],
-      [Math.max(...lats), Math.max(...lngs)]
+      [Math.max(...lats), Math.max(...lngs)],
     ];
 
-    const fallbackAreaHa = geoMetrics.areaHa > 0 ? geoMetrics.areaHa : 3800.5;
-    const baseNdvi = ecoZone.baseNdvi;
-    const biomassPerHa = (ecoZone.biomassMin + ecoZone.biomassMax) / 2;
-    const carbonPerHa = biomassPerHa * 0.475; // IPCC Tier 2 / 3 default carbon fraction
-    const co2Multiplier = 44.0 / 12.0; // 3.6667
-    const totalCo2e = Number((carbonPerHa * fallbackAreaHa * co2Multiplier).toFixed(2));
-
-    // Verra VM0047 / VM0048 Stratum & Multi-Pool Calculations
-    const stratum = ecoZone.zone.includes('Sundarbans') 
-      ? "SUNDARBANS_MANGROVE" 
-      : (ecoZone.zone.includes('Chittagong') || ecoZone.zone.includes('Hill') ? "TROPICAL_HILL_FOREST" : "SAL_FOREST");
-    const isMangrove = stratum === "SUNDARBANS_MANGROVE";
-    
-    // IPCC Tier-3 Pools
-    const agbCarbon = Number(carbonPerHa.toFixed(2));
-    const bgbCarbon = Number((agbCarbon * (isMangrove ? 0.49 : 0.24)).toFixed(2));
-    const socCarbon = isMangrove ? 180.4 : 65.0; // Mangrove sediment vs upland mineral soil
-    const totalPoolsCarbon = Number((agbCarbon + bgbCarbon + socCarbon).toFixed(2));
-
-    // Dynamic Synthetic Control Baseline (Abadie et al.)
-    const counterfactualCarbon = Number((agbCarbon * 0.82).toFixed(2));
-    const carbonDelta = Math.max(0, agbCarbon - counterfactualCarbon);
-    const grossAdditionalityCo2 = Number((carbonDelta * fallbackAreaHa * co2Multiplier).toFixed(2));
-    const leakageBeltArea = Number((fallbackAreaHa * 2.74).toFixed(1));
-    const leakageRisk = "LOW";
-    const leakageDeduction = 0.0;
-    const bufferPct = 18.0; // Verra AFOLU non-permanence risk buffer
-    const bufferWithheld = Number((grossAdditionalityCo2 * (bufferPct / 100)).toFixed(2));
-    const netCreditable = Number((grossAdditionalityCo2 - bufferWithheld - leakageDeduction).toFixed(2));
-
-    // Conformal Uncertainty & Verra Precision Discount
-    const halfWidth = Number((agbCarbon * 0.051).toFixed(2));
-    const carbonLower90 = Number((agbCarbon - halfWidth).toFixed(2));
-    const carbonUpper90 = Number((agbCarbon + halfWidth).toFixed(2));
-    const rme = Number(((halfWidth / agbCarbon) * 100).toFixed(1));
-    const verraDiscount = rme > 15.0 ? Number((rme - 15.0).toFixed(1)) : 0.0;
-    const conservativeCreditable = Number((netCreditable * (1 - verraDiscount / 100)).toFixed(2));
-
-    const newJob = {
-      id: `mrv-${Date.now()}`,
-      status: "completed",
-      project_name: projectName,
-      analysis_type: activeLayer,
-      start_date: startDate,
-      end_date: endDate,
-      created_at: new Date().toISOString(),
-      polygon_geojson: JSON.stringify(geojsonPolygon),
-      bounds: calculatedBounds,
-      result: {
-        estimated_biomass: Number(biomassPerHa.toFixed(2)),
-        estimated_carbon: Number(carbonPerHa.toFixed(2)),
-        tonnes_co2e: totalCo2e,
-        avg_ndvi: Number(baseNdvi.toFixed(3)),
-        avg_evi: Number((baseNdvi * 0.92).toFixed(3)),
-        avg_ndwi: ecoZone.zone.includes('Sundarbans') ? 0.48 : 0.22,
-        forest_area_ha: fallbackAreaHa,
-        confidence: 0.94,
-        satellite_sources: "Sentinel-2 MSI & Sentinel-1 SAR (Tier 3 model)",
-        forest_stratum: stratum,
-        carbon_agb_tc_ha: agbCarbon,
-        carbon_bgb_tc_ha: bgbCarbon,
-        carbon_soc_tc_ha: socCarbon,
-        carbon_lower_90: carbonLower90,
-        carbon_upper_90: carbonUpper90,
-        relative_margin_of_error: rme,
-        verra_precision_discount_pct: verraDiscount,
-        conservative_creditable_tco2e: conservativeCreditable
-      },
-      baseline: {
-        counterfactual_carbon_tc_ha: counterfactualCarbon,
-        gross_additionality_tco2e: grossAdditionalityCo2,
-        leakage_belt_area_ha: leakageBeltArea,
-        leakage_risk_rating: leakageRisk,
-        leakage_deduction_tco2e: leakageDeduction,
-        buffer_deduction_pct: bufferPct,
-        buffer_withheld_tco2e: bufferWithheld,
-        net_creditable_tco2e: netCreditable
-      },
-      provenance: {
-        genesis_hash: "a4f89d34e2c14092b7c62b48ec42f3609341ef99b2184adbb08764ef1a0c8672",
-        previous_hash: "a4f89d34e2c14092b7c62b48ec42f3609341ef99b2184adbb08764ef1a0c8672",
-        sha256_hash: Array.from(crypto.getRandomValues(new Uint8Array(32))).map(b => b.toString(16).padStart(2, '0')).join(''),
-        signature_scheme: "SHA256_ECDSA_SECP256K1"
-      }
-    };
-
-    // Instant zero-latency execution
     setAnalyzing(true);
-    
-    // Sub-150ms instant execution
-    setTimeout(() => {
-      setAnalyzing(false);
+    try {
+      const submitCtrl = new AbortController();
+      const submitTimer = setTimeout(() => submitCtrl.abort(), 15000);
+      const formData = new FormData();
+      formData.append('polygon_geojson', JSON.stringify(geojsonPolygon));
+      formData.append('start_date', startDate);
+      formData.append('end_date', endDate);
+      formData.append('analysis_type', activeLayer);
+      formData.append('project_name', projectName);
+
+      const submitRes = await carbonFetch(`${FASTAPI_API_URL}/api/carbon/analyze`, {
+        method: 'POST',
+        body: formData,
+        signal: submitCtrl.signal,
+      }).finally(() => clearTimeout(submitTimer));
+
+      if (!submitRes.ok) {
+        const errBody = await submitRes.json().catch(() => ({}));
+        throw new Error(errBody.detail || `Backend returned HTTP ${submitRes.status}`);
+      }
+
+      const queued = await submitRes.json();
+      const jobId = queued.job_id;
+      if (!jobId) {
+        throw new Error('Analysis response did not include a job_id.');
+      }
+
+      showToast('Queued live satellite EO extraction (GEE / STAC + AI estimator)...', 'info');
+
+      let completedJob = null;
+      const maxPolls = 60;
+      for (let attempt = 0; attempt < maxPolls; attempt++) {
+        await new Promise((resolve) => setTimeout(resolve, 1200));
+        const pollCtrl = new AbortController();
+        const pollTimer = setTimeout(() => pollCtrl.abort(), 10000);
+        const jobRes = await carbonFetch(`${FASTAPI_API_URL}/api/carbon/jobs/${jobId}`, {
+          signal: pollCtrl.signal,
+        }).finally(() => clearTimeout(pollTimer));
+
+        if (!jobRes.ok) {
+          throw new Error(`Job status check failed (HTTP ${jobRes.status})`);
+        }
+        const jobPayload = await jobRes.json();
+        if (jobPayload.status === 'completed' && jobPayload.result) {
+          completedJob = jobPayload;
+          break;
+        }
+        if (jobPayload.status === 'failed') {
+          throw new Error('Satellite EO pipeline reported job failure.');
+        }
+      }
+
+      if (!completedJob) {
+        throw new Error('Satellite EO job timed out waiting for completion.');
+      }
+
+      const r = completedJob.result || {};
+      const b = completedJob.baseline || {};
+      const eoSummary = r.eo_summary || {};
+      const hydratedJob = {
+        ...completedJob,
+        project_name: projectName,
+        bounds: calculatedBounds,
+      };
+
       setIsDrawing(false);
-      setAnalysisHistory(prev => [newJob, ...prev]);
-      setSelectedJob(newJob);
-      setDashboardData(prev => ({
+      setAnalysisHistory((prev) => [hydratedJob, ...prev.filter((j) => j.id !== hydratedJob.id)]);
+      setSelectedJob(hydratedJob);
+      setDashboardData((prev) => ({
         ...prev,
-        current_carbon_estimate_tC_ha: Number(carbonPerHa.toFixed(1)),
-        estimated_biomass_Mg_ha: Number(biomassPerHa.toFixed(1)),
-        estimated_co2_storage_tCO2e: totalCo2e,
-        vegetation_index_ndvi: Number(baseNdvi.toFixed(3)),
-        total_area_size_ha: fallbackAreaHa,
-        last_analysis_date: new Date().toISOString().split('T')[0],
-        forest_stratum: stratum,
-        carbon_agb_tc_ha: agbCarbon,
-        carbon_bgb_tc_ha: bgbCarbon,
-        carbon_soc_tc_ha: socCarbon,
-        carbon_total_tc_ha: totalPoolsCarbon,
-        counterfactual_carbon_tc_ha: counterfactualCarbon,
-        gross_additionality_tco2e: grossAdditionalityCo2,
-        leakage_belt_area_ha: leakageBeltArea,
-        leakage_risk_rating: leakageRisk,
-        buffer_withheld_tco2e: bufferWithheld,
-        net_creditable_tco2e: netCreditable,
-        carbon_lower_90: carbonLower90,
-        carbon_upper_90: carbonUpper90,
-        relative_margin_of_error: rme,
-        verra_precision_discount_pct: verraDiscount,
-        conservative_creditable_tco2e: conservativeCreditable
+        current_carbon_estimate_tC_ha: Number((r.estimated_carbon ?? 0).toFixed(2)),
+        estimated_biomass_Mg_ha: Number((r.estimated_biomass ?? 0).toFixed(2)),
+        estimated_co2_storage_tCO2e: Number((r.tonnes_co2e ?? 0).toFixed(2)),
+        vegetation_index_ndvi: Number((r.avg_ndvi ?? 0).toFixed(3)),
+        total_area_size_ha: Number((r.forest_area_ha ?? geoMetrics.areaHa ?? 0).toFixed(2)),
+        last_analysis_date: hydratedJob.created_at?.split('T')[0] || new Date().toISOString().split('T')[0],
+        forest_stratum: r.forest_stratum || prev.forest_stratum,
+        carbon_agb_tc_ha: r.carbon_agb_tc_ha ?? prev.carbon_agb_tc_ha,
+        carbon_bgb_tc_ha: r.carbon_bgb_tc_ha ?? prev.carbon_bgb_tc_ha,
+        carbon_soc_tc_ha: r.carbon_soc_tc_ha ?? prev.carbon_soc_tc_ha,
+        carbon_total_tc_ha: r.estimated_carbon ?? prev.carbon_total_tc_ha,
+        counterfactual_carbon_tc_ha: b.counterfactual_carbon_tc_ha ?? prev.counterfactual_carbon_tc_ha,
+        gross_additionality_tco2e: b.gross_additionality_tco2e ?? prev.gross_additionality_tco2e,
+        leakage_belt_area_ha: b.leakage_belt_area_ha ?? prev.leakage_belt_area_ha,
+        leakage_risk_rating: b.leakage_risk_rating ?? prev.leakage_risk_rating,
+        leakage_deduction_tco2e: b.leakage_deduction_tco2e ?? prev.leakage_deduction_tco2e,
+        buffer_deduction_pct: b.buffer_deduction_pct ?? prev.buffer_deduction_pct,
+        buffer_withheld_tco2e: b.buffer_withheld_tco2e ?? prev.buffer_withheld_tco2e,
+        net_creditable_tco2e: b.net_creditable_tco2e ?? prev.net_creditable_tco2e,
+        carbon_lower_90: r.carbon_lower_90 ?? prev.carbon_lower_90,
+        carbon_upper_90: r.carbon_upper_90 ?? prev.carbon_upper_90,
+        relative_margin_of_error: r.relative_margin_of_error ?? prev.relative_margin_of_error,
+        verra_precision_discount_pct: r.verra_precision_discount_pct ?? prev.verra_precision_discount_pct,
+        conservative_creditable_tco2e: r.conservative_creditable_tco2e ?? prev.conservative_creditable_tco2e,
+        sha256_ledger_hash: hydratedJob.provenance?.record_hash ?? prev.sha256_ledger_hash,
       }));
       setMapBounds(calculatedBounds);
       setActiveTab('map');
-      showToast(`AI Estimation Complete! ${fallbackAreaHa} ha in ${ecoZone.zone} • ${agbCarbon} tC/ha AGB + ${socCarbon} tC/ha SOC.`, "success");
-    }, 120);
 
-    // Detached background call to FastAPI if running
-    try {
-      const controller = new AbortController();
-      const tId = setTimeout(() => controller.abort(), 800);
-      const formData = new FormData();
-      formData.append("polygon_geojson", JSON.stringify(geojsonPolygon));
-      formData.append("start_date", startDate);
-      formData.append("end_date", endDate);
-      formData.append("analysis_type", activeLayer);
-      formData.append("project_name", projectName);
-      carbonFetch(`${FASTAPI_API_URL}/api/carbon/analyze`, {
-        method: 'POST',
-        body: formData,
-        signal: controller.signal
-      }).then(() => clearTimeout(tId)).catch(() => clearTimeout(tId));
-    } catch {
-      // Ignored
+      fetchProvenanceTrust(r.id || hydratedJob.id);
+      fetchVerificationTasks();
+      loadOsmLayers(activePoints, b.gross_additionality_tco2e ?? null, true);
+
+      const modeTag = eoSummary.pixel_extraction_mode || hydratedJob.provenance?.data_source || 'backend';
+      showToast(
+        `Live EO Analysis Complete (${modeTag}): ${r.forest_area_ha ?? geoMetrics.areaHa} ha · NDVI ${Number(r.avg_ndvi ?? 0).toFixed(3)} · ${Number(r.estimated_carbon ?? 0).toFixed(1)} tC/ha`,
+        'success'
+      );
+    } catch (err) {
+      showToast(
+        `Satellite analysis failed (${err?.message || 'FastAPI backend unreachable on :8000'}). No synthetic client estimate generated.`,
+        'error'
+      );
+    } finally {
+      setAnalyzing(false);
     }
-
-    // Trigger QuackOSM / Overpass 10 km leakage belt vector context cleanly in background
-    loadOsmLayers(activePoints, grossAdditionalityCo2, true);
   };
 
   // Handle spatial GeoJSON / KML boundary upload
@@ -1865,7 +1854,7 @@ const CarbonMonitoring = () => {
     const ecoZone = getBangladeshEcoZone(parsedLat, parsedLng);
 
     const pixelController = new AbortController();
-    const pixelTimeout = setTimeout(() => pixelController.abort(), 15000);
+    const pixelTimeout = setTimeout(() => pixelController.abort(), 25000);
     const geoController = new AbortController();
     const geoTimeout = setTimeout(() => geoController.abort(), 5000);
 
@@ -1877,11 +1866,16 @@ const CarbonMonitoring = () => {
           lat: parsedLat,
           lng: parsedLng,
           job_id: selectedJob?.id || null,
+          start_date: startDate,
+          end_date: endDate,
         }),
         signal: pixelController.signal,
       }).then(async (res) => {
         clearTimeout(pixelTimeout);
-        if (!res.ok) throw new Error(`HTTP ${res.status}`);
+        if (!res.ok) {
+          const errBody = await res.json().catch(() => ({}));
+          throw new Error(errBody.detail || `HTTP ${res.status}`);
+        }
         return res.json();
       }),
       fetch(
@@ -1920,6 +1914,8 @@ const CarbonMonitoring = () => {
         name: locationName,
         region: districtInfo,
         ndvi: Number(p.ndvi ?? 0).toFixed(3),
+        evi: p.evi != null ? Number(p.evi).toFixed(3) : null,
+        ndwi: p.ndwi != null ? Number(p.ndwi).toFixed(3) : null,
         biomass: Number(p.estimated_biomass_mg_ha ?? 0).toFixed(2),
         carbon: Number(p.estimated_carbon_tc_ha ?? 0).toFixed(2),
         carbonTotal: p.estimated_carbon_total_tc_ha != null ? Number(p.estimated_carbon_total_tc_ha).toFixed(2) : null,
@@ -1927,12 +1923,21 @@ const CarbonMonitoring = () => {
         bgbCarbon: p.carbon_bgb_tc_ha != null ? Number(p.carbon_bgb_tc_ha).toFixed(2) : null,
         socCarbon: p.carbon_soc_tc_ha != null ? Number(p.carbon_soc_tc_ha).toFixed(2) : null,
         co2eHa: p.tonnes_co2e_ha != null ? Number(p.tonnes_co2e_ha).toFixed(2) : null,
+        treeHeightM: p.average_tree_height_m != null ? Number(p.average_tree_height_m).toFixed(1) : null,
+        elevationM: p.elevation_m != null ? Number(p.elevation_m).toFixed(1) : null,
+        pixelExtractionMode: p.pixel_extraction_mode || p.data_source || 'unknown',
+        eoPixelVerified: Boolean(p.eo_pixel_verified),
+        gediSource: p.gedi_tree_height_source || 'unknown',
+        s2ScenesCount: Array.isArray(p.s2_scene_ids) ? p.s2_scene_ids.length : 0,
+        s1ScenesCount: Array.isArray(p.s1_scene_ids) ? p.s1_scene_ids.length : 0,
+        dateRange: p.date_range || { start_date: startDate, end_date: endDate },
         confidence: p.confidence_label || `${Math.round((p.confidence ?? 0) * 100)}% (backend model; unverified)`,
         dataSource: p.data_source || 'unknown',
         timestamp: new Date().toLocaleTimeString(),
         forestType: `${p.forest_stratum || ecoZone.forestType} • ${p.data_source || 'backend'}`
       };
     } else {
+      const reason = pixelOutcome.status === 'rejected' ? (pixelOutcome.reason?.message || 'unreachable') : 'no payload';
       newPixel = {
         lat: latStr,
         lng: lngStr,
@@ -1941,12 +1946,13 @@ const CarbonMonitoring = () => {
         ndvi: "Unavailable",
         biomass: "Unavailable",
         carbon: "Unavailable",
-        confidence: "FastAPI backend (:8000) offline — pixel telemetry unavailable",
+        confidence: `Backend pixel telemetry unavailable (${reason})`,
         dataSource: "backend_offline",
+        eoPixelVerified: false,
         timestamp: new Date().toLocaleTimeString(),
         forestType: `${ecoZone.zone} (Backend Offline)`
       };
-      showToast('FastAPI backend (:8000) unreachable — cannot compute live pixel carbon.', 'info');
+      showToast(`Pixel telemetry unavailable (${reason}) — start FastAPI (:8000) to inspect live satellite pixels.`, 'error');
     }
 
     setInspectedPixel(newPixel);
@@ -2044,10 +2050,24 @@ const CarbonMonitoring = () => {
           <div className={`flex items-center gap-2 px-3 py-2 rounded-xl border ${
             isLight ? 'bg-white border-[#0F291B]/12' : 'bg-[#08130C] border-[#152B1D]'
           }`}>
-            <span className={`w-2 h-2 rounded-full ${isLight ? 'bg-[#15803d]' : 'bg-emerald'}`} />
-            <span className={isLight ? 'text-[#0F291B] font-semibold' : 'text-white font-semibold'}>Sentinel-1/2 SAR</span>
+            <span className={`w-2 h-2 rounded-full ${
+              modelSettings.satellite_engine_mode === 'gee_live'
+                ? (isLight ? 'bg-[#15803d]' : 'bg-emerald')
+                : modelSettings.satellite_engine_mode === 'stac_cog'
+                ? 'bg-sky-500'
+                : 'bg-amber-500'
+            }`} />
+            <span className={isLight ? 'text-[#0F291B] font-semibold' : 'text-white font-semibold'}>Sentinel-1/2 + GEDI</span>
             <span className="opacity-40">·</span>
-            <span>STAC Online</span>
+            <span>
+              {modelSettings.satellite_engine_mode === 'gee_live'
+                ? 'GEE Live'
+                : modelSettings.satellite_engine_mode === 'stac_cog'
+                ? 'STAC COG Live'
+                : modelSettings.satellite_engine_mode === 'simulation_fallback'
+                ? 'Sim Fallback'
+                : 'Connecting...'}
+            </span>
           </div>
           <button
             onClick={handleVerifyChain}
@@ -2066,7 +2086,7 @@ const CarbonMonitoring = () => {
       </div>
 
       {/* Tabs Navigation Bar */}
-      <div className={`flex items-center overflow-x-auto space-x-1.5 p-1.5 rounded-2xl border mb-8 max-w-fit transition-colors ${
+      <div className={`flex items-center overflow-x-auto space-x-1 p-1 rounded-xl border mb-7 max-w-full transition-colors ${
         isLight 
           ? 'bg-white border-[#E2E8F0] shadow-xs' 
           : 'bg-[#08130C] border-[#152B1D]'
@@ -2087,7 +2107,7 @@ const CarbonMonitoring = () => {
             <button
               key={tab.id}
               onClick={() => setActiveTab(tab.id)}
-              className={`flex items-center space-x-2 font-sans font-medium text-xs md:text-sm px-4 py-2.5 rounded-xl transition-all whitespace-nowrap cursor-pointer ${
+              className={`flex items-center space-x-1.5 font-sans font-medium text-xs px-3 py-2 rounded-lg transition-all whitespace-nowrap cursor-pointer ${
                 isActive 
                   ? (isLight 
                       ? 'bg-[#00873E] text-white font-bold shadow-sm' 
@@ -4321,12 +4341,35 @@ const CarbonMonitoring = () => {
                   <div className={`p-4 rounded-2xl border ${
                     isLight ? 'bg-[#E8F8EE] border-[#C2E9CF]' : 'bg-emerald/10 border-emerald/20'
                   }`}>
-                    <div className="flex items-center space-x-2 text-emerald mb-1 font-bold text-xs uppercase tracking-wider">
-                      <MapPin size={16} />
-                      <span>Resolved Location Name</span>
+                    <div className="flex flex-wrap items-center justify-between gap-2 mb-1">
+                      <div className="flex items-center space-x-2 text-emerald font-bold text-xs uppercase tracking-wider">
+                        <MapPin size={16} />
+                        <span>Resolved Location Name</span>
+                      </div>
+                      {inspectedPixel.pixelExtractionMode && (
+                        <span className={`text-[10px] font-mono px-2 py-0.5 rounded-full border ${
+                          inspectedPixel.eoPixelVerified
+                            ? (isLight ? 'bg-white text-[#15803d] border-[#15803d]/30' : 'bg-emerald/15 text-emerald border-emerald/30')
+                            : 'bg-amber-500/15 text-amber-500 border-amber-500/30'
+                        }`}>
+                          {inspectedPixel.eoPixelVerified ? 'EO Pixel Live' : 'Unverified Source'} · {inspectedPixel.pixelExtractionMode}
+                        </span>
+                      )}
                     </div>
                     <p className={`text-sm font-bold leading-relaxed ${isLight ? 'text-[#0F291B]' : 'text-white'}`}>{inspectedPixel.name}</p>
                     <p className={`text-[11px] mt-1 font-mono ${isLight ? 'text-[#64748B]' : 'text-mist'}`}>{inspectedPixel.region} • <span className="text-emerald font-bold">{inspectedPixel.forestType}</span></p>
+                    {(inspectedPixel.s2ScenesCount > 0 || inspectedPixel.gediSource || inspectedPixel.elevationM != null) && (
+                      <div className={`flex flex-wrap gap-x-3 gap-y-1 text-[10px] font-mono mt-2 pt-2 border-t ${
+                        isLight ? 'border-[#C2E9CF] text-[#475569]' : 'border-emerald/20 text-mist'
+                      }`}>
+                        {inspectedPixel.evi != null && <span>EVI: <b>{inspectedPixel.evi}</b></span>}
+                        {inspectedPixel.ndwi != null && <span>NDWI: <b>{inspectedPixel.ndwi}</b></span>}
+                        {inspectedPixel.treeHeightM != null && <span>Canopy H: <b>{inspectedPixel.treeHeightM} m</b> ({inspectedPixel.gediSource})</span>}
+                        {inspectedPixel.elevationM != null && <span>Elev: <b>{inspectedPixel.elevationM} m</b></span>}
+                        <span>S2 scenes: <b>{inspectedPixel.s2ScenesCount ?? 0}</b> · S1 scenes: <b>{inspectedPixel.s1ScenesCount ?? 0}</b></span>
+                        {inspectedPixel.dateRange && <span>Window: <b>{inspectedPixel.dateRange.start_date}..{inspectedPixel.dateRange.end_date}</b></span>}
+                      </div>
+                    )}
                   </div>
 
                   <div className="grid grid-cols-1 min-[360px]:grid-cols-2 md:grid-cols-5 gap-3 sm:gap-4">
@@ -5333,10 +5376,24 @@ const CarbonMonitoring = () => {
                 }`}>Google Earth Engine (GEE) Parameters</h3>
                 
                 <div className="space-y-2">
-                  <label className={`font-bold block ${isLight ? 'text-[#0F291B]' : 'text-white'}`}>GEE Connection Status</label>
+                  <label className={`font-bold block ${isLight ? 'text-[#0F291B]' : 'text-white'}`}>Satellite EO Engine Status</label>
                   <div className={`flex items-center space-x-2 ${isLight ? 'text-[#475569]' : 'text-white'}`}>
-                    <span className="w-2.5 h-2.5 rounded-full bg-amber animate-pulse"></span>
-                    <span>Simulation Fallback Active (No GEE API Key loaded server-side)</span>
+                    <span className={`w-2.5 h-2.5 rounded-full ${
+                      modelSettings.satellite_engine_mode === 'gee_live'
+                        ? 'bg-emerald'
+                        : modelSettings.satellite_engine_mode === 'stac_cog'
+                        ? 'bg-sky-500'
+                        : 'bg-amber animate-pulse'
+                    }`}></span>
+                    <span>
+                      {modelSettings.satellite_engine_mode === 'gee_live'
+                        ? 'Google Earth Engine Live (Sentinel-2 L2A + Sentinel-1 GRD + GEDI L2A + SRTM)'
+                        : modelSettings.satellite_engine_mode === 'stac_cog'
+                        ? 'STAC COG Live Fallback Active (Element84 Sentinel-2/1 Rasterio Reader)'
+                        : modelSettings.satellite_engine_mode === 'simulation_fallback'
+                        ? 'Simulation Fallback Active (No GEE or STAC COG connection)'
+                        : 'Connecting to FastAPI Satellite Engine (:8000)...'}
+                    </span>
                   </div>
                 </div>
 
@@ -5629,28 +5686,6 @@ const CarbonMonitoring = () => {
                 Signing this calculation attests to the sensor telemetry, conformal uncertainty deductions, and IPCC Tier-3 compliance. Signatures are verified with Ed25519 and permanently anchored to the provenance block.
               </p>
             </div>
-
-            {/* Generated Public Key Banner (if keypair generated) */}
-            {generatedPublicKey && (
-              <div className={`p-3.5 rounded-2xl border mb-4 flex items-center justify-between text-xs font-mono transition-all ${
-                isLight ? 'bg-emerald-50 border-emerald-200 text-emerald-950' : 'bg-emerald-950/40 border-emerald-500/30 text-emerald-200'
-              }`}>
-                <div className="space-y-0.5 truncate mr-3">
-                  <span className="text-[10px] uppercase font-bold text-emerald tracking-wider block">
-                    Derived Ed25519 Public Key
-                  </span>
-                  <p className="truncate text-[11px] font-semibold">{generatedPublicKey}</p>
-                </div>
-                <button
-                  type="button"
-                  onClick={() => copyToClipboard(generatedPublicKey, 'Public Key')}
-                  className="px-2.5 py-1 rounded-lg border border-emerald/30 bg-emerald/10 hover:bg-emerald/20 text-emerald font-sans font-bold text-xs flex items-center space-x-1 shrink-0 cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald"
-                >
-                  <Copy size={12} />
-                  <span>Copy</span>
-                </button>
-              </div>
-            )}
 
             {/* Form */}
             <form onSubmit={handleSubmitSignature} className="space-y-4 text-xs">

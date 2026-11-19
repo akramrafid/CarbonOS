@@ -1,9 +1,13 @@
+import datetime
+import json
 import uuid
+from django.contrib.auth import get_user_model
 from django.test import TestCase
 from django.utils import timezone
 from rest_framework.test import APIClient
 from rest_framework import status
 
+from farmers_ai.models import AnalysisJob, CarbonResult
 from .models import (
     RegistryProject,
     PositiveNegativeRule,
@@ -19,6 +23,8 @@ from .registry_client import (
 )
 from .jcm_connector import map_to_jcm_format
 from .btr_export import generate_btr_structured_summary, export_btr_csv
+
+User = get_user_model()
 
 
 class PositiveNegativeListTests(TestCase):
@@ -347,14 +353,23 @@ class BTRExportTests(TestCase):
 
 
 class RESTApiTests(TestCase):
-    """Integration tests for REST API endpoints."""
+    """Integration tests for authenticated, tenant-scoped REST API endpoints."""
 
     def setUp(self):
+        self.user_a = User.objects.create_user(username="org_a_user", password="pw")
+        self.user_b = User.objects.create_user(username="org_b_user", password="pw")
+        self.unauth_client = APIClient()
         self.api_client = APIClient()
+        self.api_client.force_authenticate(user=self.user_a)
+        self.client_b = APIClient()
+        self.client_b.force_authenticate(user=self.user_b)
+
         PositiveNegativeRule.objects.all().delete()
         bootstrap_default_rules()
 
         self.project = RegistryProject.objects.create(
+            organization_id=f"user-{self.user_a.pk}",
+            owner=self.user_a,
             project_name="Coastal Sundarbans Blue Carbon Phase 1",
             external_project_id="BD-AFOLU-001",
             sector="Forestry",
@@ -365,6 +380,36 @@ class RESTApiTests(TestCase):
             eligibility_status="positive_list",
             carbon_standard="JCM"
         )
+        self.job = AnalysisJob.objects.create(
+            status="completed",
+            polygon_geojson="[[22.25, 89.50], [22.35, 89.50], [22.35, 89.60]]",
+            analysis_type="ndvi",
+            start_date=datetime.date(2026, 1, 1),
+            end_date=datetime.date(2026, 5, 1),
+        )
+        self.carbon_result = CarbonResult.objects.create(
+            job=self.job,
+            estimated_biomass=160.0,
+            estimated_carbon=75.0,
+            tonnes_co2e=275.0,
+            avg_ndvi=0.76,
+            forest_area_ha=50.0,
+            confidence=0.91,
+        )
+
+    def test_unauthenticated_and_cross_tenant_blocked(self):
+        self.assertIn(self.unauth_client.get("/api/registry-bridge/projects/").status_code, (401, 403))
+        self.assertIn(self.unauth_client.get("/api/registry-bridge/btr-summary/").status_code, (401, 403))
+        self.assertEqual(
+            self.client_b.get(f"/api/registry-bridge/projects/{self.project.id}/").status_code,
+            status.HTTP_404_NOT_FOUND,
+        )
+
+    def test_doe_url_does_not_force_sandbox_and_requires_api_key(self):
+        with self.assertRaises(RegistryBridgeError):
+            NationalRegistryClient(base_url="https://registry.doe.gov.bd/national-api", api_key="")
+        live_client = NationalRegistryClient(base_url="https://registry.doe.gov.bd/national-api", api_key="live-token")
+        self.assertFalse(live_client.sandbox_mode)
 
     def test_check_eligibility_endpoint(self):
         url = f"/api/registry-bridge/projects/{self.project.id}/check-eligibility/"
@@ -373,27 +418,158 @@ class RESTApiTests(TestCase):
         self.assertTrue(resp.data["is_eligible_for_submission"])
         self.assertEqual(resp.data["current_eligibility"], "positive_list")
 
-    def test_submit_monitoring_report_endpoint(self):
+    def test_submit_monitoring_report_rejects_missing_results_and_accepts_real_result(self):
         url = f"/api/registry-bridge/projects/{self.project.id}/submit-monitoring-report/"
-        payload = {
+        # Missing DB ID must fail cleanly without injecting mocks
+        bad_payload = {
             "carbon_result_ids": [str(uuid.uuid4())],
             "provenance_chain_hash": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
             "force_sandbox_success": True
         }
-        resp = self.api_client.post(url, payload, format="json")
-        self.assertEqual(resp.status_code, status.HTTP_201_CREATED)
-        self.assertEqual(resp.data["submission_status"], "accepted")
+        bad_resp = self.api_client.post(url, bad_payload, format="json")
+        self.assertEqual(bad_resp.status_code, status.HTTP_400_BAD_REQUEST)
+        self.assertEqual(bad_resp.data["error"], "MissingCarbonResults")
 
-    def test_jcm_export_endpoint(self):
+        # Real CarbonResult succeeds in sandbox when explicitly enabled
+        import os
+        prev_sandbox = os.environ.get("NATIONAL_REGISTRY_SANDBOX_MODE")
+        os.environ["NATIONAL_REGISTRY_SANDBOX_MODE"] = "true"
+        try:
+            payload = {
+                "carbon_result_ids": [str(self.carbon_result.id)],
+                "provenance_chain_hash": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+                "force_sandbox_success": True
+            }
+            resp = self.api_client.post(url, payload, format="json")
+            self.assertEqual(resp.status_code, status.HTTP_201_CREATED)
+            self.assertEqual(resp.data["submission_status"], "accepted")
+        finally:
+            if prev_sandbox is None:
+                os.environ.pop("NATIONAL_REGISTRY_SANDBOX_MODE", None)
+            else:
+                os.environ["NATIONAL_REGISTRY_SANDBOX_MODE"] = prev_sandbox
+
+    def test_jcm_export_requires_real_submission_and_exports_from_submission(self):
         url = f"/api/registry-bridge/projects/{self.project.id}/jcm-export/"
+        # Before any submission -> 422 (no silent mock bundle)
+        empty_resp = self.api_client.get(url)
+        self.assertEqual(empty_resp.status_code, status.HTTP_422_UNPROCESSABLE_ENTITY)
+
+        MonitoringReportSubmission.objects.create(
+            registry_project=self.project,
+            carbon_result_ids=[str(self.carbon_result.id)],
+            provenance_chain_hash_at_submission="e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+            payload_sent={
+                "carbonQuantification": {
+                    "grossTonnesCo2e": 275.0,
+                    "grossEstimatedCarbonTcHa": 75.0,
+                    "averageNdvi": 0.76,
+                    "multiPoolVector": {"abovegroundBiomassCarbonTcHa": 40.0, "belowgroundBiomassCarbonTcHa": 15.0, "soilOrganicCarbonTcHa": 20.0},
+                },
+                "conformalUncertaintyAnalysis": {"conservativeCreditableTco2e": 260.0},
+                "provenanceAuditTrail": {"hashVerificationState": "INTACT", "quorumReached": False},
+            },
+            response_status=201,
+            response_body={"status": "ACCEPTED"},
+            submission_status="accepted",
+        )
         resp = self.api_client.get(url)
         self.assertEqual(resp.status_code, status.HTTP_200_OK)
         self.assertIn("jcm_header", resp.data)
         self.assertEqual(resp.data["section_a_project_description"]["project_title"], self.project.project_name)
 
-    def test_btr_summary_csv_endpoint(self):
+    def test_btr_summary_csv_endpoint_and_verification_gate(self):
         url = "/api/registry-bridge/btr-summary/?format=csv"
         resp = self.api_client.get(url)
         self.assertEqual(resp.status_code, status.HTTP_200_OK)
         self.assertEqual(resp["Content-Type"], "text/csv")
         self.assertIn("Unique ITMO Identifier", resp.content.decode("utf-8"))
+
+        json_resp = self.api_client.get("/api/registry-bridge/btr-summary/")
+        self.assertEqual(json_resp.status_code, status.HTTP_200_OK)
+        self.assertEqual(json_resp.data["btr_metadata"]["verification_gate_status"], "UNVERIFIED_OR_SANDBOX_ONLY")
+        self.assertIn("UNVERIFIED / SANDBOX NOTICE", json_resp.data["methodological_consistency_statement"])
+
+    def test_jcm_requires_epoch_delta_and_deducts_project_emissions(self):
+        # Single standing stock without delta or baseline -> 0 creditable (no 0.20*gross fabrication)
+        standing_only = {
+            "carbon_pools": {"gross_tco2e_ha": 400.0, "total_carbon_tc_ha": 109.0},
+            "uncertainty_and_crediting": {"uncertainty_deduction_tco2e_ha": 0.0, "buffer_pool_withholding_tco2e_ha": 0.0},
+        }
+        doc_standing = map_to_jcm_format(self.project, standing_only)
+        sec_d = doc_standing["section_d_calculation_of_emission_reductions"]
+        self.assertEqual(sec_d["crediting_basis"], "STANDING_STOCK_ONLY_NOT_CREDITABLE_WITHOUT_EPOCH_DELTA")
+        self.assertEqual(sec_d["net_verified_emission_reductions_tco2e"], 0.0)
+
+        # Explicit removal delta + project emissions (diesel + fertilizer N2O)
+        epoch_data = {
+            "delta_project_tco2e": 120.0,
+            "baseline_delta_tco2e": 20.0,
+            "project_emissions": {"diesel_liters": 1000.0, "fertilizer_kg_n": 100.0},
+            "carbon_pools": {"gross_tco2e_ha": 400.0, "total_carbon_tc_ha": 109.0},
+            "uncertainty_and_crediting": {"uncertainty_deduction_tco2e_ha": 5.0, "buffer_pool_withholding_tco2e_ha": 15.0},
+        }
+        doc_epoch = map_to_jcm_format(self.project, epoch_data)
+        sec_d_ep = doc_epoch["section_d_calculation_of_emission_reductions"]
+        self.assertEqual(sec_d_ep["crediting_basis"], "EPOCH_REMOVAL_DELTA")
+        self.assertGreater(sec_d_ep["project_emissions_pe_p_tco2e"], 3.0)
+        self.assertLess(sec_d_ep["net_verified_emission_reductions_tco2e"], 80.0)
+
+    def test_aoi_overlap_loa_lifecycle_aef_and_cad_trust(self):
+        poly_a = json.dumps({
+            "type": "Polygon",
+            "coordinates": [[[89.50, 22.20], [89.60, 22.20], [89.60, 22.30], [89.50, 22.30], [89.50, 22.20]]],
+        })
+        poly_overlap = json.dumps({
+            "type": "Polygon",
+            "coordinates": [[[89.55, 22.22], [89.65, 22.22], [89.65, 22.32], [89.55, 22.32], [89.55, 22.22]]],
+        })
+        base_proj = {
+            "project_name": "Sundarbans Block A",
+            "sector": "Forestry",
+            "sectoral_scope": "14",
+            "mitigation_type": "Afforestation",
+            "company_tax_id": "TIN-111",
+            "ndc_commitment_type": "conditional",
+            "carbon_standard": "Verra",
+            "polygon_geojson": poly_a,
+        }
+        r1 = self.api_client.post("/api/registry-bridge/projects/", base_proj, format="json")
+        self.assertEqual(r1.status_code, status.HTTP_201_CREATED)
+        pid = r1.data["id"]
+
+        # Overlapping project must be blocked (400 validation error)
+        overlap_proj = {**base_proj, "project_name": "Duplicate Double-Count Zone", "polygon_geojson": poly_overlap}
+        r_ov = self.api_client.post("/api/registry-bridge/projects/", overlap_proj, format="json")
+        self.assertEqual(r_ov.status_code, status.HTTP_400_BAD_REQUEST)
+        self.assertIn("polygon_geojson", r_ov.data)
+
+        # Record & revoke Art. 6.2 LoA
+        loa_hash = "a" * 64
+        r_loa = self.api_client.post(f"/api/registry-bridge/projects/{pid}/record-loa/", {
+            "loa_reference": "DOE-LOA-2026-01", "loa_sha256": loa_hash
+        }, format="json")
+        self.assertEqual(r_loa.status_code, status.HTTP_200_OK)
+        self.assertEqual(r_loa.data["article62_loa_status"], "ACTIVE")
+
+        # UNFCCC AEF JSON & CSV Export
+        aef_resp = self.api_client.get("/api/registry-bridge/aef-export/")
+        self.assertEqual(aef_resp.status_code, status.HTTP_200_OK)
+        self.assertEqual(aef_resp.data["schema"], "unfccc-art62-aef-6cma6-v1")
+        self.assertTrue(any(row["loa_reference"] == "DOE-LOA-2026-01" for row in aef_resp.data["table_1_authorizations"]))
+
+        # CAD Trust sync without credentials fails closed (503)
+        cad_resp = self.api_client.post(f"/api/registry-bridge/projects/{pid}/cad-trust-sync/", {}, format="json")
+        self.assertEqual(cad_resp.status_code, status.HTTP_503_SERVICE_UNAVAILABLE)
+        self.assertEqual(cad_resp.data["status"], "FAILED_CLOSED_NO_CAD_TRUST_CREDENTIALS")
+
+        # Revoke LoA -> submission blocked with 409 LoARevoked
+        r_rev = self.api_client.post(f"/api/registry-bridge/projects/{pid}/revoke-loa/", {"reason": "Boundary dispute"}, format="json")
+        self.assertEqual(r_rev.status_code, status.HTTP_200_OK)
+        self.assertEqual(r_rev.data["article62_loa_status"], "REVOKED")
+        r_sub = self.api_client.post(f"/api/registry-bridge/projects/{pid}/submit-monitoring-report/", {
+            "carbon_result_ids": [str(self.carbon_result.id)],
+            "provenance_chain_hash": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        }, format="json")
+        self.assertEqual(r_sub.status_code, status.HTTP_409_CONFLICT)
+        self.assertEqual(r_sub.data["error"], "LoARevoked")

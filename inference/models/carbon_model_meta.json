@@ -1,0 +1,9 @@
+{
+  "version": "0.2.0-synthetic",
+  "trained_on": "synthetic-v1",
+  "sklearn_version": "1.8.0",
+  "xgboost_version": "3.4.1",
+  "vvb_eligible": false,
+  "trained_at": "2026-11-19T01:54:10.512870",
+  "validation": null
+}

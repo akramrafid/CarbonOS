@@ -122,7 +122,9 @@ def coverage(db, principal, period_id, framework):
     snap = db.query(ReportSnapshot).filter(ReportSnapshot.organization_id == principal.organization_id,
                                            ReportSnapshot.period_id == period.id) \
         .order_by(ReportSnapshot.revision.desc()).first()
-    totals = json.loads(snap.content)["totals_tco2e"] if snap else None
+    snap_content = json.loads(snap.content) if snap else None
+    totals = snap_content["totals_tco2e"] if snap_content else None
+    energy_summary = snap_content.get("energy_consumption") if snap_content else None
     metrics = {}
     for o in approved_metrics(db, principal, period.id):
         metrics.setdefault(o.metric_key, []).append(
@@ -148,8 +150,21 @@ def coverage(db, principal, period_id, framework):
                     missing.append("No locked GHG inventory for this period")
                 elif key == "methodology":
                     evidence["ghg_snapshot"] = {"snapshot_id": snap.id, "revision": snap.revision, "sha256": snap.content_sha256}
+                elif key == "energy_consumption":
+                    if energy_summary is None:
+                        missing.append("Locked snapshot does not include energy consumption (re-lock period after NCV upgrade)")
+                    else:
+                        evidence["energy_consumption"] = energy_summary
+                        evidence["ghg_snapshot"] = {"snapshot_id": snap.id, "revision": snap.revision, "sha256": snap.content_sha256}
                 elif key == "scope2_market" and totals["scope2_market_based"] is None:
                     missing.append("Market-based Scope 2 inputs are incomplete")
+                elif key == "scope3":
+                    if totals.get("scope3") is None:
+                        missing.append("Scope 3 inventory is not included in locked snapshot")
+                    else:
+                        evidence["scope3_tco2e"] = totals["scope3"]
+                        evidence["scope3_by_category"] = snap_content.get("scope3_by_category") or {}
+                        evidence["ghg_snapshot"] = {"snapshot_id": snap.id, "revision": snap.revision, "sha256": snap.content_sha256}
                 else:
                     field = {"scope1": "scope1", "scope2_location": "scope2_location_based",
                              "scope2_market": "scope2_market_based"}[key]

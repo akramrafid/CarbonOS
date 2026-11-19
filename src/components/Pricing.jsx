@@ -77,58 +77,78 @@ const Pricing = () => {
           </div>
         </div>
 
-        {/* 3-Column Grid */}
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 items-stretch mb-16">
+        {/* Unified 3-Column Institutional Pricing Matrix */}
+        <div className={`grid grid-cols-1 lg:grid-cols-3 rounded-2xl border overflow-hidden divide-y lg:divide-y-0 lg:divide-x mb-8 ${
+          isLight
+            ? 'bg-white border-[#0F291B]/12 divide-[#0F291B]/12 shadow-[0_12px_32px_-12px_rgba(15,41,27,0.08)]'
+            : 'bg-[#080F0B] border-white/10 divide-white/10'
+        }`}>
           
           {/* Tier 1: Project Developer */}
-          <div className="bg-white/[0.02] backdrop-blur-xl border border-white/10 rounded-[2rem] p-8 flex flex-col justify-between transition-all duration-300 hover:border-white/20 shadow-xl relative group">
+          <div className="p-7 sm:p-8 flex flex-col justify-between">
             <div>
-              <div className="flex items-center justify-between mb-4">
-                <span className="font-mono text-xs uppercase tracking-widest text-white/50 font-bold">Starter Node</span>
-                <span className="text-[10px] font-mono px-2 py-0.5 rounded bg-white/5 border border-white/10 text-white/60">Tier 01</span>
+              <div className="flex items-center justify-between mb-3">
+                <span className={`font-mono text-xs uppercase tracking-wider font-semibold ${
+                  isLight ? 'text-[#556B5E]' : 'text-white/50'
+                }`}>Starter Node</span>
+                <span className={`text-[11px] font-mono ${isLight ? 'text-[#556B5E]' : 'text-white/50'}`}>Tier 01</span>
               </div>
 
-              <h3 className="font-sans font-bold text-2xl text-white mb-2 tracking-tight">Project Developer</h3>
-              <p className="font-sans text-xs text-white/60 mb-6 leading-relaxed">
+              <h3 className={`font-sans font-bold text-2xl mb-2 tracking-tight ${
+                isLight ? 'text-[#0F291B]' : 'text-white'
+              }`}>Project Developer</h3>
+              <p className={`font-sans text-xs mb-6 leading-relaxed ${
+                isLight ? 'text-[#46574D]' : 'text-white/65'
+              }`}>
                 For local NGOs, solar developers, and clean cookstove sponsors onboarding early project batches.
               </p>
 
-              <div className="mb-6 p-4 rounded-xl bg-black/40 border border-white/5">
+              <div className={`py-4 mb-6 border-y tabular-nums ${
+                isLight ? 'border-[#0F291B]/10' : 'border-white/10'
+              }`}>
                 <div className="flex items-baseline gap-1.5">
-                  <span className="font-mono text-3xl sm:text-4xl font-extrabold text-[#FFB300]">
+                  <span className={`font-mono text-3xl sm:text-4xl font-bold ${
+                    isLight ? 'text-[#B45309]' : 'text-[#FFB300]'
+                  }`}>
                     ৳{isAnnual ? '40,000' : '50,000'}
                   </span>
-                  <span className="font-mono text-xs text-white/50">/ month</span>
+                  <span className={`font-mono text-xs ${isLight ? 'text-[#556B5E]' : 'text-white/50'}`}>/ month</span>
                 </div>
-                <div className="text-[11px] font-mono text-white/40 mt-1">
+                <div className={`text-[11px] font-mono mt-1 ${isLight ? 'text-[#556B5E]' : 'text-white/50'}`}>
                   {isAnnual ? 'Billed annually ৳4,80,000 / yr' : 'Billed monthly on invoice'}
                 </div>
               </div>
 
-              <div className="text-xs font-mono uppercase tracking-wider text-white/40 mb-3 font-semibold">Included Capabilities:</div>
-              <ul className="space-y-3 mb-8 text-xs font-sans text-white/80">
+              <div className={`text-xs font-mono uppercase tracking-wider mb-3 font-semibold ${
+                isLight ? 'text-[#556B5E]' : 'text-white/50'
+              }`}>Included Capabilities:</div>
+              <ul className={`space-y-3 mb-8 text-xs font-sans ${isLight ? 'text-[#1F3A2A]' : 'text-white/85'}`}>
                 <li className="flex items-start gap-2.5">
-                  <CheckCircle2 size={15} className="text-[#00E676] shrink-0 mt-0.5" />
+                  <CheckCircle2 size={15} className={`shrink-0 mt-0.5 ${isLight ? 'text-[#15803d]' : 'text-[#00E676]'}`} />
                   <span>Up to <strong>5 Active Project Sites</strong> on registry</span>
                 </li>
                 <li className="flex items-start gap-2.5">
-                  <CheckCircle2 size={15} className="text-[#00E676] shrink-0 mt-0.5" />
+                  <CheckCircle2 size={15} className={`shrink-0 mt-0.5 ${isLight ? 'text-[#15803d]' : 'text-[#00E676]'}`} />
                   <span>Basic IoT telemetry sync (Blynk / HTTP API)</span>
                 </li>
                 <li className="flex items-start gap-2.5">
-                  <CheckCircle2 size={15} className="text-[#00E676] shrink-0 mt-0.5" />
+                  <CheckCircle2 size={15} className={`shrink-0 mt-0.5 ${isLight ? 'text-[#15803d]' : 'text-[#00E676]'}`} />
                   <span>Automated PDF verification dossiers</span>
                 </li>
                 <li className="flex items-start gap-2.5">
-                  <CheckCircle2 size={15} className="text-[#00E676] shrink-0 mt-0.5" />
+                  <CheckCircle2 size={15} className={`shrink-0 mt-0.5 ${isLight ? 'text-[#15803d]' : 'text-[#00E676]'}`} />
                   <span>Direct bKash / Nagad rural payout settlement</span>
                 </li>
-                <li className="flex items-start gap-2.5 text-white/30">
-                  <span className="w-3.5 h-3.5 rounded-full border border-white/10 flex items-center justify-center shrink-0 mt-0.5 text-[10px]">✕</span>
+                <li className={`flex items-start gap-2.5 ${isLight ? 'text-[#84968B]' : 'text-white/35'}`}>
+                  <span className={`w-3.5 h-3.5 rounded-full border flex items-center justify-center shrink-0 mt-0.5 text-[10px] ${
+                    isLight ? 'border-[#0F291B]/20' : 'border-white/15'
+                  }`}>✕</span>
                   <span>Google Earth Engine multi-spectral analysis</span>
                 </li>
-                <li className="flex items-start gap-2.5 text-white/30">
-                  <span className="w-3.5 h-3.5 rounded-full border border-white/10 flex items-center justify-center shrink-0 mt-0.5 text-[10px]">✕</span>
+                <li className={`flex items-start gap-2.5 ${isLight ? 'text-[#84968B]' : 'text-white/35'}`}>
+                  <span className={`w-3.5 h-3.5 rounded-full border flex items-center justify-center shrink-0 mt-0.5 text-[10px] ${
+                    isLight ? 'border-[#0F291B]/20' : 'border-white/15'
+                  }`}>✕</span>
                   <span>Live primary order book bid placement</span>
                 </li>
               </ul>
@@ -136,84 +156,89 @@ const Pricing = () => {
 
             <Link 
               to="/platform/esg" 
-              className="w-full py-3.5 rounded-xl font-sans font-semibold text-xs text-center bg-white/[0.08] hover:bg-white/[0.16] text-white border border-white/15 hover:border-white/30 transition-all duration-200 block cursor-pointer"
+              className={`w-full py-3.5 rounded-xl font-sans font-semibold text-xs text-center border transition-colors block cursor-pointer ${
+                isLight
+                  ? 'bg-[#F5F8F5] hover:bg-[#E4F2EA] text-[#0F291B] border-[#0F291B]/15'
+                  : 'bg-white/[0.06] hover:bg-white/[0.12] text-white border-white/15'
+              }`}
             >
               Deploy Starter Node
             </Link>
           </div>
 
-          {/* Tier 2: Institutional (Most Popular) */}
-          <div className={`border-2 rounded-[2.2rem] p-8 flex flex-col justify-between relative z-10 group ${
+          {/* Tier 2: Institutional (Recommended) */}
+          <div className={`p-7 sm:p-8 flex flex-col justify-between ${
             isLight
-              ? 'bg-white border-[#15803d] shadow-[0_20px_48px_-12px_rgba(21,128,61,0.18)]'
-              : 'bg-gradient-to-b from-[#0D2818] to-[#08150D] border-[#00C853]/60 shadow-[0_0_50px_rgba(0,200,83,0.18)]'
+              ? 'bg-[#F7FBF8]'
+              : 'bg-[#0B1E13]'
           }`}>
-            <div className="absolute -top-3.5 left-1/2 -translate-x-1/2">
-              <span className={`font-mono text-[10px] px-3.5 py-1 rounded-full font-extrabold uppercase tracking-wider flex items-center gap-1.5 border ${
-                isLight
-                  ? 'text-white bg-[#15803d] border-[#15803d] shadow-md'
-                  : 'text-[#050C07] bg-[#00E676] shadow-[0_0_20px_rgba(0,230,118,0.4)] border-[#00E676]'
-              }`}>
-                <Zap size={12} className={isLight ? 'fill-white text-white' : 'fill-[#050C07] text-[#050C07]'} />
-                <span>Primary Sovereign Tier</span>
-              </span>
-            </div>
-
             <div>
-              <div className="flex items-center justify-between mb-4 mt-2">
-                <span className={`font-mono text-xs uppercase tracking-widest font-bold ${isLight ? 'text-[#15803d]' : 'text-[#00E676]'}`}>Institutional Scale</span>
-                <span className={`text-[10px] font-mono px-2.5 py-0.5 rounded-md font-bold ${
+              <div className="flex items-center justify-between mb-3">
+                <span className={`font-mono text-xs uppercase tracking-wider font-bold ${
+                  isLight ? 'text-[#15803d]' : 'text-[#00E676]'
+                }`}>Institutional Scale</span>
+                <span className={`text-[10px] font-mono px-2 py-0.5 rounded font-bold uppercase ${
                   isLight
-                    ? 'bg-[#E5F4EB] text-[#14532D]'
+                    ? 'bg-[#15803d] text-white'
                     : 'bg-[#00C853]/20 border border-[#00C853]/40 text-[#00E676]'
                 }`}>
                   RECOMMENDED
                 </span>
               </div>
 
-              <h3 className={`font-sans font-bold text-2xl mb-2 tracking-tight ${isLight ? 'text-[#0F291B]' : 'text-white'}`}>Enterprise & Aggregators</h3>
-              <p className={`font-sans text-xs mb-6 leading-relaxed ${isLight ? 'text-[#46574D]' : 'text-white/70'}`}>
+              <h3 className={`font-sans font-bold text-2xl mb-2 tracking-tight ${
+                isLight ? 'text-[#0F291B]' : 'text-white'
+              }`}>Enterprise & Aggregators</h3>
+              <p className={`font-sans text-xs mb-6 leading-relaxed ${
+                isLight ? 'text-[#37473E]' : 'text-white/75'
+              }`}>
                 For commercial solar IPPs, industrial textile mills, agribusiness conglomerates, and registry certifiers.
               </p>
 
-              <div className={`mb-6 p-4 rounded-xl border ${
-                isLight ? 'bg-[#EDF5F0] border-[#15803d]/15' : 'bg-black/60 border-[#00C853]/30'
+              <div className={`py-4 mb-6 border-y tabular-nums ${
+                isLight ? 'border-[#15803d]/20' : 'border-[#00C853]/25'
               }`}>
                 <div className="flex items-baseline gap-1.5">
-                  <span className={`font-mono text-3xl sm:text-4xl font-extrabold ${isLight ? 'text-[#15803d]' : 'text-[#00E676]'}`}>
+                  <span className={`font-mono text-3xl sm:text-4xl font-bold ${
+                    isLight ? 'text-[#15803d]' : 'text-[#00E676]'
+                  }`}>
                     ৳{isAnnual ? '1,20,000' : '1,50,000'}
                   </span>
-                  <span className={`font-mono text-xs ${isLight ? 'text-[#4A5D52]' : 'text-white/50'}`}>/ month</span>
+                  <span className={`font-mono text-xs ${isLight ? 'text-[#4A5D52]' : 'text-white/55'}`}>/ month</span>
                 </div>
-                <div className={`text-[11px] font-mono mt-1 font-medium ${isLight ? 'text-[#14532D]' : 'text-[#00E676]/90'}`}>
+                <div className={`text-[11px] font-mono mt-1 font-medium ${
+                  isLight ? 'text-[#14532D]' : 'text-[#00E676]/90'
+                }`}>
                   {isAnnual ? 'Billed annually ৳14,40,000 / yr (Save ৳3,60,000)' : 'Billed monthly on corporate invoice'}
                 </div>
               </div>
 
-              <div className="text-xs font-mono uppercase tracking-wider text-[#00E676] mb-3 font-bold">Everything in Starter, Plus:</div>
-              <ul className="space-y-3 mb-8 text-xs font-sans text-white/90">
+              <div className={`text-xs font-mono uppercase tracking-wider mb-3 font-bold ${
+                isLight ? 'text-[#15803d]' : 'text-[#00E676]'
+              }`}>Everything in Starter, Plus:</div>
+              <ul className={`space-y-3 mb-8 text-xs font-sans ${isLight ? 'text-[#0F291B]' : 'text-white/90'}`}>
                 <li className="flex items-start gap-2.5">
-                  <CheckCircle2 size={15} className="text-[#00E676] shrink-0 mt-0.5" />
+                  <CheckCircle2 size={15} className={`shrink-0 mt-0.5 ${isLight ? 'text-[#15803d]' : 'text-[#00E676]'}`} />
                   <span><strong>Unlimited Project Onboarding</strong> & MRV workflows</span>
                 </li>
                 <li className="flex items-start gap-2.5">
-                  <CheckCircle2 size={15} className="text-[#00E676] shrink-0 mt-0.5" />
+                  <CheckCircle2 size={15} className={`shrink-0 mt-0.5 ${isLight ? 'text-[#15803d]' : 'text-[#00E676]'}`} />
                   <span>Google Earth Engine Sentinel-2 NDVI & SAR radar pipeline</span>
                 </li>
                 <li className="flex items-start gap-2.5">
-                  <CheckCircle2 size={15} className="text-[#00E676] shrink-0 mt-0.5" />
+                  <CheckCircle2 size={15} className={`shrink-0 mt-0.5 ${isLight ? 'text-[#15803d]' : 'text-[#00E676]'}`} />
                   <span>AI satellite fraud & double-crediting verification engine</span>
                 </li>
                 <li className="flex items-start gap-2.5">
-                  <CheckCircle2 size={15} className="text-[#00E676] shrink-0 mt-0.5" />
+                  <CheckCircle2 size={15} className={`shrink-0 mt-0.5 ${isLight ? 'text-[#15803d]' : 'text-[#00E676]'}`} />
                   <span>Direct wholesale liquidity market access & block trading</span>
                 </li>
                 <li className="flex items-start gap-2.5">
-                  <CheckCircle2 size={15} className="text-[#00E676] shrink-0 mt-0.5" />
+                  <CheckCircle2 size={15} className={`shrink-0 mt-0.5 ${isLight ? 'text-[#15803d]' : 'text-[#00E676]'}`} />
                   <span>REST API + Webhooks access (50,000 calls / month)</span>
                 </li>
                 <li className="flex items-start gap-2.5">
-                  <CheckCircle2 size={15} className="text-[#00E676] shrink-0 mt-0.5" />
+                  <CheckCircle2 size={15} className={`shrink-0 mt-0.5 ${isLight ? 'text-[#15803d]' : 'text-[#00E676]'}`} />
                   <span>Dedicated compliance officer & 4-hour SLA response</span>
                 </li>
               </ul>
@@ -221,7 +246,11 @@ const Pricing = () => {
 
             <Link 
               to="/platform/esg" 
-              className="w-full py-4 rounded-xl font-sans font-bold text-xs text-center bg-[#00C853] hover:bg-[#00E676] text-[#050C07] transition-all duration-200 shadow-[0_0_25px_rgba(0,200,83,0.35)] flex items-center justify-center gap-2 cursor-pointer"
+              className={`w-full py-3.5 rounded-xl font-sans font-bold text-xs text-center transition-colors flex items-center justify-center gap-2 cursor-pointer ${
+                isLight
+                  ? 'bg-[#15803d] hover:bg-[#166534] text-white'
+                  : 'bg-[#00C853] hover:bg-[#00E676] text-[#050C07]'
+              }`}
             >
               <span>Provision Institutional Node</span>
               <ArrowRight size={14} />
@@ -229,45 +258,57 @@ const Pricing = () => {
           </div>
 
           {/* Tier 3: Sovereign & Fund */}
-          <div className="bg-white/[0.02] backdrop-blur-xl border border-white/10 rounded-[2rem] p-8 flex flex-col justify-between transition-all duration-300 hover:border-white/20 shadow-xl relative group">
+          <div className="p-7 sm:p-8 flex flex-col justify-between">
             <div>
-              <div className="flex items-center justify-between mb-4">
-                <span className="font-mono text-xs uppercase tracking-widest text-white/50 font-bold">National Architecture</span>
-                <span className="text-[10px] font-mono px-2 py-0.5 rounded bg-white/5 border border-white/10 text-white/60">Sovereign</span>
+              <div className="flex items-center justify-between mb-3">
+                <span className={`font-mono text-xs uppercase tracking-wider font-semibold ${
+                  isLight ? 'text-[#556B5E]' : 'text-white/50'
+                }`}>National Architecture</span>
+                <span className={`text-[11px] font-mono ${isLight ? 'text-[#556B5E]' : 'text-white/50'}`}>Sovereign</span>
               </div>
 
-              <h3 className="font-sans font-bold text-2xl text-white mb-2 tracking-tight">Government & Climate Funds</h3>
-              <p className="font-sans text-xs text-white/60 mb-6 leading-relaxed">
+              <h3 className={`font-sans font-bold text-2xl mb-2 tracking-tight ${
+                isLight ? 'text-[#0F291B]' : 'text-white'
+              }`}>Government & Climate Funds</h3>
+              <p className={`font-sans text-xs mb-6 leading-relaxed ${
+                isLight ? 'text-[#46574D]' : 'text-white/65'
+              }`}>
                 For ministries, multilateral climate funds, bilateral Article 6.2 partner nations, and sovereign wealth entities.
               </p>
 
-              <div className="mb-6 p-4 rounded-xl bg-black/40 border border-white/5">
+              <div className={`py-4 mb-6 border-y ${
+                isLight ? 'border-[#0F291B]/10' : 'border-white/10'
+              }`}>
                 <div className="flex items-baseline gap-1.5">
-                  <span className="font-mono text-3xl sm:text-4xl font-extrabold text-cyan-400">
+                  <span className={`font-mono text-3xl sm:text-4xl font-bold ${
+                    isLight ? 'text-[#0369a1]' : 'text-cyan-400'
+                  }`}>
                     Bespoke SLA
                   </span>
                 </div>
-                <div className="text-[11px] font-mono text-white/40 mt-1">
+                <div className={`text-[11px] font-mono mt-1 ${isLight ? 'text-[#556B5E]' : 'text-white/50'}`}>
                   National mandate deployment & isolated VPC
                 </div>
               </div>
 
-              <div className="text-xs font-mono uppercase tracking-wider text-white/40 mb-3 font-semibold">Sovereign Capabilities:</div>
-              <ul className="space-y-3 mb-8 text-xs font-sans text-white/80">
+              <div className={`text-xs font-mono uppercase tracking-wider mb-3 font-semibold ${
+                isLight ? 'text-[#556B5E]' : 'text-white/50'
+              }`}>Sovereign Capabilities:</div>
+              <ul className={`space-y-3 mb-8 text-xs font-sans ${isLight ? 'text-[#1F3A2A]' : 'text-white/85'}`}>
                 <li className="flex items-start gap-2.5">
-                  <CheckCircle2 size={15} className="text-cyan-400 shrink-0 mt-0.5" />
+                  <CheckCircle2 size={15} className={`shrink-0 mt-0.5 ${isLight ? 'text-[#0369a1]' : 'text-cyan-400'}`} />
                   <span>Dedicated sovereign registry instance & on-premise HSM</span>
                 </li>
                 <li className="flex items-start gap-2.5">
-                  <CheckCircle2 size={15} className="text-cyan-400 shrink-0 mt-0.5" />
+                  <CheckCircle2 size={15} className={`shrink-0 mt-0.5 ${isLight ? 'text-[#0369a1]' : 'text-cyan-400'}`} />
                   <span>White-label ministry portal with multi-department RBAC</span>
                 </li>
                 <li className="flex items-start gap-2.5">
-                  <CheckCircle2 size={15} className="text-cyan-400 shrink-0 mt-0.5" />
+                  <CheckCircle2 size={15} className={`shrink-0 mt-0.5 ${isLight ? 'text-[#0369a1]' : 'text-cyan-400'}`} />
                   <span>Unlimited high-throughput cryptographic verification calls</span>
                 </li>
                 <li className="flex items-start gap-2.5">
-                  <CheckCircle2 size={15} className="text-cyan-400 shrink-0 mt-0.5" />
+                  <CheckCircle2 size={15} className={`shrink-0 mt-0.5 ${isLight ? 'text-[#0369a1]' : 'text-cyan-400'}`} />
                   <span>99.98% High Availability Uptime Guarantee with financial SLA</span>
                 </li>
               </ul>
@@ -275,7 +316,11 @@ const Pricing = () => {
 
             <a 
               href="mailto:institutional@carbonzerobd.com" 
-              className="w-full py-3.5 rounded-xl font-sans font-semibold text-xs text-center bg-white/[0.06] hover:bg-cyan-500 hover:text-black text-white border border-white/10 hover:border-cyan-500 transition-all duration-200 block"
+              className={`w-full py-3.5 rounded-xl font-sans font-semibold text-xs text-center border transition-colors block ${
+                isLight
+                  ? 'bg-[#EFF6F9] hover:bg-[#0369a1] text-[#0369a1] hover:text-white border-[#0369a1]/25'
+                  : 'bg-white/[0.06] hover:bg-cyan-500 hover:text-black text-white border-white/15 hover:border-cyan-500'
+              }`}
             >
               Consult Climate Solutions Desk
             </a>
@@ -283,25 +328,28 @@ const Pricing = () => {
 
         </div>
 
-        {/* Corporate Settlement & Regulatory Compliance Trust Badges */}
-        <div className="p-6 rounded-2xl bg-white/[0.02] border border-white/10 backdrop-blur-xl flex flex-wrap items-center justify-between gap-6">
+        {/* Corporate Settlement & Regulatory Compliance Strip */}
+        <div className={`px-6 py-4 rounded-xl border flex flex-wrap items-center justify-between gap-4 ${
+          isLight
+            ? 'bg-white border-[#0F291B]/12'
+            : 'bg-[#080F0B] border-white/10'
+        }`}>
           <div className="flex items-center gap-3">
-            <Building2 size={20} className="text-emerald-400 shrink-0" />
+            <Building2 size={18} className={isLight ? 'text-[#15803d] shrink-0' : 'text-emerald-400 shrink-0'} />
             <div>
-              <div className="font-sans font-bold text-xs text-white">
+              <div className={`font-sans font-semibold text-xs ${isLight ? 'text-[#0F291B]' : 'text-white'}`}>
                 Institutional Billing & Regulatory Reconciliation
               </div>
-              <div className="text-[11px] font-mono text-white/50">
+              <div className={`text-[11px] font-mono ${isLight ? 'text-[#556B5E]' : 'text-white/55'}`}>
                 Bangladesh Bank RTGS, BEFTN, SWIFT, and Mushak-6.3 VAT invoicing supported
               </div>
             </div>
           </div>
 
-          <div className="flex flex-wrap items-center gap-4 text-xs font-mono text-white/70">
-            <span className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-black/40 border border-white/5">
-              <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
-              <span>99.98% SLA</span>
-            </span>
+          <div className={`text-xs font-mono font-semibold tabular-nums ${
+            isLight ? 'text-[#15803d]' : 'text-emerald-400'
+          }`}>
+            99.98% SLA
           </div>
         </div>
 

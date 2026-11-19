@@ -34,58 +34,27 @@ SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
 
 Base = declarative_base()
 
+def upgrade(url: str = DATABASE_URL):
+    """Runs Alembic migrations for carbon_monitoring dMRV tables."""
+    from pathlib import Path
+    from alembic import command
+    from alembic.config import Config
+
+    cfg = Config()
+    cfg.set_main_option("script_location", str(Path(__file__).resolve().parent.parent / "carbon_migrations"))
+    cfg.set_main_option("sqlalchemy.url", str(url))
+    command.upgrade(cfg, "head")
+
+
 def init_db():
     """
-    Create all database tables if they don't exist.
-    Must be called AFTER all models are imported so Base.metadata knows about them.
-    Also dynamically adds any new multi-pool columns to existing SQLite tables.
+    Applies Alembic migrations for carbon_monitoring dMRV tables cleanly.
     """
-    Base.metadata.create_all(bind=engine)
-
     try:
-        from sqlalchemy import inspect, text
-        inspector = inspect(engine)
-        if "farmers_ai_carbonresult" in inspector.get_table_names():
-            existing_cols = {c["name"] for c in inspector.get_columns("farmers_ai_carbonresult")}
-            cols_to_add = [
-                ("forest_stratum", "VARCHAR(50) DEFAULT 'SUNDARBANS_MANGROVE'"),
-                ("carbon_agb_tc_ha", "FLOAT"),
-                ("carbon_bgb_tc_ha", "FLOAT"),
-                ("carbon_soc_tc_ha", "FLOAT"),
-                ("relative_margin_of_error", "FLOAT"),
-                ("verra_precision_discount_pct", "FLOAT"),
-                ("conservative_creditable_tco2e", "FLOAT"),
-                ("parcel_id", "VARCHAR(255)"),
-                ("biomass_agb_mg_ha", "FLOAT"),
-                ("biomass_bgb_mg_ha", "FLOAT"),
-                ("indices_json", "TEXT"),
-                ("interval_json", "TEXT"),
-            ]
-            with engine.begin() as conn:
-                for col_name, col_type in cols_to_add:
-                    if col_name not in existing_cols:
-                        conn.execute(text(f"ALTER TABLE farmers_ai_carbonresult ADD COLUMN {col_name} {col_type}"))
-
-        table_column_patches = {
-            "farmers_ai_analysisjob": [("organization_id", "VARCHAR(64)")],
-            "farmers_ai_uploadedboundary": [("organization_id", "VARCHAR(64)")],
-            "carbon_mrv_groundtruthplot": [("organization_id", "VARCHAR(64)")],
-            "farmers_ai_carbonalert": [("organization_id", "VARCHAR(64)")],
-            "carbon_mrv_estimateprovenance": [
-                ("chain_index", "INTEGER"),
-                ("quantification_snapshot_json", "TEXT"),
-            ],
-        }
-        existing_tables = set(inspector.get_table_names())
-        with engine.begin() as conn:
-            for tbl, patches in table_column_patches.items():
-                if tbl in existing_tables:
-                    tbl_cols = {c["name"] for c in inspector.get_columns(tbl)}
-                    for col_name, col_type in patches:
-                        if col_name not in tbl_cols:
-                            conn.execute(text(f"ALTER TABLE {tbl} ADD COLUMN {col_name} {col_type}"))
+        upgrade(DATABASE_URL)
     except Exception as e:
-        print(f"[DB Init Warning] Schema check/migration error: {e}")
+        print(f"[DB Init Warning] Carbon Alembic upgrade fallback ({e}); running create_all.")
+        Base.metadata.create_all(bind=engine)
 
 def get_db():
     """

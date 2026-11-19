@@ -152,29 +152,55 @@ def compute_conformal_verra_assessment(
     carbon_upper_90: float,
     estimated_carbon_tc_ha: float,
     db: Session = None,
-    allowable_error: float = 0.15
+    allowable_error: float = 0.15,
+    model_predict_fn=None,
 ) -> dict:
     """
-    Combines Conformal Prediction intervals with Verra VM0047 precision deduction:
-    1. Calibrates conformal uncertainty bound q_hat.
-    2. Constructs distribution-free 90% confidence bounds.
-    3. Evaluates Relative Margin of Error (RME).
-    4. Computes conservative creditable credits.
+    Combines Split Conformal Prediction intervals (`calibrate_from_db` + `predict_conformal_interval`)
+    with Verra VM0047 precision deduction.
+
+    When >= 20 real held-out GroundTruthPlot residuals exist and `model_predict_fn` is provided,
+    uses finite-sample conformal q_hat; otherwise explicitly reports uncalibrated proxy status
+    and takes the conservative wider bound of model Monte Carlo interval vs fallback conformal floor.
     """
     engine = ConformalUncertaintyEngine(alpha=0.10)
-    calibration_status = "model_interval_proxy"
+    calibration_status = "uncalibrated_proxy_not_conformal"
+    is_valid_conformal = False
+    calibration_plot_count = 0
     calibrated_q_hat = None
-    if db is not None:
-        real_plots = db.query(GroundTruthPlot).count()
-        if real_plots >= 20:
-            calibration_status = "empirical_conformal"
 
-    # Calculate margin ratio from carbon stock interval
-    if estimated_carbon_tc_ha > 0 and carbon_upper_90 > carbon_lower_90:
-        stock_rme = (carbon_upper_90 - carbon_lower_90) / (2.0 * estimated_carbon_tc_ha)
+    if db is not None:
+        plots = db.query(GroundTruthPlot).all()
+        calibration_plot_count = len(plots)
+        if callable(model_predict_fn) and calibration_plot_count >= 20:
+            q_hat_tc = engine.calibrate_from_db(db, model_predict_fn=model_predict_fn)
+            calibration_status = "empirical_conformal"
+            is_valid_conformal = True
+            calibrated_q_hat = q_hat_tc
+        else:
+            q_hat_tc = 15.0  # Conservative uncalibrated floor from engine
     else:
-        stock_rme = 0.12  # conservative 12% default
-    
+        q_hat_tc = 15.0
+
+    # Derive conformal interval around point tC/ha via engine.predict_conformal_interval
+    conf_low_tc, conf_high_tc, conf_hw_tc = engine.predict_conformal_interval(
+        float(estimated_carbon_tc_ha or 0.0),
+        float(q_hat_tc),
+    )
+
+    if estimated_carbon_tc_ha > 0:
+        conformal_rme = conf_hw_tc / float(estimated_carbon_tc_ha)
+        model_rme = (
+            (carbon_upper_90 - carbon_lower_90) / (2.0 * estimated_carbon_tc_ha)
+            if carbon_upper_90 > carbon_lower_90
+            else 0.12
+        )
+        # If genuinely calibrated via >=20 plots + OOF predictions, use empirical conformal RME;
+        # when uncalibrated, conservatively take the max(model_rme, conformal_rme_floor).
+        stock_rme = conformal_rme if is_valid_conformal else max(model_rme, conformal_rme)
+    else:
+        stock_rme = 0.15
+
     net_half_width = net_creditable_tco2e * stock_rme
     net_lower = max(0.0, net_creditable_tco2e - net_half_width)
     net_upper = net_creditable_tco2e + net_half_width
@@ -190,10 +216,14 @@ def compute_conformal_verra_assessment(
     return {
         "conformal_method": "split_conformal_quantile_regression",
         "calibration_status": calibration_status,
+        "is_statistically_valid_conformal": is_valid_conformal,
+        "calibration_plot_count": calibration_plot_count,
+        "calibrated_q_hat_tc_ha": calibrated_q_hat,
         "confidence_level_pct": 90.0,
         "net_creditable_point_tco2e": round(net_creditable_tco2e, 2),
         "conformal_lower_90": round(net_lower, 2),
         "conformal_upper_90": round(net_upper, 2),
+        "stock_conformal_bounds_tc_ha": [conf_low_tc, conf_high_tc],
         "relative_margin_of_error": verra_eval["relative_margin_of_error"],
         "allowable_error_threshold": allowable_error,
         "verra_precision_discount_pct": verra_eval["precision_discount_pct"],

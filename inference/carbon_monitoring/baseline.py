@@ -140,7 +140,110 @@ class SyntheticControlEngine:
             "donor_matrix_pre": donor_matrix_pre,
             "donor_matrix_post": donor_matrix_post,
             "baseline_data_origin": "simulated_donor_trajectories",
+            "vvb_baseline_eligible": False,
         }
+
+    def fetch_eo_donor_trajectories(
+        self,
+        polygon_geojson: str,
+        satellite_engine=None,
+        n_donors: int = 10,
+        years_pre: int = 5,
+        years_post: int = 3,
+        seed: int = 42,
+        allow_simulated_fallback: bool = True,
+    ) -> dict:
+        """
+        Attempts genuine off-site EO annular donor sampling (12–30 km outside AOI, outside
+        10 km leakage belt) using SatelliteEngine when real EO pixels are available.
+        Computes pre-treatment covariate balance (Standardized Mean Difference).
+        Falls back to simulated donors ONLY when `allow_simulated_fallback=True`,
+        flagging `baseline_data_origin='simulated_donor_trajectories'` and `vvb_baseline_eligible=False`.
+        """
+        if satellite_engine is not None:
+            try:
+                proj_poly = parse_aoi_polygon(polygon_geojson)
+                c_lng, c_lat = float(proj_poly.centroid.x), float(proj_poly.centroid.y)
+                allom = {"SUNDARBANS_MANGROVE": 165.0, "TROPICAL_MOIST_FOREST": 118.0, "COASTAL_AGROFORESTRY": 78.0}.get(self.stratum, 120.0)
+                pre_years = [2019 + i for i in range(years_pre)]
+                post_years = [2019 + years_pre + i for i in range(years_post)]
+                timeline = pre_years + post_years
+
+                def _sample_point_series(p_lat: float, p_lng: float):
+                    buf = 0.002
+                    sq = [
+                        [p_lat - buf, p_lng - buf], [p_lat - buf, p_lng + buf],
+                        [p_lat + buf, p_lng + buf], [p_lat + buf, p_lng - buf],
+                        [p_lat - buf, p_lng - buf],
+                    ]
+                    series = []
+                    for yr in timeline:
+                        res = satellite_engine.run_analysis(sq, f"{yr}-01-01", f"{yr}-12-31", "ndvi")
+                        if not res or not res.get("eo_pixel_verified"):
+                            return None
+                        series.append(round(max(1.0, float(res["average_ndvi"]) * allom), 2))
+                    return series
+
+                proj_series = _sample_point_series(c_lat, c_lng)
+                if proj_series is not None:
+                    donors = {}
+                    donor_matrix_pre = []
+                    donor_matrix_post = []
+                    donor_features = []
+                    for j in range(n_donors):
+                        angle = (2.0 * math.pi * j) / max(1, n_donors)
+                        dist_km = 14.0 + (j % 3) * 6.5
+                        d_lat = round(c_lat + (dist_km * math.sin(angle)) / 111.132, 5)
+                        d_lng = round(c_lng + (dist_km * math.cos(angle)) / (111.320 * max(0.2, math.cos(math.radians(c_lat)))), 5)
+                        d_series = _sample_point_series(d_lat, d_lng)
+                        if d_series is None:
+                            continue
+                        did = f"EO_DONOR_{self.stratum[:4]}_{j+1:02d}"
+                        d_pre, d_post = d_series[:years_pre], d_series[years_pre:]
+                        donors[did] = {"id": did, "lat": d_lat, "lng": d_lng, "distance_km": round(dist_km, 1), "pre": d_pre, "post": d_post, "full": d_series}
+                        donor_features.append({
+                            "type": "Feature", "id": did,
+                            "properties": {"donor_id": did, "stratum": self.stratum, "distance_km": round(dist_km, 1), "latest_carbon_tc_ha": d_post[-1], "data_origin": "real_eo_annular_control"},
+                            "geometry": {"type": "Point", "coordinates": [d_lng, d_lat]},
+                        })
+                        donor_matrix_pre.append(d_pre)
+                        donor_matrix_post.append(d_post)
+
+                    if len(donors) >= 3:
+                        p_pre_arr = np.array(proj_series[:years_pre], dtype=float)
+                        d_pre_mat = np.array(donor_matrix_pre, dtype=float).T
+                        smd = float(abs(np.mean(p_pre_arr) - np.mean(d_pre_mat)) / max(float(np.std(d_pre_mat)), 1e-6))
+                        return {
+                            "timeline": timeline,
+                            "pre_years": pre_years,
+                            "post_years": post_years,
+                            "project_pre": p_pre_arr,
+                            "project_post": np.array(proj_series[years_pre:], dtype=float),
+                            "donors": donors,
+                            "donor_plots_geojson": {"type": "FeatureCollection", "features": donor_features},
+                            "donor_matrix_pre": d_pre_mat,
+                            "donor_matrix_post": np.array(donor_matrix_post, dtype=float).T,
+                            "covariate_balance_smd": round(smd, 4),
+                            "baseline_data_origin": "real_eo_annular_control",
+                            "vvb_baseline_eligible": True,
+                        }
+            except Exception as err:
+                print(f"[Baseline] Real EO donor sampling failed: {err}")
+
+        if not allow_simulated_fallback:
+            raise RuntimeError("Real EO donor pixel trajectories unavailable and allow_simulated_fallback=False.")
+
+        out = self.generate_candidate_donors(
+            polygon_geojson=polygon_geojson,
+            n_donors=n_donors,
+            years_pre=years_pre,
+            years_post=years_post,
+            seed=seed,
+        )
+        p_pre_arr = np.array(out["project_pre"], dtype=float)
+        d_pre_mat = np.array(out["donor_matrix_pre"], dtype=float)
+        out["covariate_balance_smd"] = round(float(abs(np.mean(p_pre_arr) - np.mean(d_pre_mat)) / max(float(np.std(d_pre_mat)), 1e-6)), 4)
+        return out
 
     def compute_in_space_placebo(
         self,
@@ -388,23 +491,28 @@ def run_dynamic_baseline_assessment(
     regional_control_loss_rate: float = 0.018,
     osm_context: Optional[Dict[str, Any]] = None,
     allow_live_overpass: bool = False,
+    satellite_engine=None,
+    allow_simulated_fallback: bool = True,
+    custom_risk_scores: Optional[Dict[str, float]] = None,
 ) -> dict:
     """
     Executes end-to-end Verra VM0047 dynamic baseline workflow:
-    1. Generates and matches candidate donor plots using Synthetic Control (Abadie et al.).
+    1. Matches candidate annular donor plots (real EO pixels when available; simulated fallback labeled explicitly).
     2. Projects counterfactual baseline carbon trajectory.
     3. Computes 10km leakage belt buffer and leakage deductions.
     4. Calculates Verra AFOLU non-permanence risk buffer withholding.
     5. Computes Net Creditable tCO2e.
     """
-    # 1. Synthetic Control Matching
+    # 1. Synthetic Control Matching (prefer real EO donor trajectories when satellite_engine yields real rasters)
     sc_engine = SyntheticControlEngine(stratum=stratum)
-    donors_data = sc_engine.generate_candidate_donors(
+    donors_data = sc_engine.fetch_eo_donor_trajectories(
         polygon_geojson=polygon_geojson,
+        satellite_engine=satellite_engine,
         n_donors=10,
         years_pre=5,
         years_post=3,
-        seed=42
+        seed=42,
+        allow_simulated_fallback=allow_simulated_fallback,
     )
     
     weights, pre_rmse = sc_engine.fit_synthetic_weights(
@@ -480,7 +588,10 @@ def run_dynamic_baseline_assessment(
     leakage_deduction_tco2e = leakage_assessment["leakage_deduction_tco2e"]
 
     # 3. Non-Permanence Risk Buffer Pool Allocation
-    risk_profile = RiskBufferCalculator.calculate_risk_buffer(stratum=stratum)
+    risk_profile = RiskBufferCalculator.calculate_risk_buffer(
+        stratum=stratum,
+        custom_risk_scores=custom_risk_scores,
+    )
     buffer_pct = risk_profile["total_buffer_pct"]
     
     net_pre_buffer = max(0.0, gross_additionality_tco2e - leakage_deduction_tco2e)
@@ -525,5 +636,7 @@ def run_dynamic_baseline_assessment(
         "risk_breakdown": risk_profile,
         "donor_plots_geojson": donor_geo,
         "placebo_test": placebo_test,
+        "covariate_balance_smd": donors_data.get("covariate_balance_smd"),
         "baseline_data_origin": donors_data.get("baseline_data_origin", "simulated_donor_trajectories"),
+        "vvb_baseline_eligible": bool(donors_data.get("vvb_baseline_eligible", False)),
     }

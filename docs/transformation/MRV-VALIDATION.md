@@ -68,6 +68,7 @@ CarbonOS integrates automated remote sensing, radar backscatter, allometric allo
 
 ## 4. Scientific Grounding & Simulation Boundaries (Scenario D)
 
-1. **Live Imagery Requirement:** Official registry submission bundles require genuine Sentinel STAC scene IDs with cloud coverage <= 20% and validated ground control points.
-2. **Offline Simulation Tagging:** When external STAC endpoints are unreachable (e.g. during network failure or offline developer testing), generated arrays are explicitly tagged with `data_origin = "simulation"`.
-3. **No Phantom Credits:** Simulated or offline test runs are barred from automatic issuance as tradeable carbon credits.
+6. **Real EO COG vs Simulation Boundaries (Fail-Closed):**
+   - `SatelliteEngine._extract_stac_cog_grid` reads real GeoTIFF COGs (`B02..B12`, `SCL`, and `Sentinel-1` GRD `VV`/`VH`) preserving raw measured `average_bands` into `CarbonEstimator` without scalar-NDVI overwrites.
+   - When real COG extraction or `>= 30` (RF) / `>= 150` (Fusion) calibrated ground-truth plots or `>= 20` held-out conformal plots are absent, runs are explicitly marked (`pixel_extraction_mode="stac_metadata_heuristic"` / `"simulated"`, `model_trained_on="synthetic-v1"`, `is_statistically_valid_conformal=False`, `vvb_model_eligible=False`) and blocked from registry issuance (`BLOCKED_PENDING_AUDIT_REQUIREMENTS`).
+   - Multi-pool intervals use seeded IPCC 2006 Approach 2 Monte Carlo error propagation (`propagate_multipool_uncertainty`); Article 6.2 / JCM exports enforce epoch-over-epoch removal deltas, `PE_p` deductions, SHA-256 LoA tracking, and AOI polygon overlap checks.

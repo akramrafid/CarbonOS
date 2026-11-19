@@ -926,6 +926,96 @@ def _generator_checks(acts: List[Activity], res: Result, bands: Dict[str, Tuple[
                 flag("GENERATOR_EFFICIENCY_OUT_OF_BAND", gen, kind, True, f"{ratio} {unit} outside {low}–{high} {unit}")
 
 
+# GRI 302-1 Fuel Net Calorific Values (MJ per canonical unit):
+# Primary source: IPCC 2006 Guidelines Vol. 2 Ch. 1 Table 1.2 (TJ/Gg NCV) with API/IEA standard liquid densities.
+FUEL_NCV_MJ_PER_UNIT: Dict[str, Tuple[Decimal, str]] = {
+    "diesel": (Decimal("36.335"), "non_renewable_fuel"),    # 43.0 TJ/Gg * 0.845 kg/L
+    "petrol": (Decimal("33.0035"), "non_renewable_fuel"),   # 44.3 TJ/Gg * 0.745 kg/L
+    "lpg": (Decimal("47.3"), "non_renewable_fuel"),         # 47.3 TJ/Gg
+    "furnace_oil": (Decimal("38.784"), "non_renewable_fuel"),  # 40.4 TJ/Gg * 0.960 kg/L
+    "wood": (Decimal("15.6"), "renewable_biomass"),         # IPCC Vol. 2 Table 1.2 dry wood
+    "solid_biomass": (Decimal("15.6"), "renewable_biomass"),
+}
+DEFAULT_GAS_NCV_MJ_PER_M3 = Decimal("38.0")
+
+
+def energy_consumption_summary(
+    activities: List[Activity],
+    facilities: Dict[str, Facility],
+    boundary_method: str,
+) -> Dict[str, object]:
+    """
+    GRI 302-1 deterministic energy consumption summary within the organization (GJ and MWh).
+    Converts fuels via Net Calorific Values (IPCC 2006 Vol. 2 Ch. 1 Table 1.2 / verified gas certificates),
+    electricity via 0.0036 GJ/kWh, and purchased steam directly in GJ.
+    Captive generator fuels are included once via fuel input; generator output & exported power are memo items.
+    """
+    if boundary_method not in BOUNDARY_METHODS:
+        raise ValueError(f"Unknown boundary_method '{boundary_method}'")
+
+    buckets = {
+        "non_renewable_fuel_gj": Decimal(0),
+        "renewable_biomass_gj": Decimal(0),
+        "electricity_purchased_gj": Decimal(0),
+        "steam_purchased_gj": Decimal(0),
+        "onsite_renewable_generation_gj": Decimal(0),
+        "electricity_export_gj": Decimal(0),
+    }
+    uses_default_gas_ncv = False
+
+    for a in activities:
+        fac = facilities.get(a.facility_id)
+        if fac is None:
+            continue
+        share = inclusion_share(fac, boundary_method)
+        if share == 0:
+            continue
+        qty = Decimal(a.quantity) * share
+
+        if a.activity_type == "natural_gas":
+            if a.heating_value is not None:
+                gj = qty * a.volume_correction * a.heating_value.gcv_mj_per_m3 * a.heating_value.ncv_to_gcv / Decimal(1000)
+                if a.heating_value.is_default:
+                    uses_default_gas_ncv = True
+            else:
+                gj = qty * a.volume_correction * DEFAULT_GAS_NCV_MJ_PER_M3 / Decimal(1000)
+                uses_default_gas_ncv = True
+            buckets["non_renewable_fuel_gj"] += gj
+        elif a.activity_type in FUEL_NCV_MJ_PER_UNIT:
+            mj_per_unit, kind = FUEL_NCV_MJ_PER_UNIT[a.activity_type]
+            buckets[f"{kind}_gj"] += qty * mj_per_unit / Decimal(1000)
+        elif a.activity_type == "electricity":
+            buckets["electricity_purchased_gj"] += qty * Decimal("0.0036")
+        elif a.activity_type == "purchased_steam":
+            buckets["steam_purchased_gj"] += qty
+        elif a.activity_type == "onsite_renewable_generation":
+            buckets["onsite_renewable_generation_gj"] += qty * Decimal("0.0036")
+        elif a.activity_type == "electricity_export":
+            buckets["electricity_export_gj"] += qty * Decimal("0.0036")
+
+    total_gj = (
+        buckets["non_renewable_fuel_gj"]
+        + buckets["renewable_biomass_gj"]
+        + buckets["electricity_purchased_gj"]
+        + buckets["steam_purchased_gj"]
+    )
+    total_mwh = (total_gj / Decimal("3.6")).quantize(TONNE_PRECISION, rounding=ROUND_HALF_UP)
+
+    return {
+        "standard": "GRI 302-1 (Net Calorific Value basis)",
+        "source_citation": "IPCC 2006 Guidelines Vol. 2 Ch. 1 Table 1.2 (NCV) + approved gas heating certificates",
+        "non_renewable_fuel_gj": buckets["non_renewable_fuel_gj"].quantize(TONNE_PRECISION, rounding=ROUND_HALF_UP),
+        "renewable_biomass_gj": buckets["renewable_biomass_gj"].quantize(TONNE_PRECISION, rounding=ROUND_HALF_UP),
+        "electricity_purchased_gj": buckets["electricity_purchased_gj"].quantize(TONNE_PRECISION, rounding=ROUND_HALF_UP),
+        "steam_purchased_gj": buckets["steam_purchased_gj"].quantize(TONNE_PRECISION, rounding=ROUND_HALF_UP),
+        "total_energy_gj": total_gj.quantize(TONNE_PRECISION, rounding=ROUND_HALF_UP),
+        "total_energy_mwh": total_mwh,
+        "onsite_renewable_generation_gj": buckets["onsite_renewable_generation_gj"].quantize(TONNE_PRECISION, rounding=ROUND_HALF_UP),
+        "electricity_export_gj": buckets["electricity_export_gj"].quantize(TONNE_PRECISION, rounding=ROUND_HALF_UP),
+        "uses_default_gas_ncv": uses_default_gas_ncv,
+    }
+
+
 def uncertainty_summary(res: Result) -> Dict[str, object]:
     """IPCC 2006 Vol. 1 Ch. 3 Approach 1 (Eq. 3.2) per total, without the large-uncertainty correction."""
     def summarize(lines: List[Line]):
@@ -943,4 +1033,206 @@ def uncertainty_summary(res: Result) -> Dict[str, object]:
         "scope1": summarize(pick("1", "direct")),
         "scope2_location": summarize(pick("2", "location")),
         "scope2_market": summarize(pick("2", "market")) if res.scope2_market_kg is not None else None,
+    }
+
+
+# --- Scope 3 (GHG Protocol Corporate Value Chain Standard, Categories 1–15) -------------------
+
+SCOPE3_CATEGORIES: Dict[str, str] = {
+    "cat_1_purchased_goods": "Category 1: Purchased goods and services",
+    "cat_2_capital_goods": "Category 2: Capital goods",
+    "cat_3_fuel_energy_related": "Category 3: Fuel- and energy-related activities (not in Scope 1 or 2)",
+    "cat_4_upstream_transport": "Category 4: Upstream transportation and distribution",
+    "cat_5_waste_generated": "Category 5: Waste generated in operations",
+    "cat_6_business_travel": "Category 6: Business travel",
+    "cat_7_employee_commuting": "Category 7: Employee commuting",
+    "cat_8_upstream_leased_assets": "Category 8: Upstream leased assets",
+    "cat_9_downstream_transport": "Category 9: Downstream transportation and distribution",
+    "cat_10_processing_sold_products": "Category 10: Processing of sold products",
+    "cat_11_use_sold_products": "Category 11: Use of sold products",
+    "cat_12_eol_sold_products": "Category 12: End-of-life treatment of sold products",
+    "cat_13_downstream_leased_assets": "Category 13: Downstream leased assets",
+    "cat_14_franchises": "Category 14: Franchises",
+    "cat_15_investments": "Category 15: Investments",
+}
+SCOPE3_METHODS = ("supplier_specific", "hybrid", "average_data", "spend_based")
+DEFAULT_SCOPE3_UNCERTAINTY_PCT: Dict[str, Decimal] = {
+    "supplier_specific": Decimal("10"),
+    "hybrid": Decimal("20"),
+    "average_data": Decimal("35"),
+    "spend_based": Decimal("50"),
+}
+
+
+@dataclass(frozen=True)
+class FacilityOwnershipPeriod:
+    """Dated organizational ownership/control span enabling GHG Protocol Ch. 5 time-proportioned inclusion."""
+    facility_id: str
+    effective_from: dt.date
+    effective_to: Optional[dt.date]
+    operational_control: bool
+    financial_control: bool
+    equity_share_pct: Decimal
+
+
+def time_weighted_inclusion_share(
+    facility: Facility,
+    boundary_method: str,
+    period_start: dt.date,
+    period_end: dt.date,
+    ownership_history: List[FacilityOwnershipPeriod] = (),
+) -> Decimal:
+    """
+    Computes exact day-proportioned organizational inclusion share across [period_start, period_end]
+    from dated ownership spans (M&A acquisitions/divestments), falling back to current-state Facility
+    flags when no dated ownership spans cover this facility.
+    """
+    spans = [o for o in ownership_history if o.facility_id == facility.id]
+    if not spans:
+        return inclusion_share(facility, boundary_method)
+
+    total_days = (period_end - period_start).days + 1
+    if total_days <= 0:
+        return Decimal(0)
+
+    weighted_days = Decimal(0)
+    for o in spans:
+        span_end = o.effective_to or period_end
+        overlap_start = max(period_start, o.effective_from)
+        overlap_end = min(period_end, span_end)
+        if overlap_end < overlap_start:
+            continue
+        days = Decimal((overlap_end - overlap_start).days + 1)
+        temp_fac = replace(
+            facility,
+            operational_control=o.operational_control,
+            financial_control=o.financial_control,
+            equity_share_pct=o.equity_share_pct,
+        )
+        weighted_days += days * inclusion_share(temp_fac, boundary_method)
+
+    return min(Decimal(1), (weighted_days / Decimal(total_days)).quantize(Decimal("0.00000001"), rounding=ROUND_HALF_UP))
+
+
+def evaluate_base_year_recalculation(
+    base_year_tco2e: Decimal,
+    structural_change_delta_tco2e: Decimal,
+    reason: str,
+    significance_threshold_pct: Decimal = Decimal("5.0"),
+) -> Dict[str, object]:
+    """
+    GHG Protocol Corporate Standard Chapter 5 structural change significance test.
+    """
+    base = Decimal(base_year_tco2e)
+    delta = Decimal(structural_change_delta_tco2e)
+    threshold = Decimal(significance_threshold_pct)
+    if base <= 0:
+        pct_change = Decimal(100) if delta != 0 else Decimal(0)
+    else:
+        pct_change = (abs(delta) / base * Decimal(100)).quantize(PCT_PRECISION, rounding=ROUND_HALF_UP)
+
+    triggered = pct_change >= threshold
+    adjusted_base = (base + delta).quantize(TONNE_PRECISION, rounding=ROUND_HALF_UP) if triggered else base
+    return {
+        "standard": "GHG Protocol Corporate Standard Ch. 5 Base Year Recalculation",
+        "original_base_year_tco2e": base,
+        "structural_change_delta_tco2e": delta,
+        "pct_change": pct_change,
+        "significance_threshold_pct": threshold,
+        "recalculation_required": triggered,
+        "status": "BASE_YEAR_SIGNIFICANT_STRUCTURAL_CHANGE" if triggered else "BELOW_SIGNIFICANCE_THRESHOLD",
+        "recalculated_base_year_tco2e": adjusted_base,
+        "reason": reason,
+    }
+
+
+@dataclass(frozen=True)
+class Scope3Activity:
+    id: str
+    category: str
+    method: str
+    quantity: Decimal
+    unit: str
+    factor_kgco2e_per_unit: Optional[Decimal]
+    factor_source: str
+    facility_id: Optional[str] = None
+    uncertainty_pct: Optional[Decimal] = None
+
+
+def calculate_scope3(records: List[Scope3Activity]) -> Dict[str, object]:
+    """
+    Deterministic Scope 3 Value Chain calculation engine (all 15 GHG Protocol categories).
+    Requires an explicit cited factor per record (no unverified EEIO or generic defaults injected).
+    Propagates IPCC 2006 Approach 1 category & total uncertainty.
+    """
+    by_category: Dict[str, Decimal] = {cat: Decimal(0) for cat in SCOPE3_CATEGORIES}
+    by_method: Dict[str, Decimal] = {m: Decimal(0) for m in SCOPE3_METHODS}
+    uncertainty_terms: List[Tuple[Decimal, Optional[Decimal]]] = []
+    exceptions: List[dict] = []
+    total_kg = Decimal(0)
+
+    for r in sorted(records, key=lambda x: (x.category, x.id)):
+        if r.category not in SCOPE3_CATEGORIES:
+            exceptions.append({"code": "UNKNOWN_SCOPE3_CATEGORY", "record_id": r.id, "blocking": True,
+                               "detail": f"Unknown Scope 3 category '{r.category}'"})
+            continue
+        if r.method not in SCOPE3_METHODS:
+            exceptions.append({"code": "UNKNOWN_SCOPE3_METHOD", "record_id": r.id, "blocking": True,
+                               "detail": f"Unknown Scope 3 method '{r.method}'"})
+            continue
+        if r.factor_kgco2e_per_unit is None or not (r.factor_source or "").strip():
+            exceptions.append({"code": "MISSING_SCOPE3_FACTOR", "record_id": r.id, "blocking": True,
+                               "detail": "Scope 3 activity requires an explicit factor and source citation"})
+            continue
+        kg = (Decimal(r.quantity) * Decimal(r.factor_kgco2e_per_unit)).quantize(KG_PRECISION, rounding=ROUND_HALF_UP)
+        by_category[r.category] += kg
+        by_method[r.method] += kg
+        total_kg += kg
+        u = Decimal(r.uncertainty_pct) if r.uncertainty_pct is not None else DEFAULT_SCOPE3_UNCERTAINTY_PCT[r.method]
+        uncertainty_terms.append((kg, u))
+
+    combined_u = _pct(combine_sum(uncertainty_terms)) if uncertainty_terms else None
+    total_t = to_tonnes(total_kg)
+    supplier_pct = _pct((by_method["supplier_specific"] / total_kg * Decimal(100))) if total_kg else Decimal("0.00")
+
+    return {
+        "total_kg": total_kg,
+        "total_tco2e": total_t,
+        "by_category_kg": {k: v for k, v in by_category.items() if v > 0},
+        "by_category_tco2e": {k: to_tonnes(v) for k, v in by_category.items() if v > 0},
+        "by_method_kg": {k: v for k, v in by_method.items() if v > 0},
+        "supplier_specific_share_pct": supplier_pct,
+        "uncertainty_pct": combined_u,
+        "blocking": any(e["blocking"] for e in exceptions),
+        "exceptions": exceptions,
+    }
+
+
+def combine_scope123_uncertainty(
+    scope1_kg: Decimal,
+    scope1_u: Optional[Decimal],
+    scope2_loc_kg: Decimal,
+    scope2_loc_u: Optional[Decimal],
+    scope3_kg: Decimal,
+    scope3_u: Optional[Decimal],
+) -> Dict[str, object]:
+    """IPCC 2006 Approach 1 Eq. 3.2 quadrature propagation across Scope 1, Scope 2 location, and Scope 3."""
+    terms = []
+    if scope1_kg > 0 and scope1_u is not None:
+        terms.append((Decimal(scope1_kg), Decimal(scope1_u)))
+    if scope2_loc_kg > 0 and scope2_loc_u is not None:
+        terms.append((Decimal(scope2_loc_kg), Decimal(scope2_loc_u)))
+    if scope3_kg > 0 and scope3_u is not None:
+        terms.append((Decimal(scope3_kg), Decimal(scope3_u)))
+    combined = _pct(combine_sum(terms)) if terms else None
+    return {
+        "approach": "IPCC 2006 Vol. 1 Ch. 3 Approach 1 Quadrature (Scope 1 + 2 Location + 3)",
+        "combined_uncertainty_pct": combined,
+        "scopes_included": [
+            s for s, kg, u in (
+                ("scope1", scope1_kg, scope1_u),
+                ("scope2_location", scope2_loc_kg, scope2_loc_u),
+                ("scope3", scope3_kg, scope3_u),
+            ) if kg > 0 and u is not None
+        ],
     }

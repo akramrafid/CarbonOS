@@ -78,7 +78,7 @@ class DisclosureTest(MetricHelpers):
         scope1 = self.row(report, "GRI 305-1")
         self.assertEqual(scope1["status"], "MISSING_DATA")
         self.assertIn("No locked GHG inventory for this period", scope1["missing"])
-        self.assertEqual(self.row(report, "GRI 305-3")["missing"], ["Scope 3 accounting is not implemented"])
+        self.assertEqual(self.row(report, "GRI 305-3")["missing"], ["No locked GHG inventory for this period"])
         self.assertNotIn("compliant", str(report).lower().replace("not a compliance determination", ""))
         csv_text = self.call("GET", "viewer-a", f"/periods/{self.period}/disclosures/GRI?format=csv", status=200).text
         self.assertIn("GRI 305-1,Direct (Scope 1) GHG emissions,MISSING_DATA", csv_text)

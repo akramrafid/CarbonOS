@@ -29,10 +29,11 @@ sys.path.append(BASE_DIR)
 sys.path.append(os.path.join(BASE_DIR, "inference"))
 
 import _isolated_db  # noqa: F401,E402  (temporary database, never backend/db.sqlite3)
+from dmrv_harness import setup_dmrv_test_tenants  # noqa: E402
 from inference.carbon_monitoring.database import init_db, SessionLocal
 from inference.carbon_monitoring.models import (
-    CarbonResult, GroundTruthPlot, EstimateProvenance,
-    VerificationTask, DroneSurveyResult, ValidatorSignature
+    AnalysisJob, CarbonResult, GroundTruthPlot, EstimateProvenance,
+    VerificationTask, DroneSurveyResult, ValidatorSignature, AccreditedValidator
 )
 from inference.carbon_monitoring.router import router as carbon_router
 from inference.carbon_monitoring import provenance as provenance_utils
@@ -52,6 +53,9 @@ class TestDMRVv2TestSuite(unittest.TestCase):
     @classmethod
     def setUpClass(cls):
         init_db()
+        cls.tenants = setup_dmrv_test_tenants("v2")
+        cls.headers = cls.tenants["owner_a"]
+        cls.org_a = cls.tenants["org_a"]
         cls.app = FastAPI(title="dMRV v2 Test Harness")
         cls.app.include_router(carbon_router)
         cls.client = TestClient(cls.app)
@@ -64,11 +68,17 @@ class TestDMRVv2TestSuite(unittest.TestCase):
             self.db.query(ValidatorSignature).filter(
                 ValidatorSignature.validator_id.in_(["VVB-AUDITOR-01", "BFD-REGISTRY-02", "VVB-API-TEST"])
             ).delete(synchronize_session=False)
+            self.db.query(AccreditedValidator).filter(
+                AccreditedValidator.validator_id.in_(["VVB-AUDITOR-01", "BFD-REGISTRY-02", "VVB-API-TEST"])
+            ).delete(synchronize_session=False)
             self.db.query(EstimateProvenance).filter(
                 EstimateProvenance.result_id.like("test-%") | EstimateProvenance.result_id.like("api-sign-%")
             ).delete(synchronize_session=False)
             self.db.query(CarbonResult).filter(
                 CarbonResult.job_id.like("job-vm0047-%") | CarbonResult.parcel_id.like("SUNDARBANS-PROJECT-%")
+            ).delete(synchronize_session=False)
+            self.db.query(AnalysisJob).filter(
+                AnalysisJob.id.like("job-vm0047-%")
             ).delete(synchronize_session=False)
             self.db.commit()
         except Exception:
@@ -257,7 +267,7 @@ class TestDMRVv2TestSuite(unittest.TestCase):
     def test_08_verification_tasks_api_endpoints(self):
         """Test GET and POST verification tasks via FastAPI test client."""
         # List tasks
-        resp = self.client.get("/api/carbon/verification-tasks")
+        resp = self.client.get("/api/carbon/verification-tasks", headers=self.headers)
         self.assertEqual(resp.status_code, 200)
         self.assertIsInstance(resp.json(), list)
 
@@ -306,8 +316,15 @@ class TestDMRVv2TestSuite(unittest.TestCase):
         self.db.commit()
         self.db.refresh(prov_record)
 
-        # Validator 1: TUV SUD / VVB Auditor
+        # Validator 1: TUV SUD / VVB Auditor (registered in AccreditedValidator)
         v1_keys = provenance_utils.generate_validator_keypair()
+        provenance_utils.register_accredited_validator(
+            self.db,
+            validator_id="VVB-AUDITOR-01",
+            validator_name="Dr. Aris Thorne",
+            validator_organization="TUV SUD Forest Carbon",
+            public_key_hex=v1_keys["public_key_hex"],
+        )
         v1_sig = provenance_utils.sign_record_hash(prov_record.record_hash, v1_keys["private_key_hex"])
         provenance_utils.add_validator_signature(
             db=self.db,
@@ -320,8 +337,15 @@ class TestDMRVv2TestSuite(unittest.TestCase):
             comments="Field inventory sample validated against drone survey."
         )
 
-        # Validator 2: Bangladesh Forest Department
+        # Validator 2: Bangladesh Forest Department (registered in AccreditedValidator)
         v2_keys = provenance_utils.generate_validator_keypair()
+        provenance_utils.register_accredited_validator(
+            self.db,
+            validator_id="BFD-REGISTRY-02",
+            validator_name="Kazi Rahman",
+            validator_organization="Bangladesh Forest Department",
+            public_key_hex=v2_keys["public_key_hex"],
+        )
         v2_sig = provenance_utils.sign_record_hash(prov_record.record_hash, v2_keys["private_key_hex"])
         provenance_utils.add_validator_signature(
             db=self.db,
@@ -334,6 +358,20 @@ class TestDMRVv2TestSuite(unittest.TestCase):
             comments="Government baseline check completed."
         )
 
+        # Unregistered rogue key must be rejected
+        rogue_keys = provenance_utils.generate_validator_keypair()
+        rogue_sig = provenance_utils.sign_record_hash(prov_record.record_hash, rogue_keys["private_key_hex"])
+        with self.assertRaises(ValueError):
+            provenance_utils.add_validator_signature(
+                db=self.db,
+                result_id=prov_record.result_id,
+                validator_id="ROGUE-SELF-ASSERTED",
+                validator_name="Fake",
+                validator_organization="Fake Org",
+                public_key_hex=rogue_keys["public_key_hex"],
+                signature_hex=rogue_sig,
+            )
+
         # Retrieve dual trust status
         trust = provenance_utils.get_provenance_trust_status(prov_record, self.db)
         self.assertEqual(trust["verified_signature_count"], 2)
@@ -343,10 +381,33 @@ class TestDMRVv2TestSuite(unittest.TestCase):
             self.assertTrue(v_sig["cryptographically_verified"])
 
     def test_11_provenance_api_sign_endpoint(self):
-        """Test POST /api/carbon/provenance/{result_id}/sign via HTTP client."""
-        # Create a record
-        test_hash = provenance_utils.compute_record_hash({"test": "data"}, "GENESIS")
+        """Test POST /api/carbon/provenance/{result_id}/sign via HTTP client (accredited key vs rogue key)."""
+        api_job_id = f"job-vm0047-sign-{uuid.uuid4().hex[:8]}"
         api_prov_id = f"api-sign-test-result-{uuid.uuid4().hex[:8]}"
+        job = AnalysisJob(
+            id=api_job_id,
+            organization_id=self.org_a,
+            status="completed",
+            polygon_geojson="[[22.25,89.55],[22.26,89.55],[22.26,89.56]]",
+            analysis_type="ndvi",
+            start_date=datetime.date(2026, 1, 1),
+            end_date=datetime.date(2026, 3, 1),
+        )
+        c_res = CarbonResult(
+            id=api_prov_id,
+            job_id=api_job_id,
+            estimated_biomass=200.0,
+            estimated_carbon=94.0,
+            tonnes_co2e=344.7,
+            avg_ndvi=0.72,
+            forest_area_ha=10.0,
+            confidence=0.90,
+        )
+        self.db.add(job)
+        self.db.add(c_res)
+        self.db.flush()
+
+        test_hash = provenance_utils.compute_record_hash({"test": "data"}, "GENESIS")
         prov_record = EstimateProvenance(
             result_id=api_prov_id,
             data_source="sentinel2_stac",
@@ -365,6 +426,14 @@ class TestDMRVv2TestSuite(unittest.TestCase):
         self.db.commit()
 
         keys = provenance_utils.generate_validator_keypair()
+        reg_resp = self.client.post("/api/carbon/validators", json={
+            "validator_id": "VVB-API-TEST",
+            "validator_name": "Auditor Jane",
+            "validator_organization": "Global Carbon Certifiers",
+            "public_key_hex": keys["public_key_hex"],
+        }, headers=self.headers)
+        self.assertEqual(reg_resp.status_code, 201)
+
         sig_hex = provenance_utils.sign_record_hash(test_hash, keys["private_key_hex"])
 
         resp = self.client.post(f"/api/carbon/provenance/{prov_record.result_id}/sign", json={
@@ -374,9 +443,21 @@ class TestDMRVv2TestSuite(unittest.TestCase):
             "public_key_hex": keys["public_key_hex"],
             "signature_hex": sig_hex,
             "comments": "Audited via automated API call"
-        })
+        }, headers=self.headers)
         self.assertEqual(resp.status_code, 200)
         self.assertEqual(resp.json()["status"], "success")
+
+        # Self-asserted unregistered key via API must fail
+        rogue = provenance_utils.generate_validator_keypair()
+        rogue_sig = provenance_utils.sign_record_hash(test_hash, rogue["private_key_hex"])
+        rogue_resp = self.client.post(f"/api/carbon/provenance/{prov_record.result_id}/sign", json={
+            "validator_id": "UNREGISTERED-VVB",
+            "validator_name": "Rogue",
+            "validator_organization": "Fake",
+            "public_key_hex": rogue["public_key_hex"],
+            "signature_hex": rogue_sig,
+        }, headers=self.headers)
+        self.assertEqual(rogue_resp.status_code, 400)
 
     # -------------------------------------------------------------------------
     # 4. Verra VM0047 Registry Export Tests
@@ -384,9 +465,20 @@ class TestDMRVv2TestSuite(unittest.TestCase):
 
     def test_12_vm0047_stocking_index_export(self):
         """Test exporting a Verra VM0047 compliant submission bundle with all required sections."""
-        # Create dummy result with multi-pool and uncertainty
+        # Create dummy job + result with multi-pool and uncertainty scoped to org_a
         vm_job_id = f"job-vm0047-test-{uuid.uuid4().hex[:8]}"
         vm_project_id = f"SUNDARBANS-PROJECT-{uuid.uuid4().hex[:8]}"
+        vm_job = AnalysisJob(
+            id=vm_job_id,
+            organization_id=self.org_a,
+            status="completed",
+            polygon_geojson="[[22.25,89.55],[22.26,89.55],[22.26,89.56]]",
+            analysis_type="ndvi",
+            start_date=datetime.date(2026, 1, 1),
+            end_date=datetime.date(2026, 3, 1),
+        )
+        self.db.add(vm_job)
+        self.db.flush()
         c_res = CarbonResult(
             job_id=vm_job_id,
             parcel_id=vm_project_id,
@@ -441,7 +533,7 @@ class TestDMRVv2TestSuite(unittest.TestCase):
         self.assertGreater(crediting["net_creditable_tco2e_ha"], 0.0)
 
         # 4. API endpoint test
-        api_resp = self.client.get(f"/api/carbon/registry-export/vm0047/{vm_project_id}?result_id={c_res.id}")
+        api_resp = self.client.get(f"/api/carbon/registry-export/vm0047/{vm_project_id}?result_id={c_res.id}", headers=self.headers)
         self.assertEqual(api_resp.status_code, 200)
         self.assertEqual(api_resp.json()["metadata"]["project_id"], vm_project_id)
 

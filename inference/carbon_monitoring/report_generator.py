@@ -187,17 +187,18 @@ class ReportGenerator:
         if conservative_credits is None:
             conservative_credits = round(tonnes_co2e * (1.0 - precision_discount), 2)
 
-        # Baseline parsing
-        donor_count = getattr(baseline, "donor_pool_count", 8) if baseline else 8
-        pre_rmse = getattr(baseline, "pre_treatment_rmse", 1.45) if baseline else 1.45
-        counterfactual_tc_ha = getattr(baseline, "counterfactual_carbon_tc_ha", round(carbon_tc_ha * 0.75, 2)) if baseline else round(carbon_tc_ha * 0.75, 2)
-        gross_additionality = getattr(baseline, "gross_additionality_tco2e", round(tonnes_co2e * 0.25, 2)) if baseline else round(tonnes_co2e * 0.25, 2)
+        # Baseline parsing (explicitly track whether baseline is simulated vs measured)
+        has_baseline_record = baseline is not None
+        donor_count = getattr(baseline, "donor_pool_count", 0) if baseline else 0
+        pre_rmse = getattr(baseline, "pre_treatment_rmse", None) if baseline else None
+        counterfactual_tc_ha = getattr(baseline, "counterfactual_carbon_tc_ha", 0.0) if baseline else 0.0
+        gross_additionality = getattr(baseline, "gross_additionality_tco2e", 0.0) if baseline else 0.0
         leakage_belt_ha = getattr(baseline, "leakage_belt_area_ha", round(area_ha * 8.5, 2)) if baseline else round(area_ha * 8.5, 2)
         leakage_deduction = getattr(baseline, "leakage_deduction_tco2e", 0.0) if baseline else 0.0
-        leakage_rating = getattr(baseline, "leakage_risk_rating", "LOW") if baseline else "LOW"
-        buffer_pct = getattr(baseline, "buffer_deduction_pct", 18.0) if baseline else (18.0 if stratum == "SUNDARBANS_MANGROVE" else 12.0)
-        buffer_withheld = getattr(baseline, "buffer_withheld_tco2e", round(gross_additionality * (buffer_pct / 100.0), 2)) if baseline else round(gross_additionality * (buffer_pct / 100.0), 2)
-        net_creditable = getattr(baseline, "net_creditable_tco2e", round(gross_additionality - leakage_deduction - buffer_withheld, 2)) if baseline else round(gross_additionality - leakage_deduction - buffer_withheld, 2)
+        leakage_rating = getattr(baseline, "leakage_risk_rating", "UNASSESSED") if baseline else "UNASSESSED"
+        buffer_pct = getattr(baseline, "buffer_deduction_pct", 18.0 if stratum == "SUNDARBANS_MANGROVE" else 12.0) if baseline else (18.0 if stratum == "SUNDARBANS_MANGROVE" else 12.0)
+        buffer_withheld = getattr(baseline, "buffer_withheld_tco2e", round(gross_additionality * (buffer_pct / 100.0), 2)) if baseline else 0.0
+        net_creditable = getattr(baseline, "net_creditable_tco2e", round(gross_additionality - leakage_deduction - buffer_withheld, 2)) if baseline else 0.0
 
         donor_weights = {}
         if baseline and hasattr(baseline, "weights_json") and baseline.weights_json:
@@ -205,65 +206,151 @@ class ReportGenerator:
                 donor_weights = json.loads(baseline.weights_json)
             except Exception:
                 donor_weights = {}
-        if not donor_weights:
-            donor_weights = {"donor_control_01": 0.42, "donor_control_02": 0.38, "donor_control_03": 0.20}
 
-        # Provenance records
+        # Provenance & live DB verification records
         rec_hash = getattr(provenance, "record_hash", None) if provenance else None
         prev_hash = getattr(provenance, "previous_hash", "GENESIS") if provenance else "GENESIS"
         scene_ids = []
         if provenance and hasattr(provenance, "satellite_scene_ids") and provenance.satellite_scene_ids:
             try:
-                scene_ids = json.loads(provenance.satellite_scene_ids)
+                parsed_scenes = json.loads(provenance.satellite_scene_ids)
+                if isinstance(parsed_scenes, list):
+                    scene_ids = [s for s in parsed_scenes if s]
             except Exception:
                 scene_ids = [str(provenance.satellite_scene_ids)]
+
+        model_trained_on = getattr(provenance, "model_trained_on", None) or (
+            result.get("model_trained_on") if isinstance(result, dict) else None
+        ) or "synthetic-v1"
+        data_source = (
+            getattr(provenance, "data_source", None)
+            or getattr(job, "data_source", None)
+            or (result.get("data_source") if isinstance(result, dict) else None)
+            or "unknown"
+        )
+        gedi_source = (
+            getattr(provenance, "gedi_tree_height_source", None)
+            or "allometric_formula_estimate_not_gedi_l2b"
+        )
+
+        # Query drone surveys & ground truth plots when DB session is available
+        drone_surveys = []
+        gt_plot_count = 0
+        chain_valid = None
+        quorum_reached = False
+        if db is not None:
+            try:
+                from .models import GroundTruthPlot, DroneSurveyResult, VerificationTask
+                from . import provenance as provenance_utils
+
+                gt_plot_count = db.query(GroundTruthPlot).count()
+                res_id = getattr(result, "id", None) if not isinstance(result, dict) else result.get("id")
+                if res_id is not None:
+                    tasks = db.query(VerificationTask).filter(VerificationTask.result_id == res_id).all()
+                    task_ids = [t.id for t in tasks]
+                    if task_ids:
+                        surveys = db.query(DroneSurveyResult).filter(DroneSurveyResult.task_id.in_(task_ids)).all()
+                        drone_surveys = [
+                            {
+                                "survey_id": s.id,
+                                "survey_date": str(s.survey_date),
+                                "drone_platform": s.drone_platform,
+                                "gsd_cm_per_px": s.gsd_cm_per_px,
+                                "measured_biomass_mg_ha": s.measured_biomass_mg_ha,
+                                "measured_carbon_tc_ha": s.measured_carbon_tc_ha,
+                            }
+                            for s in surveys
+                        ]
+                if provenance is not None:
+                    trust = provenance_utils.get_provenance_trust_status(provenance, db)
+                    chain_valid = bool(trust.get("hash_chain_intact"))
+                    quorum_reached = bool(trust.get("quorum_reached"))
+            except Exception:
+                pass
+
+        # Identify explicit VVB certification blockers instead of claiming universal compliance
+        blockers = []
+        if data_source == "simulated":
+            blockers.append("SIMULATED_SATELLITE_INPUT")
+        if str(model_trained_on).startswith("synthetic"):
+            blockers.append("MODEL_TRAINED_ON_SYNTHETIC_DATA")
         if not scene_ids:
-            scene_ids = ["S2A_MSIL2A_20231015T042001_R076_T45QXE_20231015T073522", "S1A_IW_GRDH_1SDV_20231018T120530_RTC"]
+            blockers.append("NO_EO_SCENE_IDS_RECORDED")
+        if not has_baseline_record:
+            blockers.append("MISSING_SYNTHETIC_CONTROL_BASELINE")
+        if gt_plot_count < 20:
+            blockers.append(f"CONFORMAL_CALIBRATION_PLOTS_LT_20 ({gt_plot_count}/20)")
+        if not quorum_reached:
+            blockers.append("ACCREDITED_VVB_SIGNATURE_QUORUM_NOT_MET")
+        if chain_valid is False:
+            blockers.append("PROVENANCE_HASH_CHAIN_BROKEN")
+
+        issuance_status = "ELIGIBLE_FOR_VVB_SUBMISSION" if not blockers else "BLOCKED_PENDING_AUDIT_REQUIREMENTS"
+        chain_status = "VERIFIED_VALID" if chain_valid else ("BROKEN_TAMPER_DETECTED" if chain_valid is False else ("UNVERIFIED_EPHEMERAL_HASH" if not rec_hash else "RECORDED_UNCHECKED_DB"))
 
         if not rec_hash:
             seed_content = f"{job_id}:{stratum}:{tonnes_co2e}:{net_creditable}:{conservative_credits}"
             rec_hash = hashlib.sha256(seed_content.encode("utf-8")).hexdigest()
 
+        now_utc_str = datetime.datetime.now(datetime.timezone.utc).strftime("%Y-%m-%d %H:%M:%S UTC")
+
+        # Determine boundary geometry / GIS QA metadata
+        poly_vertex_count = 0
+        if isinstance(poly_parsed, dict) and isinstance(poly_parsed.get("coordinates"), list):
+            ring = poly_parsed["coordinates"][0] if poly_parsed["coordinates"] else []
+            poly_vertex_count = len(ring) if isinstance(ring, list) else 0
+        elif isinstance(poly_parsed, list):
+            poly_vertex_count = len(poly_parsed)
+
         dossier = {
             "dossier_id": f"VVB-DOSSIER-{job_id[:8].upper()}",
-            "dossier_version": "2.0.0",
+            "dossier_version": "2.1.0",
             "certification_standard": "Verra VM0047 v1.0 & VCS Standard v4.5",
             "methodology_scope": "Afforestation, Reforestation & Revegetation (ARR) with Tidal Wetland Blue Carbon Conservativeness",
-            "reported_at": datetime.datetime.utcnow().strftime("%Y-%m-%d %H:%M:%S UTC"),
+            "reported_at": now_utc_str,
             "project_metadata": {
                 "project_id": job_id,
-                "project_title": "Sundarbans Coastal Mangrove Delta Restoration & Blue Carbon Project",
+                "project_title": getattr(job, "project_name", None) or "Coastal Forest Restoration & Carbon Monitoring Project",
                 "country": "Bangladesh",
-                "administrative_division": "Khulna / Bagerhat Coastal Embankment Polders",
+                "administrative_division": "Khulna / Coastal Forest Zone",
                 "forest_stratum": stratum,
                 "project_boundary_area_ha": round(area_ha, 2),
-                "monitoring_start_date": str(start_date) if start_date else "2023-01-01",
-                "monitoring_end_date": str(end_date) if end_date else "2023-12-31",
-                "boundary_geometry": poly_parsed
+                "monitoring_start_date": str(start_date) if start_date else "UNSPECIFIED",
+                "monitoring_end_date": str(end_date) if end_date else "UNSPECIFIED",
+                "boundary_geometry": poly_parsed,
+                "gis_qa": {
+                    "crs_epsg": "EPSG:4326",
+                    "polygon_vertices": poly_vertex_count,
+                    "boundary_present": poly_vertex_count >= 3,
+                },
             },
             "space_data_provenance": {
                 "optical_constellation": "Copernicus Sentinel-2 MSI (10m Multi-Spectral, BOA Bottom-Of-Atmosphere)",
-                "sar_constellation": "Copernicus Sentinel-1 C-SAR GRD (Dual-Pol VV/VH, Radiometric Terrain Corrected)",
-                "lidar_source": "NASA GEDI L2B (rh98 25m Canopy Height Footprint Metrics)",
+                "sar_constellation": "Copernicus Sentinel-1 C-SAR GRD (Dual-Pol VV/VH)",
+                "lidar_source": "NASA GEDI L2A/L2B rh100 (Live)" if "gedi_l2" in gedi_source else "Allometric Formula Estimate (NASA GEDI L2B unavailable for AOI)",
+                "data_source": data_source,
                 "scenes_processed": scene_ids,
                 "average_ndvi": round(avg_ndvi, 3),
-                "satellite_sources_label": sat_sources
+                "satellite_sources_label": sat_sources,
+                "model_trained_on": model_trained_on,
             },
             "ipcc_tier3_multipool_inventory": {
                 "aboveground_biomass_density_mg_ha": round(biomass, 2),
                 "aboveground_carbon_tc_ha": round(agb_tc_ha, 2),
                 "belowground_carbon_tc_ha": round(bgb_tc_ha, 2),
-                "root_to_shoot_ratio": 0.49 if stratum == "SUNDARBANS_MANGROVE" else 0.235,
+                "root_to_shoot_ratio": 0.49 if stratum == "SUNDARBANS_MANGROVE" else (0.28 if stratum == "COASTAL_AGROFORESTRY" else 0.235),
                 "soil_organic_carbon_tc_ha": round(soc_tc_ha, 2),
                 "soc_core_depth_cm": 100,
-                "soil_bulk_density_g_cm3": 0.82 if stratum == "SUNDARBANS_MANGROVE" else 1.25,
+                "soil_bulk_density_g_cm3": 0.82 if stratum == "SUNDARBANS_MANGROVE" else (1.25 if stratum == "COASTAL_AGROFORESTRY" else 1.15),
+                "soc_data_basis": "stratum_allometry_until_core_uploaded",
                 "total_carbon_density_tc_ha": round(carbon_tc_ha, 2),
                 "gross_carbon_stock_tco2e": round(tonnes_co2e, 2)
             },
             "dynamic_synthetic_control_baseline": {
                 "methodology": "Abadie et al. (2010, 2021) Convex Quadratic Synthetic Control / Verra VM0047 Section 8.1",
+                "baseline_record_present": has_baseline_record,
                 "donor_pool_count": donor_count,
-                "pre_treatment_rmse": round(pre_rmse, 3),
+                "pre_treatment_rmse": round(pre_rmse, 3) if pre_rmse is not None else None,
                 "donor_weights": donor_weights,
                 "counterfactual_carbon_tc_ha": round(counterfactual_tc_ha, 2),
                 "gross_additionality_tco2e": round(gross_additionality, 2)
@@ -279,28 +366,35 @@ class ReportGenerator:
                 "net_creditable_volume_tco2e": round(net_creditable, 2)
             },
             "conformal_uncertainty_and_conservativeness": {
-                "statistical_framework": "Split Conformal Quantile Regression (Angelopoulos & Bates 2021)",
+                "statistical_framework": "Split Conformal Quantile Regression (Angelopoulos & Bates 2021) + IPCC Approach 2 MC",
                 "confidence_level_pct": 90.0,
+                "calibration_plot_count": gt_plot_count,
+                "conformal_calibration_valid": gt_plot_count >= 20,
                 "conformal_bounds_90_tco2e": {
-                    "lower": round(getattr(result, "carbon_lower_90", net_creditable * 0.88) or (net_creditable * 0.88), 2),
-                    "upper": round(getattr(result, "carbon_upper_90", net_creditable * 1.12) or (net_creditable * 1.12), 2)
+                    "lower": round(getattr(result, "carbon_lower_90", 0.0) or 0.0, 2),
+                    "upper": round(getattr(result, "carbon_upper_90", 0.0) or 0.0, 2)
                 },
                 "relative_margin_of_error_pct": round(rme * 100.0, 2),
                 "verra_allowable_precision_threshold_pct": 15.0,
                 "verra_precision_discount_pct": round(precision_discount * 100.0, 2),
                 "conservative_creditable_tco2e": round(conservative_credits, 2),
-                "vvb_registry_issuance_status": "CERTIFIED_ELIGIBLE_FOR_VERRA_REGISTRY"
+                "vvb_registry_issuance_status": issuance_status,
+                "issuance_blockers": blockers,
+            },
+            "drone_uav_and_field_calibration": {
+                "ground_truth_plots_available": gt_plot_count,
+                "drone_surveys_linked": drone_surveys,
+                "drone_calibration_status": "VERIFIED_UAV_RECONCILED" if drone_surveys else "NO_UAV_SURVEY_LINKED",
             },
             "tamper_evident_audit_trail": {
-                "cryptographic_algorithm": "SHA-256 Chained Hash Immutable Ledger",
+                "cryptographic_algorithm": "SHA-256 Chained Hash Immutable Ledger + Ed25519 Multi-Validator Quorum",
                 "record_hash": rec_hash,
                 "previous_hash": prev_hash,
-                "chain_verification_status": "VERIFIED_VALID",
+                "chain_verification_status": chain_status,
+                "validator_quorum_reached": quorum_reached,
                 "vvb_digital_attestation": (
-                    "This digital MRV monitoring dossier was automatically compiled and attested by the "
-                    "CarbonOS institutional dMRV engine in strict conformity with Verra VM0047 and VCS Standard v4.5. "
-                    "All remote sensing data, allometric multi-pool parameters, synthetic baseline models, and conformal "
-                    "precision calculations are immutably preserved in the audit hash chain."
+                    "This digital MRV monitoring dossier was compiled by CarbonOS with explicit separation of verified "
+                    "measurements vs uncalibrated/simulated components per Verra VM0047 and VCS v4.5 audit governance."
                 )
             }
         }

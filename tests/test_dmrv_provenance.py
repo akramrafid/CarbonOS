@@ -22,6 +22,7 @@ sys.path.append(BASE_DIR)
 sys.path.append(os.path.join(BASE_DIR, "inference"))
 
 import _isolated_db  # noqa: F401,E402  (temporary database, never backend/db.sqlite3)
+from dmrv_harness import setup_dmrv_test_tenants  # noqa: E402
 from inference.carbon_monitoring.database import init_db, SessionLocal
 from inference.carbon_monitoring.models import CarbonResult, GroundTruthPlot, EstimateProvenance
 from inference.carbon_monitoring.router import router as carbon_router
@@ -34,6 +35,8 @@ class TestDMRVProvenanceExtension(unittest.TestCase):
     @classmethod
     def setUpClass(cls):
         init_db()
+        cls.tenants = setup_dmrv_test_tenants("prov")
+        cls.headers = cls.tenants["owner_a"]
         cls.app = FastAPI(title="dMRV Test Harness")
         cls.app.include_router(carbon_router)
         cls.client = TestClient(cls.app)
@@ -46,7 +49,7 @@ class TestDMRVProvenanceExtension(unittest.TestCase):
 
     def test_01_honest_model_metadata(self):
         """Phase 3.3: Confirm active model settings surface honest synthetic metadata."""
-        response = self.client.get("/api/carbon/settings")
+        response = self.client.get("/api/carbon/settings", headers=self.headers)
         self.assertEqual(response.status_code, 200)
         data = response.json()
         self.assertIn("synthetic", data.get("model_version", "").lower() + data.get("model_trained_on", "").lower())
@@ -67,7 +70,7 @@ class TestDMRVProvenanceExtension(unittest.TestCase):
             "collected_by": "Bangladesh Forest Dept Field Team",
             "notes": "Healthy dense mangrove patch with mature Sundari trees."
         }
-        resp = self.client.post("/api/carbon/ground-truth", data=payload)
+        resp = self.client.post("/api/carbon/ground-truth", data=payload, headers=self.headers)
         self.assertEqual(resp.status_code, 200)
         created = resp.json()
         self.assertEqual(created["status"], "recorded")
@@ -75,7 +78,7 @@ class TestDMRVProvenanceExtension(unittest.TestCase):
         plot_id = created["id"]
 
         # Verify listing
-        list_resp = self.client.get("/api/carbon/ground-truth")
+        list_resp = self.client.get("/api/carbon/ground-truth", headers=self.headers)
         self.assertEqual(list_resp.status_code, 200)
         plots = list_resp.json()
         matching = [p for p in plots if p["id"] == plot_id]
@@ -84,13 +87,13 @@ class TestDMRVProvenanceExtension(unittest.TestCase):
 
     def test_03_recalibration_pipeline_guard(self):
         """Phase 3 Part (b): Confirm recalibration refuses to promote when below sample threshold or on simulated data."""
-        resp = self.client.post("/api/carbon/recalibrate")
+        resp = self.client.post("/api/carbon/recalibrate", headers=self.headers)
         self.assertEqual(resp.status_code, 200)
         res = resp.json()
         self.assertFalse(res.get("promoted"))
         self.assertIn("reason", res)
         # Verify model remains uncorrupted
-        settings = self.client.get("/api/carbon/settings").json()
+        settings = self.client.get("/api/carbon/settings", headers=self.headers).json()
         self.assertEqual(settings.get("model_trained_on"), "synthetic-v1")
 
     def test_04_analysis_prediction_interval_and_provenance(self):
@@ -110,7 +113,7 @@ class TestDMRVProvenanceExtension(unittest.TestCase):
             "project_name": "Sundarbans Mangrove Conservation Unit"
         }
         # In TestClient, BackgroundTasks are executed synchronously
-        analyze_resp = self.client.post("/api/carbon/analyze", data=analyze_payload)
+        analyze_resp = self.client.post("/api/carbon/analyze", data=analyze_payload, headers=self.headers)
         self.assertEqual(analyze_resp.status_code, 200)
         job_id = analyze_resp.json()["job_id"]
 
@@ -120,7 +123,7 @@ class TestDMRVProvenanceExtension(unittest.TestCase):
         result_id = result_row.id
 
         # Verify endpoint GET /api/carbon/results/{result_id}
-        res_resp = self.client.get(f"/api/carbon/results/{result_id}")
+        res_resp = self.client.get(f"/api/carbon/results/{result_id}", headers=self.headers)
         self.assertEqual(res_resp.status_code, 200)
         res_data = res_resp.json()
 
@@ -136,7 +139,7 @@ class TestDMRVProvenanceExtension(unittest.TestCase):
         self.assertLessEqual(res_data["carbon_lower_90"], res_data["carbon_upper_90"])
 
         # Verify provenance record via GET /api/carbon/provenance/{result_id}
-        prov_resp = self.client.get(f"/api/carbon/provenance/{result_id}")
+        prov_resp = self.client.get(f"/api/carbon/provenance/{result_id}", headers=self.headers)
         self.assertEqual(prov_resp.status_code, 200)
         prov_data = prov_resp.json()
 
@@ -149,7 +152,7 @@ class TestDMRVProvenanceExtension(unittest.TestCase):
 
     def test_05_verify_provenance_chain_endpoint(self):
         """Phase 3.2: Verify full provenance chain validity via API."""
-        resp = self.client.get("/api/carbon/provenance/verify-chain")
+        resp = self.client.get("/api/carbon/provenance/verify-chain", headers=self.headers)
         self.assertEqual(resp.status_code, 200)
         chain_data = resp.json()
         self.assertTrue(chain_data["valid"])
@@ -173,7 +176,7 @@ class TestDMRVProvenanceExtension(unittest.TestCase):
             self.assertEqual(tampered_result["reason"], "record_hash does not match content")
 
             # API endpoint must also report invalid
-            api_resp = self.client.get("/api/carbon/provenance/verify-chain")
+            api_resp = self.client.get("/api/carbon/provenance/verify-chain", headers=self.headers)
             self.assertFalse(api_resp.json()["valid"])
         finally:
             # Revert tamper to restore pristine state
@@ -183,6 +186,66 @@ class TestDMRVProvenanceExtension(unittest.TestCase):
         # Confirm restored valid state
         restored_result = provenance_utils.verify_chain(self.db)
         self.assertTrue(restored_result["valid"])
+
+    def test_07_quantification_tamper_detected_by_provenance_hash(self):
+        """P0: Mutating CarbonResult credit/biomass numbers in SQL must break provenance verification."""
+        prov = self.db.query(EstimateProvenance).filter(EstimateProvenance.quantification_snapshot_json.isnot(None)).first()
+        self.assertIsNotNone(prov)
+        c_res = self.db.query(CarbonResult).filter(CarbonResult.id == prov.result_id).first()
+        self.assertIsNotNone(c_res)
+        orig_co2 = c_res.tonnes_co2e
+        try:
+            c_res.tonnes_co2e = orig_co2 + 9999.0
+            self.db.commit()
+            chain = provenance_utils.verify_chain(self.db)
+            self.assertFalse(chain["valid"])
+            self.assertIn("mutated", chain["reason"])
+            trust = provenance_utils.get_provenance_trust_status(prov, self.db)
+            self.assertFalse(trust["hash_chain_intact"])
+        finally:
+            c_res.tonnes_co2e = orig_co2
+            self.db.commit()
+
+    def test_08_auth_rbac_and_tenant_isolation_on_dmrv_endpoints(self):
+        """P0: Unauthenticated callers get 401, RBAC blocks unauthorized mutations, and cross-tenant reads get 404."""
+        self.assertEqual(self.client.get("/api/carbon/dashboard").status_code, 401)
+        self.assertEqual(self.client.get("/api/carbon/settings").status_code, 401)
+        self.assertEqual(self.client.post("/api/carbon/recalibrate").status_code, 401)
+        self.assertIn(self.client.post("/api/carbon/provenance/generate-keys").status_code, (404, 405))
+
+        # Viewer cannot write; contributor cannot run admin recalibration or settings
+        self.assertEqual(
+            self.client.post("/api/carbon/recalibrate", headers=self.tenants["contrib_a"]).status_code, 403
+        )
+        self.assertEqual(
+            self.client.post("/api/carbon/settings", json={"model_type": "xgboost"}, headers=self.tenants["contrib_a"]).status_code,
+            403,
+        )
+        self.assertEqual(
+            self.client.post(
+                "/api/carbon/ground-truth",
+                data={
+                    "plot_name": "X", "location_lat": 22.0, "location_lng": 89.0,
+                    "measured_biomass_mg_ha": 10.0, "measured_carbon_tc_ha": 5.0,
+                    "measurement_date": "2026-01-01", "measurement_method": "field",
+                    "collected_by": "viewer",
+                },
+                headers=self.tenants["viewer_a"],
+            ).status_code,
+            403,
+        )
+
+        # Cross-tenant isolation: Org B cannot read Org A's result or provenance
+        any_res = self.db.query(CarbonResult).first()
+        self.assertIsNotNone(any_res)
+        self.assertEqual(
+            self.client.get(f"/api/carbon/results/{any_res.id}", headers=self.tenants["owner_b"]).status_code,
+            404,
+        )
+        self.assertEqual(
+            self.client.get(f"/api/carbon/provenance/{any_res.id}", headers=self.tenants["owner_b"]).status_code,
+            404,
+        )
 
 
 if __name__ == "__main__":
