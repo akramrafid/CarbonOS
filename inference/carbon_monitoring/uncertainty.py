@@ -43,24 +43,25 @@ class ConformalUncertaintyEngine:
     ) -> float:
         """
         Calibrates conformal margin using available ground-truth field plots.
-        If database has fewer than 15 plots, supplements with an empirical
-        bootstrap residual distribution to maintain conservative guarantees.
+        Uses genuine `model_predict_fn(plot)` predictions when supplied rather than
+        injecting random Gaussian perturbations; returns an explicit conservative fallback
+        quantile when insufficient calibrated ground-truth plots exist.
         """
         plots = db.query(GroundTruthPlot).all()
         residuals = []
         for p in plots:
-            measured = p.measured_carbon_tc_ha
-            # If predictor provided, use actual residual, else use variance against mean
-            predicted = measured * np.random.normal(1.0, 0.07)
-            residuals.append(abs(measured - predicted))
+            measured = float(p.measured_carbon_tc_ha)
+            if callable(model_predict_fn):
+                try:
+                    predicted = float(model_predict_fn(p))
+                    residuals.append(abs(measured - predicted))
+                except Exception:
+                    continue
 
-        # Guarantee at least 25 calibration samples using empirical delta-mud variance
-        if len(residuals) < 20:
-            np.random.seed(42)
-            supplemental = np.random.gamma(shape=2.5, scale=4.0, size=30)
-            residuals.extend(list(supplemental))
+        if len(residuals) >= 20:
+            return self.compute_conformal_quantile(np.array(residuals))
 
-        return self.compute_conformal_quantile(np.array(residuals))
+        return 15.0  # Conservative uncalibrated floor until >= 20 real plot residuals exist
 
     def predict_conformal_interval(
         self,
@@ -161,7 +162,13 @@ def compute_conformal_verra_assessment(
     4. Computes conservative creditable credits.
     """
     engine = ConformalUncertaintyEngine(alpha=0.10)
-    
+    calibration_status = "model_interval_proxy"
+    calibrated_q_hat = None
+    if db is not None:
+        real_plots = db.query(GroundTruthPlot).count()
+        if real_plots >= 20:
+            calibration_status = "empirical_conformal"
+
     # Calculate margin ratio from carbon stock interval
     if estimated_carbon_tc_ha > 0 and carbon_upper_90 > carbon_lower_90:
         stock_rme = (carbon_upper_90 - carbon_lower_90) / (2.0 * estimated_carbon_tc_ha)
@@ -182,6 +189,7 @@ def compute_conformal_verra_assessment(
 
     return {
         "conformal_method": "split_conformal_quantile_regression",
+        "calibration_status": calibration_status,
         "confidence_level_pct": 90.0,
         "net_creditable_point_tco2e": round(net_creditable_tco2e, 2),
         "conformal_lower_90": round(net_lower, 2),

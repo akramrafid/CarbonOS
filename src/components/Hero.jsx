@@ -16,10 +16,13 @@ import {
 } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import { Link } from 'react-router-dom';
+import { useTheme } from '../context/ThemeContext';
 
 const Hero = () => {
   const containerRef = useRef(null);
   const { t } = useTranslation();
+  const { theme } = useTheme();
+  const isLight = theme === 'light';
   const [activeStreamIndex, setActiveStreamIndex] = useState(0);
 
   const tradeStreams = [
@@ -112,15 +115,41 @@ const Hero = () => {
       ref={containerRef}
       className="relative min-h-[100dvh] w-full flex items-center justify-center overflow-hidden bg-[#040A06]"
     >
-      {/* Background Photography with Modern Composite Layering */}
+      {/* Background Photography with Theme-Aware Composite Layering */}
       <div 
         className="hero-bg absolute inset-0 z-0 bg-cover bg-center"
         style={{ backgroundImage: 'url("/hero_landscape.png")' }}
       ></div>
       
-      {/* High-End Dark Gradient & Contrast Overlays */}
-      <div className="absolute inset-0 z-0 bg-gradient-to-t from-[#040A06] via-[#040A06]/75 to-[#040A06]/60"></div>
-      <div className="absolute inset-0 z-0 bg-[radial-gradient(ellipse_80%_80%_at_50%_-20%,rgba(0,200,83,0.15),rgba(255,255,255,0))]"></div>
+      {/* High-End Theme-Adaptive Contrast Overlays */}
+      {isLight ? (
+        <>
+          <div
+            className="absolute inset-0 z-0 pointer-events-none"
+            style={{
+              background:
+                'linear-gradient(105deg, rgba(242, 243, 238, 0.94) 0%, rgba(242, 243, 238, 0.84) 48%, rgba(242, 243, 238, 0.42) 100%)',
+            }}
+          />
+          <div
+            className="absolute inset-x-0 bottom-0 h-44 z-0 pointer-events-none"
+            style={{
+              background: 'linear-gradient(to top, #f2f3ee 0%, rgba(242, 243, 238, 0) 100%)',
+            }}
+          />
+          <div
+            className="absolute inset-x-0 top-0 h-28 z-0 pointer-events-none"
+            style={{
+              background: 'linear-gradient(to bottom, rgba(242, 243, 238, 0.82) 0%, rgba(242, 243, 238, 0) 100%)',
+            }}
+          />
+        </>
+      ) : (
+        <>
+          <div className="absolute inset-0 z-0 bg-gradient-to-t from-[#040A06] via-[#040A06]/75 to-[#040A06]/60"></div>
+          <div className="absolute inset-0 z-0 bg-[radial-gradient(ellipse_80%_80%_at_50%_-20%,rgba(0,200,83,0.15),rgba(255,255,255,0))]"></div>
+        </>
+      )}
       
       {/* Subtle Precision Grid Lines */}
       <div className="absolute inset-0 z-0 bg-[linear-gradient(to_right,#00c85308_1px,transparent_1px),linear-gradient(to_bottom,#00c85308_1px,transparent_1px)] bg-[size:4rem_4rem] [mask-image:radial-gradient(ellipse_60%_50%_at_50%_40%,#000_70%,transparent_100%)]"></div>
@@ -140,19 +169,27 @@ const Hero = () => {
           <div className="lg:col-span-7 flex flex-col items-start text-left pt-2 sm:pt-6 lg:pt-0 min-w-0">
             
             {/* Live Protocol Status Pill */}
-            <div className="hero-pill inline-flex flex-wrap items-center gap-2 bg-black/40 hover:bg-black/60 backdrop-blur-xl border border-emerald/30 hover:border-emerald/60 rounded-2xl sm:rounded-full py-1.5 px-3 sm:px-4 mb-5 sm:mb-6 shadow-[0_0_20px_rgba(0,200,83,0.15)] transition-all duration-300 max-w-full">
+            <div className={`hero-pill inline-flex flex-wrap items-center gap-2 backdrop-blur-xl rounded-2xl sm:rounded-full py-1.5 px-3.5 sm:px-4 mb-5 sm:mb-6 transition-all duration-300 max-w-full border ${
+              isLight
+                ? 'bg-white/92 border-[#0F291B]/12 shadow-[0_6px_18px_-6px_rgba(15,41,27,0.10)]'
+                : 'bg-black/40 hover:bg-black/60 border-emerald/30 hover:border-emerald/60 shadow-[0_0_20px_rgba(0,200,83,0.15)]'
+            }`}>
               <span className="flex h-2 w-2 relative shrink-0">
-                <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-[#00C853] opacity-75"></span>
-                <span className="relative inline-flex rounded-full h-2 w-2 bg-[#00C853]"></span>
+                <span className={`animate-ping absolute inline-flex h-full w-full rounded-full opacity-75 ${isLight ? 'bg-[#15803d]' : 'bg-[#00C853]'}`}></span>
+                <span className={`relative inline-flex rounded-full h-2 w-2 ${isLight ? 'bg-[#15803d]' : 'bg-[#00C853]'}`}></span>
               </span>
-              <span className="font-mono text-[10px] sm:text-[11px] font-semibold tracking-wider text-emerald uppercase whitespace-nowrap">
+              <span className={`font-mono text-[10px] sm:text-[11px] font-semibold tracking-wider uppercase whitespace-nowrap ${isLight ? 'text-[#15803d]' : 'text-emerald'}`}>
                 CarbonOS Protocol v2.4
               </span>
-              <span className="text-white/20 hidden sm:inline">|</span>
-              <span className="font-sans text-[11px] text-white/80 hidden sm:inline">
+              <span className={`hidden sm:inline ${isLight ? 'text-[#0F291B]/20' : 'text-white/20'}`}>|</span>
+              <span className={`font-sans text-[11px] hidden sm:inline ${isLight ? 'text-[#37473E]' : 'text-white/80'}`}>
                 GHG Protocol Scope 1 &amp; 2 method
               </span>
-              <span className="bg-emerald/15 text-emerald border border-emerald/30 font-mono text-[9px] px-1.5 py-0.5 rounded font-bold whitespace-nowrap">
+              <span className={`font-mono text-[9px] px-2 py-0.5 rounded-full font-bold whitespace-nowrap ${
+                isLight
+                  ? 'bg-[#E3F2E9] text-[#14532D]'
+                  : 'bg-emerald/15 text-emerald border border-emerald/30'
+              }`}>
                 97% DIRECT PAYOUT
               </span>
             </div>
@@ -165,7 +202,11 @@ const Hero = () => {
               <span className="hero-h1 font-sans font-extrabold text-[32px] sm:text-5xl lg:text-[68px] leading-[1.08] text-white">
                 Carbon Infrastructure
               </span>
-              <span className="hero-h1 serif-drama italic text-[38px] sm:text-6xl lg:text-[80px] leading-[1.05] bg-gradient-to-r from-[#00C853] via-[#69F0AE] to-[#A7F3D0] bg-clip-text text-transparent mt-1 drop-shadow-sm">
+              <span className={`hero-h1 serif-drama italic text-[38px] sm:text-6xl lg:text-[80px] leading-[1.05] mt-1 ${
+                isLight
+                  ? 'text-[#15803d]'
+                  : 'bg-gradient-to-r from-[#00C853] via-[#69F0AE] to-[#A7F3D0] bg-clip-text text-transparent drop-shadow-sm'
+              }`}>
                 & Credit Exchange.
               </span>
             </h1>
@@ -187,9 +228,13 @@ const Hero = () => {
               
               <Link 
                 to="/platform/carbon-registry" 
-                className="inline-flex items-center justify-center bg-white/[0.06] hover:bg-white/[0.12] text-white border border-white/15 hover:border-emerald/40 font-sans font-medium text-sm sm:text-base px-5 sm:px-6 py-3.5 sm:py-4 rounded-full backdrop-blur-md transition-all duration-300 hover:scale-[1.02] active:scale-[0.98] min-h-[44px] w-full sm:w-auto"
+                className={`inline-flex items-center justify-center font-sans font-medium text-sm sm:text-base px-5 sm:px-6 py-3.5 sm:py-4 rounded-full backdrop-blur-md transition-all duration-300 hover:scale-[1.02] active:scale-[0.98] min-h-[44px] w-full sm:w-auto border ${
+                  isLight
+                    ? 'bg-white/95 hover:bg-white text-[#0F291B] border-[#0F291B]/14 hover:border-[#15803d]/40 shadow-[0_6px_18px_-6px_rgba(15,41,27,0.10)]'
+                    : 'bg-white/[0.06] hover:bg-white/[0.12] text-white border-white/15 hover:border-emerald/40'
+                }`}
               >
-                <Terminal size={16} className="mr-2 text-emerald" />
+                <Terminal size={16} className={`mr-2 ${isLight ? 'text-[#15803d]' : 'text-emerald'}`} />
                 <span>Registry Terminal</span>
               </Link>
 
@@ -222,20 +267,28 @@ const Hero = () => {
 
           {/* Right Column: Sovereign Exchange Terminal Card */}
           <div className="lg:col-span-5 w-full min-w-0">
-            <div className="hero-terminal-card bg-[#080F0B]/90 backdrop-blur-2xl border border-white/15 rounded-2xl sm:rounded-[2rem] p-4 sm:p-6 lg:p-7 shadow-[0_20px_60px_rgba(0,0,0,0.7)] relative overflow-hidden">
+            <div className={`hero-terminal-card backdrop-blur-2xl border rounded-2xl sm:rounded-[2rem] p-4 sm:p-6 lg:p-7 relative overflow-hidden ${
+              isLight
+                ? 'bg-white/95 border-[#0F291B]/12 shadow-[0_24px_60px_-15px_rgba(15,41,27,0.14),0_6px_18px_-6px_rgba(15,41,27,0.06)]'
+                : 'bg-[#080F0B]/90 border-white/15 shadow-[0_20px_60px_rgba(0,0,0,0.7)]'
+            }`}>
               
               {/* Corner Accent Glow */}
               <div className="absolute top-0 right-0 w-48 h-48 bg-emerald/10 rounded-full blur-3xl pointer-events-none"></div>
               
               {/* Terminal Header */}
-              <div className="flex flex-wrap items-center justify-between gap-2 border-b border-white/10 pb-3 sm:pb-4 mb-4 sm:mb-5">
+              <div className={`flex flex-wrap items-center justify-between gap-2 border-b pb-3 sm:pb-4 mb-4 sm:mb-5 ${isLight ? 'border-[#0F291B]/10' : 'border-white/10'}`}>
                 <div className="flex items-center space-x-2">
-                  <div className="w-2.5 h-2.5 rounded-full bg-emerald animate-pulse shrink-0"></div>
-                  <span className="font-mono text-[10px] sm:text-[11px] uppercase tracking-widest text-white/80 font-semibold">
+                  <div className={`w-2.5 h-2.5 rounded-full animate-pulse shrink-0 ${isLight ? 'bg-[#15803d]' : 'bg-emerald'}`}></div>
+                  <span className={`font-mono text-[10px] sm:text-[11px] uppercase tracking-widest font-semibold ${isLight ? 'text-[#0F291B]' : 'text-white/80'}`}>
                     Live Clearing Terminal // Dhaka
                   </span>
                 </div>
-                <div className="flex items-center space-x-1.5 font-mono text-[10px] text-emerald bg-emerald/10 border border-emerald/20 px-2 py-0.5 rounded shrink-0">
+                <div className={`flex items-center space-x-1.5 font-mono text-[10px] px-2.5 py-0.5 rounded-full shrink-0 ${
+                  isLight
+                    ? 'text-[#14532D] bg-[#E5F4EB]'
+                    : 'text-emerald bg-emerald/10 border border-emerald/20'
+                }`}>
                   <Activity size={12} />
                   <span>42ms Consensus</span>
                 </div>
@@ -245,78 +298,78 @@ const Hero = () => {
               <div className="grid grid-cols-1 min-[360px]:grid-cols-2 gap-2.5 sm:gap-3.5 mb-4 sm:mb-5">
                 
                 {/* Metric 1 */}
-                <div className="bg-white/[0.03] border border-white/10 rounded-2xl p-3 sm:p-4 flex flex-col justify-between min-w-0">
-                  <div className="flex items-center justify-between text-white/50 text-[10px] sm:text-[11px] font-mono gap-1">
+                <div className={`border rounded-2xl p-3 sm:p-4 flex flex-col justify-between min-w-0 ${isLight ? 'bg-[#F5F8F5] border-[#0F291B]/8' : 'bg-white/[0.03] border-white/10'}`}>
+                  <div className={`flex items-center justify-between text-[10px] sm:text-[11px] font-mono gap-1 ${isLight ? 'text-[#4A5D52]' : 'text-white/50'}`}>
                     <span className="truncate">TOTAL REDUCTION</span>
-                    <TrendingUp size={14} className="text-emerald shrink-0" />
+                    <TrendingUp size={14} className={`shrink-0 ${isLight ? 'text-[#15803d]' : 'text-emerald'}`} />
                   </div>
                   <div className="mt-2">
-                    <span className="font-mono font-bold text-xl sm:text-2xl lg:text-3xl text-white">10.42M</span>
-                    <span className="font-mono text-xs text-emerald ml-1 font-semibold">tCO₂e</span>
+                    <span className={`font-mono font-bold text-xl sm:text-2xl lg:text-3xl ${isLight ? 'text-[#0F291B]' : 'text-white'}`}>10.42M</span>
+                    <span className={`font-mono text-xs ml-1 font-semibold ${isLight ? 'text-[#15803d]' : 'text-emerald'}`}>tCO₂e</span>
                   </div>
-                  <span className="font-sans text-[10px] text-emerald/80 mt-1 font-medium">+18.4% YoY</span>
+                  <span className={`font-sans text-[10px] mt-1 font-semibold ${isLight ? 'text-[#15803d]' : 'text-emerald/80'}`}>+18.4% YoY</span>
                 </div>
 
                 {/* Metric 2 */}
-                <div className="bg-white/[0.03] border border-white/10 rounded-2xl p-3 sm:p-4 flex flex-col justify-between min-w-0">
-                  <div className="flex items-center justify-between text-white/50 text-[10px] sm:text-[11px] font-mono gap-1">
+                <div className={`border rounded-2xl p-3 sm:p-4 flex flex-col justify-between min-w-0 ${isLight ? 'bg-[#F5F8F5] border-[#0F291B]/8' : 'bg-white/[0.03] border-white/10'}`}>
+                  <div className={`flex items-center justify-between text-[10px] sm:text-[11px] font-mono gap-1 ${isLight ? 'text-[#4A5D52]' : 'text-white/50'}`}>
                     <span className="truncate">FARMER REMITTANCE</span>
-                    <span className="text-[10px] text-emerald font-mono font-bold shrink-0">97.0%</span>
+                    <span className={`text-[10px] font-mono font-bold shrink-0 ${isLight ? 'text-[#15803d]' : 'text-emerald'}`}>97.0%</span>
                   </div>
                   <div className="mt-2">
-                    <span className="font-mono font-bold text-xl sm:text-2xl lg:text-3xl text-emerald">৳412.8M</span>
+                    <span className={`font-mono font-bold text-xl sm:text-2xl lg:text-3xl ${isLight ? 'text-[#15803d]' : 'text-emerald'}`}>৳412.8M</span>
                   </div>
-                  <span className="font-sans text-[10px] text-white/60 mt-1">bKash / Nagad Direct Wallets</span>
+                  <span className={`font-sans text-[10px] mt-1 ${isLight ? 'text-[#4A5D52]' : 'text-white/60'}`}>bKash / Nagad Direct Wallets</span>
                 </div>
 
                 {/* Metric 3 */}
-                <div className="bg-white/[0.03] border border-white/10 rounded-2xl p-3 sm:p-4 flex flex-col justify-between min-w-0">
-                  <div className="flex items-center justify-between text-white/50 text-[10px] sm:text-[11px] font-mono gap-1">
+                <div className={`border rounded-2xl p-3 sm:p-4 flex flex-col justify-between min-w-0 ${isLight ? 'bg-[#F5F8F5] border-[#0F291B]/8' : 'bg-white/[0.03] border-white/10'}`}>
+                  <div className={`flex items-center justify-between text-[10px] sm:text-[11px] font-mono gap-1 ${isLight ? 'text-[#4A5D52]' : 'text-white/50'}`}>
                     <span className="truncate">LIVE LIQUIDITY</span>
-                    <Layers size={14} className="text-cyan-400 shrink-0" />
+                    <Layers size={14} className={`shrink-0 ${isLight ? 'text-[#0369a1]' : 'text-cyan-400'}`} />
                   </div>
                   <div className="mt-2">
-                    <span className="font-mono font-bold text-xl sm:text-2xl lg:text-3xl text-white">42,850</span>
-                    <span className="font-mono text-xs text-white/50 ml-1">tCO₂e</span>
+                    <span className={`font-mono font-bold text-xl sm:text-2xl lg:text-3xl ${isLight ? 'text-[#0F291B]' : 'text-white'}`}>42,850</span>
+                    <span className={`font-mono text-xs ml-1 ${isLight ? 'text-[#4A5D52]' : 'text-white/50'}`}>tCO₂e</span>
                   </div>
-                  <span className="font-sans text-[10px] text-cyan-400 mt-1">Available for Settlement</span>
+                  <span className={`font-sans text-[10px] mt-1 font-medium ${isLight ? 'text-[#0369a1]' : 'text-cyan-400'}`}>Available for Settlement</span>
                 </div>
 
                 {/* Metric 4 */}
-                <div className="bg-white/[0.03] border border-white/10 rounded-2xl p-3 sm:p-4 flex flex-col justify-between min-w-0">
-                  <div className="flex items-center justify-between text-white/50 text-[10px] sm:text-[11px] font-mono gap-1">
+                <div className={`border rounded-2xl p-3 sm:p-4 flex flex-col justify-between min-w-0 ${isLight ? 'bg-[#F5F8F5] border-[#0F291B]/8' : 'bg-white/[0.03] border-white/10'}`}>
+                  <div className={`flex items-center justify-between text-[10px] sm:text-[11px] font-mono gap-1 ${isLight ? 'text-[#4A5D52]' : 'text-white/50'}`}>
                     <span className="truncate">AVG CLEARING</span>
-                    <span className="font-mono text-[10px] text-white/40 shrink-0">BDT / t</span>
+                    <span className={`font-mono text-[10px] shrink-0 ${isLight ? 'text-[#4A5D52]' : 'text-white/40'}`}>BDT / t</span>
                   </div>
                   <div className="mt-2">
-                    <span className="font-mono font-bold text-xl sm:text-2xl lg:text-3xl text-white">৳14,920</span>
+                    <span className={`font-mono font-bold text-xl sm:text-2xl lg:text-3xl ${isLight ? 'text-[#0F291B]' : 'text-white'}`}>৳14,920</span>
                   </div>
-                  <span className="font-sans text-[10px] text-white/60 mt-1">Indicative spot reference</span>
+                  <span className={`font-sans text-[10px] mt-1 ${isLight ? 'text-[#4A5D52]' : 'text-white/60'}`}>Indicative spot reference</span>
                 </div>
 
               </div>
 
               {/* Streaming Real-Time Transaction Ribbon */}
-              <div className="bg-black/50 border border-white/10 rounded-xl p-3.5 mb-5 relative">
+              <div className={`border rounded-xl p-3.5 mb-5 relative ${isLight ? 'bg-[#EDF5F0] border-[#15803d]/15' : 'bg-black/50 border-white/10'}`}>
                 <div className="flex items-center justify-between mb-1.5">
-                  <span className="font-mono text-[10px] text-emerald uppercase tracking-wider font-semibold flex items-center gap-1.5">
-                    <Radio size={12} className="text-emerald animate-pulse" />
+                  <span className={`font-mono text-[10px] uppercase tracking-wider font-semibold flex items-center gap-1.5 ${isLight ? 'text-[#15803d]' : 'text-emerald'}`}>
+                    <Radio size={12} className={`animate-pulse ${isLight ? 'text-[#15803d]' : 'text-emerald'}`} />
                     <span>Real-Time Settlement Feed</span>
                   </span>
-                  <span className="font-mono text-[10px] text-white/40">
+                  <span className={`font-mono text-[10px] ${isLight ? 'text-[#4A5D52]' : 'text-white/40'}`}>
                     {tradeStreams[activeStreamIndex].time}
                   </span>
                 </div>
-                <p className="font-mono text-xs text-white font-medium truncate">
+                <p className={`font-mono text-xs font-medium truncate ${isLight ? 'text-[#0F291B]' : 'text-white'}`}>
                   {tradeStreams[activeStreamIndex].desc}
                 </p>
-                <p className="font-mono text-[11px] text-emerald/80 truncate mt-0.5">
+                <p className={`font-mono text-[11px] truncate mt-0.5 ${isLight ? 'text-[#15803d] font-medium' : 'text-emerald/80'}`}>
                   → {tradeStreams[activeStreamIndex].detail}
                 </p>
               </div>
 
               {/* No registry integration or third-party certification is claimed. */}
-              <p className="pt-2 border-t border-white/10 font-sans text-[10px] text-white/50">
+              <p className={`pt-2 border-t font-sans text-[10px] ${isLight ? 'border-[#0F291B]/10 text-[#556B5E]' : 'border-white/10 text-white/50'}`}>
                 No registry integration or third-party certification is claimed.
               </p>
 

@@ -10,6 +10,8 @@ import datetime
 from .osm_intelligence import (
     compute_leakage_belt_geometry,
     extract_osm_context,
+    parse_aoi_polygon,
+    resolve_local_geoparquet_path,
     resolve_local_pbf_path,
 )
 
@@ -65,13 +67,26 @@ class SyntheticControlEngine:
             val += np.random.normal(4.2, 0.5)
             proj_post.append(round(float(val), 2))
 
+        # Generate spatially distributed external annular donor plot coordinates (12-30 km outside AOI)
+        try:
+            proj_poly = parse_aoi_polygon(polygon_geojson)
+            c_lng, c_lat = float(proj_poly.centroid.x), float(proj_poly.centroid.y)
+        except Exception:
+            c_lat, c_lng = 22.15, 89.50
+
         # Donor plots across the regional stratum (each has its own natural fluctuation / regional trend)
         donors = {}
         donor_matrix_pre = []
         donor_matrix_post = []
+        donor_features = []
 
         for j in range(n_donors):
             donor_id = f"DONOR_PLOT_{self.stratum[:4]}_{j+1:02d}"
+            angle = (2.0 * math.pi * j) / max(1, n_donors)
+            dist_km = 14.0 + (j % 3) * 6.5
+            d_lat = round(c_lat + (dist_km * math.sin(angle)) / 111.132, 5)
+            d_lng = round(c_lng + (dist_km * math.cos(angle)) / (111.320 * max(0.2, math.cos(math.radians(c_lat)))), 5)
+
             # Donors have varying baselines and continue on business-as-usual regional trajectory
             offset = np.random.uniform(-15.0, 15.0)
             d_val = base_c + offset
@@ -88,10 +103,25 @@ class SyntheticControlEngine:
 
             donors[donor_id] = {
                 "id": donor_id,
+                "lat": d_lat,
+                "lng": d_lng,
+                "distance_km": round(dist_km, 1),
                 "pre": d_pre,
                 "post": d_post,
                 "full": d_pre + d_post
             }
+            donor_features.append({
+                "type": "Feature",
+                "id": donor_id,
+                "properties": {
+                    "donor_id": donor_id,
+                    "stratum": self.stratum,
+                    "distance_km": round(dist_km, 1),
+                    "latest_carbon_tc_ha": d_post[-1] if d_post else d_pre[-1],
+                    "data_origin": "simulated_stratum_control",
+                },
+                "geometry": {"type": "Point", "coordinates": [d_lng, d_lat]},
+            })
             donor_matrix_pre.append(d_pre)
             donor_matrix_post.append(d_post)
 
@@ -106,8 +136,45 @@ class SyntheticControlEngine:
             "project_pre": np.array(proj_pre),
             "project_post": np.array(proj_post),
             "donors": donors,
+            "donor_plots_geojson": {"type": "FeatureCollection", "features": donor_features},
             "donor_matrix_pre": donor_matrix_pre,
-            "donor_matrix_post": donor_matrix_post
+            "donor_matrix_post": donor_matrix_post,
+            "baseline_data_origin": "simulated_donor_trajectories",
+        }
+
+    def compute_in_space_placebo(
+        self,
+        project_pre: np.ndarray,
+        project_post: np.ndarray,
+        donor_pre: np.ndarray,
+        donor_post: np.ndarray,
+        weights: np.ndarray,
+    ) -> dict:
+        """Abadie et al. leave-one-out in-space placebo permutation ratio test."""
+        syn_pre = donor_pre.dot(weights)
+        syn_post = donor_post.dot(weights)
+        proj_pre_rmse = float(np.sqrt(np.mean((project_pre - syn_pre) ** 2)))
+        proj_post_rmse = float(np.sqrt(np.mean((project_post - syn_post) ** 2)))
+        treated_ratio = proj_post_rmse / max(0.05, proj_pre_rmse)
+
+        placebo_ratios = []
+        n_j = donor_pre.shape[1]
+        for j in range(n_j):
+            others_idx = [k for k in range(n_j) if k != j]
+            if not others_idx:
+                continue
+            w_j, pre_r_j = self.fit_synthetic_weights(donor_pre[:, j], donor_pre[:, others_idx])
+            post_pred_j = donor_post[:, others_idx].dot(w_j)
+            post_r_j = float(np.sqrt(np.mean((donor_post[:, j] - post_pred_j) ** 2)))
+            placebo_ratios.append(post_r_j / max(0.05, pre_r_j))
+
+        n_ge = sum(1 for r in placebo_ratios if r >= treated_ratio)
+        p_val = round(float((n_ge + 1) / (len(placebo_ratios) + 1)), 4) if placebo_ratios else 1.0
+        return {
+            "treated_post_pre_rmspe_ratio": round(treated_ratio, 2),
+            "placebo_p_value": p_val,
+            "n_placebos": len(placebo_ratios),
+            "statistically_distinct": p_val <= 0.15,
         }
 
     def fit_synthetic_weights(
@@ -350,9 +417,22 @@ def run_dynamic_baseline_assessment(
         weights=weights
     )
 
-    # Donor weights dictionary
+    # Donor weights dictionary & attach weights onto donor map pins
     donor_keys = list(donors_data["donors"].keys())
     donor_weights_map = {donor_keys[i]: round(float(weights[i]), 4) for i in range(len(weights))}
+    donor_geo = donors_data.get("donor_plots_geojson") or {"type": "FeatureCollection", "features": []}
+    for feat in donor_geo.get("features", []):
+        did = feat.get("properties", {}).get("donor_id")
+        if did in donor_weights_map:
+            feat["properties"]["weight_pct"] = round(donor_weights_map[did] * 100.0, 1)
+
+    placebo_test = sc_engine.compute_in_space_placebo(
+        project_pre=donors_data["project_pre"],
+        project_post=donors_data["project_post"],
+        donor_pre=donors_data["donor_matrix_pre"],
+        donor_post=donors_data["donor_matrix_post"],
+        weights=weights,
+    )
 
     # Counterfactual carbon stock at most recent evaluation
     counterfactual_c_final = float(counterfactual_post[-1])
@@ -376,7 +456,7 @@ def run_dynamic_baseline_assessment(
         leakage_assessment["source_used"] = "explicit_parameter"
         leakage_assessment["osm_available"] = False
         leakage_assessment["osm_leakage_metrics"] = {}
-    elif osm_context is not None or resolve_local_pbf_path() is not None or allow_live_overpass:
+    elif osm_context is not None or resolve_local_geoparquet_path() is not None or resolve_local_pbf_path() is not None or allow_live_overpass:
         leakage_assessment = LeakageMonitoringEngine.assess_osm_leakage(
             polygon_geojson=polygon_geojson,
             gross_additionality_tco2e=gross_additionality_tco2e,
@@ -442,5 +522,8 @@ def run_dynamic_baseline_assessment(
         "buffer_deduction_pct": buffer_pct,
         "buffer_withheld_tco2e": buffer_withheld_tco2e,
         "net_creditable_tco2e": net_creditable_tco2e,
-        "risk_breakdown": risk_profile
+        "risk_breakdown": risk_profile,
+        "donor_plots_geojson": donor_geo,
+        "placebo_test": placebo_test,
+        "baseline_data_origin": donors_data.get("baseline_data_origin", "simulated_donor_trajectories"),
     }

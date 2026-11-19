@@ -1,20 +1,7 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useMemo, useRef } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useTheme } from '../../context/ThemeContext';
-import { 
-  MapContainer, 
-  TileLayer, 
-  ImageOverlay, 
-  Polygon, 
-  GeoJSON,
-  Marker, 
-  useMap, 
-  useMapEvents, 
-  Popup, 
-  Tooltip 
-} from 'react-leaflet';
-import L from 'leaflet';
-import 'leaflet/dist/leaflet.css';
+import DmrvMapStudio from '../../components/DmrvMapStudio';
 import { 
   Activity, 
   AlertTriangle, 
@@ -63,14 +50,6 @@ import {
   X
 } from 'lucide-react';
 
-// Setup leaflet default marker icons
-delete L.Icon.Default.prototype._getIconUrl;
-L.Icon.Default.mergeOptions({
-  iconRetinaUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.7.1/images/marker-icon-2x.png',
-  iconUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.7.1/images/marker-icon.png',
-  shadowUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.7.1/images/marker-shadow.png',
-});
-
 const FASTAPI_API_URL = import.meta.env.VITE_FASTAPI_API_URL || 'http://localhost:8000';
 
 const OSM_VECTOR_LAYER_STYLES = {
@@ -106,33 +85,22 @@ const OSM_VECTOR_LAYER_STYLES = {
     fillOpacity: 0.7,
     dotClass: 'bg-rose-500',
   },
-};
-
-const bindOsmFeaturePopup = (feature, layer) => {
-  const props = feature?.properties || {};
-  const wrapper = document.createElement('div');
-  wrapper.className = 'text-xs p-1 leading-snug max-w-[220px]';
-
-  const title = document.createElement('div');
-  title.className = 'font-bold text-slate-900';
-  title.textContent = props.name || props.category || 'OSM Feature';
-  wrapper.appendChild(title);
-
-  const meta = document.createElement('div');
-  meta.className = 'text-[10px] font-mono text-slate-600 mt-0.5 uppercase';
-  meta.textContent = `${props.category || 'vector'} • ${props.osm_id || ''}`;
-  wrapper.appendChild(meta);
-
-  if (props.tags && typeof props.tags === 'object') {
-    const entries = Object.entries(props.tags).filter(([k]) => k !== 'name').slice(0, 4);
-    if (entries.length > 0) {
-      const tagsEl = document.createElement('div');
-      tagsEl.className = 'text-[10px] text-slate-700 mt-1 border-t border-slate-200 pt-1';
-      tagsEl.textContent = entries.map(([k, v]) => `${k}=${v}`).join(' · ');
-      wrapper.appendChild(tagsEl);
-    }
-  }
-  layer.bindPopup(wrapper);
+  overture_buildings: {
+    label: 'Overture Footprints',
+    color: '#A855F7',
+    fillColor: '#A855F7',
+    weight: 1.5,
+    fillOpacity: 0.65,
+    dotClass: 'bg-purple-500',
+  },
+  hotspots: {
+    label: 'Frontier Risk Heatmap',
+    color: '#E11D48',
+    fillColor: '#E11D48',
+    weight: 1.5,
+    fillOpacity: 0.65,
+    dotClass: 'bg-red-500',
+  },
 };
 
 const buildLocalLeakageRingFallback = (points, bufferKm = 10) => {
@@ -169,6 +137,175 @@ const buildLocalLeakageRingFallback = (points, bufferKm = 10) => {
     type: 'Polygon',
     coordinates: [outer, inner],
   };
+};
+
+const classifyBrowserOsmTags = (tags = {}) => {
+  const manMade = String(tags.man_made || '').toLowerCase();
+  const landuse = String(tags.landuse || '').toLowerCase();
+  const naturalTag = String(tags.natural || '').toLowerCase();
+  const boundary = String(tags.boundary || '').toLowerCase();
+  const leisure = String(tags.leisure || '').toLowerCase();
+  const highway = String(tags.highway || '').toLowerCase();
+  const waterway = String(tags.waterway || '').toLowerCase();
+  const excluded = new Set(['footway', 'path', 'steps', 'cycleway', 'pedestrian', 'bridleway']);
+
+  if (['kiln', 'works', 'chimney'].includes(manMade) || ['industrial', 'quarry'].includes(landuse) || tags.industrial) {
+    return 'industrial';
+  }
+  if (highway && !excluded.has(highway)) return 'roads';
+  if (waterway || naturalTag === 'water' || tags.water) return 'water';
+  if (
+    ['forest', 'orchard'].includes(landuse) ||
+    ['wood', 'wetland', 'scrub'].includes(naturalTag) ||
+    ['protected_area', 'national_park'].includes(boundary) ||
+    leisure === 'nature_reserve'
+  ) {
+    return 'forest';
+  }
+  return null;
+};
+
+const fetchOsmVectorsFromOverpassBrowser = async (points, bufferKm = 10.0) => {
+  if (!points || points.length < 3) return null;
+  let sumLat = 0;
+  let sumLng = 0;
+  let minLat = Infinity;
+  let maxLat = -Infinity;
+  let minLng = Infinity;
+  let maxLng = -Infinity;
+  for (const [lat, lng] of points) {
+    sumLat += lat;
+    sumLng += lng;
+    if (lat < minLat) minLat = lat;
+    if (lat > maxLat) maxLat = lat;
+    if (lng < minLng) minLng = lng;
+    if (lng > maxLng) maxLng = lng;
+  }
+  const cLat = sumLat / points.length;
+  const cLng = sumLng / points.length;
+  const padDeg = bufferKm / 111.0;
+  const halfSpan = 0.14;
+  const s = Math.max(minLat - padDeg, cLat - halfSpan).toFixed(5);
+  const w = Math.max(minLng - padDeg, cLng - halfSpan).toFixed(5);
+  const n = Math.min(maxLat + padDeg, cLat + halfSpan).toFixed(5);
+  const e = Math.min(maxLng + padDeg, cLng + halfSpan).toFixed(5);
+  const bbox = `${s},${w},${n},${e}`;
+
+  const ql = `[out:json][timeout:8];
+(
+  way["landuse"~"^(forest|orchard|farmland|meadow|paddy|aquaculture|industrial|quarry)$"](${bbox});
+  way["natural"~"^(wood|wetland|scrub|water)$"](${bbox});
+  way["boundary"~"^(protected_area|national_park)$"](${bbox});
+  way["waterway"~"^(river|canal|stream|tidal_channel)$"](${bbox});
+  way["highway"~"^(motorway|trunk|primary|secondary|tertiary|unclassified|track|service|residential)$"](${bbox});
+  nwr["man_made"~"^(kiln|works)$"](${bbox});
+);
+out geom qt 450;`;
+
+  const mirrors = [
+    'https://overpass-api.de/api/interpreter',
+    'https://overpass.kumi.systems/api/interpreter',
+    'https://overpass.private.coffee/api/interpreter',
+  ];
+
+  for (const mirror of mirrors) {
+    const ctrl = new AbortController();
+    const timer = setTimeout(() => ctrl.abort(), 9000);
+    try {
+      const resp = await fetch(mirror, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+        body: new URLSearchParams({ data: ql }).toString(),
+        signal: ctrl.signal,
+      });
+      clearTimeout(timer);
+      if (!resp.ok) continue;
+      const json = await resp.json();
+      const elements = Array.isArray(json?.elements) ? json.elements : [];
+      const layers = {
+        forest: { type: 'FeatureCollection', features: [] },
+        water: { type: 'FeatureCollection', features: [] },
+        roads: { type: 'FeatureCollection', features: [] },
+        industrial: { type: 'FeatureCollection', features: [] },
+      };
+      const counts = { forest: 0, water: 0, roads: 0, industrial: 0 };
+      let roadKm = 0;
+
+      for (const el of elements) {
+        const cat = classifyBrowserOsmTags(el.tags || {});
+        if (!cat) continue;
+        let geometry = null;
+        if (el.type === 'node' && el.lat != null && el.lon != null) {
+          geometry = { type: 'Point', coordinates: [el.lon, el.lat] };
+        } else if (Array.isArray(el.geometry) && el.geometry.length >= 2) {
+          const coords = el.geometry.map((pt) => [pt.lon, pt.lat]);
+          const first = coords[0];
+          const last = coords[coords.length - 1];
+          const isClosed = coords.length >= 4 && first[0] === last[0] && first[1] === last[1];
+          const isArea = Boolean(el.tags?.landuse || ['wood', 'wetland', 'scrub', 'water'].includes(el.tags?.natural) || el.tags?.boundary);
+          if (isClosed && isArea && !el.tags?.highway) {
+            geometry = { type: 'Polygon', coordinates: [coords] };
+          } else {
+            geometry = { type: 'LineString', coordinates: coords };
+            if (cat === 'roads') {
+              for (let i = 1; i < coords.length; i++) {
+                const dLat = (coords[i][1] - coords[i - 1][1]) * 111.132;
+                const dLng = (coords[i][0] - coords[i - 1][0]) * 111.32 * Math.cos((cLat * Math.PI) / 180);
+                roadKm += Math.hypot(dLat, dLng);
+              }
+            }
+          }
+        }
+        if (!geometry) continue;
+        counts[cat] += 1;
+        if (layers[cat].features.length < 220) {
+          layers[cat].features.push({
+            type: 'Feature',
+            id: `${el.type}/${el.id}`,
+            properties: {
+              osm_id: `${el.type}/${el.id}`,
+              category: cat,
+              name: el.tags?.name || el.tags?.[cat] || cat,
+              tags: el.tags || {},
+            },
+            geometry,
+          });
+        }
+      }
+
+      const fallbackRing = buildLocalLeakageRingFallback(points, bufferKm);
+      const approxBeltKm2 = Math.max(10, Math.PI * ((bufferKm + 5) ** 2 - 25));
+      const roadDensity = roadKm / approxBeltKm2;
+      const roadP = Math.min(1, roadDensity / 2.5);
+      const indP = Math.min(1, counts.industrial / 8.0);
+      const pressureScore = Math.min(1, 0.45 * roadP + 0.2 * indP);
+      const derivedLoss = Number((0.008 + pressureScore * 0.042).toFixed(4));
+
+      return {
+        osm_available: true,
+        source_used: 'browser_overpass',
+        cached: false,
+        layer_counts: counts,
+        layers,
+        leakage_belt: {
+          buffer_km: bufferKm,
+          leakage_belt_area_ha: Number((approxBeltKm2 * 100).toFixed(1)),
+          geojson: fallbackRing,
+          metrics: {
+            road_length_km: Number(roadKm.toFixed(2)),
+            road_density_km_per_km2: Number(roadDensity.toFixed(3)),
+            cropland_share_pct: 0,
+            industrial_count: counts.industrial,
+            derived_leakage_loss_rate: derivedLoss,
+            leakage_source: 'browser_overpass_fallback',
+          },
+        },
+      };
+    } catch {
+      clearTimeout(timer);
+    }
+  }
+  return null;
 };
 
 // Geodesic Area & Perimeter calculation on WGS84 ellipsoid
@@ -287,61 +424,6 @@ const getBangladeshEcoZone = (lat, lng) => {
       forestType: 'Open Agroforestry / Agricultural Canopy'
     };
   }
-};
-
-// A component to center/zoom map when boundaries are uploaded or presets selected
-const RecenterMap = ({ bounds, center, zoom }) => {
-  const map = useMap();
-  useEffect(() => {
-    if (bounds && Array.isArray(bounds) && bounds.length === 2 && bounds[0] && bounds[1]) {
-      map.fitBounds(bounds, { padding: [50, 50], maxZoom: 13 });
-    } else if (center && Array.isArray(center) && center.length === 2 && !isNaN(center[0]) && !isNaN(center[1])) {
-      map.setView(center, zoom || map.getZoom());
-    }
-  }, [bounds, center, zoom, map]);
-  return null;
-};
-
-// Component to force Leaflet resize on mount or tab switch so tiles render immediately
-const MapResizeHandler = () => {
-  const map = useMap();
-  useEffect(() => {
-    map.invalidateSize();
-    const timer = setTimeout(() => {
-      map.invalidateSize();
-    }, 150);
-    return () => clearTimeout(timer);
-  }, [map]);
-  return null;
-};
-
-// Component to handle drawing points and click inspection on map
-const MapEventHandler = ({ 
-  isDrawing, 
-  drawPoints, 
-  setDrawPoints, 
-  onPixelClick, 
-  hoverCoords, 
-  setHoverCoords 
-}) => {
-  const map = useMap();
-  
-  useMapEvents({
-    mousemove(e) {
-      setHoverCoords({ lat: e.latlng.lat, lng: e.latlng.lng });
-    },
-    click(e) {
-      if (isDrawing) {
-        // Drawing mode: Add vertex to polygon
-        setDrawPoints([...drawPoints, [e.latlng.lat, e.latlng.lng]]);
-      } else {
-        // Inspection mode: Click pixel
-        onPixelClick(e.latlng.lat, e.latlng.lng);
-      }
-    }
-  });
-
-  return null;
 };
 
 // Predefined forest reserve polygons in Bangladesh
@@ -758,8 +840,12 @@ const CarbonMonitoring = () => {
     water: true,
     roads: true,
     industrial: true,
+    overture_buildings: true,
+    hotspots: true,
     leakageBelt: true,
+    donorPlots: true,
   });
+  const [donorPlotsGeoJson, setDonorPlotsGeoJson] = useState(null);
   const [osmContext, setOsmContext] = useState(null);
   const [osmLoading, setOsmLoading] = useState(false);
   const [osmRevision, setOsmRevision] = useState(0);
@@ -793,20 +879,9 @@ const CarbonMonitoring = () => {
   const [endDate, setEndDate] = useState('2026-06-01');
   const [cloudCeiling, setCloudCeiling] = useState(20);
 
-  // Hover & Inspector State
+  // Hover & Inspector State (null until user clicks a pixel or searches coordinates)
   const [hoverCoords, setHoverCoords] = useState({ lat: 22.15, lng: 89.50 });
-  const [inspectedPixel, setInspectedPixel] = useState({
-    lat: "22.25000",
-    lng: "89.50000",
-    name: "Sundarbans Mangrove Reserve (Block B)",
-    region: "Khulna Division, Bangladesh",
-    ndvi: "0.762",
-    biomass: "248.50",
-    carbon: "118.04",
-    confidence: "94% (model estimate, unverified)",
-    timestamp: "10:30:00 AM",
-    forestType: "Dense Coastal Mangrove"
-  });
+  const [inspectedPixel, setInspectedPixel] = useState(null);
 
   // Floating Toast notification state
   const [toast, setToast] = useState({ show: false, message: '', type: 'success' });
@@ -839,73 +914,130 @@ const CarbonMonitoring = () => {
     showToast(`Downloading Verra VM0047 Audit Dossier (${format.toUpperCase()})...`, 'info');
   };
 
+  const applyOsmPayload = (data, labelOverride = null) => {
+    setOsmContext(data);
+    setOsmRevision((r) => r + 1);
+
+    const beltMetrics = data?.leakage_belt?.metrics || {};
+    const assessed = data?.leakage_assessment || {};
+    if (data?.osm_available) {
+      setDashboardData((prev) => {
+        const nextLeakage = assessed.leakage_deduction_tco2e ?? prev.leakage_deduction_tco2e ?? 0;
+        const gross = prev.gross_additionality_tco2e ?? 0;
+        const bufferPctRatio = (prev.buffer_deduction_pct ?? 18.0) / 100.0;
+        const netPreBuffer = Math.max(0, gross - nextLeakage);
+        const nextBuffer = Number((netPreBuffer * bufferPctRatio).toFixed(2));
+        const nextNet = Number((netPreBuffer - nextBuffer).toFixed(2));
+        const discRatio = (prev.verra_precision_discount_pct ?? 0) / 100.0;
+        return {
+          ...prev,
+          leakage_belt_area_ha: data.leakage_belt?.leakage_belt_area_ha || prev.leakage_belt_area_ha,
+          leakage_risk_rating: assessed.leakage_risk_rating || prev.leakage_risk_rating,
+          leakage_deduction_tco2e: nextLeakage,
+          buffer_withheld_tco2e: nextBuffer,
+          net_creditable_tco2e: nextNet,
+          conservative_creditable_tco2e: Number((nextNet * (1 - discRatio)).toFixed(2)),
+          osm_leakage_metrics: beltMetrics,
+          osm_source_used: data.source_used,
+        };
+      });
+    }
+    return labelOverride || (
+      data.source_used === 'quackosm_geoparquet'
+        ? 'QuackOSM GeoParquet (DuckDB)'
+        : data.source_used === 'quackosm_pbf'
+          ? 'QuackOSM Local PBF'
+          : data.source_used === 'browser_overpass'
+            ? 'Browser Overpass'
+            : 'Overpass Fallback'
+    );
+  };
+
   const loadOsmLayers = async (pointsInput = null, grossAdditionality = null, silentOffline = false) => {
     const activePts = pointsInput && pointsInput.length >= 3 ? pointsInput : (drawPoints.length >= 3 ? drawPoints : SUNDARBANS_RESERVE);
     const geojsonCoords = [...activePts, activePts[0]].map((c) => [c[1], c[0]]);
     const geojsonPolygon = { type: 'Polygon', coordinates: [geojsonCoords] };
 
     setOsmLoading(true);
-    const controller = new AbortController();
-    const timeoutId = setTimeout(() => controller.abort(), 12000);
-
     try {
-      const res = await fetch(`${FASTAPI_API_URL}/api/carbon/osm/layers`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          polygon_geojson: geojsonPolygon,
-          buffer_km: 10.0,
-          gross_additionality_tco2e: grossAdditionality ?? dashboardData.gross_additionality_tco2e ?? 278500,
-          allow_overpass: true,
-        }),
-        signal: controller.signal,
-      });
-      clearTimeout(timeoutId);
+      const controller = new AbortController();
+      // Allow sufficient headroom for first-run QuackOSM DuckDB PBF extraction before osm_cache warms
+      const timeoutId = setTimeout(() => controller.abort(), 45000);
+      let backendReachable = false;
 
-      if (!res.ok) {
-        throw new Error(`HTTP ${res.status}`);
-      }
-      const data = await res.json();
-      setOsmContext(data);
-      setOsmRevision((r) => r + 1);
-
-      const beltMetrics = data?.leakage_belt?.metrics || {};
-      const assessed = data?.leakage_assessment || {};
-      if (data?.osm_available) {
-        setDashboardData((prev) => {
-          const nextLeakage = assessed.leakage_deduction_tco2e ?? prev.leakage_deduction_tco2e ?? 0;
-          const gross = prev.gross_additionality_tco2e ?? 0;
-          const bufferPctRatio = (prev.buffer_deduction_pct ?? 18.0) / 100.0;
-          const netPreBuffer = Math.max(0, gross - nextLeakage);
-          const nextBuffer = Number((netPreBuffer * bufferPctRatio).toFixed(2));
-          const nextNet = Number((netPreBuffer - nextBuffer).toFixed(2));
-          const discRatio = (prev.verra_precision_discount_pct ?? 0) / 100.0;
-          return {
-            ...prev,
-            leakage_belt_area_ha: data.leakage_belt?.leakage_belt_area_ha || prev.leakage_belt_area_ha,
-            leakage_risk_rating: assessed.leakage_risk_rating || prev.leakage_risk_rating,
-            leakage_deduction_tco2e: nextLeakage,
-            buffer_withheld_tco2e: nextBuffer,
-            net_creditable_tco2e: nextNet,
-            conservative_creditable_tco2e: Number((nextNet * (1 - discRatio)).toFixed(2)),
-            osm_leakage_metrics: beltMetrics,
-            osm_source_used: data.source_used,
-          };
+      try {
+        const res = await fetch(`${FASTAPI_API_URL}/api/carbon/osm/layers`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            polygon_geojson: geojsonPolygon,
+            buffer_km: 10.0,
+            gross_additionality_tco2e: grossAdditionality ?? dashboardData.gross_additionality_tco2e ?? 278500,
+            allow_overpass: true,
+          }),
+          signal: controller.signal,
         });
-        const totalVec = Object.values(data.layer_counts || {}).reduce((a, b) => a + b, 0);
-        const engineLabel = data.source_used === 'quackosm_pbf' ? 'QuackOSM Local PBF' : 'Overpass Fallback';
-        if (!silentOffline) {
-          showToast(`Loaded ${totalVec} OSM vectors via ${engineLabel} (10 km belt analyzed).`, 'success');
+        clearTimeout(timeoutId);
+        backendReachable = true;
+
+        if (!res.ok) {
+          throw new Error(`HTTP ${res.status}`);
         }
-      } else if (!silentOffline) {
-        showToast('OSM servers unavailable — rendered 10 km geometric leakage belt only.', 'info');
+        const data = await res.json();
+        if (data?.osm_available) {
+          const engineLabel = applyOsmPayload(data);
+          const totalVec = Object.values(data.layer_counts || {}).reduce((a, b) => a + b, 0);
+
+          // Fetch VT0007 spatial donor control plots for active AOI in background
+          try {
+            const bForm = new FormData();
+            bForm.append('polygon_geojson', JSON.stringify(geojsonPolygon));
+            bForm.append('forest_area_ha', String(dashboardData.total_area_size_ha || 3800));
+            bForm.append('project_carbon_tc_ha', String(dashboardData.current_carbon_estimate_tC_ha || 135));
+            const bRes = await fetch(`${FASTAPI_API_URL}/api/carbon/baseline/assess`, { method: 'POST', body: bForm });
+            if (bRes.ok) {
+              const bData = await bRes.json();
+              if (bData?.donor_plots_geojson) {
+                setDonorPlotsGeoJson(bData.donor_plots_geojson);
+              }
+            }
+          } catch {
+            // Non-blocking donor map pins
+          }
+
+          if (!silentOffline) {
+            showToast(`Loaded ${totalVec} OSM vectors via ${engineLabel} (10 km belt analyzed).`, 'success');
+          }
+          return;
+        }
+      } catch {
+        clearTimeout(timeoutId);
       }
-    } catch {
-      clearTimeout(timeoutId);
+
+      // Secondary fallback: query Overpass directly from browser when backend is offline or returned unavailable
+      try {
+        const browserOsm = await fetchOsmVectorsFromOverpassBrowser(activePts, 10.0);
+        if (browserOsm?.osm_available) {
+          applyOsmPayload(browserOsm);
+          const totalVec = Object.values(browserOsm.layer_counts || {}).reduce((a, b) => a + b, 0);
+          if (!silentOffline) {
+            showToast(
+              backendReachable
+                ? `Loaded ${totalVec} OSM vectors via direct browser Overpass fallback.`
+                : `FastAPI backend unreachable — loaded ${totalVec} OSM vectors directly via Overpass.`,
+              'success'
+            );
+          }
+          return;
+        }
+      } catch {
+        // Fall through to honest ring preview
+      }
+
       const fallbackRing = buildLocalLeakageRingFallback(activePts, 10.0);
       setOsmContext({
         osm_available: false,
-        source_used: 'offline_ring_only',
+        source_used: backendReachable ? 'unavailable' : 'offline_ring_only',
         layer_counts: { forest: 0, water: 0, roads: 0, industrial: 0 },
         layers: {
           forest: { type: 'FeatureCollection', features: [] },
@@ -922,7 +1054,12 @@ const CarbonMonitoring = () => {
       });
       setOsmRevision((r) => r + 1);
       if (!silentOffline) {
-        showToast('OSM backend offline — displaying 10 km boundary ring preview only.', 'info');
+        showToast(
+          backendReachable
+            ? 'OSM servers & local PBF unavailable — displaying 10 km boundary ring preview only.'
+            : 'FastAPI backend (:8000) & Overpass unreachable — displaying 10 km boundary ring preview only.',
+          'info'
+        );
       }
     } finally {
       setOsmLoading(false);
@@ -1695,9 +1832,8 @@ const CarbonMonitoring = () => {
     }
   };
 
-  // Click handler to inspect a pixel's properties on map
+  // Click handler to inspect a pixel's properties on map via real backend /api/carbon/pixel-inspect
   const handlePixelClick = async (lat, lng) => {
-    // Sanitize and clean coordinate inputs to prevent double dots or invalid formats
     const parsedLat = typeof lat === 'number' ? lat : parseFloat(lat);
     const parsedLng = typeof lng === 'number' ? lng : parseFloat(lng);
     if (isNaN(parsedLat) || isNaN(parsedLng)) return;
@@ -1710,95 +1846,100 @@ const CarbonMonitoring = () => {
       lat: latStr,
       lng: lngStr,
       name: "Resolving location details...",
-      region: "Contacting geocoder...",
-      ndvi: "Calculating...",
-      biomass: "Calculating...",
-      carbon: "Calculating...",
-      confidence: "...",
-      forestType: "Classifying..."
+      region: "Contacting backend & geocoder...",
+      ndvi: "Querying...",
+      biomass: "Querying...",
+      carbon: "Querying...",
+      confidence: "Querying backend...",
+      forestType: "Resolving stratum..."
     });
 
     const ecoZone = getBangladeshEcoZone(parsedLat, parsedLng);
 
-    let forestType = ecoZone.forestType;
-    let estimatedBiomass = (ecoZone.biomassMin + ecoZone.biomassMax) / 2;
-    let estimatedCarbon = estimatedBiomass * 0.475;
-    let ndvi = ecoZone.baseNdvi;
+    const pixelController = new AbortController();
+    const pixelTimeout = setTimeout(() => pixelController.abort(), 15000);
+    const geoController = new AbortController();
+    const geoTimeout = setTimeout(() => geoController.abort(), 5000);
 
-    // Check if clicking inside the currently selected analysis job bounds
-    let usedJobData = false;
-    if (selectedJob && selectedJob.result) {
-      const bounds = getJobBounds(selectedJob);
-      const minLat = bounds[0][0];
-      const maxLat = bounds[1][0];
-      const minLng = bounds[0][1];
-      const maxLng = bounds[1][1];
+    const [pixelOutcome, geoOutcome] = await Promise.allSettled([
+      fetch(`${FASTAPI_API_URL}/api/carbon/pixel-inspect`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          lat: parsedLat,
+          lng: parsedLng,
+          job_id: selectedJob?.id || null,
+        }),
+        signal: pixelController.signal,
+      }).then(async (res) => {
+        clearTimeout(pixelTimeout);
+        if (!res.ok) throw new Error(`HTTP ${res.status}`);
+        return res.json();
+      }),
+      fetch(
+        `https://nominatim.openstreetmap.org/reverse?format=json&lat=${parsedLat}&lon=${parsedLng}&zoom=10&addressdetails=1`,
+        {
+          headers: { 'Accept-Language': 'en', 'User-Agent': 'CarbonZero-BD-App' },
+          signal: geoController.signal,
+        }
+      ).then((res) => {
+        clearTimeout(geoTimeout);
+        return res.ok ? res.json() : null;
+      }),
+    ]);
+    clearTimeout(pixelTimeout);
+    clearTimeout(geoTimeout);
 
-      if (parsedLat >= minLat && parsedLat <= maxLat && parsedLng >= minLng && parsedLng <= maxLng) {
-        usedJobData = true;
-        const latFraction = (parsedLat - minLat) / (maxLat - minLat || 1);
-        const lngFraction = (parsedLng - minLng) / (maxLng - minLng || 1);
-        
-        // Deterministic variation based on location
-        const distSeed = Math.sin(latFraction * Math.PI) * Math.cos(lngFraction * Math.PI);
-        const ndviDeviation = distSeed * 0.18;
-        
-        const avgNdvi = selectedJob.result.avg_ndvi || ecoZone.baseNdvi;
-        ndvi = Math.min(0.92, Math.max(0.08, avgNdvi + ndviDeviation));
-        estimatedBiomass = (selectedJob.result.estimated_biomass || estimatedBiomass) * (ndvi / (avgNdvi || 1));
-        estimatedCarbon = estimatedBiomass * 0.475;
-        forestType = ndvi > 0.6 ? `${ecoZone.forestType} Canopy` : "Secondary Canopy / Mixed Growth";
-      }
-    }
-
-    if (!usedJobData) {
-      // Deterministic variation calibrated to ecoZone
-      const variation = Math.sin(parsedLat * 100) * Math.cos(parsedLng * 100);
-      ndvi = Math.min(0.92, Math.max(0.12, ecoZone.baseNdvi + variation * 0.08));
-      const biomassSpan = ecoZone.biomassMax - ecoZone.biomassMin;
-      estimatedBiomass = ecoZone.biomassMin + (ndvi / 0.8) * biomassSpan;
-      estimatedCarbon = estimatedBiomass * 0.475;
-    }
-
-    // Geocode location using OpenStreetMap Nominatim API
     let locationName = `Coordinates: ${latStr}, ${lngStr}`;
     let districtInfo = ecoZone.zone;
-
-    try {
-      const res = await fetch(`https://nominatim.openstreetmap.org/reverse?format=json&lat=${parsedLat}&lon=${parsedLng}&zoom=10&addressdetails=1`, {
-        headers: {
-          'Accept-Language': 'en',
-          'User-Agent': 'CarbonZero-BD-App'
-        }
-      });
-      if (res.ok) {
-        const data = await res.json();
-        locationName = data.display_name || locationName;
-        if (data.address) {
-          const district = data.address.district || data.address.state_district || data.address.county || data.address.city || "";
-          const state = data.address.state || "";
-          const country = data.address.country || "Bangladesh";
-          districtInfo = [district, state, country].filter(Boolean).join(", ");
-        }
+    if (geoOutcome.status === 'fulfilled' && geoOutcome.value) {
+      const data = geoOutcome.value;
+      locationName = data.display_name || locationName;
+      if (data.address) {
+        const district = data.address.district || data.address.state_district || data.address.county || data.address.city || "";
+        const state = data.address.state || "";
+        const country = data.address.country || "Bangladesh";
+        districtInfo = [district, state, country].filter(Boolean).join(", ");
       }
-    } catch (error) {
-      console.warn("Nominatim reverse geocode fallback applied", error);
-      locationName = `${ecoZone.zone} (${latStr}, ${lngStr})`;
-      districtInfo = "Bangladesh Sovereign Territory";
     }
 
-    const newPixel = {
-      lat: latStr,
-      lng: lngStr,
-      name: locationName,
-      region: districtInfo,
-      ndvi: ndvi.toFixed(3),
-      biomass: estimatedBiomass.toFixed(2),
-      carbon: estimatedCarbon.toFixed(2),
-      confidence: "94% (NFI Tier-2 Calibrated)",
-      timestamp: new Date().toLocaleTimeString(),
-      forestType
-    };
+    let newPixel;
+    if (pixelOutcome.status === 'fulfilled' && pixelOutcome.value) {
+      const p = pixelOutcome.value;
+      newPixel = {
+        lat: latStr,
+        lng: lngStr,
+        name: locationName,
+        region: districtInfo,
+        ndvi: Number(p.ndvi ?? 0).toFixed(3),
+        biomass: Number(p.estimated_biomass_mg_ha ?? 0).toFixed(2),
+        carbon: Number(p.estimated_carbon_tc_ha ?? 0).toFixed(2),
+        carbonTotal: p.estimated_carbon_total_tc_ha != null ? Number(p.estimated_carbon_total_tc_ha).toFixed(2) : null,
+        agbCarbon: p.carbon_agb_tc_ha != null ? Number(p.carbon_agb_tc_ha).toFixed(2) : null,
+        bgbCarbon: p.carbon_bgb_tc_ha != null ? Number(p.carbon_bgb_tc_ha).toFixed(2) : null,
+        socCarbon: p.carbon_soc_tc_ha != null ? Number(p.carbon_soc_tc_ha).toFixed(2) : null,
+        co2eHa: p.tonnes_co2e_ha != null ? Number(p.tonnes_co2e_ha).toFixed(2) : null,
+        confidence: p.confidence_label || `${Math.round((p.confidence ?? 0) * 100)}% (backend model; unverified)`,
+        dataSource: p.data_source || 'unknown',
+        timestamp: new Date().toLocaleTimeString(),
+        forestType: `${p.forest_stratum || ecoZone.forestType} • ${p.data_source || 'backend'}`
+      };
+    } else {
+      newPixel = {
+        lat: latStr,
+        lng: lngStr,
+        name: locationName,
+        region: districtInfo,
+        ndvi: "Unavailable",
+        biomass: "Unavailable",
+        carbon: "Unavailable",
+        confidence: "FastAPI backend (:8000) offline — pixel telemetry unavailable",
+        dataSource: "backend_offline",
+        timestamp: new Date().toLocaleTimeString(),
+        forestType: `${ecoZone.zone} (Backend Offline)`
+      };
+      showToast('FastAPI backend (:8000) unreachable — cannot compute live pixel carbon.', 'info');
+    }
 
     setInspectedPixel(newPixel);
 
@@ -4269,15 +4410,19 @@ const CarbonMonitoring = () => {
                     ? 'bg-emerald/15 text-emerald'
                     : (isLight ? 'bg-slate-100 text-slate-600' : 'bg-white/10 text-mist')
                 }`}>
-                  {osmContext?.source_used === 'quackosm_pbf'
-                    ? (osmContext.cached ? 'QuackOSM PBF (Cached)' : 'QuackOSM PBF')
-                    : osmContext?.source_used === 'overpass_api'
-                      ? (osmContext.cached ? 'Overpass (Cached)' : 'Overpass Fallback')
-                      : osmContext?.source_used === 'offline_ring_only'
-                        ? 'Belt Preview Only'
-                        : osmContext?.source_used === 'unavailable'
-                          ? 'OSM Unavailable'
-                          : 'Not Loaded'}
+                  {osmContext?.source_used === 'quackosm_geoparquet'
+                    ? (osmContext.cached ? 'GeoParquet (Cached)' : 'DuckDB GeoParquet')
+                    : osmContext?.source_used === 'quackosm_pbf'
+                      ? (osmContext.cached ? 'QuackOSM PBF (Cached)' : 'QuackOSM PBF')
+                      : osmContext?.source_used === 'overpass_api'
+                        ? (osmContext.cached ? 'Overpass (Cached)' : 'Overpass Fallback')
+                        : osmContext?.source_used === 'browser_overpass'
+                          ? 'Browser Overpass'
+                          : osmContext?.source_used === 'offline_ring_only'
+                            ? 'Belt Preview Only'
+                            : osmContext?.source_used === 'unavailable'
+                              ? 'OSM Unavailable'
+                              : 'Not Loaded'}
                 </span>
               </div>
 
@@ -4298,6 +4443,7 @@ const CarbonMonitoring = () => {
               <div className="space-y-1.5">
                 {[
                   { id: 'leakageBelt', label: '10 km Leakage Belt Ring', dotClass: 'bg-amber-400', count: osmContext?.leakage_belt?.geojson ? 1 : 0 },
+                  { id: 'donorPlots', label: 'VT0007 Donor Plots', dotClass: 'bg-teal-400', count: donorPlotsGeoJson?.features?.length ?? 0 },
                   ...Object.entries(OSM_VECTOR_LAYER_STYLES).map(([id, cfg]) => ({
                     id,
                     label: cfg.label,
@@ -4320,7 +4466,7 @@ const CarbonMonitoring = () => {
                       <span className="truncate">{ov.label}</span>
                     </span>
                     <span className="text-[10px] font-mono shrink-0 ml-2">
-                      {osmContext ? `${ov.count}` : (osmOverlays[ov.id] ? 'ON' : 'OFF')}
+                      {osmContext || ov.id === 'donorPlots' ? `${ov.count}` : (osmOverlays[ov.id] ? 'ON' : 'OFF')}
                     </span>
                   </button>
                 ))}
@@ -4335,15 +4481,15 @@ const CarbonMonitoring = () => {
                     </span>
                   </div>
                   <div className={`p-2 rounded-lg border ${isLight ? 'bg-slate-50 border-slate-200' : 'bg-white/[0.03] border-white/10'}`}>
-                    <span className="text-[10px] text-slate-500 block">Cropland Share</span>
+                    <span className="text-[10px] text-slate-500 block">Nearest Road Edge</span>
                     <span className={`font-mono font-bold ${isLight ? 'text-slate-900' : 'text-white'}`}>
-                      {osmContext.leakage_belt.metrics.cropland_share_pct}%
+                      {osmContext.frontier_analytics?.nearest_road_km != null ? `${osmContext.frontier_analytics.nearest_road_km} km` : `${osmContext.leakage_belt.metrics.cropland_share_pct}% crop`}
                     </span>
                   </div>
                   <div className={`p-2 rounded-lg border ${isLight ? 'bg-slate-50 border-slate-200' : 'bg-white/[0.03] border-white/10'}`}>
-                    <span className="text-[10px] text-slate-500 block">Kilns &amp; Industry</span>
+                    <span className="text-[10px] text-slate-500 block">Kilns &amp; Buildings</span>
                     <span className={`font-mono font-bold ${isLight ? 'text-slate-900' : 'text-white'}`}>
-                      {osmContext.leakage_belt.metrics.industrial_count} sites
+                      {osmContext.leakage_belt.metrics.industrial_count} / {osmContext.frontier_analytics?.overture_belt_buildings ?? 0}
                     </span>
                   </div>
                   <div className={`p-2 rounded-lg border ${isLight ? 'bg-slate-50 border-slate-200' : 'bg-white/[0.03] border-white/10'}`}>
@@ -4358,204 +4504,31 @@ const CarbonMonitoring = () => {
 
           </div>
 
-          {/* Interactive Leaflet Map Container */}
+          {/* Interactive WebGL 3D & Epoch-Swipe MapLibre Studio */}
           <div className="lg:col-span-3 flex flex-col space-y-4">
-            
-            {/* Map Frame */}
-            <div className="relative rounded-3xl overflow-hidden border border-white/10 h-[500px] z-10">
-              
-              <MapContainer 
-                center={mapCenter} 
-                zoom={mapZoom} 
-                className="w-full h-full"
-                scrollWheelZoom={true}
-              >
-                {/* Instant Resize Handler to prevent grey / stuck tiles */}
-                <MapResizeHandler />
-
-                {/* Tile Layer Toggle */}
-                {basemap === 'dark' ? (
-                  <TileLayer
-                    key="dark"
-                    url="https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png"
-                    attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors &copy; <a href="https://carto.com/attributions">CARTO</a>'
-                    maxZoom={19}
-                  />
-                ) : basemap === 'satellite' ? (
-                  <TileLayer
-                    key="satellite"
-                    url="https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}"
-                    attribution='&copy; ESRI ArcGIS World Imagery'
-                    maxZoom={19}
-                  />
-                ) : (
-                  <TileLayer
-                    key="terrain"
-                    url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
-                    attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
-                    maxZoom={19}
-                  />
-                )}
-
-                {/* 10 km VM0047 Leakage Belt Ring + OSM Vector Overlays */}
-                {osmOverlays.leakageBelt && osmContext?.leakage_belt?.geojson && (
-                  <GeoJSON
-                    key={`belt-${osmRevision}`}
-                    data={osmContext.leakage_belt.geojson}
-                    style={{
-                      color: '#F59E0B',
-                      weight: 2,
-                      dashArray: '6 4',
-                      fillColor: '#F59E0B',
-                      fillOpacity: 0.08,
-                    }}
-                  />
-                )}
-
-                {Object.entries(OSM_VECTOR_LAYER_STYLES).map(([layerKey, styleCfg]) => {
-                  const fc = osmContext?.layers?.[layerKey];
-                  if (!osmOverlays[layerKey] || !fc?.features?.length) return null;
-                  return (
-                    <GeoJSON
-                      key={`${layerKey}-${osmRevision}`}
-                      data={fc}
-                      style={{
-                        color: styleCfg.color,
-                        fillColor: styleCfg.fillColor,
-                        weight: styleCfg.weight,
-                        fillOpacity: styleCfg.fillOpacity,
-                      }}
-                      pointToLayer={(_, latlng) =>
-                        L.circleMarker(latlng, {
-                          radius: 5,
-                          color: styleCfg.color,
-                          fillColor: styleCfg.fillColor,
-                          weight: 1.5,
-                          fillOpacity: 0.85,
-                        })
-                      }
-                      onEachFeature={bindOsmFeaturePopup}
-                    />
-                  );
-                })}
-
-                {/* Draw polygon coordinates visual styled dynamically by LAYER_CONFIG */}
-                {drawPoints.length > 0 && (
-                  <>
-                    <Polygon 
-                      positions={drawPoints} 
-                      pathOptions={{ 
-                        color: LAYER_CONFIG[activeLayer]?.borderColor || '#00C853', 
-                        fillColor: LAYER_CONFIG[activeLayer]?.fillColor || '#00C853', 
-                        fillOpacity: LAYER_CONFIG[activeLayer]?.fillOpacity || 0.3,
-                        weight: 2.5
-                      }} 
-                    />
-                    {isDrawing && drawPoints.map((point, idx) => (
-                      <Marker key={idx} position={point} />
-                    ))}
-                  </>
-                )}
-
-                {/* Inspected Pixel Marker with Popup */}
-                {inspectedPixel && !isNaN(parseFloat(inspectedPixel.lat)) && !isNaN(parseFloat(inspectedPixel.lng)) && (
-                  <Marker position={[parseFloat(inspectedPixel.lat), parseFloat(inspectedPixel.lng)]}>
-                    <Popup>
-                      <div className="text-xs p-1 max-w-xs leading-tight">
-                        <div className="font-bold text-[#00873E]">{inspectedPixel.forestType || "Inspected Pixel"}</div>
-                        <div className="text-gray-500 font-mono text-[10px] mt-0.5">
-                          {inspectedPixel.lat}, {inspectedPixel.lng}
-                        </div>
-                        <div className="mt-1.5 font-medium text-gray-700">
-                          Biomass: <span className="font-bold">{inspectedPixel.biomass} Mg/ha</span>
-                        </div>
-                        <div className="mt-1.5 font-medium text-gray-700">
-                          Carbon: <span className="font-bold">{inspectedPixel.carbon} tC/ha</span>
-                        </div>
-                        <div className="text-[10px] text-gray-500 mt-1">
-                          NDVI: {inspectedPixel.ndvi} • {inspectedPixel.confidence}
-                        </div>
-                      </div>
-                    </Popup>
-                  </Marker>
-                )}
-
-                {/* Display GEE/Simulated image overlay results */}
-                {selectedJob && selectedJob.result && selectedJob.layers && selectedJob.layers.length > 0 && (
-                  selectedJob.layers
-                    .filter(l => l.layer_type === activeLayer)
-                    .map((layer, idx) => (
-                      <ImageOverlay
-                        key={idx}
-                        url={layer.layer_url}
-                        bounds={getJobBounds(selectedJob)}
-                        opacity={0.65}
-                      />
-                    ))
-                )}
-
-                {/* Recenter Map when boundaries loaded */}
-                <RecenterMap bounds={mapBounds} center={mapCenter} zoom={mapZoom} />
-
-                {/* Map event helper */}
-                <MapEventHandler 
-                  isDrawing={isDrawing} 
-                  drawPoints={drawPoints} 
-                  setDrawPoints={setDrawPoints} 
-                  onPixelClick={handlePixelClick}
-                  hoverCoords={hoverCoords}
-                  setHoverCoords={setHoverCoords}
-                />
-              </MapContainer>
-
-              {/* Lat/Lng Hover Indicator (Bottom Left) */}
-              <div className="absolute bottom-4 left-4 bg-carbon/80 backdrop-blur-md border border-white/10 px-3 py-1.5 rounded-lg text-[10px] text-mist font-mono z-20">
-                Lat: {hoverCoords.lat.toFixed(5)}, Lng: {hoverCoords.lng.toFixed(5)}
-              </div>
-
-              {/* Map Loading overlay */}
-              {analyzing && (
-                <div className="absolute inset-0 bg-carbon/80 backdrop-blur-sm z-30 flex flex-col items-center justify-center space-y-4">
-                  <div className="w-12 h-12 border-4 border-emerald border-t-transparent rounded-full animate-spin"></div>
-                  <h3 className="font-bold font-sans text-lg text-white">Generating Median Sentinel-2 Composite...</h3>
-                  <p className="text-xs text-mist max-w-sm text-center">Processing cloud masking filters and running Random Forest Carbon estimations on the AI Inference service.</p>
-                </div>
-              )}
-
-              {/* Map Legend Overlay (Top Right) - Fully dynamic based on LAYER_CONFIG */}
-              <div className="absolute top-2.5 right-2.5 sm:top-4 sm:right-4 bg-carbon/90 backdrop-blur-md border border-white/15 p-2.5 sm:p-3.5 rounded-2xl max-w-[165px] sm:max-w-[210px] z-20 space-y-2 sm:space-y-2.5 shadow-xl">
-                <div className="flex items-center justify-between gap-2">
-                  <h4 className="text-[10px] font-bold uppercase tracking-wider text-mist truncate">
-                    {LAYER_CONFIG[activeLayer]?.title || 'INDEX RANGE'}
-                  </h4>
-                  <span className={`text-[9px] px-1.5 py-0.5 rounded font-bold shrink-0 ${LAYER_CONFIG[activeLayer]?.badgeClass || 'bg-emerald text-carbon'}`}>
-                    {LAYER_CONFIG[activeLayer]?.id?.toUpperCase()}
-                  </span>
-                </div>
-                
-                <div className="flex items-center space-x-3">
-                  <div 
-                    className="w-3 h-20 rounded shadow-inner"
-                    style={{ background: LAYER_CONFIG[activeLayer]?.gradientCSS || 'linear-gradient(to top, #78350F, #F59E0B, #84CC16, #00C853)' }}
-                  ></div>
-                  <div className="flex flex-col justify-between h-20 text-[10px] text-mist font-mono">
-                    {LAYER_CONFIG[activeLayer]?.ticks?.map((tick, i) => (
-                      <span key={i} className={i === 0 ? 'text-white font-semibold' : ''}>{tick}</span>
-                    )) || (
-                      <>
-                        <span>High (0.85)</span>
-                        <span>Med (0.50)</span>
-                        <span>Low (0.15)</span>
-                      </>
-                    )}
-                  </div>
-                </div>
-
-                <p className="text-[9px] text-mist/80 border-t border-white/10 pt-1.5 leading-tight">
-                  {LAYER_CONFIG[activeLayer]?.description}
-                </p>
-              </div>
-            </div>
+            <DmrvMapStudio
+              drawPoints={drawPoints}
+              setDrawPoints={setDrawPoints}
+              isDrawing={isDrawing}
+              basemap={basemap}
+              setBasemap={setBasemap}
+              activeLayer={activeLayer}
+              layerConfig={LAYER_CONFIG}
+              osmContext={osmContext}
+              osmOverlays={osmOverlays}
+              inspectedPixel={inspectedPixel}
+              activeAlerts={activeAlerts}
+              selectedJob={selectedJob}
+              baselineData={selectedJob?.baseline}
+              donorPlotsGeoJson={donorPlotsGeoJson}
+              mapBounds={mapBounds}
+              mapCenter={mapCenter}
+              mapZoom={mapZoom}
+              onPixelClick={handlePixelClick}
+              onHoverCoords={setHoverCoords}
+              analyzing={analyzing}
+              isLight={isLight}
+            />
 
             {/* Interactive Pixel Query Results (Appears on Map Click) */}
             <div className={`border rounded-3xl p-6 relative overflow-hidden transition-all ${
@@ -4595,20 +4568,25 @@ const CarbonMonitoring = () => {
                       </span>
                     </div>
                     <div className={`p-4 rounded-xl border ${isLight ? 'bg-[#F8FAFC] border-[#E2E8F0]' : 'bg-white/5 border-white/5'}`}>
-                      <span className={`text-[10px] block ${isLight ? 'text-[#64748B]' : 'text-mist'}`}>Estimated Biomass</span>
+                      <span className={`text-[10px] block ${isLight ? 'text-[#64748B]' : 'text-mist'}`}>Estimated AGB Biomass</span>
                       <span className={`text-sm font-bold mt-1 block ${isLight ? 'text-[#0F291B]' : 'text-white'}`}>
-                        {inspectedPixel.biomass} Mg/ha
+                        {isNaN(Number(inspectedPixel.biomass)) ? inspectedPixel.biomass : `${inspectedPixel.biomass} Mg/ha`}
                       </span>
                     </div>
                     <div className={`p-4 rounded-xl border ${isLight ? 'bg-[#F8FAFC] border-[#E2E8F0]' : 'bg-white/5 border-white/5'}`}>
-                      <span className={`text-[10px] block ${isLight ? 'text-[#64748B]' : 'text-mist'}`}>Estimated Carbon</span>
+                      <span className={`text-[10px] block ${isLight ? 'text-[#64748B]' : 'text-mist'}`}>Estimated AGB Carbon</span>
                       <span className={`text-sm font-bold mt-1 block ${isLight ? 'text-[#0F291B]' : 'text-white'}`}>
-                        {inspectedPixel.carbon} tC/ha
+                        {isNaN(Number(inspectedPixel.carbon)) ? inspectedPixel.carbon : `${inspectedPixel.carbon} tC/ha`}
                       </span>
+                      {inspectedPixel.carbonTotal && (
+                        <span className={`text-[10px] font-mono mt-1 block ${isLight ? 'text-[#64748B]' : 'text-mist'}`}>
+                          All pools: {inspectedPixel.carbonTotal} tC/ha (SOC {inspectedPixel.socCarbon})
+                        </span>
+                      )}
                     </div>
                     <div className={`p-4 rounded-xl border ${isLight ? 'bg-[#F8FAFC] border-[#E2E8F0]' : 'bg-white/5 border-white/5'}`}>
-                      <span className={`text-[10px] block ${isLight ? 'text-[#64748B]' : 'text-mist'}`}>Model Confidence</span>
-                      <span className="text-sm font-bold text-emerald mt-1 block">
+                      <span className={`text-[10px] block ${isLight ? 'text-[#64748B]' : 'text-mist'}`}>Model Confidence &amp; Basis</span>
+                      <span className={`text-xs font-bold mt-1 block ${inspectedPixel.dataSource === 'backend_offline' ? 'text-amber-500' : 'text-emerald'}`}>
                         {inspectedPixel.confidence}
                       </span>
                     </div>

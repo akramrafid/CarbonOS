@@ -1,8 +1,11 @@
 import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { ArrowRight, CheckCircle2, ShieldCheck, Zap, Building2, HelpCircle, FileCheck2 } from 'lucide-react';
+import { useTheme } from '../context/ThemeContext';
 
 const Pricing = () => {
+  const { theme } = useTheme();
+  const isLight = theme === 'light';
   const [isAnnual, setIsAnnual] = useState(true);
 
   return (
@@ -20,7 +23,7 @@ const Pricing = () => {
 
           <h2 className="text-3xl sm:text-4xl lg:text-5xl font-sans font-bold tracking-tight text-white leading-tight">
             Predictable Scaling for{' '}
-            <span className="bg-gradient-to-r from-[#00E676] via-[#10B981] to-[#00C853] bg-clip-text text-transparent font-extrabold">
+            <span className={isLight ? 'text-[#15803d] font-extrabold' : 'bg-gradient-to-r from-[#00E676] via-[#10B981] to-[#00C853] bg-clip-text text-transparent font-extrabold'}>
               Carbon Developers
             </span>
           </h2>
@@ -29,14 +32,22 @@ const Pricing = () => {
           </p>
 
           {/* Billing Interval Toggle Switch */}
-          <div className="mt-8 inline-flex flex-wrap items-center justify-center p-1.5 rounded-2xl bg-[#08150D] border border-[#183822] shadow-lg backdrop-blur-xl gap-1 max-w-full">
+          <div className={`mt-8 inline-flex flex-wrap items-center justify-center p-1.5 rounded-2xl border backdrop-blur-xl gap-1 max-w-full ${
+            isLight
+              ? 'bg-white border-[#0F291B]/12 shadow-[0_8px_24px_-6px_rgba(15,41,27,0.08)]'
+              : 'bg-[#08150D] border-[#183822] shadow-lg'
+          }`}>
             <button
               type="button"
               onClick={() => setIsAnnual(false)}
               className={`px-3.5 sm:px-5 py-2.5 rounded-xl text-xs font-sans font-semibold transition-all duration-200 cursor-pointer min-h-[40px] ${
-                !isAnnual 
-                  ? 'bg-white text-black shadow-md font-bold' 
-                  : 'text-gray-300 hover:text-white'
+                isLight
+                  ? !isAnnual
+                    ? 'bg-[#0F291B] text-white shadow-sm font-bold'
+                    : 'text-[#46574D] hover:text-[#0F291B]'
+                  : !isAnnual 
+                    ? 'bg-white text-black shadow-md font-bold' 
+                    : 'text-gray-300 hover:text-white'
               }`}
             >
               Monthly Billing
@@ -45,17 +56,28 @@ const Pricing = () => {
               type="button"
               onClick={() => setIsAnnual(true)}
               className={`px-3.5 sm:px-5 py-2.5 rounded-xl text-xs font-sans font-semibold flex items-center gap-2 transition-all duration-200 cursor-pointer min-h-[40px] ${
-                isAnnual 
-                  ? 'bg-[#00C853] text-[#050C07] font-bold shadow-[0_0_20px_rgba(0,200,83,0.35)]' 
-                  : 'text-gray-300 hover:text-white'
+                isLight
+                  ? isAnnual
+                    ? 'bg-[#15803d] text-white font-bold shadow-sm'
+                    : 'text-[#46574D] hover:text-[#0F291B]'
+                  : isAnnual 
+                    ? 'bg-[#00C853] text-[#050C07] font-bold shadow-[0_0_20px_rgba(0,200,83,0.35)]' 
+                    : 'text-gray-300 hover:text-white'
               }`}
             >
               <span>Annual Settlement</span>
-              <span className={`text-[10px] font-mono font-extrabold uppercase px-2 py-0.5 rounded-full ${
-                isAnnual 
-                  ? 'bg-[#050C07]/20 text-[#050C07]' 
-                  : 'bg-[#00C853]/20 text-[#00E676] border border-[#00C853]/30'
-              }`}>
+              <span
+                className={`text-[10px] font-mono font-extrabold uppercase px-2 py-0.5 rounded-full ${
+                  isLight
+                    ? isAnnual
+                      ? 'text-white'
+                      : 'bg-[#E3F2E9] text-[#15803d]'
+                    : isAnnual 
+                      ? 'bg-[#050C07]/20 text-[#050C07]' 
+                      : 'bg-[#00C853]/20 text-[#00E676] border border-[#00C853]/30'
+                }`}
+                style={isLight && isAnnual ? { backgroundColor: '#0F291B', color: '#FFFFFF' } : undefined}
+              >
                 Save 20%
               </span>
             </button>
@@ -128,35 +150,49 @@ const Pricing = () => {
           </div>
 
           {/* Tier 2: Institutional (Most Popular) */}
-          <div className="bg-gradient-to-b from-[#0D2818] to-[#08150D] border-2 border-[#00C853]/60 shadow-[0_0_50px_rgba(0,200,83,0.18)] rounded-[2.2rem] p-8 flex flex-col justify-between relative z-10 group">
+          <div className={`border-2 rounded-[2.2rem] p-8 flex flex-col justify-between relative z-10 group ${
+            isLight
+              ? 'bg-white border-[#15803d] shadow-[0_20px_48px_-12px_rgba(21,128,61,0.18)]'
+              : 'bg-gradient-to-b from-[#0D2818] to-[#08150D] border-[#00C853]/60 shadow-[0_0_50px_rgba(0,200,83,0.18)]'
+          }`}>
             <div className="absolute -top-3.5 left-1/2 -translate-x-1/2">
-              <span className="font-mono text-[10px] text-[#050C07] bg-[#00E676] px-3.5 py-1 rounded-full font-extrabold uppercase tracking-wider shadow-[0_0_20px_rgba(0,230,118,0.4)] flex items-center gap-1.5 border border-[#00E676]">
-                <Zap size={12} className="fill-[#050C07] text-[#050C07]" />
+              <span className={`font-mono text-[10px] px-3.5 py-1 rounded-full font-extrabold uppercase tracking-wider flex items-center gap-1.5 border ${
+                isLight
+                  ? 'text-white bg-[#15803d] border-[#15803d] shadow-md'
+                  : 'text-[#050C07] bg-[#00E676] shadow-[0_0_20px_rgba(0,230,118,0.4)] border-[#00E676]'
+              }`}>
+                <Zap size={12} className={isLight ? 'fill-white text-white' : 'fill-[#050C07] text-[#050C07]'} />
                 <span>Primary Sovereign Tier</span>
               </span>
             </div>
 
             <div>
               <div className="flex items-center justify-between mb-4 mt-2">
-                <span className="font-mono text-xs uppercase tracking-widest text-[#00E676] font-bold">Institutional Scale</span>
-                <span className="text-[10px] font-mono px-2.5 py-0.5 rounded-md bg-[#00C853]/20 border border-[#00C853]/40 text-[#00E676] font-bold">
+                <span className={`font-mono text-xs uppercase tracking-widest font-bold ${isLight ? 'text-[#15803d]' : 'text-[#00E676]'}`}>Institutional Scale</span>
+                <span className={`text-[10px] font-mono px-2.5 py-0.5 rounded-md font-bold ${
+                  isLight
+                    ? 'bg-[#E5F4EB] text-[#14532D]'
+                    : 'bg-[#00C853]/20 border border-[#00C853]/40 text-[#00E676]'
+                }`}>
                   RECOMMENDED
                 </span>
               </div>
 
-              <h3 className="font-sans font-bold text-2xl text-white mb-2 tracking-tight">Enterprise & Aggregators</h3>
-              <p className="font-sans text-xs text-white/70 mb-6 leading-relaxed">
+              <h3 className={`font-sans font-bold text-2xl mb-2 tracking-tight ${isLight ? 'text-[#0F291B]' : 'text-white'}`}>Enterprise & Aggregators</h3>
+              <p className={`font-sans text-xs mb-6 leading-relaxed ${isLight ? 'text-[#46574D]' : 'text-white/70'}`}>
                 For commercial solar IPPs, industrial textile mills, agribusiness conglomerates, and registry certifiers.
               </p>
 
-              <div className="mb-6 p-4 rounded-xl bg-black/60 border border-[#00C853]/30">
+              <div className={`mb-6 p-4 rounded-xl border ${
+                isLight ? 'bg-[#EDF5F0] border-[#15803d]/15' : 'bg-black/60 border-[#00C853]/30'
+              }`}>
                 <div className="flex items-baseline gap-1.5">
-                  <span className="font-mono text-3xl sm:text-4xl font-extrabold text-[#00E676]">
+                  <span className={`font-mono text-3xl sm:text-4xl font-extrabold ${isLight ? 'text-[#15803d]' : 'text-[#00E676]'}`}>
                     ৳{isAnnual ? '1,20,000' : '1,50,000'}
                   </span>
-                  <span className="font-mono text-xs text-white/50">/ month</span>
+                  <span className={`font-mono text-xs ${isLight ? 'text-[#4A5D52]' : 'text-white/50'}`}>/ month</span>
                 </div>
-                <div className="text-[11px] font-mono text-[#00E676]/90 mt-1 font-medium">
+                <div className={`text-[11px] font-mono mt-1 font-medium ${isLight ? 'text-[#14532D]' : 'text-[#00E676]/90'}`}>
                   {isAnnual ? 'Billed annually ৳14,40,000 / yr (Save ৳3,60,000)' : 'Billed monthly on corporate invoice'}
                 </div>
               </div>

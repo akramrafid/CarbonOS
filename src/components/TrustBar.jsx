@@ -1,7 +1,10 @@
 import React from 'react';
 import { ShieldCheck, CheckCircle2, Globe2, Award, FileCheck, Layers } from 'lucide-react';
+import { useTheme } from '../context/ThemeContext';
 
 const TrustBar = () => {
+  const { theme } = useTheme();
+  const isLight = theme === 'light';
   const items = [
     { label: "GHG Protocol Corporate Standard", badge: "METHOD", icon: ShieldCheck },
     { label: "No default grid factor: cited, approved factors only", badge: "POLICY", icon: CheckCircle2 },
@@ -15,26 +18,40 @@ const TrustBar = () => {
   const duplicatedItems = [...items, ...items, ...items];
 
   return (
-    <div className="w-full bg-[#050C07] border-y border-white/[0.08] relative overflow-hidden py-3.5 z-20">
+    <div className={`w-full border-y relative overflow-hidden py-3.5 z-20 ${
+      isLight ? 'bg-[#EAECE6] border-[#0F291B]/10' : 'bg-[#050C07] border-white/[0.08]'
+    }`}>
       {/* Edge gradient fade masks */}
-      <div className="absolute left-0 top-0 bottom-0 w-24 bg-gradient-to-r from-[#050C07] to-transparent z-10 pointer-events-none"></div>
-      <div className="absolute right-0 top-0 bottom-0 w-24 bg-gradient-to-l from-[#050C07] to-transparent z-10 pointer-events-none"></div>
+      <div className={`absolute left-0 top-0 bottom-0 w-24 bg-gradient-to-r to-transparent z-10 pointer-events-none ${
+        isLight ? 'from-[#EAECE6]' : 'from-[#050C07]'
+      }`}></div>
+      <div className={`absolute right-0 top-0 bottom-0 w-24 bg-gradient-to-l to-transparent z-10 pointer-events-none ${
+        isLight ? 'from-[#EAECE6]' : 'from-[#050C07]'
+      }`}></div>
 
       <div className="flex whitespace-nowrap marquee-track min-w-max items-center">
         {duplicatedItems.map((item, index) => {
           const IconComponent = item.icon;
           return (
             <div key={index} className="flex items-center space-x-3 px-6">
-              <div className="flex items-center space-x-2 bg-white/[0.03] hover:bg-white/[0.06] border border-white/[0.08] hover:border-emerald/30 rounded-full px-3.5 py-1 transition-colors">
-                <IconComponent size={13} className="text-emerald shrink-0" />
-                <span className="font-mono text-xs text-white/90 tracking-wide font-medium">
+              <div className={`flex items-center space-x-2 border rounded-full px-3.5 py-1 transition-colors ${
+                isLight
+                  ? 'bg-white/95 hover:bg-white border-[#0F291B]/10 hover:border-[#15803d]/35 shadow-xs'
+                  : 'bg-white/[0.03] hover:bg-white/[0.06] border-white/[0.08] hover:border-emerald/30'
+              }`}>
+                <IconComponent size={13} className={`shrink-0 ${isLight ? 'text-[#15803d]' : 'text-emerald'}`} />
+                <span className={`font-mono text-xs tracking-wide font-medium ${isLight ? 'text-[#0F291B]' : 'text-white/90'}`}>
                   {item.label}
                 </span>
-                <span className="bg-emerald/10 text-emerald text-[9px] font-mono px-1.5 py-0.2 rounded border border-emerald/20 font-bold">
+                <span className={`text-[9px] font-mono px-1.5 py-0.2 rounded font-bold ${
+                  isLight
+                    ? 'bg-[#E3F2E9] text-[#14532D]'
+                    : 'bg-emerald/10 text-emerald border border-emerald/20'
+                }`}>
                   {item.badge}
                 </span>
               </div>
-              <span className="text-emerald/40 text-sm font-bold">·</span>
+              <span className={`text-sm font-bold ${isLight ? 'text-[#15803d]/45' : 'text-emerald/40'}`}>·</span>
             </div>
           );
         })}

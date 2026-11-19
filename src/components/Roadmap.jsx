@@ -1,6 +1,7 @@
 import React, { useEffect, useRef } from 'react';
 import gsap from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
+import { useTheme } from '../context/ThemeContext';
 
 gsap.registerPlugin(ScrollTrigger);
 
@@ -40,6 +41,8 @@ const steps = [
 const Roadmap = () => {
   const containerRef = useRef(null);
   const lineRef = useRef(null);
+  const { theme } = useTheme();
+  const isLight = theme === 'light';
 
   useEffect(() => {
     let ctx = gsap.context(() => {
@@ -114,8 +117,10 @@ const Roadmap = () => {
                 <div key={index} className={`roadmap-step relative flex flex-col md:flex-row items-center ${isEven ? 'md:flex-row-reverse' : ''}`}>
                   
                   {/* Timeline Dot */}
-                  <div className="hidden md:flex absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 w-10 h-10 bg-[#080F0B] border-2 border-emerald rounded-full items-center justify-center z-10 emerald-glow">
-                    <div className="w-3 h-3 bg-emerald rounded-full animate-pulse"></div>
+                  <div className={`hidden md:flex absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 w-10 h-10 border-2 rounded-full items-center justify-center z-10 emerald-glow ${
+                    isLight ? 'bg-white border-[#15803d]' : 'bg-[#080F0B] border-emerald'
+                  }`}>
+                    <div className={`w-3 h-3 rounded-full animate-pulse ${isLight ? 'bg-[#15803d]' : 'bg-emerald'}`}></div>
                   </div>
 
                   {/* Spacer for alternating layout */}
@@ -123,23 +128,35 @@ const Roadmap = () => {
 
                   {/* Content Card */}
                   <div className={`w-full md:w-1/2 ${isEven ? 'md:pr-16 text-left md:text-right' : 'md:pl-16 text-left'}`}>
-                    <div className="bg-[#080F0B]/80 backdrop-blur-md registry-border p-5 sm:p-8 rounded-2xl sm:rounded-[2rem] hover:bg-[#0D2B1A]/60 transition-colors group">
+                    <div className={`backdrop-blur-md p-5 sm:p-8 rounded-2xl sm:rounded-[2rem] transition-all group border ${
+                      isLight
+                        ? 'bg-white border-[#0F291B]/10 hover:border-[#15803d]/35 shadow-[0_10px_28px_-8px_rgba(15,41,27,0.08)]'
+                        : 'bg-[#080F0B]/80 registry-border hover:bg-[#0D2B1A]/60'
+                    }`}>
                       <div className={`flex flex-wrap items-center gap-2 sm:gap-3 mb-4 ${isEven ? 'md:justify-end' : 'justify-start'}`}>
-                        <span className="font-mono text-xs text-emerald bg-emerald/10 px-2 py-1 rounded shrink-0">
+                        <span className={`font-mono text-xs px-2.5 py-1 rounded-full shrink-0 font-semibold ${
+                          isLight ? 'text-[#15803d] bg-[#E3F2E9]' : 'text-emerald bg-emerald/10'
+                        }`}>
                           STEP {step.icon}
                         </span>
-                        <h3 className="font-sans font-bold text-xl sm:text-2xl text-registry group-hover:text-emerald transition-colors">
+                        <h3 className={`font-sans font-bold text-xl sm:text-2xl transition-colors ${
+                          isLight ? 'text-[#0F291B] group-hover:text-[#15803d]' : 'text-registry group-hover:text-emerald'
+                        }`}>
                           {step.title}
                         </h3>
                       </div>
                       
-                      <p className="font-sans text-mist mb-6 leading-relaxed">
+                      <p className={`font-sans mb-6 leading-relaxed ${isLight ? 'text-[#46574D]' : 'text-mist'}`}>
                         {step.description}
                       </p>
                       
                       <div className={`flex flex-wrap gap-2 ${isEven ? 'md:justify-end' : 'justify-start'}`}>
                         {step.metrics.map((metric, mIndex) => (
-                          <span key={mIndex} className="font-mono text-[11px] text-mist/70 bg-[#040A06] border border-emerald/10 px-3 py-1 rounded-full">
+                          <span key={mIndex} className={`font-mono text-[11px] px-3 py-1 rounded-full border ${
+                            isLight
+                              ? 'text-[#37473E] bg-[#F5F8F5] border-[#0F291B]/10'
+                              : 'text-mist/70 bg-[#040A06] border-emerald/10'
+                          }`}>
                             {metric}
                           </span>
                         ))}

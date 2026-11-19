@@ -3,8 +3,11 @@ import {
   Upload, FileText, Cpu, ShieldCheck, Download, 
   ArrowLeft, ArrowRight, Play, Pause, RefreshCw 
 } from 'lucide-react';
+import { useTheme } from '../context/ThemeContext';
 
 const CorporateSaaSPipeline = () => {
+  const { theme } = useTheme();
+  const isLight = theme === 'light';
   const [activeStep, setActiveStep] = useState(0);
   const [isPlaying, setIsPlaying] = useState(true);
   const [transitionState, setTransitionState] = useState('active'); // 'active' | 'transitioning'
@@ -204,7 +207,11 @@ const CorporateSaaSPipeline = () => {
         </div>
 
         {/* Outer Visual Panel (Matches Video Layout, using 12-column grid to give text more space) */}
-        <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-10 bg-[#080F0B] border border-white/5 rounded-3xl lg:rounded-[3rem] p-5 sm:p-8 lg:p-14 shadow-[0_0_100px_rgba(0,0,0,0.5)] backdrop-blur-md">
+        <div className={`grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-10 border rounded-3xl lg:rounded-[3rem] p-5 sm:p-8 lg:p-14 backdrop-blur-md ${
+          isLight
+            ? 'bg-white border-[#0F291B]/12 shadow-[0_18px_45px_-12px_rgba(15,41,27,0.10)]'
+            : 'bg-[#080F0B] border-white/5 shadow-[0_0_100px_rgba(0,0,0,0.5)]'
+        }`}>
           
           {/* Left Column: Controls, Info & Status (Takes 4 columns, wider typography) */}
           <div className="lg:col-span-4 flex flex-col justify-between border-b lg:border-b-0 lg:border-r border-white/10 pb-8 lg:pb-0 lg:pr-10">
@@ -361,7 +368,11 @@ const CorporateSaaSPipeline = () => {
             </div>
 
             {/* Main Visual Display Canvas (Responsive height & scaled inner SVG stage on narrow viewports) */}
-            <div className="relative bg-[#040A06] rounded-2xl sm:rounded-[2rem] border border-white/5 min-h-[320px] sm:h-[420px] py-6 sm:py-0 flex items-center justify-center overflow-hidden shadow-inner group">
+            <div className={`relative rounded-2xl sm:rounded-[2rem] border min-h-[320px] sm:h-[420px] py-6 sm:py-0 flex items-center justify-center overflow-hidden group ${
+              isLight
+                ? 'bg-[#F5F8F5] border-[#0F291B]/10'
+                : 'bg-[#040A06] border-white/5 shadow-inner'
+            }`}>
               
               {/* Grid Overlay inside the canvas */}
               <div className="absolute inset-0 bg-[linear-gradient(to_right,#00c85302_1px,transparent_1px),linear-gradient(to_bottom,#00c85302_1px,transparent_1px)] bg-[size:2.5rem_2.5rem] z-0 pointer-events-none"></div>
@@ -459,7 +470,9 @@ const CorporateSaaSPipeline = () => {
                     </svg>
 
                     {/* Central Document + Scanline (Scaled up) */}
-                    <div className="absolute left-[175px] top-[80px] w-24 h-28 bg-[#080F0B] border border-emerald/30 rounded-xl flex flex-col items-center justify-center shadow-[0_0_40px_rgba(16,185,129,0.2)] z-20 overflow-hidden animate-float-doc">
+                    <div className={`absolute left-[175px] top-[80px] w-24 h-28 border border-emerald/30 rounded-xl flex flex-col items-center justify-center shadow-[0_0_40px_rgba(16,185,129,0.2)] z-20 overflow-hidden animate-float-doc ${
+                      isLight ? 'bg-white' : 'bg-[#080F0B]'
+                    }`}>
                       <Cpu className="text-emerald mb-1 animate-pulse" size={32} />
                       <span className="font-mono text-[10px] text-white/70 font-semibold tracking-wider">EXTRACTING</span>
                       
@@ -469,7 +482,7 @@ const CorporateSaaSPipeline = () => {
 
                     {/* Target Scope Nodes (Scaled up card width and paddings) */}
                     {/* Scope 1 */}
-                    <div className="absolute right-[10px] top-[15px] w-32 bg-[#080F0B]/95 border border-white/10 rounded-xl p-3 text-left z-20 hover:border-emerald/40 transition-colors">
+                    <div className={`absolute right-[10px] top-[15px] w-32 border border-white/10 rounded-xl p-3 text-left z-20 hover:border-emerald/40 transition-colors ${isLight ? 'bg-white shadow-sm' : 'bg-[#080F0B]/95'}`}>
                       <div className="flex items-center justify-between mb-1.5">
                         <span className="text-[11px] font-mono text-emerald font-bold">SCOPE 1</span>
                         <span className="w-1.5 h-1.5 rounded-full bg-emerald animate-pulse"></span>
@@ -479,7 +492,7 @@ const CorporateSaaSPipeline = () => {
                     </div>
 
                     {/* Scope 2 */}
-                    <div className="absolute right-[10px] top-[100px] w-32 bg-[#080F0B]/95 border border-white/10 rounded-xl p-3 text-left z-20 hover:border-emerald/40 transition-colors">
+                    <div className={`absolute right-[10px] top-[100px] w-32 border border-white/10 rounded-xl p-3 text-left z-20 hover:border-emerald/40 transition-colors ${isLight ? 'bg-white shadow-sm' : 'bg-[#080F0B]/95'}`}>
                       <div className="flex items-center justify-between mb-1.5">
                         <span className="text-[11px] font-mono text-emerald font-bold">SCOPE 2</span>
                         <span className="w-1.5 h-1.5 rounded-full bg-emerald animate-pulse"></span>
@@ -489,7 +502,7 @@ const CorporateSaaSPipeline = () => {
                     </div>
 
                     {/* Scope 3 */}
-                    <div className="absolute right-[10px] top-[185px] w-32 bg-[#080F0B]/95 border border-white/10 rounded-xl p-3 text-left z-20 hover:border-emerald/40 transition-colors">
+                    <div className={`absolute right-[10px] top-[185px] w-32 border border-white/10 rounded-xl p-3 text-left z-20 hover:border-emerald/40 transition-colors ${isLight ? 'bg-white shadow-sm' : 'bg-[#080F0B]/95'}`}>
                       <div className="flex items-center justify-between mb-1.5">
                         <span className="text-[11px] font-mono text-emerald font-bold">SCOPE 3</span>
                         <span className="w-1.5 h-1.5 rounded-full bg-emerald animate-pulse"></span>
@@ -598,7 +611,9 @@ const CorporateSaaSPipeline = () => {
                     </svg>
 
                     {/* Central Report Document */}
-                    <div className="absolute left-[180px] top-[55px] w-[100px] h-[110px] bg-[#080F0B] border border-emerald/40 rounded-xl flex flex-col items-center justify-center shadow-[0_0_40px_rgba(16,185,129,0.25)] animate-float-doc z-20">
+                    <div className={`absolute left-[180px] top-[55px] w-[100px] h-[110px] border border-emerald/40 rounded-xl flex flex-col items-center justify-center shadow-[0_0_40px_rgba(16,185,129,0.25)] animate-float-doc z-20 ${
+                      isLight ? 'bg-white' : 'bg-[#080F0B]'
+                    }`}>
                       <Download className="text-emerald mb-1 animate-pulse" size={32} />
                       <span className="font-mono text-sm text-white font-bold">REPORT</span>
                       <span className="text-[9px] text-mist/60 font-mono tracking-tighter uppercase mt-0.5">One-Click</span>
@@ -606,21 +621,21 @@ const CorporateSaaSPipeline = () => {
 
                     {/* Output Formats targets (Scaled up width & padding) */}
                     {/* BD Gov MRV */}
-                    <div className="absolute left-[10px] top-[30px] w-[110px] bg-[#080F0B]/95 border border-white/10 rounded-xl p-3 text-center z-20 hover:border-emerald/40 transition-colors">
+                    <div className={`absolute left-[10px] top-[30px] w-[110px] border border-white/10 rounded-xl p-3 text-center z-20 hover:border-emerald/40 transition-colors ${isLight ? 'bg-white shadow-sm' : 'bg-[#080F0B]/95'}`}>
                       <span className="text-[9px] font-mono text-emerald font-bold block mb-1">METHOD</span>
                       <span className="text-xs text-white font-mono font-semibold block">GHG Protocol</span>
                       <span className="text-[9px] text-[#10b981] font-mono block mt-1 font-bold">✓ Scope 1 & 2</span>
                     </div>
 
                     {/* EU CBAM */}
-                    <div className="absolute right-[10px] top-[30px] w-[110px] bg-[#080F0B]/95 border border-white/10 rounded-xl p-3 text-center z-20 hover:border-emerald/40 transition-colors">
+                    <div className={`absolute right-[10px] top-[30px] w-[110px] border border-white/10 rounded-xl p-3 text-center z-20 hover:border-emerald/40 transition-colors ${isLight ? 'bg-white shadow-sm' : 'bg-[#080F0B]/95'}`}>
                       <span className="text-[9px] font-mono text-emerald font-bold block mb-1">REGULATION</span>
                       <span className="text-xs text-white font-mono font-semibold block">EU CBAM</span>
                       <span className="text-[9px] text-[#10b981] font-mono block mt-1 font-bold">Not yet supported</span>
                     </div>
 
                     {/* ISO 14064 */}
-                    <div className="absolute left-[175px] bottom-[15px] w-[110px] bg-[#080F0B]/95 border border-white/10 rounded-xl p-3 text-center z-20 hover:border-emerald/40 transition-colors">
+                    <div className={`absolute left-[175px] bottom-[15px] w-[110px] border border-white/10 rounded-xl p-3 text-center z-20 hover:border-emerald/40 transition-colors ${isLight ? 'bg-white shadow-sm' : 'bg-[#080F0B]/95'}`}>
                       <span className="text-[9px] font-mono text-emerald font-bold block mb-1">STANDARD</span>
                       <span className="text-xs text-white font-mono font-semibold block">ISO 14064-1</span>
                       <span className="text-[9px] text-[#10b981] font-mono block mt-1 font-bold">Statement format</span>

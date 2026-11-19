@@ -21,11 +21,15 @@ import time
 from pathlib import Path
 from typing import Any, Dict, Iterable, List, Optional, Tuple
 
+import duckdb
 import requests
-from shapely import affinity
+from shapely import affinity, from_wkb
 from shapely.geometry import LineString, MultiPolygon, Point, Polygon, mapping, shape
 from shapely.geometry.base import BaseGeometry
 from shapely.ops import unary_union
+
+from .overture_adapter import fetch_overture_buildings
+from .spatial_analytics import compute_frontier_accessibility
 
 try:
     from shapely.validation import make_valid
@@ -47,10 +51,15 @@ DEFAULT_PBF_CANDIDATES = (
     INFERENCE_DIR / "data" / "bangladesh-latest.osm.pbf",
     Path("/app/data/osm/bangladesh-latest.osm.pbf"),
 )
+DEFAULT_GEOPARQUET_CANDIDATES = (
+    INFERENCE_DIR / "data" / "bangladesh_dmrv.geoparquet",
+    Path("/app/data/osm/bangladesh_dmrv.geoparquet"),
+)
 DEFAULT_CACHE_DIR = INFERENCE_DIR / "data" / "osm_cache"
 DEFAULT_OVERPASS_MIRRORS = (
     "https://overpass-api.de/api/interpreter",
     "https://overpass.kumi.systems/api/interpreter",
+    "https://overpass.private.coffee/api/interpreter",
     "https://maps.mail.ru/osm/tools/overpass/api/interpreter",
 )
 FALLBACK_BOX_COORDS = [(89.5, 22.2), (89.6, 22.2), (89.6, 22.3), (89.5, 22.3)]
@@ -215,6 +224,66 @@ def classify_osm_tags(tags: Dict[str, Any]) -> Optional[str]:
     return None
 
 
+def resolve_local_geoparquet_path() -> Optional[Path]:
+    """Finds the pre-baked bbox-indexed GeoParquet unless local OSM files are disabled or overridden."""
+    if os.getenv("DMRV_DISABLE_LOCAL_PBF", "").strip().lower() in {"1", "true", "yes"}:
+        return None
+    if os.getenv("OSM_PBF_PATH", "").strip():
+        return None
+    env_pq = os.getenv("OSM_GEOPARQUET_PATH", "").strip()
+    if env_pq:
+        cand = Path(env_pq)
+        return cand if cand.is_file() else None
+    for cand in DEFAULT_GEOPARQUET_CANDIDATES:
+        if cand.is_file():
+            return cand
+    return None
+
+
+def _fetch_from_geoparquet(parquet_path: Path, query_geom: BaseGeometry, limit: int = 12000) -> List[Dict[str, Any]]:
+    """
+    Millisecond in-process DuckDB bbox predicate pushdown over pre-baked GeoParquet.
+    Avoids Python multiprocessing spawn overhead/crashes on Windows inside FastAPI.
+    """
+    min_lng, min_lat, max_lng, max_lat = query_geom.bounds
+    pq_posix = str(parquet_path).replace("\\", "/")
+    con = duckdb.connect(":memory:")
+    try:
+        rows = con.execute(
+            f"""
+            SELECT feature_id, tags, geom_wkb
+            FROM read_parquet('{pq_posix}')
+            WHERE xmax >= ? AND xmin <= ? AND ymax >= ? AND ymin <= ?
+            LIMIT ?
+            """,
+            [float(min_lng), float(max_lng), float(min_lat), float(max_lat), int(limit)],
+        ).fetchall()
+    finally:
+        con.close()
+
+    records: List[Dict[str, Any]] = []
+    for fid, raw_tags, geom_wkb in rows:
+        if not geom_wkb:
+            continue
+        try:
+            geom = from_wkb(bytes(geom_wkb))
+        except Exception:
+            continue
+        if geom is None or geom.is_empty or not geom.intersects(query_geom):
+            continue
+        tags = _normalize_tags(raw_tags)
+        category = classify_osm_tags(tags)
+        if not category:
+            continue
+        records.append({
+            "id": str(fid),
+            "category": category,
+            "tags": tags,
+            "geometry": geom,
+        })
+    return records
+
+
 def resolve_local_pbf_path() -> Optional[Path]:
     """Finds an explicit or default local `.osm.pbf` file unless disabled by env."""
     if os.getenv("DMRV_DISABLE_LOCAL_PBF", "").strip().lower() in {"1", "true", "yes"}:
@@ -367,10 +436,10 @@ def overpass_elements_to_features(elements: Iterable[Dict[str, Any]]) -> List[Di
 
 
 def _bounded_overpass_bbox(query_geom: BaseGeometry) -> Tuple[float, float, float, float]:
-    """Bounds Overpass query window safely (max +-0.22 deg around centroid) to stay fast and polite."""
+    """Bounds Overpass query window safely (max +-0.14 deg around centroid) to stay fast and avoid 504s."""
     min_lng, min_lat, max_lng, max_lat = query_geom.bounds
     c_lng, c_lat = query_geom.centroid.x, query_geom.centroid.y
-    half_span = 0.22
+    half_span = 0.14
     return (
         max(min_lat, c_lat - half_span),
         max(min_lng, c_lng - half_span),
@@ -379,25 +448,23 @@ def _bounded_overpass_bbox(query_geom: BaseGeometry) -> Tuple[float, float, floa
     )
 
 
-def _fetch_with_overpass(query_geom: BaseGeometry, timeout: int = 6) -> List[Dict[str, Any]]:
-    """Queries Overpass API using inline `out geom` across fallback mirrors."""
+def _fetch_with_overpass(query_geom: BaseGeometry, timeout: int = 7) -> List[Dict[str, Any]]:
+    """Queries Overpass API using lightweight `way`/`node` `out geom` across fallback mirrors."""
     s, w, n, e = _bounded_overpass_bbox(query_geom)
     bbox = f"{s:.5f},{w:.5f},{n:.5f},{e:.5f}"
+    server_timeout = max(5, min(10, int(timeout)))
+    # Omit multi-district relation geometries on Overpass so coastal/river deltas stay within timeout.
     ql = (
-        f"[out:json][timeout:{max(5, int(timeout))}];\n"
+        f"[out:json][timeout:{server_timeout}];\n"
         "(\n"
         f'  way["landuse"~"^(forest|orchard|farmland|meadow|paddy|aquaculture|industrial|quarry)$"]({bbox});\n'
-        f'  relation["landuse"~"^(forest|farmland|industrial)$"]({bbox});\n'
         f'  way["natural"~"^(wood|wetland|scrub|water)$"]({bbox});\n'
-        f'  relation["natural"~"^(wood|wetland|water)$"]({bbox});\n'
         f'  way["boundary"~"^(protected_area|national_park)$"]({bbox});\n'
-        f'  relation["boundary"~"^(protected_area|national_park)$"]({bbox});\n'
         f'  way["waterway"~"^(river|canal|stream|tidal_channel)$"]({bbox});\n'
         f'  way["highway"~"^(motorway|trunk|primary|secondary|tertiary|unclassified|track|service|residential)$"]({bbox});\n'
-        f'  node["man_made"~"^(kiln|works)$"]({bbox});\n'
-        f'  way["man_made"~"^(kiln|works)$"]({bbox});\n'
+        f'  nwr["man_made"~"^(kiln|works)$"]({bbox});\n'
         ");\n"
-        "out geom qt 600;\n"
+        "out geom qt 450;\n"
     )
     custom_url = os.getenv("OVERPASS_API_URL", "").strip()
     urls = (custom_url,) if custom_url else DEFAULT_OVERPASS_MIRRORS
@@ -413,7 +480,7 @@ def _fetch_with_overpass(query_geom: BaseGeometry, timeout: int = 6) -> List[Dic
                 url,
                 data={"data": ql},
                 headers=headers,
-                timeout=max(5, int(timeout)) + 2,
+                timeout=server_timeout + 2,
             )
             resp.raise_for_status()
             payload = resp.json()
@@ -627,13 +694,15 @@ def extract_osm_context(
     belt_area_ha: float = belt_info["leakage_belt_area_ha"]
 
     cache_dir = _get_cache_dir()
+    parquet_path = resolve_local_geoparquet_path()
     pbf_path = resolve_local_pbf_path()
 
-    source_tag = (
-        f"pbf:{pbf_path.name}:{int(pbf_path.stat().st_mtime)}"
-        if pbf_path is not None
-        else "overpass"
-    )
+    if parquet_path is not None:
+        source_tag = f"pq:{parquet_path.name}:{int(parquet_path.stat().st_mtime)}"
+    elif pbf_path is not None:
+        source_tag = f"pbf:{pbf_path.name}:{int(pbf_path.stat().st_mtime)}"
+    else:
+        source_tag = "overpass"
     cache_file = cache_dir / f"{_cache_key(project_poly, belt_info['buffer_km'], source_tag)}.json"
 
     if not ignore_cache:
@@ -650,13 +719,21 @@ def extract_osm_context(
     error_detail: Optional[str] = None
     offline_env = os.getenv("DMRV_OFFLINE_ONLY", "").strip().lower() in {"1", "true", "yes"}
 
-    if pbf_path is not None:
+    if parquet_path is not None:
+        try:
+            features = _fetch_from_geoparquet(parquet_path, query_poly)
+            source_used = "quackosm_geoparquet"
+        except Exception as exc:
+            logger.warning("GeoParquet read failed (%s): %s", parquet_path, exc)
+            error_detail = f"geoparquet_error: {exc}"
+
+    if source_used == "unavailable" and pbf_path is not None:
         try:
             features = _fetch_with_quackosm(pbf_path, query_poly, cache_dir)
             source_used = "quackosm_pbf"
         except Exception as exc:
             logger.warning("QuackOSM PBF read failed (%s): %s", pbf_path, exc)
-            error_detail = f"quackosm_error: {exc}"
+            error_detail = f"quackosm_error: {exc}" if not error_detail else f"{error_detail}; quackosm_error: {exc}"
 
     if source_used == "unavailable" and allow_overpass and not offline_env:
         try:
@@ -699,13 +776,45 @@ def extract_osm_context(
     collections, counts = _serialize_geojson_layers(features)
     belt_metrics = compute_belt_metrics(features, belt_poly, belt_area_ha)
 
+    # Supplement with Overture Maps building footprints when online & requested
+    overture_res = (
+        fetch_overture_buildings(query_poly, belt_poly=belt_poly, cache_dir=cache_dir)
+        if (allow_overpass and not offline_env)
+        else {"overture_available": False, "building_count": 0, "belt_building_count": 0, "features": {"type": "FeatureCollection", "features": []}}
+    )
+    collections["overture_buildings"] = overture_res.get("features", {"type": "FeatureCollection", "features": []})
+    counts["overture_buildings"] = int(overture_res.get("building_count", 0))
+
+    frontier = compute_frontier_accessibility(
+        project_poly=project_poly,
+        belt_poly=belt_poly,
+        features=features,
+        overture_buildings_count=int(overture_res.get("belt_building_count", 0)),
+    )
+    collections["hotspots"] = frontier.get("hotspots_geojson", {"type": "FeatureCollection", "features": []})
+    counts["hotspots"] = len(collections["hotspots"].get("features", []))
+    belt_metrics["nearest_road_km"] = frontier.get("nearest_road_km")
+    belt_metrics["nearest_industrial_km"] = frontier.get("nearest_industrial_km")
+    belt_metrics["overture_belt_buildings"] = int(overture_res.get("belt_building_count", 0))
+    belt_metrics["mean_frontier_risk_score"] = frontier.get("mean_frontier_risk_score")
+
     response = {
         "osm_available": True,
         "source_used": source_used,
         "cached": False,
-        "pbf_file": pbf_path.name if pbf_path is not None and source_used == "quackosm_pbf" else None,
+        "pbf_file": (
+            parquet_path.name
+            if parquet_path is not None and source_used == "quackosm_geoparquet"
+            else (pbf_path.name if pbf_path is not None and source_used == "quackosm_pbf" else None)
+        ),
         "layer_counts": counts,
         "layers": collections,
+        "overture": {
+            "overture_available": bool(overture_res.get("overture_available")),
+            "source_used": overture_res.get("source_used"),
+            "belt_building_count": int(overture_res.get("belt_building_count", 0)),
+        },
+        "frontier_analytics": {k: v for k, v in frontier.items() if k != "hotspots_geojson"},
         "leakage_belt": {
             "buffer_km": belt_info["buffer_km"],
             "leakage_belt_area_ha": belt_area_ha,

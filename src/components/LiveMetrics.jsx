@@ -15,6 +15,7 @@ import {
   TrendingDown,
   Gauge
 } from 'lucide-react';
+import { useTheme } from '../context/ThemeContext';
 
 gsap.registerPlugin(ScrollTrigger);
 
@@ -187,13 +188,17 @@ const LiveMetrics = () => {
     return () => ctx.revert();
   }, []);
 
+  const { theme } = useTheme();
+  const isLight = theme === 'light';
   const airStatus = getAirStatus(metrics.air);
   const co2Status = getCO2Status(metrics.co2);
 
   return (
     <section 
       ref={containerRef} 
-      className="w-full bg-[#050C07] text-white py-16 sm:py-24 px-4 sm:px-6 lg:px-12 relative overflow-hidden border-t border-white/10"
+      className={`w-full py-16 sm:py-24 px-4 sm:px-6 lg:px-12 relative overflow-hidden border-t ${
+        isLight ? 'bg-[#F2F3EE] text-[#0F291B] border-[#0F291B]/8' : 'bg-[#050C07] text-white border-white/10'
+      }`}
     >
       {/* Background ambient radial illumination */}
       <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[800px] h-[500px] bg-emerald-950/20 blur-[140px] pointer-events-none rounded-full" />
@@ -213,7 +218,7 @@ const LiveMetrics = () => {
             </div>
 
             <h2 className="text-3xl sm:text-4xl lg:text-5xl font-sans font-bold tracking-tight text-white leading-tight">
-              Real-Time Ecological <span className="text-transparent bg-clip-text bg-gradient-to-r from-emerald-400 via-teal-300 to-cyan-400">Ground Truth</span>.
+              Real-Time Ecological <span className={isLight ? 'text-[#15803d]' : 'text-transparent bg-clip-text bg-gradient-to-r from-emerald-400 via-teal-300 to-cyan-400'}>Ground Truth</span>.
             </h2>
             <p className="mt-3 text-base sm:text-lg text-white/70 max-w-2xl font-normal leading-relaxed">
               Every carbon credit issued on Carbon Zero BD is anchored to physical IoT micro-stations, continuous optical analyzers, and automated cryptographic proof.
@@ -243,33 +248,58 @@ const LiveMetrics = () => {
         </div>
 
         {/* Station Navigation Selector Bar */}
-        <div className="mb-8 p-1.5 rounded-2xl bg-black/40 border border-white/10 backdrop-blur-xl grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-1.5">
+        <div className={`mb-8 p-1.5 rounded-2xl border backdrop-blur-xl grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-1.5 ${
+          isLight
+            ? 'bg-white border-[#0F291B]/12 shadow-[0_8px_24px_-6px_rgba(15,41,27,0.08)]'
+            : 'bg-black/40 border-white/10'
+        }`}>
           {STATIONS.map((station) => {
             const isActive = activeStation.id === station.id;
             return (
               <button
                 key={station.id}
                 onClick={() => handleStationChange(station)}
-                className={`w-full px-3.5 sm:px-4 py-3 rounded-xl text-left transition-all duration-200 flex items-center justify-between gap-3 min-w-0 ${
-                  isActive 
-                    ? 'bg-gradient-to-r from-emerald-950/80 to-emerald-900/40 border border-emerald-500/40 shadow-lg text-white' 
-                    : 'bg-transparent hover:bg-white/[0.04] text-white/60 hover:text-white border border-transparent'
+                className={`w-full px-3.5 sm:px-4 py-3 rounded-xl text-left transition-all duration-200 flex items-center justify-between gap-3 min-w-0 cursor-pointer ${
+                  isLight
+                    ? isActive
+                      ? 'bg-[#15803d] text-white shadow-sm'
+                      : 'bg-transparent hover:bg-[#EFF6F1] text-[#37473E] hover:text-[#0F291B] border border-transparent'
+                    : isActive 
+                      ? 'bg-gradient-to-r from-emerald-950/80 to-emerald-900/40 border border-emerald-500/40 shadow-lg text-white' 
+                      : 'bg-transparent hover:bg-white/[0.04] text-white/60 hover:text-white border border-transparent'
                 }`}
               >
                 <div className="min-w-0">
                   <div className="flex items-center gap-2 flex-wrap">
                     <span className="font-sans font-semibold text-xs tracking-tight truncate">{station.name}</span>
                     {station.isLiveFeed && (
-                      <span className="text-[9px] font-mono font-bold uppercase tracking-wider px-1.5 py-0.5 rounded bg-emerald-500/20 text-emerald-300 border border-emerald-500/30 shrink-0">
+                      <span
+                        className={`text-[9px] font-mono font-bold uppercase tracking-wider px-1.5 py-0.5 rounded shrink-0 ${
+                          isLight
+                            ? isActive
+                              ? 'text-white'
+                              : 'bg-[#E3F2E9] text-[#15803d]'
+                            : 'bg-emerald-500/20 text-emerald-300 border border-emerald-500/30'
+                        }`}
+                        style={isLight && isActive ? { backgroundColor: '#0F291B', color: '#FFFFFF' } : undefined}
+                      >
                         LIVE IoT
                       </span>
                     )}
                   </div>
-                  <div className="text-[10px] font-mono text-white/40 truncate mt-0.5">
+                  <div className={`text-[10px] font-mono truncate mt-0.5 ${
+                    isLight
+                      ? isActive ? 'text-white/85' : 'text-[#556B5E]'
+                      : 'text-white/40'
+                  }`}>
                     {station.location.split('(')[0]}
                   </div>
                 </div>
-                <div className={`w-2 h-2 rounded-full shrink-0 ${isActive ? 'bg-emerald-400 shadow-[0_0_8px_#10B981]' : 'bg-white/20'}`} />
+                <div className={`w-2 h-2 rounded-full shrink-0 ${
+                  isLight
+                    ? isActive ? 'bg-white' : 'bg-[#0F291B]/20'
+                    : isActive ? 'bg-emerald-400 shadow-[0_0_8px_#10B981]' : 'bg-white/20'
+                }`} />
               </button>
             );
           })}

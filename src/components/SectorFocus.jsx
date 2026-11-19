@@ -12,6 +12,7 @@ import {
   TrendingUp,
   ShieldAlert
 } from 'lucide-react';
+import { useTheme } from '../context/ThemeContext';
 
 const sectors = [
   {
@@ -95,8 +96,12 @@ const sectors = [
 ];
 
 const SectorFocus = () => {
+  const { theme } = useTheme();
+  const isLight = theme === 'light';
   return (
-    <section className="w-full bg-[#030805] text-white py-20 sm:py-32 px-4 sm:px-6 lg:px-12 relative overflow-hidden border-t border-white/10">
+    <section className={`w-full py-20 sm:py-32 px-4 sm:px-6 lg:px-12 relative overflow-hidden border-t ${
+      isLight ? 'bg-[#F2F3EE] text-[#0F291B] border-[#0F291B]/8' : 'bg-[#030805] text-white border-white/10'
+    }`}>
       
       {/* Background Graphic Grid */}
       <div className="absolute inset-0 bg-[linear-gradient(to_right,rgba(16,185,129,0.04)_1px,transparent_1px),linear-gradient(to_bottom,rgba(16,185,129,0.04)_1px,transparent_1px)] bg-[size:4rem_4rem] z-0 pointer-events-none" />
@@ -111,7 +116,7 @@ const SectorFocus = () => {
           </div>
 
           <h2 className="text-3xl sm:text-4xl lg:text-5xl font-sans font-bold tracking-tight text-white leading-tight">
-            High-Integrity Carbon <span className="text-transparent bg-clip-text bg-gradient-to-r from-emerald-400 via-teal-300 to-cyan-400">Sector Portfolios</span>.
+            High-Integrity Carbon <span className={isLight ? 'text-[#15803d]' : 'text-transparent bg-clip-text bg-gradient-to-r from-emerald-400 via-teal-300 to-cyan-400'}>Sector Portfolios</span>.
           </h2>
 
           <p className="font-sans text-base sm:text-lg text-white/70 mt-4 leading-relaxed">
@@ -172,14 +177,22 @@ const SectorFocus = () => {
                   <div className="flex flex-wrap items-center gap-2.5">
                     <Link 
                       to={sector.route} 
-                      className="flex-1 min-w-[130px] min-h-[42px] bg-white/[0.06] hover:bg-emerald-500 hover:text-black text-white py-2.5 px-4 rounded-xl font-sans font-semibold text-xs flex justify-center items-center gap-1.5 transition-all duration-200 border border-white/10 hover:border-emerald-500"
+                      className={`flex-1 min-w-[130px] min-h-[42px] py-2.5 px-4 rounded-xl font-sans font-semibold text-xs flex justify-center items-center gap-1.5 transition-all duration-200 border ${
+                        isLight
+                          ? 'bg-[#15803d] hover:bg-[#166534] text-white border-transparent shadow-xs'
+                          : 'bg-white/[0.06] hover:bg-emerald-500 hover:text-black text-white border-white/10 hover:border-emerald-500'
+                      }`}
                     >
                       <span>Sector Dossier</span>
                       <ArrowRight size={13} />
                     </Link>
                     <Link
                       to="/platform/marketplace"
-                      className="min-h-[42px] px-3.5 py-2.5 rounded-xl bg-white/[0.03] hover:bg-white/[0.08] text-white/70 hover:text-white border border-white/10 text-xs font-mono font-semibold transition-all flex items-center justify-center"
+                      className={`min-h-[42px] px-3.5 py-2.5 rounded-xl border text-xs font-mono font-semibold transition-all flex items-center justify-center ${
+                        isLight
+                          ? 'bg-[#F5F8F5] hover:bg-[#E4F2EA] text-[#0F291B] border-[#0F291B]/12'
+                          : 'bg-white/[0.03] hover:bg-white/[0.08] text-white/70 hover:text-white border-white/10'
+                      }`}
                       title="View active lots in marketplace"
                     >
                       Browse Credits

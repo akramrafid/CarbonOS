@@ -101,7 +101,8 @@ class TestDMRVSatelliteIngestion(unittest.TestCase):
         meta = result.get("analysis_metadata", {})
         self.assertGreater(len(meta.get("s2_scene_ids", [])), 0)
         self.assertGreater(len(meta.get("s1_scene_ids", [])), 0)
-        self.assertEqual(meta.get("gedi_tree_height_source"), "gedi_l2b_spatial_allometry")
+        self.assertEqual(meta.get("gedi_tree_height_source"), "formula_estimate_not_gedi_l2b")
+        self.assertIn(meta.get("pixel_extraction_mode"), ["stac_cog_rasterio", "stac_metadata_heuristic"])
         self.assertIn("stac_endpoint", meta)
 
         # Biophysical consistency checks

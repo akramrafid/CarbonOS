@@ -237,6 +237,39 @@ class TestDMRVOsmQuackOSM(unittest.TestCase):
         self.assertEqual(fallback_direct["leakage_source"], "fallback_default_no_osm")
         self.assertFalse(fallback_direct["osm_available"])
 
+    def test_06_pixel_inspect_endpoint_honest_provenance(self):
+        with patch.dict(os.environ, {"DMRV_FORCE_SIMULATION": "1"}, clear=False):
+            resp = self.client.post(
+                "/api/carbon/pixel-inspect",
+                json={"lat": 22.25, "lng": 89.50},
+            )
+        self.assertEqual(resp.status_code, 200)
+        body = resp.json()
+        self.assertAlmostEqual(body["lat"], 22.25, places=4)
+        self.assertAlmostEqual(body["lng"], 89.50, places=4)
+        self.assertEqual(body["data_source"], "simulated")
+        self.assertFalse(body["is_verified"])
+        self.assertNotIn("NFI Tier-2 Calibrated", body["confidence_label"])
+        self.assertGreater(body["estimated_biomass_mg_ha"], 0.0)
+        self.assertGreater(body["estimated_carbon_tc_ha"], 0.0)
+
+    def test_07_baseline_donor_geo_and_placebo_test(self):
+        report = run_dynamic_baseline_assessment(
+            job_id="TEST_DONOR_GEO",
+            polygon_geojson=json.dumps(SUNDARBANS_AOI),
+            forest_area_ha=450.0,
+            project_carbon_tc_ha=140.0,
+            stratum="SUNDARBANS_MANGROVE",
+            leakage_belt_loss_rate=0.014,
+            allow_live_overpass=False,
+        )
+        self.assertIn("donor_plots_geojson", report)
+        feats = report["donor_plots_geojson"].get("features", [])
+        self.assertEqual(len(feats), 10)
+        self.assertIn("placebo_test", report)
+        self.assertIn("placebo_p_value", report["placebo_test"])
+        self.assertEqual(report["baseline_data_origin"], "simulated_donor_trajectories")
+
 
 if __name__ == "__main__":
     unittest.main()

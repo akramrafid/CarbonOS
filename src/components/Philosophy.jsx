@@ -8,7 +8,7 @@ const SplitText = ({ text, className }) => {
   return (
     <span className={className}>
       {text.split(' ').map((word, i) => (
-        <span key={i} className="inline-block relative overflow-hidden">
+        <span key={i} className="inline-block relative overflow-hidden py-0.5">
           <span className="philosophy-word inline-block opacity-0 translate-y-[20px]">{word}</span>
           {/* Add a space after each word except the last to preserve spacing */}
           {i !== text.split(' ').length - 1 && '\u00A0'}
@@ -77,9 +77,9 @@ const Philosophy = () => {
           className="font-sans text-[24px] text-white mb-2"
         />
 
-        <div className="serif-drama text-[80px] lg:text-[120px] leading-none text-emerald mb-12">
+        <div className="serif-drama text-[80px] lg:text-[120px] leading-[1.15] text-emerald mb-12">
           {['B', 'a', 'n', 'g', 'l', 'a', 'd', 'e', 's', 'h', '.'].map((letter, i) => (
-            <span key={i} className="inline-block relative overflow-hidden">
+            <span key={i} className="inline-block relative overflow-hidden py-2">
               <span className="philosophy-word inline-block opacity-0 translate-y-[20px]">{letter}</span>
             </span>
           ))}

@@ -112,7 +112,7 @@ export const RequestDemoModal = ({ isOpen, onClose }) => {
 
   return (
     <div 
-      className="fixed inset-0 z-[100] flex items-center justify-center p-4 sm:p-6 bg-black/80 backdrop-blur-md animate-in fade-in duration-200"
+      className="fixed inset-0 z-[100] pointer-events-auto flex items-center justify-center p-4 sm:p-6 bg-black/80 backdrop-blur-md animate-in fade-in duration-200"
       onClick={handleResetAndClose}
       role="dialog"
       aria-modal="true"
@@ -182,7 +182,7 @@ export const RequestDemoModal = ({ isOpen, onClose }) => {
           <div>
             {/* Modal Header */}
             <div className="mb-6 space-y-2 pr-8">
-              <BrandLogo variant="dark" heightClass="h-6" showBdBadge={true} className="mb-1" />
+              <BrandLogo variant="auto" heightClass="h-6" showBdBadge={true} className="mb-1" />
               <div className="inline-flex items-center space-x-1.5 font-mono text-[11px] text-emerald bg-emerald/10 border border-emerald/20 px-2.5 py-0.5 rounded-full uppercase tracking-wider">
                 <Sparkles size={12} />
                 <span>Enterprise & Project Partnership</span>

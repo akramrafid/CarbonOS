@@ -52,13 +52,26 @@ def _extract_features_for_plot(satellite_engine: SatelliteEngine, plot: GroundTr
 
 def _extract_features_for_drone_survey(satellite_engine: SatelliteEngine, survey: DroneSurveyResult) -> tuple:
     """Extracts satellite features for a DroneSurveyResult by locating its
-    parent parcel coordinates from the linked CarbonResult."""
+    parent parcel coordinates from EstimateProvenance or AnalysisJob polygon centroid."""
     task = survey.verification_task
     if not task or not task.carbon_result:
         return None, None
     c_res = task.carbon_result
-    lat = getattr(c_res, "location_lat", None)
-    lng = getattr(c_res, "location_lng", None)
+    lat = getattr(c_res.provenance, "geolocation_lat", None) if getattr(c_res, "provenance", None) else None
+    lng = getattr(c_res.provenance, "geolocation_lng", None) if getattr(c_res, "provenance", None) else None
+    if (lat is None or lng is None) and getattr(c_res, "job", None) and getattr(c_res.job, "polygon_geojson", None):
+        try:
+            poly = json.loads(c_res.job.polygon_geojson)
+            pts = poly["coordinates"][0] if isinstance(poly, dict) and poly.get("type") == "Polygon" else poly
+            if isinstance(pts, list) and pts:
+                if isinstance(poly, dict):
+                    lat = sum(float(p[1]) for p in pts) / len(pts)
+                    lng = sum(float(p[0]) for p in pts) / len(pts)
+                else:
+                    lat = sum(float(p[0]) for p in pts) / len(pts)
+                    lng = sum(float(p[1]) for p in pts) / len(pts)
+        except Exception:
+            lat, lng = None, None
     if lat is None or lng is None:
         return None, None
     polygon = _point_to_polygon(lat, lng)

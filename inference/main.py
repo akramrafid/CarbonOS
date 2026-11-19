@@ -43,11 +43,10 @@ app = FastAPI(title="Farmer's AI Inference Service")
 # Startup check for required environment variables
 @app.on_event("startup")
 async def startup_event():
-    required_env_vars = ["GEMINI_API_KEY"]
-    for var in required_env_vars:
-        if not os.getenv(var):
-            raise RuntimeError(f"Missing critical environment variable: {var}")
-    print("Startup validation completed: All critical environment variables are set.")
+    if not os.getenv("GEMINI_API_KEY"):
+        print("[Startup Warning] GEMINI_API_KEY is not set; Gemini vision fallback & LLM extraction will be unavailable.")
+    else:
+        print("Startup validation completed: All critical environment variables are set.")
 
 # Tighten CORS: Allow specific origins instead of wildcard when credentials are true
 allowed_origins_str = os.getenv(

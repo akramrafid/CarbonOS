@@ -12,6 +12,7 @@ const Navbar = () => {
   const [isDemoModalOpen, setIsDemoModalOpen] = useState(false);
   const { t, i18n } = useTranslation();
   const { theme, toggleTheme } = useTheme();
+  const isLight = theme === 'light';
   const navigate = useNavigate();
   const location = useLocation();
 
@@ -89,12 +90,15 @@ const Navbar = () => {
   ];
 
   return (
+    <>
     <nav className="fixed top-3 sm:top-5 left-0 w-full z-50 flex justify-center px-2.5 sm:px-5 xl:px-8 pointer-events-none pt-[env(safe-area-inset-top)]">
       <div 
         className={`w-full max-w-[1780px] rounded-full border transition-all duration-500 ease-out flex items-center justify-between px-3 sm:px-5 lg:px-6 xl:px-8 py-1.5 sm:py-2.5 pointer-events-auto gap-1.5 sm:gap-3 ${
-          scrolled 
-            ? 'bg-[#040A06]/85 dark:bg-[#040A06]/85 backdrop-blur-xl border-emerald/20 shadow-[0_8px_32px_rgba(0,0,0,0.37)]' 
-            : 'bg-[#040A06]/60 dark:bg-[#040A06]/60 backdrop-blur-md border-white/10'
+          isLight
+            ? 'bg-white/92 backdrop-blur-xl border-[#0F291B]/12 shadow-[0_10px_30px_-10px_rgba(15,41,27,0.10)]'
+            : scrolled 
+              ? 'bg-[#040A06]/85 dark:bg-[#040A06]/85 backdrop-blur-xl border-emerald/20 shadow-[0_8px_32px_rgba(0,0,0,0.37)]' 
+              : 'bg-[#040A06]/60 dark:bg-[#040A06]/60 backdrop-blur-md border-white/10'
         }`}
       >
         {/* Left Side: Brand Logo */}
@@ -219,7 +223,7 @@ const Navbar = () => {
         <button
           type="button"
           onClick={closeMenu}
-          aria-label="Close navigation menu"
+          aria-label="Dismiss navigation drawer"
           className="fixed top-5 right-5 min-w-[44px] min-h-[44px] rounded-full flex items-center justify-center border border-white/20 bg-white/10 text-white hover:border-emerald transition-colors cursor-pointer"
         >
           <X size={20} />
@@ -284,13 +288,14 @@ const Navbar = () => {
         </div>
       </div>
 
-      {/* Enterprise Demo Request Modal */}
+    </nav>
+
+      {/* Enterprise Demo Request Modal (outside pointer-events-none nav stacking context) */}
       <RequestDemoModal 
         isOpen={isDemoModalOpen} 
         onClose={() => setIsDemoModalOpen(false)} 
       />
-
-    </nav>
+    </>
   );
 };
 
