@@ -1,7 +1,11 @@
 import React, { useEffect, useMemo, useRef, useState } from 'react';
-import { Map as MapLibreMap, ScaleControl, Popup } from 'maplibre-gl';
+import { Map as MapLibreMap, ScaleControl, Popup, setWorkerUrl } from 'maplibre-gl';
+import maplibreWorkerUrl from 'maplibre-gl/dist/maplibre-gl-worker.mjs?url';
 import 'maplibre-gl/dist/maplibre-gl.css';
 import { Layers, Mountain, SplitSquareHorizontal, Compass, Maximize2, Crosshair } from 'lucide-react';
+
+// Ensure MapLibre v6 resolves its standalone module worker cleanly in Vite dev and production builds
+setWorkerUrl(maplibreWorkerUrl);
 
 const EMPTY_FC = { type: 'FeatureCollection', features: [] };
 
@@ -184,6 +188,7 @@ export const DmrvMapStudio = ({
   mapZoom,
   onPixelClick,
   onHoverCoords,
+  onFinishDrawing,
   analyzing,
   isLight,
 }) => {
@@ -194,6 +199,8 @@ export const DmrvMapStudio = ({
   const drawPointsRef = useRef(drawPoints);
   const onPixelClickRef = useRef(onPixelClick);
   const onHoverCoordsRef = useRef(onHoverCoords);
+  const onFinishDrawingRef = useRef(onFinishDrawing);
+  const syncLatestRef = useRef(null);
 
   const [is3D, setIs3D] = useState(false);
   const [swipeActive, setSwipeActive] = useState(false);
@@ -206,7 +213,22 @@ export const DmrvMapStudio = ({
     drawPointsRef.current = drawPoints;
     onPixelClickRef.current = onPixelClick;
     onHoverCoordsRef.current = onHoverCoords;
-  }, [isDrawing, drawPoints, onPixelClick, onHoverCoords]);
+    onFinishDrawingRef.current = onFinishDrawing;
+  }, [isDrawing, drawPoints, onPixelClick, onHoverCoords, onFinishDrawing]);
+
+  useEffect(() => {
+    const map = mapRef.current;
+    if (!map) return;
+    const canvas = map.getCanvas?.();
+    if (canvas) {
+      canvas.style.cursor = isDrawing ? 'crosshair' : '';
+    }
+    if (isDrawing) {
+      map.doubleClickZoom?.disable();
+    } else {
+      map.doubleClickZoom?.enable();
+    }
+  }, [isDrawing]);
 
   const canopyGridFC = useMemo(
     () => buildCanopyGridGeoJSON(drawPoints, activeLayer, selectedJob, baselineData),
@@ -230,9 +252,23 @@ export const DmrvMapStudio = ({
 
     map.addControl(new ScaleControl({ maxWidth: 110, unit: 'metric' }), 'bottom-right');
 
+    const resizeObserver = typeof ResizeObserver !== 'undefined'
+      ? new ResizeObserver(() => {
+          try {
+            map.resize();
+          } catch {
+            // ignore resize during unmount
+          }
+        })
+      : null;
+    if (resizeObserver && containerRef.current) {
+      resizeObserver.observe(containerRef.current);
+    }
+
     map.on('load', () => {
       // GeoJSON sources
       map.addSource('aoi-polygon', { type: 'geojson', data: EMPTY_FC });
+      map.addSource('aoi-draw-path', { type: 'geojson', data: EMPTY_FC });
       map.addSource('aoi-vertices', { type: 'geojson', data: EMPTY_FC });
       map.addSource('canopy-grid', { type: 'geojson', data: EMPTY_FC });
       map.addSource('leakage-belt', { type: 'geojson', data: EMPTY_FC });
@@ -364,28 +400,38 @@ export const DmrvMapStudio = ({
         },
       });
 
-      // 7. Project AOI Border & Vertices
+      // 7. Project AOI Border, Live Draw Path & Vertices
       map.addLayer({
         id: 'aoi-fill',
         type: 'fill',
         source: 'aoi-polygon',
-        paint: { 'fill-color': '#00C853', 'fill-opacity': 0.08 },
+        paint: { 'fill-color': '#00C853', 'fill-opacity': 0.16 },
       });
       map.addLayer({
         id: 'aoi-outline',
         type: 'line',
         source: 'aoi-polygon',
-        paint: { 'line-color': '#00E676', 'line-width': 2.6 },
+        paint: { 'line-color': '#00E676', 'line-width': 3 },
+      });
+      map.addLayer({
+        id: 'aoi-draw-polyline',
+        type: 'line',
+        source: 'aoi-draw-path',
+        paint: {
+          'line-color': '#FFB300',
+          'line-width': 2.5,
+          'line-dasharray': [2, 2],
+        },
       });
       map.addLayer({
         id: 'aoi-vertex-dots',
         type: 'circle',
         source: 'aoi-vertices',
         paint: {
-          'circle-radius': 5,
-          'circle-color': '#00E676',
+          'circle-radius': 6,
+          'circle-color': '#FFB300',
           'circle-stroke-color': '#040906',
-          'circle-stroke-width': 1.5,
+          'circle-stroke-width': 2,
         },
       });
 
@@ -427,6 +473,21 @@ export const DmrvMapStudio = ({
       });
 
       loadedRef.current = true;
+      if (isDrawingRef.current) {
+        const canvas = map.getCanvas?.();
+        if (canvas) canvas.style.cursor = 'crosshair';
+        map.doubleClickZoom?.disable();
+      }
+      if (syncLatestRef.current) {
+        syncLatestRef.current();
+      }
+    });
+
+    map.on('dblclick', (e) => {
+      if (isDrawingRef.current && drawPointsRef.current?.length >= 3 && onFinishDrawingRef.current) {
+        e.preventDefault();
+        onFinishDrawingRef.current();
+      }
     });
 
     map.on('mousemove', (e) => {
@@ -468,6 +529,7 @@ export const DmrvMapStudio = ({
     });
 
     return () => {
+      if (resizeObserver) resizeObserver.disconnect();
       loadedRef.current = false;
       map.remove();
       mapRef.current = null;
@@ -513,9 +575,22 @@ export const DmrvMapStudio = ({
         safeSetGeoJSON(map, 'aoi-polygon', EMPTY_FC);
       }
 
+      if (drawPoints && drawPoints.length >= 2 && (isDrawing || drawPoints.length < 3)) {
+        safeSetGeoJSON(map, 'aoi-draw-path', {
+          type: 'FeatureCollection',
+          features: [{
+            type: 'Feature',
+            geometry: { type: 'LineString', coordinates: drawPoints.map((p) => [p[1], p[0]]) },
+            properties: {},
+          }],
+        });
+      } else {
+        safeSetGeoJSON(map, 'aoi-draw-path', EMPTY_FC);
+      }
+
       safeSetGeoJSON(map, 'aoi-vertices', {
         type: 'FeatureCollection',
-        features: isDrawing
+        features: (isDrawing || (drawPoints && drawPoints.length < 3))
           ? (drawPoints || []).map((p, idx) => ({
               type: 'Feature',
               properties: { idx },
@@ -580,11 +655,10 @@ export const DmrvMapStudio = ({
       }
     };
 
+    syncLatestRef.current = syncData;
     if (!map) return;
     if (loadedRef.current) {
       syncData();
-    } else {
-      map.once('load', syncData);
     }
   }, [drawPoints, isDrawing, canopyGridFC, osmContext, osmOverlays, donorPlotsGeoJson, activeAlerts, inspectedPixel, showCanopyGrid, is3D]);
 

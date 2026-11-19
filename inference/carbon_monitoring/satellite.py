@@ -331,16 +331,33 @@ class SatelliteEngine:
             vv, vh, s1_ratio,
             canopy_height, terrain
         ])
-        gee_payload = ee.Dictionary({
-            'stats': stacked.reduceRegion(
-                reducer=ee.Reducer.mean(),
-                geometry=aoi,
-                scale=10,
-                maxPixels=1e9
-            ),
-            's2_ids': s2_collection.limit(25).aggregate_array('system:index'),
-            's1_ids': s1_collection.limit(15).aggregate_array('system:index'),
-        }).getInfo() or {}
+        # Cap GEE RPC deadline cleanly for lightweight single-pixel inspection so UI never hangs
+        deadline_applied = False
+        if (not include_grid and not include_tile
+                and hasattr(ee, 'data') and hasattr(ee.data, 'setDeadline')):
+            try:
+                ee.data.setDeadline(18000)
+                deadline_applied = True
+            except Exception:
+                deadline_applied = False
+
+        try:
+            gee_payload = ee.Dictionary({
+                'stats': stacked.reduceRegion(
+                    reducer=ee.Reducer.mean(),
+                    geometry=aoi,
+                    scale=10,
+                    maxPixels=1e9
+                ),
+                's2_ids': s2_collection.limit(25).aggregate_array('system:index'),
+                's1_ids': s1_collection.limit(15).aggregate_array('system:index'),
+            }).getInfo() or {}
+        finally:
+            if deadline_applied:
+                try:
+                    ee.data.setDeadline(0)
+                except Exception:
+                    pass
 
         mean_stats = gee_payload.get('stats') or {}
         scene_ids = gee_payload.get('s2_ids') or []

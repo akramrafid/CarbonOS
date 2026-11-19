@@ -243,7 +243,7 @@ def run_async_analysis(job_id: str):
                 forest_area_ha=forest_area_ha,
                 project_carbon_tc_ha=carbon_per_ha,
                 stratum=estimator_result.get("forest_stratum", "SUNDARBANS_MANGROVE"),
-                satellite_engine=sat_engine if sat_result.get("eo_pixel_verified") else None,
+                satellite_engine=None,
             )
             baseline_rec = BaselineAssessment(
                 job_id=job.id,
@@ -341,6 +341,7 @@ def run_async_analysis(job_id: str):
     except Exception as e:
         print(f"[AI Pipeline Error] Async analysis failed for job {job_id}: {e}")
         try:
+            db.rollback()
             job = db.query(AnalysisJob).filter(AnalysisJob.id == job_id).first()
             if job:
                 job.status = "failed"

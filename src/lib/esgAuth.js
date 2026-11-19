@@ -89,7 +89,7 @@ export function createLocalOfflineDemoSession() {
 export async function requestDemoSession() {
   try {
     const controller = typeof AbortController !== 'undefined' ? new AbortController() : null;
-    const timeout = controller ? setTimeout(() => controller.abort(), 4000) : null;
+    const timeout = controller ? setTimeout(() => controller.abort(new Error('Demo session request timed out after 4s')), 4000) : null;
     const res = await fetch(`${API_BASE}/api/esg/demo/session`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },

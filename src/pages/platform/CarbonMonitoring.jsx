@@ -929,6 +929,8 @@ const CarbonMonitoring = () => {
   // Hover & Inspector State (null until user clicks a pixel or searches coordinates)
   const [hoverCoords, setHoverCoords] = useState({ lat: 22.15, lng: 89.50 });
   const [inspectedPixel, setInspectedPixel] = useState(null);
+  const activePixelReqRef = useRef(0);
+  const pixelAbortRef = useRef(null);
 
   // Floating Toast notification state
   const [toast, setToast] = useState({ show: false, message: '', type: 'success' });
@@ -1591,7 +1593,10 @@ const CarbonMonitoring = () => {
     setAnalyzing(true);
     try {
       const submitCtrl = new AbortController();
-      const submitTimer = setTimeout(() => submitCtrl.abort(), 15000);
+      const submitTimer = setTimeout(
+        () => submitCtrl.abort(new Error('Satellite analysis request timed out after 45s')),
+        45000
+      );
       const formData = new FormData();
       formData.append('polygon_geojson', JSON.stringify(geojsonPolygon));
       formData.append('start_date', startDate);
@@ -1623,7 +1628,7 @@ const CarbonMonitoring = () => {
       for (let attempt = 0; attempt < maxPolls; attempt++) {
         await new Promise((resolve) => setTimeout(resolve, 1200));
         const pollCtrl = new AbortController();
-        const pollTimer = setTimeout(() => pollCtrl.abort(), 10000);
+        const pollTimer = setTimeout(() => pollCtrl.abort(new Error('Job poll request timed out')), 15000);
         const jobRes = await carbonFetch(`${FASTAPI_API_URL}/api/carbon/jobs/${jobId}`, {
           signal: pollCtrl.signal,
         }).finally(() => clearTimeout(pollTimer));
@@ -1835,6 +1840,13 @@ const CarbonMonitoring = () => {
     const parsedLng = typeof lng === 'number' ? lng : parseFloat(lng);
     if (isNaN(parsedLat) || isNaN(parsedLng)) return;
 
+    // Cancel any earlier in-flight pixel lookup so stale aborts never overwrite newer coordinates
+    activePixelReqRef.current += 1;
+    const reqId = activePixelReqRef.current;
+    if (pixelAbortRef.current) {
+      pixelAbortRef.current.abort(new DOMException('Superseded by newer coordinate click', 'SupersededAbort'));
+    }
+
     const latStr = parsedLat.toFixed(5);
     const lngStr = parsedLng.toFixed(5);
 
@@ -1854,9 +1866,16 @@ const CarbonMonitoring = () => {
     const ecoZone = getBangladeshEcoZone(parsedLat, parsedLng);
 
     const pixelController = new AbortController();
-    const pixelTimeout = setTimeout(() => pixelController.abort(), 25000);
+    pixelAbortRef.current = pixelController;
+    const pixelTimeout = setTimeout(
+      () => pixelController.abort(new Error('Satellite pixel request timed out after 40s')),
+      40000
+    );
     const geoController = new AbortController();
-    const geoTimeout = setTimeout(() => geoController.abort(), 5000);
+    const geoTimeout = setTimeout(
+      () => geoController.abort(new Error('Geocoder lookup timed out')),
+      8000
+    );
 
     const [pixelOutcome, geoOutcome] = await Promise.allSettled([
       carbonFetch(`${FASTAPI_API_URL}/api/carbon/pixel-inspect`, {
@@ -1891,6 +1910,11 @@ const CarbonMonitoring = () => {
     ]);
     clearTimeout(pixelTimeout);
     clearTimeout(geoTimeout);
+
+    // Ignore response if superseded by a newer click
+    if (reqId !== activePixelReqRef.current) {
+      return;
+    }
 
     let locationName = `Coordinates: ${latStr}, ${lngStr}`;
     let districtInfo = ecoZone.zone;
@@ -3911,13 +3935,18 @@ const CarbonMonitoring = () => {
                   type="text" 
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
+                  onKeyDown={(e) => {
+                    if (e.key === 'Enter') handleCoordsSearch();
+                  }}
                   placeholder="Lat, Lng (e.g. 22.3, 89.6)"
                   className={`flex-1 border rounded-xl px-3 py-2 text-sm focus:outline-none focus:border-emerald/50 transition-colors ${
                     isLight ? 'bg-[#F8FAFC] border-[#CBD5E1] text-[#0F291B] placeholder-[#94A3B8]' : 'bg-white/5 border-white/10 text-white placeholder-mist/60'
                   }`}
                 />
                 <button 
+                  type="button"
                   onClick={handleCoordsSearch}
+                  aria-label="Search coordinates or location"
                   className="bg-emerald text-carbon font-bold p-2.5 rounded-xl hover:bg-emerald/80 transition-colors cursor-pointer"
                 >
                   <Search size={16} />
@@ -3986,21 +4015,30 @@ const CarbonMonitoring = () => {
                   <div>
                     <span className={`text-xs font-medium block ${isLight ? 'text-[#0F291B]' : 'text-white'}`}>Custom Draw Polygon</span>
                     <span className={`text-[10px] block ${isLight ? 'text-[#64748B]' : 'text-mist'}`}>
-                      {isDrawing ? 'Click points on map' : 'Click to plot custom bounds'}
+                      {isDrawing
+                        ? (drawPoints.length >= 3 ? 'Click more points or Finish Polygon' : 'Click 3+ corners on the map')
+                        : 'Click to plot custom bounds'}
                     </span>
                   </div>
                   <button 
+                    type="button"
                     onClick={() => {
-                      setIsDrawing(!isDrawing);
-                      if (!isDrawing) setDrawPoints([]);
+                      if (!isDrawing) {
+                        setDrawPoints([]);
+                        setIsDrawing(true);
+                      } else {
+                        setIsDrawing(false);
+                      }
                     }}
                     className={`text-xs font-bold px-3 py-1.5 rounded-lg transition-colors cursor-pointer ${
                       isDrawing 
-                        ? 'bg-amber text-carbon' 
+                        ? (drawPoints.length >= 3 ? 'bg-emerald text-carbon hover:bg-emerald-400' : 'bg-amber text-carbon')
                         : (isLight ? 'bg-[#E2E8F0] hover:bg-[#CBD5E1] text-[#0F291B]' : 'bg-white/10 hover:bg-white/20 text-white')
                     }`}
                   >
-                    {isDrawing ? 'Drawing... (Click map)' : 'Start Drawing'}
+                    {isDrawing
+                      ? (drawPoints.length >= 3 ? `Finish Polygon (${drawPoints.length})` : `Click Map (${drawPoints.length}/3+)`)
+                      : 'Start Drawing'}
                   </button>
                 </div>
                 
@@ -4011,18 +4049,29 @@ const CarbonMonitoring = () => {
                     <div className={`p-3.5 rounded-xl border space-y-2.5 ${
                       isLight ? 'bg-[#E8F8EE]/60 border-[#C2E9CF]' : 'bg-emerald/10 border-emerald/20'
                     }`}>
-                      <div className="flex items-center justify-between">
+                      <div className="flex items-center justify-between gap-2">
                         <span className={`text-[11px] font-bold uppercase tracking-wider flex items-center space-x-1.5 ${
                           isLight ? 'text-[#00873E]' : 'text-emerald'
                         }`}>
                           <CheckCircle size={13} />
                           <span>Enclosed Boundary</span>
                         </span>
-                        <span className={`text-[10px] font-mono px-2 py-0.5 rounded-full ${
-                          isLight ? 'bg-white text-[#475569] border border-[#C2E9CF]' : 'bg-carbon/60 text-mist border border-white/10'
-                        }`}>
-                          {drawPoints.length} vertices
-                        </span>
+                        <div className="flex items-center gap-1.5">
+                          {isDrawing && (
+                            <button
+                              type="button"
+                              onClick={() => setDrawPoints((prev) => prev.slice(0, -1))}
+                              className="text-[10px] font-mono px-2 py-0.5 rounded bg-amber/20 text-amber border border-amber/30 hover:bg-amber/30 cursor-pointer"
+                            >
+                              Undo
+                            </button>
+                          )}
+                          <span className={`text-[10px] font-mono px-2 py-0.5 rounded-full ${
+                            isLight ? 'bg-white text-[#475569] border border-[#C2E9CF]' : 'bg-carbon/60 text-mist border border-white/10'
+                          }`}>
+                            {drawPoints.length} vertices
+                          </span>
+                        </div>
                       </div>
 
                       <div className="grid grid-cols-1 min-[360px]:grid-cols-2 gap-2 pt-1 border-t border-emerald/15 text-xs">
@@ -4075,12 +4124,22 @@ const CarbonMonitoring = () => {
                   }`}>
                     <div className="flex items-center justify-between font-semibold">
                       <span>Vertices Plotted: {drawPoints.length}</span>
-                      <button 
-                        onClick={() => setDrawPoints([])}
-                        className="text-red-500 underline hover:text-red-400 cursor-pointer text-[11px]"
-                      >
-                        Reset
-                      </button>
+                      <div className="flex items-center gap-2.5">
+                        <button
+                          type="button"
+                          onClick={() => setDrawPoints((prev) => prev.slice(0, -1))}
+                          className="underline hover:opacity-80 cursor-pointer text-[11px]"
+                        >
+                          Undo
+                        </button>
+                        <button 
+                          type="button"
+                          onClick={() => setDrawPoints([])}
+                          className="text-red-500 underline hover:text-red-400 cursor-pointer text-[11px]"
+                        >
+                          Reset
+                        </button>
+                      </div>
                     </div>
                     <p className="text-[11px] mt-1 opacity-90">
                       Click {3 - drawPoints.length} more point{3 - drawPoints.length === 1 ? '' : 's'} on the map to enclose a complete boundary.
@@ -4321,6 +4380,7 @@ const CarbonMonitoring = () => {
               mapZoom={mapZoom}
               onPixelClick={handlePixelClick}
               onHoverCoords={setHoverCoords}
+              onFinishDrawing={() => setIsDrawing(false)}
               analyzing={analyzing}
               isLight={isLight}
             />
