@@ -119,16 +119,13 @@ const Impact = () => {
       <div className="max-w-7xl mx-auto space-y-20 relative z-10">
         
         {/* Page Header */}
-        <div className="text-center max-w-3xl mx-auto space-y-6">
-          <span className="font-mono text-xs text-[#00C853] tracking-widest px-4 py-1.5 bg-[#0D2B1A]/60 border border-[#00C853]/20 rounded-full inline-block animate-pulse">
-            ECOLOGICAL & SOCIAL IMPACT LOG
-          </span>
-          <h1 className="serif-drama text-4xl sm:text-5xl lg:text-6xl font-bold tracking-tight text-white leading-tight">
-            Realized Carbon <br className="hidden sm:block"/>
+        <div className="max-w-3xl space-y-4">
+          <h1 className="font-sans text-4xl sm:text-5xl lg:text-6xl font-extrabold tracking-tight text-white leading-tight">
+            Realized Carbon{' '}
             <span className="text-[#00C853]">Impact Outcomes</span>
           </h1>
-          <p className="font-sans text-sm sm:text-base text-mist max-w-xl mx-auto leading-relaxed">
-            Carbon Zero BD monitors, registers, and monetizes verified carbon emissions reductions while directing funding into local rural communities in Bangladesh.
+          <p className="font-sans text-sm sm:text-base text-mist max-w-xl leading-relaxed">
+            Ecological and social impact log tracking emissions reductions monitored across rural communities in Bangladesh.
           </p>
         </div>
 
@@ -234,7 +231,7 @@ const Impact = () => {
             <div className="flex justify-between items-center pb-3 border-b border-white/5">
               <span className="font-sans font-bold text-sm text-white">Recent Micro-disbursements</span>
               <span className="font-mono text-[9px] uppercase tracking-wider text-emerald bg-emerald/10 border border-emerald/20 px-2.5 py-0.5 rounded-full flex items-center space-x-1">
-                <span className="w-1.5 h-1.5 rounded-full bg-emerald animate-ping mr-1"></span>
+                <span className="w-1.5 h-1.5 rounded-full bg-emerald mr-1"></span>
                 LIVE
               </span>
             </div>

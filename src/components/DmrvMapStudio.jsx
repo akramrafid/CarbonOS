@@ -757,7 +757,7 @@ export const DmrvMapStudio = ({
 
         <div className="text-[9px] text-mist/85 border-t border-white/10 pt-1.5 space-y-1">
           <div className="flex items-center gap-1.5"><span className="w-2 h-2 rounded-full bg-teal-400 inline-block" /> VT0007 Donor Plots</div>
-          <div className="flex items-center gap-1.5"><span className="w-2 h-2 rounded-full bg-purple-400 inline-block" /> Overture Buildings</div>
+          <div className="flex items-center gap-1.5"><span className="w-2 h-2 rounded-full bg-amber-400 inline-block" /> Overture Buildings</div>
           <div className="flex items-center gap-1.5"><span className="w-2 h-2 rounded-full bg-rose-500 inline-block" /> Frontier Heat / Kilns</div>
         </div>
       </div>

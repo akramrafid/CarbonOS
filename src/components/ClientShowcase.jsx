@@ -45,126 +45,102 @@ const ClientShowcase = () => {
     return (
       <div
         key={client.id}
-        className={`group relative rounded-3xl ${isLowerRow ? 'p-6 sm:p-6 xl:p-6 2xl:p-7' : 'p-7 sm:p-8 xl:p-8 2xl:p-9'} transition-all duration-300 hover:-translate-y-1.5 flex flex-col justify-between h-full min-h-[440px] sm:min-h-[460px] overflow-hidden border ${
+        className={`group relative rounded-2xl ${isLowerRow ? 'p-5 sm:p-6' : 'p-6 sm:p-7'} transition-colors flex flex-col justify-between h-full overflow-hidden border ${
           isLight
-            ? 'bg-white border-[#0F291B]/10 hover:border-[#15803d]/40 shadow-[0_10px_30px_-8px_rgba(15,41,27,0.08),0_2px_8px_-2px_rgba(15,41,27,0.04)] hover:shadow-[0_18px_42px_-10px_rgba(21,128,61,0.14)]'
-            : 'bg-gradient-to-b from-[#091A10]/95 via-[#06130B]/95 to-[#030805] hover:bg-[#0C2416] border-[#184227]/75 hover:border-[#00E676]/80 shadow-[0_12px_40px_rgba(0,0,0,0.6),inset_0_1px_0_rgba(255,255,255,0.06)] hover:shadow-[0_20px_60px_rgba(0,200,83,0.18),inset_0_1px_0_rgba(0,230,118,0.3)]'
+            ? 'bg-white border-[#0F291B]/10 hover:border-[#15803d]/40 shadow-[0_8px_24px_-8px_rgba(15,41,27,0.07)]'
+            : 'bg-[#08130C] hover:bg-[#0B1C12] border-[#184227]/75 hover:border-[#00C853]/70'
         }`}
       >
-        {/* Ambient Card Hover Glow */}
-        <div
-          className={`absolute inset-0 rounded-3xl opacity-0 group-hover:opacity-100 transition-opacity duration-500 pointer-events-none ${
-            isLight
-              ? 'bg-[radial-gradient(ellipse_at_top,_var(--tw-gradient-stops))] from-emerald-500/[0.05] via-transparent to-transparent'
-              : 'bg-[radial-gradient(ellipse_at_top,_var(--tw-gradient-stops))] from-emerald-500/[0.08] via-transparent to-transparent'
-          }`}
-        />
-
         <div className="relative z-10">
           {/* Top Row: Logo Badge & Live Site Link */}
-          <div className={`flex items-center justify-between ${isLowerRow ? 'gap-2.5' : 'gap-4'} mb-7 min-w-0`}>
-            {/* Enhanced Logo Container for Maximum Contrast & Visibility */}
+          <div className={`flex items-center justify-between ${isLowerRow ? 'gap-2.5' : 'gap-4'} mb-5 min-w-0`}>
             <div 
               className={`${
-                isLowerRow ? 'h-14 sm:h-15 w-24 sm:w-28 xl:w-28 2xl:w-32 px-2.5 py-2' : 'h-16 sm:h-17 w-36 sm:w-42 xl:w-44 px-3.5 py-2'
-              } rounded-2xl flex items-center justify-center shrink-0 transition-all duration-300 group-hover:scale-[1.03] ${
+                isLowerRow ? 'h-12 w-24 sm:w-26 px-2.5 py-1.5' : 'h-14 w-34 sm:w-38 px-3 py-2'
+              } rounded-xl flex items-center justify-center shrink-0 transition-transform duration-200 ${
                 isDarkLogo
                   ? isLight
-                    ? 'client-logo-swatch-dark bg-[#0D2317] border border-[#1B4D2E] shadow-sm'
-                    : 'client-logo-swatch-dark bg-[#06160C] border-2 border-[#1B4D2B] shadow-[0_0_24px_rgba(0,200,83,0.2)] ring-1 ring-emerald-500/30'
+                    ? 'client-logo-swatch-dark bg-[#0D2317] border border-[#1B4D2E]'
+                    : 'client-logo-swatch-dark bg-[#06160C] border border-[#1B4D2B]'
                   : isLight
-                    ? 'bg-[#F5F8F5] border border-[#0F291B]/10 shadow-xs'
-                    : 'bg-white border-2 border-slate-200 shadow-md ring-1 ring-black/5'
+                    ? 'bg-[#F5F8F5] border border-[#0F291B]/10'
+                    : 'bg-white border border-slate-200'
               }`}
             >
               <img 
                 src={client.logo} 
                 alt={`${client.name} official logo`}
-                className={`${isLowerRow ? 'max-h-9 sm:max-h-10' : 'max-h-11 sm:max-h-12'} max-w-full w-auto object-contain transition-transform duration-300`}
+                className={`${isLowerRow ? 'max-h-8 sm:max-h-9' : 'max-h-10'} max-w-full w-auto object-contain`}
                 loading="lazy"
               />
             </div>
 
-            {/* Verified Badge & Live Domain */}
-            <div className="flex flex-col items-end min-w-0 flex-1 gap-1.5">
-              <div className={`inline-flex items-center space-x-1.5 px-3 py-1 rounded-full transition-all border shrink-0 ${
-                isLight
-                  ? 'bg-[#E6F4EC] group-hover:bg-[#DAF0E3] border-[#15803d]/20 text-[#15803d]'
-                  : 'bg-[#00C853]/12 group-hover:bg-[#00C853]/20 border-[#00C853]/35 text-[#00E676] shadow-xs'
+            <div className="flex flex-col items-end min-w-0 flex-1 gap-1">
+              <span className={`text-[11px] font-mono font-semibold tracking-wide whitespace-nowrap ${
+                isLight ? 'text-[#15803d]' : 'text-[#34D399]'
               }`}>
-                <span className={`w-1.5 h-1.5 rounded-full animate-pulse shrink-0 ${isLight ? 'bg-[#15803d]' : 'bg-[#00E676]'}`} />
-                <ShieldCheck className={`w-3.5 h-3.5 shrink-0 ${isLight ? 'text-[#15803d]' : 'text-[#00C853]'}`} />
-                <span className={`text-[11px] font-mono font-semibold tracking-wide whitespace-nowrap ${isLight ? 'text-[#14532D]' : 'text-[#34D399]'}`}>
-                  Client
-                </span>
-              </div>
+                Active Client
+              </span>
               <a
                 href={client.website}
                 target="_blank"
                 rel="noopener noreferrer"
-                className={`text-[11px] font-mono flex items-center justify-end space-x-1 transition-colors group/link px-0.5 py-0.5 max-w-full min-w-0 ${
-                  isLight ? 'text-[#4A5D52] hover:text-[#15803d]' : 'text-gray-400 hover:text-[#00E676]'
+                className={`text-[11px] font-mono flex items-center justify-end space-x-1 transition-colors group/link max-w-full min-w-0 ${
+                  isLight ? 'text-[#4A5D52] hover:text-[#15803d]' : 'text-gray-400 hover:text-[#00C853]'
                 }`}
                 title={`Visit ${client.name} official website`}
               >
                 <span className="truncate">{cleanUrl}</span>
-                <ArrowUpRight className={`w-3 h-3 group-hover/link:translate-x-0.5 group-hover/link:-translate-y-0.5 transition-transform shrink-0 ${isLight ? 'text-[#15803d]' : 'text-[#00C853]'}`} />
+                <ArrowUpRight className={`w-3 h-3 shrink-0 ${isLight ? 'text-[#15803d]' : 'text-[#00C853]'}`} />
               </a>
             </div>
           </div>
 
           {/* Company Name & Sector */}
-          <div className="mb-4">
-            <h3 className={`font-sans font-extrabold text-2xl sm:text-[26px] transition-colors tracking-tight leading-snug ${
-              isLight ? 'text-[#0F291B] group-hover:text-[#15803d]' : 'text-white group-hover:text-[#00E676]'
+          <div className="mb-3">
+            <h3 className={`font-sans font-bold text-xl sm:text-2xl transition-colors tracking-tight leading-snug ${
+              isLight ? 'text-[#0F291B] group-hover:text-[#15803d]' : 'text-white group-hover:text-[#00C853]'
             }`}>
               {client.name}
             </h3>
-            <span className={`text-xs sm:text-[13px] font-mono font-bold uppercase tracking-wider block mt-1.5 ${
-              isLight ? 'text-[#15803d]' : 'text-[#00E676]'
+            <span className={`text-xs font-mono font-semibold uppercase tracking-wider block mt-1 ${
+              isLight ? 'text-[#15803d]' : 'text-[#00C853]'
             }`}>
               {client.sector}
             </span>
           </div>
 
           {/* Legal Entity / Location */}
-          <div className={`text-xs sm:text-[13px] mb-5 flex items-center space-x-2 font-sans ${isLight ? 'text-[#4A5D52]' : 'text-gray-400'}`}>
-            <Building2 className={`w-4 h-4 shrink-0 ${isLight ? 'text-[#15803d]' : 'text-emerald-400/80'}`} />
+          <div className={`text-xs mb-4 flex items-center space-x-1.5 font-sans ${isLight ? 'text-[#4A5D52]' : 'text-gray-400'}`}>
+            <Building2 className={`w-3.5 h-3.5 shrink-0 ${isLight ? 'text-[#15803d]' : 'text-emerald-400/80'}`} />
             <span className="truncate" title={client.headquarters}>{client.headquarters}</span>
           </div>
 
-          {/* Sustainability Highlight */}
-          <div className={`relative p-4 sm:p-5 rounded-2xl border mb-6 overflow-hidden transition-colors ${
-            isLight
-              ? 'bg-[#F5F8F5] border-[#0F291B]/10 group-hover:border-[#15803d]/30'
-              : 'bg-[#030A05]/90 border-[#163822] group-hover:border-[#00C853]/40 shadow-inner'
+          {/* Sustainability Highlight (Flat Hairline Top Rule — No Nested Card Box) */}
+          <div className={`pt-4 pb-5 border-t flex items-start space-x-2.5 ${
+            isLight ? 'border-[#0F291B]/8' : 'border-white/[0.08]'
           }`}>
-            <div className="flex items-start space-x-3">
-              <Leaf className={`w-4 h-4 shrink-0 mt-0.5 ${isLight ? 'text-[#15803d]' : 'text-[#00E676]'}`} />
-              <p className={`text-xs sm:text-[13.5px] font-sans leading-relaxed font-normal min-h-[46px] ${
-                isLight ? 'text-[#26382E]' : 'text-gray-200'
-              }`}>
-                {client.sustainabilityHighlight}
-              </p>
-            </div>
+            <Leaf className={`w-4 h-4 shrink-0 mt-0.5 ${isLight ? 'text-[#15803d]' : 'text-[#00C853]'}`} />
+            <p className={`text-xs sm:text-[13px] font-sans leading-relaxed ${
+              isLight ? 'text-[#26382E]' : 'text-gray-200'
+            }`}>
+              {client.sustainabilityHighlight}
+            </p>
           </div>
         </div>
 
         {/* Bottom Card Footer: Facilities & Audit Info */}
-        <div className={`relative z-10 pt-5 border-t flex items-center justify-between text-xs font-mono ${
+        <div className={`relative z-10 pt-4 border-t flex items-center justify-between text-xs font-mono ${
           isLight ? 'border-[#0F291B]/10 text-[#4A5D52]' : 'border-white/[0.08] text-gray-400'
         }`}>
           <div className="flex items-center space-x-2">
-            <span className="relative flex h-2.5 w-2.5">
-              <span className={`animate-ping absolute inline-flex h-full w-full rounded-full opacity-75 ${isLight ? 'bg-[#15803d]' : 'bg-[#00E676]'}`} />
-              <span className={`relative inline-flex rounded-full h-2.5 w-2.5 ${isLight ? 'bg-[#15803d]' : 'bg-[#00C853]'}`} />
-            </span>
-            <span className={`font-medium text-xs sm:text-[13px] ${isLight ? 'text-[#26382E]' : 'text-gray-300'}`}>
+            <span className={`inline-flex rounded-full h-2 w-2 ${isLight ? 'bg-[#15803d]' : 'bg-[#00C853]'}`} />
+            <span className={`font-medium text-xs ${isLight ? 'text-[#26382E]' : 'text-gray-300'}`}>
               {client.facilities.length} Active Sites
             </span>
           </div>
-          <div className="text-right">
-            <span className={`font-extrabold font-mono text-base sm:text-lg ${isLight ? 'text-[#15803d]' : 'text-[#00E676]'}`}>
+          <div className="text-right tabular-nums">
+            <span className={`font-bold font-mono text-base ${isLight ? 'text-[#15803d]' : 'text-[#00C853]'}`}>
               {client.activeInsets.toLocaleString()} tCO₂e
             </span>
             <span className={`text-xs ml-1.5 font-sans ${isLight ? 'text-[#4A5D52]' : 'text-gray-400'}`}>Offset</span>
@@ -175,31 +151,17 @@ const ClientShowcase = () => {
   };
 
   return (
-    <section className={`w-full py-24 sm:py-32 relative overflow-hidden font-sans border-b ${
+    <section className={`w-full py-20 sm:py-28 relative overflow-hidden font-sans border-b ${
       isLight ? 'bg-[#F2F3EE] border-[#0F291B]/8' : 'bg-[#040A06] border-white/5'
     }`}>
-      {/* Ambient background glows */}
-      <div className={`absolute top-1/4 left-1/2 -translate-x-1/2 w-[900px] h-[450px] rounded-full blur-[180px] pointer-events-none ${isLight ? 'bg-[#15803d]/[0.05]' : 'bg-[#00C853]/10'}`} />
-      <div className={`absolute bottom-10 right-10 w-[600px] h-[400px] rounded-full blur-[160px] pointer-events-none ${isLight ? 'bg-emerald-500/[0.04]' : 'bg-emerald-500/5'}`} />
-      <div className={`absolute top-10 left-10 w-[500px] h-[300px] rounded-full blur-[150px] pointer-events-none ${isLight ? 'bg-[#15803d]/[0.03]' : 'bg-[#00E676]/5'}`} />
-
-      {/* Expanded Container Width to utilize high-resolution canvas generously */}
+      {/* Expanded Container Width */}
       <div className="max-w-[2100px] 2xl:max-w-[2300px] w-full mx-auto px-6 sm:px-10 lg:px-14 xl:px-18 2xl:px-24 relative z-10">
         
-        {/* Section Header */}
-        <div className="text-center max-w-3xl mx-auto mb-16">
-          <div className={`inline-flex items-center space-x-2 px-4 py-1.5 rounded-full font-mono text-xs font-bold uppercase tracking-wider mb-4 border ${
-            isLight
-              ? 'bg-[#E5F4EB] border-[#15803d]/20 text-[#15803d]'
-              : 'bg-[#00C853]/10 border-[#00C853]/30 text-[#00E676] shadow-sm'
-          }`}>
-            <Award className={`w-4 h-4 ${isLight ? 'text-[#15803d]' : 'text-[#00C853]'}`} />
-            <span>Trusted Enterprise Client Network</span>
-          </div>
-
+        {/* Section Header (No Eyebrow Pill, No Gradient Text) */}
+        <div className="text-center max-w-3xl mx-auto mb-12">
           <h2 className={`text-3xl sm:text-4xl lg:text-5xl font-extrabold tracking-tight leading-tight mb-4 ${isLight ? 'text-[#0F291B]' : 'text-white'}`}>
-            Powering Bangladesh's <br />
-            <span className={isLight ? 'text-[#15803d]' : 'bg-gradient-to-r from-[#00E676] via-[#10B981] to-[#34D399] bg-clip-text text-transparent'}>
+            Powering Bangladesh's{' '}
+            <span className={isLight ? 'text-[#15803d]' : 'text-[#00C853]'}>
               Decarbonization Pioneers
             </span>
           </h2>

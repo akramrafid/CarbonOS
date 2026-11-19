@@ -266,7 +266,11 @@ export const FactorRegistryStudio = ({ isLight, locale }) => {
                 <td className="py-3 text-right">
                   <button 
                     onClick={() => setSelectedFactor(f)}
-                    className="px-2.5 py-1 rounded-xl bg-gray-100 dark:bg-[#040A06] hover:bg-emerald-500/10 text-gray-700 dark:text-gray-300 hover:text-emerald-500 font-mono text-[10px]"
+                    className={`px-3 py-1 rounded-lg font-mono text-[10px] font-semibold border transition-colors cursor-pointer ${
+                      isLight
+                        ? 'bg-[#F5F8F5] text-[#0F291B] border-[#0F291B]/12 hover:bg-[#E4F2EA] hover:text-[#15803d]'
+                        : 'bg-[#040A06] text-white border-[#1B4D2E] hover:bg-[#0D2B1A] hover:text-emerald'
+                    }`}
                   >
                     Inspect
                   </button>

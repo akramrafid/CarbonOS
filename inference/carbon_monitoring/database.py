@@ -65,6 +65,25 @@ def init_db():
                 for col_name, col_type in cols_to_add:
                     if col_name not in existing_cols:
                         conn.execute(text(f"ALTER TABLE farmers_ai_carbonresult ADD COLUMN {col_name} {col_type}"))
+
+        table_column_patches = {
+            "farmers_ai_analysisjob": [("organization_id", "VARCHAR(64)")],
+            "farmers_ai_uploadedboundary": [("organization_id", "VARCHAR(64)")],
+            "carbon_mrv_groundtruthplot": [("organization_id", "VARCHAR(64)")],
+            "farmers_ai_carbonalert": [("organization_id", "VARCHAR(64)")],
+            "carbon_mrv_estimateprovenance": [
+                ("chain_index", "INTEGER"),
+                ("quantification_snapshot_json", "TEXT"),
+            ],
+        }
+        existing_tables = set(inspector.get_table_names())
+        with engine.begin() as conn:
+            for tbl, patches in table_column_patches.items():
+                if tbl in existing_tables:
+                    tbl_cols = {c["name"] for c in inspector.get_columns(tbl)}
+                    for col_name, col_type in patches:
+                        if col_name not in tbl_cols:
+                            conn.execute(text(f"ALTER TABLE {tbl} ADD COLUMN {col_name} {col_type}"))
     except Exception as e:
         print(f"[DB Init Warning] Schema check/migration error: {e}")
 

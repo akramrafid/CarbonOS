@@ -573,22 +573,18 @@ export const MarketplaceBrowse = () => {
           <div className="absolute top-0 right-0 -mr-24 -mt-24 w-96 h-96 bg-emerald/10 rounded-full blur-3xl pointer-events-none"></div>
 
           <div className="relative z-10 flex flex-col lg:flex-row justify-between items-start lg:items-end gap-6">
-            <div className="max-w-3xl space-y-4">
-              <div className="flex flex-wrap items-center gap-2">
-                <span className="font-mono text-[11px] font-bold tracking-widest px-3 py-1 bg-emerald/10 border border-emerald/30 text-emerald rounded-full uppercase flex items-center space-x-1.5">
-                  <span className="w-1.5 h-1.5 rounded-full bg-emerald animate-ping mr-1"></span>
-                  CARBON ZERO BD • DEMO MARKETPLACE
-                </span>
-                <span className="font-mono text-[11px] px-2.5 py-1 rounded-full bg-white/5 border border-white/10 text-slate-400">
-                  Demo listings: not registered or verified
-                </span>
-              </div>
-
-              <h1 className={`serif-drama text-4xl sm:text-5xl lg:text-6xl font-bold tracking-tight leading-[1.08] ${
-                isLight ? 'text-[#181414]' : 'text-white'
+            <div className="max-w-3xl space-y-3">
+              <h1 className={`font-sans text-4xl sm:text-5xl lg:text-6xl font-extrabold tracking-tight leading-[1.08] ${
+                isLight ? 'text-[#0F291B]' : 'text-white'
               }`}>
                 Institutional Carbon Marketplace
               </h1>
+
+              <div className="flex flex-wrap items-center gap-x-3 gap-y-1 text-xs font-mono text-slate-400">
+                <span className="font-semibold text-emerald">CARBON ZERO BD · DEMO MARKETPLACE</span>
+                <span>·</span>
+                <span>Demo listings: not registered or verified</span>
+              </div>
 
               <p className={`font-sans text-base sm:text-lg max-w-2xl leading-relaxed ${
                 isLight ? 'text-[#413f3f]' : 'text-slate-300'
@@ -885,7 +881,7 @@ export const MarketplaceBrowse = () => {
                         <span>AVAILABLE</span>
                       </span>
                     ) : (
-                      <span className="font-mono text-[10px] text-purple-400 border border-purple-500/30 px-2 py-0.5 rounded">
+                      <span className="font-mono text-[10px] text-amber-400 border border-amber-500/30 px-2 py-0.5 rounded">
                         RETIRED
                       </span>
                     )}

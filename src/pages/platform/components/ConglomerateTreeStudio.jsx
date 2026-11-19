@@ -83,69 +83,77 @@ export const ConglomerateTreeStudio = ({ isLight, locale }) => {
   return (
     <div className="space-y-6">
       {/* Header Banner */}
-      <div className={`p-6 rounded-3xl border ${
+      <div className={`p-6 rounded-2xl border ${
         isLight 
-          ? 'bg-gradient-to-r from-purple-50 to-indigo-50/50 border-purple-200' 
-          : 'bg-gradient-to-r from-[#100B1A] to-[#0D1622] border-[#2A1D4E]'
+          ? 'bg-white border-[#0F291B]/12' 
+          : 'bg-[#08130C] border-[#1B4D2E]'
       }`}>
         <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
           <div className="space-y-1">
-            <div className="flex items-center space-x-2">
-              <div className="w-8 h-8 rounded-xl bg-purple-500/10 border border-purple-500/30 flex items-center justify-center text-purple-500">
+            <div className="flex items-center space-x-2.5">
+              <div className={`w-8 h-8 rounded-xl border flex items-center justify-center ${
+                isLight ? 'bg-[#E4F2EA] border-[#15803d]/25 text-[#15803d]' : 'bg-emerald/10 border-emerald/30 text-emerald'
+              }`}>
                 <Network className="w-4 h-4" />
               </div>
-              <h2 className={`text-xl font-bold font-sans ${isLight ? 'text-gray-900' : 'text-white'}`}>
+              <h2 className={`text-xl font-bold font-sans ${isLight ? 'text-[#0F291B]' : 'text-white'}`}>
                 {locale.entityTitle}
               </h2>
-              <span className="px-2.5 py-0.5 rounded-full text-[10px] font-mono font-bold bg-purple-500/15 text-purple-600 dark:text-purple-400 border border-purple-500/30">
-                Sweep Trees Model
+              <span className={`px-2.5 py-0.5 rounded-full text-[10px] font-mono font-bold border ${
+                isLight ? 'bg-[#E4F2EA] text-[#14532D] border-[#15803d]/25' : 'bg-emerald/10 text-emerald border-emerald/30'
+              }`}>
+                Multi-Entity Model
               </span>
             </div>
-            <p className={`text-xs ${isLight ? 'text-gray-600' : 'text-[#8FA899]'}`}>
+            <p className={`text-xs ${isLight ? 'text-[#46574D]' : 'text-[#8FA899]'}`}>
               {locale.entitySubtitle}
             </p>
           </div>
 
           <div className="flex items-center space-x-3 text-xs font-mono">
-            <span className="px-3 py-1.5 rounded-2xl border bg-[#040A06] border-[#1B4D2E] text-purple-400">
+            <span className={`px-3 py-1.5 rounded-xl border ${
+              isLight ? 'bg-[#F5F8F5] border-[#0F291B]/12 text-[#0F291B]' : 'bg-[#040A06] border-[#1B4D2E] text-emerald'
+            }`}>
               Holding Group: Apex Holdings (BD)
             </span>
           </div>
         </div>
       </div>
 
-      {/* Group Consolidated Overview Cards */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-        <div className={`p-4 rounded-3xl border ${isLight ? 'bg-white border-gray-200' : 'bg-[#0A160F] border-[#1B4D2E]'}`}>
-          <span className="text-[10px] font-mono text-gray-500 uppercase block mb-1">Group Consolidated Gross</span>
-          <span className="text-2xl font-bold font-mono text-emerald-500">
+      {/* Group Consolidated Summary Strip (Hairline-Divided Telemetry Sheet) */}
+      <div className={`rounded-2xl border grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 divide-y sm:divide-y-0 sm:divide-x ${
+        isLight ? 'bg-white border-[#0F291B]/12 divide-[#0F291B]/10' : 'bg-[#0A160F] border-[#1B4D2E] divide-[#1B4D2E]'
+      }`}>
+        <div className="p-5">
+          <span className={`text-[11px] font-medium block mb-1 ${isLight ? 'text-[#46574D]' : 'text-[#94A3B8]'}`}>Group Consolidated Gross</span>
+          <span className={`text-2xl font-bold font-mono tabular-nums ${isLight ? 'text-[#15803d]' : 'text-emerald'}`}>
             {groupTotals.total.toFixed(1)} tCO₂e
           </span>
-          <span className="text-[10px] text-gray-400 block mt-1">4 reporting legal entities</span>
+          <span className={`text-[11px] block mt-1 ${isLight ? 'text-[#556B5E]' : 'text-[#94A3B8]'}`}>4 reporting legal entities</span>
         </div>
 
-        <div className={`p-4 rounded-3xl border ${isLight ? 'bg-white border-gray-200' : 'bg-[#0A160F] border-[#1B4D2E]'}`}>
-          <span className="text-[10px] font-mono text-gray-500 uppercase block mb-1">Group Carbon Intensity</span>
-          <span className="text-2xl font-bold font-mono text-cyan-400">
+        <div className="p-5">
+          <span className={`text-[11px] font-medium block mb-1 ${isLight ? 'text-[#46574D]' : 'text-[#94A3B8]'}`}>Group Carbon Intensity</span>
+          <span className={`text-2xl font-bold font-mono tabular-nums ${isLight ? 'text-[#0369a1]' : 'text-cyan-400'}`}>
             {groupIntensity} t / Cr BDT
           </span>
-          <span className="text-[10px] text-gray-400 block mt-1">৳ {groupTotals.revenue} Crore consolidated rev</span>
+          <span className={`text-[11px] block mt-1 ${isLight ? 'text-[#556B5E]' : 'text-[#94A3B8]'}`}>৳ {groupTotals.revenue} Crore consolidated rev</span>
         </div>
 
-        <div className={`p-4 rounded-3xl border ${isLight ? 'bg-white border-gray-200' : 'bg-[#0A160F] border-[#1B4D2E]'}`}>
-          <span className="text-[10px] font-mono text-gray-500 uppercase block mb-1">Total Group Workforce</span>
-          <span className="text-2xl font-bold font-mono text-purple-400">
+        <div className="p-5">
+          <span className={`text-[11px] font-medium block mb-1 ${isLight ? 'text-[#46574D]' : 'text-[#94A3B8]'}`}>Total Group Workforce</span>
+          <span className={`text-2xl font-bold font-mono tabular-nums ${isLight ? 'text-[#0F291B]' : 'text-white'}`}>
             {groupTotals.workforce} Staff
           </span>
-          <span className="text-[10px] text-gray-400 block mt-1">Across Savar, Narayanganj & HQ</span>
+          <span className={`text-[11px] block mt-1 ${isLight ? 'text-[#556B5E]' : 'text-[#94A3B8]'}`}>Across Savar, Narayanganj &amp; HQ</span>
         </div>
 
-        <div className={`p-4 rounded-3xl border ${isLight ? 'bg-white border-gray-200' : 'bg-[#0A160F] border-[#1B4D2E]'}`}>
-          <span className="text-[10px] font-mono text-gray-500 uppercase block mb-1">GHGP Consolidation</span>
-          <span className="text-base font-bold font-sans text-gray-800 dark:text-gray-200 block mt-1">
+        <div className="p-5">
+          <span className={`text-[11px] font-medium block mb-1 ${isLight ? 'text-[#46574D]' : 'text-[#94A3B8]'}`}>GHGP Consolidation</span>
+          <span className={`text-lg font-bold font-sans block mt-0.5 ${isLight ? 'text-[#0F291B]' : 'text-white'}`}>
             Operational Control
           </span>
-          <span className="text-[10px] text-emerald-500 block mt-1">100% boundary compliance</span>
+          <span className={`text-[11px] block mt-1 ${isLight ? 'text-[#15803d]' : 'text-emerald'}`}>100% boundary compliance</span>
         </div>
       </div>
 

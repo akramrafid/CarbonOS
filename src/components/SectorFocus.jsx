@@ -99,88 +99,96 @@ const SectorFocus = () => {
   const { theme } = useTheme();
   const isLight = theme === 'light';
   return (
-    <section className={`w-full py-20 sm:py-32 px-4 sm:px-6 lg:px-12 relative overflow-hidden border-t ${
-      isLight ? 'bg-[#F2F3EE] text-[#0F291B] border-[#0F291B]/8' : 'bg-[#030805] text-white border-white/10'
+    <section className={`w-full py-20 sm:py-28 px-4 sm:px-6 lg:px-12 relative overflow-hidden border-t ${
+      isLight ? 'bg-[#F2F3EE] text-[#0F291B] border-[#0F291B]/10' : 'bg-[#030805] text-white border-white/10'
     }`}>
-      
-      {/* Background Graphic Grid */}
-      <div className="absolute inset-0 bg-[linear-gradient(to_right,rgba(16,185,129,0.04)_1px,transparent_1px),linear-gradient(to_bottom,rgba(16,185,129,0.04)_1px,transparent_1px)] bg-[size:4rem_4rem] z-0 pointer-events-none" />
-      <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[800px] h-[800px] bg-emerald-950/20 rounded-full blur-[140px] pointer-events-none z-0" />
-
       <div className="max-w-7xl mx-auto relative z-10">
         
         {/* Header */}
-        <div className="mb-20 text-center max-w-3xl mx-auto">
-          <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-emerald-950/50 border border-emerald-500/30 text-emerald-400 font-mono text-xs font-semibold uppercase tracking-wider mb-5 shadow-[0_0_15px_rgba(16,185,129,0.12)]">
-            <span>CarbonOS priority sectors</span>
-          </div>
-
-          <h2 className="text-3xl sm:text-4xl lg:text-5xl font-sans font-bold tracking-tight text-white leading-tight">
-            High-Integrity Carbon <span className={isLight ? 'text-[#15803d]' : 'text-transparent bg-clip-text bg-gradient-to-r from-emerald-400 via-teal-300 to-cyan-400'}>Sector Portfolios</span>.
+        <div className="mb-12 max-w-3xl">
+          <h2 className={`text-3xl sm:text-4xl lg:text-5xl font-sans font-bold tracking-tight leading-tight ${
+            isLight ? 'text-[#0F291B]' : 'text-white'
+          }`}>
+            High-Integrity Carbon <span className={isLight ? 'text-[#15803d]' : 'text-[#00E676]'}>Sector Portfolios.</span>
           </h2>
 
-          <p className="font-sans text-base sm:text-lg text-white/70 mt-4 leading-relaxed">
-            Six priority sectors where Bangladeshi projects can show measurable reductions and direct social co-benefits.
+          <p className={`font-sans text-base sm:text-lg mt-3 leading-relaxed ${
+            isLight ? 'text-[#37473E]' : 'text-white/70'
+          }`}>
+            Six CarbonOS priority sectors across Bangladesh calibrated for measurable emissions reductions and direct social co-benefits.
           </p>
         </div>
 
-        {/* 3x2 Grid */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-7">
+        {/* 3x2 Hairline Portfolio Matrix */}
+        <div className={`grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-px border rounded-xl overflow-hidden ${
+          isLight ? 'bg-[#0F291B]/12 border-[#0F291B]/12' : 'bg-white/10 border-white/10'
+        }`}>
           {sectors.map((sector, index) => {
             const IconComponent = sector.icon;
             return (
               <div 
                 key={index} 
-                className={`relative bg-white/[0.02] backdrop-blur-xl border border-white/10 ${sector.borderColor} rounded-[2rem] p-8 transition-all duration-300 hover:bg-white/[0.04] hover:-translate-y-1.5 group flex flex-col justify-between shadow-2xl overflow-hidden`}
+                className={`p-6 sm:p-7 flex flex-col justify-between transition-colors ${
+                  isLight
+                    ? 'bg-white hover:bg-[#FAFDFB]'
+                    : 'bg-[#060E09] hover:bg-[#09150E]'
+                }`}
               >
-                {/* Subtle top corner gradient bloom */}
-                <div className={`absolute -top-16 -right-16 w-36 h-36 bg-gradient-to-br ${sector.color} rounded-full blur-2xl group-hover:scale-125 transition-transform duration-500 pointer-events-none`} />
-
-                {/* Top Section */}
                 <div>
-                  <div className="flex justify-between items-start mb-6 relative z-10">
-                    <div className={`w-14 h-14 rounded-2xl bg-white/[0.05] border border-white/10 flex items-center justify-center ${sector.iconColor} shadow-inner group-hover:scale-105 transition-transform duration-300`}>
-                      <IconComponent size={26} strokeWidth={1.75} />
-                    </div>
-                    <span className="font-mono text-[10px] text-emerald-300 bg-emerald-950/40 border border-emerald-500/25 px-3 py-1 rounded-full uppercase tracking-wider">
+                  <div className={`flex items-center justify-between gap-3 mb-4 pb-3 border-b text-[11px] font-mono ${
+                    isLight ? 'border-[#0F291B]/8 text-[#556B5E]' : 'border-white/10 text-white/50'
+                  }`}>
+                    <span className="uppercase tracking-wider">{sector.methodology}</span>
+                    <span className={`font-semibold ${isLight ? 'text-[#15803d]' : 'text-emerald-400'}`}>
                       {sector.funding}
                     </span>
                   </div>
                   
-                  <div className="mb-2">
-                    <span className="text-[11px] font-mono text-white/40 uppercase tracking-wider block">
-                      {sector.methodology}
-                    </span>
-                    <h3 className="font-sans font-bold text-xl sm:text-2xl text-white mt-1 tracking-tight group-hover:text-emerald-300 transition-colors">
+                  <div className="flex items-start gap-3 mb-2.5">
+                    <IconComponent size={20} strokeWidth={1.75} className={`mt-1 shrink-0 ${
+                      isLight ? 'text-[#15803d]' : sector.iconColor
+                    }`} />
+                    <h3 className={`font-sans font-bold text-lg sm:text-xl tracking-tight ${
+                      isLight ? 'text-[#0F291B]' : 'text-white'
+                    }`}>
                       {sector.name}
                     </h3>
                   </div>
 
-                  <p className="font-sans text-sm text-white/60 leading-relaxed mt-2 mb-6">
+                  <p className={`font-sans text-sm leading-relaxed mb-6 ${
+                    isLight ? 'text-[#37473E]' : 'text-white/65'
+                  }`}>
                     {sector.desc}
                   </p>
                 </div>
 
-                {/* Metrics and Action Footer */}
-                <div className="pt-4 border-t border-white/5 relative z-10">
-                  <div className="flex items-center justify-between mb-4">
+                <div className={`pt-4 border-t ${isLight ? 'border-[#0F291B]/8' : 'border-white/10'}`}>
+                  <div className="flex items-center justify-between mb-4 tabular-nums">
                     <div>
-                      <span className="text-[10px] font-mono text-white/40 uppercase tracking-wider block">Annual Abatement</span>
-                      <span className="font-mono font-bold text-white text-base tracking-tight">{sector.market}</span>
+                      <span className={`text-[10px] font-mono uppercase tracking-wider block ${
+                        isLight ? 'text-[#556B5E]' : 'text-white/45'
+                      }`}>Annual Abatement</span>
+                      <span className={`font-mono font-bold text-base tracking-tight ${
+                        isLight ? 'text-[#0F291B]' : 'text-white'
+                      }`}>{sector.market}</span>
                     </div>
                     <div className="text-right">
-                      <span className="text-[10px] font-mono text-white/40 uppercase tracking-wider block">Additionality</span>
-                      <span className="font-mono text-xs text-emerald-400 font-semibold">{sector.additionality}</span>
+                      <span className={`text-[10px] font-mono uppercase tracking-wider block ${
+                        isLight ? 'text-[#556B5E]' : 'text-white/45'
+                      }`}>Additionality</span>
+                      <span className={`font-mono text-xs font-semibold ${
+                        isLight ? 'text-[#15803d]' : 'text-emerald-400'
+                      }`}>{sector.additionality}</span>
                     </div>
                   </div>
 
                   <div className="flex flex-wrap items-center gap-2.5">
                     <Link 
                       to={sector.route} 
-                      className={`flex-1 min-w-[130px] min-h-[42px] py-2.5 px-4 rounded-xl font-sans font-semibold text-xs flex justify-center items-center gap-1.5 transition-all duration-200 border ${
+                      className={`flex-1 min-w-[130px] min-h-[40px] py-2 px-3.5 rounded-lg font-sans font-semibold text-xs flex justify-center items-center gap-1.5 transition-colors ${
                         isLight
-                          ? 'bg-[#15803d] hover:bg-[#166534] text-white border-transparent shadow-xs'
-                          : 'bg-white/[0.06] hover:bg-emerald-500 hover:text-black text-white border-white/10 hover:border-emerald-500'
+                          ? 'bg-[#15803d] hover:bg-[#166534] text-white'
+                          : 'bg-[#00C853] hover:bg-[#00E676] text-[#050C07]'
                       }`}
                     >
                       <span>Sector Dossier</span>
@@ -188,10 +196,10 @@ const SectorFocus = () => {
                     </Link>
                     <Link
                       to="/platform/marketplace"
-                      className={`min-h-[42px] px-3.5 py-2.5 rounded-xl border text-xs font-mono font-semibold transition-all flex items-center justify-center ${
+                      className={`min-h-[40px] px-3.5 py-2 rounded-lg border text-xs font-mono font-semibold transition-colors flex items-center justify-center ${
                         isLight
                           ? 'bg-[#F5F8F5] hover:bg-[#E4F2EA] text-[#0F291B] border-[#0F291B]/12'
-                          : 'bg-white/[0.03] hover:bg-white/[0.08] text-white/70 hover:text-white border-white/10'
+                          : 'bg-white/[0.04] hover:bg-white/[0.1] text-white/80 hover:text-white border-white/15'
                       }`}
                       title="View active lots in marketplace"
                     >
@@ -205,8 +213,8 @@ const SectorFocus = () => {
         </div>
 
         {/* Positive List Institutional Footnote */}
-        <div className="mt-12 text-center">
-          <p className="text-xs font-mono text-white/40 max-w-xl mx-auto">
+        <div className="mt-8">
+          <p className={`text-xs font-mono ${isLight ? 'text-[#556B5E]' : 'text-white/50'}`}>
             Sector listings are informational. No project here has been registered or verified by a regulator or a third party.
           </p>
         </div>

@@ -1,5 +1,6 @@
-from rest_framework.decorators import api_view, parser_classes
+from rest_framework.decorators import api_view, parser_classes, permission_classes
 from rest_framework.parsers import MultiPartParser, FormParser
+from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from rest_framework import status
 import os
@@ -13,6 +14,7 @@ from .risk_engine import calculate_disease_risk
 FASTAPI_URL = os.getenv("FASTAPI_URL", "http://127.0.0.1:8000/predict")
 
 @api_view(['POST'])
+@permission_classes([IsAuthenticated])
 @parser_classes([MultiPartParser, FormParser])
 def diagnose(request):
     # Phase 9: Broadcast processing status
@@ -154,6 +156,7 @@ def diagnose(request):
         return Response({"error": f"Failed to connect to inference service: {str(e)}"}, status=status.HTTP_503_SERVICE_UNAVAILABLE)
 
 @api_view(['GET'])
+@permission_classes([IsAuthenticated])
 def get_journal(request):
     """
     Returns a list of past diagnoses for the current farmer/field.
@@ -201,6 +204,7 @@ def get_journal(request):
     }, status=status.HTTP_200_OK)
 
 @api_view(['POST'])
+@permission_classes([IsAuthenticated])
 def agronomist_review(request, diagnosis_id):
     """
     Allows an agronomist to submit a review/correction for a diagnosis.
@@ -243,6 +247,7 @@ def agronomist_review(request, diagnosis_id):
     }, status=status.HTTP_200_OK)
 
 @api_view(['GET'])
+@permission_classes([IsAuthenticated])
 def get_weather_risk(request, field_id):
     snapshot = WeatherRiskSnapshot.objects.filter(field_id=field_id).order_by('-created_at').first()
     if snapshot:
@@ -257,6 +262,7 @@ def get_weather_risk(request, field_id):
     return Response({"error": "No risk data found for this field."}, status=status.HTTP_404_NOT_FOUND)
 
 @api_view(['GET'])
+@permission_classes([IsAuthenticated])
 def get_carbon_health_trends(request):
     """
     Returns aggregated health trends for Tier B carbon-asset trees (Mango, Jackfruit, Guava, Citrus).
@@ -285,6 +291,7 @@ def get_carbon_health_trends(request):
     return Response(result, status=status.HTTP_200_OK)
 
 @api_view(['POST'])
+@permission_classes([IsAuthenticated])
 def save_telemetry(request):
     """
     Saves a new Carbon Monitor telemetry reading to the database.
@@ -312,6 +319,7 @@ def save_telemetry(request):
         return Response({"error": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
 @api_view(['GET'])
+@permission_classes([IsAuthenticated])
 def get_telemetry_history(request):
     """
     Returns the history of Carbon Monitor telemetry readings (max 50, newest first).

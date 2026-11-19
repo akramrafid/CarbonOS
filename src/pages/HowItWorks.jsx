@@ -1,43 +1,55 @@
 import React, { useEffect, useRef, useState } from 'react';
 import { Link } from 'react-router-dom';
+import { Radio, Building2, Wallet } from 'lucide-react';
+import { useTheme } from '../context/ThemeContext';
 
-const StepCard = ({ step, index, inView }) => {
+const StepCard = ({ step, index, inView, isLight }) => {
   return (
-    <div className={`relative flex flex-col md:flex-row items-center justify-between w-full mb-24 transition-all duration-1000 ${
-      inView ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-24'
+    <div className={`relative flex flex-col md:flex-row items-center justify-between w-full mb-20 transition-all duration-700 ${
+      inView ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-12'
     } ${index % 2 === 0 ? 'md:flex-row' : 'md:flex-row-reverse'}`}>
       
       {/* Connector Line Point */}
       <div className="hidden md:block absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 z-20">
-        <div className={`w-8 h-8 rounded-full border-4 border-[#040A06] flex items-center justify-center transition-all duration-700 delay-300 ${
-          inView ? 'bg-emerald shadow-[0_0_20px_#16A34A]' : 'bg-[#0D2B1A]'
+        <div className={`w-7 h-7 rounded-full border-2 flex items-center justify-center transition-colors ${
+          isLight
+            ? inView ? 'bg-[#15803d] border-[#15803d] text-white' : 'bg-white border-[#0F291B]/25 text-[#0F291B]'
+            : inView ? 'bg-emerald border-emerald text-[#040A06]' : 'bg-[#080F0B] border-white/20 text-white'
         }`}>
-          <div className="w-2 h-2 bg-white rounded-full"></div>
+          <span className="font-mono text-[10px] font-bold tabular-nums">{index + 1}</span>
         </div>
       </div>
 
       {/* Content Container */}
-      <div className={`w-full md:w-5/12 ${index % 2 === 0 ? 'md:text-right md:pr-12' : 'md:text-left md:pl-12'} text-center md:text-left mb-8 md:mb-0`}>
-        <div className="inline-block px-3 py-1 bg-emerald/10 border border-emerald/20 rounded-full font-mono text-[10px] text-emerald mb-4 tracking-widest uppercase">
-          Phase 0{index + 1}
-        </div>
-        <h3 className="text-3xl font-bold text-white mb-3 font-sans tracking-tight">{step.title}</h3>
-        <p className="text-mist leading-relaxed text-sm md:text-base">
+      <div className={`w-full md:w-5/12 ${index % 2 === 0 ? 'md:text-right md:pr-12' : 'md:text-left md:pl-12'} text-left mb-6 md:mb-0`}>
+        <h3 className={`text-2xl sm:text-3xl font-bold mb-3 font-sans tracking-tight ${
+          isLight ? 'text-[#0F291B]' : 'text-white'
+        }`}>{step.title}</h3>
+        <p className={`leading-relaxed text-sm md:text-base ${
+          isLight ? 'text-[#37473E]' : 'text-mist'
+        }`}>
           {step.description}
         </p>
         {step.metric && (
-          <div className={`mt-6 p-4 rounded-xl border border-white/5 bg-white/5 backdrop-blur-sm inline-block w-full text-left`}>
-            <p className="text-[10px] text-mist/70 font-mono uppercase mb-1">{step.metricLabel}</p>
-            <p className="text-lg font-bold text-emerald">{step.metric}</p>
+          <div className={`mt-5 pt-3 border-t flex items-baseline justify-between gap-4 text-left ${
+            isLight ? 'border-[#0F291B]/12' : 'border-white/10'
+          }`}>
+            <span className={`text-[11px] font-mono uppercase tracking-wider ${
+              isLight ? 'text-[#556B5E]' : 'text-mist/70'
+            }`}>{step.metricLabel}</span>
+            <span className={`text-sm font-mono font-bold tabular-nums ${
+              isLight ? 'text-[#15803d]' : 'text-emerald'
+            }`}>{step.metric}</span>
           </div>
         )}
       </div>
 
       {/* Visual / Graphic Container */}
-      <div className="w-full md:w-5/12 bg-[#080F0B] border border-white/10 rounded-[2rem] p-8 hover:border-emerald/40 transition-colors group relative overflow-hidden h-[280px] flex items-center justify-center">
-        {/* Glow effect */}
-        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-3/4 h-3/4 bg-emerald/5 blur-[80px] group-hover:bg-emerald/10 transition-colors z-0"></div>
-        
+      <div className={`w-full md:w-5/12 border rounded-2xl p-7 transition-colors relative overflow-hidden h-[240px] flex items-center justify-center ${
+        isLight
+          ? 'bg-white border-[#0F291B]/12 shadow-[0_8px_24px_-10px_rgba(15,41,27,0.08)]'
+          : 'bg-[#080F0B] border-white/10 hover:border-emerald/35'
+      }`}>
         <div className="relative z-10 w-full h-full flex flex-col items-center justify-center text-center">
           {step.visual}
         </div>
@@ -47,6 +59,8 @@ const StepCard = ({ step, index, inView }) => {
 };
 
 const HowItWorks = () => {
+  const { theme } = useTheme();
+  const isLight = theme === 'light';
   const [visibleSteps, setVisibleSteps] = useState([false, false, false, false, false]);
   const observerRefs = useRef([]);
 
@@ -82,13 +96,12 @@ const HowItWorks = () => {
       metric: "50,000+ Readings / Hour",
       visual: (
         <div className="text-center">
-          <div className="relative w-24 h-24 mx-auto mb-4">
-            <div className="absolute inset-0 border-2 border-emerald border-dashed rounded-full animate-[spin_10s_linear_infinite]"></div>
-            <div className="absolute inset-2 bg-[#0D2B1A] rounded-full flex items-center justify-center">
-              <span className="text-3xl">📡</span>
-            </div>
+          <div className={`w-16 h-16 mx-auto mb-3 rounded-xl border flex items-center justify-center ${
+            isLight ? 'bg-[#E5F4EB] border-[#15803d]/25 text-[#15803d]' : 'bg-[#0D2B1A] border-emerald/25 text-emerald'
+          }`}>
+            <Radio size={26} />
           </div>
-          <div className="font-mono text-xs text-emerald bg-emerald/10 px-2 py-1 rounded inline-block">LoRaWAN Active</div>
+          <div className={`font-mono text-xs font-semibold ${isLight ? 'text-[#15803d]' : 'text-emerald'}`}>LoRaWAN Active</div>
         </div>
       )
     },
@@ -98,20 +111,20 @@ const HowItWorks = () => {
       metricLabel: "Satellite Resolution",
       metric: "10m (Sentinel-2) Multi-spectral",
       visual: (
-        <div className="w-full max-w-[200px] space-y-3">
-          <div className="flex justify-between items-center text-xs text-mist">
+        <div className="w-full max-w-[220px] space-y-3">
+          <div className={`flex justify-between items-center text-xs ${isLight ? 'text-[#37473E]' : 'text-mist'}`}>
             <span>Ground Data</span>
-            <span className="text-emerald">Matched</span>
+            <span className={`font-mono font-semibold ${isLight ? 'text-[#15803d]' : 'text-emerald'}`}>Matched</span>
           </div>
-          <div className="h-1.5 w-full bg-[#1A1A1A] rounded-full overflow-hidden">
-            <div className="h-full bg-emerald w-full animate-[pulse_2s_ease-in-out_infinite]"></div>
+          <div className={`h-1.5 w-full rounded-full overflow-hidden ${isLight ? 'bg-[#0F291B]/10' : 'bg-[#1A1A1A]'}`}>
+            <div className={`h-full w-full ${isLight ? 'bg-[#15803d]' : 'bg-emerald'}`}></div>
           </div>
-          <div className="flex justify-between items-center text-xs text-mist">
+          <div className={`flex justify-between items-center text-xs ${isLight ? 'text-[#37473E]' : 'text-mist'}`}>
             <span>Satellite Sync</span>
-            <span className="text-emerald">Verified</span>
+            <span className={`font-mono font-semibold ${isLight ? 'text-[#15803d]' : 'text-emerald'}`}>Verified</span>
           </div>
-          <div className="h-1.5 w-full bg-[#1A1A1A] rounded-full overflow-hidden">
-            <div className="h-full bg-emerald w-[92%]"></div>
+          <div className={`h-1.5 w-full rounded-full overflow-hidden ${isLight ? 'bg-[#0F291B]/10' : 'bg-[#1A1A1A]'}`}>
+            <div className={`h-full w-[92%] ${isLight ? 'bg-[#15803d]' : 'bg-emerald'}`}></div>
           </div>
         </div>
       )
@@ -122,17 +135,15 @@ const HowItWorks = () => {
       metricLabel: "Standard Compliant",
       metric: "Verra VCS / Gold Standard",
       visual: (
-        <div className="relative">
-          <div className="absolute -inset-4 bg-emerald/20 blur-xl rounded-full"></div>
-          <div className="relative bg-[#040A06] border border-emerald/30 p-4 rounded-xl">
-            <div className="font-mono text-[10px] text-emerald mb-1 border-b border-emerald/20 pb-1">CERTIFICATE: BD-2026-CR-001</div>
-            <div className="text-3xl font-bold text-white my-2">1.0 <span className="text-sm font-sans font-normal text-mist">tCO₂e</span></div>
-            <div className="flex justify-center mt-2">
-              <svg className="w-16 h-8 text-emerald/40" viewBox="0 0 100 20" preserveAspectRatio="none">
-                <path d="M0,10 Q25,20 50,10 T100,10" fill="none" stroke="currentColor" strokeWidth="2" />
-              </svg>
-            </div>
-          </div>
+        <div className={`w-full max-w-[240px] border p-4 rounded-xl text-left ${
+          isLight ? 'bg-[#F7FBF8] border-[#15803d]/25' : 'bg-[#040A06] border-emerald/25'
+        }`}>
+          <div className={`font-mono text-[10px] mb-1 border-b pb-1.5 ${
+            isLight ? 'text-[#15803d] border-[#15803d]/20' : 'text-emerald border-emerald/20'
+          }`}>SERIAL: BD-2026-CR-001</div>
+          <div className={`text-2xl font-mono font-bold tabular-nums mt-2 ${
+            isLight ? 'text-[#0F291B]' : 'text-white'
+          }`}>1.0 <span className={`text-xs font-sans font-normal ${isLight ? 'text-[#556B5E]' : 'text-mist'}`}>tCO₂e</span></div>
         </div>
       )
     },
@@ -143,12 +154,21 @@ const HowItWorks = () => {
       metric: "৳ 15,400 / tonne",
       visual: (
         <div className="flex flex-col items-center">
-          <div className="flex space-x-2 mb-4">
-            <div className="w-12 h-12 rounded-full bg-white flex items-center justify-center shadow-lg z-10 text-xl border-2 border-[#080F0B]">🏢</div>
-            <div className="w-12 h-12 rounded-full bg-emerald flex items-center justify-center shadow-lg -ml-4 z-20 text-xl border-2 border-[#080F0B] text-white">💰</div>
+          <div className="flex items-center space-x-3 mb-3">
+            <div className={`w-11 h-11 rounded-lg border flex items-center justify-center ${
+              isLight ? 'bg-[#F5F8F5] border-[#0F291B]/15 text-[#0F291B]' : 'bg-[#0D1E14] border-white/15 text-white'
+            }`}>
+              <Building2 size={20} />
+            </div>
+            <span className={`font-mono text-xs ${isLight ? 'text-[#556B5E]' : 'text-white/50'}`}>→</span>
+            <div className={`w-11 h-11 rounded-lg border flex items-center justify-center ${
+              isLight ? 'bg-[#E5F4EB] border-[#15803d]/30 text-[#15803d]' : 'bg-emerald/15 border-emerald/35 text-emerald'
+            }`}>
+              <Wallet size={20} />
+            </div>
           </div>
-          <div className="font-mono text-xs text-mist bg-[#1A1A1A] px-3 py-1.5 rounded-lg border border-white/10">
-            Escrow Locked
+          <div className={`font-mono text-xs font-semibold ${isLight ? 'text-[#37473E]' : 'text-mist'}`}>
+            Escrow Settlement Locked
           </div>
         </div>
       )
@@ -159,16 +179,17 @@ const HowItWorks = () => {
       metricLabel: "Settlement Speed",
       metric: "< 5 Seconds End-to-End",
       visual: (
-        <div className="w-full flex flex-col items-center">
-          <div className="flex justify-center mb-6 w-full">
-            <div className="bg-[#1A3A28] text-white font-bold px-6 py-2 rounded-lg flex items-center space-x-2 shadow-[0_0_15px_rgba(22,163,74,0.3)] border border-emerald/30 animate-pulse">
-              <div className="w-3 h-3 bg-emerald rounded-full"></div>
-              <span>Mobile Banking System</span>
-            </div>
+        <div className="w-full max-w-[240px] flex flex-col items-center space-y-3">
+          <div className={`w-full py-2 px-4 rounded-lg border font-sans font-semibold text-xs text-center ${
+            isLight ? 'bg-[#15803d] text-white border-transparent' : 'bg-[#1A3A28] text-white border-emerald/30'
+          }`}>
+            Mobile Banking System
           </div>
-          <div className="text-center bg-[#0D2B1A]/50 w-full p-3 rounded-lg border border-emerald/20">
-            <p className="text-xs text-mist font-mono mb-1">FARMER RECEIVES</p>
-            <p className="text-xl font-bold text-emerald">৳ 14,938</p>
+          <div className={`w-full pt-2 border-t flex items-baseline justify-between tabular-nums ${
+            isLight ? 'border-[#0F291B]/12' : 'border-white/10'
+          }`}>
+            <span className={`text-[11px] font-mono ${isLight ? 'text-[#556B5E]' : 'text-mist'}`}>FARMER RECEIVES</span>
+            <span className={`text-lg font-mono font-bold ${isLight ? 'text-[#15803d]' : 'text-emerald'}`}>৳ 14,938</span>
           </div>
         </div>
       )
@@ -176,36 +197,40 @@ const HowItWorks = () => {
   ];
 
   return (
-    <div className="min-h-screen bg-[#040A06] font-sans selection:bg-emerald selection:text-carbon relative pt-20">
-      
-      {/* Background Noise & Grid */}
-      <div className="fixed inset-0 pointer-events-none z-0 opacity-[0.02]" style={{ backgroundImage: 'url("data:image/svg+xml,%3Csvg viewBox=\'0 0 200 200\' xmlns=\'http://www.w3.org/2000/svg\'%3E%3Cfilter id=\'noiseFilter\'%3E%3CfeTurbulence type=\'fractalNoise\' baseFrequency=\'0.65\' numOctaves=\'3\' stitchTiles=\'stitch\'/%3E%3C/filter%3E%3Crect width=\'100%25\' height=\'100%25\' filter=\'url(%23noiseFilter)\'/%3E%3C/svg%3E")' }}></div>
-      <div className="absolute inset-0 bg-[linear-gradient(to_right,#00C85305_1px,transparent_1px),linear-gradient(to_bottom,#00C85305_1px,transparent_1px)] bg-[size:4rem_4rem] z-0 pointer-events-none"></div>
+    <div className={`min-h-screen font-sans selection:bg-emerald selection:text-carbon relative pt-20 ${
+      isLight ? 'bg-[#F2F3EE] text-[#0F291B]' : 'bg-[#040A06] text-white'
+    }`}>
 
       {/* Hero Section */}
-      <header className="relative pt-24 sm:pt-36 lg:pt-40 pb-14 sm:pb-20 px-4 sm:px-6 lg:px-12 z-10 border-b border-white/5">
-        <div className="max-w-4xl mx-auto text-center">
-          <span className="font-mono text-xs text-emerald tracking-widest px-3 py-1 bg-[#0D2B1A]/40 border border-[#00C853]/20 rounded-full mb-5 sm:mb-6 inline-block">
-            DATA TO BDT PIPELINE
-          </span>
-          <h1 className="serif-drama text-4xl sm:text-5xl md:text-7xl text-white leading-tight mb-5 sm:mb-6 tracking-tight">
-            The Lifecycle of a <br/>
-            <span className="text-emerald italic">Verified Credit</span>
+      <header className={`relative pt-20 sm:pt-28 pb-12 sm:pb-16 px-4 sm:px-6 lg:px-12 z-10 border-b ${
+        isLight ? 'border-[#0F291B]/10' : 'border-white/10'
+      }`}>
+        <div className="max-w-4xl mx-auto">
+          <h1 className={`font-sans font-extrabold text-4xl sm:text-5xl md:text-6xl leading-tight mb-5 tracking-tight ${
+            isLight ? 'text-[#0F291B]' : 'text-white'
+          }`}>
+            The Lifecycle of a{' '}
+            <span className={isLight ? 'text-[#15803d]' : 'text-emerald'}>Verified Credit</span>
           </h1>
-          <p className="text-base sm:text-lg md:text-xl text-mist font-sans font-light max-w-2xl mx-auto">
-            Carbon Zero BD is the first end-to-end registry in South Asia with zero payment friction. See how we move value from the farm directly to the farmer.
+          <p className={`text-base sm:text-lg md:text-xl font-sans max-w-2xl leading-relaxed ${
+            isLight ? 'text-[#37473E]' : 'text-mist font-light'
+          }`}>
+            Data-to-BDT settlement pipeline moving verified carbon abatement from rural smallholder farms directly to institutional buyers.
           </p>
         </div>
       </header>
 
       {/* Main Roadmap / Timeline Section */}
-      <section className="relative py-24 px-6 lg:px-12 z-10 overflow-hidden">
+      <section className="relative py-20 px-6 lg:px-12 z-10 overflow-hidden">
         <div className="max-w-6xl mx-auto relative">
           
           {/* Vertical Connecting Line (Desktop) */}
-          <div className="hidden md:block absolute left-1/2 top-0 bottom-0 w-[2px] bg-gradient-to-b from-transparent via-[#1A3A28] to-transparent -translate-x-1/2">
-            {/* Animated glowing progress line */}
-            <div className="w-full bg-emerald h-1/3 rounded-full animate-[slide_4s_ease-in-out_infinite] shadow-[0_0_15px_#16A34A]"></div>
+          <div className={`hidden md:block absolute left-1/2 top-0 bottom-0 w-[2px] -translate-x-1/2 ${
+            isLight ? 'bg-[#0F291B]/12' : 'bg-[#1A3A28]'
+          }`}>
+            <div className={`w-full h-1/3 rounded-full animate-[slide_4s_ease-in-out_infinite] ${
+              isLight ? 'bg-[#15803d]' : 'bg-emerald'
+            }`}></div>
           </div>
 
           <div className="relative z-10 space-y-8 md:space-y-0">
@@ -214,7 +239,8 @@ const HowItWorks = () => {
                 <StepCard 
                   step={step} 
                   index={index} 
-                  inView={visibleSteps[index]} 
+                  inView={visibleSteps[index]}
+                  isLight={isLight}
                 />
               </div>
             ))}
@@ -224,21 +250,29 @@ const HowItWorks = () => {
       </section>
 
       {/* Final Call To Action */}
-      <section className="relative py-24 px-6 lg:px-12 z-10 border-t border-white/5 bg-gradient-to-b from-transparent to-[#0A1F13]">
-        <div className="max-w-4xl mx-auto text-center">
-          <h2 className="serif-drama text-4xl text-white mb-6">Experience the Pipeline</h2>
-          <p className="text-mist mb-10 max-w-xl mx-auto">
-            Ready to see the smart contract in action? Head over to the Marketplace and initiate a live test transaction.
-          </p>
-          <div className="flex flex-col sm:flex-row justify-center items-center space-y-4 sm:space-y-0 sm:space-x-6">
-            <Link to="/platform/marketplace" className="bg-emerald text-carbon font-sans font-bold text-lg px-8 py-4 rounded-xl transition-all shadow-[0_0_20px_rgba(0,200,83,0.3)] hover:shadow-[0_0_30px_rgba(0,200,83,0.5)] hover:-translate-y-1 w-full sm:w-auto">
-              Test Corporate Purchase →
-            </Link>
+      <section className={`relative py-20 px-6 lg:px-12 z-10 border-t ${
+        isLight ? 'border-[#0F291B]/10 bg-white' : 'border-white/10 bg-[#080F0B]'
+      }`}>
+        <div className="max-w-4xl mx-auto flex flex-col sm:flex-row sm:items-center justify-between gap-6">
+          <div>
+            <h2 className={`font-sans font-bold text-3xl mb-2 tracking-tight ${
+              isLight ? 'text-[#0F291B]' : 'text-white'
+            }`}>Experience the Pipeline</h2>
+            <p className={`max-w-xl text-sm sm:text-base ${
+              isLight ? 'text-[#37473E]' : 'text-mist'
+            }`}>
+              Open the Marketplace to initiate a live simulated retirement transaction.
+            </p>
           </div>
+          <Link to="/platform/marketplace" className={`font-sans font-bold text-sm px-6 py-3.5 rounded-xl transition-colors shrink-0 text-center ${
+            isLight
+              ? 'bg-[#15803d] hover:bg-[#166534] text-white'
+              : 'bg-emerald hover:bg-[#00E676] text-[#050C07]'
+          }`}>
+            Test Corporate Purchase →
+          </Link>
         </div>
       </section>
-      
-
 
       <style dangerouslySetInnerHTML={{__html: `
         @keyframes slide {

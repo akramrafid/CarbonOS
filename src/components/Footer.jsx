@@ -47,7 +47,7 @@ const Footer = () => {
           {t('footer.ctaSubtext')}
         </p>
         <Link
-          to="/platform/saas-dashboard"
+          to="/platform/esg"
           className={`font-sans font-bold text-sm px-7 sm:px-8 py-3.5 sm:py-4 rounded-full flex items-center space-x-3 transition-all min-h-[44px] ${
             isLight
               ? 'bg-[#15803d] hover:bg-[#166534] text-white shadow-[0_12px_28px_-6px_rgba(21,128,61,0.45)]'

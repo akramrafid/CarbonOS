@@ -305,13 +305,24 @@ const CarbonRegistry = () => {
         const pData = await projRes.json();
         const results = Array.isArray(pData) ? pData : (pData.results || []);
         if (results.length > 0) {
-          // Merge with detailed metrics
-          const merged = results.map((p, idx) => ({
+          const normalized = results.map((p) => ({
             ...p,
-            metrics: DEFAULT_PROJECTS[idx % DEFAULT_PROJECTS.length].metrics
+            metrics: p.metrics || {
+              biomass_mg_ha: null,
+              carbon_tc_ha: null,
+              ndvi: null,
+              s1_ratio: null,
+              canopy_height_m: null,
+              tonnes_co2e: null,
+              confidence_interval: 'Awaiting verified dMRV submission',
+              carbon_agb_tc_ha: null,
+              carbon_bgb_tc_ha: null,
+              carbon_soc_tc_ha: null,
+              provenance_hash: null,
+            },
           }));
-          setProjects(merged);
-          setSelectedProjectId(merged[0].id);
+          setProjects(normalized);
+          setSelectedProjectId(normalized[0].id);
           connected = true;
         }
       }
@@ -408,31 +419,11 @@ const CarbonRegistry = () => {
           message: err.detail || err.error || 'National Registry API rejected transmission.'
         });
       }
-    } catch {
-      // Local simulated success if backend offline
-      const mockAssignedId = `BD-DOE-${Math.random().toString(36).substring(2, 8).toUpperCase()}`;
+    } catch (err) {
       setSubmissionFeedback({
-        status: 'success',
-        message: `Offline Simulator: Monitoring Report successfully logged into local audit ledger. Assigned Registry ID: ${mockAssignedId}`,
-        data: {
-          submission_id: `sub-${Date.now().toString(16)}`,
-          registry_assigned_id: mockAssignedId,
-          provenance_verified: true
-        }
+        status: 'error',
+        message: `Transmission failed: National Registry Bridge API is unreachable or unauthorized (${err?.message || 'network error'}). No mock submission was created.`
       });
-      setSubmissions(prev => [
-        {
-          id: `sub-${Date.now().toString(16)}`,
-          project_name: selectedProject.project_name,
-          external_id: mockAssignedId,
-          provenance_hash: payload.provenance_chain_hash,
-          response_status: 201,
-          submission_status: 'accepted',
-          tonnes_co2e: selectedProject.metrics.tonnes_co2e,
-          submitted_at: new Date().toISOString()
-        },
-        ...prev
-      ]);
     } finally {
       setIsSubmitting(false);
     }
@@ -469,105 +460,81 @@ const CarbonRegistry = () => {
   // Confirm Adjustment Handler
   const handleConfirmAdjustment = async (adjId) => {
     try {
-      await fetch(`${DJANGO_API_URL}/api/registry-bridge/adjustments/${adjId}/confirm/`, {
+      const res = await fetch(`${DJANGO_API_URL}/api/registry-bridge/adjustments/${adjId}/confirm/`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ confirmation_id: `DOE-DNA-CONF-${Date.now().toString().slice(-4)}` })
       });
-    } catch {
-      // Local state update
-    }
-    setAdjustments(prev => prev.map(a => {
-      if (a.id === adjId) {
-        return {
-          ...a,
-          adjustment_applied: true,
-          adjustment_applied_at: new Date().toISOString(),
-          adjustment_confirmation_id: `DOE-DNA-CONF-${Date.now().toString().slice(-6)}`,
-          reconciliation_status: "adjusted_confirmed"
-        };
+      if (!res.ok) {
+        const err = await res.json().catch(() => ({}));
+        setSubmissionFeedback({
+          status: 'error',
+          message: err.detail || `Corresponding adjustment confirmation rejected (${res.status}).`
+        });
+        return;
       }
-      return a;
-    }));
+      const confirmed = await res.json();
+      setAdjustments(prev => prev.map(a => {
+        if (a.id === adjId) {
+          return {
+            ...a,
+            adjustment_applied: true,
+            adjustment_applied_at: confirmed.applied_at || new Date().toISOString(),
+            adjustment_confirmation_id: confirmed.confirmation_id,
+            reconciliation_status: confirmed.reconciliation_status || "adjusted_confirmed"
+          };
+        }
+        return a;
+      }));
+    } catch {
+      setSubmissionFeedback({
+        status: 'error',
+        message: 'Cannot confirm Corresponding Adjustment while Registry Bridge API is offline.'
+      });
+    }
   };
 
   // Export BTR CSV trigger
-  const handleDownloadBtrCsv = () => {
-    const csvContent = [
-      "Field,Value",
-      "Party,People's Republic of Bangladesh",
-      "Designated National Authority,Ministry of Environment Forest and Climate Change (MoEFCC)",
-      "Agreement Type,Article 6.2 Bilateral / JCM / Article 6.4",
-      "Reporting Period,2024-2026",
-      "Total ITMOs Authorized (tCO2e),5000.0",
-      "Total Adjustments Applied (tCO2e),5000.0",
-      "National NDC 3.0 Reserve Retention (tCO2e),5000.0",
-      "Inventory Sector LULUCF / Forestry (tCO2e),10000.0",
-      "Inventory Sector Agriculture (tCO2e),0.0",
-      "Inventory Sector Energy (tCO2e),0.0",
-      "Cryptographic Hash Integrity,VERIFIED_SHA256"
-    ].join("\n");
-
-    const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
-    const url = URL.createObjectURL(blob);
-    const link = document.createElement("a");
-    link.setAttribute("href", url);
-    link.setAttribute("download", `Bangladesh_BTR_Article6_Structured_Summary_${new Date().toISOString().slice(0, 10)}.csv`);
-    document.body.appendChild(link);
-    link.click();
-    document.body.removeChild(link);
+  const handleDownloadBtrCsv = async () => {
+    try {
+      const res = await fetch(`${DJANGO_API_URL}/api/registry-bridge/btr-summary/?format=csv`);
+      if (!res.ok) {
+        throw new Error(`Registry API returned ${res.status}`);
+      }
+      const csvContent = await res.text();
+      const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+      const url = URL.createObjectURL(blob);
+      const link = document.createElement("a");
+      link.setAttribute("href", url);
+      link.setAttribute("download", `Bangladesh_BTR_Article6_Structured_Summary_${new Date().toISOString().slice(0, 10)}.csv`);
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+    } catch (err) {
+      setSubmissionFeedback({
+        status: 'error',
+        message: `BTR CSV export unavailable while Registry Bridge API is offline or unauthorized (${err?.message || 'error'}).`
+      });
+    }
   };
 
   // JCM Export loader
   const handleOpenJcmExport = async () => {
     try {
       const res = await fetch(`${DJANGO_API_URL}/api/registry-bridge/projects/${selectedProject.id}/jcm-export/`);
-      if (res.ok) {
-        const data = await res.json();
-        setJcmData(data);
-      } else {
-        throw new Error();
+      if (!res.ok) {
+        const err = await res.json().catch(() => ({}));
+        throw new Error(err.detail || `HTTP ${res.status}`);
       }
-    } catch {
-      // Local JCM structure
-      setJcmData({
-        document_metadata: {
-          document_type: "JCM Monitoring Report Form (JCM_BD_F_MoR)",
-          version: "02.0",
-          jurisdiction: "Japan-Bangladesh Bilateral JCM",
-          secretariat: "Mitsubishi UFJ Research and Consulting (MURC) / MoEFCC Joint Committee Secretariat"
-        },
-        project_identification: {
-          jcm_project_number: selectedProject.external_project_id || "BD-JCM-001",
-          project_title: selectedProject.project_name,
-          host_country: "People's Republic of Bangladesh",
-          partner_country: "Japan"
-        },
-        methodology_reference: {
-          applied_methodology_id: "JCM_BD_AM001",
-          methodology_name: "Afforestation and Reforestation of Degraded Mangrove Ecosystems in Coastal Bangladesh"
-        },
-        emission_reduction_calculation: {
-          formula: "ER_p = RE_p - PE_p - Uncertainty_Deduction",
-          reference_emissions_re_p_tco2e: 10240.0,
-          project_emissions_pe_p_tco2e: 965.2,
-          gross_emission_reductions_tco2e: 9274.8,
-          uncertainty_deduction_tco2e: 274.8,
-          net_emission_reductions_er_p_tco2e: 9000.0,
-          bilateral_allocation_split: {
-            bangladesh_ndc_retention_percent: "50%",
-            bangladesh_retained_credits_tco2e: 4500.0,
-            japan_itmo_transfer_percent: "50%",
-            japan_transferred_credits_tco2e: 4500.0
-          }
-        },
-        cryptographic_verification: {
-          provenance_hash_attached: selectedProject.metrics.provenance_hash,
-          genesis_valid: true
-        }
+      const data = await res.json();
+      setJcmData(data);
+      setShowJcmModal(true);
+    } catch (err) {
+      setSubmissionFeedback({
+        status: 'error',
+        message: `JCM export unavailable: ${err?.message || 'No verified dMRV monitoring result found or API unreachable.'}`
       });
     }
-    setShowJcmModal(true);
   };
 
   return (
@@ -584,23 +551,23 @@ const CarbonRegistry = () => {
           <div className="absolute top-0 right-0 w-96 h-96 bg-[#00C853]/5 rounded-full blur-3xl pointer-events-none"></div>
 
           <div className="flex flex-col lg:flex-row items-start lg:items-center justify-between gap-6 pb-6 border-b border-[#152B1D]">
-            <div className="space-y-2">
-              <div className="flex items-center space-x-3">
-                <span className="inline-flex items-center space-x-1.5 font-mono text-[11px] font-bold text-[#00C853] bg-[#00C853]/10 border border-[#00C853]/30 px-3 py-1 rounded-full uppercase tracking-widest">
-                  <Landmark size={13} className="text-[#00C853]" />
-                  <span>People's Republic of Bangladesh</span>
-                </span>
-                <span className="text-white/30 text-xs">•</span>
-                <span className="font-mono text-[11px] text-white/70">DOE Article 6 DNA</span>
-                <span className="text-white/30 text-xs">•</span>
-                <span className="font-mono text-[11px] text-white/50">World Bank PMI Workstream B</span>
-              </div>
-              <h1 className="serif-drama text-3xl sm:text-4xl lg:text-5xl font-bold tracking-tight text-white flex items-center gap-3">
+            <div className="space-y-2.5">
+              <h1 className="font-sans text-3xl sm:text-4xl lg:text-5xl font-extrabold tracking-tight text-white flex flex-wrap items-center gap-3">
                 Carbon Registry
-                <span className="font-mono text-xs font-normal px-2.5 py-1 rounded-md bg-[#0D2B1A] border border-[#00C853]/30 text-[#00C853]">
+                <span className="font-mono text-xs font-normal px-2.5 py-1 rounded bg-[#0D2B1A] border border-[#00C853]/30 text-[#00C853] tabular-nums">
                   v2.4.1 (D4C API)
                 </span>
               </h1>
+              <div className="flex flex-wrap items-center gap-x-3 gap-y-1 text-xs font-mono text-white/65">
+                <span className="inline-flex items-center space-x-1.5 text-[#00C853] font-semibold">
+                  <Landmark size={13} />
+                  <span>People's Republic of Bangladesh</span>
+                </span>
+                <span className="text-white/30">·</span>
+                <span>DOE Article 6 DNA</span>
+                <span className="text-white/30">·</span>
+                <span>World Bank PMI Workstream B</span>
+              </div>
               <p className="font-sans text-sm sm:text-base text-white/70 max-w-3xl leading-relaxed">
                 National sovereign client bridge linking CarbonOS continuous dMRV telemetry with Bangladesh's 
                 National Carbon Registry, UNDP Digital for Climate (D4C) ledger, and official UNFCCC Article 6.2 / JCM Bilateral accounts.
@@ -610,11 +577,11 @@ const CarbonRegistry = () => {
             {/* Live Registry Engine Telemetry Bar */}
             <div className="flex flex-col sm:flex-row items-start sm:items-center gap-3 bg-[#040906] border border-[#152B1D] p-3.5 rounded-2xl shrink-0">
               <div className="flex items-center space-x-2.5 px-3 py-1.5 rounded-xl bg-white/[0.02]">
-                <div className={`w-2.5 h-2.5 rounded-full ${isLiveConnected ? 'bg-[#00C853] animate-pulse shadow-[0_0_8px_#00C853]' : 'bg-emerald-400'}`}></div>
+                <div className={`w-2.5 h-2.5 rounded-full ${isLiveConnected ? 'bg-[#00C853] animate-pulse shadow-[0_0_8px_#00C853]' : 'bg-amber-400'}`}></div>
                 <div className="flex flex-col">
                   <span className="font-mono text-[10px] text-white/40 uppercase tracking-wider">Gateway Status</span>
                   <span className="font-mono text-xs font-bold text-white">
-                    {isLiveConnected ? "LIVE: national-api.doe.gov.bd" : "ACTIVE: Sovereign Ledger (Sandbox)"}
+                    {isLiveConnected ? "CONNECTED: Local Registry Bridge API" : "OFFLINE SAMPLE PREVIEW (API Unreachable)"}
                   </span>
                 </div>
               </div>
@@ -643,51 +610,79 @@ const CarbonRegistry = () => {
             </div>
           </div>
 
+          {!isLiveConnected && (
+            <div role="note" className="mt-4 px-4 py-2.5 rounded-xl border border-amber-500/40 bg-amber-500/10 text-amber-200 font-mono text-xs flex items-center justify-between gap-3">
+              <span>OFFLINE SAMPLE PREVIEW — Registry Bridge API is disconnected or unauthenticated. Displayed records are illustrative samples; mutations and exports are disabled until connected.</span>
+            </div>
+          )}
+
           {/* Quick Metrics Strip */}
           <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-5 gap-4 pt-6">
             <div className="bg-[#040906]/60 border border-[#152B1D] rounded-xl p-3.5">
-              <span className="font-mono text-[10px] text-white/50 uppercase tracking-widest block mb-1">Total Serialized Volume</span>
+              <span className="font-mono text-[10px] text-white/50 uppercase tracking-widest block mb-1">
+                {isLiveConnected ? "Tracked Registry Volume" : "Sample Volume (Offline)"}
+              </span>
               <div className="flex items-baseline space-x-1.5">
-                <span className="font-mono text-2xl font-bold text-white">10,000.0</span>
+                <span className="font-mono text-2xl font-bold text-white">
+                  {isLiveConnected
+                    ? adjustments.reduce((acc, a) => acc + Number(a.metric_tonnes_co2e || 0), 0).toFixed(1)
+                    : "—"}
+                </span>
                 <span className="font-mono text-xs text-[#00C853]">tCO2e</span>
               </div>
-              <span className="font-sans text-[11px] text-white/40 block mt-1">100% Measured via dMRV</span>
+              <span className="font-sans text-[11px] text-white/40 block mt-1">
+                {isLiveConnected ? `${submissions.length} logged submissions` : "Connect API for live ledger volume"}
+              </span>
             </div>
 
             <div className="bg-[#040906]/60 border border-[#152B1D] rounded-xl p-3.5">
-              <span className="font-mono text-[10px] text-white/50 uppercase tracking-widest block mb-1">Article 6.2 ITMO Transfer</span>
+              <span className="font-mono text-[10px] text-white/50 uppercase tracking-widest block mb-1">Article 6.2 ITMO Adjusted</span>
               <div className="flex items-baseline space-x-1.5">
-                <span className="font-mono text-2xl font-bold text-[#00C853]">5,000.0</span>
+                <span className="font-mono text-2xl font-bold text-[#00C853]">
+                  {isLiveConnected
+                    ? adjustments.filter(a => a.adjustment_applied).reduce((acc, a) => acc + Number(a.metric_tonnes_co2e || 0), 0).toFixed(1)
+                    : "—"}
+                </span>
                 <span className="font-mono text-xs text-[#00C853]">tCO2e</span>
               </div>
-              <span className="font-sans text-[11px] text-white/40 block mt-1">Government of Japan (JCM)</span>
+              <span className="font-sans text-[11px] text-white/40 block mt-1">Explicitly confirmed adjustments only</span>
             </div>
 
             <div className="bg-[#040906]/60 border border-[#152B1D] rounded-xl p-3.5">
-              <span className="font-mono text-[10px] text-white/50 uppercase tracking-widest block mb-1">Bangladesh NDC Retention</span>
+              <span className="font-mono text-[10px] text-white/50 uppercase tracking-widest block mb-1">Pending CA Issuance</span>
               <div className="flex items-baseline space-x-1.5">
-                <span className="font-mono text-2xl font-bold text-white">5,000.0</span>
+                <span className="font-mono text-2xl font-bold text-white">
+                  {isLiveConnected
+                    ? adjustments.filter(a => !a.adjustment_applied).reduce((acc, a) => acc + Number(a.metric_tonnes_co2e || 0), 0).toFixed(1)
+                    : "—"}
+                </span>
                 <span className="font-mono text-xs text-white/60">tCO2e</span>
               </div>
-              <span className="font-sans text-[11px] text-white/40 block mt-1">Sovereign Unadjusted Reserve</span>
+              <span className="font-sans text-[11px] text-white/40 block mt-1">Unadjusted / Pending DNA confirmation</span>
             </div>
 
             <div className="bg-[#040906]/60 border border-[#152B1D] rounded-xl p-3.5">
               <span className="font-mono text-[10px] text-white/50 uppercase tracking-widest block mb-1">DOE Positive List Status</span>
               <div className="flex items-center space-x-2 mt-1">
                 <ShieldCheck size={20} className="text-[#00C853]" />
-                <span className="font-mono text-lg font-bold text-white">100% Eligible</span>
+                <span className="font-mono text-lg font-bold text-white">
+                  {projects.filter(p => p.eligibility_status === 'positive_list').length}/{projects.length} Eligible
+                </span>
               </div>
-              <span className="font-sans text-[11px] text-[#00C853] block mt-1">0 Negative List Infractions</span>
+              <span className="font-sans text-[11px] text-[#00C853] block mt-1">
+                {projects.filter(p => p.eligibility_status === 'negative_list').length} Negative List Projects
+              </span>
             </div>
 
             <div className="bg-[#040906]/60 border border-[#152B1D] rounded-xl p-3.5 col-span-2 sm:col-span-1">
               <span className="font-mono text-[10px] text-white/50 uppercase tracking-widest block mb-1">Cryptographic Provenance</span>
               <div className="flex items-center space-x-2 mt-1">
-                <Fingerprint size={20} className="text-[#00C853]" />
-                <span className="font-mono text-lg font-bold text-white">Merkle Chain</span>
+                <Fingerprint size={20} className={isLiveConnected ? "text-[#00C853]" : "text-amber-400"} />
+                <span className="font-mono text-lg font-bold text-white">{isLiveConnected ? "API Linked" : "Sample Preview"}</span>
               </div>
-              <span className="font-sans text-[11px] text-white/40 block mt-1">SHA-256 Root Hash Verified</span>
+              <span className="font-sans text-[11px] text-white/40 block mt-1">
+                {isLiveConnected ? "SHA-256 provenance checked per submission" : "Offline sample fixtures only — not verified registry state"}
+              </span>
             </div>
           </div>
         </header>
@@ -822,7 +817,7 @@ const CarbonRegistry = () => {
                       </div>
                     </div>
                     <span className="font-mono text-xs bg-[#00C853]/10 text-[#00C853] border border-[#00C853]/20 px-2.5 py-1 rounded-full flex items-center space-x-1">
-                      <span className="w-1.5 h-1.5 rounded-full bg-[#00C853] animate-ping mr-1"></span>
+                      <span className="w-1.5 h-1.5 rounded-full bg-[#00C853] mr-1"></span>
                       Synchronized
                     </span>
                   </div>

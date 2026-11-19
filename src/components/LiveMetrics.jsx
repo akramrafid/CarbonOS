@@ -197,48 +197,50 @@ const LiveMetrics = () => {
     <section 
       ref={containerRef} 
       className={`w-full py-16 sm:py-24 px-4 sm:px-6 lg:px-12 relative overflow-hidden border-t ${
-        isLight ? 'bg-[#F2F3EE] text-[#0F291B] border-[#0F291B]/8' : 'bg-[#050C07] text-white border-white/10'
+        isLight ? 'bg-[#F2F3EE] text-[#0F291B] border-[#0F291B]/10' : 'bg-[#050C07] text-white border-white/10'
       }`}
     >
-      {/* Background ambient radial illumination */}
-      <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[800px] h-[500px] bg-emerald-950/20 blur-[140px] pointer-events-none rounded-full" />
-      <div className="absolute top-0 right-0 w-[400px] h-[300px] bg-cyan-950/15 blur-[120px] pointer-events-none" />
-
       <div className="max-w-7xl mx-auto relative z-10">
         
         {/* Institutional Section Header */}
-        <div className="flex flex-col lg:flex-row lg:items-end justify-between gap-8 mb-12">
+        <div className="flex flex-col lg:flex-row lg:items-end justify-between gap-6 mb-10">
           <div>
-            <div className="inline-flex items-center gap-2.5 px-3.5 py-1.5 rounded-full bg-emerald-950/40 border border-emerald-500/30 text-emerald-400 font-mono text-xs font-semibold uppercase tracking-wider mb-4 shadow-[0_0_15px_rgba(16,185,129,0.15)]">
-              <span className="relative flex h-2 w-2">
-                <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
-                <span className="relative inline-flex rounded-full h-2 w-2 bg-emerald-500"></span>
-              </span>
-              <span>National MRV Ground Station Telemetry Network</span>
-            </div>
-
-            <h2 className="text-3xl sm:text-4xl lg:text-5xl font-sans font-bold tracking-tight text-white leading-tight">
-              Real-Time Ecological <span className={isLight ? 'text-[#15803d]' : 'text-transparent bg-clip-text bg-gradient-to-r from-emerald-400 via-teal-300 to-cyan-400'}>Ground Truth</span>.
+            <h2 className={`text-3xl sm:text-4xl lg:text-5xl font-sans font-bold tracking-tight leading-tight ${
+              isLight ? 'text-[#0F291B]' : 'text-white'
+            }`}>
+              Real-Time Ecological <span className={isLight ? 'text-[#15803d]' : 'text-[#00E676]'}>Ground Truth.</span>
             </h2>
-            <p className="mt-3 text-base sm:text-lg text-white/70 max-w-2xl font-normal leading-relaxed">
-              Every carbon credit issued on Carbon Zero BD is anchored to physical IoT micro-stations, continuous optical analyzers, and automated cryptographic proof.
+            <p className={`mt-3 text-base sm:text-lg max-w-2xl font-normal leading-relaxed ${
+              isLight ? 'text-[#37473E]' : 'text-white/75'
+            }`}>
+              National MRV ground station telemetry network anchoring Carbon Zero BD issuances to physical IoT sensors, optical analyzers, and cryptographic proof.
             </p>
           </div>
 
-          {/* Network Live Telemetry Status Capsule */}
-          <div className="flex flex-wrap items-center gap-3 bg-white/[0.03] border border-white/10 p-3 rounded-2xl backdrop-blur-xl shrink-0">
-            <div className="flex items-center gap-2 px-3 py-1.5 rounded-xl bg-black/40 border border-white/5 font-mono text-xs text-white/80">
-              <Radio size={13} className="text-emerald-400 animate-pulse" />
-              <span>Nodes: <strong className="text-white">4 Active</strong></span>
-            </div>
-            <div className="flex items-center gap-2 px-3 py-1.5 rounded-xl bg-black/40 border border-white/5 font-mono text-xs text-white/80">
-              <Wifi size={13} className="text-cyan-400" />
-              <span>Latency: <strong className="text-white">~18ms</strong></span>
-            </div>
+          {/* Inline Feed Status & Sync Control */}
+          <div className={`inline-flex flex-wrap items-center gap-4 px-4 py-2.5 rounded-xl border shrink-0 font-mono text-xs tabular-nums ${
+            isLight
+              ? 'bg-white border-[#0F291B]/12 text-[#37473E]'
+              : 'bg-[#080F0B] border-white/10 text-white/75'
+          }`}>
+            <span className="inline-flex items-center gap-1.5">
+              <Radio size={13} className={isLight ? 'text-[#15803d]' : 'text-emerald-400'} />
+              <span>Nodes: <strong className={isLight ? 'text-[#0F291B]' : 'text-white'}>4 Active</strong></span>
+            </span>
+            <span className={isLight ? 'text-[#0F291B]/20' : 'text-white/20'}>|</span>
+            <span className="inline-flex items-center gap-1.5">
+              <Wifi size={13} className={isLight ? 'text-[#0369a1]' : 'text-cyan-400'} />
+              <span>Latency: <strong className={isLight ? 'text-[#0F291B]' : 'text-white'}>~18ms</strong></span>
+            </span>
             <button 
+              type="button"
               onClick={activeStation.isLiveFeed ? fetchLiveBlynkData : () => handleStationChange(activeStation)}
               disabled={isRefreshing}
-              className="flex items-center gap-1.5 px-3.5 py-1.5 rounded-xl bg-emerald-500/20 hover:bg-emerald-500/30 text-emerald-300 border border-emerald-500/30 font-mono text-xs font-semibold transition-all"
+              className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg font-mono text-xs font-semibold transition-colors cursor-pointer ${
+                isLight
+                  ? 'bg-[#15803d] hover:bg-[#166534] text-white'
+                  : 'bg-[#00C853] hover:bg-[#00E676] text-[#050C07]'
+              }`}
               title="Ping current station telemetry"
             >
               <RefreshCw size={12} className={isRefreshing ? "animate-spin" : ""} />
@@ -247,228 +249,277 @@ const LiveMetrics = () => {
           </div>
         </div>
 
-        {/* Station Navigation Selector Bar */}
-        <div className={`mb-8 p-1.5 rounded-2xl border backdrop-blur-xl grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-1.5 ${
+        {/* Unified Ground Station Telemetry Console */}
+        <div className={`rounded-2xl border overflow-hidden ${
           isLight
-            ? 'bg-white border-[#0F291B]/12 shadow-[0_8px_24px_-6px_rgba(15,41,27,0.08)]'
-            : 'bg-black/40 border-white/10'
+            ? 'bg-white border-[#0F291B]/12 shadow-[0_12px_32px_-12px_rgba(15,41,27,0.08)]'
+            : 'bg-[#080F0B] border-white/10'
         }`}>
-          {STATIONS.map((station) => {
-            const isActive = activeStation.id === station.id;
-            return (
-              <button
-                key={station.id}
-                onClick={() => handleStationChange(station)}
-                className={`w-full px-3.5 sm:px-4 py-3 rounded-xl text-left transition-all duration-200 flex items-center justify-between gap-3 min-w-0 cursor-pointer ${
-                  isLight
-                    ? isActive
-                      ? 'bg-[#15803d] text-white shadow-sm'
-                      : 'bg-transparent hover:bg-[#EFF6F1] text-[#37473E] hover:text-[#0F291B] border border-transparent'
-                    : isActive 
-                      ? 'bg-gradient-to-r from-emerald-950/80 to-emerald-900/40 border border-emerald-500/40 shadow-lg text-white' 
-                      : 'bg-transparent hover:bg-white/[0.04] text-white/60 hover:text-white border border-transparent'
+
+          {/* Station Navigation Bar */}
+          <div className={`grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 divide-y sm:divide-y-0 lg:divide-x border-b ${
+            isLight
+              ? 'divide-[#0F291B]/10 border-[#0F291B]/10 bg-[#F7F9F7]'
+              : 'divide-white/10 border-white/10 bg-white/[0.02]'
+          }`}>
+            {STATIONS.map((station) => {
+              const isActive = activeStation.id === station.id;
+              return (
+                <button
+                  type="button"
+                  key={station.id}
+                  onClick={() => handleStationChange(station)}
+                  className={`w-full px-4 py-3.5 text-left transition-colors flex items-center justify-between gap-3 min-w-0 cursor-pointer border-b-2 ${
+                    isLight
+                      ? isActive
+                        ? 'bg-white text-[#0F291B] border-[#15803d]'
+                        : 'bg-transparent hover:bg-white/70 text-[#46574D] hover:text-[#0F291B] border-transparent'
+                      : isActive
+                        ? 'bg-[#0D1E14] text-white border-[#00E676]'
+                        : 'bg-transparent hover:bg-white/[0.03] text-white/60 hover:text-white border-transparent'
+                  }`}
+                >
+                  <div className="min-w-0">
+                    <div className="flex items-center gap-2 flex-wrap">
+                      <span className="font-sans font-semibold text-xs tracking-tight truncate">{station.name}</span>
+                      {station.isLiveFeed && (
+                        <span className={`text-[10px] font-mono font-bold uppercase tracking-wider shrink-0 ${
+                          isLight ? 'text-[#15803d]' : 'text-emerald-400'
+                        }`}>
+                          LIVE
+                        </span>
+                      )}
+                    </div>
+                    <div className={`text-[11px] font-mono truncate mt-0.5 ${
+                      isLight ? 'text-[#556B5E]' : 'text-white/50'
+                    }`}>
+                      {station.location.split('(')[0]}
+                    </div>
+                  </div>
+                  <div className={`w-2 h-2 rounded-full shrink-0 ${
+                    isLight
+                      ? isActive ? 'bg-[#15803d]' : 'bg-[#0F291B]/15'
+                      : isActive ? 'bg-emerald-400' : 'bg-white/20'
+                  }`} />
+                </button>
+              );
+            })}
+          </div>
+
+          {/* Selected Station Meta Strip */}
+          <div className={`px-5 py-3 border-b flex flex-wrap items-center justify-between gap-3 text-xs font-mono ${
+            isLight
+              ? 'border-[#0F291B]/10 text-[#37473E] bg-white'
+              : 'border-white/10 text-white/65 bg-black/20'
+          }`}>
+            <div className="flex flex-wrap items-center gap-2 sm:gap-4">
+              <span className={`flex items-center gap-1.5 font-medium ${isLight ? 'text-[#0F291B]' : 'text-white/90'}`}>
+                <MapPin size={13} className={isLight ? 'text-[#15803d] shrink-0' : 'text-emerald-400 shrink-0'} />
+                <span>{activeStation.location}</span>
+              </span>
+              <span className={`hidden sm:inline ${isLight ? 'text-[#0F291B]/25' : 'text-white/20'}`}>|</span>
+              <span className="flex items-center gap-1.5">
+                <Cpu size={13} className={isLight ? 'text-[#0369a1] shrink-0' : 'text-cyan-400 shrink-0'} />
+                <span>{activeStation.hardware}</span>
+              </span>
+            </div>
+
+            <div className="flex flex-wrap items-center gap-3 tabular-nums">
+              <span className={`font-semibold ${isLight ? 'text-[#15803d]' : 'text-emerald-400'}`}>
+                {activeStation.protocol}
+              </span>
+              {lastUpdated && (
+                <span className={isLight ? 'text-[#556B5E]' : 'text-white/50'}>
+                  Synced: <span className={isLight ? 'text-[#0F291B]' : 'text-white/85'}>{lastUpdated}</span>
+                </span>
+              )}
+            </div>
+          </div>
+
+          {/* Error Notification Bar if Blynk has connection lag */}
+          {error && (
+            <div className={`px-5 py-3 border-b flex flex-col sm:flex-row sm:items-center justify-between gap-2 text-xs font-mono ${
+              isLight
+                ? 'bg-amber-50 border-amber-200 text-amber-900'
+                : 'bg-amber-500/10 border-amber-500/25 text-amber-300'
+            }`}>
+              <div className="flex items-center gap-2">
+                <AlertCircle size={15} className="shrink-0 text-amber-500" />
+                <span>{error}</span>
+              </div>
+              <span className={`text-[11px] shrink-0 ${isLight ? 'text-amber-800/70' : 'text-white/50'}`}>
+                Secured via SHA-256 local ledger
+              </span>
+            </div>
+          )}
+
+          {/* 4-Column Hairline Telemetry Readout Matrix */}
+          <div className={`grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 divide-y sm:divide-y-0 sm:divide-x ${
+            isLight ? 'divide-[#0F291B]/10' : 'divide-white/10'
+          }`}>
+            
+            {/* Cell 1: Ambient Temperature */}
+            <div className="mrv-telemetry-card p-6">
+              <div className="flex items-center justify-between mb-4">
+                <span className={`text-[11px] font-mono uppercase tracking-wider font-semibold ${
+                  isLight ? 'text-[#556B5E]' : 'text-white/55'
+                }`}>
+                  Ambient Surface Temp
+                </span>
+                <Activity size={15} className={isLight ? 'text-[#0369a1]' : 'text-cyan-400'} />
+              </div>
+
+              <div className="flex items-baseline gap-1.5 mb-3 tabular-nums">
+                <span className={`font-mono text-4xl font-bold tracking-tight ${
+                  isLight ? 'text-[#0F291B]' : 'text-white'
+                }`}>
+                  {metrics.temp !== null ? metrics.temp.toFixed(1) : "--"}
+                </span>
+                <span className={`font-mono text-lg font-semibold ${isLight ? 'text-[#0369a1]' : 'text-cyan-400'}`}>°C</span>
+              </div>
+
+              <div className={`flex items-center justify-between pt-3 border-t text-[11px] font-mono tabular-nums ${
+                isLight ? 'border-[#0F291B]/8 text-[#556B5E]' : 'border-white/10 text-white/55'
+              }`}>
+                <span>Diurnal: 24.2° - 32.8°</span>
+                <span className={`font-semibold ${isLight ? 'text-[#15803d]' : 'text-emerald-400'}`}>Calibrated</span>
+              </div>
+            </div>
+
+            {/* Cell 2: Relative Humidity */}
+            <div className="mrv-telemetry-card p-6">
+              <div className="flex items-center justify-between mb-4">
+                <span className={`text-[11px] font-mono uppercase tracking-wider font-semibold ${
+                  isLight ? 'text-[#556B5E]' : 'text-white/55'
+                }`}>
+                  Relative Humidity
+                </span>
+                <Gauge size={15} className={isLight ? 'text-[#15803d]' : 'text-emerald-400'} />
+              </div>
+
+              <div className="flex items-baseline gap-1.5 mb-3 tabular-nums">
+                <span className={`font-mono text-4xl font-bold tracking-tight ${
+                  isLight ? 'text-[#0F291B]' : 'text-white'
+                }`}>
+                  {metrics.hum !== null ? metrics.hum.toFixed(1) : "--"}
+                </span>
+                <span className={`font-mono text-lg font-semibold ${isLight ? 'text-[#15803d]' : 'text-emerald-400'}`}>%</span>
+              </div>
+
+              <div className={`flex items-center justify-between pt-3 border-t text-[11px] font-mono tabular-nums ${
+                isLight ? 'border-[#0F291B]/8 text-[#556B5E]' : 'border-white/10 text-white/55'
+              }`}>
+                <span>Vapor Density: 18.4 g/m³</span>
+                <span className={`font-semibold ${isLight ? 'text-[#15803d]' : 'text-emerald-400'}`}>Nominal</span>
+              </div>
+            </div>
+
+            {/* Cell 3: Air Quality Index */}
+            <div className="mrv-telemetry-card p-6">
+              <div className="flex items-center justify-between mb-4">
+                <span className={`text-[11px] font-mono uppercase tracking-wider font-semibold ${
+                  isLight ? 'text-[#556B5E]' : 'text-white/55'
+                }`}>
+                  Air Quality Raw / AQI
+                </span>
+                <span className={`text-[10px] font-mono font-bold uppercase tracking-wider ${
+                  isLight ? 'text-[#15803d]' : airStatus.text === 'Optimal' ? 'text-emerald-400' : 'text-amber-400'
+                }`}>
+                  {airStatus.text}
+                </span>
+              </div>
+
+              <div className="flex items-baseline gap-1.5 mb-3 tabular-nums">
+                <span className={`font-mono text-4xl font-bold tracking-tight ${
+                  isLight ? 'text-[#0F291B]' : 'text-white'
+                }`}>
+                  {metrics.air !== null ? metrics.air : "--"}
+                </span>
+                <span className={`font-mono text-xs ${isLight ? 'text-[#556B5E]' : 'text-white/50'}`}>raw counts</span>
+              </div>
+
+              <div className={`flex items-center justify-between pt-3 border-t text-[11px] font-mono tabular-nums ${
+                isLight ? 'border-[#0F291B]/8 text-[#556B5E]' : 'border-white/10 text-white/55'
+              }`}>
+                <span>Sensor: MQ-135 NDIR</span>
+                <span className={isLight ? 'text-[#0369a1]' : 'text-cyan-400'}>Baseline: modelled</span>
+              </div>
+            </div>
+
+            {/* Cell 4: CO2 Concentration */}
+            <div className="mrv-telemetry-card p-6">
+              <div className="flex items-center justify-between mb-4">
+                <span className={`text-[11px] font-mono uppercase tracking-wider font-semibold ${
+                  isLight ? 'text-[#556B5E]' : 'text-white/55'
+                }`}>
+                  CO₂ Concentration
+                </span>
+                <span className={`text-[10px] font-mono font-bold uppercase tracking-wider ${
+                  isLight ? 'text-[#15803d]' : co2Status.text === 'Baseline Clean' ? 'text-emerald-400' : 'text-amber-400'
+                }`}>
+                  {co2Status.text}
+                </span>
+              </div>
+
+              <div className="flex items-baseline gap-1.5 mb-3 tabular-nums">
+                <span className={`font-mono text-4xl font-bold tracking-tight ${
+                  isLight ? 'text-[#0F291B]' : 'text-white'
+                }`}>
+                  {metrics.co2 !== null ? metrics.co2 : "--"}
+                </span>
+                <span className={`font-mono text-lg font-semibold ${isLight ? 'text-amber-700' : 'text-amber-400'}`}>ppm</span>
+              </div>
+
+              <div className={`flex items-center justify-between pt-3 border-t text-[11px] font-mono tabular-nums ${
+                isLight ? 'border-[#0F291B]/8 text-[#556B5E]' : 'border-white/10 text-white/55'
+              }`}>
+                <span>Delta: +{(metrics.co2 && activeStation.baselineCo2 ? Math.max(0, metrics.co2 - activeStation.baselineCo2) : 6)} ppm</span>
+                <span className={`font-semibold ${isLight ? 'text-[#15803d]' : 'text-emerald-400'}`}>MRV telemetry (unverified)</span>
+              </div>
+            </div>
+
+          </div>
+
+          {/* Integrity Ledger Seal Footer */}
+          <div className={`px-5 py-4 border-t flex flex-col md:flex-row items-start md:items-center justify-between gap-4 ${
+            isLight
+              ? 'border-[#0F291B]/10 bg-[#F7F9F7]'
+              : 'border-white/10 bg-white/[0.02]'
+          }`}>
+            <div className="flex items-center gap-3">
+              <ShieldCheck size={18} className={isLight ? 'text-[#15803d] shrink-0' : 'text-emerald-400 shrink-0'} />
+              <div>
+                <div className={`font-sans font-semibold text-xs tracking-wide ${
+                  isLight ? 'text-[#0F291B]' : 'text-white'
+                }`}>
+                  Hardware-Attested Ecological Integrity Ledger
+                </div>
+                <div className={`text-[11px] font-mono ${
+                  isLight ? 'text-[#556B5E]' : 'text-white/55'
+                }`}>
+                  Data signed via hardware ECDSA keypair · Ingested directly to the Carbon Zero BD clearing ledger
+                </div>
+              </div>
+            </div>
+
+            <div className={`flex flex-wrap items-center gap-4 text-xs font-mono tabular-nums ${
+              isLight ? 'text-[#37473E]' : 'text-white/65'
+            }`}>
+              <span>
+                Total Ingested: <strong className={isLight ? 'text-[#15803d]' : 'text-emerald-400'}>{packetCount.toLocaleString()}</strong> frames
+              </span>
+              <a 
+                href="/platform/mrv-dashboard" 
+                className={`inline-flex items-center gap-1 font-semibold transition-colors ${
+                  isLight ? 'text-[#15803d] hover:text-[#166534]' : 'text-emerald-400 hover:text-emerald-300'
                 }`}
               >
-                <div className="min-w-0">
-                  <div className="flex items-center gap-2 flex-wrap">
-                    <span className="font-sans font-semibold text-xs tracking-tight truncate">{station.name}</span>
-                    {station.isLiveFeed && (
-                      <span
-                        className={`text-[9px] font-mono font-bold uppercase tracking-wider px-1.5 py-0.5 rounded shrink-0 ${
-                          isLight
-                            ? isActive
-                              ? 'text-white'
-                              : 'bg-[#E3F2E9] text-[#15803d]'
-                            : 'bg-emerald-500/20 text-emerald-300 border border-emerald-500/30'
-                        }`}
-                        style={isLight && isActive ? { backgroundColor: '#0F291B', color: '#FFFFFF' } : undefined}
-                      >
-                        LIVE IoT
-                      </span>
-                    )}
-                  </div>
-                  <div className={`text-[10px] font-mono truncate mt-0.5 ${
-                    isLight
-                      ? isActive ? 'text-white/85' : 'text-[#556B5E]'
-                      : 'text-white/40'
-                  }`}>
-                    {station.location.split('(')[0]}
-                  </div>
-                </div>
-                <div className={`w-2 h-2 rounded-full shrink-0 ${
-                  isLight
-                    ? isActive ? 'bg-white' : 'bg-[#0F291B]/20'
-                    : isActive ? 'bg-emerald-400 shadow-[0_0_8px_#10B981]' : 'bg-white/20'
-                }`} />
-              </button>
-            );
-          })}
-        </div>
-
-        {/* Selected Station Meta Bar */}
-        <div className="mb-8 px-4 sm:px-5 py-3 rounded-xl bg-white/[0.02] border border-white/5 flex flex-wrap items-center justify-between gap-3 sm:gap-4 text-xs font-mono text-white/60">
-          <div className="flex flex-wrap items-center gap-2 sm:gap-4">
-            <span className="flex items-center gap-1.5 text-white/90">
-              <MapPin size={13} className="text-emerald-400 shrink-0" />
-              <span>{activeStation.location}</span>
-            </span>
-            <span className="text-white/20 hidden sm:inline">•</span>
-            <span className="flex items-center gap-1.5">
-              <Cpu size={13} className="text-cyan-400 shrink-0" />
-              <span>{activeStation.hardware}</span>
-            </span>
-          </div>
-
-          <div className="flex flex-wrap items-center gap-3">
-            <span className="px-2.5 py-1 rounded bg-white/5 border border-white/10 text-emerald-400 font-semibold">
-              {activeStation.protocol}
-            </span>
-            {lastUpdated && (
-              <span className="text-white/40">
-                Synced at: <span className="text-white/80">{lastUpdated}</span>
-              </span>
-            )}
-          </div>
-        </div>
-
-        {/* Error Notification Bar if Blynk has connection lag */}
-        {error && (
-          <div className="mb-8 bg-amber-500/10 border border-amber-500/30 rounded-2xl p-4 flex flex-col sm:flex-row sm:items-center justify-between gap-2 sm:gap-4 text-amber-300 text-xs font-mono">
-            <div className="flex items-center gap-2.5">
-              <AlertCircle size={16} className="shrink-0 text-amber-400" />
-              <span>{error}</span>
-            </div>
-            <span className="text-white/40 text-[11px] shrink-0">Secured via SHA-256 local ledger</span>
-          </div>
-        )}
-
-        {/* 4 Core Telemetry Metric Cards */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
-          
-          {/* Card 1: Ambient Temperature */}
-          <div className="mrv-telemetry-card relative group rounded-2xl p-6 bg-white/[0.03] border border-white/10 hover:border-emerald-500/30 backdrop-blur-xl transition-all duration-300 shadow-xl overflow-hidden">
-            <div className="absolute top-0 right-0 w-28 h-28 bg-cyan-500/5 rounded-full blur-2xl group-hover:bg-cyan-500/10 transition-colors" />
-            <div className="flex items-center justify-between mb-4">
-              <span className="text-[11px] font-mono uppercase tracking-widest text-white/50 font-bold">
-                Ambient Surface Temp
-              </span>
-              <Activity size={15} className="text-cyan-400/80" />
-            </div>
-
-            <div className="flex items-baseline gap-1.5 mb-3">
-              <span className="font-mono text-4xl lg:text-5xl font-extrabold text-white tracking-tight">
-                {metrics.temp !== null ? metrics.temp.toFixed(1) : "--"}
-              </span>
-              <span className="font-mono text-xl text-cyan-400 font-bold">°C</span>
-            </div>
-
-            <div className="flex items-center justify-between pt-3 border-t border-white/5 text-[11px] font-mono text-white/50">
-              <span>Diurnal: 24.2° - 32.8°</span>
-              <span className="text-emerald-400 font-semibold">Calibrated</span>
+                <span>Full MRV Terminal</span>
+                <ArrowUpRight size={14} />
+              </a>
             </div>
           </div>
 
-          {/* Card 2: Relative Humidity */}
-          <div className="mrv-telemetry-card relative group rounded-2xl p-6 bg-white/[0.03] border border-white/10 hover:border-emerald-500/30 backdrop-blur-xl transition-all duration-300 shadow-xl overflow-hidden">
-            <div className="absolute top-0 right-0 w-28 h-28 bg-emerald-500/5 rounded-full blur-2xl group-hover:bg-emerald-500/10 transition-colors" />
-            <div className="flex items-center justify-between mb-4">
-              <span className="text-[11px] font-mono uppercase tracking-widest text-white/50 font-bold">
-                Relative Humidity
-              </span>
-              <Gauge size={15} className="text-emerald-400/80" />
-            </div>
-
-            <div className="flex items-baseline gap-1.5 mb-3">
-              <span className="font-mono text-4xl lg:text-5xl font-extrabold text-white tracking-tight">
-                {metrics.hum !== null ? metrics.hum.toFixed(1) : "--"}
-              </span>
-              <span className="font-mono text-xl text-emerald-400 font-bold">%</span>
-            </div>
-
-            <div className="flex items-center justify-between pt-3 border-t border-white/5 text-[11px] font-mono text-white/50">
-              <span>Vapor Density: 18.4 g/m³</span>
-              <span className="text-emerald-400 font-semibold">Nominal</span>
-            </div>
-          </div>
-
-          {/* Card 3: Air Quality Index */}
-          <div className="mrv-telemetry-card relative group rounded-2xl p-6 bg-white/[0.03] border border-white/10 hover:border-emerald-500/30 backdrop-blur-xl transition-all duration-300 shadow-xl overflow-hidden">
-            <div className="flex items-center justify-between mb-4">
-              <span className="text-[11px] font-mono uppercase tracking-widest text-white/50 font-bold">
-                Air Quality Raw / AQI
-              </span>
-              <div className={`px-2 py-0.5 rounded text-[10px] font-mono font-bold uppercase tracking-wider border ${airStatus.badge}`}>
-                {airStatus.text}
-              </div>
-            </div>
-
-            <div className="flex items-baseline gap-1.5 mb-3">
-              <span className="font-mono text-4xl lg:text-5xl font-extrabold text-white tracking-tight">
-                {metrics.air !== null ? metrics.air : "--"}
-              </span>
-              <span className="font-mono text-sm text-white/50">raw counts</span>
-            </div>
-
-            <div className="flex items-center justify-between pt-3 border-t border-white/5 text-[11px] font-mono text-white/50">
-              <span>Sensor: MQ-135 NDIR</span>
-              <span className="text-cyan-400">Baseline: modelled</span>
-            </div>
-          </div>
-
-          {/* Card 4: CO2 Concentration */}
-          <div className="mrv-telemetry-card relative group rounded-2xl p-6 bg-white/[0.03] border border-white/10 hover:border-emerald-500/30 backdrop-blur-xl transition-all duration-300 shadow-xl overflow-hidden">
-            <div className="flex items-center justify-between mb-4">
-              <span className="text-[11px] font-mono uppercase tracking-widest text-white/50 font-bold">
-                CO₂ Concentration
-              </span>
-              <div className={`px-2 py-0.5 rounded text-[10px] font-mono font-bold uppercase tracking-wider border ${co2Status.badge}`}>
-                {co2Status.text}
-              </div>
-            </div>
-
-            <div className="flex items-baseline gap-1.5 mb-3">
-              <span className="font-mono text-4xl lg:text-5xl font-extrabold text-white tracking-tight">
-                {metrics.co2 !== null ? metrics.co2 : "--"}
-              </span>
-              <span className="font-mono text-xl text-amber-400 font-bold">ppm</span>
-            </div>
-
-            <div className="flex items-center justify-between pt-3 border-t border-white/5 text-[11px] font-mono text-white/50">
-              <span>Delta: +{(metrics.co2 && activeStation.baselineCo2 ? Math.max(0, metrics.co2 - activeStation.baselineCo2) : 6)} ppm</span>
-              <span className="text-emerald-400 font-semibold">MRV telemetry (unverified)</span>
-            </div>
-          </div>
-
-        </div>
-
-        {/* Bottom Hardware Architecture & Integrity Ledger Seal */}
-        <div className="mt-8 p-5 rounded-2xl bg-gradient-to-r from-white/[0.02] via-emerald-950/10 to-white/[0.02] border border-white/10 flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
-          <div className="flex items-center gap-3">
-            <div className="w-9 h-9 rounded-xl bg-emerald-500/10 border border-emerald-500/25 flex items-center justify-center shrink-0">
-              <ShieldCheck size={18} className="text-emerald-400" />
-            </div>
-            <div>
-              <div className="font-sans font-bold text-xs text-white tracking-wide">
-                Hardware-Attested Ecological Integrity Ledger
-              </div>
-              <div className="text-[11px] font-mono text-white/50">
-                Data signed via hardware ECDSA keypair • Ingested directly to the Carbon Zero BD clearing ledger
-              </div>
-            </div>
-          </div>
-
-          <div className="flex items-center gap-3 text-xs font-mono text-white/60">
-            <span className="px-3 py-1 rounded-lg bg-black/40 border border-white/5 text-white/70">
-              Total Ingested: <strong className="text-emerald-400">{packetCount.toLocaleString()}</strong> frames
-            </span>
-            <a 
-              href="/platform/mrv-dashboard" 
-              className="inline-flex items-center gap-1 text-emerald-400 hover:text-emerald-300 font-semibold transition-colors"
-            >
-              <span>Full MRV Terminal</span>
-              <ArrowUpRight size={14} />
-            </a>
-          </div>
         </div>
 
       </div>

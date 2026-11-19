@@ -186,100 +186,129 @@ const CorporateSaaSPipeline = () => {
         }
       ` }} />
 
-      {/* Decorative Blur Backgrounds */}
-      <div className="absolute top-1/4 left-1/3 w-[600px] h-[600px] bg-emerald/5 rounded-full blur-[140px] pointer-events-none z-0"></div>
-      <div className="absolute bottom-1/4 right-1/4 w-[500px] h-[500px] bg-cyan/5 rounded-full blur-[120px] pointer-events-none z-0"></div>
-
-      {/* Increased max-width of the section container to 90rem (1440px) for a grander look */}
+      {/* Main container */}
       <div className="max-w-[90rem] mx-auto px-4 sm:px-6 lg:px-12 relative z-10">
         
-        {/* Header Block (Scaled up title and subtitle sizes) */}
-        <div className="text-center mb-12 sm:mb-20 max-w-4xl mx-auto">
-          <span className="font-mono text-xs text-emerald tracking-[0.25em] px-4 py-1.5 bg-emerald/10 border border-emerald/20 rounded-full mb-5 inline-block uppercase font-bold">
-            Workflow & System Integration
-          </span>
-          <h2 className="text-3xl sm:text-5xl md:text-6xl font-bold text-white tracking-tight leading-tight">
-            Corporate  SaaS  Pipeline
+        {/* Header Block */}
+        <div className="mb-12 sm:mb-16 max-w-3xl">
+          <h2 className={`text-3xl sm:text-5xl font-bold tracking-tight leading-tight ${
+            isLight ? 'text-[#0F291B]' : 'text-white'
+          }`}>
+            Corporate SaaS Pipeline
           </h2>
-          <p className="text-sm sm:text-base md:text-lg text-mist/85 mt-4 font-light">
-            Automating emissions tracking, verification, and compliance inside a single unified pipeline.
+          <p className={`text-sm sm:text-base md:text-lg mt-3 leading-relaxed ${
+            isLight ? 'text-[#37473E]' : 'text-mist/85 font-light'
+          }`}>
+            Automating emissions tracking, verification, and compliance inside a unified institutional workflow.
           </p>
         </div>
 
-        {/* Outer Visual Panel (Matches Video Layout, using 12-column grid to give text more space) */}
-        <div className={`grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-10 border rounded-3xl lg:rounded-[3rem] p-5 sm:p-8 lg:p-14 backdrop-blur-md ${
+        {/* Outer Visual Panel */}
+        <div className={`grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-10 border rounded-2xl p-5 sm:p-8 lg:p-12 ${
           isLight
-            ? 'bg-white border-[#0F291B]/12 shadow-[0_18px_45px_-12px_rgba(15,41,27,0.10)]'
-            : 'bg-[#080F0B] border-white/5 shadow-[0_0_100px_rgba(0,0,0,0.5)]'
+            ? 'bg-white border-[#0F291B]/12 shadow-[0_14px_36px_-12px_rgba(15,41,27,0.08)]'
+            : 'bg-[#080F0B] border-white/10'
         }`}>
           
-          {/* Left Column: Controls, Info & Status (Takes 4 columns, wider typography) */}
-          <div className="lg:col-span-4 flex flex-col justify-between border-b lg:border-b-0 lg:border-r border-white/10 pb-8 lg:pb-0 lg:pr-10">
+          {/* Left Column: Controls, Info & Status */}
+          <div className={`lg:col-span-4 flex flex-col justify-between border-b lg:border-b-0 lg:border-r pb-8 lg:pb-0 lg:pr-10 ${
+            isLight ? 'border-[#0F291B]/10' : 'border-white/10'
+          }`}>
             
             {/* Title / Description area */}
-            <div className="space-y-8">
+            <div className="space-y-6">
               <div>
-                <h3 className="font-mono text-xs text-emerald uppercase tracking-wider font-bold mb-1">
+                <h3 className={`font-mono text-xs uppercase tracking-wider font-bold mb-1 ${
+                  isLight ? 'text-[#15803d]' : 'text-emerald'
+                }`}>
                   Process Stage
                 </h3>
-                <div className="flex items-center justify-between">
-                  <span className="text-4xl font-bold text-white tracking-tight">
+                <div className="flex items-center justify-between gap-3">
+                  <span className={`text-3xl sm:text-4xl font-bold tracking-tight ${
+                    isLight ? 'text-[#0F291B]' : 'text-white'
+                  }`}>
                     {steps[activeStep].title}
                   </span>
                   
                   {/* Navigation Button Controls */}
-                  <div className="flex items-center space-x-3">
+                  <div className="flex items-center space-x-2">
                     <button 
+                      type="button"
                       onClick={handlePrev}
-                      className="w-11 h-11 rounded-full border border-white/15 bg-white/5 flex items-center justify-center text-white/70 hover:text-emerald hover:border-emerald/40 hover:bg-white/10 transition-all cursor-pointer shadow-sm"
+                      className={`w-10 h-10 rounded-lg border flex items-center justify-center transition-colors cursor-pointer ${
+                        isLight
+                          ? 'border-[#0F291B]/15 bg-[#F5F8F5] text-[#0F291B] hover:border-[#15803d] hover:text-[#15803d]'
+                          : 'border-white/15 bg-white/5 text-white/75 hover:text-emerald hover:border-emerald/40'
+                      }`}
                       aria-label="Previous step"
                     >
-                      <ArrowLeft size={18} />
+                      <ArrowLeft size={17} />
                     </button>
                     <button 
+                      type="button"
                       onClick={handleNext}
-                      className="w-11 h-11 rounded-full border border-white/15 bg-white/5 flex items-center justify-center text-white/70 hover:text-emerald hover:border-emerald/40 hover:bg-white/10 transition-all cursor-pointer shadow-sm"
+                      className={`w-10 h-10 rounded-lg border flex items-center justify-center transition-colors cursor-pointer ${
+                        isLight
+                          ? 'border-[#0F291B]/15 bg-[#F5F8F5] text-[#0F291B] hover:border-[#15803d] hover:text-[#15803d]'
+                          : 'border-white/15 bg-white/5 text-white/75 hover:text-emerald hover:border-emerald/40'
+                      }`}
                       aria-label="Next step"
                     >
-                      <ArrowRight size={18} />
+                      <ArrowRight size={17} />
                     </button>
                   </div>
                 </div>
               </div>
 
-              {/* Dynamic Description Box (Improved font size, color and line height) */}
-              <div className={`transition-all duration-300 min-h-[180px] ${
+              {/* Dynamic Description Box */}
+              <div className={`transition-all duration-300 min-h-[160px] ${
                 transitionState === 'transitioning' ? 'opacity-0 translate-y-2' : 'opacity-100 translate-y-0'
               }`}>
-                <h4 className="text-xl font-semibold text-white mb-4">
+                <h4 className={`text-lg sm:text-xl font-semibold mb-3 ${
+                  isLight ? 'text-[#0F291B]' : 'text-white'
+                }`}>
                   {steps[activeStep].sub}
                 </h4>
-                <p className="text-base text-mist/95 leading-relaxed font-sans font-light">
+                <p className={`text-sm sm:text-base leading-relaxed font-sans ${
+                  isLight ? 'text-[#37473E]' : 'text-mist/95 font-light'
+                }`}>
                   {steps[activeStep].desc}
                 </p>
               </div>
             </div>
 
             {/* Play/Pause Autoplay Controls & Active Status Indicator */}
-            <div className="pt-8 border-t border-white/5 space-y-6">
+            <div className={`pt-6 border-t space-y-5 ${
+              isLight ? 'border-[#0F291B]/10' : 'border-white/10'
+            }`}>
               <div className="flex items-center justify-between">
                 <div className="flex items-center space-x-3">
                   <button
+                    type="button"
                     onClick={() => setIsPlaying(!isPlaying)}
-                    className="w-10 h-10 rounded-full bg-emerald/10 border border-emerald/20 text-emerald flex items-center justify-center hover:bg-emerald/20 transition-all shadow-[0_0_15px_rgba(16,185,129,0.1)] cursor-pointer"
+                    className={`w-9 h-9 rounded-lg border flex items-center justify-center transition-colors cursor-pointer ${
+                      isLight
+                        ? 'bg-[#E5F4EB] border-[#15803d]/25 text-[#15803d] hover:bg-[#D5ECDF]'
+                        : 'bg-emerald/10 border-emerald/25 text-emerald hover:bg-emerald/20'
+                    }`}
                     title={isPlaying ? "Pause autoplay" : "Play autoplay"}
                   >
-                    {isPlaying ? <Pause size={18} /> : <Play size={18} />}
+                    {isPlaying ? <Pause size={16} /> : <Play size={16} />}
                   </button>
-                  <span className="text-xs font-mono text-mist/60 font-semibold tracking-wider">
+                  <span className={`text-xs font-mono font-semibold tracking-wider ${
+                    isLight ? 'text-[#556B5E]' : 'text-mist/60'
+                  }`}>
                     {isPlaying ? "AUTOPLAYING" : "PAUSED"}
                   </span>
                 </div>
                 
                 {!isPlaying && (
                   <button
+                    type="button"
                     onClick={() => setIsPlaying(true)}
-                    className="text-xs font-mono text-emerald hover:underline hover:text-emerald/80 flex items-center space-x-1 cursor-pointer font-bold"
+                    className={`text-xs font-mono hover:underline flex items-center space-x-1 cursor-pointer font-bold ${
+                      isLight ? 'text-[#15803d]' : 'text-emerald'
+                    }`}
                   >
                     <RefreshCw size={14} className="animate-spin" style={{ animationDuration: '4s' }} />
                     <span>Resume</span>
@@ -288,15 +317,21 @@ const CorporateSaaSPipeline = () => {
               </div>
 
               {/* Status display */}
-              <div className="bg-[#040A06] rounded-xl p-4 border border-white/5">
-                <p className="text-[10px] font-mono text-mist/40 uppercase tracking-widest font-bold">
+              <div className={`pt-3 border-t ${isLight ? 'border-[#0F291B]/10' : 'border-white/10'}`}>
+                <p className={`text-[10px] font-mono uppercase tracking-widest font-bold ${
+                  isLight ? 'text-[#556B5E]' : 'text-mist/50'
+                }`}>
                   System Status
                 </p>
-                <div className="flex items-center space-x-2.5 mt-1.5">
+                <div className="flex items-center space-x-2 mt-1.5">
                   <div className={`w-2 h-2 rounded-full ${
-                    transitionState === 'transitioning' ? 'bg-amber animate-pulse' : 'bg-emerald animate-pulse'
+                    transitionState === 'transitioning'
+                      ? 'bg-amber'
+                      : isLight ? 'bg-[#15803d]' : 'bg-emerald'
                   }`}></div>
-                  <span className="font-mono text-xs text-white/90 font-medium">
+                  <span className={`font-mono text-xs font-medium ${
+                    isLight ? 'text-[#0F291B]' : 'text-white/90'
+                  }`}>
                     {transitionState === 'transitioning' ? 'Updating State...' : steps[activeStep].statusText}
                   </span>
                 </div>
@@ -305,42 +340,50 @@ const CorporateSaaSPipeline = () => {
 
           </div>
 
-          {/* Right Column: Steps Stepper & Visual Screen Canvas (Takes 8 columns, scaled canvas height to h-[420px]) */}
+          {/* Right Column: Steps Stepper & Visual Screen Canvas */}
           <div className="lg:col-span-8 flex flex-col space-y-8 lg:pl-10">
             
-            {/* Top Stepper Track (Nodes & Line Progress, circles scaled to w-11 h-11) */}
+            {/* Top Stepper Track */}
             <div className="relative w-full px-6 md:px-10 py-2">
-              {/* Stepper Progress Container (circles & connecting line) */}
               <div className="relative h-11 flex justify-between items-center w-full">
                 
-                {/* Stepper Progress Line (Centered vertically at top-[22px] for 44px circles) */}
-                <div className="absolute top-[22px] left-[22px] right-[22px] h-[3px] bg-white/10 -z-10"></div>
+                <div className={`absolute top-[22px] left-[22px] right-[22px] h-[2px] -z-10 ${
+                  isLight ? 'bg-[#0F291B]/12' : 'bg-white/10'
+                }`}></div>
                 <div 
-                  className="absolute top-[22px] left-[22px] h-[3px] bg-emerald -z-10 transition-all duration-500 ease-out"
+                  className={`absolute top-[22px] left-[22px] h-[2px] -z-10 transition-all duration-500 ease-out ${
+                    isLight ? 'bg-[#15803d]' : 'bg-emerald'
+                  }`}
                   style={{ width: `calc(${(activeStep / 3) * 100}% - ${(activeStep / 3) * 44}px)` }}
                 ></div>
 
-                {/* Individual Steps Nodes (Circles only) */}
                 {steps.map((step, idx) => {
                   const isActive = activeStep === idx;
                   const isCompleted = activeStep > idx;
 
                   return (
                     <button
+                      type="button"
                       key={idx}
                       onClick={() => handleStepChange(idx)}
-                      className={`w-11 h-11 rounded-full border-2 flex items-center justify-center transition-all duration-300 focus:outline-none cursor-pointer z-10 ${
-                        isActive 
-                          ? 'bg-[#040A06] border-emerald text-emerald shadow-[0_0_20px_rgba(0,200,83,0.4)] scale-110' 
-                          : isCompleted 
-                          ? 'bg-emerald border-emerald text-carbon font-bold' 
-                          : 'bg-[#040A06] border-white/15 text-white/40 hover:border-white/40 hover:scale-105'
+                      className={`w-11 h-11 rounded-full border-2 flex items-center justify-center transition-colors focus:outline-none cursor-pointer z-10 ${
+                        isLight
+                          ? isActive
+                            ? 'bg-white border-[#15803d] text-[#15803d]'
+                            : isCompleted
+                            ? 'bg-[#15803d] border-[#15803d] text-white font-bold'
+                            : 'bg-[#F5F8F5] border-[#0F291B]/20 text-[#46574D] hover:border-[#15803d]'
+                          : isActive 
+                            ? 'bg-[#040A06] border-emerald text-emerald' 
+                            : isCompleted 
+                            ? 'bg-emerald border-emerald text-carbon font-bold' 
+                            : 'bg-[#040A06] border-white/15 text-white/40 hover:border-white/40'
                       }`}
                     >
                       {isCompleted ? (
                         <span className="text-base font-bold">✓</span>
                       ) : (
-                        <span className="font-mono text-base font-semibold">{idx + 1}</span>
+                        <span className="font-mono text-base font-semibold tabular-nums">{idx + 1}</span>
                       )}
                     </button>
                   );

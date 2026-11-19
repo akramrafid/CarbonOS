@@ -105,15 +105,14 @@ const FrameworkAlignment = () => {
             <SealSVG />
           </div>
           <div className="relative">
-            <div className="absolute -top-8 sm:-top-14 left-0 sm:-left-6 font-mono text-[64px] sm:text-[100px] lg:text-[120px] text-emerald opacity-10 leading-none pointer-events-none select-none">01</div>
-            <h3 className="font-sans font-bold text-2xl sm:text-3xl lg:text-4xl text-white mb-4 sm:mb-6 relative z-10">Built Around Published Rules</h3>
-            <p className="font-sans text-base sm:text-lg text-mist leading-relaxed mb-6 sm:mb-8 relative z-10">
+            <h3 className="font-sans font-bold text-2xl sm:text-3xl lg:text-4xl text-white mb-4 sm:mb-6">Built Around Published Rules</h3>
+            <p className="font-sans text-base sm:text-lg text-mist leading-relaxed mb-6 sm:mb-8">
               Designed around Bangladesh's climate rules as they are published. A rule enters the product only with its primary document cited; nothing here is approved or endorsed by a regulator.
             </p>
-            <div className="flex flex-wrap gap-2.5 sm:gap-3 relative z-10">
-              <span className="font-mono text-xs text-registry bg-black/40 border border-emerald/20 px-3 py-1.5 rounded">[GHG Protocol]</span>
-              <span className="font-mono text-xs text-registry bg-black/40 border border-emerald/20 px-3 py-1.5 rounded">[ISO 14064-1]</span>
-              <span className="font-mono text-xs text-registry bg-black/40 border border-emerald/20 px-3 py-1.5 rounded">[IPCC 2006]</span>
+            <div className="pt-4 border-t border-white/15 flex flex-wrap gap-x-6 gap-y-2 text-xs font-mono text-registry/85 tabular-nums">
+              <span>GHG Protocol</span>
+              <span>ISO 14064-1</span>
+              <span>IPCC 2006</span>
             </div>
           </div>
         </div>
@@ -129,15 +128,14 @@ const FrameworkAlignment = () => {
             <ScannerGrid />
           </div>
           <div className="relative">
-            <div className="absolute -top-8 sm:-top-14 left-0 sm:-left-6 font-mono text-[64px] sm:text-[100px] lg:text-[120px] text-emerald opacity-10 leading-none pointer-events-none select-none">02</div>
-            <h3 className="font-sans font-bold text-2xl sm:text-3xl lg:text-4xl text-white mb-4 sm:mb-6 relative z-10">MRV That Works in the Field</h3>
-            <p className="font-sans text-base sm:text-lg text-mist leading-relaxed mb-6 sm:mb-8 relative z-10">
+            <h3 className="font-sans font-bold text-2xl sm:text-3xl lg:text-4xl text-white mb-4 sm:mb-6">MRV That Works in the Field</h3>
+            <p className="font-sans text-base sm:text-lg text-mist leading-relaxed mb-6 sm:mb-8">
               Google Earth Engine satellite integration. GPS field tagging. IoT sensor data ingestion. Mobile farmer reporting app. AI-powered anomaly detection comparing satellite data against project reports. MRV that works in Khulna, not just in Dhaka conference rooms.
             </p>
-            <div className="flex flex-wrap gap-2.5 sm:gap-3 relative z-10">
-              <span className="font-mono text-xs text-registry bg-black/40 border border-emerald/20 px-3 py-1.5 rounded">[Google Earth Engine]</span>
-              <span className="font-mono text-xs text-registry bg-black/40 border border-emerald/20 px-3 py-1.5 rounded">[PostGIS]</span>
-              <span className="font-mono text-xs text-registry bg-black/40 border border-emerald/20 px-3 py-1.5 rounded">[TensorFlow]</span>
+            <div className="pt-4 border-t border-white/15 flex flex-wrap gap-x-6 gap-y-2 text-xs font-mono text-registry/85 tabular-nums">
+              <span>Google Earth Engine</span>
+              <span>PostGIS</span>
+              <span>TensorFlow</span>
             </div>
           </div>
         </div>
@@ -153,16 +151,15 @@ const FrameworkAlignment = () => {
             <EKGWave />
           </div>
           <div className="relative">
-            <div className="absolute -top-8 sm:-top-14 left-0 sm:-left-6 font-mono text-[64px] sm:text-[100px] lg:text-[120px] text-emerald opacity-10 leading-none pointer-events-none select-none">03</div>
-            <h3 className="font-sans font-bold text-2xl sm:text-3xl lg:text-4xl text-white mb-4 sm:mb-6 relative z-10">International Standards, Local Execution</h3>
-            <p className="font-sans text-base sm:text-lg text-mist leading-relaxed mb-6 sm:mb-8 relative z-10">
+            <h3 className="font-sans font-bold text-2xl sm:text-3xl lg:text-4xl text-white mb-4 sm:mb-6">International Standards, Local Execution</h3>
+            <p className="font-sans text-base sm:text-lg text-mist leading-relaxed mb-6 sm:mb-8">
               Verra VCS, Gold Standard, Article 6 and CDM methodologies are referenced, not integrated: CarbonOS has no registry connection or certification. Your Bangladesh projects speak the language of international carbon buyers in London, Singapore, and Tokyo.
             </p>
-            <div className="flex flex-wrap gap-2.5 sm:gap-3 relative z-10">
-              <span className="font-mono text-xs text-registry bg-black/40 border border-emerald/20 px-3 py-1.5 rounded">[Verra VCS]</span>
-              <span className="font-mono text-xs text-registry bg-black/40 border border-emerald/20 px-3 py-1.5 rounded">[Gold Standard]</span>
-              <span className="font-mono text-xs text-registry bg-black/40 border border-emerald/20 px-3 py-1.5 rounded">[Article 6]</span>
-              <span className="font-mono text-xs text-registry bg-black/40 border border-emerald/20 px-3 py-1.5 rounded">[CDM]</span>
+            <div className="pt-4 border-t border-white/15 flex flex-wrap gap-x-6 gap-y-2 text-xs font-mono text-registry/85 tabular-nums">
+              <span>Verra VCS</span>
+              <span>Gold Standard</span>
+              <span>Article 6</span>
+              <span>CDM</span>
             </div>
           </div>
         </div>

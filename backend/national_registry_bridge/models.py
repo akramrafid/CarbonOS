@@ -1,4 +1,5 @@
 import uuid
+from django.conf import settings
 from django.db import models
 
 
@@ -21,6 +22,19 @@ class RegistryProject(models.Model):
     ]
 
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
+    organization_id = models.CharField(
+        max_length=64,
+        db_index=True,
+        default="default-org",
+        help_text="Tenant organization identifier owning this registry project"
+    )
+    owner = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        null=True,
+        blank=True,
+        on_delete=models.SET_NULL,
+        related_name="registry_projects"
+    )
     external_project_id = models.CharField(
         max_length=64, 
         null=True, 

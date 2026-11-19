@@ -2,6 +2,8 @@ import React, { useState, useEffect, useMemo, useRef } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useTheme } from '../../context/ThemeContext';
 import DmrvMapStudio from '../../components/DmrvMapStudio';
+import { getEsgAuthHeaders, hasEsgToken } from '../../lib/esgApi';
+import { loadSession } from '../../lib/esgAuth';
 import { 
   Activity, 
   AlertTriangle, 
@@ -51,6 +53,24 @@ import {
 } from 'lucide-react';
 
 const FASTAPI_API_URL = import.meta.env.VITE_FASTAPI_API_URL || 'http://localhost:8000';
+
+let _carbonSessionPromise = null;
+async function ensureCarbonSession() {
+  if (hasEsgToken()) return;
+  if (!_carbonSessionPromise) {
+    _carbonSessionPromise = loadSession().catch(() => null).finally(() => {
+      _carbonSessionPromise = null;
+    });
+  }
+  await _carbonSessionPromise;
+}
+
+async function carbonFetch(url, options = {}) {
+  await ensureCarbonSession();
+  const authHeaders = getEsgAuthHeaders();
+  const mergedHeaders = { ...authHeaders, ...(options.headers || {}) };
+  return fetch(url, { ...options, headers: mergedHeaders });
+}
 
 const OSM_VECTOR_LAYER_STYLES = {
   forest: {
@@ -909,9 +929,23 @@ const CarbonMonitoring = () => {
     }
   };
 
-  const triggerDossierDownload = (jobId, format = 'pdf') => {
-    window.open(`${FASTAPI_API_URL}/api/carbon/report/audit-dossier/${jobId}?format=${format}`);
-    showToast(`Downloading Verra VM0047 Audit Dossier (${format.toUpperCase()})...`, 'info');
+  const triggerDossierDownload = async (jobId, format = 'pdf') => {
+    try {
+      const res = await carbonFetch(`${FASTAPI_API_URL}/api/carbon/report/audit-dossier/${jobId}?format=${format}`);
+      if (!res.ok) throw new Error(`HTTP ${res.status}`);
+      const blob = await res.blob();
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `VVB_Audit_Dossier_${jobId.slice(0, 8)}.${format === 'markdown' ? 'md' : format}`;
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      URL.revokeObjectURL(url);
+      showToast(`Downloaded Verra VM0047 Audit Dossier (${format.toUpperCase()})`, 'success');
+    } catch (e) {
+      showToast(`Audit dossier download failed (${e?.message || 'unauthorized or offline'})`, 'error');
+    }
   };
 
   const applyOsmPayload = (data, labelOverride = null) => {
@@ -966,7 +1000,7 @@ const CarbonMonitoring = () => {
       let backendReachable = false;
 
       try {
-        const res = await fetch(`${FASTAPI_API_URL}/api/carbon/osm/layers`, {
+        const res = await carbonFetch(`${FASTAPI_API_URL}/api/carbon/osm/layers`, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({
@@ -994,7 +1028,7 @@ const CarbonMonitoring = () => {
             bForm.append('polygon_geojson', JSON.stringify(geojsonPolygon));
             bForm.append('forest_area_ha', String(dashboardData.total_area_size_ha || 3800));
             bForm.append('project_carbon_tc_ha', String(dashboardData.current_carbon_estimate_tC_ha || 135));
-            const bRes = await fetch(`${FASTAPI_API_URL}/api/carbon/baseline/assess`, { method: 'POST', body: bForm });
+            const bRes = await carbonFetch(`${FASTAPI_API_URL}/api/carbon/baseline/assess`, { method: 'POST', body: bForm });
             if (bRes.ok) {
               const bData = await bRes.json();
               if (bData?.donor_plots_geojson) {
@@ -1069,25 +1103,27 @@ const CarbonMonitoring = () => {
   const handleVerifyChain = async () => {
     setVerifyingLedger(true);
     try {
-      const res = await fetch(`${FASTAPI_API_URL}/api/carbon/provenance/verify-chain`);
+      const res = await carbonFetch(`${FASTAPI_API_URL}/api/carbon/provenance/verify-chain`);
       if (res.ok) {
         const data = await res.json();
+        const isValid = Boolean(data.valid ?? data.chain_valid);
+        const totalRecs = data.records_checked ?? data.total_records ?? 0;
         setLedgerStatus({
-          verified: data.chain_valid,
-          total_records: data.total_records || 24,
-          chain_valid: data.chain_valid,
-          last_verified: data.verification_timestamp || new Date().toISOString()
+          verified: isValid,
+          total_records: totalRecs,
+          chain_valid: isValid,
+          last_verified: new Date().toISOString()
         });
-        if (data.chain_valid) {
-          showToast(`SHA-256 Ledger Verified: All ${data.total_records || 24} blocks cryptographically intact!`, 'success');
+        if (isValid) {
+          showToast(`SHA-256 Ledger Verified: All ${totalRecs} blocks cryptographically intact!`, 'success');
         } else {
-          showToast(`Integrity warning: Discrepancy at block #${data.broken_at_result_id}`, 'error');
+          showToast(`Integrity warning: Discrepancy at block #${data.broken_at || data.broken_at_result_id}: ${data.reason || ''}`, 'error');
         }
       } else {
-        showToast('SHA-256 Ledger verified: Cryptographic chain intact (0 tampered blocks).', 'success');
+        showToast(`Chain verification failed (HTTP ${res.status}). Authenticate to verify ledger.`, 'error');
       }
     } catch {
-      showToast('SHA-256 Ledger verified: Cryptographic chain intact (0 tampered blocks).', 'success');
+      showToast('Cannot verify SHA-256 chain while backend API is offline.', 'error');
     } finally {
       setVerifyingLedger(false);
     }
@@ -1115,10 +1151,11 @@ const CarbonMonitoring = () => {
   const [provenanceSignatures, setProvenanceSignatures] = useState(DEFAULT_SIGNATURES);
   const [showSignModal, setShowSignModal] = useState(false);
   const [signFormData, setSignFormData] = useState({
-    validator_id: "val_demo_c",
-    validator_name: "Demo signer C (fictional)",
-    organization: "Demo validator C (fictional)",
-    private_key_hex: ""
+    validator_id: "",
+    validator_name: "",
+    organization: "",
+    public_key_hex: "",
+    signature_hex: ""
   });
   const [signingLedger, setSigningLedger] = useState(false);
   const [generatingKeys, setGeneratingKeys] = useState(false);
@@ -1173,7 +1210,7 @@ const CarbonMonitoring = () => {
   const fetchVerificationTasks = async () => {
     setLoadingTasks(true);
     try {
-      const res = await fetch(`${FASTAPI_API_URL}/api/carbon/verification-tasks`);
+      const res = await carbonFetch(`${FASTAPI_API_URL}/api/carbon/verification-tasks`);
       if (res.ok) {
         const data = await res.json();
         if (Array.isArray(data) && data.length > 0) {
@@ -1190,7 +1227,7 @@ const CarbonMonitoring = () => {
   // Fetch model architecture settings
   const fetchModelSettings = async () => {
     try {
-      const res = await fetch(`${FASTAPI_API_URL}/api/carbon/settings`);
+      const res = await carbonFetch(`${FASTAPI_API_URL}/api/carbon/settings`);
       if (res.ok) {
         const data = await res.json();
         setModelSettings(prev => ({ ...prev, ...data }));
@@ -1202,9 +1239,10 @@ const CarbonMonitoring = () => {
 
   // Fetch provenance trust and validator signatures
   const fetchProvenanceTrust = async (resultId) => {
-    const rId = resultId || selectedJob?.id || 'res_sundarbans_001';
+    const rId = resultId || selectedJob?.id;
+    if (!rId) return;
     try {
-      const res = await fetch(`${FASTAPI_API_URL}/api/carbon/provenance/${rId}`);
+      const res = await carbonFetch(`${FASTAPI_API_URL}/api/carbon/provenance/${rId}`);
       if (res.ok) {
         const data = await res.json();
         if (data.signatures && data.signatures.length > 0) {
@@ -1227,7 +1265,7 @@ const CarbonMonitoring = () => {
   const handleSelectModel = async (newModelType) => {
     setUpdatingModel(true);
     try {
-      const res = await fetch(`${FASTAPI_API_URL}/api/carbon/settings`, {
+      const res = await carbonFetch(`${FASTAPI_API_URL}/api/carbon/settings`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ model_type: newModelType })
@@ -1258,7 +1296,7 @@ const CarbonMonitoring = () => {
     if (!selectedTaskForDrone) return;
     setSubmittingDrone(true);
     try {
-      const res = await fetch(`${FASTAPI_API_URL}/api/carbon/verification-tasks/${selectedTaskForDrone.id}/complete`, {
+      const res = await carbonFetch(`${FASTAPI_API_URL}/api/carbon/verification-tasks/${selectedTaskForDrone.id}/complete`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
@@ -1313,82 +1351,52 @@ const CarbonMonitoring = () => {
     }
   };
 
-  // Generate Ed25519 keypair
-  const handleGenerateKeypair = async () => {
-    setGeneratingKeys(true);
-    try {
-      const res = await fetch(`${FASTAPI_API_URL}/api/carbon/provenance/generate-keys`, { method: 'POST' });
-      if (res.ok) {
-        const data = await res.json();
-        setSignFormData(prev => ({ ...prev, private_key_hex: data.private_key }));
-        setGeneratedPublicKey(data.public_key);
-        copyToClipboard(data.public_key, 'Generated Public Key');
-        showToast('Ed25519 Keypair generated! Public key copied to clipboard.', 'success');
-      } else {
-        const mockKey = Array.from({ length: 32 }, () => Math.floor(Math.random() * 256).toString(16).padStart(2, '0')).join('');
-        const mockPub = 'ed25519_pub_' + Array.from({ length: 16 }, () => Math.floor(Math.random() * 256).toString(16).padStart(2, '0')).join('');
-        setSignFormData(prev => ({ ...prev, private_key_hex: mockKey }));
-        setGeneratedPublicKey(mockPub);
-        showToast('Generated Ed25519 demonstration keypair.', 'info');
-      }
-    } catch {
-      const mockKey = Array.from({ length: 32 }, () => Math.floor(Math.random() * 256).toString(16).padStart(2, '0')).join('');
-      const mockPub = 'ed25519_pub_' + Array.from({ length: 16 }, () => Math.floor(Math.random() * 256).toString(16).padStart(2, '0')).join('');
-      setSignFormData(prev => ({ ...prev, private_key_hex: mockKey }));
-      setGeneratedPublicKey(mockPub);
-      showToast('Generated Ed25519 demonstration keypair.', 'info');
-    } finally {
-      setGeneratingKeys(false);
-    }
+  // Offline VVB signature guide (never mints keys server-side or in browser)
+  const handleGenerateKeypair = () => {
+    copyToClipboard(
+      'python scripts/sign_provenance_cli.py generate-keys',
+      'Offline VVB keygen CLI command'
+    );
+    showToast('VVB keys must be generated offline via scripts/sign_provenance_cli.py and registered by an admin.', 'info');
   };
 
-  // Sign provenance hash with Ed25519
+  // Sign provenance hash with offline Ed25519 signature + accredited public key
   const handleSubmitSignature = async (e) => {
     e.preventDefault();
-    if (!signFormData.private_key_hex) {
-      showToast('Private key hex is required to sign.', 'error');
+    if (!signFormData.public_key_hex || !signFormData.signature_hex) {
+      showToast('Accredited Ed25519 public_key_hex and offline signature_hex are required.', 'error');
       return;
     }
     setSigningLedger(true);
-    const rId = selectedJob?.id || 'res_sundarbans_001';
+    const rId = selectedJob?.id;
+    if (!rId) {
+      setSigningLedger(false);
+      showToast('Select an analyzed result before submitting a VVB co-signature.', 'error');
+      return;
+    }
     try {
-      const res = await fetch(`${FASTAPI_API_URL}/api/carbon/provenance/${rId}/sign`, {
+      const res = await carbonFetch(`${FASTAPI_API_URL}/api/carbon/provenance/${rId}/sign`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(signFormData)
+        body: JSON.stringify({
+          validator_id: signFormData.validator_id,
+          validator_name: signFormData.validator_name,
+          validator_organization: signFormData.organization,
+          public_key_hex: signFormData.public_key_hex.trim(),
+          signature_hex: signFormData.signature_hex.trim(),
+        })
       });
       if (res.ok) {
         const data = await res.json();
-        setProvenanceSignatures(prev => [data.signature, ...prev]);
-        showToast(`Ed25519 signature verified & affixed by ${signFormData.validator_name}!`, 'success');
+        await fetchProvenanceTrust(rId);
+        showToast(`Ed25519 signature verified & affixed (${data.validator_id})!`, 'success');
         setShowSignModal(false);
       } else {
-        const newSig = {
-          validator_id: signFormData.validator_id,
-          validator_name: signFormData.validator_name,
-          organization: signFormData.organization,
-          public_key_hex: signFormData.private_key_hex.slice(0, 32) + 'pub',
-          signature_hex: 'ed25519_' + Array.from({ length: 32 }, () => Math.floor(Math.random() * 256).toString(16).padStart(2, '0')).join(''),
-          signed_at: new Date().toISOString(),
-          algorithm: 'Ed25519'
-        };
-        setProvenanceSignatures(prev => [newSig, ...prev]);
-        showToast(`Ed25519 signature recorded for ${signFormData.validator_name}!`, 'success');
-        setShowSignModal(false);
+        const err = await res.json().catch(() => ({}));
+        showToast(err.detail || `Signature rejected (HTTP ${res.status}).`, 'error');
       }
     } catch {
-      const newSig = {
-        validator_id: signFormData.validator_id,
-        validator_name: signFormData.validator_name,
-        organization: signFormData.organization,
-        public_key_hex: signFormData.private_key_hex.slice(0, 32) + 'pub',
-        signature_hex: 'ed25519_' + Array.from({ length: 32 }, () => Math.floor(Math.random() * 256).toString(16).padStart(2, '0')).join(''),
-        signed_at: new Date().toISOString(),
-        algorithm: 'Ed25519'
-      };
-      setProvenanceSignatures(prev => [newSig, ...prev]);
-      showToast(`Ed25519 signature recorded for ${signFormData.validator_name}!`, 'success');
-      setShowSignModal(false);
+      showToast('Failed to submit signature: Carbon Monitoring API is unreachable.', 'error');
     } finally {
       setSigningLedger(false);
     }
@@ -1448,7 +1456,7 @@ const CarbonMonitoring = () => {
   const handleExportVM0047Bundle = async () => {
     const projectId = selectedJob?.project_id || 'sundarbans-b2';
     try {
-      const res = await fetch(`${FASTAPI_API_URL}/api/carbon/registry-export/vm0047/${projectId}`);
+      const res = await carbonFetch(`${FASTAPI_API_URL}/api/carbon/registry-export/vm0047/${projectId}`);
       if (res.ok) {
         const bundle = await res.json();
         const blob = new Blob([JSON.stringify(bundle, null, 2)], { type: 'application/json' });
@@ -1483,7 +1491,7 @@ const CarbonMonitoring = () => {
     try {
       const controller = new AbortController();
       const tId = setTimeout(() => controller.abort(), 1200);
-      const res = await fetch(`${FASTAPI_API_URL}/api/carbon/dashboard`, { signal: controller.signal });
+      const res = await carbonFetch(`${FASTAPI_API_URL}/api/carbon/dashboard`, { signal: controller.signal });
       clearTimeout(tId);
       if (res.ok) {
         const data = await res.json();
@@ -1498,7 +1506,7 @@ const CarbonMonitoring = () => {
     try {
       const controller = new AbortController();
       const tId = setTimeout(() => controller.abort(), 1200);
-      const res = await fetch(`${FASTAPI_API_URL}/api/carbon/history`, { signal: controller.signal });
+      const res = await carbonFetch(`${FASTAPI_API_URL}/api/carbon/history`, { signal: controller.signal });
       clearTimeout(tId);
       if (res.ok) {
         const data = await res.json();
@@ -1517,7 +1525,7 @@ const CarbonMonitoring = () => {
     try {
       const controller = new AbortController();
       const tId = setTimeout(() => controller.abort(), 1200);
-      const res = await fetch(`${FASTAPI_API_URL}/api/carbon/alerts`, { signal: controller.signal });
+      const res = await carbonFetch(`${FASTAPI_API_URL}/api/carbon/alerts`, { signal: controller.signal });
       clearTimeout(tId);
       if (res.ok) {
         const data = await res.json();
@@ -1697,7 +1705,7 @@ const CarbonMonitoring = () => {
       formData.append("end_date", endDate);
       formData.append("analysis_type", activeLayer);
       formData.append("project_name", projectName);
-      fetch(`${FASTAPI_API_URL}/api/carbon/analyze`, {
+      carbonFetch(`${FASTAPI_API_URL}/api/carbon/analyze`, {
         method: 'POST',
         body: formData,
         signal: controller.signal
@@ -1719,7 +1727,7 @@ const CarbonMonitoring = () => {
     formData.append("file", file);
 
     try {
-      const res = await fetch(`${FASTAPI_API_URL}/api/carbon/boundary/upload`, {
+      const res = await carbonFetch(`${FASTAPI_API_URL}/api/carbon/boundary/upload`, {
         method: 'POST',
         body: formData
       });
@@ -1862,7 +1870,7 @@ const CarbonMonitoring = () => {
     const geoTimeout = setTimeout(() => geoController.abort(), 5000);
 
     const [pixelOutcome, geoOutcome] = await Promise.allSettled([
-      fetch(`${FASTAPI_API_URL}/api/carbon/pixel-inspect`, {
+      carbonFetch(`${FASTAPI_API_URL}/api/carbon/pixel-inspect`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
@@ -1954,7 +1962,7 @@ const CarbonMonitoring = () => {
   // Resolve Alert action
   const handleResolveAlert = async (id) => {
     try {
-      const res = await fetch(`${FASTAPI_API_URL}/api/carbon/alerts/resolve/${id}`, {
+      const res = await carbonFetch(`${FASTAPI_API_URL}/api/carbon/alerts/resolve/${id}`, {
         method: 'POST'
       });
       if (res.ok) {
@@ -1967,9 +1975,23 @@ const CarbonMonitoring = () => {
     }
   };
 
-  // Download PDF Report
-  const triggerReportDownload = (jobId, format) => {
-    window.open(`${FASTAPI_API_URL}/api/carbon/report/${jobId}?format=${format}`);
+  // Download PDF / CSV / GeoJSON Report with Auth Header
+  const triggerReportDownload = async (jobId, format) => {
+    try {
+      const res = await carbonFetch(`${FASTAPI_API_URL}/api/carbon/report/${jobId}?format=${format}`);
+      if (!res.ok) throw new Error(`HTTP ${res.status}`);
+      const blob = await res.blob();
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `carbon_report_${jobId}.${format}`;
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      URL.revokeObjectURL(url);
+    } catch (e) {
+      showToast(`Report download failed (${e?.message || 'unauthorized or offline'})`, 'error');
+    }
   };
 
   return (
@@ -1998,70 +2020,48 @@ const CarbonMonitoring = () => {
         </div>
       )}
       
-      {/* Header Title & Sovereign Telemetry HUD */}
-      <div className={`flex flex-col lg:flex-row items-start lg:items-center justify-between gap-6 mb-8 pb-6 border-b transition-colors ${
-        isLight ? 'border-[#E2E8F0]' : 'border-[#152B1D]'
+      {/* Header Title & Workstation Action Strip */}
+      <div className={`flex flex-col lg:flex-row items-start lg:items-end justify-between gap-5 mb-7 pb-6 border-b transition-colors ${
+        isLight ? 'border-[#0F291B]/12' : 'border-[#152B1D]'
       }`}>
-        <div className="space-y-2.5 max-w-4xl">
-          <div className="flex flex-wrap items-center gap-2">
-            <span className={`font-mono text-[11px] font-bold uppercase tracking-wider px-2.5 py-1 rounded-md flex items-center space-x-1.5 ${
-              isLight 
-                ? 'bg-[#E8F8EE] text-[#00873E] border border-[#C2E9CF]' 
-                : 'bg-emerald/10 text-emerald border border-emerald/20'
-            }`}>
-              <ShieldCheck size={13} />
-              <span>Digital MRV (demo)</span>
-            </span>
-            <span className={`font-mono text-[11px] font-semibold px-2 py-0.5 rounded-md border ${
-              isLight ? 'bg-white text-[#475569] border-[#E2E8F0]' : 'bg-[#08130C] text-[#94A3B8] border-[#152B1D]'
-            }`}>
-              Modelled on Verra VM0047 & VM0048 (not validated)
-            </span>
-            <span className={`font-mono text-[11px] font-semibold px-2 py-0.5 rounded-md border ${
-              isLight ? 'bg-white text-[#475569] border-[#E2E8F0]' : 'bg-[#08130C] text-[#94A3B8] border-[#152B1D]'
-            }`}>
-              IPCC Tier-3 (AGB + BGB + SOC)
-            </span>
-            <button
-              onClick={handleVerifyChain}
-              disabled={verifyingLedger}
-              title="Click to cryptographically verify SHA-256 provenance hash chain"
-              className={`text-[11px] font-mono font-semibold px-2.5 py-0.5 rounded-md border flex items-center space-x-1.5 cursor-pointer transition-all ${
-                ledgerStatus.chain_valid
-                  ? (isLight ? 'bg-white text-[#00873E] border-[#A7F3D0] hover:bg-[#ECFDF5]' : 'bg-emerald/10 text-emerald border-emerald/30 hover:bg-emerald/20')
-                  : 'bg-red-500/10 text-red-400 border-red-500/30'
-              }`}
-            >
-              <Lock size={12} className={verifyingLedger ? 'animate-spin' : ''} />
-              <span>SHA-256 Ledger: {verifyingLedger ? 'Verifying...' : 'Valid'}</span>
-            </button>
-          </div>
-          <h1 className={`text-3xl md:text-4xl font-extrabold font-sans tracking-tight ${
+        <div className="space-y-1.5 max-w-3xl">
+          <h1 className={`text-2xl sm:text-3xl md:text-4xl font-extrabold font-sans tracking-tight ${
             isLight ? 'text-[#0F291B]' : 'text-white'
           }`}>
-            Carbon Zero BD Satellite MRV (demo)
+            Satellite &amp; Spectral dMRV Workstation
           </h1>
           <p className={`text-sm leading-relaxed ${
-            isLight ? 'text-[#475569]' : 'text-[#94A3B8]'
+            isLight ? 'text-[#46574D]' : 'text-[#94A3B8]'
           }`}>
-            Continuous biomass, multi-pool organic carbon stock, dynamic synthetic baseline counterfactuals, and conformal uncertainty estimates modelled on Verra VM0047/VM0048 and IPCC Tier 3 methods. Not validated by Verra or any VVB.
+            Multi-pool organic carbon density, synthetic counterfactual additionality, and 90% conformal bounds modelled on Verra VM0047/VM0048 and IPCC Tier-3 equations <span className="font-mono text-xs">(demo — unvalidated)</span>.
           </p>
         </div>
-        
-        {/* Real-Time Telemetry Node HUD */}
-        <div className={`flex items-center space-x-3.5 px-4 py-3 rounded-2xl border shrink-0 transition-all ${
-          isLight 
-            ? 'bg-white border-[#E2E8F0] text-[#0F291B] shadow-xs' 
-            : 'bg-[#08130C] border-[#152B1D] text-white'
+
+        {/* Inline Provenance & Sensor Status Strip */}
+        <div className={`flex flex-wrap items-center gap-3 shrink-0 text-xs font-mono ${
+          isLight ? 'text-[#37473E]' : 'text-[#94A3B8]'
         }`}>
-          <div className="relative flex items-center justify-center w-3 h-3">
-            <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald opacity-75"></span>
-            <span className="relative inline-flex rounded-full h-2 w-2 bg-emerald"></span>
+          <div className={`flex items-center gap-2 px-3 py-2 rounded-xl border ${
+            isLight ? 'bg-white border-[#0F291B]/12' : 'bg-[#08130C] border-[#152B1D]'
+          }`}>
+            <span className={`w-2 h-2 rounded-full ${isLight ? 'bg-[#15803d]' : 'bg-emerald'}`} />
+            <span className={isLight ? 'text-[#0F291B] font-semibold' : 'text-white font-semibold'}>Sentinel-1/2 SAR</span>
+            <span className="opacity-40">·</span>
+            <span>STAC Online</span>
           </div>
-          <div>
-            <div className="text-xs font-bold font-sans">Tier-3 Sentinel-1/2 SAR Feed</div>
-            <div className="text-[10px] font-mono text-emerald mt-0.5">GEE & STAC sources online</div>
-          </div>
+          <button
+            onClick={handleVerifyChain}
+            disabled={verifyingLedger}
+            title="Cryptographically verify SHA-256 provenance hash chain"
+            className={`px-3 py-2 rounded-xl border flex items-center gap-1.5 cursor-pointer transition-colors font-semibold ${
+              ledgerStatus.chain_valid
+                ? (isLight ? 'bg-white text-[#15803d] border-[#15803d]/25 hover:bg-[#E4F2EA]' : 'bg-[#08130C] text-emerald border-emerald/30 hover:bg-emerald/10')
+                : 'bg-red-500/10 text-red-500 border-red-500/30'
+            }`}
+          >
+            <Lock size={13} className={verifyingLedger ? 'animate-spin' : ''} />
+            <span>SHA-256 Chain: {verifyingLedger ? 'Verifying...' : 'Valid'}</span>
+          </button>
         </div>
       </div>
 
@@ -2122,461 +2122,236 @@ const CarbonMonitoring = () => {
         })}
       </div>
 
-      {/* TAB CONTENT: DASHBOARD */}
+      {/* TAB CONTENT: DASHBOARD — ASYMMETRIC SCIENTIFIC WORKSTATION */}
       {activeTab === 'dashboard' && (
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-5">
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
           {loadingDashboard ? (
-            // Skeletons
-            Array(8).fill(0).map((_, i) => (
-              <div key={i} className={`rounded-2xl p-6 h-36 animate-pulse flex flex-col justify-between border ${
-                isLight ? 'bg-white border-[#E2E8F0]' : 'bg-[#08130C] border-[#152B1D]'
-              }`}>
-                <div className={`h-4 rounded w-2/3 ${isLight ? 'bg-[#E2E8F0]' : 'bg-white/10'}`}></div>
-                <div className={`h-8 rounded w-1/2 ${isLight ? 'bg-[#E2E8F0]' : 'bg-white/10'}`}></div>
-                <div className={`h-3 rounded w-3/4 ${isLight ? 'bg-[#E2E8F0]' : 'bg-white/10'}`}></div>
-              </div>
-            ))
+            <>
+              <div className={`lg:col-span-7 rounded-2xl p-6 h-80 animate-pulse border ${isLight ? 'bg-white border-[#E2E8F0]' : 'bg-[#08130C] border-[#152B1D]'}`} />
+              <div className={`lg:col-span-5 rounded-2xl p-6 h-80 animate-pulse border ${isLight ? 'bg-white border-[#E2E8F0]' : 'bg-[#08130C] border-[#152B1D]'}`} />
+            </>
           ) : (
             <>
-              {/* Carbon Estimate Card */}
-              <div className={`rounded-2xl p-6 relative border transition-all duration-200 hover:border-emerald/40 hover:-translate-y-0.5 ${
-                isLight 
-                  ? 'bg-white border-[#E2E8F0] shadow-xs' 
-                  : 'bg-[#08130C] border-[#152B1D]'
+              {/* Left 7 Columns: Primary Carbon Stock Density & VM0047/VM0048 Stratified Ledger */}
+              <div className={`lg:col-span-7 rounded-2xl border overflow-hidden ${
+                isLight ? 'bg-white border-[#0F291B]/12 shadow-xs' : 'bg-[#08130C] border-[#152B1D]'
               }`}>
-                <div className="flex items-center justify-between">
-                  <span className={`text-[11px] font-mono font-bold uppercase tracking-wider ${
-                    isLight ? 'text-[#64748B]' : 'text-[#94A3B8]'
-                  }`}>
-                    Current Carbon Estimate
-                  </span>
-                  <div className={`p-2 rounded-lg border ${
-                    isLight ? 'bg-[#E8F8EE] text-[#00873E] border-[#C2E9CF]' : 'bg-emerald/10 text-emerald border-emerald/20'
-                  }`}>
-                    <Trees size={16} />
-                  </div>
-                </div>
-                <div className={`text-3xl font-extrabold font-mono tabular-nums tracking-tight mt-3 ${
-                  isLight ? 'text-[#0F291B]' : 'text-white'
+                {/* Dominant Biomass & Net Carbon Summary Strip */}
+                <div className={`p-6 border-b grid grid-cols-1 sm:grid-cols-3 gap-6 ${
+                  isLight ? 'border-[#0F291B]/10' : 'border-[#152B1D]'
                 }`}>
-                  {dashboardData.current_carbon_estimate_tC_ha} <span className={`text-xs font-normal font-sans ${isLight ? 'text-[#64748B]' : 'text-[#94A3B8]'}`}>tC/ha</span>
-                </div>
-                <div className="text-xs font-medium text-emerald flex items-center space-x-1.5 mt-3">
-                  <TrendingUp size={13} />
-                  <span className="font-mono tabular-nums">±4.2% uncertainty (model, unverified)</span>
-                </div>
-              </div>
-
-              {/* CO2 Storage Card */}
-              <div className={`rounded-2xl p-6 relative border transition-all duration-200 hover:border-emerald/40 hover:-translate-y-0.5 ${
-                isLight 
-                  ? 'bg-white border-[#E2E8F0] shadow-xs' 
-                  : 'bg-[#08130C] border-[#152B1D]'
-              }`}>
-                <div className="flex items-center justify-between">
-                  <span className={`text-[11px] font-mono font-bold uppercase tracking-wider ${
-                    isLight ? 'text-[#64748B]' : 'text-[#94A3B8]'
-                  }`}>
-                    Estimated CO₂ Storage
-                  </span>
-                  <div className={`p-2 rounded-lg border ${
-                    isLight ? 'bg-[#E8F8EE] text-[#00873E] border-[#C2E9CF]' : 'bg-emerald/10 text-emerald border-emerald/20'
-                  }`}>
-                    <CloudRain size={16} />
-                  </div>
-                </div>
-                <div className={`text-3xl font-extrabold font-mono tabular-nums tracking-tight mt-3 ${
-                  isLight ? 'text-[#0F291B]' : 'text-white'
-                }`}>
-                  {dashboardData.estimated_co2_storage_tCO2e.toLocaleString()} <span className={`text-xs font-normal font-sans ${isLight ? 'text-[#64748B]' : 'text-[#94A3B8]'}`}>tCO₂e</span>
-                </div>
-                <div className={`text-xs mt-3 font-medium ${isLight ? 'text-[#64748B]' : 'text-[#94A3B8]'}`}>
-                  Total mitigated climate footprint
-                </div>
-              </div>
-
-              {/* Forest Health Score Card */}
-              <div className={`rounded-2xl p-6 relative border transition-all duration-200 hover:border-emerald/40 hover:-translate-y-0.5 ${
-                isLight 
-                  ? 'bg-white border-[#E2E8F0] shadow-xs' 
-                  : 'bg-[#08130C] border-[#152B1D]'
-              }`}>
-                <div className="flex items-center justify-between">
-                  <span className={`text-[11px] font-mono font-bold uppercase tracking-wider ${
-                    isLight ? 'text-[#64748B]' : 'text-[#94A3B8]'
-                  }`}>
-                    Forest Health Score
-                  </span>
-                  <div className={`p-2 rounded-lg border ${
-                    isLight ? 'bg-[#E8F8EE] text-[#00873E] border-[#C2E9CF]' : 'bg-emerald/10 text-emerald border-emerald/20'
-                  }`}>
-                    <Activity size={16} />
-                  </div>
-                </div>
-                <div className={`text-3xl font-extrabold font-mono tabular-nums tracking-tight mt-3 ${
-                  isLight ? 'text-[#0F291B]' : 'text-white'
-                }`}>
-                  {dashboardData.forest_health_score}%
-                </div>
-                <div className="text-xs font-medium text-emerald mt-3 flex items-center space-x-1.5">
-                  <CheckCircle size={13} />
-                  <span>Photosynthetic canopy active</span>
-                </div>
-              </div>
-
-              {/* NDVI Card */}
-              <div className={`rounded-2xl p-6 relative border transition-all duration-200 hover:border-emerald/40 hover:-translate-y-0.5 ${
-                isLight 
-                  ? 'bg-white border-[#E2E8F0] shadow-xs' 
-                  : 'bg-[#08130C] border-[#152B1D]'
-              }`}>
-                <div className="flex items-center justify-between">
-                  <span className={`text-[11px] font-mono font-bold uppercase tracking-wider ${
-                    isLight ? 'text-[#64748B]' : 'text-[#94A3B8]'
-                  }`}>
-                    Vegetation Index (NDVI)
-                  </span>
-                  <div className={`p-2 rounded-lg border ${
-                    isLight ? 'bg-[#E8F8EE] text-[#00873E] border-[#C2E9CF]' : 'bg-emerald/10 text-emerald border-emerald/20'
-                  }`}>
-                    <Layers size={16} />
-                  </div>
-                </div>
-                <div className={`text-3xl font-extrabold font-mono tabular-nums tracking-tight mt-3 ${
-                  isLight ? 'text-[#0F291B]' : 'text-white'
-                }`}>
-                  {dashboardData.vegetation_index_ndvi}
-                </div>
-                <div className="text-xs font-medium text-emerald mt-3 flex items-center space-x-1.5">
-                  <span className="font-mono tabular-nums">Sentinel-2 10m calibrated index</span>
-                </div>
-              </div>
-
-              {/* Biomass Density Card */}
-              <div className={`rounded-2xl p-6 relative border transition-all duration-200 hover:border-emerald/40 hover:-translate-y-0.5 ${
-                isLight 
-                  ? 'bg-white border-[#E2E8F0] shadow-xs' 
-                  : 'bg-[#08130C] border-[#152B1D]'
-              }`}>
-                <div className="flex items-center justify-between">
-                  <span className={`text-[11px] font-mono font-bold uppercase tracking-wider ${
-                    isLight ? 'text-[#64748B]' : 'text-[#94A3B8]'
-                  }`}>
-                    Estimated Biomass
-                  </span>
-                  <div className={`p-2 rounded-lg border ${
-                    isLight ? 'bg-[#E8F8EE] text-[#00873E] border-[#C2E9CF]' : 'bg-emerald/10 text-emerald border-emerald/20'
-                  }`}>
-                    <Cpu size={16} />
-                  </div>
-                </div>
-                <div className={`text-3xl font-extrabold font-mono tabular-nums tracking-tight mt-3 ${
-                  isLight ? 'text-[#0F291B]' : 'text-white'
-                }`}>
-                  {dashboardData.estimated_biomass_Mg_ha} <span className={`text-xs font-normal font-sans ${isLight ? 'text-[#64748B]' : 'text-[#94A3B8]'}`}>Mg/ha</span>
-                </div>
-                <div className={`text-xs mt-3 font-medium ${isLight ? 'text-[#64748B]' : 'text-[#94A3B8]'}`}>
-                  Above-ground organic dry mass
-                </div>
-              </div>
-
-              {/* Area Size Card */}
-              <div className={`rounded-2xl p-6 relative border transition-all duration-200 hover:border-emerald/40 hover:-translate-y-0.5 ${
-                isLight 
-                  ? 'bg-white border-[#E2E8F0] shadow-xs' 
-                  : 'bg-[#08130C] border-[#152B1D]'
-              }`}>
-                <div className="flex items-center justify-between">
-                  <span className={`text-[11px] font-mono font-bold uppercase tracking-wider ${
-                    isLight ? 'text-[#64748B]' : 'text-[#94A3B8]'
-                  }`}>
-                    Total Monitored Area
-                  </span>
-                  <div className={`p-2 rounded-lg border ${
-                    isLight ? 'bg-[#E8F8EE] text-[#00873E] border-[#C2E9CF]' : 'bg-emerald/10 text-emerald border-emerald/20'
-                  }`}>
-                    <Navigation size={16} />
-                  </div>
-                </div>
-                <div className={`text-3xl font-extrabold font-mono tabular-nums tracking-tight mt-3 ${
-                  isLight ? 'text-[#0F291B]' : 'text-white'
-                }`}>
-                  {dashboardData.total_area_size_ha.toLocaleString()} <span className={`text-xs font-normal font-sans ${isLight ? 'text-[#64748B]' : 'text-[#94A3B8]'}`}>ha</span>
-                </div>
-                <div className={`text-xs mt-3 font-medium ${isLight ? 'text-[#64748B]' : 'text-[#94A3B8]'}`}>
-                  Aggregated boundary polygon size
-                </div>
-              </div>
-
-              {/* Confidence Score Card */}
-              <div className={`rounded-2xl p-6 relative border transition-all duration-200 hover:border-emerald/40 hover:-translate-y-0.5 ${
-                isLight 
-                  ? 'bg-white border-[#E2E8F0] shadow-xs' 
-                  : 'bg-[#08130C] border-[#152B1D]'
-              }`}>
-                <div className="flex items-center justify-between">
-                  <span className={`text-[11px] font-mono font-bold uppercase tracking-wider ${
-                    isLight ? 'text-[#64748B]' : 'text-[#94A3B8]'
-                  }`}>
-                    Model Confidence
-                  </span>
-                  <div className={`p-2 rounded-lg border ${
-                    isLight ? 'bg-[#E8F8EE] text-[#00873E] border-[#C2E9CF]' : 'bg-emerald/10 text-emerald border-emerald/20'
-                  }`}>
-                    <CheckCircle size={16} />
-                  </div>
-                </div>
-                <div className={`text-3xl font-extrabold font-mono tabular-nums tracking-tight mt-3 ${
-                  isLight ? 'text-[#0F291B]' : 'text-white'
-                }`}>
-                  {(dashboardData.confidence_score * 100).toFixed(0)}%
-                </div>
-                <div className="text-xs font-medium text-emerald mt-3 flex items-center space-x-1.5">
-                  <Check size={13} />
-                  <span>Conformal 90% uncertainty (model)</span>
-                </div>
-              </div>
-
-              {/* Latest Analysis Card */}
-              <div className={`rounded-2xl p-6 relative border transition-all duration-200 hover:border-emerald/40 hover:-translate-y-0.5 ${
-                isLight 
-                  ? 'bg-white border-[#E2E8F0] shadow-xs' 
-                  : 'bg-[#08130C] border-[#152B1D]'
-              }`}>
-                <div className="flex items-center justify-between">
-                  <span className={`text-[11px] font-mono font-bold uppercase tracking-wider ${
-                    isLight ? 'text-[#64748B]' : 'text-[#94A3B8]'
-                  }`}>
-                    Last Analysis Run
-                  </span>
-                  <div className={`p-2 rounded-lg border ${
-                    isLight ? 'bg-[#E8F8EE] text-[#00873E] border-[#C2E9CF]' : 'bg-emerald/10 text-emerald border-emerald/20'
-                  }`}>
-                    <Calendar size={16} />
-                  </div>
-                </div>
-                <div className={`text-2xl font-bold font-mono tabular-nums tracking-tight mt-3.5 ${
-                  isLight ? 'text-[#0F291B]' : 'text-white'
-                }`}>
-                  {dashboardData.last_analysis_date || "2026-06-25"}
-                </div>
-                <div className={`text-xs mt-3 font-mono ${isLight ? 'text-[#64748B]' : 'text-[#94A3B8]'}`}>
-                  Pass: {dashboardData.latest_satellite_date || "2026-06-25"}
-                </div>
-              </div>
-            </>
-          )}
-
-          {/* ============================================================ */}
-          {/* VERRA VM0047 & VM0048 MULTI-POOL & CONSERVATIVENESS STRIP */}
-          {/* ============================================================ */}
-          <div className={`col-span-1 md:col-span-2 lg:col-span-4 rounded-3xl p-6 md:p-7 border transition-all ${
-            isLight 
-              ? 'bg-white border-[#E2E8F0] shadow-xs' 
-              : 'bg-[#08130C] border-[#152B1D]'
-          }`}>
-            <div className={`flex flex-col md:flex-row md:items-center justify-between gap-4 pb-5 border-b mb-6 ${
-              isLight ? 'border-[#E2E8F0]' : 'border-[#152B1D]'
-            }`}>
-              <div>
-                <div className="flex flex-wrap items-center gap-2 mb-1.5">
-                  <div className={`p-1.5 rounded-lg border ${isLight ? 'bg-[#E8F8EE] text-[#00873E] border-[#C2E9CF]' : 'bg-emerald/10 text-emerald border-emerald/20'}`}>
-                    <Scale size={18} />
-                  </div>
-                  <h3 className={`font-extrabold text-lg md:text-xl font-sans tracking-tight ${
-                    isLight ? 'text-[#0F291B]' : 'text-white'
-                  }`}>
-                    Verra VM0047 & VM0048 Multi-Pool Accounting & Conservativeness
-                  </h3>
-                  <span className={`text-[11px] font-mono font-bold px-2.5 py-0.5 rounded-full border ${
-                    isLight ? 'bg-[#E8F8EE] text-[#00873E] border-[#C2E9CF]' : 'bg-emerald/10 text-emerald border-emerald/25'
-                  }`}>
-                    {dashboardData.forest_stratum || 'SUNDARBANS_MANGROVE'}
-                  </span>
-                </div>
-                <p className={`text-xs ${isLight ? 'text-[#64748B]' : 'text-[#94A3B8]'}`}>
-                  IPCC Tier-3 multi-pool living and sediment carbon stocks, dynamic counterfactual additionality, and conformal uncertainty guarantees.
-                </p>
-              </div>
-
-              <button
-                onClick={() => setActiveTab('verra_audit')}
-                className={`flex items-center space-x-2 text-xs font-bold px-4 py-2.5 rounded-xl border transition-all cursor-pointer whitespace-nowrap shadow-xs ${
-                  isLight
-                    ? 'bg-[#00873E] text-white hover:bg-[#007033] border-[#00873E]'
-                    : 'bg-emerald text-carbon hover:bg-emerald-400 border-emerald'
-                }`}
-              >
-                <ShieldCheck size={16} />
-                <span>Open Full VVB Audit Dossier</span>
-                <ChevronRight size={14} />
-              </button>
-            </div>
-
-            <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-              {/* Pillar 1: Multi-Pool Stocks */}
-              <div className={`rounded-2xl p-5 border flex flex-col justify-between ${
-                isLight ? 'bg-[#F8FAFC] border-[#E2E8F0]' : 'bg-[#050C07] border-[#152B1D]'
-              }`}>
-                <div>
-                  <div className="flex items-center justify-between mb-3">
-                    <span className={`text-xs font-bold uppercase tracking-wider ${isLight ? 'text-[#64748B]' : 'text-[#94A3B8]'}`}>
-                      IPCC Tier-3 Multi-Pool Stocks
-                    </span>
-                    <span className="text-[11px] font-mono font-bold text-emerald">tC/ha</span>
-                  </div>
-
-                  <div className="space-y-2.5 text-xs">
-                    <div className={`flex items-center justify-between pb-1.5 border-b ${isLight ? 'border-[#E2E8F0]' : 'border-[#152B1D]'}`}>
-                      <span className={isLight ? 'text-[#475569]' : 'text-[#94A3B8]'}>Above-Ground Biomass (AGB)</span>
-                      <span className={`font-mono font-bold tabular-nums ${isLight ? 'text-[#0F291B]' : 'text-white'}`}>
-                        {dashboardData.carbon_agb_tc_ha || 112.5}
-                      </span>
+                  <div>
+                    <div className={`text-xs font-medium ${isLight ? 'text-[#46574D]' : 'text-[#94A3B8]'}`}>
+                      Mean Carbon Density
                     </div>
-                    <div className={`flex items-center justify-between pb-1.5 border-b ${isLight ? 'border-[#E2E8F0]' : 'border-[#152B1D]'}`}>
-                      <span className={isLight ? 'text-[#475569]' : 'text-[#94A3B8]'}>Below-Ground Biomass (BGB, R=0.49)</span>
-                      <span className={`font-mono font-bold tabular-nums ${isLight ? 'text-[#0F291B]' : 'text-white'}`}>
-                        {dashboardData.carbon_bgb_tc_ha || 55.13}
-                      </span>
-                    </div>
-                    <div className={`flex items-center justify-between pb-1.5 border-b ${isLight ? 'border-[#E2E8F0]' : 'border-[#152B1D]'}`}>
-                      <span className={isLight ? 'text-[#475569]' : 'text-[#94A3B8]'}>Soil Organic Carbon (SOC, 100cm)</span>
-                      <span className={`font-mono font-bold tabular-nums ${isLight ? 'text-[#0F291B]' : 'text-white'}`}>
-                        {dashboardData.carbon_soc_tc_ha || 180.4}
-                      </span>
-                    </div>
-                  </div>
-                </div>
-
-                <div className={`mt-4 pt-3 border-t flex items-center justify-between ${
-                  isLight ? 'border-[#E2E8F0]' : 'border-[#152B1D]'
-                }`}>
-                  <span className={`text-xs font-extrabold ${isLight ? 'text-[#0F291B]' : 'text-white'}`}>
-                    Total Organic Carbon Density
-                  </span>
-                  <span className="text-base font-mono font-extrabold tabular-nums text-emerald">
-                    {dashboardData.carbon_total_tc_ha || 348.03} <span className="text-xs font-normal">tC/ha</span>
-                  </span>
-                </div>
-              </div>
-
-              {/* Pillar 2: Dynamic Synthetic Baseline */}
-              <div className={`rounded-2xl p-5 border flex flex-col justify-between ${
-                isLight ? 'bg-[#F8FAFC] border-[#E2E8F0]' : 'bg-[#050C07] border-[#152B1D]'
-              }`}>
-                <div>
-                  <div className="flex items-center justify-between mb-3">
-                    <span className={`text-xs font-bold uppercase tracking-wider ${isLight ? 'text-[#64748B]' : 'text-[#94A3B8]'}`}>
-                      Dynamic Synthetic Baseline (VM0048)
-                    </span>
-                    <span className={`text-[10px] font-mono px-2 py-0.5 rounded border ${
-                      isLight ? 'bg-[#E8F8EE] text-[#00873E] border-[#C2E9CF]' : 'bg-emerald/10 text-emerald border-emerald/20'
+                    <div className={`text-3xl font-extrabold font-mono tabular-nums tracking-tight mt-1 ${
+                      isLight ? 'text-[#0F291B]' : 'text-white'
                     }`}>
-                      Abadie et al.
+                      {dashboardData.current_carbon_estimate_tC_ha} <span className={`text-xs font-normal font-sans ${isLight ? 'text-[#556B5E]' : 'text-[#94A3B8]'}`}>tC/ha</span>
+                    </div>
+                    <div className={`text-xs font-mono tabular-nums mt-1 ${isLight ? 'text-[#15803d]' : 'text-emerald'}`}>
+                      90% CI [{dashboardData.carbon_lower_90 || 106.8}, {dashboardData.carbon_upper_90 || 118.2}]
+                    </div>
+                  </div>
+
+                  <div>
+                    <div className={`text-xs font-medium ${isLight ? 'text-[#46574D]' : 'text-[#94A3B8]'}`}>
+                      Gross Project Storage
+                    </div>
+                    <div className={`text-2xl sm:text-3xl font-extrabold font-mono tabular-nums tracking-tight mt-1 ${
+                      isLight ? 'text-[#0F291B]' : 'text-white'
+                    }`}>
+                      {dashboardData.estimated_co2_storage_tCO2e.toLocaleString()} <span className={`text-xs font-normal font-sans ${isLight ? 'text-[#556B5E]' : 'text-[#94A3B8]'}`}>tCO₂e</span>
+                    </div>
+                    <div className={`text-xs mt-1 ${isLight ? 'text-[#556B5E]' : 'text-[#94A3B8]'}`}>
+                      Unverified model inventory
+                    </div>
+                  </div>
+
+                  <div>
+                    <div className={`text-xs font-medium ${isLight ? 'text-[#46574D]' : 'text-[#94A3B8]'}`}>
+                      Net Creditable (Conserv.)
+                    </div>
+                    <div className={`text-2xl sm:text-3xl font-extrabold font-mono tabular-nums tracking-tight mt-1 ${
+                      isLight ? 'text-[#15803d]' : 'text-emerald'
+                    }`}>
+                      {(dashboardData.net_creditable_tco2e || 228370).toLocaleString()} <span className={`text-xs font-normal font-sans ${isLight ? 'text-[#556B5E]' : 'text-[#94A3B8]'}`}>tCO₂e</span>
+                    </div>
+                    <div className={`text-xs font-mono tabular-nums mt-1 ${isLight ? 'text-[#46574D]' : 'text-[#94A3B8]'}`}>
+                      After 18% Verra risk buffer
+                    </div>
+                  </div>
+                </div>
+
+                {/* Stratified Multi-Pool & Additionality Ledger Table */}
+                <div className="p-6">
+                  <div className="flex flex-wrap items-center justify-between gap-2 mb-4">
+                    <h3 className={`font-bold text-sm tracking-tight font-sans ${isLight ? 'text-[#0F291B]' : 'text-white'}`}>
+                      IPCC Tier-3 Carbon Pools &amp; VM0048 Baseline Reconciliation
+                    </h3>
+                    <span className={`font-mono text-xs ${isLight ? 'text-[#15803d]' : 'text-emerald'}`}>
+                      Stratum: {dashboardData.forest_stratum || 'SUNDARBANS_MANGROVE'}
                     </span>
                   </div>
 
-                  <div className="space-y-2.5 text-xs">
-                    <div className={`flex items-center justify-between pb-1.5 border-b ${isLight ? 'border-[#E2E8F0]' : 'border-[#152B1D]'}`}>
-                      <span className={isLight ? 'text-[#475569]' : 'text-[#94A3B8]'}>Counterfactual Baseline Stock</span>
+                  <div className={`divide-y text-xs ${isLight ? 'divide-[#0F291B]/8' : 'divide-[#152B1D]'}`}>
+                    <div className="py-2.5 flex items-center justify-between gap-4">
+                      <span className={isLight ? 'text-[#37473E]' : 'text-[#94A3B8]'}>Above-Ground Living Biomass (AGB)</span>
                       <span className={`font-mono font-bold tabular-nums ${isLight ? 'text-[#0F291B]' : 'text-white'}`}>
-                        {dashboardData.counterfactual_carbon_tc_ha || 92.4} tC/ha
+                        {dashboardData.carbon_agb_tc_ha || 112.5} tC/ha
                       </span>
                     </div>
-                    <div className={`flex items-center justify-between pb-1.5 border-b ${isLight ? 'border-[#E2E8F0]' : 'border-[#152B1D]'}`}>
-                      <span className={isLight ? 'text-[#475569]' : 'text-[#94A3B8]'}>Gross Additionality</span>
+                    <div className="py-2.5 flex items-center justify-between gap-4">
+                      <span className={isLight ? 'text-[#37473E]' : 'text-[#94A3B8]'}>Below-Ground Root Biomass (BGB, R=0.49)</span>
                       <span className={`font-mono font-bold tabular-nums ${isLight ? 'text-[#0F291B]' : 'text-white'}`}>
-                        {(dashboardData.gross_additionality_tco2e || 278500).toLocaleString()} tCO₂e
+                        {dashboardData.carbon_bgb_tc_ha || 55.13} tC/ha
                       </span>
                     </div>
-                    <div className={`flex items-center justify-between pb-1.5 border-b ${isLight ? 'border-[#E2E8F0]' : 'border-[#152B1D]'}`}>
-                      <div>
-                        <span className={isLight ? 'text-[#475569]' : 'text-[#94A3B8]'}>10km Leakage Belt Deduction</span>
+                    <div className="py-2.5 flex items-center justify-between gap-4">
+                      <span className={isLight ? 'text-[#37473E]' : 'text-[#94A3B8]'}>Soil Organic Carbon (SOC, 100cm horizon)</span>
+                      <span className={`font-mono font-bold tabular-nums ${isLight ? 'text-[#0F291B]' : 'text-white'}`}>
+                        {dashboardData.carbon_soc_tc_ha || 180.4} tC/ha
+                      </span>
+                    </div>
+                    <div className="py-2.5 flex items-center justify-between gap-4">
+                      <span className={isLight ? 'text-[#37473E]' : 'text-[#94A3B8]'}>Combined Organic Carbon Density</span>
+                      <span className={`font-mono font-extrabold tabular-nums ${isLight ? 'text-[#15803d]' : 'text-emerald'}`}>
+                        {dashboardData.carbon_total_tc_ha || 348.03} tC/ha
+                      </span>
+                    </div>
+                    <div className="py-2.5 flex items-center justify-between gap-4">
+                      <span className={isLight ? 'text-[#37473E]' : 'text-[#94A3B8]'}>Dynamic Synthetic Counterfactual (Abadie et al.)</span>
+                      <span className={`font-mono font-bold tabular-nums ${isLight ? 'text-[#0F291B]' : 'text-white'}`}>
+                        {dashboardData.counterfactual_carbon_tc_ha || 92.4} tC/ha · Gross {(dashboardData.gross_additionality_tco2e || 278500).toLocaleString()} tCO₂e
+                      </span>
+                    </div>
+                    <div className="py-2.5 flex items-center justify-between gap-4">
+                      <span className={isLight ? 'text-[#37473E]' : 'text-[#94A3B8]'}>
+                        10 km Leakage Belt Deduction
                         {dashboardData.osm_leakage_metrics?.road_density_km_per_km2 !== undefined && (
-                          <span className="block text-[10px] font-mono text-[#64748B] dark:text-[#94A3B8]">
-                            Roads {dashboardData.osm_leakage_metrics.road_density_km_per_km2} km/km² · Crop {dashboardData.osm_leakage_metrics.cropland_share_pct}% ({dashboardData.osm_source_used === 'quackosm_pbf' ? 'QuackOSM PBF' : 'Overpass'})
+                          <span className="ml-2 font-mono opacity-75">
+                            (Roads {dashboardData.osm_leakage_metrics.road_density_km_per_km2} km/km², {dashboardData.osm_source_used === 'quackosm_pbf' ? 'QuackOSM PBF' : 'Overpass'})
                           </span>
                         )}
-                      </div>
-                      <span className="font-mono font-bold text-emerald">
-                        {Number(dashboardData.leakage_deduction_tco2e || 0).toFixed(1)} tCO₂e (Risk: {dashboardData.leakage_risk_rating || 'LOW'})
+                      </span>
+                      <span className={`font-mono font-bold tabular-nums ${isLight ? 'text-[#15803d]' : 'text-emerald'}`}>
+                        -{Number(dashboardData.leakage_deduction_tco2e || 0).toFixed(1)} tCO₂e ({dashboardData.leakage_risk_rating || 'LOW'})
                       </span>
                     </div>
-                    <div className={`flex items-center justify-between pb-1.5 border-b ${isLight ? 'border-[#E2E8F0]' : 'border-[#152B1D]'}`}>
-                      <span className={isLight ? 'text-[#475569]' : 'text-[#94A3B8]'}>Verra Risk Buffer Withholding (18%)</span>
+                    <div className="py-2.5 flex items-center justify-between gap-4">
+                      <span className={isLight ? 'text-[#37473E]' : 'text-[#94A3B8]'}>Verra Risk Buffer Withholding (18%)</span>
                       <span className="font-mono font-bold tabular-nums text-amber-600 dark:text-amber-400">
                         -{(dashboardData.buffer_withheld_tco2e || 50130).toLocaleString()} tCO₂e
                       </span>
                     </div>
                   </div>
                 </div>
-
-                <div className={`mt-4 pt-3 border-t flex items-center justify-between ${
-                  isLight ? 'border-[#E2E8F0]' : 'border-[#152B1D]'
-                }`}>
-                  <span className={`text-xs font-extrabold ${isLight ? 'text-[#0F291B]' : 'text-white'}`}>
-                    Net Creditable Volume
-                  </span>
-                  <span className="text-base font-mono font-extrabold tabular-nums text-emerald">
-                    {(dashboardData.net_creditable_tco2e || 228370).toLocaleString()} <span className="text-xs font-normal">tCO₂e</span>
-                  </span>
-                </div>
               </div>
 
-              {/* Pillar 3: Conformal Uncertainty & Conservativeness */}
-              <div className={`rounded-2xl p-5 border flex flex-col justify-between ${
-                isLight ? 'bg-[#F8FAFC] border-[#E2E8F0]' : 'bg-[#050C07] border-[#152B1D]'
+              {/* Right 5 Columns: Optical / Canopy Integrity Telemetry Sheet & Audit Actions */}
+              <div className={`lg:col-span-5 rounded-2xl border p-6 flex flex-col justify-between gap-6 ${
+                isLight ? 'bg-white border-[#0F291B]/12 shadow-xs' : 'bg-[#08130C] border-[#152B1D]'
               }`}>
                 <div>
-                  <div className="flex items-center justify-between mb-3">
-                    <span className={`text-xs font-bold uppercase tracking-wider ${isLight ? 'text-[#64748B]' : 'text-[#94A3B8]'}`}>
-                      Conformal Uncertainty (90% CI)
-                    </span>
-                    <span className="text-[11px] font-mono font-bold text-emerald">VM0047 Sec 8.3</span>
-                  </div>
+                  <h3 className={`font-bold text-sm tracking-tight font-sans mb-4 ${isLight ? 'text-[#0F291B]' : 'text-white'}`}>
+                    Canopy, Spatial &amp; Calibration Readout
+                  </h3>
+                  <div className={`divide-y text-xs ${isLight ? 'divide-[#0F291B]/8' : 'divide-[#152B1D]'}`}>
+                    <div className="py-3 flex items-center justify-between">
+                      <div>
+                        <div className={isLight ? 'text-[#0F291B] font-semibold' : 'text-white font-semibold'}>Forest Health Score</div>
+                        <div className={isLight ? 'text-[#556B5E]' : 'text-[#94A3B8]'}>Photosynthetic canopy index</div>
+                      </div>
+                      <span className={`font-mono text-lg font-extrabold tabular-nums ${isLight ? 'text-[#0F291B]' : 'text-white'}`}>
+                        {dashboardData.forest_health_score}%
+                      </span>
+                    </div>
 
-                  <div className="space-y-2.5 text-xs">
-                    <div className={`flex items-center justify-between pb-1.5 border-b ${isLight ? 'border-[#E2E8F0]' : 'border-[#152B1D]'}`}>
-                      <span className={isLight ? 'text-[#475569]' : 'text-[#94A3B8]'}>Conformal 90% Confidence Interval</span>
+                    <div className="py-3 flex items-center justify-between">
+                      <div>
+                        <div className={isLight ? 'text-[#0F291B] font-semibold' : 'text-white font-semibold'}>NDVI Spectral Mean</div>
+                        <div className={isLight ? 'text-[#556B5E]' : 'text-[#94A3B8]'}>Sentinel-2 10m calibrated</div>
+                      </div>
+                      <span className={`font-mono text-lg font-extrabold tabular-nums ${isLight ? 'text-[#15803d]' : 'text-emerald'}`}>
+                        {dashboardData.vegetation_index_ndvi}
+                      </span>
+                    </div>
+
+                    <div className="py-3 flex items-center justify-between">
+                      <div>
+                        <div className={isLight ? 'text-[#0F291B] font-semibold' : 'text-white font-semibold'}>Organic Biomass Density</div>
+                        <div className={isLight ? 'text-[#556B5E]' : 'text-[#94A3B8]'}>Above-ground dry mass</div>
+                      </div>
+                      <span className={`font-mono text-lg font-extrabold tabular-nums ${isLight ? 'text-[#0F291B]' : 'text-white'}`}>
+                        {dashboardData.estimated_biomass_Mg_ha} <span className="text-xs font-normal">Mg/ha</span>
+                      </span>
+                    </div>
+
+                    <div className="py-3 flex items-center justify-between">
+                      <div>
+                        <div className={isLight ? 'text-[#0F291B] font-semibold' : 'text-white font-semibold'}>Monitored Boundary Polygon</div>
+                        <div className={isLight ? 'text-[#556B5E]' : 'text-[#94A3B8]'}>Aggregated GeoParquet AOI</div>
+                      </div>
+                      <span className={`font-mono text-lg font-extrabold tabular-nums ${isLight ? 'text-[#0F291B]' : 'text-white'}`}>
+                        {dashboardData.total_area_size_ha.toLocaleString()} <span className="text-xs font-normal">ha</span>
+                      </span>
+                    </div>
+
+                    <div className="py-3 flex items-center justify-between">
+                      <div>
+                        <div className={isLight ? 'text-[#0F291B] font-semibold' : 'text-white font-semibold'}>Conformal RME / Uncertainty</div>
+                        <div className={isLight ? 'text-[#556B5E]' : 'text-[#94A3B8]'}>Verra Sec 8.3 threshold ≤ 15%</div>
+                      </div>
+                      <span className={`font-mono font-bold tabular-nums ${isLight ? 'text-[#15803d]' : 'text-emerald'}`}>
+                        ±4.2% · {dashboardData.relative_margin_of_error || 5.1}% RME
+                      </span>
+                    </div>
+
+                    <div className="py-3 flex items-center justify-between">
+                      <div>
+                        <div className={isLight ? 'text-[#0F291B] font-semibold' : 'text-white font-semibold'}>Confidence &amp; Last Pass</div>
+                        <div className={isLight ? 'text-[#556B5E]' : 'text-[#94A3B8]'}>{dashboardData.last_analysis_date || '2026-06-25'}</div>
+                      </div>
                       <span className={`font-mono font-bold tabular-nums ${isLight ? 'text-[#0F291B]' : 'text-white'}`}>
-                        [{dashboardData.carbon_lower_90 || 106.8}, {dashboardData.carbon_upper_90 || 118.2}] tC/ha
-                      </span>
-                    </div>
-                    <div className={`flex items-center justify-between pb-1.5 border-b ${isLight ? 'border-[#E2E8F0]' : 'border-[#152B1D]'}`}>
-                      <span className={isLight ? 'text-[#475569]' : 'text-[#94A3B8]'}>Relative Margin of Error (RME)</span>
-                      <span className="font-mono font-bold tabular-nums text-emerald">
-                        {dashboardData.relative_margin_of_error || 5.1}% (Threshold: ≤ 15%)
-                      </span>
-                    </div>
-                    <div className={`flex items-center justify-between pb-1.5 border-b ${isLight ? 'border-[#E2E8F0]' : 'border-[#152B1D]'}`}>
-                      <span className={isLight ? 'text-[#475569]' : 'text-[#94A3B8]'}>Verra Precision Deduction</span>
-                      <span className="font-mono font-bold text-emerald">
-                        0.0% (Zero penalty applied)
+                        {(dashboardData.confidence_score * 100).toFixed(0)}%
                       </span>
                     </div>
                   </div>
                 </div>
 
-                <div className={`mt-4 pt-3 border-t flex items-center justify-between ${
-                  isLight ? 'border-[#E2E8F0]' : 'border-[#152B1D]'
-                }`}>
-                  <span className={`text-xs font-extrabold ${isLight ? 'text-[#0F291B]' : 'text-white'}`}>
-                    Conservative Creditable Volume
-                  </span>
-                  <span className="text-base font-mono font-extrabold tabular-nums text-emerald">
-                    {(dashboardData.conservative_creditable_tco2e || 228370).toLocaleString()} <span className="text-xs font-normal">tCO₂e</span>
-                  </span>
+                <div className="flex flex-wrap gap-2.5 pt-2">
+                  <button
+                    onClick={() => setActiveTab('verra_audit')}
+                    className={`flex-1 min-w-[170px] flex items-center justify-center gap-2 text-xs font-bold px-4 py-2.5 rounded-xl transition-all cursor-pointer ${
+                      isLight
+                        ? 'bg-[#15803d] text-white hover:bg-[#166534]'
+                        : 'bg-emerald text-carbon hover:bg-emerald-400'
+                    }`}
+                  >
+                    <ShieldCheck size={15} />
+                    <span>VVB Audit Dossier</span>
+                  </button>
+                  <button
+                    onClick={() => setActiveTab('map')}
+                    className={`px-4 py-2.5 rounded-xl text-xs font-semibold border transition-all cursor-pointer ${
+                      isLight
+                        ? 'bg-[#F5F8F5] text-[#0F291B] border-[#0F291B]/12 hover:bg-[#E4F2EA]'
+                        : 'bg-[#050C07] text-white border-[#152B1D] hover:border-emerald/40'
+                    }`}
+                  >
+                    Open Spatial Map →
+                  </button>
                 </div>
               </div>
-            </div>
-          </div>
+            </>
+          )}
 
           {/* ============================================================ */}
           {/* HIGH-CRAFT INTERACTIVE TELEMETRY CHART CONTAINER */}
           {/* ============================================================ */}
-          <div className={`col-span-1 md:col-span-2 lg:col-span-4 rounded-3xl p-6 md:p-8 border transition-all ${
+          <div className={`col-span-1 lg:col-span-12 rounded-2xl p-6 md:p-8 border transition-all ${
             isLight 
-              ? 'bg-white border-[#E2E8F0] shadow-xs' 
+              ? 'bg-white border-[#0F291B]/12 shadow-xs' 
               : 'bg-[#08130C] border-[#152B1D]'
           }`}>
             {/* Chart Header Bar */}
@@ -5408,10 +5183,10 @@ const CarbonMonitoring = () => {
                     Multi-Modal Sensor Fusion with Ground-Truth Gate
                   </p>
                 </div>
-                <span className={`px-2.5 py-1 rounded-full text-[10px] font-mono font-bold uppercase tracking-wider ${
+                <span className={`px-2.5 py-1 rounded text-[10px] font-mono font-semibold uppercase tracking-wider tabular-nums ${
                   modelSettings.active_model === 'fusion'
-                    ? 'bg-purple-500/10 text-purple-400 border border-purple-500/20'
-                    : 'bg-emerald/10 text-emerald border border-emerald/20'
+                    ? (isLight ? 'bg-[#E6F4F1] text-[#0F766E] border border-[#0F766E]/25' : 'bg-cyan-500/10 text-cyan-300 border border-cyan-500/25')
+                    : (isLight ? 'bg-[#E3F2E9] text-[#15803d] border border-[#15803d]/25' : 'bg-emerald/10 text-emerald border border-emerald/20')
                 }`}>
                   Engine: {modelSettings.active_model.toUpperCase()}
                 </span>
@@ -5486,14 +5261,16 @@ const CarbonMonitoring = () => {
                   onClick={() => handleSelectModel('fusion')}
                   className={`p-3.5 rounded-xl border transition-all cursor-pointer ${
                     modelSettings.active_model === 'fusion'
-                      ? (isLight ? 'bg-purple-500/5 border-purple-500 ring-1 ring-purple-500' : 'bg-purple-500/10 border-purple-500/50 ring-1 ring-purple-500/40')
-                      : (isLight ? 'bg-white border-[#E2E8F0] hover:border-purple-400' : 'bg-white/5 border-white/10 hover:border-white/20')
+                      ? (isLight ? 'bg-[#E6F4F1] border-[#0F766E] ring-1 ring-[#0F766E]' : 'bg-cyan-500/10 border-cyan-500/50 ring-1 ring-cyan-500/40')
+                      : (isLight ? 'bg-white border-[#E2E8F0] hover:border-[#0F766E]/45' : 'bg-white/5 border-white/10 hover:border-white/20')
                   }`}
                 >
                   <div className="flex items-center justify-between">
                     <div className="flex items-center space-x-2.5">
                       <div className={`w-4 h-4 rounded-full border flex items-center justify-center ${
-                        modelSettings.active_model === 'fusion' ? 'border-purple-500 bg-purple-500' : 'border-gray-400'
+                        modelSettings.active_model === 'fusion'
+                          ? (isLight ? 'border-[#0F766E] bg-[#0F766E]' : 'border-cyan-400 bg-cyan-500')
+                          : 'border-gray-400'
                       }`}>
                         {modelSettings.active_model === 'fusion' && <div className="w-1.5 h-1.5 rounded-full bg-white" />}
                       </div>
@@ -5504,7 +5281,7 @@ const CarbonMonitoring = () => {
                     <span className={`text-[10px] font-medium px-2 py-0.5 rounded-md ${
                       modelSettings.fusion_model_status === 'gated_insufficient_real_data'
                         ? 'bg-amber-500/10 text-amber-500 border border-amber-500/20'
-                        : 'bg-purple-500/10 text-purple-400 border border-purple-500/20'
+                        : (isLight ? 'bg-[#E6F4F1] text-[#0F766E] border border-[#0F766E]/25' : 'bg-cyan-500/10 text-cyan-300 border border-cyan-500/25')
                     }`}>
                       {modelSettings.fusion_model_status === 'gated_insufficient_real_data' ? 'Gated (<150 Real Plots)' : 'Deep Neural Net'}
                     </span>
@@ -5930,46 +5707,47 @@ const CarbonMonitoring = () => {
                 </div>
               </div>
 
-              <div className="space-y-1.5">
+              <div className="space-y-3">
                 <div className="flex items-center justify-between">
-                  <label htmlFor="private_key_hex" className={`font-bold block ${isLight ? 'text-[#0F291B]' : 'text-white'}`}>
-                    Ed25519 Private Key (Hex, 64 characters)
+                  <label htmlFor="public_key_hex" className={`font-bold block ${isLight ? 'text-[#0F291B]' : 'text-white'}`}>
+                    Accredited VVB Ed25519 Public Key (Hex, 64 chars)
                   </label>
                   <button
                     type="button"
                     onClick={handleGenerateKeypair}
-                    disabled={generatingKeys}
                     className="text-[10px] font-bold text-emerald hover:underline flex items-center space-x-1 cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald rounded"
                   >
-                    <Sparkles size={11} />
-                    <span>{generatingKeys ? 'Generating...' : 'Generate New Keypair'}</span>
+                    <Key size={11} />
+                    <span>Copy Offline Keygen CLI</span>
                   </button>
                 </div>
-                <div className="relative">
-                  <input
-                    id="private_key_hex"
-                    type={showPrivateKey ? "text" : "password"}
-                    required
-                    value={signFormData.private_key_hex}
-                    onChange={(e) => setSignFormData(prev => ({ ...prev, private_key_hex: e.target.value }))}
-                    placeholder="Paste 64-character private key hex or click 'Generate New Keypair'"
-                    className={`w-full border rounded-xl pl-3.5 pr-10 py-2.5 font-mono text-[11px] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald ${
-                      isLight ? 'bg-[#F8FAFC] border-[#CBD5E1] text-[#0F291B]' : 'bg-white/5 border-white/10 text-white'
-                    }`}
-                  />
-                  <button
-                    type="button"
-                    onClick={() => setShowPrivateKey(!showPrivateKey)}
-                    className={`absolute right-3 top-1/2 -translate-y-1/2 p-1 rounded transition-colors cursor-pointer ${
-                      isLight ? 'text-slate-400 hover:text-slate-700' : 'text-mist hover:text-white'
-                    }`}
-                    aria-label={showPrivateKey ? "Hide private key" : "Show private key"}
-                  >
-                    {showPrivateKey ? <EyeOff size={15} /> : <Eye size={15} />}
-                  </button>
-                </div>
+                <input
+                  id="public_key_hex"
+                  type="text"
+                  required
+                  value={signFormData.public_key_hex}
+                  onChange={(e) => setSignFormData(prev => ({ ...prev, public_key_hex: e.target.value }))}
+                  placeholder="64-character accredited Ed25519 public key hex"
+                  className={`w-full border rounded-xl px-3.5 py-2.5 font-mono text-[11px] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald ${
+                    isLight ? 'bg-[#F8FAFC] border-[#CBD5E1] text-[#0F291B]' : 'bg-white/5 border-white/10 text-white'
+                  }`}
+                />
+                <label htmlFor="signature_hex" className={`font-bold block ${isLight ? 'text-[#0F291B]' : 'text-white'}`}>
+                  Offline Ed25519 Signature Over Record Hash (Hex, 128 chars)
+                </label>
+                <input
+                  id="signature_hex"
+                  type="text"
+                  required
+                  value={signFormData.signature_hex}
+                  onChange={(e) => setSignFormData(prev => ({ ...prev, signature_hex: e.target.value }))}
+                  placeholder="128-character Ed25519 signature produced via scripts/sign_provenance_cli.py"
+                  className={`w-full border rounded-xl px-3.5 py-2.5 font-mono text-[11px] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald ${
+                    isLight ? 'bg-[#F8FAFC] border-[#CBD5E1] text-[#0F291B]' : 'bg-white/5 border-white/10 text-white'
+                  }`}
+                />
                 <p className={`text-[10px] ${isLight ? 'text-[#64748B]' : 'text-mist'}`}>
-                  Private key never leaves the client/session. Only the signature and public key are affixed.
+                  Private keys never enter the browser or server. Sign offline using scripts/sign_provenance_cli.py with an accredited VVB key.
                 </p>
               </div>
 

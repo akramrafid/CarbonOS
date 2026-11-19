@@ -11,6 +11,7 @@ class AnalysisJob(Base):
     __tablename__ = 'farmers_ai_analysisjob'
 
     id = Column(String(36), primary_key=True, default=generate_uuid)
+    organization_id = Column(String(64), nullable=True, index=True)
     status = Column(String(50), default='pending')
     polygon_geojson = Column(Text, nullable=False)
     analysis_type = Column(String(50), default='ndvi')
@@ -87,6 +88,7 @@ class GroundTruthPlot(Base):
     __tablename__ = 'carbon_mrv_groundtruthplot'
 
     id = Column(String(36), primary_key=True, default=generate_uuid)
+    organization_id = Column(String(64), nullable=True, index=True)
     plot_name = Column(String(255), nullable=False)
     location_lat = Column(Float, nullable=False)
     location_lng = Column(Float, nullable=False)
@@ -132,6 +134,8 @@ class EstimateProvenance(Base):
 
     record_hash = Column(String(64), nullable=False)       # sha256 of this record's own content
     previous_hash = Column(String(64), nullable=False)      # sha256 of the prior record, or 'GENESIS'
+    chain_index = Column(Integer, nullable=True, index=True)
+    quantification_snapshot_json = Column(Text, nullable=True)  # canonical JSON of CarbonResult/Baseline/AOI hash
     created_at = Column(DateTime, default=datetime.datetime.utcnow)
 
     result = relationship("CarbonResult", back_populates="provenance")
@@ -155,6 +159,7 @@ class UploadedBoundary(Base):
     __tablename__ = 'farmers_ai_uploadedboundary'
 
     id = Column(String(36), primary_key=True, default=generate_uuid)
+    organization_id = Column(String(64), nullable=True, index=True)
     name = Column(String(255), nullable=False)
     file_type = Column(String(50), nullable=False)
     boundary_data = Column(Text, nullable=False)
@@ -178,6 +183,7 @@ class CarbonAlert(Base):
     __tablename__ = 'farmers_ai_carbonalert'
 
     id = Column(String(36), primary_key=True, default=generate_uuid)
+    organization_id = Column(String(64), nullable=True, index=True)
     alert_type = Column(String(100), nullable=False)
     severity = Column(String(50), nullable=False)
     location_lat = Column(Float, nullable=False)
@@ -300,4 +306,23 @@ class ValidatorSignature(Base):
     signed_at = Column(DateTime, default=datetime.datetime.utcnow)
 
     provenance_record = relationship("EstimateProvenance", back_populates="signatures")
+
+
+class AccreditedValidator(Base):
+    """
+    Accredited VVB / Designated Operational Entity (DOE) public-key trust registry.
+    Prevents self-asserted public keys from satisfying validator quorum.
+    """
+    __tablename__ = 'carbon_mrv_accreditedvalidator'
+
+    id = Column(String(36), primary_key=True, default=generate_uuid)
+    validator_id = Column(String(100), nullable=False, unique=True, index=True)
+    validator_name = Column(String(255), nullable=False)
+    validator_organization = Column(String(255), nullable=False)
+    public_key_hex = Column(String(128), nullable=False, unique=True)
+    accreditation_standard = Column(String(100), default="Verra VVB / ISO 14065", nullable=False)
+    registered_by_sub = Column(String(128), nullable=True)
+    is_active = Column(Boolean, default=True, nullable=False)
+    revoked_at = Column(DateTime, nullable=True)
+    created_at = Column(DateTime, default=datetime.datetime.utcnow)
 

@@ -155,10 +155,10 @@ USE_TZ = True
 
 STATIC_URL = 'static/'
 
-# REST Framework Configuration
+# REST Framework Configuration (Fail closed: IsAuthenticated required regardless of DEBUG)
 REST_FRAMEWORK = {
     'DEFAULT_PERMISSION_CLASSES': [
-        'rest_framework.permissions.AllowAny' if DEBUG else 'rest_framework.permissions.IsAuthenticated',
+        'rest_framework.permissions.IsAuthenticated',
     ],
     'DEFAULT_AUTHENTICATION_CLASSES': [
         'rest_framework.authentication.SessionAuthentication',

@@ -25,6 +25,15 @@ export function clearEsgSession() {
 
 export const hasEsgToken = () => Boolean(session.token);
 
+export function getEsgAuthHeaders() {
+  if (!session.token) return {};
+  const headers = { Authorization: `Bearer ${session.token}` };
+  if (session.organizationId) {
+    headers['X-Organization-Id'] = session.organizationId;
+  }
+  return headers;
+}
+
 export class EsgApiError extends Error {
   constructor(status, message) {
     super(message);

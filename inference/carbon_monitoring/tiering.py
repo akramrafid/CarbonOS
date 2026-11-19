@@ -165,15 +165,25 @@ def complete_verification_task(
         "measured_biomass_mg_ha": survey_result.measured_biomass_mg_ha
     }
 
-def list_verification_tasks(status: Optional[str] = None, db: Optional[Session] = None) -> List[Dict[str, Any]]:
+def list_verification_tasks(
+    status: Optional[str] = None,
+    db: Optional[Session] = None,
+    organization_id: Optional[str] = None,
+) -> List[Dict[str, Any]]:
     """
-    Lists verification tasks, optionally filtered by status ('pending', 'completed', etc.).
-    Includes parcel and carbon estimate metadata.
+    Lists verification tasks, optionally filtered by status and tenant organization_id.
     """
     if db is None:
         return []
 
+    from .models import AnalysisJob
     query = db.query(VerificationTask)
+    if organization_id is not None:
+        query = (
+            query.join(CarbonResult, CarbonResult.id == VerificationTask.result_id)
+            .join(AnalysisJob, AnalysisJob.id == CarbonResult.job_id)
+            .filter(AnalysisJob.organization_id == organization_id)
+        )
     if status:
         query = query.filter(VerificationTask.status == status)
     tasks = query.order_by(VerificationTask.created_at.desc()).all()

@@ -348,10 +348,10 @@ def duckdb_calculate(
     principal: Principal = Depends(require("read")),
 ):
     """
-    In-Process DuckDB-Style OLAP Calculation Endpoint.
-    Executes both Activity-Based (Scope 1, 2, 3) and Spend-Based EEIO (CEDA) calculations
-    in sub-25ms with resource estimation and cryptographic audit hash.
+    Legacy demo OLAP endpoint — restricted to demo workspaces only.
+    Production tenants must use the deterministic Decimal ledger (/periods/{id}/calculate).
     """
+    _demo_only(principal)
     from .calculation_engine import calculate_activity_footprint, calculate_spend_eeio_footprint
     import hashlib
 
@@ -382,12 +382,13 @@ def duckdb_calculate(
 @router.get("/emission-factors/registry")
 def get_factor_registry(principal: Principal = Depends(require("read"))):
     """
-    Legacy demo factor catalog. No primary source was located for its values: every entry is UNVERIFIED
-    and none is used by the ledger. It holds no grid factor (location-based Scope 2 needs an approved
-    grid-average factor in the ledger's factor registry).
+    Legacy demo factor catalog — restricted to demo workspaces only (unverified illustrative entries).
     """
+    _demo_only(principal)
     from .factor_registry import FACTOR_REGISTRY_CATALOG
     return {
+        "data_classification": "DEMO_SAMPLE",
+        "inventory_eligible": False,
         "catalog_version": "v2026.1-NATIONAL",
         "catalog_status": "UNVERIFIED_LEGACY_DEMO_CATALOG",
         "total_factors": len(FACTOR_REGISTRY_CATALOG),
@@ -400,9 +401,9 @@ def run_factor_regression(
     principal: Principal = Depends(require("admin")),
 ):
     """
-    Watershed-style regression testing:
-    Tests proposed emission factor changes against customer baseline portfolios.
+    Legacy demo regression harness — restricted to demo workspaces only.
     """
+    _demo_only(principal)
     from .factor_registry import run_factor_regression_test
     proposed = payload.get("proposed_factors", {})
     tolerance = float(payload.get("tolerance_pct", 2.0))

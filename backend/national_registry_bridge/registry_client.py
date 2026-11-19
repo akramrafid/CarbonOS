@@ -58,19 +58,30 @@ class NationalRegistryClient:
         sandbox_mode: Optional[bool] = None
     ):
         self.base_url = (
-            base_url or 
+            base_url or
             os.getenv("NATIONAL_REGISTRY_BASE_URL", "https://registry.doe.gov.bd/national-api")
         ).rstrip("/")
-        self.api_key = api_key or os.getenv("NATIONAL_REGISTRY_API_KEY", "sandbox-api-key-carbonos-bd")
+        self.api_key = api_key if api_key is not None else os.getenv("NATIONAL_REGISTRY_API_KEY", "")
         self.timeout = timeout
 
-        # Enable sandbox mock mode if explicitly requested or if set via env / dummy URL
+        # Enable sandbox mode ONLY when explicitly requested or routed to explicit local/sandbox domains.
+        # Production domains (including doe.gov.bd) must never silently fall back to mock sandbox responses.
         if sandbox_mode is not None:
             self.sandbox_mode = sandbox_mode
         else:
             env_sandbox = os.getenv("NATIONAL_REGISTRY_SANDBOX_MODE", "").lower() in ("true", "1", "yes")
-            is_mock_url = "example.com" in self.base_url or "sandbox" in self.base_url or "localhost" in self.base_url or "doe.gov.bd" in self.base_url
-            self.sandbox_mode = env_sandbox or is_mock_url
+            is_local_mock = (
+                "example.com" in self.base_url
+                or "sandbox." in self.base_url
+                or "localhost" in self.base_url
+                or "127.0.0.1" in self.base_url
+            )
+            self.sandbox_mode = env_sandbox or is_local_mock
+
+        if not self.sandbox_mode and not self.api_key:
+            raise RegistryBridgeError(
+                "NATIONAL_REGISTRY_API_KEY is required when NationalRegistryClient is running in live mode."
+            )
 
     def _get_headers(self) -> Dict[str, str]:
         return {
@@ -170,6 +181,14 @@ class NationalRegistryClient:
         mean_carbon = total_carbon / count
         mean_ndvi = avg_ndvi_sum / count
 
+        rel_half_width = (upper_90_sum - lower_90_sum) / (2 * (total_carbon or 1))
+        conservativeness_deduction_pct = round(max(0.0, (rel_half_width - 0.15) * 100.0), 2) if rel_half_width > 0.15 else 0.0
+        conservative_creditable = round(total_tco2e * max(0.0, 1.0 - (conservativeness_deduction_pct / 100.0)), 2)
+
+        add_tel = additional_telemetry or {}
+        data_origin = "simulation" if self.sandbox_mode else str(add_tel.get("data_source", "live_dMRV"))
+        vvb_quorum_reached = bool(add_tel.get("quorum_reached", False))
+
         payload = {
             "mrvSubmissionHeader": {
                 "client": "CarbonOS Bangladesh dMRV",
@@ -179,6 +198,7 @@ class NationalRegistryClient:
                 "externalProjectId": registry_project.external_project_id or "",
                 "carbonStandard": registry_project.carbon_standard,
                 "ndcCommitmentType": registry_project.ndc_commitment_type,
+                "dataOrigin": data_origin,
             },
             "projectDetails": {
                 "projectName": registry_project.project_name,
@@ -205,16 +225,18 @@ class NationalRegistryClient:
                 "confidenceInterval": "90%",
                 "carbonLower90TcHa": round(lower_90_sum / count, 2),
                 "carbonUpper90TcHa": round(upper_90_sum / count, 2),
-                "relativeHalfWidthPct": round(((upper_90_sum - lower_90_sum) / (2 * (total_carbon or 1))) * 100, 2),
-                "conservativenessDeductionPct": 0.0 if ((upper_90_sum - lower_90_sum) / (2 * (total_carbon or 1))) <= 0.10 else 5.0,
-                "conservativeCreditableTco2e": round(total_tco2e * 0.95, 2)
+                "relativeHalfWidthPct": round(rel_half_width * 100, 2),
+                "conservativenessDeductionPct": conservativeness_deduction_pct,
+                "conservativeCreditableTco2e": conservative_creditable
             },
             "provenanceAuditTrail": {
                 "provenanceChainHash": provenance_chain_hash,
                 "substantiatingResultIds": result_ids,
                 "hashVerificationState": "INTACT",
-                "sensorStack": "Sentinel-2 MSI (10m L2A) + Sentinel-1 SAR + NASA GEDI LiDAR",
-                "modelPipeline": "RandomForest Quantile Regressor + Conformal Calibration (Tier-3)"
+                "quorumReached": vvb_quorum_reached,
+                "dataOrigin": data_origin,
+                "sensorStack": add_tel.get("sensor_stack", "Sentinel-2 MSI (10m L2A) + Sentinel-1 SAR"),
+                "modelPipeline": add_tel.get("model_pipeline", "dMRV Carbon Estimator"),
             }
         }
 
@@ -232,16 +254,21 @@ class NationalRegistryClient:
                     "carbon_soc_tc_ha": pool_soc_sum / count,
                 },
                 "remote_sensing_telemetry": {
-                    "indices": {"ndvi": mean_ndvi, "s1_ratio": 0.35, "tree_height_m": 14.8}
+                    "indices": {
+                        "ndvi": mean_ndvi,
+                        "s1_ratio": add_tel.get("s1_ratio"),
+                        "tree_height_m": add_tel.get("tree_height_m"),
+                    }
                 },
                 "uncertainty_and_crediting": {
-                    "uncertainty_deduction_tco2e_ha": total_tco2e * 0.05,
-                    "buffer_pool_withholding_tco2e_ha": total_tco2e * 0.18,
+                    "uncertainty_deduction_tco2e_ha": max(0.0, total_tco2e - conservative_creditable),
+                    "buffer_pool_withholding_tco2e_ha": float(add_tel.get("buffer_pool_withholding_tco2e_ha", 0.0) or 0.0),
                 },
                 "cryptographic_provenance_and_trust": {
                     "record_hash": provenance_chain_hash,
-                    "previous_hash": "CHAIN_PREV",
-                    "hash_chain_intact": True
+                    "previous_hash": add_tel.get("previous_hash", "RECORDED"),
+                    "hash_chain_intact": True,
+                    "quorum_reached": vvb_quorum_reached,
                 }
             }
             payload["jcmBilateralDocument"] = map_to_jcm_format(registry_project, monitoring_data_bundle)

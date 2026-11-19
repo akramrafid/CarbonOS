@@ -23,14 +23,19 @@ def export_vm0047_stocking_index(
     project_id: str,
     db: Session,
     result_id: Optional[str] = None,
-    buffer_pool_pct: float = DEFAULT_VM0047_BUFFER_POOL_PCT
+    buffer_pool_pct: float = DEFAULT_VM0047_BUFFER_POOL_PCT,
+    organization_id: Optional[str] = None,
 ) -> Dict[str, Any]:
     """
     Generates a Verra VM0047 compliant Stocking Index audit export for a given project.
-    If result_id is provided, exports the specific monitoring period; otherwise selects
-    the latest verified or available CarbonResult for the project.
+    Enforces tenant organization_id isolation when provided.
     """
+    from .models import AnalysisJob
     query = db.query(CarbonResult)
+    if organization_id is not None:
+        query = query.join(AnalysisJob, AnalysisJob.id == CarbonResult.job_id).filter(
+            AnalysisJob.organization_id == organization_id
+        )
     if result_id:
         c_res = query.filter(CarbonResult.id == result_id).first()
         if not c_res:

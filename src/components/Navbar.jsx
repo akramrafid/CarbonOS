@@ -86,7 +86,7 @@ const Navbar = () => {
     { id: 'Carbon Credit', key: 'carbonCredit', path: '/carbon-monitoring' },
     { id: 'Marketplace', key: 'marketplace', path: '/platform/marketplace' },
     { id: 'Carbon Registry', key: 'carbonRegistry', path: '/platform/carbon-registry' },
-    { id: 'ESG', key: 'esg', path: '/platform/saas-dashboard' }
+    { id: 'ESG', key: 'esg', path: '/esg' }
   ];
 
   return (

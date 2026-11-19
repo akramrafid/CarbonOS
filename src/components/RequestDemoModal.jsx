@@ -107,7 +107,7 @@ export const RequestDemoModal = ({ isOpen, onClose }) => {
 
   const handleGoToDashboard = () => {
     handleResetAndClose();
-    navigate('/platform/saas-dashboard');
+    navigate('/platform/esg');
   };
 
   return (

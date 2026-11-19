@@ -428,11 +428,11 @@ const MRVDashboard = () => {
     <div className="pt-24 pb-16 min-h-[80vh] flex flex-col items-center noise-overlay">
       
       {/* Header section */}
-      <div className="w-full bg-[#040A06] border-b border-emerald/10 py-16 px-6 lg:px-12 relative overflow-hidden flex flex-col items-center justify-center text-center">
-        <div className="absolute inset-0 bg-[linear-gradient(to_right,#00C85311_1px,transparent_1px),linear-gradient(to_bottom,#00C85311_1px,transparent_1px)] bg-[size:4rem_4rem] [mask-image:radial-gradient(ellipse_60%_50%_at_50%_0%,#000_70%,transparent_100%)] pointer-events-none"></div>
-        <span className="font-mono text-xs text-emerald tracking-widest px-3 py-1 bg-[#0D2B1A]/40 border border-[#00C853]/20 rounded-full mb-6 inline-block z-10">PLATFORM</span>
-        <h1 className="serif-drama text-[56px] lg:text-[72px] text-white leading-tight mb-4 z-10">MRV Dashboard</h1>
-        <p className="font-sans text-lg text-mist max-w-2xl z-10">Real-time Measurement, Reporting, and Verification data feeds.</p>
+      <div className="w-full bg-[#040A06] border-b border-emerald/10 py-14 px-6 lg:px-12 relative overflow-hidden">
+        <div className="max-w-5xl mx-auto relative z-10">
+          <h1 className="font-sans font-extrabold text-4xl sm:text-5xl text-white leading-tight mb-3 tracking-tight">MRV Dashboard</h1>
+          <p className="font-sans text-base sm:text-lg text-mist max-w-2xl">Real-time Measurement, Reporting, and Verification data feeds.</p>
+        </div>
       </div>
 
       <div className="max-w-5xl w-full mx-auto px-6 lg:px-12 mt-16 relative z-10 space-y-8">
@@ -510,8 +510,8 @@ const MRVDashboard = () => {
                   DISCONNECTED
                 </span>
               ) : (
-                <span className="text-[10px] font-mono text-emerald bg-emerald/10 px-3 py-1 rounded-full border border-emerald/20 flex items-center">
-                  <span className="w-1.5 h-1.5 rounded-full bg-emerald mr-1.5 animate-ping"></span>
+                <span className="text-[10px] font-mono text-emerald bg-emerald/10 px-3 py-1 rounded-full border border-emerald/20 flex items-center tabular-nums">
+                  <span className="w-1.5 h-1.5 rounded-full bg-emerald mr-1.5"></span>
                   CONNECTED
                 </span>
               )}
@@ -690,13 +690,13 @@ const MRVDashboard = () => {
         </div>
 
         {/* Farmer's AI Carbon Asset Alerts */}
-        <div className="bg-[#080F0B] registry-border p-8 rounded-[2rem] shadow-[0_0_30px_rgba(0,200,83,0.05)]">
+        <div className="bg-[#080F0B] registry-border p-8 rounded-2xl">
           <div className="flex items-center justify-between mb-6">
             <div className="flex items-center">
-              <span className="w-2.5 h-2.5 rounded-full bg-purple-500 animate-pulse mr-3"></span>
+              <span className="w-2.5 h-2.5 rounded-full bg-cyan-400 mr-3"></span>
               <h2 className="font-sans font-bold text-2xl text-white">Carbon Asset Health Alerts</h2>
             </div>
-            <span className="flex items-center text-[10px] font-mono bg-purple-500/10 text-purple-400 px-2 py-1 rounded border border-purple-500/20">
+            <span className="flex items-center text-[10px] font-mono bg-cyan-500/10 text-cyan-300 px-2 py-1 rounded border border-cyan-500/20">
               TIER B (PERENNIALS)
             </span>
           </div>
@@ -704,7 +704,7 @@ const MRVDashboard = () => {
           <div className="space-y-3 max-h-[300px] overflow-y-auto pr-2 scrollbar-thin">
             {trendsLoading ? (
               <div className="flex items-center justify-center py-12">
-                <Loader2 className="w-6 h-6 animate-spin text-purple-400" />
+                <Loader2 className="w-6 h-6 animate-spin text-cyan-400" />
               </div>
             ) : !hasAlerts ? (
               <div className="text-xs text-gray-500 font-mono text-center py-12 border border-gray-800/40 rounded-xl bg-[#040A06]/50">

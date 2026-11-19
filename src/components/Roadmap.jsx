@@ -83,82 +83,82 @@ const Roadmap = () => {
   }, []);
 
   return (
-    <section className="w-full bg-[#040A06] py-16 sm:py-24 px-4 sm:px-6 lg:px-12 relative overflow-hidden noise-overlay">
+    <section className={`w-full py-16 sm:py-24 px-4 sm:px-6 lg:px-12 relative overflow-hidden border-t ${
+      isLight ? 'bg-[#F2F3EE] text-[#0F291B] border-[#0F291B]/10' : 'bg-[#040A06] text-white border-white/10 noise-overlay'
+    }`}>
       <div className="max-w-7xl mx-auto relative z-10" ref={containerRef}>
         
         {/* Header */}
-        <div className="text-center mb-12 sm:mb-20">
-          <span className="font-mono text-xs text-emerald tracking-widest px-3 py-1 bg-[#0D2B1A]/40 border border-[#00C853]/20 rounded-full mb-6 inline-block">
-            PROCESS OVERVIEW
-          </span>
-          <h2 className="serif-drama text-4xl sm:text-[48px] lg:text-[64px] text-white leading-tight mb-4">
+        <div className="mb-12 sm:mb-16 max-w-2xl">
+          <h2 className={`font-sans font-bold text-3xl sm:text-4xl lg:text-5xl tracking-tight leading-tight mb-3 ${
+            isLight ? 'text-[#0F291B]' : 'text-white'
+          }`}>
             How Carbon Zero BD Works
           </h2>
-          <p className="font-sans text-lg text-mist max-w-2xl mx-auto">
-            A transparent, end-to-end operational framework for the national carbon ecosystem.
+          <p className={`font-sans text-base sm:text-lg leading-relaxed ${
+            isLight ? 'text-[#37473E]' : 'text-mist'
+          }`}>
+            A transparent, end-to-end operational framework from field telemetry to institutional carbon settlement.
           </p>
         </div>
 
         {/* Roadmap Timeline */}
         <div className="relative max-w-4xl mx-auto">
           {/* Vertical Line */}
-          <div className="absolute left-12 md:left-1/2 top-0 bottom-0 w-[2px] bg-[#00C853]/10 -translate-x-1/2 rounded-full hidden md:block">
+          <div className={`absolute left-12 md:left-1/2 top-0 bottom-0 w-[2px] -translate-x-1/2 rounded-full hidden md:block ${
+            isLight ? 'bg-[#0F291B]/12' : 'bg-[#00C853]/15'
+          }`}>
             <div 
               ref={lineRef} 
-              className="absolute top-0 left-0 w-full h-full bg-emerald origin-top"
-              style={{ boxShadow: '0 0 10px rgba(0,200,83,0.5)' }}
+              className={`absolute top-0 left-0 w-full h-full origin-top ${isLight ? 'bg-[#15803d]' : 'bg-emerald'}`}
             ></div>
           </div>
 
-          <div className="flex flex-col space-y-12 relative">
+          <div className="flex flex-col space-y-10 relative">
             {steps.map((step, index) => {
               const isEven = index % 2 === 0;
               return (
                 <div key={index} className={`roadmap-step relative flex flex-col md:flex-row items-center ${isEven ? 'md:flex-row-reverse' : ''}`}>
                   
                   {/* Timeline Dot */}
-                  <div className={`hidden md:flex absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 w-10 h-10 border-2 rounded-full items-center justify-center z-10 emerald-glow ${
+                  <div className={`hidden md:flex absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 w-8 h-8 border-2 rounded-full items-center justify-center z-10 ${
                     isLight ? 'bg-white border-[#15803d]' : 'bg-[#080F0B] border-emerald'
                   }`}>
-                    <div className={`w-3 h-3 rounded-full animate-pulse ${isLight ? 'bg-[#15803d]' : 'bg-emerald'}`}></div>
+                    <div className={`w-2.5 h-2.5 rounded-full ${isLight ? 'bg-[#15803d]' : 'bg-emerald'}`}></div>
                   </div>
 
                   {/* Spacer for alternating layout */}
                   <div className="hidden md:block md:w-1/2"></div>
 
                   {/* Content Card */}
-                  <div className={`w-full md:w-1/2 ${isEven ? 'md:pr-16 text-left md:text-right' : 'md:pl-16 text-left'}`}>
-                    <div className={`backdrop-blur-md p-5 sm:p-8 rounded-2xl sm:rounded-[2rem] transition-all group border ${
+                  <div className={`w-full md:w-1/2 ${isEven ? 'md:pr-14 text-left md:text-right' : 'md:pl-14 text-left'}`}>
+                    <div className={`p-5 sm:p-7 rounded-2xl transition-colors group border ${
                       isLight
-                        ? 'bg-white border-[#0F291B]/10 hover:border-[#15803d]/35 shadow-[0_10px_28px_-8px_rgba(15,41,27,0.08)]'
-                        : 'bg-[#080F0B]/80 registry-border hover:bg-[#0D2B1A]/60'
+                        ? 'bg-white border-[#0F291B]/12 hover:border-[#15803d]/40 shadow-[0_8px_24px_-10px_rgba(15,41,27,0.08)]'
+                        : 'bg-[#080F0B] border-white/10 hover:border-emerald/40'
                     }`}>
-                      <div className={`flex flex-wrap items-center gap-2 sm:gap-3 mb-4 ${isEven ? 'md:justify-end' : 'justify-start'}`}>
-                        <span className={`font-mono text-xs px-2.5 py-1 rounded-full shrink-0 font-semibold ${
-                          isLight ? 'text-[#15803d] bg-[#E3F2E9]' : 'text-emerald bg-emerald/10'
+                      <div className={`flex items-baseline gap-2.5 mb-2.5 ${isEven ? 'md:justify-end' : 'justify-start'}`}>
+                        <span className={`font-mono text-xs tabular-nums font-bold ${
+                          isLight ? 'text-[#15803d]' : 'text-emerald'
                         }`}>
-                          STEP {step.icon}
+                          Step {step.icon}
                         </span>
-                        <h3 className={`font-sans font-bold text-xl sm:text-2xl transition-colors ${
-                          isLight ? 'text-[#0F291B] group-hover:text-[#15803d]' : 'text-registry group-hover:text-emerald'
+                        <h3 className={`font-sans font-bold text-xl transition-colors ${
+                          isLight ? 'text-[#0F291B] group-hover:text-[#15803d]' : 'text-white group-hover:text-emerald'
                         }`}>
                           {step.title}
                         </h3>
                       </div>
                       
-                      <p className={`font-sans mb-6 leading-relaxed ${isLight ? 'text-[#46574D]' : 'text-mist'}`}>
+                      <p className={`font-sans text-sm mb-5 leading-relaxed ${isLight ? 'text-[#37473E]' : 'text-mist'}`}>
                         {step.description}
                       </p>
                       
-                      <div className={`flex flex-wrap gap-2 ${isEven ? 'md:justify-end' : 'justify-start'}`}>
+                      <div className={`pt-3 border-t flex flex-wrap gap-x-4 gap-y-1 text-[11px] font-mono ${
+                        isLight ? 'border-[#0F291B]/8 text-[#556B5E]' : 'border-white/10 text-mist/75'
+                      } ${isEven ? 'md:justify-end' : 'justify-start'}`}>
                         {step.metrics.map((metric, mIndex) => (
-                          <span key={mIndex} className={`font-mono text-[11px] px-3 py-1 rounded-full border ${
-                            isLight
-                              ? 'text-[#37473E] bg-[#F5F8F5] border-[#0F291B]/10'
-                              : 'text-mist/70 bg-[#040A06] border-emerald/10'
-                          }`}>
-                            {metric}
-                          </span>
+                          <span key={mIndex}>{metric}</span>
                         ))}
                       </div>
                     </div>

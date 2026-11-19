@@ -1457,15 +1457,14 @@ const SaaSDashboard = () => {
         }`}>
           <div className="flex items-center justify-between mb-1.5">
             <div className="flex items-center space-x-2">
-              <span className="relative flex h-2 w-2">
-                <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-[#00C853] opacity-75"></span>
-                <span className="relative inline-flex rounded-full h-2 w-2 bg-[#00C853]"></span>
-              </span>
+              <span className={`inline-flex rounded-full h-2 w-2 ${isLight ? 'bg-[#15803d]' : 'bg-[#00C853]'}`} />
               <span className="font-sans font-bold text-[11px] tracking-tight">
                 Live MRV Telemetry
               </span>
             </div>
-            <span className="text-[9px] font-mono font-bold text-emerald-400 bg-[#00C853]/15 border border-[#00C853]/30 px-1.5 py-0.5 rounded leading-none">
+            <span className={`text-[9px] font-mono font-bold px-1.5 py-0.5 rounded leading-none ${
+              isLight ? 'text-[#15803d] bg-[#15803d]/10 border border-[#15803d]/25' : 'text-emerald-400 bg-[#00C853]/15 border border-[#00C853]/30'
+            }`}>
               SYNC
             </span>
           </div>
@@ -1813,9 +1812,9 @@ const SaaSDashboard = () => {
                     ESG Progress
                   </h1>
                   <span className={`px-2.5 py-0.5 rounded-full text-[10px] font-mono font-bold uppercase ${
-                    isLight ? 'bg-[#E8F7EC] text-[#0B4D26] border border-[#00C853]/30' : 'bg-[#0D2B1A] text-[#4ADE80] border border-[#1B4D2E]'
+                    isLight ? 'bg-amber-100 text-amber-900 border border-amber-300' : 'bg-amber-500/15 text-amber-300 border border-amber-500/30'
                   }`}>
-                    Live Active
+                    Demo Showcase
                   </span>
                 </div>
                 <p className={`text-xs font-sans ${isLight ? 'text-[#557361]' : 'text-[#7C9A88]'}`}>
@@ -1892,12 +1891,12 @@ const SaaSDashboard = () => {
                     }`}>
                       <div className="flex items-center justify-between">
                         <span className={`text-[10px] font-sans font-medium ${isLight ? 'text-[#557361]' : 'text-[#7C9A88]'}`}>
-                          Emissions Reduced
+                          Sample Reduced (Demo)
                         </span>
                         <span className={`text-[9px] font-mono font-bold px-1.5 py-0.5 rounded-full ${
-                          isLight ? 'bg-[#E8F7EC] text-[#0B4D26]' : 'bg-[#00C853]/15 text-[#4ADE80]'
+                          isLight ? 'bg-amber-100 text-amber-900' : 'bg-amber-500/15 text-amber-300'
                         }`}>
-                          +14%
+                          SAMPLE
                         </span>
                       </div>
                       <div className="mt-1 flex items-baseline space-x-1.5">
@@ -2572,9 +2571,9 @@ const SaaSDashboard = () => {
                         Multi-Corpus RAG Active
                       </span>
                       <span className={`inline-flex items-center px-2.5 py-1 rounded-full text-[10px] font-mono font-bold ${
-                        isLight ? 'bg-[#F0F5F1] text-[#345942] border border-[#D5E3D8]' : 'bg-[#0D2214] text-[#A7F3D0] border border-[#1E4D2B]'
+                        isLight ? 'bg-amber-100 text-amber-900 border border-amber-300' : 'bg-amber-500/15 text-amber-300 border border-amber-500/30'
                       }`}>
-                        DoE 2023 Factors
+                        Unverified Sample Factors (Demo)
                       </span>
                     </div>
                   </div>
@@ -4260,11 +4259,11 @@ const SaaSDashboard = () => {
                 <div className="space-y-1.5">
                   <div className="flex justify-between text-xs font-sans">
                     <span className="font-bold text-[#0F291B]">Scope 3 (Supply Chain & Business travel)</span>
-                    <span className="font-mono font-semibold text-purple-600">{results.scope3} tCO2e ({results.total > 0 ? ((results.scope3 / results.total) * 100).toFixed(0) : 0}%)</span>
+                    <span className="font-mono font-semibold text-[#0F766E] tabular-nums">{results.scope3} tCO2e ({results.total > 0 ? ((results.scope3 / results.total) * 100).toFixed(0) : 0}%)</span>
                   </div>
                   <div className="w-full bg-[#F1F5F9] h-2.5 rounded-full overflow-hidden">
                     <div 
-                      className="bg-purple-600 h-full transition-all duration-500" 
+                      className="bg-[#0F766E] h-full transition-all duration-500" 
                       style={{ width: `${results.total > 0 ? (results.scope3 / results.total) * 100 : 0}%` }}
                     ></div>
                   </div>

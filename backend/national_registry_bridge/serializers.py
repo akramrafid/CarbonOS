@@ -17,6 +17,7 @@ class RegistryProjectSerializer(serializers.ModelSerializer):
     class Meta:
         model = RegistryProject
         fields = "__all__"
+        read_only_fields = ("organization_id", "owner", "eligibility_status")
 
 
 class MonitoringReportSubmissionSerializer(serializers.ModelSerializer):

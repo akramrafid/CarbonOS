@@ -618,7 +618,7 @@ const PurchaseConfirmModal = ({ credit, creditId, onClose, onPurchaseComplete })
                       <span className="font-mono text-[9px] uppercase tracking-widest text-emerald font-bold block">
                         CARBONOS DEMO
                       </span>
-                      <h3 className="serif-drama text-lg font-bold text-white tracking-wide">
+                      <h3 className="font-sans text-lg font-bold text-white tracking-tight">
                         Demo Retirement Receipt
                       </h3>
                     </div>

@@ -11,7 +11,8 @@ from pydantic import BaseModel, Field
 from .database import get_db, SessionLocal
 from .models import (AnalysisJob, CarbonResult, SatelliteLayer, UploadedBoundary, CarbonReport,
                       CarbonAlert, GroundTruthPlot, EstimateProvenance, BaselineAssessment,
-                      VerificationTask, DroneSurveyResult, ValidatorSignature)
+                      VerificationTask, DroneSurveyResult, ValidatorSignature, AccreditedValidator)
+from esg_rag.auth import Principal, require
 from .satellite import SatelliteEngine
 from .estimator import CarbonEstimator, XGB_AVAILABLE
 from .report_generator import ReportGenerator
@@ -59,6 +60,44 @@ class SignProvenanceRequest(BaseModel):
 
 class UpdateSettingsRequest(BaseModel):
     model_type: str
+
+
+class RegisterValidatorRequest(BaseModel):
+    validator_id: str
+    validator_name: str
+    validator_organization: str
+    public_key_hex: str
+    accreditation_standard: str = "Verra VVB / ISO 14065"
+
+
+def _get_tenant_job(db: Session, job_id: str, organization_id: str) -> AnalysisJob:
+    job = (
+        db.query(AnalysisJob)
+        .filter(AnalysisJob.id == job_id, AnalysisJob.organization_id == organization_id)
+        .first()
+    )
+    if not job:
+        raise HTTPException(status_code=404, detail="Analysis job not found.")
+    return job
+
+
+def _get_tenant_result(db: Session, result_id: str, organization_id: str) -> CarbonResult:
+    res = (
+        db.query(CarbonResult)
+        .join(AnalysisJob, AnalysisJob.id == CarbonResult.job_id)
+        .filter(CarbonResult.id == result_id, AnalysisJob.organization_id == organization_id)
+        .first()
+    )
+    if not res:
+        res = (
+            db.query(CarbonResult)
+            .join(AnalysisJob, AnalysisJob.id == CarbonResult.job_id)
+            .filter(CarbonResult.job_id == result_id, AnalysisJob.organization_id == organization_id)
+            .first()
+        )
+    if not res:
+        raise HTTPException(status_code=404, detail="Carbon result not found.")
+    return res
 
 router = APIRouter(prefix="/api/carbon", tags=["Carbon Monitoring"])
 
@@ -155,33 +194,7 @@ def run_async_analysis(job_id: str):
             conservative_creditable_tco2e=initial_uncert["conservative_creditable_tco2e"]
         )
         db.add(result)
-        db.flush()  # populate result.id before building the provenance record below
-
-        # Part (c): immutable provenance record, written in the SAME transaction
-        # as the result it describes. If this fails, the whole estimate is
-        # rolled back rather than existing without a provenance trail.
-        prov = provenance_utils.build_provenance_record(
-            db,
-            result_id=result.id,
-            data_source=sat_result.get("data_source", "unknown"),
-            satellite_scene_ids=sat_result.get("analysis_metadata", {}).get("s2_scene_ids", []),
-            gedi_tree_height_source=sat_result.get("analysis_metadata", {}).get(
-                "gedi_tree_height_source", "formula_estimate_not_gedi_l2b"),
-            model_type=estimator_result.get("model_used", "random_forest"),
-            model_version=estimator_result.get("model_version", "0.0.0-unset"),
-            model_trained_on=estimator_result.get("model_trained_on", "synthetic-v1"),
-            feature_vector=estimator_result.get("feature_vector", {}),
-            lat=coords[0][0], lng=coords[0][1]
-        )
-        db.add(prov)
-
-        # Treeconomy tiered uncertainty monitoring dispatch
-        try:
-            flag_res = flag_for_verification(result, threshold_relative_width=0.35, db=db)
-            if flag_res.get("flagged"):
-                print(f"[Tiering Alert] High uncertainty W={flag_res['relative_width']} triggered verification task {flag_res.get('task_id')}")
-        except Exception as e_tier:
-            print(f"[Tiering Warning] Failed to evaluate verification task: {e_tier}")
+        db.flush()  # populate result.id
 
         # Save layer
         tile_url = sat_result.get("tile_url", "")
@@ -196,6 +209,7 @@ def run_async_analysis(job_id: str):
         db.add(layer)
 
         # Verra VM0047 Dynamic Synthetic Control Baseline & 10km Leakage Belt
+        baseline_rec = None
         try:
             baseline_data = run_dynamic_baseline_assessment(
                 job_id=job.id,
@@ -236,9 +250,41 @@ def run_async_analysis(job_id: str):
         except Exception as e_base:
             print(f"[Baseline Warning] Could not construct baseline for job {job.id}: {e_base}")
 
+        db.flush()
+
+        # Part (c): immutable provenance record written AFTER final result & baseline values
+        # so the SHA-256 digest seals exact quantification + AOI polygon + input provenance.
+        prov = provenance_utils.build_provenance_record(
+            db,
+            result_id=result.id,
+            data_source=sat_result.get("data_source", "unknown"),
+            satellite_scene_ids=sat_result.get("analysis_metadata", {}).get("s2_scene_ids", []),
+            gedi_tree_height_source=sat_result.get("analysis_metadata", {}).get(
+                "gedi_tree_height_source", "formula_estimate_not_gedi_l2b"),
+            model_type=estimator_result.get("model_used", "random_forest"),
+            model_version=estimator_result.get("model_version", "0.0.0-unset"),
+            model_trained_on=estimator_result.get("model_trained_on", "synthetic-v1"),
+            feature_vector=estimator_result.get("feature_vector", {}),
+            lat=coords[0][0], lng=coords[0][1],
+            carbon_result=result,
+            baseline=baseline_rec,
+            polygon_geojson=job.polygon_geojson,
+            organization_id=job.organization_id,
+        )
+        db.add(prov)
+
+        # Treeconomy tiered uncertainty monitoring dispatch
+        try:
+            flag_res = flag_for_verification(result, threshold_relative_width=0.35, db=db)
+            if flag_res.get("flagged"):
+                print(f"[Tiering Alert] High uncertainty W={flag_res['relative_width']} triggered verification task {flag_res.get('task_id')}")
+        except Exception as e_tier:
+            print(f"[Tiering Warning] Failed to evaluate verification task: {e_tier}")
+
         # Create system Alerts if forest health is poor (NDVI < 0.35) and area is significant
         if sat_result["average_ndvi"] < 0.40 and forest_area_ha > 5.0:
             alert = CarbonAlert(
+                organization_id=job.organization_id,
                 alert_type="rapid_decline",
                 severity="critical" if sat_result["average_ndvi"] < 0.30 else "warning",
                 location_lat=coords[0][0],
@@ -249,6 +295,7 @@ def run_async_analysis(job_id: str):
             db.add(alert)
         elif random_trigger_fire_alert(coords):
             alert = CarbonAlert(
+                organization_id=job.organization_id,
                 alert_type="fire_risk",
                 severity="warning",
                 location_lat=coords[0][0],
@@ -292,6 +339,7 @@ async def analyze_carbon(
     end_date: str = Form(...),
     analysis_type: str = Form("ndvi"),
     project_name: str = Form("Carbon Project"),
+    principal: Principal = Depends(require("write")),
     db: Session = Depends(get_db)
 ):
     """
@@ -305,8 +353,9 @@ async def analyze_carbon(
     except ValueError:
         raise HTTPException(status_code=400, detail="Invalid date format. Use YYYY-MM-DD.")
 
-    # Create job in database
+    # Create job in database scoped to authenticated organization
     job = AnalysisJob(
+        organization_id=principal.organization_id,
         status="pending",
         polygon_geojson=polygon_geojson,
         analysis_type=analysis_type,
@@ -329,13 +378,19 @@ async def analyze_carbon(
     }
 
 @router.get("/history")
-def get_analysis_history(page: int = 1, limit: int = 10, db: Session = Depends(get_db)):
+def get_analysis_history(
+    page: int = 1,
+    limit: int = 10,
+    principal: Principal = Depends(require("read")),
+    db: Session = Depends(get_db),
+):
     """
-    Retrieves pagination list of past analyses and results.
+    Retrieves paginated list of past analyses and results for the caller's organization.
     """
     offset = (page - 1) * limit
-    jobs = db.query(AnalysisJob).order_by(AnalysisJob.created_at.desc()).offset(offset).limit(limit).all()
-    total = db.query(AnalysisJob).count()
+    base_q = db.query(AnalysisJob).filter(AnalysisJob.organization_id == principal.organization_id)
+    jobs = base_q.order_by(AnalysisJob.created_at.desc()).offset(offset).limit(limit).all()
+    total = base_q.count()
 
     results = []
     for job in jobs:
@@ -409,15 +464,15 @@ def get_analysis_history(page: int = 1, limit: int = 10, db: Session = Depends(g
     }
 
 @router.get("/results/{result_id}")
-def get_result(result_id: str, db: Session = Depends(get_db)):
+def get_result(
+    result_id: str,
+    principal: Principal = Depends(require("read")),
+    db: Session = Depends(get_db),
+):
     """
-    Retrieves a single carbon result by result_id or job_id, including 90% prediction intervals, multi-pool vector, and Verra conformal precision.
+    Retrieves a single carbon result by result_id or job_id, scoped to caller's organization.
     """
-    res = db.query(CarbonResult).filter(CarbonResult.id == result_id).first()
-    if not res:
-        res = db.query(CarbonResult).filter(CarbonResult.job_id == result_id).first()
-    if not res:
-        raise HTTPException(status_code=404, detail="Carbon result not found.")
+    res = _get_tenant_result(db, result_id, principal.organization_id)
 
     return {
         "id": res.id,
@@ -445,15 +500,18 @@ def get_result(result_id: str, db: Session = Depends(get_db)):
     }
 
 @router.get("/baseline/{job_id}")
-def get_baseline_assessment(job_id: str, db: Session = Depends(get_db)):
+def get_baseline_assessment(
+    job_id: str,
+    principal: Principal = Depends(require("read")),
+    db: Session = Depends(get_db),
+):
     """
-    Retrieves the Verra VM0047 dynamic synthetic control baseline assessment,
-    including donor weights, counterfactual trajectory, leakage deduction, and buffer pool withholding.
+    Retrieves the Verra VM0047 dynamic synthetic control baseline assessment for a tenant job.
     """
-    baseline = db.query(BaselineAssessment).filter(BaselineAssessment.job_id == job_id).first()
+    job = _get_tenant_job(db, job_id, principal.organization_id)
+    baseline = db.query(BaselineAssessment).filter(BaselineAssessment.job_id == job.id).first()
     if not baseline:
-        job = db.query(AnalysisJob).filter(AnalysisJob.id == job_id).first()
-        if not job or not job.result:
+        if not job.result:
             raise HTTPException(status_code=404, detail="Baseline assessment not found for this job.")
         # Compute on-the-fly if missing on older job
         baseline_data = run_dynamic_baseline_assessment(
@@ -465,7 +523,7 @@ def get_baseline_assessment(job_id: str, db: Session = Depends(get_db)):
         )
         return baseline_data
 
-    job_row = db.query(AnalysisJob).filter(AnalysisJob.id == job_id).first()
+    job_row = job
     belt_geo = (
         LeakageMonitoringEngine.calculate_leakage_belt_geometry(job_row.polygon_geojson, buffer_km=10.0)
         if job_row
@@ -494,7 +552,10 @@ def get_baseline_assessment(job_id: str, db: Session = Depends(get_db)):
 
 
 @router.post("/osm/layers")
-def get_osm_vector_layers(payload: OsmLayersRequest):
+def get_osm_vector_layers(
+    payload: OsmLayersRequest,
+    principal: Principal = Depends(require("read")),
+):
     """
     Extracts OpenStreetMap vector overlays (forest, water, roads, industrial) and computes
     Verra VM0047 10 km leakage belt spatial pressure metrics via QuackOSM (local Bangladesh PBF)
@@ -521,7 +582,11 @@ def get_osm_vector_layers(payload: OsmLayersRequest):
 
 
 @router.post("/pixel-inspect")
-def inspect_pixel_carbon(payload: PixelInspectRequest, db: Session = Depends(get_db)):
+def inspect_pixel_carbon(
+    payload: PixelInspectRequest,
+    principal: Principal = Depends(require("read")),
+    db: Session = Depends(get_db),
+):
     """
     Runs backend dMRV multi-pool carbon estimation for a 100m spatial patch centered at (lat, lng).
     Returns real backend satellite indices, model estimates, provenance, and unverified/calibrated status
@@ -569,7 +634,11 @@ def inspect_pixel_carbon(payload: PixelInspectRequest, db: Session = Depends(get
 
     matched_job_id = None
     if payload.job_id:
-        job = db.query(AnalysisJob).filter(AnalysisJob.id == payload.job_id).first()
+        job = (
+            db.query(AnalysisJob)
+            .filter(AnalysisJob.id == payload.job_id, AnalysisJob.organization_id == principal.organization_id)
+            .first()
+        )
         if job and job.result:
             matched_job_id = job.id
 
@@ -614,7 +683,8 @@ def assess_baseline_direct(
     project_carbon_tc_ha: float = Form(...),
     stratum: str = Form("SUNDARBANS_MANGROVE"),
     leakage_belt_loss_rate: float = Form(0.015),
-    regional_control_loss_rate: float = Form(0.018)
+    regional_control_loss_rate: float = Form(0.018),
+    principal: Principal = Depends(require("read")),
 ):
     """
     Direct simulation endpoint for Verra VM0047 dynamic baseline, leakage belt, and risk buffer.
@@ -630,16 +700,16 @@ def assess_baseline_direct(
     )
 
 @router.get("/uncertainty/{result_id}")
-def get_uncertainty_assessment(result_id: str, db: Session = Depends(get_db)):
+def get_uncertainty_assessment(
+    result_id: str,
+    principal: Principal = Depends(require("read")),
+    db: Session = Depends(get_db),
+):
     """
     Retrieves finite-sample distribution-free conformal uncertainty intervals (90% CI)
     and Verra VM0047 precision deduction evaluation for a carbon analysis result.
     """
-    res = db.query(CarbonResult).filter(CarbonResult.id == result_id).first()
-    if not res:
-        res = db.query(CarbonResult).filter(CarbonResult.job_id == result_id).first()
-    if not res:
-        raise HTTPException(status_code=404, detail="Carbon result not found.")
+    res = _get_tenant_result(db, result_id, principal.organization_id)
 
     assessment = compute_conformal_verra_assessment(
         net_creditable_tco2e=res.tonnes_co2e,
@@ -659,7 +729,8 @@ def assess_uncertainty_direct(
     carbon_lower_90: float = Form(...),
     carbon_upper_90: float = Form(...),
     estimated_carbon_tc_ha: float = Form(...),
-    allowable_error: float = Form(0.15)
+    allowable_error: float = Form(0.15),
+    principal: Principal = Depends(require("read")),
 ):
     """
     Direct simulation endpoint for Conformal Prediction bounds and Verra VM0047 precision deduction.
@@ -673,12 +744,17 @@ def assess_uncertainty_direct(
     )
 
 @router.get("/report/{job_id}")
-def get_report(job_id: str, format: str = "pdf", db: Session = Depends(get_db)):
+def get_report(
+    job_id: str,
+    format: str = "pdf",
+    principal: Principal = Depends(require("read")),
+    db: Session = Depends(get_db),
+):
     """
-    Compiles and downloads report in PDF, CSV, or GeoJSON formats.
+    Compiles and downloads report in PDF, CSV, or GeoJSON formats, scoped to caller's organization.
     """
-    job = db.query(AnalysisJob).filter(AnalysisJob.id == job_id).first()
-    if not job or not job.result:
+    job = _get_tenant_job(db, job_id, principal.organization_id)
+    if not job.result:
         raise HTTPException(status_code=404, detail="Analysis result or job not found.")
 
     # Project metadata mapping
@@ -738,13 +814,18 @@ def get_report(job_id: str, format: str = "pdf", db: Session = Depends(get_db)):
         )
 
 @router.get("/report/audit-dossier/{job_id}")
-def get_audit_dossier(job_id: str, format: str = "json", db: Session = Depends(get_db)):
+def get_audit_dossier(
+    job_id: str,
+    format: str = "json",
+    principal: Principal = Depends(require("read")),
+    db: Session = Depends(get_db),
+):
     """
-    Generates an automated, institutional-grade Verra VM0047 Monitoring Dossier & VVB Audit Package.
+    Generates an institutional-grade Verra VM0047 Monitoring Dossier & VVB Audit Package.
     Outputs: JSON (default), Markdown ('markdown' or 'md'), or PDF ('pdf').
     """
-    job = db.query(AnalysisJob).filter(AnalysisJob.id == job_id).first()
-    if not job or not job.result:
+    job = _get_tenant_job(db, job_id, principal.organization_id)
+    if not job.result:
         raise HTTPException(status_code=404, detail="Analysis result or job not found.")
 
     provenance = db.query(EstimateProvenance).filter(EstimateProvenance.result_id == job.result.id).first()
@@ -770,6 +851,7 @@ def get_audit_dossier(job_id: str, format: str = "json", db: Session = Depends(g
 @router.post("/boundary/upload")
 async def upload_boundary(
     file: UploadFile = File(...),
+    principal: Principal = Depends(require("write")),
     db: Session = Depends(get_db)
 ):
     """
@@ -843,8 +925,9 @@ async def upload_boundary(
                 
             boundary_geojson = json.dumps({"type": "Polygon", "coordinates": [coords_list]})
 
-        # Save boundary
+        # Save boundary scoped to tenant organization
         boundary = UploadedBoundary(
+            organization_id=principal.organization_id,
             name=filename,
             file_type=file_ext,
             boundary_data=boundary_geojson
@@ -863,33 +946,48 @@ async def upload_boundary(
         raise HTTPException(status_code=400, detail=f"Failed to parse spatial file: {str(e)}")
 
 @router.get("/dashboard")
-def get_dashboard_summary(db: Session = Depends(get_db)):
+def get_dashboard_summary(
+    principal: Principal = Depends(require("read")),
+    db: Session = Depends(get_db),
+):
     """
-    Returns aggregated carbon estimates, NDVI, and forest health statistics.
+    Returns aggregated carbon estimates, NDVI, and forest health statistics for the caller's organization.
     """
-    # Fetch completed analysis jobs
-    results = db.query(CarbonResult).all()
-    alerts_count = db.query(CarbonAlert).filter(CarbonAlert.is_resolved == False).count()
-    
+    results = (
+        db.query(CarbonResult)
+        .join(AnalysisJob, AnalysisJob.id == CarbonResult.job_id)
+        .filter(AnalysisJob.organization_id == principal.organization_id)
+        .order_by(CarbonResult.created_at.asc())
+        .all()
+    )
+    alerts_count = (
+        db.query(CarbonAlert)
+        .filter(CarbonAlert.organization_id == principal.organization_id, CarbonAlert.is_resolved == False)  # noqa: E712
+        .count()
+    )
+
     total_co2e = sum([r.tonnes_co2e for r in results])
     total_area = sum([r.forest_area_ha for r in results])
-    
+
     if len(results) > 0:
         avg_ndvi = sum([r.avg_ndvi for r in results]) / len(results)
         avg_confidence = sum([r.confidence for r in results]) / len(results)
-        # Average biomass density
         avg_biomass = sum([r.estimated_biomass for r in results]) / len(results)
     else:
         avg_ndvi = 0.0
         avg_confidence = 0.0
         avg_biomass = 0.0
 
+    forest_change_pct = None
+    if len(results) >= 2 and results[0].avg_ndvi > 0:
+        forest_change_pct = round(((results[-1].avg_ndvi - results[0].avg_ndvi) / results[0].avg_ndvi) * 100.0, 2)
+
     return {
         "current_carbon_estimate_tC_ha": round(avg_biomass * 0.475, 2) if len(results) > 0 else 0.0,
         "estimated_co2_storage_tCO2e": round(total_co2e, 2),
         "forest_health_score": round(avg_ndvi * 100, 1),
         "vegetation_index_ndvi": round(avg_ndvi, 3),
-        "forest_change_percent": 1.25, # mock forest cover trend change
+        "forest_change_percent": forest_change_pct,
         "estimated_biomass_Mg_ha": round(avg_biomass, 2),
         "confidence_score": round(avg_confidence, 2),
         "latest_satellite_date": datetime.date.today().strftime("%Y-%m-%d"),
@@ -899,11 +997,19 @@ def get_dashboard_summary(db: Session = Depends(get_db)):
     }
 
 @router.get("/alerts", response_model=List[dict])
-def get_alerts(db: Session = Depends(get_db)):
+def get_alerts(
+    principal: Principal = Depends(require("read")),
+    db: Session = Depends(get_db),
+):
     """
-    List all active satellite-triggered forest risk alerts.
+    List all active satellite-triggered forest risk alerts for the caller's organization.
     """
-    alerts = db.query(CarbonAlert).order_by(CarbonAlert.created_at.desc()).all()
+    alerts = (
+        db.query(CarbonAlert)
+        .filter(CarbonAlert.organization_id == principal.organization_id)
+        .order_by(CarbonAlert.created_at.desc())
+        .all()
+    )
     return [
         {
             "id": a.id,
@@ -918,38 +1024,27 @@ def get_alerts(db: Session = Depends(get_db)):
     ]
 
 @router.post("/alerts/resolve/{alert_id}")
-def resolve_alert(alert_id: str, db: Session = Depends(get_db)):
+def resolve_alert(
+    alert_id: str,
+    principal: Principal = Depends(require("write")),
+    db: Session = Depends(get_db),
+):
     """
-    Marks an alert as resolved.
+    Marks a tenant alert as resolved.
     """
-    alert = db.query(CarbonAlert).filter(CarbonAlert.id == alert_id).first()
+    alert = (
+        db.query(CarbonAlert)
+        .filter(CarbonAlert.id == alert_id, CarbonAlert.organization_id == principal.organization_id)
+        .first()
+    )
     if not alert:
         raise HTTPException(status_code=404, detail="Alert not found.")
     alert.is_resolved = True
     db.commit()
     return {"status": "success", "message": "Alert marked as resolved."}
 
-@router.post("/settings")
-def update_settings(model_type: Optional[str] = Form(None), payload: Optional[UpdateSettingsRequest] = None):
-    """
-    Toggles the active carbon estimation machine learning model (random_forest, xgboost, fusion).
-    """
-    chosen_type = (payload.model_type if payload else None) or model_type
-    if not chosen_type:
-        raise HTTPException(status_code=400, detail="model_type is required.")
-    success = carbon_estimator.set_model_type(chosen_type)
-    if not success:
-        raise HTTPException(status_code=400, detail=f"Model type '{chosen_type}' is invalid or not available.")
-    return {
-        "status": "success",
-        "active_model": carbon_estimator.model_type,
-        "xgboost_available": XGB_AVAILABLE,
-        "fusion_model_available": True,
-        "fusion_model_loaded": carbon_estimator.fusion_estimator.is_loaded
-    }
-
 @router.get("/settings")
-def get_settings():
+def get_settings(principal: Principal = Depends(require("read"))):
     """
     Retrieves active model settings including multi-modal fusion model gate status.
     """
@@ -967,15 +1062,27 @@ def get_settings():
 
 
 @router.post("/settings")
-def update_settings(payload: UpdateSettingsRequest):
+def update_settings(
+    payload: Optional[UpdateSettingsRequest] = None,
+    model_type: Optional[str] = Form(None),
+    principal: Principal = Depends(require("admin")),
+):
     """
-    Updates the active estimator model type (e.g. 'random_forest', 'xgboost', 'fusion').
+    Updates the active estimator model type (admin only).
     """
+    chosen_type = (payload.model_type if payload else None) or model_type
+    if not chosen_type:
+        raise HTTPException(status_code=400, detail="model_type is required.")
     try:
-        carbon_estimator.set_model_type(payload.model_type)
+        success = carbon_estimator.set_model_type(chosen_type)
+        if not success:
+            raise HTTPException(status_code=400, detail=f"Model type '{chosen_type}' is invalid or not available.")
         return {
             "status": "success",
             "active_model": carbon_estimator.model_type,
+            "xgboost_available": XGB_AVAILABLE,
+            "fusion_model_available": True,
+            "fusion_model_loaded": carbon_estimator.fusion_estimator.is_loaded,
             "fusion_model_status": carbon_estimator.fusion_estimator.model_meta.get("status", "gated_insufficient_real_data")
         }
     except ValueError as ve:
@@ -995,15 +1102,11 @@ def submit_ground_truth_plot(
     collected_by: str = Form(...),
     plot_radius_m: float = Form(15.0),
     notes: Optional[str] = Form(None),
+    principal: Principal = Depends(require("write")),
     db: Session = Depends(get_db)
 ):
     """
-    Logs a real field measurement. This is the only thing that can ever make
-    the model's accuracy claims real - there is no code substitute for someone
-    physically measuring trees. TODO: gate this behind field-team authentication
-    once auth exists; right now anyone who can reach this endpoint can write to
-    the calibration dataset, which is a data-integrity risk worth closing before
-    this goes anywhere near a VVB conversation.
+    Logs a real field measurement scoped to the caller's authenticated organization.
     """
     try:
         m_date = datetime.datetime.strptime(measurement_date, "%Y-%m-%d").date()
@@ -1011,6 +1114,7 @@ def submit_ground_truth_plot(
         raise HTTPException(status_code=400, detail="Invalid measurement_date format. Use YYYY-MM-DD.")
 
     plot = GroundTruthPlot(
+        organization_id=principal.organization_id,
         plot_name=plot_name,
         location_lat=location_lat,
         location_lng=location_lng,
@@ -1029,8 +1133,16 @@ def submit_ground_truth_plot(
 
 
 @router.get("/ground-truth")
-def list_ground_truth_plots(db: Session = Depends(get_db)):
-    plots = db.query(GroundTruthPlot).order_by(GroundTruthPlot.measurement_date.desc()).all()
+def list_ground_truth_plots(
+    principal: Principal = Depends(require("read")),
+    db: Session = Depends(get_db),
+):
+    plots = (
+        db.query(GroundTruthPlot)
+        .filter(GroundTruthPlot.organization_id == principal.organization_id)
+        .order_by(GroundTruthPlot.measurement_date.desc())
+        .all()
+    )
     return [{
         "id": p.id, "plot_name": p.plot_name, "location": [p.location_lat, p.location_lng],
         "measured_carbon_tc_ha": p.measured_carbon_tc_ha, "measurement_date": p.measurement_date.isoformat(),
@@ -1039,36 +1151,37 @@ def list_ground_truth_plots(db: Session = Depends(get_db)):
 
 
 @router.post("/recalibrate")
-def trigger_recalibration():
+def trigger_recalibration(principal: Principal = Depends(require("admin"))):
     """
-    Manually triggers the recalibration job (normally run on a schedule via
-    Celery beat - see calibration.py). TODO: gate behind admin auth before
-    exposing this outside internal use; it's a cheap operation to abuse
-    (mostly Earth Engine quota) even though it can't corrupt the live model
-    thanks to the staging/validate/promote design.
+    Triggers the recalibration job (admin only).
     """
     result = run_recalibration()
     return result
 
-# --- Part (c): provenance ---
+# --- Part (c): provenance & Accredited VVB PKI ---
 
 @router.get("/provenance/verify-chain")
-def verify_provenance_chain(db: Session = Depends(get_db)):
+def verify_provenance_chain(
+    principal: Principal = Depends(require("read")),
+    db: Session = Depends(get_db),
+):
     """
-    Walks the entire provenance chain and confirms nothing has been altered
-    after the fact. Run this before any audit conversation.
+    Walks the provenance chain and confirms hash + live quantification integrity.
     """
-    return provenance_utils.verify_chain(db)
+    return provenance_utils.verify_chain(db, organization_id=principal.organization_id)
 
 
 @router.get("/provenance/{result_id}")
-def get_provenance(result_id: str, db: Session = Depends(get_db)):
+def get_provenance(
+    result_id: str,
+    principal: Principal = Depends(require("read")),
+    db: Session = Depends(get_db),
+):
     """
-    Returns the full provenance record for one estimate with dual trust status:
-    1. Hash-chain integrity
-    2. Independent Ed25519 validator co-signatures
+    Returns the full provenance record for a tenant's estimate with dual trust status.
     """
-    record = db.query(EstimateProvenance).filter(EstimateProvenance.result_id == result_id).first()
+    res = _get_tenant_result(db, result_id, principal.organization_id)
+    record = db.query(EstimateProvenance).filter(EstimateProvenance.result_id == res.id).first()
     if not record:
         raise HTTPException(status_code=404, detail="No provenance record found for this result.")
 
@@ -1092,24 +1205,81 @@ def get_provenance(result_id: str, db: Session = Depends(get_db)):
     }
 
 
-@router.post("/provenance/generate-keys")
-def generate_validator_keys():
-    """
-    Generates a new Ed25519 keypair for an accredited validator or VVB auditor.
-    """
-    return provenance_utils.generate_validator_keypair()
+@router.get("/validators")
+def list_accredited_validators(
+    principal: Principal = Depends(require("read")),
+    db: Session = Depends(get_db),
+):
+    rows = db.query(AccreditedValidator).order_by(AccreditedValidator.created_at.desc()).all()
+    return [
+        {
+            "validator_id": v.validator_id,
+            "validator_name": v.validator_name,
+            "validator_organization": v.validator_organization,
+            "public_key_hex": v.public_key_hex,
+            "accreditation_standard": v.accreditation_standard,
+            "is_active": v.is_active,
+            "revoked_at": v.revoked_at.isoformat() if v.revoked_at else None,
+        }
+        for v in rows
+    ]
+
+
+@router.post("/validators", status_code=201)
+def create_accredited_validator(
+    payload: RegisterValidatorRequest,
+    principal: Principal = Depends(require("admin")),
+    db: Session = Depends(get_db),
+):
+    """Registers an external accredited VVB/DOE Ed25519 public key (admin only)."""
+    try:
+        entry = provenance_utils.register_accredited_validator(
+            db,
+            validator_id=payload.validator_id,
+            validator_name=payload.validator_name,
+            validator_organization=payload.validator_organization,
+            public_key_hex=payload.public_key_hex,
+            accreditation_standard=payload.accreditation_standard,
+            registered_by_sub=principal.sub,
+        )
+        return {
+            "status": "registered",
+            "validator_id": entry.validator_id,
+            "validator_organization": entry.validator_organization,
+            "public_key_hex": entry.public_key_hex,
+        }
+    except Exception as e:
+        raise HTTPException(status_code=400, detail=f"Invalid validator registration: {e}")
+
+
+@router.delete("/validators/{validator_id}")
+def revoke_validator(
+    validator_id: str,
+    principal: Principal = Depends(require("admin")),
+    db: Session = Depends(get_db),
+):
+    try:
+        entry = provenance_utils.revoke_accredited_validator(db, validator_id)
+        return {"status": "revoked", "validator_id": entry.validator_id}
+    except ValueError as ve:
+        raise HTTPException(status_code=404, detail=str(ve))
 
 
 @router.post("/provenance/{result_id}/sign")
-def sign_provenance(result_id: str, payload: SignProvenanceRequest, db: Session = Depends(get_db)):
+def sign_provenance(
+    result_id: str,
+    payload: SignProvenanceRequest,
+    principal: Principal = Depends(require("review")),
+    db: Session = Depends(get_db),
+):
     """
-    Attaches an external validator's Ed25519 co-signature to the provenance record.
-    Cryptographically verifies the signature over record_hash.
+    Attaches an accredited VVB validator's Ed25519 co-signature to a tenant provenance record.
     """
+    res = _get_tenant_result(db, result_id, principal.organization_id)
     try:
         sig_record = provenance_utils.add_validator_signature(
             db=db,
-            result_id=result_id,
+            result_id=res.id,
             validator_id=payload.validator_id,
             validator_name=payload.validator_name,
             validator_organization=payload.validator_organization,
@@ -1133,20 +1303,33 @@ def sign_provenance(result_id: str, payload: SignProvenanceRequest, db: Session 
 # --- Tiered Monitoring & Drone Verification Tasks (Treeconomy Pattern) ---
 
 @router.get("/verification-tasks")
-def get_verification_tasks(status: Optional[str] = None, db: Session = Depends(get_db)):
+def get_verification_tasks(
+    status: Optional[str] = None,
+    principal: Principal = Depends(require("read")),
+    db: Session = Depends(get_db),
+):
     """
-    Lists verification tasks flagged due to high model prediction uncertainty.
+    Lists verification tasks flagged due to high model prediction uncertainty for caller's organization.
     """
-    return list_verification_tasks(status=status, db=db)
+    return list_verification_tasks(status=status, db=db, organization_id=principal.organization_id)
 
 
 @router.post("/verification-tasks/{task_id}/complete")
-def complete_task(task_id: int, payload: CompleteTaskRequest, db: Session = Depends(get_db)):
+def complete_task(
+    task_id: str,
+    payload: CompleteTaskRequest,
+    principal: Principal = Depends(require("write")),
+    db: Session = Depends(get_db),
+):
     """
-    Marks a verification task as completed and ingests drone survey measurements.
+    Marks a verification task as completed and ingests drone survey measurements (tenant-scoped).
     """
+    task = db.query(VerificationTask).filter(VerificationTask.id == task_id).first()
+    if not task:
+        raise HTTPException(status_code=404, detail="Verification task not found.")
+    _get_tenant_result(db, task.result_id, principal.organization_id)
     try:
-        res = complete_verification_task(task_id, payload.dict(), db)
+        res = complete_verification_task(task_id, payload.model_dump(), db)
         return res
     except ValueError as ve:
         raise HTTPException(status_code=404, detail=str(ve))
@@ -1161,19 +1344,19 @@ def get_vm0047_export(
     project_id: str,
     result_id: Optional[str] = None,
     buffer_pool_pct: float = 18.0,
+    principal: Principal = Depends(require("read")),
     db: Session = Depends(get_db)
 ):
     """
-    Exports a Verra VM0047-compliant Dynamic Stocking Index submission bundle.
-    Contains multi-pool carbon stocks, sensor telemetry, conformal uncertainty deductions,
-    risk buffer pool withholding, and cryptographic multi-validator provenance.
+    Exports a Verra VM0047-compliant Dynamic Stocking Index submission bundle scoped to caller's organization.
     """
     try:
         bundle = export_vm0047_stocking_index(
             project_id=project_id,
             db=db,
             result_id=result_id,
-            buffer_pool_pct=buffer_pool_pct
+            buffer_pool_pct=buffer_pool_pct,
+            organization_id=principal.organization_id,
         )
         return bundle
     except ValueError as ve:

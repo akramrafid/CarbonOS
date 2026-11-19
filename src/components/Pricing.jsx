@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
-import { ArrowRight, CheckCircle2, ShieldCheck, Zap, Building2, HelpCircle, FileCheck2 } from 'lucide-react';
+import { ArrowRight, CheckCircle2, Building2 } from 'lucide-react';
 import { useTheme } from '../context/ThemeContext';
 
 const Pricing = () => {
@@ -9,44 +9,44 @@ const Pricing = () => {
   const [isAnnual, setIsAnnual] = useState(true);
 
   return (
-    <section id="pricing" className="w-full bg-[#040A06] text-white py-20 sm:py-28 px-4 sm:px-6 lg:px-12 relative overflow-hidden border-t border-white/10">
-      {/* Background ambient lighting */}
-      <div className="absolute top-1/3 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[850px] h-[550px] bg-emerald-950/20 blur-[150px] pointer-events-none rounded-full" />
-
+    <section id="pricing" className={`w-full py-20 sm:py-28 px-4 sm:px-6 lg:px-12 relative overflow-hidden border-t ${
+      isLight ? 'bg-[#F2F3EE] text-[#0F291B] border-[#0F291B]/10' : 'bg-[#040A06] text-white border-white/10'
+    }`}>
       <div className="max-w-7xl mx-auto relative z-10">
-        
-        {/* Header */}
-        <div className="mb-14 text-center max-w-3xl mx-auto">
-          <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-emerald-950/60 border border-[#00C853]/40 text-[#00E676] font-mono text-xs font-semibold uppercase tracking-wider mb-5 shadow-[0_0_15px_rgba(0,230,118,0.15)]">
-            <span>Sovereign Infrastructure SaaS & Node Licensure</span>
+        {/* Header & Billing Interval Controls */}
+        <div className="flex flex-col lg:flex-row lg:items-end justify-between gap-6 mb-12">
+          <div className="max-w-2xl">
+            <h2 className={`text-3xl sm:text-4xl lg:text-5xl font-sans font-bold tracking-tight leading-tight ${
+              isLight ? 'text-[#0F291B]' : 'text-white'
+            }`}>
+              Predictable Scaling for{' '}
+              <span className={isLight ? 'text-[#15803d]' : 'text-[#00E676]'}>
+                Carbon Developers
+              </span>
+            </h2>
+            <p className={`font-sans text-base sm:text-lg mt-3 leading-relaxed ${
+              isLight ? 'text-[#37473E]' : 'text-white/70'
+            }`}>
+              Sovereign infrastructure SaaS and node licensure with automated MRV pipelines and zero hidden transaction tariffs.
+            </p>
           </div>
 
-          <h2 className="text-3xl sm:text-4xl lg:text-5xl font-sans font-bold tracking-tight text-white leading-tight">
-            Predictable Scaling for{' '}
-            <span className={isLight ? 'text-[#15803d] font-extrabold' : 'bg-gradient-to-r from-[#00E676] via-[#10B981] to-[#00C853] bg-clip-text text-transparent font-extrabold'}>
-              Carbon Developers
-            </span>
-          </h2>
-          <p className="font-sans text-base sm:text-lg text-white/70 mt-4 leading-relaxed">
-            Deploy automated MRV, satellite data pipelines, and sovereign ledger registry nodes with zero hidden transaction tariffs.
-          </p>
-
-          {/* Billing Interval Toggle Switch */}
-          <div className={`mt-8 inline-flex flex-wrap items-center justify-center p-1.5 rounded-2xl border backdrop-blur-xl gap-1 max-w-full ${
+          {/* Billing Interval Switch */}
+          <div className={`inline-flex flex-wrap items-center p-1 rounded-xl border gap-1 shrink-0 ${
             isLight
-              ? 'bg-white border-[#0F291B]/12 shadow-[0_8px_24px_-6px_rgba(15,41,27,0.08)]'
-              : 'bg-[#08150D] border-[#183822] shadow-lg'
+              ? 'bg-white border-[#0F291B]/12'
+              : 'bg-[#08150D] border-[#183822]'
           }`}>
             <button
               type="button"
               onClick={() => setIsAnnual(false)}
-              className={`px-3.5 sm:px-5 py-2.5 rounded-xl text-xs font-sans font-semibold transition-all duration-200 cursor-pointer min-h-[40px] ${
+              className={`px-4 py-2 rounded-lg text-xs font-sans font-semibold transition-colors cursor-pointer min-h-[38px] ${
                 isLight
                   ? !isAnnual
-                    ? 'bg-[#0F291B] text-white shadow-sm font-bold'
+                    ? 'bg-[#0F291B] text-white font-bold'
                     : 'text-[#46574D] hover:text-[#0F291B]'
                   : !isAnnual 
-                    ? 'bg-white text-black shadow-md font-bold' 
+                    ? 'bg-white text-black font-bold' 
                     : 'text-gray-300 hover:text-white'
               }`}
             >
@@ -55,30 +55,23 @@ const Pricing = () => {
             <button
               type="button"
               onClick={() => setIsAnnual(true)}
-              className={`px-3.5 sm:px-5 py-2.5 rounded-xl text-xs font-sans font-semibold flex items-center gap-2 transition-all duration-200 cursor-pointer min-h-[40px] ${
+              className={`px-4 py-2 rounded-lg text-xs font-sans font-semibold flex items-center gap-2 transition-colors cursor-pointer min-h-[38px] ${
                 isLight
                   ? isAnnual
-                    ? 'bg-[#15803d] text-white font-bold shadow-sm'
+                    ? 'bg-[#15803d] text-white font-bold'
                     : 'text-[#46574D] hover:text-[#0F291B]'
                   : isAnnual 
-                    ? 'bg-[#00C853] text-[#050C07] font-bold shadow-[0_0_20px_rgba(0,200,83,0.35)]' 
+                    ? 'bg-[#00C853] text-[#050C07] font-bold' 
                     : 'text-gray-300 hover:text-white'
               }`}
             >
               <span>Annual Settlement</span>
-              <span
-                className={`text-[10px] font-mono font-extrabold uppercase px-2 py-0.5 rounded-full ${
-                  isLight
-                    ? isAnnual
-                      ? 'text-white'
-                      : 'bg-[#E3F2E9] text-[#15803d]'
-                    : isAnnual 
-                      ? 'bg-[#050C07]/20 text-[#050C07]' 
-                      : 'bg-[#00C853]/20 text-[#00E676] border border-[#00C853]/30'
-                }`}
-                style={isLight && isAnnual ? { backgroundColor: '#0F291B', color: '#FFFFFF' } : undefined}
-              >
-                Save 20%
+              <span className={`text-[10px] font-mono font-bold uppercase ${
+                isLight
+                  ? isAnnual ? 'text-[#DCFCE7]' : 'text-[#15803d]'
+                  : isAnnual ? 'text-[#050C07]' : 'text-[#00E676]'
+              }`}>
+                −20%
               </span>
             </button>
           </div>
@@ -142,7 +135,7 @@ const Pricing = () => {
             </div>
 
             <Link 
-              to="/platform/saas-dashboard" 
+              to="/platform/esg" 
               className="w-full py-3.5 rounded-xl font-sans font-semibold text-xs text-center bg-white/[0.08] hover:bg-white/[0.16] text-white border border-white/15 hover:border-white/30 transition-all duration-200 block cursor-pointer"
             >
               Deploy Starter Node
@@ -227,7 +220,7 @@ const Pricing = () => {
             </div>
 
             <Link 
-              to="/platform/saas-dashboard" 
+              to="/platform/esg" 
               className="w-full py-4 rounded-xl font-sans font-bold text-xs text-center bg-[#00C853] hover:bg-[#00E676] text-[#050C07] transition-all duration-200 shadow-[0_0_25px_rgba(0,200,83,0.35)] flex items-center justify-center gap-2 cursor-pointer"
             >
               <span>Provision Institutional Node</span>

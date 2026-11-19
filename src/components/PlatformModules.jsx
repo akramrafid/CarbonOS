@@ -394,10 +394,7 @@ const PlatformModules = () => {
               onMouseEnter={() => setHoveredNode({ type: 'left', id: node.id })}
               onMouseLeave={() => setHoveredNode(null)}
             >
-              {/* Pulsing indicator dot */}
-              <div className="w-2 h-2 rounded-full bg-[#10b981] mr-3 relative flex items-center justify-center">
-                <div className="absolute w-2.5 h-2.5 rounded-full bg-[#10b981]/50 animate-ping group-hover:duration-700"></div>
-              </div>
+              <div className={`w-2 h-2 rounded-full mr-3 shrink-0 ${isLight ? 'bg-[#15803d]' : 'bg-[#10b981]'}`} />
               <span className="text-registry text-xs font-mono tracking-wide">{node.title}</span>
               {/* Edge connector anchor */}
               <div className={`absolute right-[-4px] top-1/2 -translate-y-1/2 w-2 h-2 rounded-full bg-[#10b981] border z-30 shadow-[0_0_8px_rgba(16,185,129,0.8)] group-hover:scale-125 transition-transform duration-300 ${isLight ? 'border-white' : 'border-[#040A06]'}`}></div>
@@ -425,10 +422,7 @@ const PlatformModules = () => {
               onMouseEnter={() => setHoveredNode({ type: 'right', id: node.id })}
               onMouseLeave={() => setHoveredNode(null)}
             >
-              {/* Pulsing indicator dot */}
-              <div className="w-2 h-2 rounded-full bg-[#06b6d4] mr-3 relative flex items-center justify-center">
-                <div className="absolute w-2.5 h-2.5 rounded-full bg-[#06b6d4]/50 animate-ping group-hover:duration-700"></div>
-              </div>
+              <div className={`w-2 h-2 rounded-full mr-3 shrink-0 ${isLight ? 'bg-[#0369a1]' : 'bg-[#06b6d4]'}`} />
               <span className="text-registry text-xs font-mono tracking-wide">{node.title}</span>
               {/* Edge connector anchor */}
               <div className={`absolute left-[-4px] top-1/2 -translate-y-1/2 w-2 h-2 rounded-full bg-[#06b6d4] border z-30 shadow-[0_0_8px_rgba(6,182,212,0.8)] group-hover:scale-125 transition-transform duration-300 ${isLight ? 'border-white' : 'border-[#040A06]'}`}></div>
@@ -587,9 +581,7 @@ const PlatformModules = () => {
                       : 'bg-[#080F0B]/80 border-emerald/20 hover:border-emerald/50'
                   }`}
                 >
-                  <div className="w-2 h-2 rounded-full bg-[#10b981] mr-3 relative flex items-center justify-center">
-                    <div className="absolute w-2 h-2 rounded-full bg-[#10b981]/50 animate-ping"></div>
-                  </div>
+                  <div className={`w-2 h-2 rounded-full mr-3 shrink-0 ${isLight ? 'bg-[#15803d]' : 'bg-[#10b981]'}`} />
                   <span className="text-registry text-xs font-mono group-hover:text-emerald transition-colors">{node.title}</span>
                 </Link>
               ))}
@@ -611,9 +603,7 @@ const PlatformModules = () => {
                       : 'bg-[#080F0B]/80 border-cyan/20'
                   }`}
                 >
-                  <div className="w-2 h-2 rounded-full bg-[#06b6d4] mr-3 relative flex items-center justify-center">
-                    <div className="absolute w-2 h-2 rounded-full bg-[#06b6d4]/50 animate-ping"></div>
-                  </div>
+                  <div className={`w-2 h-2 rounded-full mr-3 shrink-0 ${isLight ? 'bg-[#0369a1]' : 'bg-[#06b6d4]'}`} />
                   <span className="text-registry text-xs font-mono">{node.title}</span>
                 </div>
               ))}

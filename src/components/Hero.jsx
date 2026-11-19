@@ -167,60 +167,30 @@ const Hero = () => {
           
           {/* Left Column: Brand Statement & Primary Actions */}
           <div className="lg:col-span-7 flex flex-col items-start text-left pt-2 sm:pt-6 lg:pt-0 min-w-0">
-            
-            {/* Live Protocol Status Pill */}
-            <div className={`hero-pill inline-flex flex-wrap items-center gap-2 backdrop-blur-xl rounded-2xl sm:rounded-full py-1.5 px-3.5 sm:px-4 mb-5 sm:mb-6 transition-all duration-300 max-w-full border ${
-              isLight
-                ? 'bg-white/92 border-[#0F291B]/12 shadow-[0_6px_18px_-6px_rgba(15,41,27,0.10)]'
-                : 'bg-black/40 hover:bg-black/60 border-emerald/30 hover:border-emerald/60 shadow-[0_0_20px_rgba(0,200,83,0.15)]'
-            }`}>
-              <span className="flex h-2 w-2 relative shrink-0">
-                <span className={`animate-ping absolute inline-flex h-full w-full rounded-full opacity-75 ${isLight ? 'bg-[#15803d]' : 'bg-[#00C853]'}`}></span>
-                <span className={`relative inline-flex rounded-full h-2 w-2 ${isLight ? 'bg-[#15803d]' : 'bg-[#00C853]'}`}></span>
-              </span>
-              <span className={`font-mono text-[10px] sm:text-[11px] font-semibold tracking-wider uppercase whitespace-nowrap ${isLight ? 'text-[#15803d]' : 'text-emerald'}`}>
-                CarbonOS Protocol v2.4
-              </span>
-              <span className={`hidden sm:inline ${isLight ? 'text-[#0F291B]/20' : 'text-white/20'}`}>|</span>
-              <span className={`font-sans text-[11px] hidden sm:inline ${isLight ? 'text-[#37473E]' : 'text-white/80'}`}>
-                GHG Protocol Scope 1 &amp; 2 method
-              </span>
-              <span className={`font-mono text-[9px] px-2 py-0.5 rounded-full font-bold whitespace-nowrap ${
-                isLight
-                  ? 'bg-[#E3F2E9] text-[#14532D]'
-                  : 'bg-emerald/15 text-emerald border border-emerald/30'
-              }`}>
-                97% DIRECT PAYOUT
-              </span>
-            </div>
 
-            {/* Headline with High-Impact Contrast */}
-            <h1 className="flex flex-col mb-5 sm:mb-6 w-full tracking-tight">
-              <span className="hero-h1 font-sans font-extrabold text-[32px] sm:text-5xl lg:text-[68px] leading-[1.08] text-white">
-                Bangladesh's
+            {/* Headline with High-Impact Typographic Scale (Unified Poppins, Zero Gradient Text) */}
+            <h1 className="flex flex-col mb-5 sm:mb-6 w-full tracking-tight font-sans font-extrabold">
+              <span className="hero-h1 text-[34px] sm:text-5xl lg:text-[64px] leading-[1.08] text-white">
+                Bangladesh's Carbon
               </span>
-              <span className="hero-h1 font-sans font-extrabold text-[32px] sm:text-5xl lg:text-[68px] leading-[1.08] text-white">
-                Carbon Infrastructure
-              </span>
-              <span className={`hero-h1 serif-drama italic text-[38px] sm:text-6xl lg:text-[80px] leading-[1.05] mt-1 ${
-                isLight
-                  ? 'text-[#15803d]'
-                  : 'bg-gradient-to-r from-[#00C853] via-[#69F0AE] to-[#A7F3D0] bg-clip-text text-transparent drop-shadow-sm'
-              }`}>
-                & Credit Exchange.
+              <span className="hero-h1 text-[34px] sm:text-5xl lg:text-[64px] leading-[1.08] text-white">
+                Infrastructure{' '}
+                <span className={isLight ? 'text-[#15803d]' : 'text-[#00C853]'}>
+                  &amp; Credit Exchange.
+                </span>
               </span>
             </h1>
 
             {/* Precision Subtitle */}
-            <p className="hero-body font-sans text-sm sm:text-lg lg:text-xl text-white/80 max-w-[620px] leading-relaxed mb-6 sm:mb-8 font-normal">
+            <p className="hero-body font-sans text-sm sm:text-lg lg:text-xl text-white/80 max-w-[600px] leading-relaxed mb-7 sm:mb-9 font-normal">
               Digitizing, tracing and securing Bangladesh's carbon asset pipeline from 1M+ smallholder rural farmers directly to global ESG institutional registries.
             </p>
 
-            {/* Action Buttons & Fast Proof */}
+            {/* Action Buttons */}
             <div className="hero-cta flex flex-wrap gap-3 sm:gap-4 items-center mb-8 sm:mb-10 w-full">
               <Link 
                 to="/platform/marketplace" 
-                className="group relative inline-flex items-center justify-center bg-[#00C853] hover:bg-[#00E676] text-[#040A06] font-sans font-bold text-sm sm:text-base px-5 sm:px-7 py-3.5 sm:py-4 rounded-full transition-all duration-300 shadow-[0_0_30px_rgba(0,200,83,0.35)] hover:shadow-[0_0_45px_rgba(0,200,83,0.55)] hover:scale-[1.02] active:scale-[0.98] min-h-[44px] w-full sm:w-auto"
+                className="group relative inline-flex items-center justify-center bg-[#00C853] hover:bg-[#00E676] text-[#040A06] font-sans font-bold text-sm sm:text-base px-6 sm:px-7 py-3.5 sm:py-4 rounded-full transition-all duration-300 shadow-[0_0_24px_rgba(0,200,83,0.3)] hover:scale-[1.02] active:scale-[0.98] min-h-[44px] w-full sm:w-auto"
               >
                 <span>Explore Credit Listings</span>
                 <ArrowRight size={18} className="ml-2 group-hover:translate-x-1 transition-transform" />
@@ -239,7 +209,7 @@ const Hero = () => {
               </Link>
 
               <Link
-                to="/platform/saas-dashboard"
+                to="/platform/esg"
                 className="inline-flex items-center text-xs font-mono text-white/70 hover:text-emerald px-2 py-2.5 min-h-[44px] transition-colors"
               >
                 <Lock size={12} className="mr-1.5 text-emerald" />
@@ -247,131 +217,119 @@ const Hero = () => {
               </Link>
             </div>
 
-            {/* Regulatory Alignment Micro-Badges */}
+            {/* Regulatory Alignment Ledger Strip */}
             <div className="flex flex-wrap gap-3 sm:gap-6 pt-5 sm:pt-6 border-t border-white/10 w-full">
               <div className="hero-trust-badge flex items-center space-x-2 text-xs text-white/70">
-                <CheckCircle2 size={16} className="text-emerald shrink-0" />
+                <CheckCircle2 size={15} className="text-emerald shrink-0" />
                 <span>Cited, second-person-approved factors only</span>
               </div>
               <div className="hero-trust-badge flex items-center space-x-2 text-xs text-white/70">
-                <ShieldCheck size={16} className="text-emerald shrink-0" />
-                <span>Every ledger line traceable to its evidence</span>
+                <ShieldCheck size={15} className="text-emerald shrink-0" />
+                <span>Every ledger line traceable to evidence</span>
               </div>
               <div className="hero-trust-badge flex items-center space-x-2 text-xs text-white/70">
-                <Globe size={16} className="text-emerald shrink-0" />
-                <span>Labelled NOT ASSURED until a verifier signs</span>
+                <Globe size={15} className="text-emerald shrink-0" />
+                <span>Labelled NOT ASSURED until verified</span>
               </div>
             </div>
 
           </div>
 
-          {/* Right Column: Sovereign Exchange Terminal Card */}
+          {/* Right Column: Single-Surface Hairline Clearing Terminal Sheet (Zero Nested Cards) */}
           <div className="lg:col-span-5 w-full min-w-0">
-            <div className={`hero-terminal-card backdrop-blur-2xl border rounded-2xl sm:rounded-[2rem] p-4 sm:p-6 lg:p-7 relative overflow-hidden ${
+            <div className={`hero-terminal-card backdrop-blur-2xl border rounded-2xl relative overflow-hidden ${
               isLight
-                ? 'bg-white/95 border-[#0F291B]/12 shadow-[0_24px_60px_-15px_rgba(15,41,27,0.14),0_6px_18px_-6px_rgba(15,41,27,0.06)]'
-                : 'bg-[#080F0B]/90 border-white/15 shadow-[0_20px_60px_rgba(0,0,0,0.7)]'
+                ? 'bg-white/96 border-[#0F291B]/12 shadow-[0_24px_60px_-15px_rgba(15,41,27,0.14),0_6px_18px_-6px_rgba(15,41,27,0.06)]'
+                : 'bg-[#080F0B]/92 border-white/15 shadow-[0_20px_60px_rgba(0,0,0,0.7)]'
             }`}>
               
-              {/* Corner Accent Glow */}
-              <div className="absolute top-0 right-0 w-48 h-48 bg-emerald/10 rounded-full blur-3xl pointer-events-none"></div>
-              
-              {/* Terminal Header */}
-              <div className={`flex flex-wrap items-center justify-between gap-2 border-b pb-3 sm:pb-4 mb-4 sm:mb-5 ${isLight ? 'border-[#0F291B]/10' : 'border-white/10'}`}>
+              {/* Terminal Top Header */}
+              <div className={`flex flex-wrap items-center justify-between gap-2 px-5 sm:px-6 py-3.5 border-b ${isLight ? 'border-[#0F291B]/10' : 'border-white/10'}`}>
                 <div className="flex items-center space-x-2">
-                  <div className={`w-2.5 h-2.5 rounded-full animate-pulse shrink-0 ${isLight ? 'bg-[#15803d]' : 'bg-emerald'}`}></div>
-                  <span className={`font-mono text-[10px] sm:text-[11px] uppercase tracking-widest font-semibold ${isLight ? 'text-[#0F291B]' : 'text-white/80'}`}>
-                    Live Clearing Terminal // Dhaka
+                  <span className={`w-2 h-2 rounded-full shrink-0 ${isLight ? 'bg-[#15803d]' : 'bg-emerald'}`} />
+                  <span className={`font-mono text-[11px] uppercase tracking-wider font-semibold ${isLight ? 'text-[#0F291B]' : 'text-white/85'}`}>
+                    Clearing Terminal · Dhaka
                   </span>
                 </div>
-                <div className={`flex items-center space-x-1.5 font-mono text-[10px] px-2.5 py-0.5 rounded-full shrink-0 ${
-                  isLight
-                    ? 'text-[#14532D] bg-[#E5F4EB]'
-                    : 'text-emerald bg-emerald/10 border border-emerald/20'
-                }`}>
-                  <Activity size={12} />
-                  <span>42ms Consensus</span>
-                </div>
+                <span className={`font-mono text-[10px] ${isLight ? 'text-[#15803d] font-semibold' : 'text-emerald'}`}>
+                  Protocol v2.4 · 42ms
+                </span>
               </div>
 
-              {/* 4 Core Metrics Grid */}
-              <div className="grid grid-cols-1 min-[360px]:grid-cols-2 gap-2.5 sm:gap-3.5 mb-4 sm:mb-5">
-                
+              {/* 2x2 Hairline Ledger Matrix (No Nested Boxes) */}
+              <div className={`grid grid-cols-1 min-[360px]:grid-cols-2 divide-y min-[360px]:divide-y-0 ${isLight ? 'divide-[#0F291B]/10' : 'divide-white/10'}`}>
                 {/* Metric 1 */}
-                <div className={`border rounded-2xl p-3 sm:p-4 flex flex-col justify-between min-w-0 ${isLight ? 'bg-[#F5F8F5] border-[#0F291B]/8' : 'bg-white/[0.03] border-white/10'}`}>
-                  <div className={`flex items-center justify-between text-[10px] sm:text-[11px] font-mono gap-1 ${isLight ? 'text-[#4A5D52]' : 'text-white/50'}`}>
-                    <span className="truncate">TOTAL REDUCTION</span>
-                    <TrendingUp size={14} className={`shrink-0 ${isLight ? 'text-[#15803d]' : 'text-emerald'}`} />
+                <div className={`p-4 sm:p-5 border-b ${isLight ? 'border-[#0F291B]/10 min-[360px]:border-r' : 'border-white/10 min-[360px]:border-r'}`}>
+                  <div className={`text-[10px] font-mono uppercase tracking-wider ${isLight ? 'text-[#4A5D52]' : 'text-white/55'}`}>
+                    Total Reduction
                   </div>
-                  <div className="mt-2">
-                    <span className={`font-mono font-bold text-xl sm:text-2xl lg:text-3xl ${isLight ? 'text-[#0F291B]' : 'text-white'}`}>10.42M</span>
-                    <span className={`font-mono text-xs ml-1 font-semibold ${isLight ? 'text-[#15803d]' : 'text-emerald'}`}>tCO₂e</span>
+                  <div className="mt-1.5 flex items-baseline gap-1">
+                    <span className={`font-mono font-bold text-xl sm:text-2xl tabular-nums ${isLight ? 'text-[#0F291B]' : 'text-white'}`}>10.42M</span>
+                    <span className={`font-mono text-xs font-semibold ${isLight ? 'text-[#15803d]' : 'text-emerald'}`}>tCO₂e</span>
                   </div>
-                  <span className={`font-sans text-[10px] mt-1 font-semibold ${isLight ? 'text-[#15803d]' : 'text-emerald/80'}`}>+18.4% YoY</span>
+                  <span className={`font-sans text-[11px] mt-1 block font-medium ${isLight ? 'text-[#15803d]' : 'text-emerald/85'}`}>+18.4% YoY</span>
                 </div>
 
                 {/* Metric 2 */}
-                <div className={`border rounded-2xl p-3 sm:p-4 flex flex-col justify-between min-w-0 ${isLight ? 'bg-[#F5F8F5] border-[#0F291B]/8' : 'bg-white/[0.03] border-white/10'}`}>
-                  <div className={`flex items-center justify-between text-[10px] sm:text-[11px] font-mono gap-1 ${isLight ? 'text-[#4A5D52]' : 'text-white/50'}`}>
-                    <span className="truncate">FARMER REMITTANCE</span>
-                    <span className={`text-[10px] font-mono font-bold shrink-0 ${isLight ? 'text-[#15803d]' : 'text-emerald'}`}>97.0%</span>
+                <div className={`p-4 sm:p-5 border-b ${isLight ? 'border-[#0F291B]/10' : 'border-white/10'}`}>
+                  <div className={`flex items-center justify-between text-[10px] font-mono uppercase tracking-wider gap-1 ${isLight ? 'text-[#4A5D52]' : 'text-white/55'}`}>
+                    <span>Direct Payout</span>
+                    <span className={`font-bold ${isLight ? 'text-[#15803d]' : 'text-emerald'}`}>97.0%</span>
                   </div>
-                  <div className="mt-2">
-                    <span className={`font-mono font-bold text-xl sm:text-2xl lg:text-3xl ${isLight ? 'text-[#15803d]' : 'text-emerald'}`}>৳412.8M</span>
+                  <div className="mt-1.5">
+                    <span className={`font-mono font-bold text-xl sm:text-2xl tabular-nums ${isLight ? 'text-[#15803d]' : 'text-emerald'}`}>৳412.8M</span>
                   </div>
-                  <span className={`font-sans text-[10px] mt-1 ${isLight ? 'text-[#4A5D52]' : 'text-white/60'}`}>bKash / Nagad Direct Wallets</span>
+                  <span className={`font-sans text-[11px] mt-1 block ${isLight ? 'text-[#4A5D52]' : 'text-white/60'}`}>bKash / Nagad direct</span>
                 </div>
 
                 {/* Metric 3 */}
-                <div className={`border rounded-2xl p-3 sm:p-4 flex flex-col justify-between min-w-0 ${isLight ? 'bg-[#F5F8F5] border-[#0F291B]/8' : 'bg-white/[0.03] border-white/10'}`}>
-                  <div className={`flex items-center justify-between text-[10px] sm:text-[11px] font-mono gap-1 ${isLight ? 'text-[#4A5D52]' : 'text-white/50'}`}>
-                    <span className="truncate">LIVE LIQUIDITY</span>
-                    <Layers size={14} className={`shrink-0 ${isLight ? 'text-[#0369a1]' : 'text-cyan-400'}`} />
+                <div className={`p-4 sm:p-5 min-[360px]:border-r ${isLight ? 'border-[#0F291B]/10' : 'border-white/10'}`}>
+                  <div className={`text-[10px] font-mono uppercase tracking-wider ${isLight ? 'text-[#4A5D52]' : 'text-white/55'}`}>
+                    Live Liquidity
                   </div>
-                  <div className="mt-2">
-                    <span className={`font-mono font-bold text-xl sm:text-2xl lg:text-3xl ${isLight ? 'text-[#0F291B]' : 'text-white'}`}>42,850</span>
-                    <span className={`font-mono text-xs ml-1 ${isLight ? 'text-[#4A5D52]' : 'text-white/50'}`}>tCO₂e</span>
+                  <div className="mt-1.5 flex items-baseline gap-1">
+                    <span className={`font-mono font-bold text-xl sm:text-2xl tabular-nums ${isLight ? 'text-[#0F291B]' : 'text-white'}`}>42,850</span>
+                    <span className={`font-mono text-xs ${isLight ? 'text-[#4A5D52]' : 'text-white/50'}`}>tCO₂e</span>
                   </div>
-                  <span className={`font-sans text-[10px] mt-1 font-medium ${isLight ? 'text-[#0369a1]' : 'text-cyan-400'}`}>Available for Settlement</span>
+                  <span className={`font-sans text-[11px] mt-1 block font-medium ${isLight ? 'text-[#0369a1]' : 'text-cyan-400'}`}>Available for settlement</span>
                 </div>
 
                 {/* Metric 4 */}
-                <div className={`border rounded-2xl p-3 sm:p-4 flex flex-col justify-between min-w-0 ${isLight ? 'bg-[#F5F8F5] border-[#0F291B]/8' : 'bg-white/[0.03] border-white/10'}`}>
-                  <div className={`flex items-center justify-between text-[10px] sm:text-[11px] font-mono gap-1 ${isLight ? 'text-[#4A5D52]' : 'text-white/50'}`}>
-                    <span className="truncate">AVG CLEARING</span>
-                    <span className={`font-mono text-[10px] shrink-0 ${isLight ? 'text-[#4A5D52]' : 'text-white/40'}`}>BDT / t</span>
+                <div className="p-4 sm:p-5">
+                  <div className={`flex items-center justify-between text-[10px] font-mono uppercase tracking-wider gap-1 ${isLight ? 'text-[#4A5D52]' : 'text-white/55'}`}>
+                    <span>Avg Clearing</span>
+                    <span>BDT/t</span>
                   </div>
-                  <div className="mt-2">
-                    <span className={`font-mono font-bold text-xl sm:text-2xl lg:text-3xl ${isLight ? 'text-[#0F291B]' : 'text-white'}`}>৳14,920</span>
+                  <div className="mt-1.5">
+                    <span className={`font-mono font-bold text-xl sm:text-2xl tabular-nums ${isLight ? 'text-[#0F291B]' : 'text-white'}`}>৳14,920</span>
                   </div>
-                  <span className={`font-sans text-[10px] mt-1 ${isLight ? 'text-[#4A5D52]' : 'text-white/60'}`}>Indicative spot reference</span>
+                  <span className={`font-sans text-[11px] mt-1 block ${isLight ? 'text-[#4A5D52]' : 'text-white/60'}`}>Indicative spot ref.</span>
                 </div>
-
               </div>
 
-              {/* Streaming Real-Time Transaction Ribbon */}
-              <div className={`border rounded-xl p-3.5 mb-5 relative ${isLight ? 'bg-[#EDF5F0] border-[#15803d]/15' : 'bg-black/50 border-white/10'}`}>
-                <div className="flex items-center justify-between mb-1.5">
+              {/* Settlement Stream Feed Row */}
+              <div className={`px-5 sm:px-6 py-4 border-t ${isLight ? 'border-[#0F291B]/10 bg-[#F7FAF8]' : 'border-white/10 bg-black/25'}`}>
+                <div className="flex items-center justify-between mb-1">
                   <span className={`font-mono text-[10px] uppercase tracking-wider font-semibold flex items-center gap-1.5 ${isLight ? 'text-[#15803d]' : 'text-emerald'}`}>
-                    <Radio size={12} className={`animate-pulse ${isLight ? 'text-[#15803d]' : 'text-emerald'}`} />
-                    <span>Real-Time Settlement Feed</span>
+                    <Radio size={11} />
+                    <span>Settlement Feed</span>
                   </span>
-                  <span className={`font-mono text-[10px] ${isLight ? 'text-[#4A5D52]' : 'text-white/40'}`}>
+                  <span className={`font-mono text-[10px] tabular-nums ${isLight ? 'text-[#4A5D52]' : 'text-white/45'}`}>
                     {tradeStreams[activeStreamIndex].time}
                   </span>
                 </div>
                 <p className={`font-mono text-xs font-medium truncate ${isLight ? 'text-[#0F291B]' : 'text-white'}`}>
                   {tradeStreams[activeStreamIndex].desc}
                 </p>
-                <p className={`font-mono text-[11px] truncate mt-0.5 ${isLight ? 'text-[#15803d] font-medium' : 'text-emerald/80'}`}>
+                <p className={`font-mono text-[11px] truncate mt-0.5 ${isLight ? 'text-[#15803d]' : 'text-emerald/85'}`}>
                   → {tradeStreams[activeStreamIndex].detail}
                 </p>
               </div>
 
-              {/* No registry integration or third-party certification is claimed. */}
-              <p className={`pt-2 border-t font-sans text-[10px] ${isLight ? 'border-[#0F291B]/10 text-[#556B5E]' : 'border-white/10 text-white/50'}`}>
+              {/* Footnote */}
+              <div className={`px-5 sm:px-6 py-2.5 border-t font-sans text-[10px] ${isLight ? 'border-[#0F291B]/8 text-[#556B5E]' : 'border-white/8 text-white/50'}`}>
                 No registry integration or third-party certification is claimed.
-              </p>
+              </div>
 
             </div>
           </div>

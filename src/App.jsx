@@ -1,5 +1,5 @@
 import React, { useEffect, Suspense } from 'react';
-import { Routes, Route, useLocation } from 'react-router-dom';
+import { Routes, Route, Navigate, useLocation } from 'react-router-dom';
 import Navbar from './components/Navbar';
 import Footer from './components/Footer';
 import Home from './pages/Home';
@@ -77,9 +77,10 @@ function App() {
           <Route path="/platform/verification-workflow" element={<VerificationWorkflow />} />
           <Route path="/platform/marketplace" element={<MarketplaceBrowse />} />
           <Route path="/platform/ai-detection" element={<AIDetection />} />
-          <Route path="/platform/saas-dashboard" element={<SaaSDashboard />} />
-          <Route path="/platform/saas" element={<SaaSDashboard />} />
-          <Route path="/esg" element={<SaaSDashboard />} />
+          <Route path="/demo-showcase" element={<SaaSDashboard />} />
+          <Route path="/platform/saas-dashboard" element={<Navigate to="/demo-showcase" replace />} />
+          <Route path="/platform/saas" element={<Navigate to="/demo-showcase" replace />} />
+          <Route path="/esg" element={<EsgWorkspace />} />
           <Route path="/platform/esg" element={<EsgWorkspace />} />
           <Route path="/platform/esg/callback" element={<EsgCallback />} />
           <Route path="/platform/impact" element={<Impact />} />
