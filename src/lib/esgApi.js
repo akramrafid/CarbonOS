@@ -5,7 +5,20 @@
 
 import { DEMO_ORG_ID, getInitialDemoState } from './esgDemoFixtures';
 
-const BASE_URL = import.meta.env.VITE_FASTAPI_API_URL || 'http://localhost:8000';
+export function resolveApiBase() {
+  const configured = typeof import.meta !== 'undefined' ? import.meta.env?.VITE_FASTAPI_API_URL : undefined;
+  if (
+    typeof import.meta !== 'undefined' &&
+    import.meta.env?.DEV &&
+    typeof window !== 'undefined' &&
+    (!configured || /^https?:\/\/(localhost|127\.0\.0\.1|\[::1\]):8000\/?$/i.test(configured))
+  ) {
+    return '';
+  }
+  return configured || 'http://localhost:8000';
+}
+
+const BASE_URL = resolveApiBase();
 
 let session = { token: null, organizationId: null };
 let offlineStore = getInitialDemoState();

@@ -2,7 +2,7 @@ import React, { useState, useEffect, useMemo, useRef } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useTheme } from '../../context/ThemeContext';
 import DmrvMapStudio from '../../components/DmrvMapStudio';
-import { clearEsgSession, getEsgAuthHeaders, hasEsgToken } from '../../lib/esgApi';
+import { clearEsgSession, getEsgAuthHeaders, hasEsgToken, resolveApiBase } from '../../lib/esgApi';
 import { clearStoredDemoSession, getStoredDemoSession, loadSession } from '../../lib/esgAuth';
 import { 
   Activity, 
@@ -52,7 +52,7 @@ import {
   X
 } from 'lucide-react';
 
-const FASTAPI_API_URL = import.meta.env.VITE_FASTAPI_API_URL || 'http://localhost:8000';
+const FASTAPI_API_URL = resolveApiBase();
 
 let _carbonSessionPromise = null;
 async function ensureCarbonSession(forceRefresh = false) {
@@ -1253,20 +1253,25 @@ const CarbonMonitoring = () => {
   // Fetch model architecture settings
   const fetchModelSettings = async () => {
     try {
-      const res = await carbonFetch(`${FASTAPI_API_URL}/api/carbon/settings`);
+      const controller = new AbortController();
+      const tId = setTimeout(() => controller.abort(), 10000);
+      const res = await carbonFetch(`${FASTAPI_API_URL}/api/carbon/settings`, { signal: controller.signal })
+        .finally(() => clearTimeout(tId));
       if (res.ok) {
         const data = await res.json();
         setModelSettings(prev => ({ ...prev, ...data }));
+      } else {
+        setModelSettings(prev => ({ ...prev, satellite_engine_mode: 'offline' }));
       }
     } catch {
-      // Retain default model settings
+      setModelSettings(prev => ({ ...prev, satellite_engine_mode: 'offline' }));
     }
   };
 
   // Fetch provenance trust and validator signatures
   const fetchProvenanceTrust = async (resultId) => {
     const rId = resultId || selectedJob?.result?.id || selectedJob?.id;
-    if (!rId) return;
+    if (!rId || String(rId).startsWith('mrv-')) return;
     try {
       const res = await carbonFetch(`${FASTAPI_API_URL}/api/carbon/provenance/${rId}`);
       if (res.ok) {
@@ -1516,12 +1521,12 @@ const CarbonMonitoring = () => {
   const fetchDashboardStats = async () => {
     try {
       const controller = new AbortController();
-      const tId = setTimeout(() => controller.abort(), 5000);
+      const tId = setTimeout(() => controller.abort(), 8000);
       const res = await carbonFetch(`${FASTAPI_API_URL}/api/carbon/dashboard`, { signal: controller.signal });
       clearTimeout(tId);
       if (res.ok) {
         const data = await res.json();
-        setDashboardData(data);
+        setDashboardData((prev) => ({ ...prev, ...data }));
       }
     } catch (e) {
       // Retain DEFAULT_DASHBOARD_DATA smoothly
@@ -1531,15 +1536,17 @@ const CarbonMonitoring = () => {
   const fetchHistory = async () => {
     try {
       const controller = new AbortController();
-      const tId = setTimeout(() => controller.abort(), 5000);
+      const tId = setTimeout(() => controller.abort(), 8000);
       const res = await carbonFetch(`${FASTAPI_API_URL}/api/carbon/history`, { signal: controller.signal });
       clearTimeout(tId);
       if (res.ok) {
         const data = await res.json();
         if (data.items && data.items.length > 0) {
           setAnalysisHistory(data.items);
-          setSelectedJob(data.items[0]);
-          setMapBounds(getJobBounds(data.items[0]));
+          const first = data.items[0];
+          setSelectedJob(first);
+          setMapBounds(getJobBounds(first));
+          fetchProvenanceTrust(first.result?.id || first.id);
         }
       }
     } catch (e) {
@@ -1550,7 +1557,7 @@ const CarbonMonitoring = () => {
   const fetchAlerts = async () => {
     try {
       const controller = new AbortController();
-      const tId = setTimeout(() => controller.abort(), 5000);
+      const tId = setTimeout(() => controller.abort(), 8000);
       const res = await carbonFetch(`${FASTAPI_API_URL}/api/carbon/alerts`, { signal: controller.signal });
       clearTimeout(tId);
       if (res.ok) {

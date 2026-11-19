@@ -4,12 +4,12 @@
 // without login/password prompts via the backend (/api/esg/demo/session), strictly
 // preserving tenant isolation and segregation of duties.
 import { UserManager, WebStorageStateStore } from 'oidc-client-ts';
-import { clearEsgSession, setEsgSession } from './esgApi';
+import { clearEsgSession, resolveApiBase, setEsgSession } from './esgApi';
 
 const issuer = typeof import.meta !== 'undefined' ? import.meta.env?.VITE_OIDC_ISSUER : undefined;
 const clientId = typeof import.meta !== 'undefined' ? import.meta.env?.VITE_OIDC_CLIENT_ID : undefined;
 const audience = typeof import.meta !== 'undefined' ? import.meta.env?.VITE_OIDC_AUDIENCE : undefined;
-const API_BASE = (typeof import.meta !== 'undefined' && import.meta.env?.VITE_FASTAPI_API_URL) || 'http://localhost:8000';
+const API_BASE = resolveApiBase();
 
 export const authConfigured = Boolean(issuer && clientId);
 export const DEMO_SESSION_KEY = 'carbonos.esg.demo_session';

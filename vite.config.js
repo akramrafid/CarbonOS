@@ -11,6 +11,16 @@ export default defineConfig({
     exclude: ['onnxruntime-web', 'puppeteer'],
   },
   server: {
+    proxy: {
+      '/api': {
+        target: 'http://127.0.0.1:8000',
+        changeOrigin: true,
+      },
+      '/health': {
+        target: 'http://127.0.0.1:8000',
+        changeOrigin: true,
+      },
+    },
     watch: {
       // Exclude large backend folders, virtual environments, and test scripts
       // from the file watcher to prevent high memory/CPU usage and heap out of memory crashes.
