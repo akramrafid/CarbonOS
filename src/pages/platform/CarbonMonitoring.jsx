@@ -2097,6 +2097,8 @@ const CarbonMonitoring = () => {
                 ? 'STAC COG Live'
                 : modelSettings.satellite_engine_mode === 'simulation_fallback'
                 ? 'Sim Fallback'
+                : modelSettings.satellite_engine_mode === 'offline'
+                ? 'Backend Offline'
                 : 'Connecting...'}
             </span>
           </div>
@@ -5459,6 +5461,8 @@ const CarbonMonitoring = () => {
                         ? 'STAC COG Live Fallback Active (Element84 Sentinel-2/1 Rasterio Reader)'
                         : modelSettings.satellite_engine_mode === 'simulation_fallback'
                         ? 'Simulation Fallback Active (No GEE or STAC COG connection)'
+                        : modelSettings.satellite_engine_mode === 'offline'
+                        ? 'FastAPI Satellite Engine Offline (:8000 unreachable)'
                         : 'Connecting to FastAPI Satellite Engine (:8000)...'}
                     </span>
                   </div>
