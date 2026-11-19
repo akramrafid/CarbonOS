@@ -99,13 +99,13 @@ export default function EsgWorkspace() {
       setTab(periodItems.length > 0 ? 'overview' : 'setup');
     }
   }, [orgId]);
-  }, [orgId]);
   // Refresh shared reference data on every tab change so new facilities/periods appear everywhere.
   useEffect(() => { loadRef(); }, [loadRef, tab]);
 
   const switchOrg = (id) => {
     setEsgSession({ organizationId: id });
     safeStorage(() => localStorage.setItem(ORG_KEY, id));
+    setRef({ types: null, periods: null, facilities: null });
     setOrgId(id);
     setTab('setup');
   };

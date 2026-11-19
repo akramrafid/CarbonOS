@@ -1,5 +1,6 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
+import { getInitialDemoState } from '../../src/lib/esgDemoFixtures.js';
 import {
   buildFacilityBreakdown,
   buildScopeShares,
@@ -123,4 +124,33 @@ test('summarizeOverviewData aggregates snapshots and E/S/G pillars', () => {
   assert.equal(vm.factorCounts.DRAFT, 1);
   assert.equal(vm.metricPillars.E[0].name, 'Water withdrawal');
   assert.equal(vm.snapshots.count, 1);
+});
+
+test('demo benchmark fixtures produce complete, crash-free overview metrics', () => {
+  const demo = getInitialDemoState();
+  const vm = summarizeOverviewData({
+    period: demo.periods[0],
+    run: demo.calculations[0],
+    activities: demo.activities,
+    facilities: demo.facilities,
+    factors: demo.factors,
+    metrics: demo.metrics,
+    metricDefinitions: demo.metricDefs,
+    scope3Records: demo.scope3Records,
+    disclosureReport: demo.disclosures.GRI,
+    snapshots: demo.snapshots,
+  });
+
+  assert.equal(vm.inventory.hasRun, true);
+  assert.ok(Math.abs(vm.inventory.scope1Tonnes - 3.886) < 1e-6);
+  assert.ok(Math.abs(vm.inventory.scope2LocationTonnes - 20.605) < 1e-6);
+  assert.equal(vm.inventory.scope2MarketTonnes, null);
+  assert.ok(Math.abs(vm.inventory.scope3Tonnes - 4.15) < 1e-6);
+  assert.equal(vm.activityPipeline.counts.APPROVED, 2);
+  assert.equal(vm.activityPipeline.counts.SUBMITTED, 1);
+  assert.equal(vm.metricPillars.E.length, 1);
+  assert.equal(vm.metricPillars.S.length, 2);
+  assert.equal(vm.metricPillars.G.length, 1);
+  assert.equal(vm.disclosure.addressed, 3);
+  assert.equal(vm.disclosure.gaps, 2);
 });

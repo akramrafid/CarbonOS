@@ -251,6 +251,7 @@ function handleOfflineRequest(path, options = {}) {
         grid_region: body?.grid_region || 'BD-NATIONAL-GRID',
         address: body?.address || '',
         operational_control: body?.operational_control ?? true,
+        financial_control: body?.financial_control ?? false,
         equity_share_pct: body?.equity_share_pct || '100.0000',
       };
       offlineStore.facilities.push(fac);
@@ -319,25 +320,29 @@ function handleOfflineRequest(path, options = {}) {
       return mockResponse({ items, total: items.length });
     }
     if (method === 'POST') {
-      const fac = offlineStore.facilities.find((f) => f.id === body?.facility_id);
+      const unit = body?.unit || 'kWh';
+      const qty = String(body?.quantity || '1000');
       const act = {
         id: `act-${Date.now()}`,
         facility_id: body?.facility_id || 'fac-demo-1',
-        facility_name: fac?.name || 'Savar Spinning Unit 1 [SAMPLE DATA]',
-        reporting_period_id: body?.reporting_period_id || 'prd-demo-1',
-        activity_type: body?.activity_type || 'electricity_grid',
-        scope: body?.scope || 'Scope 2',
-        date: body?.date || new Date().toISOString().slice(0, 10),
-        quantity: String(body?.quantity || '1000'),
-        unit: body?.unit || 'kWh',
-        emission_factor_id: body?.emission_factor_id || 'fac-f-1',
-        co2e_tonnes: ((Number(body?.quantity || 1000) * 0.634) / 1000).toFixed(4),
-        status: 'draft',
-        evidence_ref: body?.evidence_ref || 'MANUAL-ENTRY',
-        created_by_sub: 'demo-user',
+        reporting_period_id: body?.reporting_period_id || body?.period_id || 'prd-demo-1',
+        activity_type: body?.activity_type || 'electricity',
+        quantity: qty,
+        unit,
+        quantity_raw: qty,
+        unit_raw: unit,
+        activity_start: body?.activity_start || new Date().toISOString().slice(0, 10),
+        activity_end: body?.activity_end || new Date().toISOString().slice(0, 10),
+        meter_ref: body?.meter_ref || '',
+        source_type: body?.source_type || 'manual',
+        source_ref: body?.source_ref || 'MANUAL-ENTRY',
+        evidence_snippet: body?.evidence_snippet || '',
+        data_quality: body?.data_quality || 'billed',
+        status: 'DRAFT',
+        created_by: isReviewer ? 'demo-user-reviewer' : 'demo-user',
       };
       offlineStore.activities.unshift(act);
-      return mockResponse(act, 201);
+      return mockResponse({ ...act, created: true }, 201);
     }
   }
 
@@ -346,7 +351,8 @@ function handleOfflineRequest(path, options = {}) {
     const verb = RegExp.$2;
     const act = offlineStore.activities.find((a) => a.id === actId);
     if (act) {
-      act.status = verb === 'submit' ? 'submitted' : verb === 'approve' ? 'approved' : 'rejected';
+      act.status = verb === 'submit' ? 'SUBMITTED' : verb === 'approve' ? 'APPROVED' : 'REJECTED';
+      if (body?.comment) act.review_comment = body.comment;
     }
     return mockResponse(act || { message: 'Updated' });
   }
@@ -376,9 +382,18 @@ function handleOfflineRequest(path, options = {}) {
     });
   }
 
+  // 9b. Scope 3 Records
+  if (pathname === '/api/esg/scope3-records') {
+    const pId = searchParams.get('period_id');
+    const items = pId
+      ? (offlineStore.scope3Records || []).filter((r) => r.period_id === pId)
+      : (offlineStore.scope3Records || []);
+    return mockResponse({ items, total: items.length });
+  }
+
   // 11. E/S/G Metrics & Definitions
   if (pathname === '/api/esg/metric-definitions') {
-    return mockResponse({ items: offlineStore.metricDefs, total: offlineStore.metricDefs.length });
+    return mockResponse(offlineStore.metricDefs);
   }
 
   if (pathname === '/api/esg/metrics') {
@@ -387,19 +402,23 @@ function handleOfflineRequest(path, options = {}) {
       const pId = searchParams.get('period_id');
       let items = offlineStore.metrics;
       if (pId) items = items.filter((m) => m.period_id === pId);
-      if (pillar) items = items.filter((m) => m.pillar === pillar);
+      if (pillar) items = items.filter((m) => String(m.pillar).toUpperCase() === pillar.toUpperCase());
       return mockResponse({ items, total: items.length });
     }
     if (method === 'POST') {
+      const def = offlineStore.metricDefs.find((d) => d.metric_key === body?.metric_key);
       const met = {
         id: `met-${Date.now()}`,
         period_id: body?.period_id || 'prd-demo-1',
-        code: body?.code || 'GHG-S1',
-        pillar: body?.pillar || 'environmental',
+        facility_id: body?.facility_id || null,
+        metric_key: body?.metric_key || 'water_withdrawal',
+        pillar: def?.pillar || body?.pillar || 'E',
         value: String(body?.value || '0'),
-        unit: body?.unit || 'tCO2e',
-        status: 'draft',
-        comment: body?.comment || '',
+        unit: def?.unit || body?.unit || '',
+        dimensions: body?.dimensions || {},
+        evidence_ref: body?.evidence_ref || '',
+        status: 'DRAFT',
+        created_by: isReviewer ? 'demo-user-reviewer' : 'demo-user',
       };
       offlineStore.metrics.unshift(met);
       return mockResponse(met, 201);
@@ -411,24 +430,24 @@ function handleOfflineRequest(path, options = {}) {
     const verb = RegExp.$2;
     const met = offlineStore.metrics.find((m) => m.id === metId);
     if (met) {
-      met.status = verb === 'submit' ? 'submitted' : verb === 'approve' ? 'approved' : 'rejected';
+      met.status = verb === 'submit' ? 'SUBMITTED' : verb === 'approve' ? 'APPROVED' : 'REJECTED';
     }
     return mockResponse(met || { message: 'Updated' });
   }
 
   // 12. Disclosure Frameworks
   if (pathname === '/api/esg/disclosure-frameworks') {
-    return mockResponse({ items: offlineStore.frameworks, total: offlineStore.frameworks.length });
+    return mockResponse(offlineStore.frameworks);
   }
 
   if (/^\/api\/esg\/periods\/([^/]+)\/disclosures\/([^/]+)$/.test(pathname)) {
     const fw = RegExp.$2;
     const format = searchParams.get('format');
     if (format === 'csv') {
-      const csv = `Framework,Period,Section,Metric,Value,Status\n${fw},FY2024-25,Scope 1,Direct GHG Emissions,12.2020 tCO2e,Computed\n${fw},FY2024-25,Scope 2,Location-based Grid,20.6050 tCO2e,Computed\n${fw},FY2024-25,Scope 3,Upstream Freight,4.1500 tCO2e,Computed\n${fw},FY2024-25,Total,Gross Emissions,36.9570 tCO2e,Computed\n`;
+      const csv = `Framework,Period,Requirement,Status,Narrative\n${fw},FY2024-25,GRI 305-1,APPROVED,Scope 1 demo inventory\n${fw},FY2024-25,GRI 305-2,PUBLISHED,Scope 2 location demo inventory\n`;
       return mockResponse(csv, 200, { 'X-Content-SHA256': '9f83a45c61234bde77890a1bcdef9823456789abcdef0123456789abcdef0123' });
     }
-    const data = offlineStore.disclosures[fw] || offlineStore.disclosures.ghg_protocol;
+    const data = offlineStore.disclosures[fw] || offlineStore.disclosures.GRI;
     return mockResponse(data);
   }
 
@@ -438,7 +457,7 @@ function handleOfflineRequest(path, options = {}) {
 
   // 13. Members & Invitations
   if (pathname === '/api/esg/members') {
-    return mockResponse({ items: offlineStore.members, total: offlineStore.members.length });
+    return mockResponse(offlineStore.members);
   }
 
   if (/^\/api\/esg\/members\/([^/]+)$/.test(pathname)) {
@@ -456,7 +475,7 @@ function handleOfflineRequest(path, options = {}) {
 
   if (pathname === '/api/esg/invitations') {
     if (method === 'GET') {
-      return mockResponse({ items: offlineStore.invitations, total: offlineStore.invitations.length });
+      return mockResponse(offlineStore.invitations);
     }
     if (method === 'POST') {
       const inv = {
