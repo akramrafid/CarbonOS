@@ -137,19 +137,51 @@ function handleOfflineRequest(path, options = {}) {
     const prdId = RegExp.$1;
     const calc = {
       id: `calc-${Date.now()}`,
-      reporting_period_id: prdId,
-      status: 'COMPLETED',
-      created_at: new Date().toISOString(),
-      summary: {
-        scope1_tco2e: '12.2020',
-        scope2_tco2e: '20.6050',
-        scope3_tco2e: '4.1500',
-        total_tco2e: '36.9570',
+      period_id: prdId,
+      period_revision: 1,
+      boundary_method: 'operational_control',
+      methodology_version: 'GHG Protocol Corporate Std (Demo)',
+      gwp_basis: 'AR6',
+      input_sha256: '9f83a45c61234bde77890a1bcdef9823456789abcdef0123456789abcdef0123',
+      scope1_kg: '3886.000',
+      scope2_location_kg: '20605.000',
+      scope2_market_kg: null,
+      blocking: false,
+      exceptions: [],
+      excluded: [],
+      memo: {},
+      by_facility: {
+        'fac-demo-1': { scope1_kg: '3886.000', scope2_location_kg: '20605.000' },
       },
+      uncertainty: {
+        scope1: { uncertainty_pct: '5.0' },
+        scope2_location: { uncertainty_pct: '4.0' },
+      },
+      created_by: isReviewer ? 'demo-user-reviewer' : 'demo-user',
+      created_at: new Date().toISOString(),
       lines: [
-        { activity_id: 'act-demo-1', scope: 'Scope 2', factor_applied: '0.634000 kgCO2e/kWh', co2e_tonnes: '20.6050' },
-        { activity_id: 'act-demo-2', scope: 'Scope 1', factor_applied: '2.680000 kgCO2e/litres', co2e_tonnes: '3.8860' },
-        { activity_id: 'act-demo-3', scope: 'Scope 1', factor_applied: '1.980000 kgCO2e/m3', co2e_tonnes: '8.3160' },
+        {
+          id: 1,
+          facility_id: 'fac-demo-1',
+          scope: '2',
+          method: 'location',
+          quantity: '32500',
+          unit: 'kWh',
+          factor_version: 1,
+          emissions_kg: '20605.000',
+          formula: '32500 kWh × 0.634000 kgCO2e/kWh (Demo grid average)',
+        },
+        {
+          id: 2,
+          facility_id: 'fac-demo-1',
+          scope: '1',
+          method: 'direct',
+          quantity: '1450',
+          unit: 'L',
+          factor_version: 1,
+          emissions_kg: '3886.000',
+          formula: '1450 L × 2.680000 kgCO2e/L',
+        },
       ],
     };
     offlineStore.calculations.unshift(calc);
@@ -173,28 +205,30 @@ function handleOfflineRequest(path, options = {}) {
     const snap = {
       id: `snap-${Date.now()}`,
       period_id: prdId,
+      revision: p?.revision || 1,
       created_at: new Date().toISOString(),
-      summary: offlineStore.calculations[0]?.summary || {},
-      sha256: '9f83a45c61234bde77890a1bcdef9823456789abcdef0123456789abcdef0123',
+      prepared_by: 'demo-user',
+      approved_by: isReviewer ? 'demo-user-reviewer' : 'auditor',
+      content_sha256: '9f83a45c61234bde77890a1bcdef9823456789abcdef0123456789abcdef0123',
     };
     offlineStore.snapshots.unshift(snap);
-    return mockResponse({ message: 'Period locked and immutable snapshot sealed.', snapshot_id: snap.id });
+    return mockResponse(snap, 201);
   }
 
   if (/^\/api\/esg\/periods\/([^/]+)\/restate$/.test(pathname)) {
     const prdId = RegExp.$1;
     const p = offlineStore.periods.find((x) => x.id === prdId);
     if (p) {
-      p.status = 'REOPENED';
+      p.status = 'OPEN';
       p.revision = (p.revision || 1) + 1;
     }
-    return mockResponse({ message: 'Period restated and reopened for adjustment.', period: p });
+    return mockResponse(p || { message: 'Period restated.' });
   }
 
   if (/^\/api\/esg\/periods\/([^/]+)\/snapshots$/.test(pathname)) {
     const prdId = RegExp.$1;
     const snaps = offlineStore.snapshots.filter((s) => s.period_id === prdId);
-    return mockResponse({ items: snaps, total: snaps.length });
+    return mockResponse(snaps);
   }
 
   if (/^\/api\/esg\/snapshots\/([^/]+)\/export$/.test(pathname)) {
