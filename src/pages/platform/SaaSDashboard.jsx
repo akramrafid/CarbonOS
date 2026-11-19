@@ -1647,6 +1647,16 @@ const SaaSDashboard = () => {
 
             {/* Top Action Pills */}
             <div className="flex items-center gap-2 flex-wrap">
+              <Link
+                to="/platform/esg"
+                className={`min-h-[40px] border font-mono font-bold text-xs px-3.5 sm:px-4 py-2 rounded-xl transition-all flex items-center whitespace-nowrap ${
+                  isLight
+                    ? 'bg-white border-[#CCE2D3] text-[#0B4D26] hover:border-[#00C853]'
+                    : 'bg-[#08130C] border-[#174D2B] text-[#4ADE80] hover:border-[#00C853]'
+                }`}
+              >
+                Audited GHG Ledger →
+              </Link>
               <button 
                 onClick={() => setIsAddProjectOpen(true)}
                 className="min-h-[40px] bg-[#00C853] hover:bg-[#00E676] text-white font-mono font-bold text-xs px-3.5 sm:px-4 py-2 rounded-xl transition-all shadow-sm flex items-center space-x-1.5 cursor-pointer whitespace-nowrap"

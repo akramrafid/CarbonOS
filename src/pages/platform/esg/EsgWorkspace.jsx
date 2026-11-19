@@ -1,7 +1,7 @@
 // ESG workspace: sign-in, organization selection and the accounting workflow tabs.
 // Role checks here only hide controls; the API enforces every permission.
-import { useCallback, useEffect, useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useCallback, useEffect, useRef, useState } from 'react';
+import { Link, useNavigate } from 'react-router-dom';
 import { esgGet, esgSend, hasEsgToken, resetOfflineStore, setEsgSession } from '../../../lib/esgApi';
 import { authConfigured, completeSignIn, createLocalOfflineDemoSession, loadSession, resetDemoSession, saveDemoSession, signIn, signOut, switchDemoPersona } from '../../../lib/esgAuth';
 import { Button, Input, Notice, Panel, Select, useAction } from './ui';
@@ -14,6 +14,7 @@ import DisclosuresPanel from './DisclosuresPanel';
 import BillAnalysisPanel from './BillAnalysisPanel';
 import { AuditPanel, MembersPanel } from './PeoplePanel';
 import BrandLogo from '../../../components/BrandLogo';
+import OverviewPanel from './OverviewPanel';
 
 const PERMS = {
   org_owner: ['read', 'write', 'review', 'admin'], esg_admin: ['read', 'write', 'review', 'admin'],
@@ -34,6 +35,7 @@ export default function EsgWorkspace() {
   const [orgId, setOrgId] = useState(null);
   const [tab, setTab] = useState('setup');
   const [ref, setRef] = useState({ types: null, periods: null, facilities: null });
+  const autoTabOrgRef = useRef(null);
   const action = useAction();
 
   const [loadError, setLoadError] = useState(null);
@@ -90,7 +92,13 @@ export default function EsgWorkspace() {
     const [types, periods, facilities] = await Promise.all([
       esgGet('/api/esg/activity-types'), esgGet('/api/esg/periods?limit=200'), esgGet('/api/esg/facilities?limit=200'),
     ].map((p) => p.catch(() => null)));
-    setRef({ types, periods: periods?.items || [], facilities: facilities?.items || [] });
+    const periodItems = periods?.items || [];
+    setRef({ types, periods: periodItems, facilities: facilities?.items || [] });
+    if (autoTabOrgRef.current !== orgId) {
+      autoTabOrgRef.current = orgId;
+      setTab(periodItems.length > 0 ? 'overview' : 'setup');
+    }
+  }, [orgId]);
   }, [orgId]);
   // Refresh shared reference data on every tab change so new facilities/periods appear everywhere.
   useEffect(() => { loadRef(); }, [loadRef, tab]);
@@ -137,12 +145,20 @@ export default function EsgWorkspace() {
           <p className="font-mono text-[11px] uppercase tracking-wider text-emerald">CarbonOS ESG</p>
           <h1 className="font-serif text-4xl text-registry">GHG accounting workspace</h1>
         </div>
-        {user && (
-          <div className="flex items-center gap-3 text-sm text-mist">
-            <span>{user.name}</span>
-            <Button variant="secondary" onClick={signOut}>Sign out</Button>
-          </div>
-        )}
+        <div className="flex flex-wrap items-center gap-3 text-sm text-mist">
+          <Link
+            to="/demo-showcase"
+            className="inline-flex min-h-[40px] items-center rounded-lg border border-emerald/40 bg-emerald/10 px-3.5 py-2 font-mono text-xs font-bold text-emerald transition-colors hover:bg-emerald/20 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald"
+          >
+            Visual Demo Showcase ↗
+          </Link>
+          {user && (
+            <>
+              <span>{user.name}</span>
+              <Button variant="secondary" onClick={signOut}>Sign out</Button>
+            </>
+          )}
+        </div>
       </header>
       <Notice error={action.error || loadError} message={action.message} />
       {children}
@@ -195,7 +211,7 @@ export default function EsgWorkspace() {
   const perms = PERMS[org.role] || [];
   const can = { write: perms.includes('write'), review: perms.includes('review'), admin: perms.includes('admin') };
   const tabs = [
-    ['setup', 'Setup'], ['factors', 'Emission factors'], ['ledger', 'Activity ledger'], ['metrics', 'E/S/G metrics'], ['reports', 'Calculation & reports'], ['bills', 'Bill analysis'], ['disclosures', 'Disclosures'],
+    ['overview', 'Overview dashboard'], ['setup', 'Setup'], ['factors', 'Emission factors'], ['ledger', 'Activity ledger'], ['metrics', 'E/S/G metrics'], ['reports', 'Calculation & reports'], ['bills', 'Bill analysis'], ['disclosures', 'Disclosures'],
     ...(can.admin ? [['members', 'Members']] : []), ...(can.review ? [['audit', 'Audit trail']] : []),
   ];
 
@@ -219,7 +235,10 @@ export default function EsgWorkspace() {
                 )}
               </div>
               <p className="text-mist">
-                Synthetic Bangladesh spinning & manufacturing benchmarks. Backend tenant isolation and segregation of duties are strictly enforced.
+                Synthetic Bangladesh spinning & manufacturing benchmarks. Backend tenant isolation and segregation of duties are strictly enforced.{' '}
+                <Link to="/demo-showcase" className="font-mono text-emerald underline underline-offset-4 hover:text-emerald-300">
+                  Open Visual Demo Showcase →
+                </Link>
               </p>
             </div>
             <div className="flex flex-wrap items-center gap-2">
@@ -271,6 +290,14 @@ export default function EsgWorkspace() {
         ))}
       </nav>
       <div key={orgId + tab}>
+        {tab === 'overview' && (
+          <OverviewPanel
+            periods={ref.periods}
+            facilities={ref.facilities}
+            onNavigateTab={setTab}
+            isDemoWorkspace={Boolean(user?.isDemo || org.is_demo)}
+          />
+        )}
         {tab === 'setup' && <SetupPanel canAdmin={can.admin} />}
         {tab === 'factors' && <FactorsPanel canAdmin={can.admin} me={me?.sub} types={ref.types} />}
         {tab === 'ledger' && <LedgerPanel me={me?.sub} can={can} types={ref.types} periods={ref.periods} facilities={ref.facilities} />}

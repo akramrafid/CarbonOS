@@ -151,6 +151,14 @@ const Navbar = () => {
             }
           })}
 
+          {/* Visual ESG Showcase Quick Link */}
+          <Link
+            to="/demo-showcase"
+            className="font-mono text-[10px] xl:text-[11px] font-medium text-white/80 hover:text-white border border-white/20 hover:border-[#00C853]/50 px-2.5 xl:px-3 py-1.5 rounded-full transition-all duration-300 whitespace-nowrap shrink-0"
+          >
+            {t('nav.esgDemo', 'ESG Showcase')}
+          </Link>
+
           {/* Request Demo Pill Button */}
           <button
             type="button"
@@ -269,6 +277,14 @@ const Navbar = () => {
               );
             }
           })}
+
+          <Link
+            to="/demo-showcase"
+            onClick={closeMenu}
+            className="font-sans font-bold text-lg sm:text-2xl text-emerald/90 hover:text-emerald transition-colors tracking-wide text-center w-full border-b border-white/10 py-3"
+          >
+            {t('nav.esgDemo', 'ESG Showcase')}
+          </Link>
           
           <button 
             type="button"

@@ -15,6 +15,7 @@ const resources = {
         registry: "Registry",
         pricing: "Pricing",
         esg: "ESG",
+        esgDemo: "ESG Showcase",
         live: "BD REGISTRY: LIVE",
         requestDemo: "[Request Demo]"
       },
@@ -82,6 +83,7 @@ const resources = {
         registry: "রেজিস্ট্রি",
         pricing: "মূল্যতালিকা",
         esg: "ইএসজি (ESG)",
+        esgDemo: "ইএসজি শোকেস",
         live: "বিডি রেজিস্ট্রি: লাইভ",
         requestDemo: "[ডেমো অনুরোধ করুন]"
       },
