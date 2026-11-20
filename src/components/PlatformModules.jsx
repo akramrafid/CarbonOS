@@ -3,6 +3,7 @@ import { Link } from 'react-router-dom';
 import { leftNodes, rightNodes } from './platform-modules/crystalData';
 import { CrystalHubSvg } from './platform-modules/CrystalHubSvg';
 import { PlatformModulesMobile } from './platform-modules/PlatformModulesMobile';
+import { BentoModulesGrid } from './platform-modules/BentoModulesGrid';
 
 const PlatformModules = () => {
   const [hoveredNode, setHoveredNode] = useState(null);
@@ -215,6 +216,9 @@ const PlatformModules = () => {
 
         {/* Mobile View */}
         <PlatformModulesMobile />
+
+        {/* Phase 7: Asymmetric Bento Grid Showcase with Purposeful Micro-Visuals */}
+        <BentoModulesGrid />
       </div>
     </section>
   );

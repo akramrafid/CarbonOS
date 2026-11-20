@@ -1,0 +1,70 @@
+{
+  "timestamp": "2026-11-15T17:05:41.874Z",
+  "themeChecks": {
+    "initialThemeState": {
+      "dataTheme": "dark",
+      "dataThemeMode": "dark",
+      "colorScheme": "dark"
+    },
+    "duringTransition": {
+      "hasTransitionClass": true,
+      "dataTheme": "light",
+      "colorScheme": "light"
+    },
+    "afterTransition": {
+      "hasTransitionClass": false,
+      "dataTheme": "light"
+    },
+    "systemSyncedMode": "system"
+  },
+  "routesAuditedPerTheme": 13,
+  "consoleErrorCount": 0,
+  "consoleWarningCount": 0,
+  "pageErrorCount": 0,
+  "consoleIssues": [],
+  "pageErrors": [],
+  "cdpLeakAudit": {
+    "totalNavigations": 20,
+    "samples": [
+      {
+        "step": 0,
+        "route": "/platform/saas-dashboard",
+        "jsHeapUsedMB": 6.58,
+        "jsEventListeners": 284,
+        "nodes": 2204
+      },
+      {
+        "step": 5,
+        "route": "/platform/esg/overview",
+        "jsHeapUsedMB": 6.57,
+        "jsEventListeners": 231,
+        "nodes": 545
+      },
+      {
+        "step": 10,
+        "route": "/platform/saas-dashboard",
+        "jsHeapUsedMB": 7.99,
+        "jsEventListeners": 284,
+        "nodes": 2213
+      },
+      {
+        "step": 15,
+        "route": "/platform/esg/overview",
+        "jsHeapUsedMB": 7.41,
+        "jsEventListeners": 231,
+        "nodes": 524
+      },
+      {
+        "step": 20,
+        "route": "/platform/saas-dashboard",
+        "jsHeapUsedMB": 8.6,
+        "jsEventListeners": 287,
+        "nodes": 2213
+      }
+    ],
+    "heapDeltaFromStep5To20MB": 2.03,
+    "listenerDeltaFromStep5To20": 56,
+    "boundedHeap": true,
+    "boundedListeners": true
+  }
+}

@@ -54,3 +54,4 @@ If you want any of the following pages created and added to the `Legal` or `Comp
 ## 4. Newsletter & System Status Indicator
 - **Newsletter Form**: Omitted (`features.hasNewsletterEndpoint: false`) because no backend newsletter subscription endpoint exists in FastAPI (`inference/`).
 - **System Status Indicator**: Omitted (`features.hasLiveStatusEndpoint: false`) to avoid displaying a static/fake uptime badge. If you want the footer to poll `/health` when the backend is reachable, let us know.
+

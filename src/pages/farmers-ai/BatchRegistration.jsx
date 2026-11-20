@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useHarvestStore } from '../../lib/useHarvestStore';
-import { ArrowLeft, Save } from 'lucide-react';
+import { ArrowLeft, Save, MapPin } from 'lucide-react';
 import { Button } from '../../components/ui/Button';
 import { IconButton } from '../../components/ui/IconButton';
 import { PageHeader } from '../../components/ui/PageHeader';
@@ -135,7 +135,7 @@ const BatchRegistration = ({ isInline = false, onBack = null, onSaveBatch = null
       <form onSubmit={handleSubmit} className="space-y-5">
         <div>
           <label className="block text-white/80 text-sm font-bold mb-1.5">Crop Type / ফসল</label>
-          <select value={cropType} onChange={e => setCropType(e.target.value)} className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-white focus:outline-none focus:border-lime-400 focus:ring-1 focus:ring-[#CCFF00]/50 transition-all">
+          <select value={cropType} onChange={e => setCropType(e.target.value)} className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-white focus:outline-none focus:border-lime-400 focus:ring-1 focus:ring-lime-400/50 transition-all">
             <option value="rice" className="bg-carbon text-white">Paddy/Rice (ধান)</option>
             <option value="potato" className="bg-carbon text-white">Potato (আলু)</option>
             <option value="tomato" className="bg-carbon text-white">Tomato (টমেটো)</option>
@@ -149,12 +149,12 @@ const BatchRegistration = ({ isInline = false, onBack = null, onSaveBatch = null
 
         <div>
           <label className="block text-white/80 text-sm font-bold mb-1.5">Weight / ওজন (kg)</label>
-          <input type="number" min="1" value={weight} onChange={e => setWeight(e.target.value)} required className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-white focus:outline-none focus:border-lime-400 focus:ring-1 focus:ring-[#CCFF00]/50 transition-all" placeholder="e.g., 500" />
+          <input type="number" min="1" value={weight} onChange={e => setWeight(e.target.value)} required className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-white focus:outline-none focus:border-lime-400 focus:ring-1 focus:ring-lime-400/50 transition-all" placeholder="e.g., 500" />
         </div>
 
         <div>
           <label className="block text-white/80 text-sm font-bold mb-1.5">Harvest Date / কাটার তারিখ</label>
-          <input type="date" value={date} onChange={e => setDate(e.target.value)} required className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-white focus:outline-none focus:border-lime-400 focus:ring-1 focus:ring-[#CCFF00]/50 transition-all" style={{ colorScheme: 'dark' }} />
+          <input type="date" value={date} onChange={e => setDate(e.target.value)} required className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-white focus:outline-none focus:border-lime-400 focus:ring-1 focus:ring-lime-400/50 transition-all" style={{ colorScheme: 'dark' }} />
         </div>
 
         <div>
@@ -174,20 +174,20 @@ const BatchRegistration = ({ isInline = false, onBack = null, onSaveBatch = null
                   <span>Detecting...</span>
                 </>
               ) : locationError ? (
-                <span className="text-white/40">Retry (Auto-detect) 📍</span>
+                <span className="text-white/40 inline-flex items-center gap-1">Retry (Auto-detect) <MapPin size={12} /></span>
               ) : (
-                <span>Auto-detect 📍</span>
+                <span className="inline-flex items-center gap-1">Auto-detect <MapPin size={12} /></span>
               )}
             </Button>
           </div>
-          <select value={district} onChange={e => setDistrict(e.target.value)} className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-white focus:outline-none focus:border-lime-400 focus:ring-1 focus:ring-[#CCFF00]/50 transition-all">
+          <select value={district} onChange={e => setDistrict(e.target.value)} className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-white focus:outline-none focus:border-lime-400 focus:ring-1 focus:ring-lime-400/50 transition-all">
             {districts.map(d => <option key={d} value={d} className="bg-carbon text-white">{d}</option>)}
           </select>
         </div>
 
         <div>
           <label className="block text-white/80 text-sm font-bold mb-1.5">Storage Type / সংরক্ষণের ধরন</label>
-          <select value={storageType} onChange={e => setStorageType(e.target.value)} className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-white focus:outline-none focus:border-lime-400 focus:ring-1 focus:ring-[#CCFF00]/50 transition-all">
+          <select value={storageType} onChange={e => setStorageType(e.target.value)} className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-white focus:outline-none focus:border-lime-400 focus:ring-1 focus:ring-lime-400/50 transition-all">
             <option value="jute_bag" className="bg-carbon text-white">Jute Bag Stack (চটের বস্তা)</option>
             <option value="silo" className="bg-carbon text-white">Silo / Sealed (সাইলো)</option>
             <option value="open_area" className="bg-carbon text-white">Open Area Drying (উন্মুক্ত স্থানে)</option>

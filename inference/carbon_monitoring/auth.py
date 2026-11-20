@@ -47,13 +47,17 @@ class CarbonUser:
 
 def get_jwt_secret() -> str:
     global _ephemeral_demo_secret
-    secret = os.getenv("CARBON_AUTH_JWT_SECRET") or os.getenv("ESG_AUTH_JWT_SECRET")
+    is_prod = (os.getenv("CARBON_ENV") == "production" or os.getenv("ESG_ENV") == "production")
+    if is_prod:
+        secret = os.getenv("CARBON_AUTH_JWT_SECRET")
+    else:
+        secret = os.getenv("CARBON_AUTH_JWT_SECRET") or os.getenv("ESG_AUTH_JWT_SECRET")
     if secret:
         return secret
-    if os.environ.get("CARBON_AUTH_JWT_SECRET") == "" or os.environ.get("ESG_AUTH_JWT_SECRET") == "":
+    if os.environ.get("CARBON_AUTH_JWT_SECRET") == "" or (not is_prod and os.environ.get("ESG_AUTH_JWT_SECRET") == ""):
         return ""
     # In non-production or demo environment, provide fallback ephemeral secret
-    if os.getenv("CARBON_ENV") != "production" and os.getenv("ESG_ENV") != "production":
+    if not is_prod:
         if not _ephemeral_demo_secret:
             _ephemeral_demo_secret = secrets.token_hex(32)
         return _ephemeral_demo_secret
@@ -127,27 +131,28 @@ def get_current_user(
             headers={"WWW-Authenticate": "Bearer"},
         )
 
-    # Allow mock/demo tokens when running in non-production demo mode
+    # Allow mock/demo tokens ONLY when explicitly opted in for local dev/tests outside production
     is_prod = (os.getenv("CARBON_ENV") == "production" or os.getenv("ESG_ENV") == "production")
-    if not is_prod and (raw_token.startswith("demo-") or raw_token.startswith("test-")):
-        # Synthesize demo persona
+    allow_demo_tokens = os.getenv("CARBON_ALLOW_INSECURE_DEMO_TOKENS", "false").lower() == "true"
+    if not is_prod and allow_demo_tokens and (raw_token.startswith("demo-") or raw_token.startswith("test-")):
+        # Synthesize demo persona (never elevate to platform_operator from bearer prefix)
         parts = raw_token.split("-")
-        role = "org_owner"
+        role = "viewer"
         if "reviewer" in parts or "auditor" in parts or "validator" in parts:
             role = "auditor"
-        elif "viewer" in parts:
-            role = "viewer"
-        elif "operator" in parts:
-            role = "platform_operator"
+        elif "owner" in parts or "developer" in parts or "write" in parts:
+            role = "org_owner"
+        # [COMMENTED OUT FOR PERSONAL REFERENCE — prefix-based operator escalation removed]
+        # elif "operator" in parts:
+        #     role = "platform_operator"
 
-        chosen_org = x_organization_id if isinstance(x_organization_id, str) and x_organization_id.strip() else None
-        org_id = chosen_org or "demo-org-default"
+        org_id = "demo-org-default"
         sub = f"user-{raw_token}"
         user = CarbonUser(
             sub=sub,
             organization_id=org_id,
             role=role,
-            is_platform_operator=(role == "platform_operator"),
+            is_platform_operator=False,
             is_demo=True,
         )
         request.state.user = user
@@ -155,11 +160,24 @@ def get_current_user(
 
     claims = _decode_token(raw_token)
     sub = str(claims["sub"])
-    chosen_org = x_organization_id if isinstance(x_organization_id, str) and x_organization_id.strip() else None
-    org_id = chosen_org or claims.get("organization_id") or claims.get("tenant_id") or "default-tenant"
-    role = claims.get("role", "org_owner")
+    # [COMMENTED OUT FOR PERSONAL REFERENCE — trusting caller X-Organization-Id allowed cross-tenant spoofing]
+    # chosen_org = x_organization_id if isinstance(x_organization_id, str) and x_organization_id.strip() else None
+    # org_id = chosen_org or claims.get("organization_id") or claims.get("tenant_id") or "default-tenant"
+    org_id = claims.get("organization_id") or claims.get("tenant_id") or claims.get("org_id")
+    if not org_id:
+        raise HTTPException(
+            status_code=403,
+            detail="Forbidden: token lacks organization_id claim",
+        )
+    role = claims.get("role", "viewer")
     is_operator = bool(claims.get("is_platform_operator", False))
     is_demo = bool(claims.get("is_demo", False))
+    if is_prod and is_demo:
+        raise HTTPException(
+            status_code=401,
+            detail="Demo tokens are rejected in production environment",
+            headers={"WWW-Authenticate": "Bearer"},
+        )
 
     user = CarbonUser(
         sub=sub,
@@ -195,6 +213,12 @@ def verify_job_ownership(job, user: CarbonUser) -> None:
 
     # Check tenant boundary
     job_org = getattr(job, "organization_id", None)
+    job_user = getattr(job, "user_id", None)
+    if not job_org and not job_user:
+        raise HTTPException(
+            status_code=403,
+            detail="Forbidden: analysis job lacks ownership metadata",
+        )
     if job_org and job_org != user.organization_id:
         raise HTTPException(
             status_code=403,
@@ -202,7 +226,6 @@ def verify_job_ownership(job, user: CarbonUser) -> None:
         )
 
     # Check user boundary if organization is not set
-    job_user = getattr(job, "user_id", None)
     if not job_org and job_user and job_user != user.sub:
         raise HTTPException(
             status_code=403,
@@ -218,13 +241,18 @@ def verify_boundary_ownership(boundary, user: CarbonUser) -> None:
         return
 
     b_org = getattr(boundary, "organization_id", None)
+    b_user = getattr(boundary, "user_id", None)
+    if not b_org and not b_user:
+        raise HTTPException(
+            status_code=403,
+            detail="Forbidden: boundary lacks ownership metadata",
+        )
     if b_org and b_org != user.organization_id:
         raise HTTPException(
             status_code=403,
             detail="Forbidden: this boundary belongs to another organization",
         )
 
-    b_user = getattr(boundary, "user_id", None)
     if not b_org and b_user and b_user != user.sub:
         raise HTTPException(
             status_code=403,

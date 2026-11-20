@@ -225,3 +225,4 @@ export function getAllFooterRoutes() {
 }
 
 export default footerConfig;
+

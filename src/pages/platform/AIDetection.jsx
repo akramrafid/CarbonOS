@@ -6,7 +6,7 @@ import { Card } from '../../components/ui/Card';
 
 const AIDetection = () => {
   return (
-    <div className="pt-12 pb-8 sm:pt-16 sm:pb-12 min-h-[80vh] flex flex-col items-center noise-overlay">
+    <div className="pt-12 pb-8 sm:pt-16 sm:pb-12 min-h-[80dvh] flex flex-col items-center noise-overlay">
       <div className="max-w-4xl w-full mx-auto px-6 lg:px-12">
         <PageHeader
           title="AI Fraud Detection"

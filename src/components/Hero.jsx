@@ -16,6 +16,8 @@ import {
 } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import { Link } from 'react-router-dom';
+import { BangladeshSatelliteScanSvg } from './hero/BangladeshSatelliteScanSvg';
+import { KpiTicker } from './ui/KpiTicker';
 
 const Hero = () => {
   const containerRef = useRef(null);
@@ -31,6 +33,7 @@ const Hero = () => {
 
   useEffect(() => {
     const streamTimer = setInterval(() => {
+      if (typeof document !== 'undefined' && document.visibilityState === 'hidden') return;
       setActiveStreamIndex(prev => (prev + 1) % tradeStreams.length);
     }, 4500);
     return () => clearInterval(streamTimer);
@@ -181,7 +184,7 @@ const Hero = () => {
             <div className="hero-cta flex flex-wrap gap-4 items-center mb-10 w-full min-w-0">
               <Link 
                 to="/platform/marketplace" 
-                className="group relative inline-flex items-center justify-center bg-accent hover:bg-accent-hover text-fg-primary font-sans font-bold text-sm sm:text-base px-7 py-4 rounded-full transition-all duration-300 shadow-[0_0_30px_rgba(0,200,83,0.35)] hover:shadow-[0_0_45px_rgba(0,200,83,0.55)] hover:scale-[1.02] active:scale-[0.98]"
+                className="group relative inline-flex items-center justify-center bg-accent hover:bg-accent-hover text-fg-inverse font-sans font-bold text-sm sm:text-base px-7 py-4 rounded-full transition-all duration-300 shadow-[0_0_30px_rgba(0,200,83,0.35)] hover:shadow-[0_0_45px_rgba(0,200,83,0.55)] hover:scale-[1.02] active:scale-[0.98]"
               >
                 <span>Explore Credit Listings</span>
                 <ArrowRight size={18} className="ml-2 group-hover:translate-x-1 transition-transform" />
@@ -226,9 +229,6 @@ const Hero = () => {
           <div className="lg:col-span-5 w-full min-w-0">
             <div className="hero-terminal-card bg-bg-canvas/90 backdrop-blur-2xl border border-white/15 rounded-[2rem] p-3.5 sm:p-6 lg:p-7 shadow-[0_20px_60px_rgba(0,0,0,0.7)] relative min-w-0">
               
-              {/* Corner Accent Glow */}
-              <div className="absolute top-0 right-0 w-48 h-48 bg-emerald/10 rounded-full blur-3xl pointer-events-none"></div>
-              
               {/* Terminal Header */}
               <div className="flex items-center justify-between border-b border-white/10 pb-4 mb-5 min-w-0 gap-2">
                 <div className="flex items-center space-x-2 min-w-0">
@@ -243,6 +243,9 @@ const Hero = () => {
                 </div>
               </div>
 
+              {/* Interactive Satellite Scan & 4-Stage Pipeline Visual */}
+              <BangladeshSatelliteScanSvg />
+
               {/* 4 Core Metrics Grid */}
               <div className="grid grid-cols-2 gap-2.5 sm:gap-3 mb-5 min-w-0">
                 
@@ -253,7 +256,7 @@ const Hero = () => {
                     <TrendingUp size={14} className="text-emerald shrink-0 ml-1" />
                   </div>
                   <div className="mt-2 truncate">
-                    <span className="font-mono font-bold text-lg sm:text-2xl lg:text-3xl text-white">10.42M</span>
+                    <KpiTicker value="10.42M" className="font-mono font-bold text-lg sm:text-2xl lg:text-3xl text-white" />
                     <span className="font-mono text-xs text-emerald ml-1 font-semibold">tCO₂e</span>
                   </div>
                   <span className="font-sans text-[10px] text-emerald/80 mt-1 font-medium truncate">+18.4% YoY</span>
@@ -266,7 +269,7 @@ const Hero = () => {
                     <span className="text-[10px] text-emerald font-mono font-bold shrink-0 ml-1">97%</span>
                   </div>
                   <div className="mt-2 truncate">
-                    <span className="font-mono font-bold text-lg sm:text-2xl lg:text-3xl text-emerald">৳412.8M</span>
+                    <KpiTicker value="৳412.8M" className="font-mono font-bold text-lg sm:text-2xl lg:text-3xl text-emerald" />
                   </div>
                   <span className="font-sans text-[10px] text-white/60 mt-1 truncate">bKash / Nagad</span>
                 </div>
@@ -278,7 +281,7 @@ const Hero = () => {
                     <Layers size={14} className="text-cyan-400 shrink-0 ml-1" />
                   </div>
                   <div className="mt-2 truncate">
-                    <span className="font-mono font-bold text-lg sm:text-2xl lg:text-3xl text-white">42,850</span>
+                    <KpiTicker value="42,850" className="font-mono font-bold text-lg sm:text-2xl lg:text-3xl text-white" />
                     <span className="font-mono text-xs text-white/50 ml-1">tCO₂e</span>
                   </div>
                   <span className="font-sans text-[10px] text-cyan-400 mt-1 truncate">For Settlement</span>
@@ -291,7 +294,7 @@ const Hero = () => {
                     <span className="font-mono text-[10px] text-white/40 shrink-0 ml-1">BDT/t</span>
                   </div>
                   <div className="mt-2 truncate">
-                    <span className="font-mono font-bold text-lg sm:text-2xl lg:text-3xl text-white">৳14,920</span>
+                    <KpiTicker value="৳14,920" className="font-mono font-bold text-lg sm:text-2xl lg:text-3xl text-white" />
                   </div>
                   <span className="font-sans text-[10px] text-white/60 mt-1 truncate">Spot reference</span>
                 </div>

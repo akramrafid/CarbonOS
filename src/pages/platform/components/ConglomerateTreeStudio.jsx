@@ -83,23 +83,22 @@ export const ConglomerateTreeStudio = ({ isLight, locale }) => {
 
   return (
     <div className="space-y-6">
-      {/* Header Banner */}
       <div className={`p-6 rounded-3xl border ${
         isLight 
-          ? 'bg-gradient-to-r from-purple-50 to-indigo-50/50 border-purple-200' 
+          ? 'bg-bg-surface border-border-strong' 
           : 'bg-gradient-to-r from-bg-surface to-bg-elevated border-border-subtle'
       }`}>
         <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
           <div className="space-y-1">
             <div className="flex items-center space-x-2">
-              <div className="w-8 h-8 rounded-xl bg-purple-500/10 border border-purple-500/30 flex items-center justify-center text-purple-500">
+              <div className="w-8 h-8 rounded-xl bg-accent/10 border border-accent/30 flex items-center justify-center text-accent">
                 <Network className="w-4 h-4" />
               </div>
               <h2 className={`text-xl font-bold font-sans ${isLight ? 'text-gray-900' : 'text-white'}`}>
                 {locale.entityTitle}
               </h2>
-              <span className="px-2.5 py-0.5 rounded-full text-[10px] font-mono font-bold bg-purple-500/15 text-purple-600 dark:text-purple-400 border border-purple-500/30">
-                Sweep Trees Model
+              <span className="px-2.5 py-0.5 rounded-full text-[10px] font-mono font-bold bg-accent/15 text-accent border border-accent/30">
+                Sweep Trees Model · Demo data
               </span>
             </div>
             <p className={`text-xs ${isLight ? 'text-gray-600' : 'text-fg-secondary'}`}>
@@ -108,8 +107,8 @@ export const ConglomerateTreeStudio = ({ isLight, locale }) => {
           </div>
 
           <div className="flex items-center space-x-3 text-xs font-mono">
-            <span className="px-3 py-1.5 rounded-2xl border bg-bg-canvas border-border-subtle text-purple-400">
-              Holding Group: Apex Holdings (BD)
+            <span className="px-3 py-1.5 rounded-2xl border bg-bg-canvas border-border-subtle text-fg-secondary">
+              Holding Group: Apex Holdings (Demo data)
             </span>
           </div>
         </div>

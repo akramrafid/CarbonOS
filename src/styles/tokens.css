@@ -10,6 +10,8 @@
 :root,
 [data-theme="dark"],
 .dark {
+  color-scheme: dark;
+
   /* Canvas & Surfaces */
   --color-bg-canvas: #080F0B;        /* Deep charcoal-forest canvas */
   --color-bg-surface: #0D1812;       /* Calm dark pine container */
@@ -20,7 +22,7 @@
   /* Typography & Foreground */
   --color-fg-primary: #F0F4F1;       /* Crisp chalk white (WCAG AAA 16.2:1) */
   --color-fg-secondary: rgba(240, 244, 241, 0.78); /* High-readability secondary (WCAG AA 12.6:1) */
-  --color-fg-muted: rgba(240, 244, 241, 0.55);     /* Muted metadata (WCAG AA 8.9:1) */
+  --color-fg-muted: rgba(240, 244, 241, 0.62);     /* Muted metadata (WCAG AA >= 5.1:1 on all surfaces) */
   --color-fg-accent: #00C853;        /* Vivid emerald for singular key telemetry */
   --color-fg-inverse: #080F0B;
 
@@ -40,11 +42,11 @@
   --shadow-glow-hover: 0 0 35px rgba(0, 200, 83, 0.28);
   --shadow-card: 0 4px 20px rgba(0, 0, 0, 0.35);
 
-  /* Semantic Status Indicators */
+  /* Semantic Status Indicators (WCAG AA >= 4.5:1 across all dark surfaces) */
   --color-status-success: #10B981;
   --color-status-warning: #F59E0B;
-  --color-status-error: #EF4444;
-  --color-status-info: #06B6D4;
+  --color-status-error: #F87171;
+  --color-status-info: #22D3EE;
 
   /* Bangladesh MFS Brand Colors */
   --color-brand-bkash: #E2136E;
@@ -79,6 +81,8 @@
    -------------------------------------------------------------------------- */
 [data-theme="light"],
 .light {
+  color-scheme: light;
+
   /* Canvas & Surfaces */
   --color-bg-canvas: #F2F3EE;        /* Warm tactile linen paper canvas */
   --color-bg-surface: #FFFFFF;       /* Crisp white card surface */
@@ -89,7 +93,7 @@
   /* Typography & Foreground */
   --color-fg-primary: #181414;       /* Deep charcoal black (WCAG AAA 15.3:1) */
   --color-fg-secondary: #413F3F;     /* Slate graphite (WCAG AA 6.9:1) */
-  --color-fg-muted: rgba(65, 63, 63, 0.72); /* Soft slate (WCAG AA 4.7:1) */
+  --color-fg-muted: rgba(65, 63, 63, 0.80); /* Soft slate (WCAG AA >= 5.3:1 on all surfaces) */
   --color-fg-accent: #166534;        /* Deep forest emerald (WCAG AA 6.4:1) */
   --color-fg-inverse: #FFFFFF;
 
@@ -109,11 +113,11 @@
   --shadow-glow-hover: 0 8px 30px rgba(4, 18, 38, 0.12);
   --shadow-card: 0 2px 12px rgba(4, 18, 38, 0.04), 0 1px 2px rgba(4, 18, 38, 0.06);
 
-  /* Semantic Status Indicators */
-  --color-status-success: #15803D;
-  --color-status-warning: #B45309;
-  --color-status-error: #DC2626;
-  --color-status-info: #0284C7;
+  /* Semantic Status Indicators (WCAG AA >= 4.5:1 across all light surfaces) */
+  --color-status-success: #166534;
+  --color-status-warning: #92400E;
+  --color-status-error: #B91C1C;
+  --color-status-info: #0369A1;
 
   /* Backward Compatibility Mappings */
   --color-forest: #DBF0EA;
@@ -239,15 +243,17 @@
   border: 1px solid var(--color-border-subtle);
 }
 
-/* Card Glow Micro-interaction */
+/* Card Glow Micro-interaction (Hover-capable pointer devices only) */
 .card-glow-hover {
-  transition: box-shadow 0.25s cubic-bezier(0.16, 1, 0.3, 1), transform 0.25s cubic-bezier(0.16, 1, 0.3, 1), border-color 0.25s ease;
+  transition: box-shadow 0.22s cubic-bezier(0.22, 1, 0.36, 1), transform 0.22s cubic-bezier(0.22, 1, 0.36, 1), border-color 0.22s ease;
 }
 
-.card-glow-hover:hover {
-  box-shadow: var(--shadow-glow);
-  border-color: var(--color-border-strong);
-  transform: translateY(-1px);
+@media (hover: hover) {
+  .card-glow-hover:hover {
+    box-shadow: var(--shadow-glow);
+    border-color: var(--color-border-strong);
+    transform: translateY(-2px);
+  }
 }
 
 /* Smooth Focus Ring System (2px ring with 2px offset) */
@@ -258,3 +264,103 @@
   outline: none;
   box-shadow: 0 0 0 2px var(--color-bg-canvas), 0 0 0 4px var(--color-focus-ring);
 }
+
+/* --------------------------------------------------------------------------
+   7. PHASE 9: THEME CROSSFADE, AUTOFILL, SCROLLBARS & CODE BLOCKS
+   -------------------------------------------------------------------------- */
+/* Scoped ~200ms theme crossfade on color/background/border only via temporary class */
+html.theme-transitioning,
+html.theme-transitioning *,
+html.theme-transitioning *::before,
+html.theme-transitioning *::after {
+  transition-property: color, background-color, border-color, outline-color, fill, stroke !important;
+  transition-duration: 200ms !important;
+  transition-timing-function: cubic-bezier(0.22, 1, 0.36, 1) !important;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  html.theme-transitioning,
+  html.theme-transitioning *,
+  html.theme-transitioning *::before,
+  html.theme-transitioning *::after {
+    transition-duration: 0ms !important;
+  }
+}
+
+/* Browser Autofill Overrides (Dark & Light Themes) */
+input:-webkit-autofill,
+input:-webkit-autofill:hover,
+input:-webkit-autofill:focus,
+textarea:-webkit-autofill,
+textarea:-webkit-autofill:hover,
+textarea:-webkit-autofill:focus,
+select:-webkit-autofill,
+select:-webkit-autofill:hover,
+select:-webkit-autofill:focus {
+  -webkit-text-fill-color: var(--color-fg-primary) !important;
+  -webkit-box-shadow: 0 0 0px 1000px var(--color-bg-surface) inset !important;
+  caret-color: var(--color-fg-primary) !important;
+  transition: background-color 5000s ease-in-out 0s;
+}
+
+/* Custom Dual-Theme Scrollbars */
+html {
+  scrollbar-width: thin;
+  scrollbar-color: rgba(240, 244, 241, 0.22) var(--color-bg-canvas);
+}
+
+html[data-theme="light"],
+html.light {
+  scrollbar-color: rgba(65, 63, 63, 0.28) var(--color-bg-canvas);
+}
+
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: var(--color-bg-canvas);
+}
+
+::-webkit-scrollbar-thumb {
+  background-color: rgba(240, 244, 241, 0.22);
+  border-radius: 9999px;
+  border: 2px solid var(--color-bg-canvas);
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background-color: var(--color-accent-default);
+}
+
+[data-theme="light"] ::-webkit-scrollbar-thumb,
+.light ::-webkit-scrollbar-thumb {
+  background-color: rgba(65, 63, 63, 0.28);
+  border: 2px solid var(--color-bg-canvas);
+}
+
+[data-theme="light"] ::-webkit-scrollbar-thumb:hover,
+.light ::-webkit-scrollbar-thumb:hover {
+  background-color: var(--color-accent-default);
+}
+
+/* Dual-Theme Code Blocks & Keyboard Shortcuts */
+pre,
+code {
+  font-family: var(--font-data);
+}
+
+pre {
+  background-color: var(--color-bg-muted);
+  color: var(--color-fg-primary);
+  border: 1px solid var(--color-border-subtle);
+  border-radius: 0.75rem;
+}
+
+kbd {
+  font-family: var(--font-data);
+  background-color: var(--color-bg-surface);
+  color: var(--color-fg-secondary);
+  border: 1px solid var(--color-border-subtle);
+}
+

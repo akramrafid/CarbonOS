@@ -1,4 +1,5 @@
 import React from 'react';
+import { Radio, Cpu, Cloud, Satellite, FileCheck } from 'lucide-react';
 import DeviceCard from '../components/technology/DeviceCard';
 import SatelliteLayer from '../components/technology/SatelliteLayer';
 import TechStackDiagram from '../components/technology/TechStackDiagram';
@@ -8,9 +9,9 @@ import { PageHeader } from '../components/ui/PageHeader';
 
 const Technology = () => {
   const devices = [
-    { name: "Soil Carbon Sensor", model: "METER Group TEROS 12", measures: "Soil moisture, EC, temp — used to infer SOC", frequency: "Every 15 minutes", phase: "Phase 1", status: "Deployed" },
+    { name: "Soil Carbon Sensor", model: "METER Group TEROS 12", measures: "Soil moisture, EC, temp (inferred SOC proxy)", frequency: "Every 15 minutes", phase: "Phase 1", status: "Deployed" },
     { name: "Agromet Weather Station", model: "Davis Instruments Vantage Pro 2", measures: "Temp, humidity, rainfall, wind, solar radiation", frequency: "Every 5 minutes", phase: "Phase 1", status: "Deployed" },
-    { name: "Biomass Load Cell", model: "HX711-based array", measures: "Crop weight at harvest — verifies yield", frequency: "Per harvest event", phase: "Phase 1", status: "Pilot" },
+    { name: "Biomass Load Cell", model: "HX711-based array", measures: "Crop weight at harvest for yield verification", frequency: "Per harvest event", phase: "Phase 1", status: "Pilot" },
     { name: "Eddy Covariance Tower", model: "Campbell Scientific EC155", measures: "Net ecosystem CO₂ exchange (NEE)", frequency: "10 Hz raw, 30-min avg", phase: "Phase 2", status: "Planned" },
     { name: "Drone-based NDVI Scanner", model: "DJI Matrice 300 RTK + RedEdge-MX", measures: "Canopy health and carbon proxy", frequency: "Monthly flights", phase: "Phase 2", status: "Pilot" },
     { name: "LoRaWAN Edge Gateway", model: "RAK7268 WisGate Edge Lite 2", measures: "Aggregates data from up to 2000 nodes", frequency: "Continuous", phase: "Phase 1", status: "Deployed" },
@@ -21,29 +22,27 @@ const Technology = () => {
   return (
     <div className="bg-bg-canvas font-sans pt-12 pb-8 sm:pt-16 sm:pb-12">
       
-      {/* SECTION 1: HERO */}
-      <section className="pb-16 px-4 sm:px-6 lg:px-8 bg-white border-b border-border-subtle">
+      <section className="pb-16 px-4 sm:px-6 lg:px-8 bg-bg-surface border-b border-border-subtle">
         <div className="max-w-7xl mx-auto text-center">
           <PageHeader
-            badge="// PITCH POINT: Hardware-agnostic, LoRaWAN-native"
+            badge="MRV HARDWARE & TELEMETRY ARCHITECTURE"
             title="The Infrastructure Behind Every Verified Carbon Credit"
-            description="Carbon Zero BD operates a full-stack MRV infrastructure — combining ground-level IoT sensors with satellite remote sensing and AI-powered analytics. Processing 50,000+ readings/hour."
+            description="Carbon Zero BD combines ground-level LoRaWAN sensors with Sentinel-1/2 remote sensing and deterministic allometric pipelines across Bangladesh agro-ecological zones."
             align="center"
             className="border-none mb-12 pb-0"
             titleClassName="!text-[48px] !leading-tight !font-bold !text-fg-primary !tracking-[-0.02em] max-w-4xl mx-auto"
           />
           
-          {/* Schematic Diagram placeholder */}
           <div className="w-full max-w-5xl mx-auto bg-slate-900 rounded-2xl p-8 flex flex-col md:flex-row items-center justify-between space-y-4 md:space-y-0 text-white font-mono text-sm shadow-xl">
-            <div className="flex flex-col items-center"><div className="w-12 h-12 bg-accent/20 rounded-lg border border-border-strong mb-2 flex items-center justify-center">📡</div><span>Field Sensors</span></div>
+            <div className="flex flex-col items-center"><div className="w-12 h-12 bg-accent/20 rounded-lg border border-border-strong mb-2 flex items-center justify-center text-accent"><Radio className="w-5 h-5" /></div><span>Field Sensors</span></div>
             <div className="text-accent">→</div>
-            <div className="flex flex-col items-center"><div className="w-12 h-12 bg-white/10 rounded-lg border border-white/20 mb-2 flex items-center justify-center">📶</div><span>Edge Gateway</span></div>
+            <div className="flex flex-col items-center"><div className="w-12 h-12 bg-white/10 rounded-lg border border-white/20 mb-2 flex items-center justify-center text-white"><Cpu className="w-5 h-5" /></div><span>Edge Gateway</span></div>
             <div className="text-accent">→</div>
-            <div className="flex flex-col items-center"><div className="w-12 h-12 bg-white/10 rounded-lg border border-white/20 mb-2 flex items-center justify-center">☁️</div><span>Cloud Backend</span></div>
+            <div className="flex flex-col items-center"><div className="w-12 h-12 bg-white/10 rounded-lg border border-white/20 mb-2 flex items-center justify-center text-white"><Cloud className="w-5 h-5" /></div><span>Cloud Backend</span></div>
             <div className="text-accent">↔</div>
-            <div className="flex flex-col items-center"><div className="w-12 h-12 bg-blue-500/20 rounded-lg border border-blue-500/50 mb-2 flex items-center justify-center">🛰️</div><span>Satellites</span></div>
+            <div className="flex flex-col items-center"><div className="w-12 h-12 bg-blue-500/20 rounded-lg border border-blue-500/50 mb-2 flex items-center justify-center text-blue-400"><Satellite className="w-5 h-5" /></div><span>Satellites</span></div>
             <div className="text-accent">→</div>
-            <div className="flex flex-col items-center"><div className="w-12 h-12 bg-amber-500/20 rounded-lg border border-amber-500/50 mb-2 flex items-center justify-center">📝</div><span>Registry</span></div>
+            <div className="flex flex-col items-center"><div className="w-12 h-12 bg-amber-500/20 rounded-lg border border-amber-500/50 mb-2 flex items-center justify-center text-amber-400"><FileCheck className="w-5 h-5" /></div><span>Registry</span></div>
           </div>
         </div>
       </section>

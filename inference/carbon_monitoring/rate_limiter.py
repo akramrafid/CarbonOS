@@ -3,6 +3,7 @@ Thread-safe sliding-window rate limiter for FastAPI endpoints.
 Zero external dependencies. Enforces per-client or per-user request limits
 and returns HTTP 429 with Retry-After header.
 """
+import os
 import time
 import threading
 from collections import defaultdict, deque
@@ -14,6 +15,8 @@ class SlidingWindowRateLimiter:
     """
     In-memory thread-safe rate limiter using sliding timestamp windows.
     """
+    MAX_BUCKETS = 10000
+
     def __init__(self, max_requests: int = 60, window_seconds: int = 60, key_prefix: str = ""):
         self.max_requests = max_requests
         self.window_seconds = window_seconds
@@ -27,22 +30,22 @@ class SlidingWindowRateLimiter:
         if user and getattr(user, "sub", None):
             return f"{self.key_prefix}:user:{user.sub}"
 
-        # Otherwise check Authorization header sub or IP
-        auth_header = request.headers.get("Authorization", "")
-        if auth_header.lower().startswith("bearer "):
-            token = auth_header[7:].strip()
-            # If demo token, extract identifier
-            if token.startswith("demo-"):
-                return f"{self.key_prefix}:token:{token}"
+        # [COMMENTED OUT FOR PERSONAL REFERENCE — arbitrary demo-* Bearer prefix let callers mint unlimited rate-limit buckets]
+        # auth_header = request.headers.get("Authorization", "")
+        # if auth_header.lower().startswith("bearer "):
+        #     token = auth_header[7:].strip()
+        #     if token.startswith("demo-"):
+        #         return f"{self.key_prefix}:token:{token}"
 
-        # Fallback to client host
-        forwarded = request.headers.get("X-Forwarded-For")
-        if forwarded:
-            client_ip = forwarded.split(",")[0].strip()
-        elif request.client and request.client.host:
-            client_ip = request.client.host
-        else:
-            client_ip = "127.0.0.1"
+        # Fallback to client host; only honor X-Forwarded-For when explicitly trusted behind reverse proxy
+        client_ip = request.client.host if (request.client and request.client.host) else "127.0.0.1"
+        if os.getenv("TRUST_PROXY_HEADERS", "false").lower() == "true":
+            forwarded = request.headers.get("X-Forwarded-For")
+            if forwarded:
+                # Rightmost hop added by trusted proxy cannot be spoofed by client header prefixing
+                hops = [h.strip() for h in forwarded.split(",") if h.strip()]
+                if hops:
+                    client_ip = hops[-1]
 
         return f"{self.key_prefix}:ip:{client_ip}"
 
@@ -52,6 +55,16 @@ class SlidingWindowRateLimiter:
         window_start = now - self.window_seconds
 
         with self._lock:
+            if key not in self._windows and len(self._windows) >= self.MAX_BUCKETS:
+                stale_keys = [
+                    k for k, dq in self._windows.items()
+                    if not dq or dq[-1] < window_start
+                ]
+                for sk in stale_keys:
+                    del self._windows[sk]
+                if len(self._windows) >= self.MAX_BUCKETS:
+                    oldest_key = next(iter(self._windows))
+                    del self._windows[oldest_key]
             timestamps = self._windows[key]
             # Prune old timestamps
             while timestamps and timestamps[0] < window_start:

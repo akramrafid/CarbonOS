@@ -1,4 +1,6 @@
 import json
+import os
+import re
 import time
 import datetime
 from fastapi import APIRouter, Depends, HTTPException, BackgroundTasks, UploadFile, File, Form
@@ -7,6 +9,11 @@ from sqlalchemy.orm import Session
 from typing import List, Optional
 
 from pydantic import BaseModel, Field
+
+
+def _safe_disposition_id(raw_id: str) -> str:
+    cleaned = re.sub(r"[^A-Za-z0-9._-]+", "_", (raw_id or "export").strip())
+    return (cleaned or "export")[:64]
 
 from .database import get_db, SessionLocal
 from .models import (AnalysisJob, CarbonResult, SatelliteLayer, UploadedBoundary, CarbonReport,
@@ -239,7 +246,9 @@ def run_async_analysis(job_id: str):
                 location_lat=coords[0][0],
                 location_lng=coords[0][1],
                 message=f"Rapid vegetation decline detected. Average NDVI dropped to {sat_result['average_ndvi']}.",
-                suggested_action="Deploy drone inspections or local forestry patrol immediately."
+                suggested_action="Deploy drone inspections or local forestry patrol immediately.",
+                user_id=job.user_id,
+                organization_id=job.organization_id,
             )
             db.add(alert)
         elif random_trigger_fire_alert(coords):
@@ -249,7 +258,9 @@ def run_async_analysis(job_id: str):
                 location_lat=coords[0][0],
                 location_lng=coords[0][1],
                 message="High canopy dryness and elevated thermal readings suggest fire risk in this forest block.",
-                suggested_action="Alert local fire suppression units; monitor weather patterns."
+                suggested_action="Alert local fire suppression units; monitor weather patterns.",
+                user_id=job.user_id,
+                organization_id=job.organization_id,
             )
             db.add(alert)
 
@@ -287,7 +298,8 @@ async def analyze_carbon(
     end_date: str = Form(...),
     analysis_type: str = Form("ndvi"),
     project_name: str = Form("Carbon Project"),
-    current_user: CarbonUser = Depends(get_current_user),
+    # current_user: CarbonUser = Depends(get_current_user),  # [COMMENTED OUT FOR PERSONAL REFERENCE — allowed viewer role to submit write jobs]
+    current_user: CarbonUser = Depends(require_permission("write")),
     db: Session = Depends(get_db)
 ):
     """
@@ -336,6 +348,8 @@ def get_analysis_history(
     """
     Retrieves pagination list of past analyses and results scoped to current tenant.
     """
+    page = max(1, page)
+    limit = max(1, min(limit, 100))
     offset = (page - 1) * limit
     from sqlalchemy import or_
     query = db.query(AnalysisJob)
@@ -511,7 +525,8 @@ def get_baseline_assessment(
 
 @router.post("/baseline/assess", dependencies=[Depends(rate_limit_standard)])
 def assess_baseline_direct(
-    current_user: CarbonUser = Depends(get_current_user),
+    # current_user: CarbonUser = Depends(get_current_user),  # [COMMENTED OUT FOR PERSONAL REFERENCE]
+    current_user: CarbonUser = Depends(require_permission("write")),
     polygon_geojson: str = Form(...),
     forest_area_ha: float = Form(...),
     project_carbon_tc_ha: float = Form(...),
@@ -615,6 +630,8 @@ def get_report(
         "satellite_sources": job.result.satellite_sources
     }
 
+    safe_id = _safe_disposition_id(job_id)
+
     if format in ["dossier", "vvb-pdf", "audit-pdf"]:
         if not current_user.can("review"):
             raise HTTPException(status_code=403, detail="Forbidden: dossier export requires 'review' permission")
@@ -623,36 +640,38 @@ def get_report(
         return Response(
             content=ReportGenerator.generate_vvb_dossier_pdf(dossier),
             media_type="application/pdf",
-            headers={"Content-Disposition": f"attachment; filename=VVB_Audit_Dossier_{job_id[:8]}.pdf"}
+            headers={"Content-Disposition": f"attachment; filename=VVB_Audit_Dossier_{safe_id[:8]}.pdf"}
         )
     elif format in ["dossier-md", "markdown", "md"]:
+        if not current_user.can("review"):
+            raise HTTPException(status_code=403, detail="Forbidden: dossier export requires 'review' permission")
         provenance = db.query(EstimateProvenance).filter(EstimateProvenance.result_id == job.result.id).first()
         dossier = ReportGenerator.build_vvb_audit_dossier(job, job.result, job.baseline, provenance, db=db)
         return Response(
             content=ReportGenerator.generate_vvb_dossier_markdown(dossier),
             media_type="text/markdown",
-            headers={"Content-Disposition": f"attachment; filename=VVB_Audit_Dossier_{job_id[:8]}.md"}
+            headers={"Content-Disposition": f"attachment; filename=VVB_Audit_Dossier_{safe_id[:8]}.md"}
         )
     elif format == "csv":
         csv_content = ReportGenerator.generate_csv(job_data, result_data)
         return Response(
             content=csv_content,
             media_type="text/csv",
-            headers={"Content-Disposition": f"attachment; filename=carbon_report_{job_id}.csv"}
+            headers={"Content-Disposition": f"attachment; filename=carbon_report_{safe_id}.csv"}
         )
     elif format == "geojson":
         geojson_content = ReportGenerator.generate_geojson(job_data, result_data)
         return Response(
             content=geojson_content,
             media_type="application/json",
-            headers={"Content-Disposition": f"attachment; filename=boundary_carbon_{job_id}.geojson"}
+            headers={"Content-Disposition": f"attachment; filename=boundary_carbon_{safe_id}.geojson"}
         )
     else: # PDF standard summary
         pdf_bytes = ReportGenerator.generate_pdf_placeholder(job_data, result_data)
         return Response(
             content=pdf_bytes,
             media_type="application/pdf",
-            headers={"Content-Disposition": f"attachment; filename=carbon_report_{job_id}.pdf"}
+            headers={"Content-Disposition": f"attachment; filename=carbon_report_{safe_id}.pdf"}
         )
 
 @router.get("/report/audit-dossier/{job_id}", dependencies=[Depends(rate_limit_standard)])
@@ -670,6 +689,7 @@ def get_audit_dossier(
     if not job or not job.result:
         raise HTTPException(status_code=404, detail="Analysis result or job not found.")
     verify_job_ownership(job, current_user)
+    safe_id = _safe_disposition_id(job_id)
 
     provenance = db.query(EstimateProvenance).filter(EstimateProvenance.result_id == job.result.id).first()
     dossier = ReportGenerator.build_vvb_audit_dossier(job, job.result, job.baseline, provenance, db=db)
@@ -679,14 +699,14 @@ def get_audit_dossier(
         return Response(
             content=md_text,
             media_type="text/markdown",
-            headers={"Content-Disposition": f"attachment; filename=VVB_Audit_Dossier_{job_id[:8]}.md"}
+            headers={"Content-Disposition": f"attachment; filename=VVB_Audit_Dossier_{safe_id[:8]}.md"}
         )
     elif format == "pdf":
         pdf_bytes = ReportGenerator.generate_vvb_dossier_pdf(dossier)
         return Response(
             content=pdf_bytes,
             media_type="application/pdf",
-            headers={"Content-Disposition": f"attachment; filename=VVB_Audit_Dossier_{job_id[:8]}.pdf"}
+            headers={"Content-Disposition": f"attachment; filename=VVB_Audit_Dossier_{safe_id[:8]}.pdf"}
         )
     else:
         return dossier
@@ -694,19 +714,21 @@ def get_audit_dossier(
 @router.post("/boundary/upload", dependencies=[Depends(rate_limit_upload)])
 async def upload_boundary(
     file: UploadFile = File(...),
-    current_user: CarbonUser = Depends(get_current_user),
+    # current_user: CarbonUser = Depends(get_current_user),  # [COMMENTED OUT FOR PERSONAL REFERENCE]
+    current_user: CarbonUser = Depends(require_permission("write")),
     db: Session = Depends(get_db)
 ):
     """
     Ingests and parses boundary spatial files (GeoJSON/KML) and extracts polygon paths.
     """
-    # Enforce maximum file size check of 5MB
-    contents = await file.read()
+    # Enforce maximum file size check of 5MB (bounded read prevents OOM before size check)
+    # contents = await file.read()  # [COMMENTED OUT FOR PERSONAL REFERENCE — unbounded upload read]
+    contents = await file.read(5 * 1024 * 1024 + 1)
     if len(contents) > 5 * 1024 * 1024:
         raise HTTPException(status_code=413, detail="File size exceeds the maximum limit of 5MB.")
 
-    filename = file.filename
-    file_ext = filename.split(".")[-1].lower()
+    filename = os.path.basename((file.filename or "boundary.geojson").replace("\\", "/"))
+    file_ext = filename.split(".")[-1].lower() if "." in filename else ""
 
     if file_ext not in ["geojson", "json", "kml"]:
         raise HTTPException(status_code=400, detail="Only GeoJSON and KML files are supported.")
@@ -786,8 +808,8 @@ async def upload_boundary(
             "polygon": json.loads(boundary_geojson)
         }
 
-    except Exception as e:
-        raise HTTPException(status_code=400, detail=f"Failed to parse spatial file: {str(e)}")
+    except Exception:
+        raise HTTPException(status_code=400, detail="Failed to parse spatial file. Ensure valid GeoJSON Polygon or KML coordinates.")
 
 @router.get("/dashboard", dependencies=[Depends(rate_limit_standard)])
 def get_dashboard_summary(
@@ -807,7 +829,10 @@ def get_dashboard_summary(
             )
         )
     results = query.all()
-    alerts_count = db.query(CarbonAlert).filter(CarbonAlert.is_resolved == False).count()
+    alert_query = db.query(CarbonAlert).filter(CarbonAlert.is_resolved == False)
+    if not current_user.is_platform_operator:
+        alert_query = alert_query.filter(CarbonAlert.organization_id == current_user.organization_id)
+    alerts_count = alert_query.count()
     
     total_co2e = sum([r.tonnes_co2e for r in results])
     total_area = sum([r.forest_area_ha for r in results])
@@ -842,9 +867,12 @@ def get_alerts(
     db: Session = Depends(get_db)
 ):
     """
-    List all active satellite-triggered forest risk alerts.
+    List all active satellite-triggered forest risk alerts scoped to caller tenant.
     """
-    alerts = db.query(CarbonAlert).order_by(CarbonAlert.created_at.desc()).all()
+    query = db.query(CarbonAlert)
+    if not current_user.is_platform_operator:
+        query = query.filter(CarbonAlert.organization_id == current_user.organization_id)
+    alerts = query.order_by(CarbonAlert.created_at.desc()).all()
     return [
         {
             "id": a.id,
@@ -865,11 +893,13 @@ def resolve_alert(
     db: Session = Depends(get_db)
 ):
     """
-    Marks an alert as resolved.
+    Marks an alert as resolved (tenant-scoped).
     """
     alert = db.query(CarbonAlert).filter(CarbonAlert.id == alert_id).first()
     if not alert:
         raise HTTPException(status_code=404, detail="Alert not found.")
+    if not current_user.is_platform_operator and alert.organization_id != current_user.organization_id:
+        raise HTTPException(status_code=403, detail="Forbidden: alert belongs to another organization")
     alert.is_resolved = True
     db.commit()
     return {"status": "success", "message": "Alert marked as resolved."}
@@ -897,8 +927,10 @@ def update_settings(
     current_user: CarbonUser = Depends(require_permission("admin"))
 ):
     """
-    Updates the active estimator model type (admin role required).
+    Updates the active estimator model type (platform operator required).
     """
+    if not current_user.is_platform_operator:
+        raise HTTPException(status_code=403, detail="Forbidden: changing global model settings requires platform operator role")
     try:
         carbon_estimator.set_model_type(payload.model_type)
         return {
@@ -947,7 +979,9 @@ def submit_ground_truth_plot(
         measurement_date=m_date,
         measurement_method=measurement_method,
         collected_by=collected_by,
-        notes=notes
+        notes=notes,
+        user_id=current_user.sub,
+        organization_id=current_user.organization_id,
     )
     db.add(plot)
     db.commit()
@@ -960,7 +994,10 @@ def list_ground_truth_plots(
     current_user: CarbonUser = Depends(get_current_user),
     db: Session = Depends(get_db)
 ):
-    plots = db.query(GroundTruthPlot).order_by(GroundTruthPlot.measurement_date.desc()).all()
+    query = db.query(GroundTruthPlot)
+    if not current_user.is_platform_operator:
+        query = query.filter(GroundTruthPlot.organization_id == current_user.organization_id)
+    plots = query.order_by(GroundTruthPlot.measurement_date.desc()).all()
     return [{
         "id": p.id, "plot_name": p.plot_name, "location": [p.location_lat, p.location_lng],
         "measured_carbon_tc_ha": p.measured_carbon_tc_ha, "measurement_date": p.measurement_date.isoformat(),
@@ -972,9 +1009,10 @@ def list_ground_truth_plots(
 def trigger_recalibration(current_user: CarbonUser = Depends(require_permission("admin"))):
     """
     Manually triggers the recalibration job (normally run on a schedule via
-    Celery beat - see calibration.py). Gated behind admin authorization
-    (`admin` role required) to protect Earth Engine quota and trigger staging pipeline safely.
+    Celery beat - see calibration.py). Gated behind platform operator authorization.
     """
+    if not current_user.is_platform_operator:
+        raise HTTPException(status_code=403, detail="Forbidden: global recalibration requires platform operator role")
     result = run_recalibration()
     return result
 
@@ -982,7 +1020,7 @@ def trigger_recalibration(current_user: CarbonUser = Depends(require_permission(
 
 @router.get("/provenance/verify-chain", dependencies=[Depends(rate_limit_standard)])
 def verify_provenance_chain(
-    current_user: CarbonUser = Depends(get_current_user),
+    current_user: CarbonUser = Depends(require_permission("review")),
     db: Session = Depends(get_db)
 ):
     """
@@ -1030,9 +1068,10 @@ def get_provenance(
 
 
 @router.post("/provenance/generate-keys", dependencies=[Depends(rate_limit_standard)])
-def generate_validator_keys(current_user: CarbonUser = Depends(get_current_user)):
+def generate_validator_keys(current_user: CarbonUser = Depends(require_permission("review"))):
     """
     Generates a new Ed25519 keypair for an accredited validator or VVB auditor.
+    Deprecated for client-side signing; browser VVB flows generate keys via WebCrypto.
     """
     return provenance_utils.generate_validator_keypair()
 
@@ -1048,6 +1087,9 @@ def sign_provenance(
     Attaches an external validator's Ed25519 co-signature to the provenance record.
     Cryptographically verifies the signature over record_hash.
     """
+    record = db.query(EstimateProvenance).filter(EstimateProvenance.result_id == result_id).first()
+    if record and record.result and record.result.job:
+        verify_job_ownership(record.result.job, current_user)
     try:
         sig_record = provenance_utils.add_validator_signature(
             db=db,
@@ -1068,8 +1110,8 @@ def sign_provenance(
         }
     except ValueError as ve:
         raise HTTPException(status_code=400, detail=str(ve))
-    except Exception as e:
-        raise HTTPException(status_code=500, detail=f"Failed to add signature: {e}")
+    except Exception:
+        raise HTTPException(status_code=500, detail="Failed to add validator signature")
 
 
 # --- Tiered Monitoring & Drone Verification Tasks (Treeconomy Pattern) ---
@@ -1083,12 +1125,14 @@ def get_verification_tasks(
     """
     Lists verification tasks flagged due to high model prediction uncertainty.
     """
-    return list_verification_tasks(status=status, db=db)
+    org_filter = None if current_user.is_platform_operator else current_user.organization_id
+    return list_verification_tasks(status=status, db=db, organization_id=org_filter)
 
 
 @router.post("/verification-tasks/{task_id}/complete", dependencies=[Depends(rate_limit_standard)])
 def complete_task(
-    task_id: int,
+    # task_id: int,  # [COMMENTED OUT FOR PERSONAL REFERENCE — VerificationTask.id is a UUID string]
+    task_id: str,
     payload: CompleteTaskRequest,
     current_user: CarbonUser = Depends(require_permission("write")),
     db: Session = Depends(get_db)
@@ -1096,13 +1140,18 @@ def complete_task(
     """
     Marks a verification task as completed and ingests drone survey measurements.
     """
+    task = db.query(VerificationTask).filter(VerificationTask.id == task_id).first()
+    if not task:
+        raise HTTPException(status_code=404, detail=f"VerificationTask with ID {task_id} not found.")
+    if task.result and task.result.job:
+        verify_job_ownership(task.result.job, current_user)
     try:
         res = complete_verification_task(task_id, payload.dict(), db)
         return res
     except ValueError as ve:
         raise HTTPException(status_code=404, detail=str(ve))
-    except Exception as e:
-        raise HTTPException(status_code=500, detail=f"Failed to complete task: {e}")
+    except Exception:
+        raise HTTPException(status_code=500, detail="Failed to complete verification task")
 
 
 # --- Verra VM0047 Dynamic Stocking Index Registry Export ---
@@ -1120,6 +1169,20 @@ def get_vm0047_export(
     Contains multi-pool carbon stocks, sensor telemetry, conformal uncertainty deductions,
     risk buffer pool withholding, and cryptographic multi-validator provenance.
     """
+    query = db.query(CarbonResult)
+    if result_id:
+        c_res = query.filter(CarbonResult.id == result_id).first()
+        if not c_res:
+            c_res = query.filter(CarbonResult.job_id == result_id).first()
+    else:
+        c_res = query.filter(
+            (CarbonResult.parcel_id == project_id) |
+            (CarbonResult.job_id == project_id) |
+            (CarbonResult.id == project_id)
+        ).order_by(CarbonResult.created_at.desc()).first()
+    if c_res and c_res.job:
+        verify_job_ownership(c_res.job, current_user)
+
     try:
         bundle = export_vm0047_stocking_index(
             project_id=project_id,
@@ -1130,7 +1193,7 @@ def get_vm0047_export(
         return bundle
     except ValueError as ve:
         raise HTTPException(status_code=404, detail=str(ve))
-    except Exception as e:
-        raise HTTPException(status_code=500, detail=f"Failed to generate VM0047 export: {e}")
+    except Exception:
+        raise HTTPException(status_code=500, detail="Failed to generate VM0047 export")
 
 

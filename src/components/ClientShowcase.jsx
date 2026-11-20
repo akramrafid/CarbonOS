@@ -88,7 +88,7 @@ const ClientShowcase = () => {
                 <span className={`text-[11px] sm:text-xs font-mono font-semibold tracking-wide whitespace-nowrap ${
                   isLight ? 'text-accent' : 'text-emerald-400'
                 }`}>
-                  Verified Client
+                  Demo Profile
                 </span>
               </div>
               <a
@@ -177,7 +177,7 @@ const ClientShowcase = () => {
               {client.activeInsets.toLocaleString()} tCO₂e
             </span>
             <span className={`text-[11px] sm:text-xs ml-1.5 font-sans ${isLight ? 'text-slate-500' : 'text-gray-400'}`}>
-              Verified Offset
+              Demo Baseline
             </span>
           </div>
         </div>
@@ -189,28 +189,18 @@ const ClientShowcase = () => {
     <section className={`w-full py-10 md:py-16 relative overflow-hidden font-sans border-b transition-colors duration-300 ${
       isLight ? 'bg-bg-canvas border-border-strong' : 'bg-bg-canvas border-white/5'
     }`}>
-      {/* Ambient background glows */}
-      <div className={`absolute top-1/4 left-1/2 -translate-x-1/2 w-[900px] h-[450px] rounded-full blur-[180px] pointer-events-none ${
-        isLight ? 'bg-emerald-500/5' : 'bg-accent/10'
-      }`} />
-      <div className={`absolute bottom-10 right-10 w-[600px] h-[400px] rounded-full blur-[160px] pointer-events-none ${
-        isLight ? 'bg-teal-500/5' : 'bg-emerald-500/5'
-      }`} />
-
-      {/* Expanded Container Width to utilize high-resolution canvas generously */}
       <div className="w-full max-w-[1720px] 2xl:max-w-[1920px] mx-auto px-4 sm:px-6 lg:px-8 xl:px-10 2xl:px-12 relative z-10">
         
-        {/* Section Header */}
         <SectionHeader
           centered
           badge={
             <Badge variant="emerald" className="inline-flex items-center gap-1.5 uppercase font-mono text-xs">
               <Award className="w-3.5 h-3.5" />
-              <span>Trusted Enterprise Client Network</span>
+              <span>Demo Data · Illustrative Bangladesh Sector Profiles</span>
             </Badge>
           }
-          title="Powering Bangladesh's Decarbonization Pioneers"
-          subtitle="From electric mobility and smart student transit to circular jute biopolymers and premier universities, see how Bangladesh’s industry leaders use CarbonZero BD for verified ESG carbon accounting."
+          title="Sector Reference Profiles for Bangladesh ESG Accounting"
+          subtitle="Explore illustrative Scope 1, 2, and 3 operational baselines modeled across electric mobility, student transit, circular jute biopolymers, and higher education campuses."
           className="max-w-3xl mx-auto mb-16"
         />
 

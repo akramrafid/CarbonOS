@@ -1,0 +1,204 @@
+<USER_REQUEST>
+ROLE
+You are a principal product designer and front-end architect with strong security and accessibility discipline. The app is running locally: frontend http://localhost:5173 (Vite), FastAPI http://127.0.0.1:8000, Django http://127.0.0.1:8001. Use the browser to look at the REAL UI. Never judge by code alone.
+
+WHAT I SEE IS WRONG
+1. On some pages, cards are being cut off (clipped).
+2. The dashboard navbar has no system that scales or optimizes well.
+3. The UI lacks animation, visual effects, gradients, innovation, and good responsiveness.
+4. It looks and reads like generic "AI slop": templated, repetitive, vague.
+5. Too much vertical padding (py) between one module and the next.
+6. The footer is basic.
+7. Light and dark mode must both be perfect: no errors, no leaks (visual or runtime), no repeated elements, no repeated architecture.
+8. Page-to-page transitions must be smooth.
+
+Target: premium, calm, credible, and genuinely impressive. Not flashy for its own sake.
+
+WORKING RULES
+- Create a branch `ui-overhaul`. Commit after every phase.
+- Do ONE phase at a time. At the end of each phase: run build, lint/typecheck, the JS tests and the Python tests, fix what you broke, take screenshots, update docs/OVERHAUL_PROGRESS.md (done, decisions, next), summarize in chat, then STOP and wait for me to say "continue". (The progress file lets a fresh session resume.)
+- Keep all business logic and API contracts intact. No DB schema changes.
+- Pre-approved: @playwright/test as a devDependency. Use `npx` for one-off analyzers (e.g. knip) without saving them. Ask before adding anything else.
+- All user-facing strings go through i18n.js. Update every language file you touch.
+- Never invent facts. Marketing copy, numbers, customers, certifications, partnerships, and carbon claims must be true or clearly labeled as demo. Unknowns go in docs/copy-needed.md for me to answer.
+- Small diffs. Do not rewrite what works. Verify visually after each change.
+
+=====================================================
+PHASE 0: PREFLIGHT AND BASELINE
+=====================================================
+0.1 Database sanity (read-only)
+- A previous session deleted orphan SQLite rows and fake-applied farmers_ai migration 0007. Run `python manage.py makemigrations --check --dry-run` and `showmigrations`, and report any schema drift. Do NOT touch the DB further.
+- Confirm db.sqlite3, backend/venv, and any .env files are gitignored and untracked.
+
+0.2 Access
+- If pages need login, ask me for dev credentials, or create a dev-only seed management command that reads credentials from env and is never committed with real values.
+
+0.3 Visual and runtime baseline
+- Write a Playwright script that visits EVERY route at 375 / 768 / 1024 / 1440 px in light and dark and saves screenshots to /qa/before.
+- For each route+viewport+theme, also record:
+  - console errors and warnings
+  - failed network requests
+  - horizontal overflow (document.scrollWidth > clientWidth), and elements wider than the viewport
+  - elements visually clipped by an ancestor with overflow hidden/auto/clip (compare each element's bounding box with its ancestors' boxes)
+  - layout shift
+- Write /qa/baseline-report.md with the findings. This is our checklist.
+
+0.4 Inventory (docs/inventory.md)
+- Route map; largest files (>400 lines); near-duplicate components and repeated JSX blocks; remaining hex/rgb literals per file; every use of py-/pt-/pb-/my- of 16 (4rem) or more and every min-h-screen/h-screen; repeated "section" patterns.
+
+=====================================================
+PHASE 1: ARCHITECTURE (KILL REPETITION)
+=====================================================
+- Target structure: src/app (router, providers), src/components/ui (primitives), src/components/layout (AppShell, MarketingLayout, Navbar, Sidebar, Footer), src/features/<domain>, src/lib, src/styles (tokens.css, base.css), src/config (nav.config, footer.config, site.config). Use an @/ path alias.
+- Persistent layout shells: MarketingLayout and DashboardLayout. Pages render content only. The nav and footer must never remount on navigation.
+- Split the monoliths (SaaSDashboard.jsx, CarbonMonitoring.jsx, and anything else >400 lines) into per-panel components under features/, each <300 lines, with shared hooks. No behavior change. After each extraction, compare before/after screenshots.
+- One implementation each for Card, SectionHeader, StatCard, DataTable, EmptyState, Modal, Drawer, Dropdown/Popover, Tooltip, Toast, Badge, Skeleton, Tabs, Button, IconButton, Input. Delete duplicates and fix imports.
+- Route-level code splitting (React.lazy + Suspense).
+- Remove dead code and unused exports/deps.
+
+=====================================================
+PHASE 2: DESIGN LANGUAGE (TOKENS, SPACING, GRADIENTS, EFFECTS)
+=====================================================
+2.1 Tokens
+- Semantic CSS variables for light AND dark (each tuned separately, never just inverted): background, surface, surface-raised, border, text, text-muted, primary, accent, success, warning, danger, info, focus-ring, a colorblind-safe chart palette, plus spacing, radius, shadow/glow, type scale, z-index. Expose them in tailwind.config.js via rgb(var(--token) / <alpha-value>).
+- Derive the palette from the existing brand. Do not change the brand direction without telling me.
+- Restore brand fonts (Instrument Sans, Cormorant Garamond, JetBrains Mono) in both themes, removing the forced Helvetica/Arial !important in index.css.
+- Migrate hardcoded hex colors file by file with a script and a reviewable mapping (docs/color-migration.md), checking screenshots per file. Only after pages look right, delete the large !important override block in index.css.
+- Add `npm run check:colors`, which fails if hex/rgb/hsl literals appear in src outside tokens.css and a single chart-palette file. Wire it into lint.
+
+2.2 Spacing rhythm (fixes the excessive py)
+- Rule: the PARENT controls spacing with gap/space-y. Children do not add their own py/mt. No stacked padding between adjacent sections.
+- Tokens: --section-y: clamp(2.5rem, 5vw, 5rem) for marketing pages. Dashboard density: module gap 16-24px, card padding 16-20px, tighter below 768px.
+- Create Section, PageContainer, and Stack primitives and replace ad-hoc py-16/20/24/32 and pt/pb combos. Remove spacer divs, redundant wrappers, and non-hero min-h-screen sections.
+- Acceptance: no empty band taller than ~96px between content blocks on desktop.
+
+2.3 Gradient and effects kit (reusable utilities/components, documented, both themes)
+- Section/hero backgrounds: layered radial-gradient mesh/aurora, very subtle, optional fine grain overlay (SVG data URI, 3-4% opacity). Any drift animates transform on an oversized pseudo-element, never blur or filter.
+- Gradient headline text: at most one per page.
+- Gradient borders on featured cards (mask-composite), with a border sweep on hover only.
+- Cursor-follow spotlight on cards via --mx/--my set in a rAF-throttled pointer handler. Disabled on touch and reduced-motion.
+- Glass (backdrop-filter) ONLY on navbar, popovers, and modals, with a solid fallback. Never stack blurs.
+- Elevation, glow, and 1px inner top-highlight tokens for depth, especially in dark mode.
+- Rules: at most 2 gradient hues per view; text over gradients meets WCAG AA; never animate filter, backdrop-filter, or box-shadow on large areas (crossfade a pseudo-element's opacity instead).
+
+=====================================================
+PHASE 3: FIX CLIPPED CARDS (ROOT CAUSE, NOT BANDAGES)
+=====================================================
+For every clipped card found in the baseline, identify the cause, then fix it at the source (the shared primitives), not per page. Typical causes:
+- an ancestor with overflow-hidden/auto clipping shadows, hover transforms, rings, tooltips, or dropdowns
+- fixed heights or max-h with overflowing content
+- flex/grid children missing min-w-0 / min-h-0
+- fixed column counts or min-w/fixed widths instead of fluid grids
+- whitespace-nowrap, long numbers/words, or long translated strings
+- line-clamp hiding important information
+- horizontal scrollers without padding-inline and scroll-padding
+- popovers/tooltips not rendered in a portal
+
+Fixes:
+- A Grid primitive using repeat(auto-fit, minmax(min(100%, 280px), 1fr)).
+- Container queries so each card adapts to its own width.
+- min-w-0 and overflow-wrap:anywhere on text.
+- Portals for overlays.
+- Clamp only non-critical text, with a tooltip for the full text.
+
+Add a Playwright test, run at 320-1920px in both themes, that fails if any card is clipped or overflows.
+
+=====================================================
+PHASE 4: DASHBOARD NAVIGATION SYSTEM
+=====================================================
+Build a config-driven navigation system.
+- src/config/nav.config: groups and items {id, i18n label key, icon, route, badge?, permission?, children?}. This is the single source for the sidebar, mobile drawer, command palette, breadcrumbs, and page titles.
+- Desktop (>=1280px): expanded sidebar with collapsible groups, collapsible to an icon rail. Persist the choice. Tooltips in rail mode. Shortcut to toggle (Ctrl/Cmd+B).
+- Tablet (768-1279px): icon rail by default, expanding as an overlay on demand.
+- Mobile (<768px): top app bar (menu, title, search, avatar), slide-in drawer, and optionally a bottom tab bar with at most 5 primary items plus a "More" sheet. Respect safe areas.
+- Top bar: auto breadcrumbs from route config, command palette (Ctrl/Cmd+K) for routes and actions, notifications popover, language switcher, theme toggle, user menu. When space runs out, actions collapse into a "more" menu in priority order.
+- Active item gets a sliding indicator (layoutId). Nested items expand as an accordion. The active item scrolls into view. The sidebar scrolls independently, with fade masks.
+- Performance: the sidebar must not re-render on page content changes. Import Lucide icons individually.
+- Accessibility: nav landmarks, aria-current, roving tabindex, focus trap in the drawer, Esc to close, skip-to-content link.
+- If there is a separate marketing navbar, use the same system: sticky glass that shrinks on scroll, dropdowns, and a full-screen mobile menu with staggered entrance.
+
+=====================================================
+PHASE 5: FOOTER
+=====================================================
+Redesign it and drive it from src/config/footer.config.
+- Brand block: logo plus a short, TRUE mission line.
+- 3-4 link columns (Platform, Resources, Company, Legal). Include ONLY links that resolve to real routes. List missing pages (privacy, terms, etc.) in docs/copy-needed.md and ask me.
+- Contact email and social links: ask me, don't invent.
+- Language and theme switchers.
+- A gradient hairline at the top and a large, faded wordmark with a soft gradient mask at the bottom. Back-to-top button. Dynamic copyright year.
+- A newsletter form or status indicator ONLY if a real backend endpoint exists. Otherwise omit.
+- Mobile: link columns become accordions. Fully theme-aware, accessible, and translated.
+- Dashboard pages get a slim footer or none.
+
+=====================================================
+PHASE 6: PAGE TRANSITIONS
+=====================================================
+- Only the content outlet transitions; the shell (nav, sidebar, footer) stays mounted.
+- Pick ONE mechanism based on the router version: Framer Motion AnimatePresence or native View Transitions. Explain the choice. Do not combine both on the same route.
+- Exit about 120ms, enter about 220ms (opacity plus 8px translate). Direction-aware for dashboard sub-routes (deeper moves forward, back reverses).
+- No blank flash: wrap navigation in startTransition so the old page stays visible until the next chunk is ready. After 150ms show a slim top progress bar. The Suspense fallback is a skeleton matching the real layout.
+- Prefetch route chunks on link hover/focus and when links enter the viewport (idle).
+- Scroll to top on new routes and restore on back. Move focus to the page's main heading and announce the route change via aria-live.
+- Shared-element transitions (layoutId) for list-to-detail only where low risk.
+- Respect prefers-reduced-motion (fade only).
+
+=====================================================
+PHASE 7: MOTION AND INNOVATION (PURPOSEFUL)
+=====================================================
+7.1 Motion system (extend src/lib/motion.* if it exists, otherwise create it)
+- Durations: instant 100ms, fast 150ms, base 220ms, slow 320ms, narrative 600ms. Easings: standard ease-out cubic-bezier(0.22,1,0.36,1), ease-in, ease-in-out. Spring presets (snappy, gentle) and shared variants.
+- MotionConfig reducedMotion="user" and LazyMotion. Framer Motion for component/state animation, GSAP ScrollTrigger only for scroll storytelling (gsap.context cleanup, refresh on resize/font load). Never both on one element.
+- Rules: animate transform and opacity (plus stroke-dashoffset or clip-path for draws). UI feedback <=300ms. Explanatory sequences <=800ms and skippable. Stagger <=50ms, capped at ~8 items. Never re-animate on polling or refetch. No infinite loops except live-status pulses and loaders. Pause offscreen. Reduced motion means fades only and count-ups jump to the final value.
+- Every animation must answer "what does this help the user understand?" If it can't, remove it.
+
+7.2 Make it feel alive
+- Landing hero: an interactive visual tied to the product (an animated carbon-flow or satellite-scan graphic in SVG/canvas, no heavy new libs; ask before using three.js), plus scroll-linked storytelling that explains Upload, Verify, Credit, Registry. Subtle pointer parallax, disabled on touch.
+- Features as a bento grid with varied tile sizes and a small live micro-visual in each tile (mini chart, animated icon). This breaks the monotony of identical cards.
+- Reveal-on-scroll once via IntersectionObserver. Never delay above-the-fold content.
+- KPI tickers (tabular-nums, announce only the final value), chart draw-ins, legend hover-dimming, filter changes that morph charts instead of remounting, live pulse dots, a stale-data indicator.
+- Guided ESG flow driven by REAL state (find it in the code): upload bills, detect gaps, fill missing fields, calculate emissions. A stepper (Uploaded, Reading, Gaps found, Needs your input, Calculating, Result), a scan shimmer while parsing, missing fields highlighted with auto-focus on the first, a "8/12 complete" meter, a result count-up, a breakdown that draws in, and a "How was this calculated?" panel that walks through activity data x emission factor = CO2e with sources.
+- Satellite/dMRV: layer crossfade, boundary polygon that draws itself, a Grad-CAM original-to-heatmap toggle with an opacity slider.
+- Micro-interactions on every interactive element: hover (only under @media (hover:hover)), focus-visible, active, disabled. Buttons: in-place loading, then a success check. Inline validation on blur. Toasts with swipe-to-dismiss. Modals/drawers animate in and out with a focus trap. Origin-aware dropdowns. Command palette animation. Magnetic effect on the primary CTA only.
+- Skeletons that match the real layout, shown only after a ~150ms delay. Empty states with an illustration and a primary action.
+
+=====================================================
+PHASE 8: AI-SLOP ERASER
+=====================================================
+Scan every page, component, and string, and fix:
+- Visual slop: identical icon + title + 3-line card grids repeated everywhere; every section centered with the same pill badge + gradient headline + subtitle; default purple/blue gradients; emoji used as icons; random glows and glassmorphism; decorative blobs; meaningless orbiting animations; fake dashboard screenshots; placeholder content.
+- Copy slop: "seamlessly", "unlock", "empower", "revolutionize", "cutting-edge", "next-generation", "leverage", "game-changing", em-dash overuse, vague benefits with no specifics. Rewrite as specific, sober, credible copy grounded in the real product (Bangladesh carbon market, Article 6.2 registry bridge, dMRV, ESG reporting). Remove fake stats, testimonials, logos, and certifications. Mock data shown as real must be labeled "Demo data" or removed.
+- Code slop: comments that restate the code, dead branches, commented-out blocks, unused imports/state/props, copy-pasted JSX that should be a map over data, duplicated handlers/hooks, useEffect used for derived state, nested ternaries, `any`, magic numbers, console.logs, missing React keys, inline style objects that duplicate Tailwind.
+- Output docs/slop-report.md with what was removed or rewritten, with counts.
+
+=====================================================
+PHASE 9: THEME PERFECTION AND RUNTIME HEALTH
+=====================================================
+- Theme system: light / dark / system, persisted, synced across tabs, no flash on load (inline script before first paint), color-scheme set, ~200ms crossfade on color/background/border only via a temporary class, accessible animated toggle.
+- Fix everything that breaks in either theme: charts, maps (swap tile style), SVGs (currentColor), logos/images, inputs and autofill, selects, modals, toasts, scrollbars, code blocks.
+- Contrast script: WCAG AA for all token pairs in both themes. Fix failures.
+- Zero console errors or warnings on every route in both themes, and no React key/act/hydration warnings.
+- Runtime leaks: every effect cleans up its listeners, timers, intervals, WebSockets, observers, and ScrollTriggers. Polling pauses when the tab is hidden. Prove it with a Playwright+CDP test that navigates all routes 20 times and checks JS heap and listener counts don't keep growing.
+
+=====================================================
+PHASE 10: RESPONSIVE PASS AND FINAL QA
+=====================================================
+- Mobile-first at 320 / 375 / 414 / 768 / 1024 / 1280 / 1440 / 1920 px, plus landscape phones and 200% zoom. Tap targets >=44px. Use dvh instead of vh. Safe-area insets. No horizontal page scroll. Fluid type with clamp(). Tables get a mobile pattern (scrollable with shadow hints and a sticky first column, or stacked cards).
+- Lighthouse on the landing page and two dashboard pages: performance >=90, accessibility >=95, CLS <0.05. Report bundle size before and after.
+- Re-run the Phase 0.3 script into /qa/after and build a before/after contact sheet. Every baseline issue must be fixed or listed with a reason.
+- Write docs/CHANGELOG_UI_OVERHAUL.md: changes per phase, files touched, skipped items and why, remaining risks, and a manual QA checklist for me.
+
+START with Phase 0 and then STOP.
+</USER_REQUEST>
+<ADDITIONAL_METADATA>
+The current local time is: 2026-11-10T17:46:44+06:00.
+
+The user's current state is as follows:
+Active Document: c:\projects\CarbonOS\inference\esg_rag\eval.py (LANGUAGE_UNSPECIFIED)
+Cursor is on line: 1
+Other open documents:
+- c:\projects\CarbonOS\inference\.env (LANGUAGE_UNSPECIFIED)
+- c:\projects\CarbonOS\inference\esg_app.py (LANGUAGE_UNSPECIFIED)
+- c:\projects\CarbonOS\src\pages\NotFound.jsx (LANGUAGE_UNSPECIFIED)
+- c:\projects\CarbonOS\src\components\OfflineBanner.jsx (LANGUAGE_UNSPECIFIED)
+- c:\projects\CarbonOS\docs\BASELINE.md (LANGUAGE_UNSPECIFIED)
+</ADDITIONAL_METADATA>

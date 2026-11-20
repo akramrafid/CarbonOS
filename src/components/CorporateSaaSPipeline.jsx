@@ -11,15 +11,18 @@ const CorporateSaaSPipeline = () => {
   const [isPlaying, setIsPlaying] = useState(true);
   const [transitionState, setTransitionState] = useState('active');
   const timerRef = useRef(null);
+  const stepTimeoutRef = useRef(null);
 
   const steps = PIPELINE_STEPS;
 
-  // Auto-play logic
+  // Auto-play logic (pauses when tab is hidden)
   useEffect(() => {
     if (isPlaying) {
       timerRef.current = setInterval(() => {
+        if (typeof document !== 'undefined' && document.visibilityState === 'hidden') return;
         setTransitionState('transitioning');
-        setTimeout(() => {
+        if (stepTimeoutRef.current) clearTimeout(stepTimeoutRef.current);
+        stepTimeoutRef.current = setTimeout(() => {
           setActiveStep((prev) => (prev + 1) % 4);
           setTransitionState('active');
         }, 600);
@@ -30,13 +33,15 @@ const CorporateSaaSPipeline = () => {
 
     return () => {
       if (timerRef.current) clearInterval(timerRef.current);
+      if (stepTimeoutRef.current) clearTimeout(stepTimeoutRef.current);
     };
   }, [isPlaying]);
 
   const handleStepChange = (index) => {
     setIsPlaying(false);
     setTransitionState('transitioning');
-    setTimeout(() => {
+    if (stepTimeoutRef.current) clearTimeout(stepTimeoutRef.current);
+    stepTimeoutRef.current = setTimeout(() => {
       setActiveStep(index);
       setTransitionState('active');
     }, 400);
@@ -45,7 +50,8 @@ const CorporateSaaSPipeline = () => {
   const handleNext = () => {
     setIsPlaying(false);
     setTransitionState('transitioning');
-    setTimeout(() => {
+    if (stepTimeoutRef.current) clearTimeout(stepTimeoutRef.current);
+    stepTimeoutRef.current = setTimeout(() => {
       setActiveStep((prev) => (prev + 1) % 4);
       setTransitionState('active');
     }, 400);
@@ -54,7 +60,8 @@ const CorporateSaaSPipeline = () => {
   const handlePrev = () => {
     setIsPlaying(false);
     setTransitionState('transitioning');
-    setTimeout(() => {
+    if (stepTimeoutRef.current) clearTimeout(stepTimeoutRef.current);
+    stepTimeoutRef.current = setTimeout(() => {
       setActiveStep((prev) => (prev === 0 ? 3 : prev - 1));
       setTransitionState('active');
     }, 400);
@@ -62,10 +69,6 @@ const CorporateSaaSPipeline = () => {
 
   return (
     <div className="w-full bg-bg-canvas py-10 md:py-16 relative overflow-hidden font-sans border-t border-white/5">
-      {/* Decorative Blur Backgrounds */}
-      <div className="absolute top-1/4 left-1/3 w-[600px] h-[600px] bg-emerald/5 rounded-full blur-[140px] pointer-events-none z-0"></div>
-      <div className="absolute bottom-1/4 right-1/4 w-[500px] h-[500px] bg-cyan/5 rounded-full blur-[120px] pointer-events-none z-0"></div>
-
       <div className="max-w-[90rem] mx-auto px-6 lg:px-12 relative z-10">
         {/* Header Block */}
         <SectionHeader

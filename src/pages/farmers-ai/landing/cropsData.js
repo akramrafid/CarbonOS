@@ -3,7 +3,7 @@ export const CROPS_DATA = [
     id: 'rice',
     nameEn: 'Rice',
     nameBn: 'ধান',
-    icon: '🌾',
+    icon: 'Sprout',
     diseasesEn: ["Bacterial Blight", "Blast", "Brown Spot", "Tungro"],
     diseasesBn: ["ব্যাকটেরিয়াল ব্লাইট (পাতা ধসা)", "ব্লাস্ট রোগ", "ব্রাউন স্পট (বাদামী দাগ)", "টুংরো ভাইরাস"]
   },
@@ -11,7 +11,7 @@ export const CROPS_DATA = [
     id: 'potato',
     nameEn: 'Potato',
     nameBn: 'আলু',
-    icon: '🥔',
+    icon: 'Leaf',
     diseasesEn: ["Early Blight", "Late Blight", "Healthy"],
     diseasesBn: ["আর্লি ব্লাইট (আগাম ধসা)", "লেট ব্লাইট (নাভি ধসা)", "সুস্থ আলু"]
   },
@@ -19,7 +19,7 @@ export const CROPS_DATA = [
     id: 'tomato',
     nameEn: 'Tomato',
     nameBn: 'টমেটো',
-    icon: '🍅',
+    icon: 'Leaf',
     diseasesEn: ["Bacterial Spot", "Early Blight", "Late Blight", "Leaf Mold", "Septoria Leaf Spot", "Spider Mites", "Target Spot", "Tomato Mosaic Virus", "Tomato Yellow Leaf Curl", "Healthy"],
     diseasesBn: ["ব্যাকটেরিয়াল স্পট", "আর্লি ব্লাইট (ধসা রোগ)", "লেট ব্লাইট (পাতা পচা)", "লিফ মোল্ড (ছত্রাক)", "সেপ্টোরিয়া লিফ স্পট", "মাকড়সা পোকা (Spider Mites)", "টার্গেট স্পট", "টমেটো মোজাইক ভাইরাস", "হলুদ পাতা কোঁকড়ানো ভাইরাস", "সুস্থ টমেটো"]
   },
@@ -27,7 +27,7 @@ export const CROPS_DATA = [
     id: 'maize',
     nameEn: 'Maize',
     nameBn: 'ভুট্টা',
-    icon: '🌽',
+    icon: 'Sprout',
     diseasesEn: ["Cercospora Leaf Spot", "Common Rust", "Northern Leaf Blight", "Healthy"],
     diseasesBn: ["সারকোস্পোরা লিফ স্পট", "কমন রাস্ট (মরিচা)", "নর্দার্ন লিফ ব্লাইট", "সুস্থ ভুট্টা"]
   },
@@ -35,7 +35,7 @@ export const CROPS_DATA = [
     id: 'mango',
     nameEn: 'Mango',
     nameBn: 'আম',
-    icon: '🥭',
+    icon: 'Trees',
     diseasesEn: ["Anthracnose", "Bacterial Canker", "Cutting Weevil", "Die Back", "Gall Midge", "Powdery Mildew", "Sooty Mould", "Healthy"],
     diseasesBn: ["অ্যানথ্রাকনোজ (দাগ রোগ)", "ব্যাকটেরিয়াল ক্যানকার", "পাতা কাটা উইভিল পোকা", "ডাই ব্যাক (ডাল শুকানো)", "গল মিজ পোকা (Gall Midge)", "পাউডারি মিলডিউ", "ঝুল রোগ (Sooty Mould)", "সুস্থ আম"]
   },
@@ -43,7 +43,7 @@ export const CROPS_DATA = [
     id: 'jackfruit',
     nameEn: 'Jackfruit',
     nameBn: 'কাঁঠাল',
-    icon: '🌳',
+    icon: 'Trees',
     diseasesEn: ["Algal Leaf Spot", "Black Spot", "Healthy"],
     diseasesBn: ["অ্যালগাল লিফ স্পট (শৈবাল দাগ)", "ব্ল্যাক স্পট (কালো দাগ)", "সুস্থ কাঁঠাল"]
   },
@@ -51,7 +51,7 @@ export const CROPS_DATA = [
     id: 'guava',
     nameEn: 'Guava',
     nameBn: 'পেয়ারা',
-    icon: '🍏',
+    icon: 'Trees',
     diseasesEn: ["Canker", "Dot", "Mummification", "Rust", "Healthy"],
     diseasesBn: ["ক্যানকার", "ডট (দাগ রোগ)", "মামিফিকেশন (শুকিয়ে কাঠ হওয়া)", "মরিচা রোগ (Rust)", "সুস্থ পেয়ারা"]
   },
@@ -59,7 +59,7 @@ export const CROPS_DATA = [
     id: 'citrus',
     nameEn: 'Citrus',
     nameBn: 'লেবু জাতীয়',
-    icon: '🍋',
+    icon: 'Trees',
     diseasesEn: ["Citrus Canker", "Nutrient Deficiency", "Multiple Diseases", "Healthy"],
     diseasesBn: ["সাইট্রাস ক্যানকার (ক্ষত রোগ)", "পুষ্টির অভাব (হলুদ পাতা)", "একাধিক রোগ", "সুস্থ লেবু/কমলা"]
   }

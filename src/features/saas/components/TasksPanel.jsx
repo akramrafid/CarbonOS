@@ -15,7 +15,7 @@ export const TasksPanel = (props) => {
   } = props;
 
   return (
-          <div className="bg-white border border-border-subtle rounded-3xl p-6 lg:p-8 shadow-sm space-y-6">
+          <div className="bg-bg-surface border border-border-subtle rounded-3xl p-6 lg:p-8 shadow-sm space-y-6">
             <div>
               <h2 className="font-sans font-bold text-3xl text-fg-primary">Verification Tasks</h2>
               <p className="text-sm text-fg-secondary mt-1 font-sans">Verify, audit, and log compliance steps to confirm climate metrics.</p>
@@ -28,7 +28,7 @@ export const TasksPanel = (props) => {
                 value={taskInput}
                 onChange={(e) => setTaskInput(e.target.value)}
                 placeholder="Type a new corporate ESG verification task..." 
-                className="flex-1 px-4 py-3 border border-border-subtle rounded-xl text-xs font-sans placeholder-[#94A3B8] focus:outline-none focus:border-border-subtle bg-bg-muted"
+                className="flex-1 px-4 py-3 border border-border-subtle rounded-xl text-xs font-sans placeholder-fg-muted focus:outline-none focus:border-border-subtle bg-bg-muted"
               />
               <Button 
                 type="submit"
@@ -51,6 +51,7 @@ export const TasksPanel = (props) => {
                         type="checkbox" 
                         checked={task.completed} 
                         onChange={() => toggleTask(task.id)}
+                        aria-label={`Mark task completed: ${task.text}`}
                         className="w-4.5 h-4.5 border-border-subtle rounded text-emerald focus:ring-emerald cursor-pointer"
                       />
                       <span className={`text-sm font-sans font-medium ${task.completed ? 'text-fg-secondary line-through' : 'text-fg-primary'}`}>

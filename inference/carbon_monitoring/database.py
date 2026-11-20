@@ -79,6 +79,20 @@ def init_db():
                 for col_name, col_type in b_cols:
                     if col_name not in existing_b_cols:
                         conn.execute(text(f"ALTER TABLE farmers_ai_uploadedboundary ADD COLUMN {col_name} {col_type}"))
+        if "farmers_ai_carbonalert" in inspector.get_table_names():
+            existing_alert_cols = {c["name"] for c in inspector.get_columns("farmers_ai_carbonalert")}
+            alert_cols = [("user_id", "VARCHAR(100)"), ("organization_id", "VARCHAR(100)")]
+            with engine.begin() as conn:
+                for col_name, col_type in alert_cols:
+                    if col_name not in existing_alert_cols:
+                        conn.execute(text(f"ALTER TABLE farmers_ai_carbonalert ADD COLUMN {col_name} {col_type}"))
+        if "carbon_mrv_groundtruthplot" in inspector.get_table_names():
+            existing_gt_cols = {c["name"] for c in inspector.get_columns("carbon_mrv_groundtruthplot")}
+            gt_cols = [("user_id", "VARCHAR(100)"), ("organization_id", "VARCHAR(100)")]
+            with engine.begin() as conn:
+                for col_name, col_type in gt_cols:
+                    if col_name not in existing_gt_cols:
+                        conn.execute(text(f"ALTER TABLE carbon_mrv_groundtruthplot ADD COLUMN {col_name} {col_type}"))
     except Exception as e:
         print(f"[DB Init Warning] Schema check/migration error: {e}")
 

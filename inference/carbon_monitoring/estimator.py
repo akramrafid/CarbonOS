@@ -137,19 +137,37 @@ class CarbonEstimator:
                     self.model_meta = json.load(f)
             except Exception as e:
                 print(f"[AI Module] Could not read model metadata, using default: {e}")
+        base_dir = os.path.realpath(self.model_dir)
+        rf_real = os.path.realpath(self.rf_path)
+        xgb_real = os.path.realpath(self.xgb_path)
+        expected_rf_sha = os.getenv("CARBON_RF_MODEL_SHA256", "").strip().lower()
+        expected_xgb_sha = os.getenv("CARBON_XGB_MODEL_SHA256", "").strip().lower()
+
+        def _verify_model_artifact(path: str, expected_sha: str) -> bool:
+            if not (path.startswith(base_dir + os.sep) or path == base_dir):
+                print(f"[AI Module] Refusing model load outside model_dir: {path}")
+                return False
+            if expected_sha:
+                import hashlib
+                digest = hashlib.sha256(open(path, "rb").read()).hexdigest()
+                if digest != expected_sha:
+                    print(f"[AI Module] Model SHA-256 mismatch for {path}")
+                    return False
+            return True
+
         # Load RF
-        if os.path.exists(self.rf_path):
+        if os.path.exists(rf_real) and _verify_model_artifact(rf_real, expected_rf_sha):
             try:
-                self.rf_model = joblib.load(self.rf_path)
-                print(f"[AI Module] Loaded Random Forest model from {self.rf_path}")
+                self.rf_model = joblib.load(rf_real)
+                print(f"[AI Module] Loaded Random Forest model from {rf_real}")
             except Exception as e:
                 print(f"[AI Module] Error loading RF: {e}")
                 
         # Load XGBoost
-        if XGB_AVAILABLE and os.path.exists(self.xgb_path):
+        if XGB_AVAILABLE and os.path.exists(xgb_real) and _verify_model_artifact(xgb_real, expected_xgb_sha):
             try:
-                self.xgb_model = joblib.load(self.xgb_path)
-                print(f"[AI Module] Loaded XGBoost model from {self.xgb_path}")
+                self.xgb_model = joblib.load(xgb_real)
+                print(f"[AI Module] Loaded XGBoost model from {xgb_real}")
             except Exception as e:
                 print(f"[AI Module] Error loading XGBoost: {e}")
 

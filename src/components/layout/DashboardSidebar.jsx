@@ -9,6 +9,8 @@ import {
 } from 'lucide-react';
 import { navConfig } from '../../config/nav.config';
 import { Tooltip } from '../ui/Tooltip';
+import { motion } from 'framer-motion';
+import { getSharedElementLayoutId, EASINGS } from '../../lib/motion';
 
 /**
  * DashboardSidebar Component
@@ -102,7 +104,7 @@ export const DashboardSidebar = memo(function DashboardSidebar({
           type="button"
           onClick={onToggleCollapse}
           aria-label={collapsed ? t('nav.expandSidebar', 'Expand sidebar (Ctrl+B)') : t('nav.collapseSidebar', 'Collapse sidebar (Ctrl+B)')}
-          className="hidden lg:flex p-1.5 rounded-lg text-fg-secondary hover:text-fg-primary hover:bg-bg-elevated transition-colors"
+          className="hidden lg:flex min-w-[44px] min-h-[44px] items-center justify-center p-1.5 rounded-lg text-fg-secondary hover:text-fg-primary hover:bg-bg-elevated transition-colors focus-ring-standard"
         >
           {collapsed ? <ChevronRight className="w-4 h-4" /> : <ChevronLeft className="w-4 h-4" />}
         </button>
@@ -123,7 +125,7 @@ export const DashboardSidebar = memo(function DashboardSidebar({
                 <button
                   type="button"
                   onClick={() => toggleGroup(group.id)}
-                  className="w-full flex items-center justify-between px-2 py-1 text-[11px] font-mono font-semibold uppercase tracking-wider text-fg-muted hover:text-fg-primary transition-colors mb-1 rounded"
+                  className="w-full flex items-center justify-between px-2 py-2 min-h-[40px] text-[11px] font-mono font-semibold uppercase tracking-wider text-fg-muted hover:text-fg-primary transition-colors mb-1 rounded focus-ring-standard"
                   aria-expanded={isOpen}
                 >
                   <span className="truncate">
@@ -152,26 +154,34 @@ export const DashboardSidebar = memo(function DashboardSidebar({
                         ref={isItemActive ? activeLinkRef : undefined}
                         aria-current={isItemActive ? 'page' : undefined}
                         className={({ isActive }) => `
-                          group relative flex items-center gap-3 px-3 py-2 rounded-xl text-sm font-medium transition-all duration-150 min-h-[40px]
+                          group relative flex items-center gap-3 px-3 py-2 rounded-xl text-sm font-medium transition-colors duration-150 min-h-[40px]
                           focus-ring-standard min-w-0
                           ${
                             isActive
-                              ? 'bg-accent text-fg-inverse font-semibold shadow-sm'
+                              ? 'text-fg-inverse font-semibold'
                               : 'text-fg-secondary hover:text-fg-primary hover:bg-bg-elevated'
                           }
                           ${collapsed ? 'justify-center px-0' : ''}
                         `.trim()}
                       >
-                        <Icon className="w-4 h-4 shrink-0 transition-transform group-hover:scale-105" aria-hidden="true" />
+                        {isItemActive && (
+                          <motion.span
+                            layoutId={getSharedElementLayoutId('sidebar', 'active-pill')}
+                            transition={EASINGS.spring}
+                            className="absolute inset-0 rounded-xl bg-accent shadow-sm -z-0"
+                            aria-hidden="true"
+                          />
+                        )}
+                        <Icon className="relative z-10 w-4 h-4 shrink-0 transition-transform group-hover:scale-105" aria-hidden="true" />
                         
                         {!collapsed && (
-                          <span className="truncate flex-1 text-left">
+                          <span className="relative z-10 truncate flex-1 text-left">
                             {itemLabel}
                           </span>
                         )}
 
                         {!collapsed && item.badge && (
-                          <span className={`ml-auto text-[10px] font-mono px-1.5 py-0.5 rounded ${
+                          <span className={`relative z-10 ml-auto text-[10px] font-mono px-1.5 py-0.5 rounded ${
                             isItemActive ? 'bg-white/20 text-fg-inverse' : 'bg-accent/15 text-accent'
                           }`}>
                             {item.badge}

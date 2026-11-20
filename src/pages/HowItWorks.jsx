@@ -1,5 +1,6 @@
 import React, { useEffect, useRef, useState } from 'react';
 import { Link } from 'react-router-dom';
+import { Radio, Building2, Coins } from 'lucide-react';
 import { PageHeader } from '../components/ui/PageHeader';
 
 const StepCard = ({ step, index, inView }) => {
@@ -84,9 +85,9 @@ const HowItWorks = () => {
       visual: (
         <div className="text-center">
           <div className="relative w-24 h-24 mx-auto mb-4">
-            <div className="absolute inset-0 border-2 border-emerald border-dashed rounded-full animate-[spin_10s_linear_infinite]"></div>
-            <div className="absolute inset-2 bg-bg-surface rounded-full flex items-center justify-center">
-              <span className="text-3xl">📡</span>
+            <div className="absolute inset-0 border-2 border-emerald/40 border-dashed rounded-full"></div>
+            <div className="absolute inset-2 bg-bg-surface rounded-full flex items-center justify-center text-emerald">
+              <Radio className="w-8 h-8" />
             </div>
           </div>
           <div className="font-mono text-xs text-emerald bg-emerald/10 px-2 py-1 rounded inline-block">LoRaWAN Active</div>
@@ -139,14 +140,18 @@ const HowItWorks = () => {
     },
     {
       title: "Corporate Marketplace",
-      description: "Global buyers seamlessly purchase credits to offset their emissions via our secure exchange. The platform holds funds in escrow instantly upon transaction.",
-      metricLabel: "Current Spot Price",
+      description: "Corporate buyers purchase verified credits to retire against Scope 1 and 2 inventories. Funds are held in escrow until registry serial transfer completes.",
+      metricLabel: "Indicative Spot Price (Demo data)",
       metric: "৳ 15,400 / tonne",
       visual: (
         <div className="flex flex-col items-center">
           <div className="flex space-x-2 mb-4">
-            <div className="w-12 h-12 rounded-full bg-white flex items-center justify-center shadow-lg z-10 text-xl border-2 border-border-subtle">🏢</div>
-            <div className="w-12 h-12 rounded-full bg-emerald flex items-center justify-center shadow-lg -ml-4 z-20 text-xl border-2 border-border-subtle text-white">💰</div>
+            <div className="w-12 h-12 rounded-full bg-bg-elevated flex items-center justify-center shadow-lg z-10 text-fg-primary border-2 border-border-subtle">
+              <Building2 className="w-5 h-5" />
+            </div>
+            <div className="w-12 h-12 rounded-full bg-emerald flex items-center justify-center shadow-lg -ml-4 z-20 text-white border-2 border-border-subtle">
+              <Coins className="w-5 h-5" />
+            </div>
           </div>
           <div className="font-mono text-xs text-mist bg-bg-surface px-3 py-1.5 rounded-lg border border-white/10">
             Escrow Locked

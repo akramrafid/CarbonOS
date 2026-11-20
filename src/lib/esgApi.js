@@ -517,7 +517,6 @@ async function request(path, { headers = {}, ...options } = {}) {
     // If backend is unreachable (Render cold start, sleeping, offline, network failure),
     // and this is a demo session or request, serve client-side demo fallback with active banner notification
     if (session.token.startsWith('demo-') || path.startsWith('/api/esg/')) {
-      console.warn(`[ESG API] Backend unreachable for ${path}. Serving client-side demo fallback.`);
       notifyDemoDataActive(path, 'network_unreachable');
       return handleOfflineRequest(path, options);
     }
@@ -535,7 +534,6 @@ async function request(path, { headers = {}, ...options } = {}) {
       } catch {}
       throw new EsgApiError(res.status, detail || `ESG request failed (${res.status}).`);
     }
-    console.warn(`[ESG API] Backend returned HTTP ${res.status} for ${path}. Serving client-side demo fallback.`);
     notifyDemoDataActive(path, `HTTP_${res.status}`);
     return handleOfflineRequest(path, options);
   }

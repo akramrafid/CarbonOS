@@ -86,7 +86,7 @@ export function JcmModal({
         </div>
       }
     >
-      <div className="overflow-y-auto max-h-[60vh] font-mono text-xs space-y-4 pr-1">
+      <div className="overflow-y-auto max-h-[60dvh] font-mono text-xs space-y-4 pr-1">
         <div className="p-3 bg-bg-canvas rounded-xl border border-border-subtle space-y-1.5">
           <div className="text-accent font-bold">DOCUMENT METADATA</div>
           <div className="text-white/70">Type: {jcmData.document_metadata?.document_type}</div>
@@ -169,7 +169,7 @@ export function BtrJsonModal({
         </div>
       }
     >
-      <div className="overflow-y-auto max-h-[60vh] font-mono text-xs bg-bg-canvas p-4 rounded-xl border border-border-subtle text-accent">
+      <div className="overflow-y-auto max-h-[60dvh] font-mono text-xs bg-bg-canvas p-4 rounded-xl border border-border-subtle text-accent">
         <pre className="whitespace-pre-wrap">{JSON.stringify(btrData, null, 2)}</pre>
       </div>
     </Modal>

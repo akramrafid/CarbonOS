@@ -177,14 +177,16 @@ def add_validator_signature(
         validator_id=validator_id
     ).first()
     if existing:
-        existing.signature = signature_hex
-        existing.comments = comments
-        existing.validator_name = validator_name
-        existing.validator_organization = validator_organization
-        existing.validator_public_key = public_key_hex
-        db.commit()
-        db.refresh(existing)
-        return existing
+        # [COMMENTED OUT FOR PERSONAL REFERENCE — overwriting historical validator signatures breaks append-only audit immutability]
+        # existing.signature = signature_hex
+        # existing.comments = comments
+        # existing.validator_name = validator_name
+        # existing.validator_organization = validator_organization
+        # existing.validator_public_key = public_key_hex
+        # db.commit()
+        # db.refresh(existing)
+        # return existing
+        raise ValueError(f"Validator '{validator_id}' has already signed this provenance record (signatures are append-only)")
 
     sig_entry = ValidatorSignature(
         provenance_record_id=prov_record.id,
@@ -245,8 +247,13 @@ def get_provenance_trust_status(record: EstimateProvenance, db: Session) -> dict
     quorum_target = 2
     quorum_reached = valid_count >= quorum_target
 
+    chain_check = verify_chain(db)
+    chain_valid = bool(chain_check.get("valid")) and record_hash_valid
+
     if not record_hash_valid:
         summary = "CRITICAL: Provenance record hash mismatch. Underlying data may have been altered."
+    elif not chain_valid:
+        summary = f"CRITICAL: Hash-chain verification failed at record {chain_check.get('broken_at')}: {chain_check.get('reason')}."
     elif valid_count == 0:
         summary = "Hash-chain integrity confirmed. No independent validator signatures registered yet."
     elif not quorum_reached:
@@ -259,7 +266,9 @@ def get_provenance_trust_status(record: EstimateProvenance, db: Session) -> dict
         "result_id": record.result_id,
         "record_hash": record.record_hash,
         "previous_hash": record.previous_hash,
-        "hash_chain_intact": record_hash_valid,
+        # "hash_chain_intact": record_hash_valid,  # [COMMENTED OUT FOR PERSONAL REFERENCE — only checked single record, missed upstream chain breaks]
+        "hash_chain_intact": chain_valid,
+        "record_hash_valid": record_hash_valid,
         "validator_signatures": verified_sigs,
         "verified_signature_count": valid_count,
         "quorum_target": quorum_target,

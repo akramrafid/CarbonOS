@@ -153,7 +153,7 @@ const Navbar = () => {
           <button
             type="button"
             onClick={() => setIsDemoModalOpen(true)}
-            className="font-mono text-[11px] font-bold text-white bg-bg-elevated hover:bg-accent hover:text-bg-canvas border border-border-strong/40 px-3.5 py-1.5 rounded-full transition-all duration-300 shadow-[0_0_12px_rgba(0,200,83,0.15)] ml-2 whitespace-nowrap shrink-0 cursor-pointer"
+            className="font-mono text-[11px] font-bold text-white bg-bg-elevated hover:bg-accent hover:text-bg-canvas border border-border-strong/40 px-3.5 py-1.5 rounded-full transition-all duration-300 shadow-[0_0_12px_rgba(0,200,83,0.15)] ml-2 whitespace-nowrap shrink-0 cursor-pointer min-h-[44px] inline-flex items-center"
           >
             {t('nav.requestDemo', '[Request Demo]')}
           </button>
@@ -222,7 +222,7 @@ const Navbar = () => {
       {/* Mobile Menu Drawer - Responsive with Vertical Scrolling & Scroll-Lock */}
       <div 
         id="mobile-menu-drawer"
-        className={`fixed inset-0 top-0 pt-16 bg-bg-canvas/98 backdrop-blur-3xl transition-all duration-300 z-40 flex flex-col items-center xl:hidden overflow-y-auto max-h-[100dvh] pb-12 ${
+        className={`fixed inset-0 top-0 pt-16 bg-bg-canvas/98 backdrop-blur-3xl transition-all duration-300 z-40 flex flex-col items-center xl:hidden overflow-y-auto max-h-[100dvh] pb-[max(3rem,env(safe-area-inset-bottom,3rem))] ${
           isMobileMenuOpen 
             ? 'translate-x-0 opacity-100 visible pointer-events-auto' 
             : 'translate-x-full opacity-0 invisible pointer-events-none'

@@ -21,6 +21,7 @@ export default {
           secondary: 'var(--color-fg-secondary)',
           muted: 'var(--color-fg-muted)',
           accent: 'var(--color-fg-accent)',
+          inverse: 'var(--color-fg-inverse)',
         },
         border: {
           theme: 'var(--color-border)',
@@ -61,16 +62,17 @@ export default {
           muted: 'var(--color-text-muted)',
           inverse: 'var(--color-text-inverse)',
         },
-        border: {
-          theme: 'var(--color-border)',
-          subtle: 'var(--color-border-subtle)',
-          card: 'var(--color-card-border)',
-        },
       },
       fontFamily: {
         sans: ['"Instrument Sans"', '-apple-system', 'BlinkMacSystemFont', '"Segoe UI"', 'Roboto', 'sans-serif'],
         serif: ['"Cormorant Garamond"', 'Georgia', 'serif'],
         mono: ['"JetBrains Mono"', 'monospace'],
+      },
+      minHeight: {
+        screen: ['100vh', '100dvh'],
+      },
+      height: {
+        screen: ['100vh', '100dvh'],
       },
     },
   },

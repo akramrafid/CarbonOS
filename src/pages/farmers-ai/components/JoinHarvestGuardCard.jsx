@@ -54,7 +54,7 @@ export function JoinHarvestGuardCard({
               value={name}
               onChange={e => setName(e.target.value)}
               required
-              className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-white focus:outline-none focus:border-lime-400 focus:ring-1 focus:ring-[#CCFF00]/50 transition-all"
+              className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-white focus:outline-none focus:border-lime-400 focus:ring-1 focus:ring-lime-400/50 transition-all"
             />
           </div>
           <div>
@@ -64,7 +64,7 @@ export function JoinHarvestGuardCard({
               value={phone}
               onChange={e => setPhone(e.target.value)}
               required
-              className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-white focus:outline-none focus:border-lime-400 focus:ring-1 focus:ring-[#CCFF00]/50 transition-all"
+              className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-white focus:outline-none focus:border-lime-400 focus:ring-1 focus:ring-lime-400/50 transition-all"
             />
           </div>
           <div>
@@ -74,7 +74,7 @@ export function JoinHarvestGuardCard({
               value={password}
               onChange={e => setPassword(e.target.value)}
               required
-              className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-white focus:outline-none focus:border-lime-400 focus:ring-1 focus:ring-[#CCFF00]/50 transition-all"
+              className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-white focus:outline-none focus:border-lime-400 focus:ring-1 focus:ring-lime-400/50 transition-all"
             />
           </div>
           <div>

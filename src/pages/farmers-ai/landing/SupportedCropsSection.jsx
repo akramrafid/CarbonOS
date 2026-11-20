@@ -1,6 +1,13 @@
 import React from 'react';
 import { motion } from 'framer-motion';
+import { Sprout, Leaf, Trees } from 'lucide-react';
 import { CROPS_DATA } from './cropsData';
+
+const CROP_ICON_MAP = {
+  Sprout,
+  Leaf,
+  Trees,
+};
 
 export function SupportedCropsSection({
   lang,
@@ -26,44 +33,49 @@ export function SupportedCropsSection({
       </motion.p>
 
       <div className="grid grid-cols-2 md:grid-cols-4 gap-6 mb-8">
-        {CROPS_DATA.map((crop) => (
-          <motion.button
-            key={crop.id}
-            variants={itemVariants}
-            onClick={() => onSelectCrop(selectedCrop === crop.id ? null : crop.id)}
-            className={`p-6 rounded-3xl border text-left transition-all duration-300 relative overflow-hidden group cursor-pointer ${
-              selectedCrop === crop.id
-                ? 'bg-lime-400/10 border-lime-400 shadow-[0_0_25px_rgba(204,255,0,0.15)] scale-[1.02]'
-                : 'bg-white/5 border-white/10 hover:bg-white/10 hover:border-white/20 hover:scale-[1.01]'
-            }`}
-          >
-            <div className="absolute top-0 right-0 w-24 h-24 bg-lime-400/5 blur-2xl rounded-full opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none" />
-            <div className="text-4xl mb-4 transform group-hover:scale-110 transition-transform duration-300">{crop.icon}</div>
-            <h4 className="text-xl font-bold text-white mb-1 tracking-tight">
-              {lang === 'en' ? crop.nameEn : crop.nameBn}
-            </h4>
-            <p className="text-xs text-white/40 font-medium capitalize">
-              {crop.diseasesEn.length} {text.diseasesDetected}
-            </p>
-          </motion.button>
-        ))}
+        {CROPS_DATA.map((crop) => {
+          const CropIcon = CROP_ICON_MAP[crop.icon] || Sprout;
+          return (
+            <motion.button
+              key={crop.id}
+              variants={itemVariants}
+              onClick={() => onSelectCrop(selectedCrop === crop.id ? null : crop.id)}
+              className={`p-6 rounded-3xl border text-left transition-all duration-300 relative overflow-hidden group cursor-pointer ${
+                selectedCrop === crop.id
+                  ? 'bg-lime-400/10 border-lime-400 shadow-[0_0_25px_rgba(204,255,0,0.15)] scale-[1.02]'
+                  : 'bg-white/5 border-white/10 hover:bg-white/10 hover:border-white/20 hover:scale-[1.01]'
+              }`}
+            >
+              <div className="w-11 h-11 rounded-2xl bg-lime-400/10 border border-lime-400/20 flex items-center justify-center mb-4 text-lime-400 transform group-hover:scale-105 transition-transform duration-300">
+                <CropIcon size={22} />
+              </div>
+              <h4 className="text-xl font-bold text-white mb-1 tracking-tight">
+                {lang === 'en' ? crop.nameEn : crop.nameBn}
+              </h4>
+              <p className="text-xs text-white/40 font-medium capitalize">
+                {crop.diseasesEn.length} {text.diseasesDetected}
+              </p>
+            </motion.button>
+          );
+        })}
       </div>
 
-      {/* Interactive Collapsible Detail Panel */}
       {selectedCrop && (
         <motion.div
           initial={{ opacity: 0, y: -10 }}
           animate={{ opacity: 1, y: 0 }}
           className="bg-gradient-to-r from-lime-400/10 to-transparent border border-lime-400/20 p-6 md:p-8 rounded-3xl backdrop-blur-md shadow-2xl relative"
         >
-          <div className="absolute top-0 right-0 w-32 h-32 bg-lime-400/5 blur-3xl rounded-full pointer-events-none" />
           {(() => {
             const crop = CROPS_DATA.find(c => c.id === selectedCrop);
             if (!crop) return null;
+            const SelectedIcon = CROP_ICON_MAP[crop.icon] || Sprout;
             return (
               <div>
                 <div className="flex items-center space-x-3 mb-6">
-                  <span className="text-3xl">{crop.icon}</span>
+                  <div className="w-10 h-10 rounded-xl bg-lime-400/15 border border-lime-400/30 flex items-center justify-center text-lime-400">
+                    <SelectedIcon size={20} />
+                  </div>
                   <h3 className="text-2xl font-bold text-lime-400 tracking-tight">
                     {lang === 'en' ? crop.nameEn : crop.nameBn} {lang === 'en' ? 'Diagnostics' : 'রোগ তালিকা'}
                   </h3>

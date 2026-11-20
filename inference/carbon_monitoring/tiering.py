@@ -115,7 +115,8 @@ def flag_for_verification(
     }
 
 def complete_verification_task(
-    task_id: int,
+    # task_id: int,  # [COMMENTED OUT FOR PERSONAL REFERENCE — VerificationTask.id is a UUID string]
+    task_id: str,
     drone_data: Dict[str, Any],
     db: Session
 ) -> Dict[str, Any]:
@@ -165,7 +166,11 @@ def complete_verification_task(
         "measured_biomass_mg_ha": survey_result.measured_biomass_mg_ha
     }
 
-def list_verification_tasks(status: Optional[str] = None, db: Optional[Session] = None) -> List[Dict[str, Any]]:
+def list_verification_tasks(
+    status: Optional[str] = None,
+    db: Optional[Session] = None,
+    organization_id: Optional[str] = None,
+) -> List[Dict[str, Any]]:
     """
     Lists verification tasks, optionally filtered by status ('pending', 'completed', etc.).
     Includes parcel and carbon estimate metadata.
@@ -173,7 +178,12 @@ def list_verification_tasks(status: Optional[str] = None, db: Optional[Session] 
     if db is None:
         return []
 
+    from .models import CarbonResult, AnalysisJob
     query = db.query(VerificationTask)
+    if organization_id is not None:
+        query = query.join(CarbonResult, VerificationTask.result_id == CarbonResult.id).join(
+            AnalysisJob, CarbonResult.job_id == AnalysisJob.id
+        ).filter(AnalysisJob.organization_id == organization_id)
     if status:
         query = query.filter(VerificationTask.status == status)
     tasks = query.order_by(VerificationTask.created_at.desc()).all()

@@ -9,6 +9,7 @@
     "preview": "vite preview",
     "lint": "tsc",
     "check:colors": "node scripts/check_colors.mjs",
+    "check:contrast": "node scripts/check_contrast.mjs",
     "test": "node --test tests/js/*.test.mjs"
   },
   "devDependencies": {

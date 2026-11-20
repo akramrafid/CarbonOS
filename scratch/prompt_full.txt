@@ -1,0 +1,56 @@
+<USER_REQUEST>
+ROLE
+You are a principal product designer and front-end architect with strong security and accessibility discipline. The app is running locally: frontend http://localhost:5173 (Vite), FastAPI http://127.0.0.1:8000, Django http://127.0.0.1:8001. Use the browser to look at the REAL UI. Never judge by code alone.
+
+WHAT I SEE IS WRONG
+1. On some pages, cards are being cut off (clipped).
+2. The dashboard navbar has no system that scales or optimizes well.
+3. The UI lacks animation, visual effects, gradients, innovation, and good responsiveness.
+4. It looks and reads like generic "AI slop": templated, repetitive, vague.
+5. Too much vertical padding (py) between one module and the next.
+6. The footer is basic.
+7. Light and dark mode must both be perfect: no errors, no leaks (visual or runtime), no repeated elements, no repeated architecture.
+8. Page-to-page transitions must be smooth.
+
+Target: premium, calm, credible, and genuinely impressive. Not flashy for its own sake.
+
+WORKING RULES
+- Create a branch `ui-overhaul`. Commit after every phase.
+- Do ONE phase at a time. At the end of each phase: run build, lint/typecheck, the JS tests and the Python tests, fix what you broke, take screenshots, update docs/OVERHAUL_PROGRESS.md (done, decisions, next), summarize in chat, then STOP and wait for me to say "continue". (The progress file lets a fresh session resume.)
+- Keep all business logic and API contracts intact. No DB schema changes.
+- Pre-approved: @playwright/test as a devDependency. Use `npx` for one-off analyzers (e.g. knip) without saving them. Ask before adding anything else.
+- All user-facing strings go through i18n.js. Update every language file you touch.
+- Never invent facts. Marketing copy, numbers, customers, certifications, partnerships, and carbon claims must be true or clearly labeled as demo. Unknowns go in docs/copy-needed.md for me to answer.
+- Small diffs. Do not rewrite what works. Verify visually after each change.
+
+=====================================================
+PHASE 0: PREFLI
+<truncated 15186 bytes>
+e blocks.
+- Contrast script: WCAG AA for all token pairs in both themes. Fix failures.
+- Zero console errors or warnings on every route in both themes, and no React key/act/hydration warnings.
+- Runtime leaks: every effect cleans up its listeners, timers, intervals, WebSockets, observers, and ScrollTriggers. Polling pauses when the tab is hidden. Prove it with a Playwright+CDP test that navigates all routes 20 times and checks JS heap and listener counts don't keep growing.
+
+=====================================================
+PHASE 10: RESPONSIVE PASS AND FINAL QA
+=====================================================
+- Mobile-first at 320 / 375 / 414 / 768 / 1024 / 1280 / 1440 / 1920 px, plus landscape phones and 200% zoom. Tap targets >=44px. Use dvh instead of vh. Safe-area insets. No horizontal page scroll. Fluid type with clamp(). Tables get a mobile pattern (scrollable with shadow hints and a sticky first column, or stacked cards).
+- Lighthouse on the landing page and two dashboard pages: performance >=90, accessibility >=95, CLS <0.05. Report bundle size before and after.
+- Re-run the Phase 0.3 script into /qa/after and build a before/after contact sheet. Every baseline issue must be fixed or listed with a reason.
+- Write docs/CHANGELOG_UI_OVERHAUL.md: changes per phase, files touched, skipped items and why, remaining risks, and a manual QA checklist for me.
+
+START with Phase 0 and then STOP.
+</USER_REQUEST>
+<ADDITIONAL_METADATA>
+The current local time is: 2026-11-10T17:46:44+06:00.
+
+The user's current state is as follows:
+Active Document: c:\projects\CarbonOS\inference\esg_rag\eval.py (LANGUAGE_UNSPECIFIED)
+Cursor is on line: 1
+Other open documents:
+- c:\projects\CarbonOS\inference\.env (LANGUAGE_UNSPECIFIED)
+- c:\projects\CarbonOS\inference\esg_app.py (LANGUAGE_UNSPECIFIED)
+- c:\projects\CarbonOS\src\pages\NotFound.jsx (LANGUAGE_UNSPECIFIED)
+- c:\projects\CarbonOS\src\components\OfflineBanner.jsx (LANGUAGE_UNSPECIFIED)
+- c:\projects\CarbonOS\docs\BASELINE.md (LANGUAGE_UNSPECIFIED)
+</ADDITIONAL_METADATA>

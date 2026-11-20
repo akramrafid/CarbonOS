@@ -31,10 +31,17 @@ async function main() {
 
       await page.addInitScript((t) => {
         localStorage.setItem('carbonos-theme', t);
-        document.documentElement.setAttribute('data-theme', t);
+        if (document.documentElement) {
+          document.documentElement.setAttribute('data-theme', t);
+        }
       }, theme);
 
       await page.goto(`${baseUrl}/company/about`, { waitUntil: 'networkidle' });
+      await page.evaluate((t) => {
+        document.documentElement.setAttribute('data-theme', t);
+        document.documentElement.classList.toggle('dark', t === 'dark');
+        document.documentElement.classList.toggle('light', t === 'light');
+      }, theme);
       const footer = page.locator('footer[aria-label="Site footer"]');
       await footer.scrollIntoViewIfNeeded();
       await page.waitForTimeout(300);
@@ -74,10 +81,17 @@ async function main() {
 
       await page.addInitScript((t) => {
         localStorage.setItem('carbonos-theme', t);
-        document.documentElement.setAttribute('data-theme', t);
+        if (document.documentElement) {
+          document.documentElement.setAttribute('data-theme', t);
+        }
       }, theme);
 
       await page.goto(`${baseUrl}/company/about`, { waitUntil: 'networkidle' });
+      await page.evaluate((t) => {
+        document.documentElement.setAttribute('data-theme', t);
+        document.documentElement.classList.toggle('dark', t === 'dark');
+        document.documentElement.classList.toggle('light', t === 'light');
+      }, theme);
       const footer = page.locator('footer[aria-label="Site footer"]');
       await footer.scrollIntoViewIfNeeded();
       await page.waitForTimeout(300);

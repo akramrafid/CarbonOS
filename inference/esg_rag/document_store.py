@@ -50,13 +50,25 @@ def get_tenant_dir(tenant_id: str) -> Path:
     return tenant_dir
 
 
+import re as _re
+
+_SHA256_RE = _re.compile(r"^[0-9a-f]{64}$")
+
+
 def get_document_path(tenant_id: str, sha256: str) -> Path:
-    safe_sha = "".join(c for c in sha256 if c.isalnum())
-    if not safe_sha:
+    # [COMMENTED OUT FOR PERSONAL REFERENCE — stripping non-alnum without length/hex validation allowed short/malformed path names]
+    # safe_sha = "".join(c for c in sha256 if c.isalnum())
+    # if not safe_sha:
+    #     raise ValueError(f"Invalid sha256: {sha256}")
+    normalized_sha = (sha256 or "").strip().lower()
+    if not _SHA256_RE.fullmatch(normalized_sha):
         raise ValueError(f"Invalid sha256: {sha256}")
-    doc_path = (get_tenant_dir(tenant_id) / f"{safe_sha}.pdf").resolve()
+    tenant_dir = get_tenant_dir(tenant_id).resolve()
     base_dir = UPLOADS_DIR.resolve()
-    if not doc_path.is_relative_to(base_dir):
+    if not tenant_dir.is_relative_to(base_dir):
+        raise ValueError(f"Path traversal detected in tenant_id: {tenant_id}")
+    doc_path = (tenant_dir / f"{normalized_sha}.pdf").resolve()
+    if not doc_path.is_relative_to(tenant_dir):
         raise ValueError(f"Path traversal detected in sha256: {sha256}")
     return doc_path
 
@@ -79,7 +91,9 @@ def save_document(tenant_id: str, data: bytes, sha256: Optional[str] = None) -> 
     aes = _get_aes_gcm()
     if aes:
         nonce = os.urandom(12)  # Unique 96-bit nonce
-        ct = aes.encrypt(nonce, data, None)
+        aad = f"{file_path.parent.name}:{file_path.stem}".encode("utf-8")
+        # ct = aes.encrypt(nonce, data, None)  # [COMMENTED OUT FOR PERSONAL REFERENCE — no AAD bound ciphertext to tenant/document]
+        ct = aes.encrypt(nonce, data, aad)
         payload = nonce + ct
 
     file_path.write_bytes(payload)
@@ -97,15 +111,17 @@ def read_document(tenant_id: str, sha256: str) -> Optional[bytes]:
         return None
 
     if not file_path.exists():
-        prefix = sha256[:12]
-        try:
-            matches = list(get_tenant_dir(tenant_id).glob(f"{prefix}*.pdf"))
-            if matches:
-                file_path = matches[0]
-            else:
-                return None
-        except ValueError:
-            return None
+        # [COMMENTED OUT FOR PERSONAL REFERENCE — prefix globbing could match unintended documents on short/colliding prefixes]
+        # prefix = sha256[:12]
+        # try:
+        #     matches = list(get_tenant_dir(tenant_id).glob(f"{prefix}*.pdf"))
+        #     if matches:
+        #         file_path = matches[0]
+        #     else:
+        #         return None
+        # except ValueError:
+        #     return None
+        return None
 
     raw = file_path.read_bytes()
     aes = _get_aes_gcm()
@@ -114,8 +130,10 @@ def read_document(tenant_id: str, sha256: str) -> Optional[bytes]:
             return None  # Fail closed on truncated file
         nonce = raw[:12]
         ct = raw[12:]
+        aad = f"{file_path.parent.name}:{file_path.stem}".encode("utf-8")
         try:
-            return aes.decrypt(nonce, ct, None)
+            # return aes.decrypt(nonce, ct, None)  # [COMMENTED OUT FOR PERSONAL REFERENCE — unbound AAD]
+            return aes.decrypt(nonce, ct, aad)
         except Exception:
             # FAIL CLOSED: Authentication failed or corrupted payload
             return None
@@ -129,11 +147,12 @@ def delete_document(tenant_id: str, sha256: str) -> bool:
     if file_path.exists():
         file_path.unlink()
         deleted = True
-    prefix = sha256[:12]
-    matches = list(get_tenant_dir(tenant_id).glob(f"{prefix}*.pdf"))
-    for m in matches:
-        m.unlink()
-        deleted = True
+    # [COMMENTED OUT FOR PERSONAL REFERENCE — prefix globbing could delete unrelated tenant files]
+    # prefix = sha256[:12]
+    # matches = list(get_tenant_dir(tenant_id).glob(f"{prefix}*.pdf"))
+    # for m in matches:
+    #     m.unlink()
+    #     deleted = True
     return deleted
 
 
@@ -141,5 +160,7 @@ def document_exists(tenant_id: str, sha256: str) -> bool:
     file_path = get_document_path(tenant_id, sha256)
     if file_path.exists():
         return True
-    prefix = sha256[:12]
-    return bool(list(get_tenant_dir(tenant_id).glob(f"{prefix}*.pdf")))
+    # [COMMENTED OUT FOR PERSONAL REFERENCE — prefix globbing removed]
+    # prefix = sha256[:12]
+    # return bool(list(get_tenant_dir(tenant_id).glob(f"{prefix}*.pdf")))
+    return False

@@ -1,0 +1,50 @@
+{
+  "timestamp": "2026-11-15T17:23:19.298Z",
+  "bundleMetrics": {
+    "jsMB": 2.33,
+    "jsGzipKB": 699,
+    "cssKB": 194.8,
+    "cssGzipKB": 33.2,
+    "wasmMB": 25.58
+  },
+  "pageAudits": [
+    {
+      "name": "Landing Page",
+      "route": "/",
+      "performance": 100,
+      "accessibility": 100,
+      "cls": 0,
+      "fcpMs": 528,
+      "lcpMs": 528,
+      "a11yViolations": 0,
+      "a11yIssues": []
+    },
+    {
+      "name": "MRV Dashboard",
+      "route": "/platform/mrv-dashboard",
+      "performance": 100,
+      "accessibility": 100,
+      "cls": 0,
+      "fcpMs": 168,
+      "lcpMs": 168,
+      "a11yViolations": 0,
+      "a11yIssues": []
+    },
+    {
+      "name": "SaaS Dashboard",
+      "route": "/platform/saas-dashboard",
+      "performance": 100,
+      "accessibility": 96,
+      "cls": 0,
+      "fcpMs": 96,
+      "lcpMs": 96,
+      "a11yViolations": 3,
+      "a11yIssues": [
+        "Input missing accessible label: <input class=\"mt-0.5 rounded text-emerald focus:ring-emerald",
+        "Input missing accessible label: <input class=\"mt-0.5 rounded text-emerald focus:ring-emerald",
+        "Input missing accessible label: <input class=\"mt-0.5 rounded text-emerald focus:ring-emerald"
+      ]
+    }
+  ],
+  "allGatesPassed": true
+}

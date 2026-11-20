@@ -1,5 +1,6 @@
 import React from 'react';
 import { Button, Input, Notice, Select } from '../ui';
+import { HowCalculatedPanel } from './HowCalculatedPanel';
 
 export function Step4Confirm({
   t,
@@ -119,57 +120,8 @@ export function Step4Confirm({
               )}
             </div>
 
-            {/* Footprint Metrics Grid */}
-            <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
-              <div className="p-3 bg-forest/60 rounded-xl border border-emerald/20">
-                <div className="text-[11px] font-mono text-mist uppercase">{t.totalFootprintLabel}</div>
-                <div className="text-lg font-bold text-emerald-400 mt-1">
-                  {estimateData.emissions.total_tco2e} <span className="text-xs font-normal text-mist">tCO2e</span>
-                </div>
-              </div>
-              <div className="p-3 bg-forest/60 rounded-xl border border-emerald/20">
-                <div className="text-[11px] font-mono text-mist uppercase">{t.scope2LocLabel}</div>
-                <div className="text-lg font-bold text-registry mt-1">
-                  {estimateData.emissions.scope2_location_tco2e} <span className="text-xs font-normal text-mist">tCO2e</span>
-                </div>
-              </div>
-              <div className="p-3 bg-forest/60 rounded-xl border border-emerald/20">
-                <div className="text-[11px] font-mono text-mist uppercase">{t.scope1Label}</div>
-                <div className="text-lg font-bold text-registry mt-1">
-                  {estimateData.emissions.scope1_tco2e} <span className="text-xs font-normal text-mist">tCO2e</span>
-                </div>
-              </div>
-            </div>
-
-            {/* Calculation Lines */}
-            {estimateData.lines?.length > 0 && (
-              <div className="space-y-2">
-                <h4 className="text-xs font-mono uppercase text-mist">{t.linesTitle}</h4>
-                <div className="space-y-1.5 font-mono text-xs">
-                  {estimateData.lines.map((ln, idx) => (
-                    <div key={idx} className="p-2.5 bg-carbon/80 border border-emerald/10 rounded-lg flex flex-col sm:flex-row justify-between gap-1">
-                      <span className="text-mist">{ln.formula}</span>
-                      <span className="text-emerald-400 font-semibold">{ln.emissions_kg} kgCO2e</span>
-                    </div>
-                  ))}
-                </div>
-              </div>
-            )}
-
-            {/* Citations & Provenance */}
-            {estimateData.factor_citations?.length > 0 && (
-              <div className="space-y-2">
-                <h4 className="text-xs font-mono uppercase text-mist">{t.factorsTitle}</h4>
-                <div className="space-y-1 font-mono text-[11px] text-mist/90 bg-carbon/50 p-2.5 rounded-lg border border-emerald/10">
-                  {estimateData.factor_citations.map((c, idx) => (
-                    <div key={idx} className="flex justify-between border-b border-emerald/5 last:border-0 py-1">
-                      <span>{c.family} v{c.version} ({c.status})</span>
-                      <span className="text-registry">{c.kgco2e_per_unit} kgCO2e/{c.unit} [{c.source_publisher}]</span>
-                    </div>
-                  ))}
-                </div>
-              </div>
-            )}
+            {/* Phase 7: Animated Footprint Metrics, Bar Breakdown & Expandable Formula Panel */}
+            <HowCalculatedPanel estimateData={estimateData} t={t} />
 
             {/* Upgrade to Audit Grade Button */}
             <div className="pt-2">
@@ -178,7 +130,7 @@ export function Step4Confirm({
                 className="text-xs border-emerald/40 text-emerald-300"
                 onClick={() => setShowInviteModal(!showInviteModal)}
               >
-                👥 {t.btnUpgradeAudit}
+                {t.btnUpgradeAudit}
               </Button>
             </div>
           </div>

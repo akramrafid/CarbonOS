@@ -6,7 +6,7 @@ import {
   DEFAULT_ADJUSTMENTS
 } from './registryData';
 
-const DJANGO_API_URL = import.meta.env.VITE_DJANGO_API_URL || 'http://localhost:8001';
+const DJANGO_API_URL = import.meta.env.VITE_DJANGO_API_URL || '';
 
 export function useRegistryState() {
   const [activeTab, setActiveTab] = useState('overview');
@@ -37,6 +37,11 @@ export function useRegistryState() {
   }, [projects, selectedProjectId]);
 
   const fetchRegistryData = async () => {
+    if (!DJANGO_API_URL) {
+      setIsLiveConnected(false);
+      setIsLoading(false);
+      return;
+    }
     setIsLoading(true);
     try {
       const [projRes, rulesRes, subsRes, adjRes] = await Promise.all([

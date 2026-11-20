@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useTheme } from '../../context/ThemeContext';
 import { useCarbonMapState } from './hooks/useCarbonMapState';
@@ -13,10 +13,18 @@ export function useCarbonMonitoringState() {
 
   // Floating Toast notification state
   const [toast, setToast] = useState({ show: false, message: '', type: 'success' });
+  const toastTimerRef = useRef(null);
   const showToast = (message, type = 'success') => {
     setToast({ show: true, message, type });
-    setTimeout(() => setToast({ show: false, message: '', type: 'success' }), 4000);
+    if (toastTimerRef.current) clearTimeout(toastTimerRef.current);
+    toastTimerRef.current = setTimeout(() => setToast({ show: false, message: '', type: 'success' }), 4000);
   };
+
+  useEffect(() => {
+    return () => {
+      if (toastTimerRef.current) clearTimeout(toastTimerRef.current);
+    };
+  }, []);
 
   // Modular state hooks
   const mapState = useCarbonMapState({ selectedJob: null, showToast });

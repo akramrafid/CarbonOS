@@ -1,0 +1,892 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>CarbonOS Overhaul — Before vs After Visual Contact Sheet</title>
+  <style>
+    body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; background: #080f0b; color: #e1e7e4; margin: 0; padding: 24px; }
+    h1 { font-size: 24px; color: #00c853; margin-bottom: 8px; }
+    p { color: #8fa89b; margin-top: 0; font-size: 14px; }
+    .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(460px, 1fr)); gap: 20px; }
+    .card { background: #0d1a12; border: 1px solid rgba(255,255,255,0.08); border-radius: 12px; overflow: hidden; padding: 12px; }
+    .card-title { font-size: 13px; font-mono: monospace; font-weight: bold; margin-bottom: 8px; display: flex; justify-content: space-between; }
+    .images { display: flex; gap: 8px; }
+    .col { flex: 1; display: flex; flex-direction: column; align-items: center; }
+    .col span { font-size: 11px; font-weight: bold; margin-bottom: 4px; text-transform: uppercase; color: #8fa89b; }
+    .col.after span { color: #00c853; }
+    .img-wrap { width: 100%; border: 1px solid rgba(255,255,255,0.05); border-radius: 6px; overflow: hidden; background: #000; }
+    img { width: 100%; height: auto; display: block; object-fit: cover; }
+    .badge { font-size: 10px; padding: 2px 6px; border-radius: 4px; background: rgba(0,200,83,0.15); color: #00c853; border: 1px solid rgba(0,200,83,0.3); }
+  </style>
+</head>
+<body>
+  <h1>CarbonOS UI Overhaul: Before vs After Visual Contact Sheet</h1>
+  <p>Displaying side-by-side visual comparisons across 288 captures. Viewports: 375px, 768px, 1024px, 1440px in Dark and Light themes.</p>
+  <div class="grid">
+    
+      <div class="card">
+        <div class="card-title">
+          <span>home (375px, dark)</span>
+          <span class="badge">CLS: 0</span>
+        </div>
+        <div class="images">
+          <div class="col before">
+            <span>Before</span>
+            <div class="img-wrap"><img src="before/home_375x667_dark.png" alt="Before home" loading="lazy" /></div>
+          </div>
+          <div class="col after">
+            <span>After (Overhaul)</span>
+            <div class="img-wrap"><img src="after/home_375x667_dark.png" alt="After home" loading="lazy" /></div>
+          </div>
+        </div>
+      </div>
+      
+
+      <div class="card">
+        <div class="card-title">
+          <span>home (375px, light)</span>
+          <span class="badge">CLS: 0.6719</span>
+        </div>
+        <div class="images">
+          <div class="col before">
+            <span>Before</span>
+            <div class="img-wrap"><img src="before/home_375x667_light.png" alt="Before home" loading="lazy" /></div>
+          </div>
+          <div class="col after">
+            <span>After (Overhaul)</span>
+            <div class="img-wrap"><img src="after/home_375x667_light.png" alt="After home" loading="lazy" /></div>
+          </div>
+        </div>
+      </div>
+      
+
+      <div class="card">
+        <div class="card-title">
+          <span>home (768px, dark)</span>
+          <span class="badge">CLS: 0.15</span>
+        </div>
+        <div class="images">
+          <div class="col before">
+            <span>Before</span>
+            <div class="img-wrap"><img src="before/home_768x1024_dark.png" alt="Before home" loading="lazy" /></div>
+          </div>
+          <div class="col after">
+            <span>After (Overhaul)</span>
+            <div class="img-wrap"><img src="after/home_768x1024_dark.png" alt="After home" loading="lazy" /></div>
+          </div>
+        </div>
+      </div>
+      
+
+      <div class="card">
+        <div class="card-title">
+          <span>home (768px, light)</span>
+          <span class="badge">CLS: 0.2</span>
+        </div>
+        <div class="images">
+          <div class="col before">
+            <span>Before</span>
+            <div class="img-wrap"><img src="before/home_768x1024_light.png" alt="Before home" loading="lazy" /></div>
+          </div>
+          <div class="col after">
+            <span>After (Overhaul)</span>
+            <div class="img-wrap"><img src="after/home_768x1024_light.png" alt="After home" loading="lazy" /></div>
+          </div>
+        </div>
+      </div>
+      
+
+      <div class="card">
+        <div class="card-title">
+          <span>home (1024px, dark)</span>
+          <span class="badge">CLS: 0.0999</span>
+        </div>
+        <div class="images">
+          <div class="col before">
+            <span>Before</span>
+            <div class="img-wrap"><img src="before/home_1024x768_dark.png" alt="Before home" loading="lazy" /></div>
+          </div>
+          <div class="col after">
+            <span>After (Overhaul)</span>
+            <div class="img-wrap"><img src="after/home_1024x768_dark.png" alt="After home" loading="lazy" /></div>
+          </div>
+        </div>
+      </div>
+      
+
+      <div class="card">
+        <div class="card-title">
+          <span>home (1024px, light)</span>
+          <span class="badge">CLS: 0.1199</span>
+        </div>
+        <div class="images">
+          <div class="col before">
+            <span>Before</span>
+            <div class="img-wrap"><img src="before/home_1024x768_light.png" alt="Before home" loading="lazy" /></div>
+          </div>
+          <div class="col after">
+            <span>After (Overhaul)</span>
+            <div class="img-wrap"><img src="after/home_1024x768_light.png" alt="After home" loading="lazy" /></div>
+          </div>
+        </div>
+      </div>
+      
+
+      <div class="card">
+        <div class="card-title">
+          <span>home (1440px, dark)</span>
+          <span class="badge">CLS: 0.0587</span>
+        </div>
+        <div class="images">
+          <div class="col before">
+            <span>Before</span>
+            <div class="img-wrap"><img src="before/home_1440x900_dark.png" alt="Before home" loading="lazy" /></div>
+          </div>
+          <div class="col after">
+            <span>After (Overhaul)</span>
+            <div class="img-wrap"><img src="after/home_1440x900_dark.png" alt="After home" loading="lazy" /></div>
+          </div>
+        </div>
+      </div>
+      
+
+      <div class="card">
+        <div class="card-title">
+          <span>home (1440px, light)</span>
+          <span class="badge">CLS: 0.0671</span>
+        </div>
+        <div class="images">
+          <div class="col before">
+            <span>Before</span>
+            <div class="img-wrap"><img src="before/home_1440x900_light.png" alt="Before home" loading="lazy" /></div>
+          </div>
+          <div class="col after">
+            <span>After (Overhaul)</span>
+            <div class="img-wrap"><img src="after/home_1440x900_light.png" alt="After home" loading="lazy" /></div>
+          </div>
+        </div>
+      </div>
+      
+
+      <div class="card">
+        <div class="card-title">
+          <span>how-it-works (375px, dark)</span>
+          <span class="badge">CLS: 3.0237</span>
+        </div>
+        <div class="images">
+          <div class="col before">
+            <span>Before</span>
+            <div class="img-wrap"><img src="before/how-it-works_375x667_dark.png" alt="Before how-it-works" loading="lazy" /></div>
+          </div>
+          <div class="col after">
+            <span>After (Overhaul)</span>
+            <div class="img-wrap"><img src="after/how-it-works_375x667_dark.png" alt="After how-it-works" loading="lazy" /></div>
+          </div>
+        </div>
+      </div>
+      
+
+      <div class="card">
+        <div class="card-title">
+          <span>how-it-works (375px, light)</span>
+          <span class="badge">CLS: 3.3597</span>
+        </div>
+        <div class="images">
+          <div class="col before">
+            <span>Before</span>
+            <div class="img-wrap"><img src="before/how-it-works_375x667_light.png" alt="Before how-it-works" loading="lazy" /></div>
+          </div>
+          <div class="col after">
+            <span>After (Overhaul)</span>
+            <div class="img-wrap"><img src="after/how-it-works_375x667_light.png" alt="After how-it-works" loading="lazy" /></div>
+          </div>
+        </div>
+      </div>
+      
+
+      <div class="card">
+        <div class="card-title">
+          <span>how-it-works (768px, dark)</span>
+          <span class="badge">CLS: 6.0499</span>
+        </div>
+        <div class="images">
+          <div class="col before">
+            <span>Before</span>
+            <div class="img-wrap"><img src="before/how-it-works_768x1024_dark.png" alt="Before how-it-works" loading="lazy" /></div>
+          </div>
+          <div class="col after">
+            <span>After (Overhaul)</span>
+            <div class="img-wrap"><img src="after/how-it-works_768x1024_dark.png" alt="After how-it-works" loading="lazy" /></div>
+          </div>
+        </div>
+      </div>
+      
+
+      <div class="card">
+        <div class="card-title">
+          <span>how-it-works (768px, light)</span>
+          <span class="badge">CLS: 6.5999</span>
+        </div>
+        <div class="images">
+          <div class="col before">
+            <span>Before</span>
+            <div class="img-wrap"><img src="before/how-it-works_768x1024_light.png" alt="Before how-it-works" loading="lazy" /></div>
+          </div>
+          <div class="col after">
+            <span>After (Overhaul)</span>
+            <div class="img-wrap"><img src="after/how-it-works_768x1024_light.png" alt="After how-it-works" loading="lazy" /></div>
+          </div>
+        </div>
+      </div>
+      
+
+      <div class="card">
+        <div class="card-title">
+          <span>how-it-works (1024px, dark)</span>
+          <span class="badge">CLS: 4.5932</span>
+        </div>
+        <div class="images">
+          <div class="col before">
+            <span>Before</span>
+            <div class="img-wrap"><img src="before/how-it-works_1024x768_dark.png" alt="Before how-it-works" loading="lazy" /></div>
+          </div>
+          <div class="col after">
+            <span>After (Overhaul)</span>
+            <div class="img-wrap"><img src="after/how-it-works_1024x768_dark.png" alt="After how-it-works" loading="lazy" /></div>
+          </div>
+        </div>
+      </div>
+      
+
+      <div class="card">
+        <div class="card-title">
+          <span>how-it-works (1024px, light)</span>
+          <span class="badge">CLS: 4.9465</span>
+        </div>
+        <div class="images">
+          <div class="col before">
+            <span>Before</span>
+            <div class="img-wrap"><img src="before/how-it-works_1024x768_light.png" alt="Before how-it-works" loading="lazy" /></div>
+          </div>
+          <div class="col after">
+            <span>After (Overhaul)</span>
+            <div class="img-wrap"><img src="after/how-it-works_1024x768_light.png" alt="After how-it-works" loading="lazy" /></div>
+          </div>
+        </div>
+      </div>
+      
+
+      <div class="card">
+        <div class="card-title">
+          <span>how-it-works (1440px, dark)</span>
+          <span class="badge">CLS: 6.5924</span>
+        </div>
+        <div class="images">
+          <div class="col before">
+            <span>Before</span>
+            <div class="img-wrap"><img src="before/how-it-works_1440x900_dark.png" alt="Before how-it-works" loading="lazy" /></div>
+          </div>
+          <div class="col after">
+            <span>After (Overhaul)</span>
+            <div class="img-wrap"><img src="after/how-it-works_1440x900_dark.png" alt="After how-it-works" loading="lazy" /></div>
+          </div>
+        </div>
+      </div>
+      
+
+      <div class="card">
+        <div class="card-title">
+          <span>how-it-works (1440px, light)</span>
+          <span class="badge">CLS: 7.0319</span>
+        </div>
+        <div class="images">
+          <div class="col before">
+            <span>Before</span>
+            <div class="img-wrap"><img src="before/how-it-works_1440x900_light.png" alt="Before how-it-works" loading="lazy" /></div>
+          </div>
+          <div class="col after">
+            <span>After (Overhaul)</span>
+            <div class="img-wrap"><img src="after/how-it-works_1440x900_light.png" alt="After how-it-works" loading="lazy" /></div>
+          </div>
+        </div>
+      </div>
+      
+
+      <div class="card">
+        <div class="card-title">
+          <span>project-onboarding (375px, dark)</span>
+          <span class="badge">CLS: 0</span>
+        </div>
+        <div class="images">
+          <div class="col before">
+            <span>Before</span>
+            <div class="img-wrap"><img src="before/project-onboarding_375x667_dark.png" alt="Before project-onboarding" loading="lazy" /></div>
+          </div>
+          <div class="col after">
+            <span>After (Overhaul)</span>
+            <div class="img-wrap"><img src="after/project-onboarding_375x667_dark.png" alt="After project-onboarding" loading="lazy" /></div>
+          </div>
+        </div>
+      </div>
+      
+
+      <div class="card">
+        <div class="card-title">
+          <span>project-onboarding (375px, light)</span>
+          <span class="badge">CLS: 0</span>
+        </div>
+        <div class="images">
+          <div class="col before">
+            <span>Before</span>
+            <div class="img-wrap"><img src="before/project-onboarding_375x667_light.png" alt="Before project-onboarding" loading="lazy" /></div>
+          </div>
+          <div class="col after">
+            <span>After (Overhaul)</span>
+            <div class="img-wrap"><img src="after/project-onboarding_375x667_light.png" alt="After project-onboarding" loading="lazy" /></div>
+          </div>
+        </div>
+      </div>
+      
+
+      <div class="card">
+        <div class="card-title">
+          <span>project-onboarding (768px, dark)</span>
+          <span class="badge">CLS: 0.9662</span>
+        </div>
+        <div class="images">
+          <div class="col before">
+            <span>Before</span>
+            <div class="img-wrap"><img src="before/project-onboarding_768x1024_dark.png" alt="Before project-onboarding" loading="lazy" /></div>
+          </div>
+          <div class="col after">
+            <span>After (Overhaul)</span>
+            <div class="img-wrap"><img src="after/project-onboarding_768x1024_dark.png" alt="After project-onboarding" loading="lazy" /></div>
+          </div>
+        </div>
+      </div>
+      
+
+      <div class="card">
+        <div class="card-title">
+          <span>project-onboarding (768px, light)</span>
+          <span class="badge">CLS: 1.017</span>
+        </div>
+        <div class="images">
+          <div class="col before">
+            <span>Before</span>
+            <div class="img-wrap"><img src="before/project-onboarding_768x1024_light.png" alt="Before project-onboarding" loading="lazy" /></div>
+          </div>
+          <div class="col after">
+            <span>After (Overhaul)</span>
+            <div class="img-wrap"><img src="after/project-onboarding_768x1024_light.png" alt="After project-onboarding" loading="lazy" /></div>
+          </div>
+        </div>
+      </div>
+      
+
+      <div class="card">
+        <div class="card-title">
+          <span>project-onboarding (1024px, dark)</span>
+          <span class="badge">CLS: 0.3303</span>
+        </div>
+        <div class="images">
+          <div class="col before">
+            <span>Before</span>
+            <div class="img-wrap"><img src="before/project-onboarding_1024x768_dark.png" alt="Before project-onboarding" loading="lazy" /></div>
+          </div>
+          <div class="col after">
+            <span>After (Overhaul)</span>
+            <div class="img-wrap"><img src="after/project-onboarding_1024x768_dark.png" alt="After project-onboarding" loading="lazy" /></div>
+          </div>
+        </div>
+      </div>
+      
+
+      <div class="card">
+        <div class="card-title">
+          <span>project-onboarding (1024px, light)</span>
+          <span class="badge">CLS: 0.346</span>
+        </div>
+        <div class="images">
+          <div class="col before">
+            <span>Before</span>
+            <div class="img-wrap"><img src="before/project-onboarding_1024x768_light.png" alt="Before project-onboarding" loading="lazy" /></div>
+          </div>
+          <div class="col after">
+            <span>After (Overhaul)</span>
+            <div class="img-wrap"><img src="after/project-onboarding_1024x768_light.png" alt="After project-onboarding" loading="lazy" /></div>
+          </div>
+        </div>
+      </div>
+      
+
+      <div class="card">
+        <div class="card-title">
+          <span>project-onboarding (1440px, dark)</span>
+          <span class="badge">CLS: 0.0281</span>
+        </div>
+        <div class="images">
+          <div class="col before">
+            <span>Before</span>
+            <div class="img-wrap"><img src="before/project-onboarding_1440x900_dark.png" alt="Before project-onboarding" loading="lazy" /></div>
+          </div>
+          <div class="col after">
+            <span>After (Overhaul)</span>
+            <div class="img-wrap"><img src="after/project-onboarding_1440x900_dark.png" alt="After project-onboarding" loading="lazy" /></div>
+          </div>
+        </div>
+      </div>
+      
+
+      <div class="card">
+        <div class="card-title">
+          <span>project-onboarding (1440px, light)</span>
+          <span class="badge">CLS: 0.0293</span>
+        </div>
+        <div class="images">
+          <div class="col before">
+            <span>Before</span>
+            <div class="img-wrap"><img src="before/project-onboarding_1440x900_light.png" alt="Before project-onboarding" loading="lazy" /></div>
+          </div>
+          <div class="col after">
+            <span>After (Overhaul)</span>
+            <div class="img-wrap"><img src="after/project-onboarding_1440x900_light.png" alt="After project-onboarding" loading="lazy" /></div>
+          </div>
+        </div>
+      </div>
+      
+
+      <div class="card">
+        <div class="card-title">
+          <span>mrv-dashboard (375px, dark)</span>
+          <span class="badge">CLS: 0</span>
+        </div>
+        <div class="images">
+          <div class="col before">
+            <span>Before</span>
+            <div class="img-wrap"><img src="before/mrv-dashboard_375x667_dark.png" alt="Before mrv-dashboard" loading="lazy" /></div>
+          </div>
+          <div class="col after">
+            <span>After (Overhaul)</span>
+            <div class="img-wrap"><img src="after/mrv-dashboard_375x667_dark.png" alt="After mrv-dashboard" loading="lazy" /></div>
+          </div>
+        </div>
+      </div>
+      
+
+      <div class="card">
+        <div class="card-title">
+          <span>mrv-dashboard (375px, light)</span>
+          <span class="badge">CLS: 0</span>
+        </div>
+        <div class="images">
+          <div class="col before">
+            <span>Before</span>
+            <div class="img-wrap"><img src="before/mrv-dashboard_375x667_light.png" alt="Before mrv-dashboard" loading="lazy" /></div>
+          </div>
+          <div class="col after">
+            <span>After (Overhaul)</span>
+            <div class="img-wrap"><img src="after/mrv-dashboard_375x667_light.png" alt="After mrv-dashboard" loading="lazy" /></div>
+          </div>
+        </div>
+      </div>
+      
+
+      <div class="card">
+        <div class="card-title">
+          <span>mrv-dashboard (768px, dark)</span>
+          <span class="badge">CLS: 0.9119</span>
+        </div>
+        <div class="images">
+          <div class="col before">
+            <span>Before</span>
+            <div class="img-wrap"><img src="before/mrv-dashboard_768x1024_dark.png" alt="Before mrv-dashboard" loading="lazy" /></div>
+          </div>
+          <div class="col after">
+            <span>After (Overhaul)</span>
+            <div class="img-wrap"><img src="after/mrv-dashboard_768x1024_dark.png" alt="After mrv-dashboard" loading="lazy" /></div>
+          </div>
+        </div>
+      </div>
+      
+
+      <div class="card">
+        <div class="card-title">
+          <span>mrv-dashboard (768px, light)</span>
+          <span class="badge">CLS: 0.9457</span>
+        </div>
+        <div class="images">
+          <div class="col before">
+            <span>Before</span>
+            <div class="img-wrap"><img src="before/mrv-dashboard_768x1024_light.png" alt="Before mrv-dashboard" loading="lazy" /></div>
+          </div>
+          <div class="col after">
+            <span>After (Overhaul)</span>
+            <div class="img-wrap"><img src="after/mrv-dashboard_768x1024_light.png" alt="After mrv-dashboard" loading="lazy" /></div>
+          </div>
+        </div>
+      </div>
+      
+
+      <div class="card">
+        <div class="card-title">
+          <span>mrv-dashboard (1024px, dark)</span>
+          <span class="badge">CLS: 2.3003</span>
+        </div>
+        <div class="images">
+          <div class="col before">
+            <span>Before</span>
+            <div class="img-wrap"><img src="before/mrv-dashboard_1024x768_dark.png" alt="Before mrv-dashboard" loading="lazy" /></div>
+          </div>
+          <div class="col after">
+            <span>After (Overhaul)</span>
+            <div class="img-wrap"><img src="after/mrv-dashboard_1024x768_dark.png" alt="After mrv-dashboard" loading="lazy" /></div>
+          </div>
+        </div>
+      </div>
+      
+
+      <div class="card">
+        <div class="card-title">
+          <span>mrv-dashboard (1024px, light)</span>
+          <span class="badge">CLS: 2.4224</span>
+        </div>
+        <div class="images">
+          <div class="col before">
+            <span>Before</span>
+            <div class="img-wrap"><img src="before/mrv-dashboard_1024x768_light.png" alt="Before mrv-dashboard" loading="lazy" /></div>
+          </div>
+          <div class="col after">
+            <span>After (Overhaul)</span>
+            <div class="img-wrap"><img src="after/mrv-dashboard_1024x768_light.png" alt="After mrv-dashboard" loading="lazy" /></div>
+          </div>
+        </div>
+      </div>
+      
+
+      <div class="card">
+        <div class="card-title">
+          <span>mrv-dashboard (1440px, dark)</span>
+          <span class="badge">CLS: 1.2058</span>
+        </div>
+        <div class="images">
+          <div class="col before">
+            <span>Before</span>
+            <div class="img-wrap"><img src="before/mrv-dashboard_1440x900_dark.png" alt="Before mrv-dashboard" loading="lazy" /></div>
+          </div>
+          <div class="col after">
+            <span>After (Overhaul)</span>
+            <div class="img-wrap"><img src="after/mrv-dashboard_1440x900_dark.png" alt="After mrv-dashboard" loading="lazy" /></div>
+          </div>
+        </div>
+      </div>
+      
+
+      <div class="card">
+        <div class="card-title">
+          <span>mrv-dashboard (1440px, light)</span>
+          <span class="badge">CLS: 1.215</span>
+        </div>
+        <div class="images">
+          <div class="col before">
+            <span>Before</span>
+            <div class="img-wrap"><img src="before/mrv-dashboard_1440x900_light.png" alt="Before mrv-dashboard" loading="lazy" /></div>
+          </div>
+          <div class="col after">
+            <span>After (Overhaul)</span>
+            <div class="img-wrap"><img src="after/mrv-dashboard_1440x900_light.png" alt="After mrv-dashboard" loading="lazy" /></div>
+          </div>
+        </div>
+      </div>
+      
+
+      <div class="card">
+        <div class="card-title">
+          <span>carbon-registry (375px, dark)</span>
+          <span class="badge">CLS: 0.1822</span>
+        </div>
+        <div class="images">
+          <div class="col before">
+            <span>Before</span>
+            <div class="img-wrap"><img src="before/carbon-registry_375x667_dark.png" alt="Before carbon-registry" loading="lazy" /></div>
+          </div>
+          <div class="col after">
+            <span>After (Overhaul)</span>
+            <div class="img-wrap"><img src="after/carbon-registry_375x667_dark.png" alt="After carbon-registry" loading="lazy" /></div>
+          </div>
+        </div>
+      </div>
+      
+
+      <div class="card">
+        <div class="card-title">
+          <span>carbon-registry (375px, light)</span>
+          <span class="badge">CLS: 0</span>
+        </div>
+        <div class="images">
+          <div class="col before">
+            <span>Before</span>
+            <div class="img-wrap"><img src="before/carbon-registry_375x667_light.png" alt="Before carbon-registry" loading="lazy" /></div>
+          </div>
+          <div class="col after">
+            <span>After (Overhaul)</span>
+            <div class="img-wrap"><img src="after/carbon-registry_375x667_light.png" alt="After carbon-registry" loading="lazy" /></div>
+          </div>
+        </div>
+      </div>
+      
+
+      <div class="card">
+        <div class="card-title">
+          <span>carbon-registry (768px, dark)</span>
+          <span class="badge">CLS: 1.1821</span>
+        </div>
+        <div class="images">
+          <div class="col before">
+            <span>Before</span>
+            <div class="img-wrap"><img src="before/carbon-registry_768x1024_dark.png" alt="Before carbon-registry" loading="lazy" /></div>
+          </div>
+          <div class="col after">
+            <span>After (Overhaul)</span>
+            <div class="img-wrap"><img src="after/carbon-registry_768x1024_dark.png" alt="After carbon-registry" loading="lazy" /></div>
+          </div>
+        </div>
+      </div>
+      
+
+      <div class="card">
+        <div class="card-title">
+          <span>carbon-registry (768px, light)</span>
+          <span class="badge">CLS: 1.2159</span>
+        </div>
+        <div class="images">
+          <div class="col before">
+            <span>Before</span>
+            <div class="img-wrap"><img src="before/carbon-registry_768x1024_light.png" alt="Before carbon-registry" loading="lazy" /></div>
+          </div>
+          <div class="col after">
+            <span>After (Overhaul)</span>
+            <div class="img-wrap"><img src="after/carbon-registry_768x1024_light.png" alt="After carbon-registry" loading="lazy" /></div>
+          </div>
+        </div>
+      </div>
+      
+
+      <div class="card">
+        <div class="card-title">
+          <span>carbon-registry (1024px, dark)</span>
+          <span class="badge">CLS: 3.6865</span>
+        </div>
+        <div class="images">
+          <div class="col before">
+            <span>Before</span>
+            <div class="img-wrap"><img src="before/carbon-registry_1024x768_dark.png" alt="Before carbon-registry" loading="lazy" /></div>
+          </div>
+          <div class="col after">
+            <span>After (Overhaul)</span>
+            <div class="img-wrap"><img src="after/carbon-registry_1024x768_dark.png" alt="After carbon-registry" loading="lazy" /></div>
+          </div>
+        </div>
+      </div>
+      
+
+      <div class="card">
+        <div class="card-title">
+          <span>carbon-registry (1024px, light)</span>
+          <span class="badge">CLS: 3.8311</span>
+        </div>
+        <div class="images">
+          <div class="col before">
+            <span>Before</span>
+            <div class="img-wrap"><img src="before/carbon-registry_1024x768_light.png" alt="Before carbon-registry" loading="lazy" /></div>
+          </div>
+          <div class="col after">
+            <span>After (Overhaul)</span>
+            <div class="img-wrap"><img src="after/carbon-registry_1024x768_light.png" alt="After carbon-registry" loading="lazy" /></div>
+          </div>
+        </div>
+      </div>
+      
+
+      <div class="card">
+        <div class="card-title">
+          <span>carbon-registry (1440px, dark)</span>
+          <span class="badge">CLS: 1.4733</span>
+        </div>
+        <div class="images">
+          <div class="col before">
+            <span>Before</span>
+            <div class="img-wrap"><img src="before/carbon-registry_1440x900_dark.png" alt="Before carbon-registry" loading="lazy" /></div>
+          </div>
+          <div class="col after">
+            <span>After (Overhaul)</span>
+            <div class="img-wrap"><img src="after/carbon-registry_1440x900_dark.png" alt="After carbon-registry" loading="lazy" /></div>
+          </div>
+        </div>
+      </div>
+      
+
+      <div class="card">
+        <div class="card-title">
+          <span>carbon-registry (1440px, light)</span>
+          <span class="badge">CLS: 1.5109</span>
+        </div>
+        <div class="images">
+          <div class="col before">
+            <span>Before</span>
+            <div class="img-wrap"><img src="before/carbon-registry_1440x900_light.png" alt="Before carbon-registry" loading="lazy" /></div>
+          </div>
+          <div class="col after">
+            <span>After (Overhaul)</span>
+            <div class="img-wrap"><img src="after/carbon-registry_1440x900_light.png" alt="After carbon-registry" loading="lazy" /></div>
+          </div>
+        </div>
+      </div>
+      
+
+      <div class="card">
+        <div class="card-title">
+          <span>verification-workflow (375px, dark)</span>
+          <span class="badge">CLS: 0</span>
+        </div>
+        <div class="images">
+          <div class="col before">
+            <span>Before</span>
+            <div class="img-wrap"><img src="before/verification-workflow_375x667_dark.png" alt="Before verification-workflow" loading="lazy" /></div>
+          </div>
+          <div class="col after">
+            <span>After (Overhaul)</span>
+            <div class="img-wrap"><img src="after/verification-workflow_375x667_dark.png" alt="After verification-workflow" loading="lazy" /></div>
+          </div>
+        </div>
+      </div>
+      
+
+      <div class="card">
+        <div class="card-title">
+          <span>verification-workflow (375px, light)</span>
+          <span class="badge">CLS: 0</span>
+        </div>
+        <div class="images">
+          <div class="col before">
+            <span>Before</span>
+            <div class="img-wrap"><img src="before/verification-workflow_375x667_light.png" alt="Before verification-workflow" loading="lazy" /></div>
+          </div>
+          <div class="col after">
+            <span>After (Overhaul)</span>
+            <div class="img-wrap"><img src="after/verification-workflow_375x667_light.png" alt="After verification-workflow" loading="lazy" /></div>
+          </div>
+        </div>
+      </div>
+      
+
+      <div class="card">
+        <div class="card-title">
+          <span>verification-workflow (768px, dark)</span>
+          <span class="badge">CLS: 2.1866</span>
+        </div>
+        <div class="images">
+          <div class="col before">
+            <span>Before</span>
+            <div class="img-wrap"><img src="before/verification-workflow_768x1024_dark.png" alt="Before verification-workflow" loading="lazy" /></div>
+          </div>
+          <div class="col after">
+            <span>After (Overhaul)</span>
+            <div class="img-wrap"><img src="after/verification-workflow_768x1024_dark.png" alt="After verification-workflow" loading="lazy" /></div>
+          </div>
+        </div>
+      </div>
+      
+
+      <div class="card">
+        <div class="card-title">
+          <span>verification-workflow (768px, light)</span>
+          <span class="badge">CLS: 2.2374</span>
+        </div>
+        <div class="images">
+          <div class="col before">
+            <span>Before</span>
+            <div class="img-wrap"><img src="before/verification-workflow_768x1024_light.png" alt="Before verification-workflow" loading="lazy" /></div>
+          </div>
+          <div class="col after">
+            <span>After (Overhaul)</span>
+            <div class="img-wrap"><img src="after/verification-workflow_768x1024_light.png" alt="After verification-workflow" loading="lazy" /></div>
+          </div>
+        </div>
+      </div>
+      
+
+      <div class="card">
+        <div class="card-title">
+          <span>verification-workflow (1024px, dark)</span>
+          <span class="badge">CLS: 0.7534</span>
+        </div>
+        <div class="images">
+          <div class="col before">
+            <span>Before</span>
+            <div class="img-wrap"><img src="before/verification-workflow_1024x768_dark.png" alt="Before verification-workflow" loading="lazy" /></div>
+          </div>
+          <div class="col after">
+            <span>After (Overhaul)</span>
+            <div class="img-wrap"><img src="after/verification-workflow_1024x768_dark.png" alt="After verification-workflow" loading="lazy" /></div>
+          </div>
+        </div>
+      </div>
+      
+
+      <div class="card">
+        <div class="card-title">
+          <span>verification-workflow (1024px, light)</span>
+          <span class="badge">CLS: 0.7701</span>
+        </div>
+        <div class="images">
+          <div class="col before">
+            <span>Before</span>
+            <div class="img-wrap"><img src="before/verification-workflow_1024x768_light.png" alt="Before verification-workflow" loading="lazy" /></div>
+          </div>
+          <div class="col after">
+            <span>After (Overhaul)</span>
+            <div class="img-wrap"><img src="after/verification-workflow_1024x768_light.png" alt="After verification-workflow" loading="lazy" /></div>
+          </div>
+        </div>
+      </div>
+      
+
+      <div class="card">
+        <div class="card-title">
+          <span>verification-workflow (1440px, dark)</span>
+          <span class="badge">CLS: 0.0574</span>
+        </div>
+        <div class="images">
+          <div class="col before">
+            <span>Before</span>
+            <div class="img-wrap"><img src="before/verification-workflow_1440x900_dark.png" alt="Before verification-workflow" loading="lazy" /></div>
+          </div>
+          <div class="col after">
+            <span>After (Overhaul)</span>
+            <div class="img-wrap"><img src="after/verification-workflow_1440x900_dark.png" alt="After verification-workflow" loading="lazy" /></div>
+          </div>
+        </div>
+      </div>
+      
+
+      <div class="card">
+        <div class="card-title">
+          <span>verification-workflow (1440px, light)</span>
+          <span class="badge">CLS: 0.0586</span>
+        </div>
+        <div class="images">
+          <div class="col before">
+            <span>Before</span>
+            <div class="img-wrap"><img src="before/verification-workflow_1440x900_light.png" alt="Before verification-workflow" loading="lazy" /></div>
+          </div>
+          <div class="col after">
+            <span>After (Overhaul)</span>
+            <div class="img-wrap"><img src="after/verification-workflow_1440x900_light.png" alt="After verification-workflow" loading="lazy" /></div>
+          </div>
+        </div>
+      </div>
+      
+  </div>
+</body>
+</html>

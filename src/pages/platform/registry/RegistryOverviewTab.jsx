@@ -39,7 +39,7 @@ export function RegistryOverviewTab({
               onClick={() => setSelectedProjectId(proj.id)}
               className={`p-5 rounded-2xl border transition-all cursor-pointer relative overflow-hidden ${
                 isSelected
-                  ? 'bg-bg-elevated border-border-strong shadow-[0_0_24px_rgba(0,200,83,0.15)] ring-1 ring-[#00C853]'
+                  ? 'bg-bg-elevated border-border-strong shadow-[0_0_24px_rgba(0,200,83,0.15)] ring-1 ring-accent'
                   : 'bg-bg-elevated/60 border-border-subtle hover:border-white/20'
               }`}
             >

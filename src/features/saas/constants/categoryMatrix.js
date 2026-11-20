@@ -163,7 +163,7 @@ export const computeCategoryMatrix = (rawParams = {}, customAddedItems = [], adj
     health_care: `Occupational health and safety supplies represent ${top1.percentage}%. Consolidating medical deliveries and selecting autoclave-reusable PPE reduces consumable waste.`,
     others: `Ancillary services and solid waste make up ${top1.percentage}%. Installing on-site waste segregation and subscribing to green cloud data regions mitigates operational overhead.`
   };
-  const quickTip = tipsCatalog[top1.id] || `Conduct an ISO 50001 energy audit on your largest consumption facilities to unlock immediate 10-15% operational emission reductions.`;
+  const quickTip = tipsCatalog[top1.id] || `Conduct an ISO 50001 energy audit on your largest consumption facilities to identify 10-15% operational emission reductions.`;
 
   return {
     categories,

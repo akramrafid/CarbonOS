@@ -730,6 +730,14 @@ def bill_gaps(db, principal, bill_id: str) -> dict:
 
     ready_to_post = len(calc_blockers) == 0 and len(missing_required) == 0 and bill.status != "POSTED"
 
+    has_src = False
+    _cand = bill.filename.split("_", 1)[0].strip().lower() if bill.filename and "_" in bill.filename else (bill.document_sha256 or "").strip().lower()
+    if len(_cand) == 64 and all(c in "0123456789abcdef" for c in _cand):
+        try:
+            has_src = document_store.document_exists(principal.organization_id, _cand)
+        except ValueError:
+            has_src = False
+
     return {
         "profile_key": bill.profile_key or "unknown",
         "present": present,
@@ -739,10 +747,8 @@ def bill_gaps(db, principal, bill_id: str) -> dict:
         "findings": findings_list,
         "calc_blockers": calc_blockers,
         "ready_to_post": ready_to_post,
-        "has_source_document": document_store.document_exists(
-            principal.organization_id,
-            bill.filename.split("_")[0] if bill.filename and "_" in bill.filename else bill.document_sha256
-        )
+        # "has_source_document": document_store.document_exists(...)  # [COMMENTED OUT FOR PERSONAL REFERENCE — unvalidated prefix caused ValueError on manual filenames]
+        "has_source_document": has_src
     }
 
 
@@ -1029,8 +1035,11 @@ def estimate_bill(db, principal, bill_id: str, allow_provisional: bool = False,
             and (end is None or f.valid_to is None or end <= f.valid_to)
             for f in factors_for_calc
         )
-        if not has_approved_grid:
-            provisional_factor_record = wire_bd_grid_proposal(db, principal, grid_region=facility.grid_region)
+        if not has_approved_grid and (facility.grid_region or "").upper().startswith("BD"):
+            # Only propose the Bangladesh national grid factor cleanly for BD-* regions; prevent arbitrary tenant region strings on global DRAFT catalog
+            safe_region = facility.grid_region if getattr(principal, "is_platform_operator", False) else "BD-NATIONAL"
+            # provisional_factor_record = wire_bd_grid_proposal(db, principal, grid_region=facility.grid_region)  # [COMMENTED OUT FOR PERSONAL REFERENCE — arbitrary facility.grid_region poisoned global EmissionFactor]
+            provisional_factor_record = wire_bd_grid_proposal(db, principal, grid_region=safe_region)
             if not allow_provisional:
                 if "MISSING_GRID_AVERAGE_FACTOR" not in calc_blockers:
                     calc_blockers.append("MISSING_GRID_AVERAGE_FACTOR")
@@ -1043,7 +1052,7 @@ def estimate_bill(db, principal, bill_id: str, allow_provisional: bool = False,
                     activity_type=provisional_factor_record.activity_type,
                     unit=provisional_factor_record.unit,
                     kgco2e_per_unit=Decimal(str(provisional_factor_record.kgco2e_per_unit)),
-                    region=facility.grid_region,
+                    region=safe_region,
                     gwp_basis=provisional_factor_record.gwp_basis,
                     method=provisional_factor_record.method,
                     valid_from=min(provisional_factor_record.valid_from, start) if start else provisional_factor_record.valid_from,

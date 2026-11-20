@@ -100,7 +100,7 @@ const PaymentStatusTracker = ({ transactionId, onComplete }) => {
           <div className="text-center w-full max-w-sm">
             <div className="w-8 h-8 border-4 border-border-strong border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
             <p className="text-fg-primary font-semibold mb-4">Executing Smart Contract</p>
-            <div className="bg-white p-4 rounded-lg border border-border-subtle text-sm text-left shadow-sm">
+            <div className="bg-bg-surface p-4 rounded-lg border border-border-subtle text-sm text-left shadow-sm">
               <div className="flex justify-between mb-2 pb-2 border-b border-border-subtle">
                 <span className="text-fg-secondary">Platform Fee (3%)</span>
                 <span className="font-mono text-fg-primary">Calculating...</span>

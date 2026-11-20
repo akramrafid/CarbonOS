@@ -1,8 +1,14 @@
 import React, { useRef } from 'react';
-import { ChevronLeft, ChevronRight } from 'lucide-react';
+import { ChevronLeft, ChevronRight, Sprout, Leaf, Trees } from 'lucide-react';
 import { CROPS } from './cameraData';
 import { Button } from '../../../components/ui/Button';
 import { IconButton } from '../../../components/ui/IconButton';
+
+const CROP_ICON_MAP = {
+  Sprout,
+  Leaf,
+  Trees,
+};
 
 export function CropSelector({ species, onSelectSpecies }) {
   const scrollContainerRef = useRef(null);
@@ -49,6 +55,7 @@ export function CropSelector({ species, onSelectSpecies }) {
           >
             {CROPS.map((crop) => {
               const isSelected = species === crop.id;
+              const CropIcon = CROP_ICON_MAP[crop.icon] || Sprout;
               return (
                 <Button
                   key={crop.id}
@@ -57,7 +64,7 @@ export function CropSelector({ species, onSelectSpecies }) {
                   onClick={() => onSelectSpecies(crop.id)}
                   className={`shrink-0 ${isSelected ? '!border-lime-400/50 !bg-lime-400/15 !text-lime-400' : 'text-white/70'}`}
                 >
-                  <span className="text-base mr-1">{crop.icon}</span>
+                  <CropIcon size={14} className="mr-1.5 text-lime-400 shrink-0" />
                   <span>{crop.name}</span>
                 </Button>
               );

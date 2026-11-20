@@ -27,72 +27,48 @@ const HarvestGuardDashboard = ({ isInline = false, onBack = null, onAddBatchClic
     setWeatherLoading(true);
     
     const fetchWeather = async () => {
-      try {
-        const res = await fetch(`/api/farmers-ai/weather/current/?location=${encodeURIComponent(userLocation)}`);
-        if (!res.ok) throw new Error("Backend weather proxy failed");
-        const data = await res.json();
-        if (isMounted) {
-          setWeatherData({
-            temp: Math.round(data.temp),
-            humidity: data.humidity,
-            description: data.description,
-            icon: data.icon,
-            wind: data.wind,
-            source: data.source || 'Regional Telemetry'
-          });
-          setWeatherLoading(false);
-        }
-      } catch (err) {
-        console.warn("OpenWeatherMap fetch failed, falling back to open-meteo:", err);
+      const djangoApiUrl = import.meta.env.VITE_DJANGO_API_URL || '';
+      if (djangoApiUrl) {
         try {
-          const coords = {
-            "Dhaka": { lat: 23.8103, lon: 90.4125 },
-            "Rajshahi": { lat: 24.3636, lon: 88.6241 },
-            "Sylhet": { lat: 24.8949, lon: 91.8687 },
-            "Chittagong": { lat: 22.3569, lon: 91.7832 },
-            "Khulna": { lat: 22.8456, lon: 89.5403 },
-            "Barisal": { lat: 22.7010, lon: 90.3535 },
-            "Rangpur": { lat: 25.7508, lon: 89.2467 },
-          };
-          const c = coords[userLocation] || coords["Dhaka"];
-          const res = await fetch(`https://api.open-meteo.com/v1/forecast?latitude=${c.lat}&longitude=${c.lon}&current=temperature_2m,relative_humidity_2m,wind_speed_10m`);
-          if (!res.ok) throw new Error("Open-Meteo failed");
+          const res = await fetch(`${djangoApiUrl}/api/farmers-ai/weather/current/?location=${encodeURIComponent(userLocation)}`);
+          if (!res.ok) throw new Error('Backend weather proxy failed');
           const data = await res.json();
           if (isMounted) {
             setWeatherData({
-              temp: Math.round(data.current.temperature_2m),
-              humidity: data.current.relative_humidity_2m,
-              description: "Clear sky (fallback)",
-              icon: "01d",
-              wind: data.current.wind_speed_10m,
-              source: 'Open-Meteo API'
+              temp: Math.round(data.temp),
+              humidity: data.humidity,
+              description: data.description,
+              icon: data.icon,
+              wind: data.wind,
+              source: data.source || 'Regional Telemetry',
             });
             setWeatherLoading(false);
+            return;
           }
-        } catch (meteoErr) {
-          console.warn("Both weather APIs failed, using local mock data:", meteoErr);
-          const mockBases = {
-            "Dhaka": { temp: 32, humidity: 75, desc: "Scattered Clouds", wind: 3.5 },
-            "Rajshahi": { temp: 36, humidity: 60, desc: "Sunny and Clear", wind: 2.1 },
-            "Sylhet": { temp: 28, humidity: 90, desc: "Moderate Rain", wind: 4.2 },
-            "Chittagong": { temp: 31, humidity: 85, desc: "Light Drizzle", wind: 5.0 },
-            "Khulna": { temp: 34, humidity: 80, desc: "Humid and Clear", wind: 3.1 },
-            "Barisal": { temp: 30, humidity: 88, desc: "Overcast Clouds", wind: 4.8 },
-            "Rangpur": { temp: 29, humidity: 70, desc: "Partly Cloudy", wind: 2.6 },
-          };
-          const mock = mockBases[userLocation] || mockBases["Dhaka"];
-          if (isMounted) {
-            setWeatherData({
-              temp: mock.temp,
-              humidity: mock.humidity,
-              description: mock.desc,
-              icon: "02d",
-              wind: mock.wind,
-              source: 'Local Engine'
-            });
-            setWeatherLoading(false);
-          }
+        } catch {
+          // Fall through to calibrated regional weather baseline
         }
+      }
+      const mockBases = {
+        "Dhaka": { temp: 32, humidity: 75, desc: "Scattered Clouds", wind: 3.5 },
+        "Rajshahi": { temp: 36, humidity: 60, desc: "Sunny and Clear", wind: 2.1 },
+        "Sylhet": { temp: 28, humidity: 90, desc: "Moderate Rain", wind: 4.2 },
+        "Chittagong": { temp: 31, humidity: 85, desc: "Light Drizzle", wind: 5.0 },
+        "Khulna": { temp: 34, humidity: 80, desc: "Humid and Clear", wind: 3.1 },
+        "Barisal": { temp: 30, humidity: 88, desc: "Overcast Clouds", wind: 4.8 },
+        "Rangpur": { temp: 29, humidity: 70, desc: "Partly Cloudy", wind: 2.6 },
+      };
+      const mock = mockBases[userLocation] || mockBases["Dhaka"];
+      if (isMounted) {
+        setWeatherData({
+          temp: mock.temp,
+          humidity: mock.humidity,
+          description: mock.desc,
+          icon: "02d",
+          wind: mock.wind,
+          source: 'Regional Baseline (Demo data)'
+        });
+        setWeatherLoading(false);
       }
     };
     
@@ -170,9 +146,7 @@ const HarvestGuardDashboard = ({ isInline = false, onBack = null, onAddBatchClic
         )}
       </div>
 
-      {/* Profile Header */}
       <div className="bg-white/5 backdrop-blur-md border border-white/10 p-6 md:p-8 rounded-[28px] mb-8 flex flex-col md:flex-row items-center justify-between shadow-lg relative overflow-hidden group">
-        <div className="absolute top-0 right-0 w-32 h-32 bg-lime-400/5 blur-2xl rounded-full pointer-events-none" />
         <div className="flex flex-col md:flex-row items-center space-y-4 md:space-y-0 md:space-x-6 relative z-10 w-full md:w-auto text-center md:text-left">
           <div className="w-20 h-20 bg-white/5 rounded-full flex items-center justify-center border-2 border-lime-400 shrink-0">
             <Sprout size={40} className="text-lime-400 animate-pulse" />

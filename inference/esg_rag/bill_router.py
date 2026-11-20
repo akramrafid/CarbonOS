@@ -4,6 +4,7 @@ bill_service. Documents are read locally (pdfplumber / Tesseract); nothing is se
 """
 import hashlib
 import os
+import re
 from typing import List, Literal, Optional
 
 from fastapi import APIRouter, Response, Depends, File, Form, HTTPException, Query, UploadFile
@@ -22,6 +23,29 @@ from .ledger_router import Limit, Offset, _list, out, run
 
 router = APIRouter(tags=["ESG Bills"])
 MAX_UPLOAD_BYTES = 15 * 1024 * 1024
+_SHA256_RE = re.compile(r"^[0-9a-f]{64}$")
+_SAFE_FILENAME_RE = re.compile(r"[^A-Za-z0-9._-]+")
+
+
+def _safe_download_name(filename: Optional[str], fallback: str = "bill.pdf") -> str:
+    base = os.path.basename((filename or "").replace("\\", "/")).strip()
+    if len(base) > 65 and base[64] == "_" and _SHA256_RE.fullmatch(base[:64].lower()):
+        base = base[65:]
+    cleaned = _SAFE_FILENAME_RE.sub("_", base).strip("._")
+    return (cleaned or fallback)[:120]
+
+
+def _extract_validated_sha256(bill: Bill) -> str:
+    candidates = []
+    if bill.filename and "_" in bill.filename:
+        candidates.append(bill.filename.split("_", 1)[0])
+    if getattr(bill, "document_sha256", None):
+        candidates.append(bill.document_sha256)
+    for cand in candidates:
+        norm = (cand or "").strip().lower()
+        if _SHA256_RE.fullmatch(norm):
+            return norm
+    raise HTTPException(404, "Source document not retained or invalid hash")
 
 
 class YamlIn(BaseModel):
@@ -122,12 +146,13 @@ def list_profiles(status: Optional[str] = None, limit: int = Limit, offset: int 
 
 
 @router.post("/bills", status_code=201)
-def create_bill(body: BillIn, p: Principal = Depends(require("read")), db: Session = Depends(get_db)):
+def create_bill(body: BillIn, p: Principal = Depends(require("write")), db: Session = Depends(get_db)):
     try:
         doc = bx.document_from_layout(body.document.model_dump())
     except (ValueError, KeyError, TypeError) as e:
         raise HTTPException(422, f"Document: {e}")
-    bill = run(bill_service.create_bill, db, p, body.facility_id, doc, body.filename, body.profile_id)
+    safe_name = _safe_download_name(body.filename, "bill.pdf") if body.filename else None
+    bill = run(bill_service.create_bill, db, p, body.facility_id, doc, safe_name, body.profile_id)
     return _bill_out(run(bill_service.bill_detail, db, p, bill.id))
 
 
@@ -149,14 +174,20 @@ def upload_bill(facility_id: str = Form(...), file: UploadFile = File(...), ocr:
     except Exception as e:  # unreadable, too large, or Tesseract missing or timed out: say so, keep nothing
         raise HTTPException(422, f"Could not read the document locally ({type(e).__name__})")
     file_sha256 = hashlib.sha256(data).hexdigest()
-    prefix = file_sha256[:12]
+    # [COMMENTED OUT FOR PERSONAL REFERENCE — 12-char prefix matching risked spurious duplicate collisions]
+    # prefix = file_sha256[:12]
+    # existing = db.query(Bill).filter(
+    #     Bill.organization_id == p.organization_id,
+    #     Bill.filename.like(f"{prefix}_%")
+    # ).first()
     existing = db.query(Bill).filter(
         Bill.organization_id == p.organization_id,
-        Bill.filename.like(f"{prefix}_%")
+        Bill.filename.like(f"{file_sha256}_%")
     ).first()
     if existing:
         raise HTTPException(409, f"Duplicate bill: file already uploaded for this tenant as bill {existing.id}")
-    name = f"{file_sha256}_{os.path.basename(file.filename or 'bill')}"[:255]
+    safe_base = _safe_download_name(file.filename, "bill.pdf")
+    name = f"{file_sha256}_{safe_base}"[:255]
     bill = run(bill_service.create_bill, db, p, facility_id, doc, name)
     if document_store.is_retention_enabled():
         document_store.save_document(p.organization_id, data, file_sha256)
@@ -192,24 +223,24 @@ def enter_bill_value(bill_id: str, body: EnterValueIn, p: Principal = Depends(re
 
 
 @router.post("/bill-values/{value_id}/map")
-def map_value(value_id: int, body: MapIn, p: Principal = Depends(require("read")), db: Session = Depends(get_db)):
+def map_value(value_id: int, body: MapIn, p: Principal = Depends(require("write")), db: Session = Depends(get_db)):
     return out(run(bill_service.map_value, db, p, value_id, body.parameter_key, body.group_index))
 
 
 @router.post("/bill-values/{value_id}/{action}")
 def review_value(value_id: int, action: Literal["confirm", "correct", "reject"], body: ReviewValueIn = ReviewValueIn(),
-                 p: Principal = Depends(require("read")), db: Session = Depends(get_db)):
+                 p: Principal = Depends(require("write")), db: Session = Depends(get_db)):
     return out(run(bill_service.review_value, db, p, value_id, action, body.value, body.unit, body.comment))
 
 
 @router.post("/bills/{bill_id}/assign-profile")
-def assign_profile(bill_id: str, body: AssignIn, p: Principal = Depends(require("read")), db: Session = Depends(get_db)):
+def assign_profile(bill_id: str, body: AssignIn, p: Principal = Depends(require("write")), db: Session = Depends(get_db)):
     bill = run(bill_service.assign_profile, db, p, bill_id, body.profile_id)
     return _bill_out(run(bill_service.bill_detail, db, p, bill.id))
 
 
 @router.post("/bills/{bill_id}/post", status_code=201)
-def post_bill(bill_id: str, body: PostIn, p: Principal = Depends(require("read")), db: Session = Depends(get_db)):
+def post_bill(bill_id: str, body: PostIn, p: Principal = Depends(require("write")), db: Session = Depends(get_db)):
     return [out(r) for r in run(bill_service.post_bill, db, p, bill_id, body.period_id)]
 
 
@@ -227,18 +258,23 @@ def bill_analysis(keys: str = Query(..., max_length=2000), group_by: str = Query
 def get_bill_document(bill_id: str, p: Principal = Depends(require("read")), db: Session = Depends(get_db)):
     """Download or view retained source PDF with SHA-256 header."""
     bill = run(bill_service._get, db, Bill, p, bill_id)
-    file_sha256 = bill.filename.split("_")[0] if bill.filename and "_" in bill.filename else bill.document_sha256
+    # file_sha256 = bill.filename.split("_")[0] if bill.filename and "_" in bill.filename else bill.document_sha256  # [COMMENTED OUT FOR PERSONAL REFERENCE — unvalidated split allowed arbitrary prefix/filename]
+    file_sha256 = _extract_validated_sha256(bill)
     content = document_store.read_document(p.organization_id, file_sha256)
     if not content:
         raise HTTPException(404, "Source document not retained or deleted")
     actual_sha = hashlib.sha256(content).hexdigest()
     run(bill_service.log_document_read, db, p, bill.id, actual_sha)
+    safe_name = _safe_download_name(bill.filename, "bill.pdf")
     return Response(
         content=content,
         media_type="application/pdf",
         headers={
             "X-Content-SHA256": actual_sha,
-            "Content-Disposition": f'inline; filename="{bill.filename or "bill.pdf"}"'
+            # "Content-Disposition": f'inline; filename="{bill.filename or "bill.pdf"}"'  # [COMMENTED OUT FOR PERSONAL REFERENCE — unsanitized inline filename risked header injection & active rendering]
+            "Content-Disposition": f'attachment; filename="{safe_name}"',
+            "Content-Security-Policy": "sandbox",
+            "X-Content-Type-Options": "nosniff",
         }
     )
 
@@ -247,7 +283,8 @@ def get_bill_document(bill_id: str, p: Principal = Depends(require("read")), db:
 def delete_bill_document(bill_id: str, p: Principal = Depends(require("write")), db: Session = Depends(get_db)):
     """Hard-delete retained source document upon request."""
     bill = run(bill_service._get, db, Bill, p, bill_id)
-    file_sha256 = bill.filename.split("_")[0] if bill.filename and "_" in bill.filename else bill.document_sha256
+    # file_sha256 = bill.filename.split("_")[0] if bill.filename and "_" in bill.filename else bill.document_sha256  # [COMMENTED OUT FOR PERSONAL REFERENCE]
+    file_sha256 = _extract_validated_sha256(bill)
     deleted = document_store.delete_document(p.organization_id, file_sha256)
     if not deleted:
         raise HTTPException(404, "Source document not found or already deleted")

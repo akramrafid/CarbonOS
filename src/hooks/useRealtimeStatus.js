@@ -19,36 +19,36 @@ export function useRealtimeStatus(initialStatus, creditId) {
     // to simulate the pipeline executing in the background.
     
     let timer;
-    if (status === 'AVAILABLE') {
-      timer = setTimeout(() => setStatus('RESERVED'), 8000 + Math.random() * 5000);
-    } else if (status === 'RESERVED') {
-      timer = setTimeout(() => setStatus('SOLD'), 4000 + Math.random() * 3000);
-    } else if (status === 'SOLD') {
-      timer = setTimeout(() => setStatus('SETTLED'), 6000 + Math.random() * 4000);
-    }
-
-    /*
-    // -------------------------------------------------------------
-    // PRODUCTION IMPLEMENTATION (Supabase Example)
-    // -------------------------------------------------------------
-    const channel = supabase
-      .channel(`credit-${creditId}`)
-      .on(
-        'postgres_changes',
-        { event: 'UPDATE', schema: 'public', table: 'Credit', filter: `id=eq.${creditId}` },
-        (payload) => {
-          setStatus(payload.new.status);
-        }
-      )
-      .subscribe();
-      
-    return () => {
-      supabase.removeChannel(channel);
+    const scheduleNext = () => {
+      if (typeof document !== 'undefined' && document.visibilityState === 'hidden') return;
+      if (status === 'AVAILABLE') {
+        timer = setTimeout(() => setStatus('RESERVED'), 8000 + Math.random() * 5000);
+      } else if (status === 'RESERVED') {
+        timer = setTimeout(() => setStatus('SOLD'), 4000 + Math.random() * 3000);
+      } else if (status === 'SOLD') {
+        timer = setTimeout(() => setStatus('SETTLED'), 6000 + Math.random() * 4000);
+      }
     };
-    */
+
+    const handleVisibilityChange = () => {
+      if (typeof document === 'undefined') return;
+      if (document.visibilityState === 'hidden') {
+        if (timer) clearTimeout(timer);
+      } else {
+        scheduleNext();
+      }
+    };
+
+    scheduleNext();
+    if (typeof document !== 'undefined') {
+      document.addEventListener('visibilitychange', handleVisibilityChange);
+    }
 
     return () => {
       if (timer) clearTimeout(timer);
+      if (typeof document !== 'undefined') {
+        document.removeEventListener('visibilitychange', handleVisibilityChange);
+      }
     };
   }, [status, creditId]);
 

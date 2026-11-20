@@ -45,9 +45,7 @@ export function FarmersHero({ lang, text }) {
           </div>
         </div>
 
-        {/* Right Side: Glassmorphic Value Proposition Card */}
         <div className="lg:col-span-5 bg-white/5 backdrop-blur-md border border-white/10 p-8 rounded-[28px] text-left space-y-4 hover:border-lime-400/40 transition-all duration-300 shadow-xl relative overflow-hidden group">
-          <div className="absolute top-0 right-0 w-24 h-24 bg-lime-400/5 blur-2xl rounded-full pointer-events-none" />
           <div className="text-white/60 text-xs font-bold uppercase tracking-wider">{text.solutionTitle}</div>
           <h3 className="text-2xl font-bold text-lime-400">
             {lang === 'en' ? 'Sustainable Farming Tech' : 'টেকসই কৃষি প্রযুক্তি'}

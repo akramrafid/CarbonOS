@@ -32,7 +32,7 @@ const steps = [
   },
   {
     title: "Marketplace Trading",
-    description: "Seamless matching of buyers and sellers, enabling secure climate finance transactions.",
+    description: "Order-book matching between verified project developers and corporate buyers with escrow-backed settlement.",
     icon: "05",
     metrics: ["Spot Pricing", "Transfer Execution", "Retirement"]
   }
@@ -107,12 +107,10 @@ const Roadmap = () => {
 
         {/* Roadmap Timeline */}
         <div className="relative max-w-4xl mx-auto">
-          {/* Vertical Line */}
           <div className="absolute left-12 md:left-1/2 top-0 bottom-0 w-[2px] bg-accent/10 -translate-x-1/2 rounded-full hidden md:block">
             <div 
               ref={lineRef} 
-              className="absolute top-0 left-0 w-full h-full bg-emerald origin-top"
-              style={{ boxShadow: '0 0 10px rgba(0,200,83,0.5)' }}
+              className="absolute top-0 left-0 w-full h-full bg-emerald origin-top shadow-glow"
             ></div>
           </div>
 

@@ -7,7 +7,7 @@ const ALLOWED_FILES = new Set([
   path.join(SRC_DIR, 'features', 'carbon-monitoring', 'constants', 'layerConfig.js')
 ]);
 
-const HEX_CLASS_REGEX = /\b(?:bg|text|border|from|to|via)-\[#[0-9a-fA-F]{3,8}\]/g;
+const HEX_CLASS_REGEX = /\b(?:bg|text|border|from|to|via|ring|outline|placeholder)-\[#[0-9a-fA-F]{3,8}\]/g;
 
 let totalViolations = 0;
 const violations = [];

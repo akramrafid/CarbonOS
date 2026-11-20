@@ -1,0 +1,1218 @@
+Total hits found: 608
+====================================================================================================
+.agents/skills/akstack/SKILL.md:68 | [CDM] | Disposition: legitimate
+  Context: 1. **Grid factor rule**: Scope 2 location-based calculations use only an approved grid-average factor from the factor registry; there is no 
+CODEBASE_AUDIT.md:401 | [official] | Disposition: legitimate
+  Context: - `src/index.css:121` explicitly overrides all light-mode fonts to `Helvetica, Arial, sans-serif !important`. Was this a deliberate design d
+CarbonOS_Claude_No_Login_ESG_Demo_Mode_Prompt.md:33 | [official] | Disposition: legitimate
+  Context: - A public demo must not present estimates, samples, or mock reports as official, certified, verified or audited.
+CarbonOS_Claude_No_Login_ESG_Demo_Mode_Prompt.md:77 | [official] | Disposition: legitimate
+  Context: - Do not display fabricated operational success, official third-party verification or customer logos/relationships.
+CarbonOS_Claude_No_Login_ESG_Demo_Mode_Prompt.md:110 | [Official] | Disposition: legitimate
+  Context: The current phase must not simply relabel misleading numbers. Replace the UI with real empty states or a clearly marked synthetic demo datas
+CarbonOS_Claude_No_Login_ESG_Demo_Mode_Prompt.md:122 | [method a] | Disposition: review / check
+  Context: - Factor provenance including source, authority, publication version, jurisdiction, units, effective dates, calculation method and approval 
+CarbonOS_ESG_Full_Completion_No_Login_.md:187 | [Reconcil] | Disposition: legitimate
+  Context: ### Reconciliation
+CarbonOS_ESG_Full_Completion_No_Login_.md:266 | [reconcil] | Disposition: legitimate
+  Context: - Activity ledger and reconciliation.
+CarbonOS_ESG_Full_Completion_No_Login_.md:397 | [method a] | Disposition: review / check
+  Context: 3. **PILOT_READY** — externally reviewed calculation method and factors, deployment controls and formal user/data protections exist.
+CarbonOS_ESG_Full_Completion_No_Login_Claude.md:187 | [Reconcil] | Disposition: legitimate
+  Context: ### Reconciliation
+CarbonOS_ESG_Full_Completion_No_Login_Claude.md:266 | [reconcil] | Disposition: legitimate
+  Context: - Activity ledger and reconciliation.
+CarbonOS_ESG_Full_Completion_No_Login_Claude.md:397 | [method a] | Disposition: review / check
+  Context: 3. **PILOT_READY** — externally reviewed calculation method and factors, deployment controls and formal user/data protections exist.
+CarbonOS_ESG_SaaS_Claude_Production_Grade_Prompt.md:106 | [official] | Disposition: legitimate
+  Context: **Factor governance:** No uncited constant allowed to be treated as an authoritative current grid/fuel factor. Version sources, jurisdiction
+CarbonOS_ESG_SaaS_Claude_Production_Grade_Prompt.md:137 | [method a] | Disposition: review / check
+  Context: - Emissions: Scope 1/2; prioritized Scope 3; method and uncertainty breakdowns.
+CarbonOS_ESG_SaaS_Claude_Production_Grade_Prompt.md:313 | [Official] | Disposition: legitimate
+  Context: ### Official standards references for verification
+PRODUCT.md:23 | [official] | Disposition: legitimate
+  Context: | **Dr. Nusrat Jahan** | Lead Third-Party ESG Auditor (ISO 14064 / GHG Protocol) | Verify corporate GHG disclosures against official Banglad
+PRODUCT.md:41 | [official] | Disposition: legitimate
+  Context: 1. **Sovereign Regulatory Grounding**: Bangladesh rules cited from primary sources: Environment Conservation Rules 2023 (S.R.O. No. 53, not 
+PRODUCT.md:58 | [CDM] | Disposition: legitimate
+  Context: * **Location-Based Method**: Multiplies metered electricity consumption (kWh) by an approved grid-average factor (no default; a CDM combined
+PRODUCT.md:71 | [official] | Disposition: legitimate
+  Context: * `emission_factors`: factor status note (no official Bangladesh grid factor located) and IPCC Guidelines for National Greenhouse Gas Invent
+PRODUCT.md:151 | [Official] | Disposition: legitimate
+  Context: | Regulation / Gazette | Official Reference | Key Parameters Ingested |
+PRODUCT.md:153 | [official] | Disposition: legitimate
+  Context: | **Bangladesh grid emission factor** | No official source located (earlier citation withdrawn) | DRAFT grid average derived from BPDB data,
+PROGRESS.md:83 | [withdrawn] | Disposition: review / check
+  Context: **Built:** Stakeholder personas (Farhan Rahman, Engr. Masud Alam, Dr. Nusrat Jahan, Abul Kashem), capability matrix, and regulatory mapping 
+PROGRESS.md:108 | [0.550] | Disposition: review / check
+  Context: 3. Scope 1, 2 (Location vs. Market dual reporting), and 3 calculation engine (the 0.550 kg CO₂e/kWh grid factor was later withdrawn as an un
+PROJECT_REVIEW.md:17 | [official] | Disposition: legitimate
+  Context: 2. **Sovereign Regulatory Grounding**: Bangladesh rules are cited from primary sources (ECR 2023 = S.R.O. No. 53; EU CBAM covers iron/steel,
+PROJECT_REVIEW.md:110 | [official] | Disposition: legitimate
+  Context: * `emission_factors`: Ingests official DoE/SREDA gazettes and IPCC coefficients.
+PROJECT_REVIEW.md:129 | [0.550] | Disposition: review / check
+  Context: * **Grid factor invariant**: location-based Scope 2 accepts only an approved grid-average factor; a combined-margin factor is rejected in co
+PROJECT_REVIEW.md:165 | [official] | Disposition: legitimate
+  Context: | **6. Regulatory Grounding** | **10.0 / 10** | Locked to official Bangladesh DoE 2023 Gazette & EU CBAM standards |
+README.md:34 | [CDM] | Disposition: legitimate
+  Context: 1. **Sovereign Regulatory Grounding**: No default grid factor: location-based Scope 2 needs an approved grid-average factor, and a CDM combi
+README.md:74 | [official] | Disposition: legitimate
+  Context: 2. `emission_factors`: a status note on Bangladesh grid and fuel factors (no official grid factor located) and IPCC 2006 references.
+README.md:135 | [official] | Disposition: legitimate
+  Context: DoEGazette["Factor status note\n(no official BD grid factor)"]
+README.md:365 | [official] | Disposition: legitimate
+  Context: | **Regulatory Grounding** | Under review | ECR 2023 = S.R.O. No. 53 (cited); no official Bangladesh grid factor located; EU CBAM scope corr
+backend/national_registry_bridge/admin.py:110 | [reconcil] | Disposition: legitimate
+  Context: "reconciliation_status"
+backend/national_registry_bridge/admin.py:114 | [reconcil] | Disposition: legitimate
+  Context: "reconciliation_status",
+backend/national_registry_bridge/admin.py:132 | [reconcil] | Disposition: legitimate
+  Context: reconciliation_status="adjusted_confirmed"
+backend/national_registry_bridge/admin.py:134 | [official] | Disposition: legitimate
+  Context: self.message_user(request, f"Marked {count} adjustment(s) as officially confirmed and applied.")
+backend/national_registry_bridge/btr_export.py:104 | [reconcil] | Disposition: legitimate
+  Context: "reconciliation_status": ca.reconciliation_status,
+backend/national_registry_bridge/btr_export.py:127 | [reconcil] | Disposition: legitimate
+  Context: "accounting_approach": "Annual trajectory approach with Multi-Year Target reconciliation",
+backend/national_registry_bridge/btr_export.py:154 | [official] | Disposition: legitimate
+  Context: Exports the Structured Summary ITMO Table to CSV format suitable for official
+backend/national_registry_bridge/btr_export.py:183 | [Reconcil] | Disposition: legitimate
+  Context: "Reconciliation Status",
+backend/national_registry_bridge/btr_export.py:203 | [reconcil] | Disposition: legitimate
+  Context: row.get("reconciliation_status"),
+backend/national_registry_bridge/jcm_connector.py:4 | [official] | Disposition: legitimate
+  Context: Built according to official bilateral guidelines:
+backend/national_registry_bridge/jcm_connector.py:33 | [official] | Disposition: legitimate
+  Context: Maps Carbon Zero BD's internal project and dMRV monitoring data to the official
+backend/national_registry_bridge/migrations/0001_initial.py:61 | [CDM] | Disposition: legitimate
+  Context: ('sectoral_scope', models.CharField(help_text='UNFCCC / CDM Sectoral Scope identifier', max_length=100)),
+backend/national_registry_bridge/migrations/0001_initial.py:84 | [official] | Disposition: legitimate
+  Context: ('adjustment_applied_at', models.DateTimeField(blank=True, help_text='Timestamp when DOE officially confirmed adjustment application', null=
+backend/national_registry_bridge/migrations/0001_initial.py:85 | [Official] | Disposition: legitimate
+  Context: ('adjustment_confirmation_id', models.CharField(blank=True, help_text='Official DOE / UNFCCC Article 6.2 registry confirmation reference', m
+backend/national_registry_bridge/migrations/0001_initial.py:89 | [reconcil] | Disposition: legitimate
+  Context: ('reconciliation_status', models.CharField(choices=[('pending_issuance', 'pending_issuance'), ('issued_unadjusted', 'issued_unadjusted'), ('
+backend/national_registry_bridge/models.py:32 | [CDM] | Disposition: legitimate
+  Context: sectoral_scope = models.CharField(max_length=100, help_text="UNFCCC / CDM Sectoral Scope identifier")
+backend/national_registry_bridge/models.py:180 | [reconcil] | Disposition: legitimate
+  Context: and reconcile against official DOE authorization and BTR accounts.
+backend/national_registry_bridge/models.py:182 | [RECONCIL] | Disposition: legitimate
+  Context: RECONCILIATION_CHOICES = [
+backend/national_registry_bridge/models.py:226 | [official] | Disposition: legitimate
+  Context: help_text="Timestamp when DOE officially confirmed adjustment application"
+backend/national_registry_bridge/models.py:232 | [Official] | Disposition: legitimate
+  Context: help_text="Official DOE / UNFCCC Article 6.2 registry confirmation reference"
+backend/national_registry_bridge/models.py:249 | [reconcil] | Disposition: legitimate
+  Context: reconciliation_status = models.CharField(
+backend/national_registry_bridge/models.py:251 | [RECONCIL] | Disposition: legitimate
+  Context: choices=RECONCILIATION_CHOICES,
+backend/national_registry_bridge/registry_client.py:221 | [official] | Disposition: legitimate
+  Context: # If JCM bilateral mechanism, attach official JCM format mapping
+backend/national_registry_bridge/registry_client.py:358 | [reconcil] | Disposition: legitimate
+  Context: reconciliation_status = "adjusted_confirmed" if confirm_applied else "pending_issuance"
+backend/national_registry_bridge/registry_client.py:371 | [reconcil] | Disposition: legitimate
+  Context: reconciliation_status=reconciliation_status,
+backend/national_registry_bridge/tests.py:98 | [CDM] | Disposition: legitimate
+  Context: carbon_standard="CDM Legacy"
+backend/national_registry_bridge/tests.py:198 | [reconcil] | Disposition: legitimate
+  Context: notes="Awaiting DOE Article 6 DNA bilateral reconciliation note."
+backend/national_registry_bridge/tests.py:203 | [reconcil] | Disposition: legitimate
+  Context: self.assertEqual(ca.reconciliation_status, "pending_issuance")
+backend/national_registry_bridge/tests.py:210 | [reconcil] | Disposition: legitimate
+  Context: ca.reconciliation_status = "adjusted_confirmed"
+backend/national_registry_bridge/tests.py:217 | [reconcil] | Disposition: legitimate
+  Context: self.assertEqual(ca.reconciliation_status, "adjusted_confirmed")
+backend/national_registry_bridge/tests.py:219 | [official] | Disposition: legitimate
+  Context: # --- CONSTRAINT 4: JCM methodology mapping is built from official standards ---
+backend/national_registry_bridge/tests.py:327 | [reconcil] | Disposition: legitimate
+  Context: reconciliation_status="adjusted_confirmed"
+backend/national_registry_bridge/views.py:206 | [reconcil] | Disposition: legitimate
+  Context: Tracking and reconciliation for Article 6.2 Corresponding Adjustments.
+backend/national_registry_bridge/views.py:218 | [reconcil] | Disposition: legitimate
+  Context: ca.reconciliation_status = "adjusted_confirmed"
+backend/national_registry_bridge/views.py:227 | [reconcil] | Disposition: legitimate
+  Context: "reconciliation_status": ca.reconciliation_status
+design-system/pages/carbon-monitoring.md:14 | [Official] | Disposition: legitimate
+  Context: - **Primary Persona:** Institutional Auditor, Verification & Validation Body (VVB) Assessor, Sovereign Carbon Registry Official.
+docs/BASELINE.md:151 | [0.663] | Disposition: review / check
+  Context: - Every active factor is mapped to an authoritative document, year, page, and GWP basis. Provisional grid factors (`0.663096 kgCO2e/kWh`) re
+docs/CONTEXT.md:16 | [Method A] | Disposition: review / check
+  Context: - `factors/bd_grid/`: Bangladesh national grid factor derivation pipeline (Method A top-down fuel balance, Method B bottom-up plant generati
+docs/CONTEXT.md:145 | [official] | Disposition: legitimate
+  Context: 2. `Bangladesh_Grid_and_Fuel_Factor_Status_Note.txt` (Corpus: `emission_factors`): CarbonOS status note documenting the absence of an offici
+docs/CONTEXT.md:210 | [Reconcil] | Disposition: legitimate
+  Context: ### Dual Extraction Architecture & Reconciliation
+docs/CONTEXT.md:254 | [CDM] | Disposition: legitimate
+  Context: - **Grid Electricity Factor**: **NONE STORED BY DEFAULT**. Former CDM combined margin ($0.550\text{ kg CO}_2\text{e/kWh}$) was retired via `
+docs/CONTEXT.md:342 | [Official] | Disposition: legitimate
+  Context: 1. **Missing Official National Grid Emission Factor**: The official published Bangladesh grid factor is unavailable. The historical 0.550 fa
+docs/ENVIRONMENT.md:15 | [Official] | Disposition: legitimate
+  Context: - Official installer from UB-Mannheim: [https://github.com/UB-Mannheim/tesseract/wiki](https://github.com/UB-Mannheim/tesseract/wiki)
+docs/VERIFICATION.md:21 | [official] | Disposition: legitimate
+  Context: | **6** | Authoritative corpus contains verbatim official regulatory documents | File header and git history inspection of `inference/esg_ra
+docs/VERIFICATION.md:26 | [0.663] | Disposition: review / check
+  Context: | **11** | Grid factor 0.663096 is an official empirical factor | `factors/bd_grid/derive.py` & `grid_factor_service.py`<br>`net_generation_
+docs/VERIFICATION.md:28 | [0.663] | Disposition: review / check
+  Context: | **13** | End-to-end bill processing executes deterministically | Executed electricity & gas end-to-end runs (`run_e2e_trace.py`):<br>`15,0
+docs/VERIFICATION.md:46 | [Monte Carlo] | Disposition: review / check
+  Context: | `tests.test_bd_grid` | **PASS** | 13 | 13 | 0 | 0 | 0 | 0.26s | Grid factor math & Monte Carlo CI |
+docs/VERIFICATION.md:166 | [official] | Disposition: legitimate
+  Context: | `bangladesh_climate_regulatory.md` | MoEFCC & BERC | 2021/2023 | Public Domain | **AGENT-AUTHORED SYNTHESIS**: Summary of ECR 2023 & NDC 2
+docs/VERIFICATION.md:175 | [official] | Disposition: legitimate
+  Context: - Queries against the corpus will return `insufficient_data: True` until official source documents (PDFs/gazettes) are ingested and approved
+docs/VERIFICATION.md:242 | [0.663] | Disposition: review / check
+  Context: ### Task 7: Grid Emission Factor Provenance (0.663096)
+docs/VERIFICATION.md:247 | [0.663] | Disposition: review / check
+  Context: - Output Factor: `0.663096 kgCO2e/kWh`.
+docs/VERIFICATION.md:249 | [2.71] | Disposition: legitimate
+  Context: - Uncertainty: `2.71%` (95% CI: 0.6459 – 0.6810 kgCO2e/kWh).
+docs/VERIFICATION.md:251 | [Method A] | Disposition: review / check
+  Context: - Method: Method A top-down national fuel balance.
+docs/VERIFICATION.md:256 | [0.663] | Disposition: review / check
+  Context: - **Conclusion**: The factor `0.663096` was generated from a synthetic calibrated input script, not extracted from an official published gov
+docs/VERIFICATION.md:284 | [0.663] | Disposition: review / check
+  Context: $$15,000 \text{ kWh} \times 0.663096 \text{ kgCO}_2\text{e/kWh} = 9,946.44 \text{ kgCO}_2\text{e} = 9.94644 \text{ tCO}_2\text{e}$$
+docs/VERIFICATION.md:359 | [Official] | Disposition: legitimate
+  Context: ### 3. No Verbatim Official Regulatory PDFs Ingested (HIGH / REGULATORY COMPLIANCE)
+docs/VERIFICATION.md:361 | [official] | Disposition: legitimate
+  Context: - **Description**: While all 5 corpus files have been front-mattered as agent-authored summaries and non-demo tenants default to `ESG_EXCLUD
+docs/VERIFICATION.md:362 | [official] | Disposition: legitimate
+  Context: - **Remediation**: Ingest authentic publisher PDFs (with SHA-256 and page indexing) using the newly implemented `ingest_official_pdf()` path
+docs/VERIFICATION.md:396 | [official] | Disposition: legitimate
+  Context: - **Description**: The natural gas emission factor $1.915000\text{ kgCO2e/m}^3$ used in the gas E2E test is derived from IPCC 2006 stationar
+docs/VERIFICATION.md:397 | [official] | Disposition: legitimate
+  Context: - **Remediation**: Ingest Petrobangla's official gas chromatography test reports once published.
+docs/VERIFICATION.md:422 | [Method A] | Disposition: review / check
+  Context: | **1** | **Synthetic Factors** | Grid factor inputs back-calculated in commit `bd35d1de5c` to force Method A and Method B match ($0.0006\%$
+docs/VERIFICATION.md:425 | [official] | Disposition: marked unverified (summary disclaimer)
+  Context: | **4** | **Corpus Honesty** | All 5 corpus files were unannotated agent summaries. Citations presented official-looking filenames. Retrieva
+docs/VERIFICATION.md:449 | [Method A] | Disposition: review / check
+  Context: *Audit Finding:* The inputs were mathematically back-calculated to force Method A and Method B total fuel energy to balance within $0.0006\%
+docs/VERIFICATION.md:576 | [Method A] | Disposition: marked unverified
+  Context: | **2** | **Removal of Unverified Claims** | Agent-written claims in corpus and factors claimed "Method A and Method B agree within 5%", cit
+docs/VERIFICATION.md:639 | [Method A] | Disposition: marked unverified
+  Context: 2. **Explicit Agent Disclaimers**: Annotated Method A, Method B, and reconciliation sections in `factors/bd_grid/README.md` and `bd_grid_met
+docs/VERIFICATION.md:640 | [Monte Carlo] | Disposition: marked unverified
+  Context: 3. **User-Facing Factor Uncertainty**: Removed Monte Carlo $\pm 2.71\%$ grid uncertainty from all user-facing strings in `factor_qa.py` and 
+docs/VERIFICATION.md:646 | [official] | Disposition: legitimate
+  Context: Searching for literal: 'no official Bangladesh grid factor'
+docs/VERIFICATION.md:656 | [withdrawn] | Disposition: review / check
+  Context: Searching for literal: 'withdrawn combined margin'
+docs/VERIFICATION.md:659 | [Method A] | Disposition: review / check
+  Context: Searching for literal: 'Method A Method B agreement'
+docs/VERIFICATION.md:663 | [official] | Disposition: legitimate
+  Context: Query: 'no official Bangladesh grid factor'
+docs/VERIFICATION.md:667 | [withdrawn] | Disposition: review / check
+  Context: Query: 'withdrawn combined margin'
+docs/VERIFICATION.md:671 | [Method A] | Disposition: review / check
+  Context: Query: 'Method A Method B agreement'
+docs/VERIFICATION.md:677 | [official] | Disposition: legitimate
+  Context: Query: 'no official Bangladesh grid factor'
+docs/VERIFICATION.md:678 | [official] | Disposition: marked unverified
+  Context: citations: [{'source': 'CarbonOS summary (not the official text)', 'snippet': '### Introduction\n---\nauthored_by: "AI Agent"\nclaimed_deriv
+docs/VERIFICATION.md:679 | [Method A] | Disposition: review / check
+  Context: Query: 'Method A Method B agreement'
+docs/VERIFICATION.md:680 | [official] | Disposition: marked unverified
+  Context: citations: [{'source': 'CarbonOS summary (not the official text)', 'snippet': '### 3. Method B (Cross-Check): Bottom-Up Generation by Techno
+docs/VERIFICATION.md:833 | [official] | Disposition: legitimate
+  Context: - `source_file_sha256`: SHA-256 hash of the exact official gazette, IPCC report, or utility publication PDF.
+docs/VERIFICATION.md:899 | [official] | Disposition: legitimate
+  Context: | `test_esg_eval_harness.py`<br>`test_rag_retrieval_benchmark_meets_targets` | `AssertionError: 'FAIL' != 'PASS'` | Task 4 quarantined agent
+docs/VERIFICATION.md:901 | [official] | Disposition: marked unverified (summary disclaimer)
+  Context: | `test_esg_security.py`<br>`test_tenant_cannot_read_other_tenant_documents_rag_or_audit` | `AssertionError: 'alpha_invoice.txt' not found` 
+docs/analytics/measurement-plan.md:42 | [reconcil] | Disposition: legitimate
+  Context: - Server/client reconciliation: {{}}
+docs/audit/DATA-AUTHENTICITY-REGISTER.md:21 | [official] | Disposition: legitimate
+  Context: | **DAR-01** | National Registry Bridge | `backend/national_registry_bridge/registry_client.py:260-271` | When `sandbox_mode=True`, returns 
+docs/audit/RISK-REGISTER.md:23 | [official] | Disposition: legitimate
+  Context: | **RSK-02** | **Compliance** | National Registry Bridge sandbox mode returns `"status": "ACCEPTED"`, creating false perception of official 
+docs/competitive/COMPETITOR-GAP-MATRIX.md:22 | [Official] | Disposition: legitimate
+  Context: - **Verra / Gold Standard**: Official crediting standards, serial number registries, project methodology verification.
+docs/competitive/COMPETITOR-GAP-MATRIX.md:35 | [withdrawn] | Disposition: review / check
+  Context: | **Scope 1 & 2 Emissions Accounting** | Watershed, Persefoni | PARTIAL (grid factor withdrawn) | `src/pages/platform/SaaSDashboard.jsx:130-
+docs/competitive/COMPETITOR-GAP-MATRIX.md:36 | [withdrawn] | Disposition: review / check
+  Context: | **Grid Emission Factor Precision** | Watershed, Persefoni | NOT_IMPLEMENTED (claim withdrawn) | The 0.550 "DoE Combined Margin" had no loc
+docs/competitive/COMPETITOR-GAP-MATRIX.md:44 | [official] | Disposition: legitimate
+  Context: | **National Carbon Registry Bridge (Article 6 & JCM)** | ClimateTrade, Carbonmark | VERIFIED_IMPLEMENTED | `backend/national_registry_bridg
+docs/competitive/COMPETITOR-GAP-MATRIX.md:60 | [official] | Disposition: legitimate
+  Context: - Eliminate all instances where failed remote connections silently fall back to synthetic data masquerading as "live telemetry" or "official
+docs/esg/06-data-authenticity-register.md:13 | [0.550] | Disposition: review / check
+  Context: | A6 | `extractor` rule `solar_netmeter` factor −0.550 | Subtracts exported solar from Scope 2 | METHOD ERROR | P0-2: solar export, kVA dema
+docs/esg/06-data-authenticity-register.md:16 | [0.550] | Disposition: marked unverified
+  Context: | A9 | `calculation_engine.DEFAULT_ACTIVITY_FACTORS` | Grid 0.550, market 0.120, commute 0.40 t/employee etc. attributed to "DoE Gazette 22.
+docs/esg/06-data-authenticity-register.md:27 | [Official] | Disposition: legitimate
+  Context: | A20 | `SaaSDashboard.jsx` `syncOfficialFactors` catch | Failure toast says "Synchronized with verified local DoE 2023 factor library" | FA
+docs/esg/ACCOUNTING_METHODOLOGY.md:59 | [combined margin] | Disposition: legitimate
+  Context: * A **combined margin** (CDM Tool 07 OM/BM/CM) is a project-baseline metric, never a Scope 2 factor. It is
+docs/esg/ACCOUNTING_METHODOLOGY.md:61 | [0.550] | Disposition: legitimate (schema constraint / standard citation)
+  Context: `ck_esg_factor_no_margin_scope2`. The 0.550 kg CO2e/kWh once hard-coded as "location-based" was a combined
+docs/esg/DISCLOSURE_FRAMEWORK_COVERAGE.md:8 | [official] | Disposition: legitimate
+  Context: paragraph/disclosure number and applicability against the current official publications (and their
+docs/esg/FACTOR_REGISTRY.md:18 | [withdrawn] | Disposition: review / check
+  Context: not be found and was withdrawn, together with the 0.550 / 0.612 / 0.488 grid margins it was said to back
+docs/esg/FACTOR_REGISTRY.md:31 | [CDM] | Disposition: legitimate
+  Context: | `grid_combined_margin` | **never** | CDM Tool 07 project-baseline metric (OM/BM/CM). Rejected by the API (422), the calculation library (`
+docs/esg/FACTOR_REGISTRY.md:45 | [CDM] | Disposition: legitimate
+  Context: | Bangladesh grid factor (location-based = grid **average**) | CarbonOS derivation from BPDB annual reports (`factors/bd_grid/`), cross-chec
+docs/esg/FACTOR_SOURCE_REGISTER.md:11 | [official] | Disposition: legitimate
+  Context: No official Bangladesh grid emission factor has been located.
+docs/esg/FACTOR_SOURCE_REGISTER.md:13 | [Withdrawn] | Disposition: review / check
+  Context: | Withdrawn entry | Value | Why it was withdrawn |
+docs/esg/FACTOR_SOURCE_REGISTER.md:17 | [0.550] | Disposition: legitimate (schema constraint / standard citation)
+  Context: | "Off-Peak Industrial Combined Cycle Baseline" (the 0.550 used in code as a "Combined Margin") | 0.550 kg CO2e/kWh | No source located, and
+docs/esg/FACTOR_SOURCE_REGISTER.md:20 | [withdrawn] | Disposition: review / check
+  Context: retired, not deleted, by the data migration `inference/esg_rag/data_migrations/retire_withdrawn_grid_factor.py`:
+docs/esg/FULL_COMPLETION_MATRIX.md:32 | [official] | Disposition: legitimate
+  Context: | **Emission Factor Registry** | Carbon Auditor validates emission factors with cited provenance | **IN_PROGRESS** | `/platform/esg` Factor 
+docs/transformation/DATA-INTEGRITY-REPORT.md:39 | [0.550] | Disposition: review / check
+  Context: - Grid Electricity: no default factor (the former 0.550 "DoE Gazette" combined margin was withdrawn (no source located; wrong factor kind fo
+docs/transformation/DATA-INTEGRITY-REPORT.md:50 | [official] | Disposition: legitimate
+  Context: - Injected clear warning: `"notice": "Simulated local sandbox record. Not an official UNFCCC or Bangladesh Ministry approval."`
+docs/transformation/FEATURE-COVERAGE.md:14 | [0.550] | Disposition: review / check
+  Context: | 1 | **Enterprise Carbon Accounting** | `IN_PROGRESS` | `inference/esg_rag/calculation_engine.py`, `factor_registry.py` | Scope 1, 2, 3 cal
+docs/transformation/FEATURE-COVERAGE.md:23 | [official] | Disposition: legitimate
+  Context: | 10 | **Verifiable Carbon-Credit Registry Integrations** | `READY_WITH_LIMITATIONS` | `backend/national_registry_bridge/`, `registry_export
+docs/transformation/FEATURE-COVERAGE.md:25 | [official] | Disposition: legitimate
+  Context: | 12 | **Professional APIs & Developer Integrations** | `VERIFIED_READY` | FastAPI `/docs`, Django REST Framework routers | Standardized Ope
+docs/transformation/IMPLEMENTATION-STATUS.md:17 | [0.550] | Disposition: review / check
+  Context: | 4 | **Carbon Accounting Accuracy** | `NEEDS_REWORK` | The 0.550 "DoE Gazette" combined-margin factor was withdrawn (no source located; wro
+docs/transformation/IMPLEMENTATION-STATUS.md:20 | [official] | Disposition: legitimate
+  Context: | 7 | **Satellite MRV Validation** | `READY_WITH_LIMITATIONS` | Sentinel-1 SAR & Sentinel-2 MSI multi-modal fusion with Quantile Random Fore
+docs/transformation/IMPLEMENTATION-STATUS.md:30 | [Combined Margin] | Disposition: legitimate
+  Context: | 17 | **Regulatory Claim Accuracy** | `NEEDS_REWORK` | The "Bangladesh DoE Combined Margin Gazette" citation could not be located and was w
+docs/transformation/MRV-VALIDATION.md:71 | [Official] | Disposition: legitimate
+  Context: 1. **Live Imagery Requirement:** Official registry submission bundles require genuine Sentinel STAC scene IDs with cloud coverage <= 20% and
+docs/transformation/RAG-EVALUATION.md:23 | [Official] | Disposition: legitimate
+  Context: │    • Bangladesh DoE Official Gazette Notifications
+docs/transformation/RAG-EVALUATION.md:24 | [official] | Disposition: legitimate
+  Context: │    • Grid/fuel factor status note (no official BD grid factor)
+docs/transformation/REGISTRY-READINESS.md:61 | [official] | Disposition: legitimate
+  Context: This created a dangerous impression that an official government carbon credit had been minted or approved.
+docs/transformation/REGISTRY-READINESS.md:66 | [official] | Disposition: legitimate
+  Context: `"notice": "Simulated local sandbox record. Not an official UNFCCC or Bangladesh Ministry approval."`
+docs/transformation/RELEASE-BLOCKERS.md:33 | [official] | Disposition: legitimate
+  Context: The system hard-gates all registry outputs with `status: "SANDBOX_ACCEPTED"` and `audit_seal: "ED25519-SANDBOX-SIMULATION"`, ensuring no pro
+docs/transformation/RELEASE-BLOCKERS.md:57 | [reconcil] | Disposition: legitimate
+  Context: The transaction system (`backend/farmers_ai_project/` and `src/lib/useHarvestStore.js`) implements transactional order state machines (`INIT
+docs/transformation/RELEASE-BLOCKERS.md:104 | [official] | Disposition: legitimate
+  Context: | **BLK-01** | National Registry | MoEFCC official API authorization & credentials | Phase 8.3 / National Partnership | Principal Architect 
+factors/bd_grid/README.md:4 | [Method A] | Disposition: marked unverified
+  Context: > **UNVERIFIED - agent-written**: All contents in this directory — including "Method A", "Method B", method agreement claims (e.g. within 5%
+factors/bd_grid/README.md:6 | [official] | Disposition: legitimate
+  Context: Location-based Scope 2 needs the **average** emission rate of the Bangladesh grid. No official published factor was
+factors/bd_grid/README.md:12 | [Method A] | Disposition: review / check
+  Context: **Method A (primary): top-down fuel balance.** Fuel to grid-connected generation → TJ (NCV) → CO2, CH4, N2O with the
+factors/bd_grid/README.md:22 | [Method B] | Disposition: review / check
+  Context: **Method B (cross-check): bottom-up generation by fuel.** Plant-wise kWh (purchases pp.116–120 and BPDB own plants)
+factors/bd_grid/README.md:24 | [Method B] | Disposition: review / check
+  Context: Every range must be cited; none is yet, so Method B is `BLOCKED` on real data until ranges are entered.
+factors/bd_grid/README.md:30 | [CDM] | Disposition: legitimate
+  Context: (c) a T&D-adjusted memo, (d) CDM Tool 07 OM/BM/CM from Method B's plants (reconciliation only, never a factor),
+factors/bd_grid/README.md:31 | [Monte Carlo] | Disposition: review / check
+  Context: deltas against the IFI dataset and Ember (`references.json`), and a seeded Monte Carlo (≥ 10,000 draws, 95 %).
+factors/bd_grid/README.md:35 | [Method A] | Disposition: review / check
+  Context: | `BLOCKED` | Method A lacks an input (no heating value, captive gas included, no CEA factor, ...). No factor row. |
+factors/bd_grid/README.md:37 | [Method B] | Disposition: review / check
+  Context: | `DRAFT_NO_CROSS_CHECK` | Method B could not run (e.g. heat rates not cited) |
+factors/bd_grid/README.md:42 | [Method A] | Disposition: review / check
+  Context: `draft_factor_rows()` makes one ledger payload per fiscal year from Method A, kind `grid_average`, valid 1 July–30 June,
+factors/bd_grid/README.md:54 | [Method A] | Disposition: review / check
+  Context: | `data/<FY>/method_a.json` | Method A inputs (see `derive.MethodAInputs`), each figure with its source and page |
+factors/bd_grid/README.md:55 | [Method B] | Disposition: review / check
+  Context: | `data/<FY>/method_b_plants.csv` | Method B plants: plant, net_gwh, fuel, technology, source, commissioning_year |
+factors/bd_grid/README.md:57 | [combined margin] | Disposition: marked unverified
+  Context: | `references.json` | IFI v2.0 combined margins (as given in the spec, unverified) and Ember (not downloaded) |
+factors/bd_grid/build.py:12 | [Monte Carlo] | Disposition: review / check
+  Context: Same inputs → byte-identical output: sorted keys, values rounded once, seeded Monte Carlo.
+factors/bd_grid/build.py:57 | [Method B] | Disposition: review / check
+  Context: anything else stays out (Method B is then BLOCKED)."""
+factors/bd_grid/build.py:93 | [Method A] | Disposition: review / check
+  Context: result, "BD-NATIONAL-GRID", raw.get("factor_source_document", "CarbonOS Method A fuel balance; see sources.json"),
+factors/bd_grid/derive.py:4 | [Method A] | Disposition: review / check
+  Context: Method A (primary), top-down fuel balance: fuel delivered to grid-connected generation (Petrobangla gas sales to
+factors/bd_grid/derive.py:10 | [Method B] | Disposition: review / check
+  Context: Method B (cross-check), bottom-up generation by fuel: plant-wise kWh (BPDB purchases and own generation) mapped
+factors/bd_grid/derive.py:17 | [CDM] | Disposition: legitimate
+  Context: 5 % and not explained → DRAFT_METHOD_GAP); (c) a T&D-adjusted memo; (d) CDM Tool 07 OM/BM/CM from Method B's
+factors/bd_grid/derive.py:18 | [reconcil] | Disposition: legitimate
+  Context: plant list, for reconciliation only; deltas against the IFI harmonised dataset and Ember; and a seeded Monte Carlo
+factors/bd_grid/derive.py:22 | [Monte Carlo] | Disposition: review / check
+  Context: arrays of draws, so the Monte Carlo reuses exactly the same functions.
+factors/bd_grid/derive.py:150 | [Method A] | Disposition: review / check
+  Context: # --- Method A ---------------------------------------------------------------------------------
+factors/bd_grid/derive.py:228 | [Method B] | Disposition: review / check
+  Context: # --- Method B ---------------------------------------------------------------------------------
+factors/bd_grid/derive.py:240 | [Method B] | Disposition: review / check
+  Context: raise Blocked("Method B: no plant-wise generation list")
+factors/bd_grid/derive.py:256 | [CDM] | Disposition: legitimate
+  Context: """CDM Tool 07 simple OM, BM and CM (CO2 only), kg/kWh, from Method B's plants. Reconciliation only: the
+factors/bd_grid/derive.py:285 | [Method A] | Disposition: review / check
+  Context: Method A totals. A partial cross-check only (public-sector plants are not the whole grid)."""
+factors/bd_grid/derive.py:395 | [Monte Carlo] | Disposition: review / check
+  Context: raise ValueError(f"Monte Carlo needs at least {MIN_DRAWS} draws")
+factors/bd_grid/derive.py:429 | [Method A] | Disposition: review / check
+  Context: "kg_co2e_per_kwh": {k: a[k] for k in AVERAGES},  # Method A, the primary estimate
+factors/bd_grid/derive.py:435 | [cdm] | Disposition: legitimate
+  Context: "cdm_tool07_reconciliation_only": tool,
+factors/bd_grid/derive.py:444 | [Method A] | Disposition: review / check
+  Context: """Ledger factor payload from Method A (created DRAFT; a second person approves), for a DRAFT_REVIEWABLE year only:
+factors/bd_grid/derive.py:462 | [Method A] | Disposition: review / check
+  Context: "source_publisher": "CarbonOS derivation, Method A fuel balance (factors/bd_grid)",
+factors/bd_grid/derive.py:465 | [Monte Carlo] | Disposition: review / check
+  Context: "licence_note": (f"Status {result['status']}; Monte Carlo {mc['p2_5']:.4f}-{mc['p97_5']:.4f} kg/kWh "
+factors/bd_grid/derive.py:466 | [Method B] | Disposition: review / check
+  Context: f"(95 %, {result['monte_carlo']['draws']} draws); Method B gap "
+factors/bd_grid/heat_rates.json:2 | [Method B] | Disposition: review / check
+  Context: "description": "Technology heat-rate ranges for Method B, kJ per kWh of net generation on a net calorific basis. Every range must cite its d
+factors/bd_grid/heat_rates.json:16 | [CDM] | Disposition: legitimate
+  Context: "UNFCCC CDM Methodological Tool 07 (emission factor for an electricity system), its annex of default power-plant efficiencies: conservative 
+factors/bd_grid/references.json:8 | [CDM] | Disposition: legitimate
+  Context: "compare_with": "CDM Tool 07 combined margins from Method B (reconciliation only)",
+factors/bd_grid/references.json:14 | [Method A] | Disposition: review / check
+  Context: "compare_with": "Method A supply-weighted average (Ember is calendar-year; the fiscal year spans two calendar years)",
+factors/bd_grid/references.json:16 | [method a] | Disposition: review / check
+  Context: "status": "NOT_DOWNLOADED: read Ember's method and emission factors before comparing"
+factors/bd_grid/sources.json:11 | [Method A] | Disposition: review / check
+  Context: "p.62 Year Wise Energy Generation (National): Method A denominator",
+factors/bd_grid/sources.json:13 | [Method B] | Disposition: review / check
+  Context: "pp.58-60 installed capacity: Method B fuel and technology",
+factors/bd_grid/sources.json:14 | [Method B] | Disposition: review / check
+  Context: "pp.116-120 energy purchased from IPPs, rental and India: Method B and imports by supplier",
+index.html:32 | [official] | Disposition: legitimate
+  Context: <meta name="description" content="The official digital infrastructure for Bangladesh's Article 6.2 carbon markets. Connecting local climate 
+index.html:41 | [official] | Disposition: legitimate
+  Context: <meta property="og:description" content="The official digital infrastructure for Bangladesh's Article 6.2 carbon markets." />
+index.html:47 | [official] | Disposition: legitimate
+  Context: <meta property="twitter:description" content="The official digital infrastructure for Bangladesh's Article 6.2 carbon markets." />
+inference/README.md:35 | [official] | Disposition: legitimate
+  Context: * `emission_factors`: a status note on Bangladesh grid and fuel factors (no official grid factor located), IPCC 2006 references.
+inference/chroma_data/fallback_emission_factors.json:2034 | [Method A] | Disposition: marked unverified
+  Context: "document": "### Introduction\n---\nauthored_by: \"AI Agent\"\nclaimed_derivation_unverified:\n  - \"CarbonOS Bangladesh Grid Derivation Pip
+inference/chroma_data/fallback_emission_factors.json:2440 | [0.550] | Disposition: marked unverified
+  Context: "document": "### CarbonOS Bangladesh Grid Emission Factor Methodology Note [UNVERIFIED - agent-written]\n**Publisher**: CarbonOS Research & 
+inference/chroma_data/fallback_emission_factors.json:2846 | [Method A] | Disposition: marked unverified
+  Context: "document": "### 2. Method A (Primary): Top-Down National Fuel Balance [UNVERIFIED - agent-written]\nMethod A calculates total greenhouse ga
+inference/chroma_data/fallback_emission_factors.json:3244 | [Method A] | Disposition: marked unverified
+  Context: "section": "2. Method A (Primary): Top-Down National Fuel Balance [UNVERIFIED - agent-written]",
+inference/chroma_data/fallback_emission_factors.json:3252 | [Method A] | Disposition: marked unverified
+  Context: "document": "### 2. Method A (Primary): Top-Down National Fuel Balance [UNVERIFIED - agent-written]\n- **Natural Gas**: Petrobangla sales to
+inference/chroma_data/fallback_emission_factors.json:3650 | [Method A] | Disposition: marked unverified
+  Context: "section": "2. Method A (Primary): Top-Down National Fuel Balance [UNVERIFIED - agent-written]",
+inference/chroma_data/fallback_emission_factors.json:3658 | [Method B] | Disposition: marked unverified
+  Context: "document": "### 3. Method B (Cross-Check): Bottom-Up Generation by Technology [UNVERIFIED - agent-written]\nMethod B acts as an unverified 
+inference/chroma_data/fallback_emission_factors.json:4056 | [Method B] | Disposition: marked unverified
+  Context: "section": "3. Method B (Cross-Check): Bottom-Up Generation by Technology [UNVERIFIED - agent-written]",
+inference/chroma_data/fallback_emission_factors.json:4064 | [Monte Carlo] | Disposition: marked unverified
+  Context: "document": "### 4. Monte Carlo Uncertainty Propagation [UNVERIFIED - agent-written]\n> [!CAUTION]\n> The grid uncertainty bounds (±2.5% to 
+inference/chroma_data/fallback_emission_factors.json:4462 | [Monte Carlo] | Disposition: marked unverified
+  Context: "section": "4. Monte Carlo Uncertainty Propagation [UNVERIFIED - agent-written]",
+inference/chroma_data/fallback_emission_factors.json:4470 | [Monte Carlo] | Disposition: marked unverified
+  Context: "document": "### 4. Monte Carlo Uncertainty Propagation [UNVERIFIED - agent-written]\nUncertainty is evaluated via 10,000 Monte Carlo draws 
+inference/chroma_data/fallback_emission_factors.json:4868 | [Monte Carlo] | Disposition: marked unverified
+  Context: "section": "4. Monte Carlo Uncertainty Propagation [UNVERIFIED - agent-written]",
+inference/chroma_data/fallback_regulatory.json:2440 | [Official] | Disposition: marked unverified
+  Context: "document": "### Introduction\n---\nauthored_by: \"AI Agent\"\nclaimed_derivation_unverified:\n  - \"Bangladesh Climate Change Strategy and 
+inference/esg_migrations/versions/0003_emission_factor_kind.py:1 | [combined margin] | Disposition: legitimate
+  Context: """emission factor kind: grid average vs combined margin
+inference/esg_migrations/versions/0003_emission_factor_kind.py:7 | [CDM] | Disposition: legitimate
+  Context: Adds esg_emission_factor.factor_kind and check constraints that make a CDM combined-margin factor
+inference/esg_migrations/versions/0005_equipment_register_and_legacy_factor_lifecycle.py:12 | [withdrawn] | Disposition: review / check
+  Context: columns so a withdrawn row can be RETIRED with a reason instead of being deleted or overwritten. Skipped when
+inference/esg_migrations/versions/0005_equipment_register_and_legacy_factor_lifecycle.py:15 | [withdrawn] | Disposition: review / check
+  Context: (esg_rag/data_migrations/retire_withdrawn_grid_factor.py).
+inference/esg_rag/accounting.py:20 | [CDM] | Disposition: legitimate
+  Context: emission rate only. Combined-margin factors (CDM Tool 07 project baselines) never produce a
+inference/esg_rag/accounting.py:76 | [CDM] | Disposition: legitimate
+  Context: # CDM Tool 07 margins answer "what does one added MWh displace?" for a project baseline, not
+inference/esg_rag/accounting.py:432 | [method a] | Disposition: review / check
+  Context: return (f.activity_type == a.activity_type and f.method == method and _unit_ok(f, a)
+inference/esg_rag/calculation_engine.py:19 | [0.550] | Disposition: review / check
+  Context: # Scope 2 factor gives None, never a default. (The former 0.550 was a CDM combined margin.)
+inference/esg_rag/corpus/bangladesh_climate_regulatory.md:15 | [Official] | Disposition: legitimate
+  Context: **License**: Government of Bangladesh Official Gazette / Public Domain
+inference/esg_rag/corpus/bd_grid_methodology.md:13 | [Method A] | Disposition: marked unverified
+  Context: > **UNVERIFIED - agent-written**: All claims regarding "Method A", "Method B", method agreement/reconciliation claims (e.g. within 5%), Mont
+inference/esg_rag/corpus/bd_grid_methodology.md:23 | [0.550] | Disposition: marked unverified
+  Context: Location-based Scope 2 accounting under the GHG Protocol requires the **average** emission rate of the electricity grid from which power is 
+inference/esg_rag/corpus/bd_grid_methodology.md:25 | [Monte Carlo] | Disposition: marked unverified
+  Context: CarbonOS agent research proposed deriving the national grid-average emission rate using two independent methodologies with Monte Carlo uncer
+inference/esg_rag/corpus/bd_grid_methodology.md:27 | [Method A] | Disposition: marked unverified
+  Context: ## 2. Method A (Primary): Top-Down National Fuel Balance [UNVERIFIED - agent-written]
+inference/esg_rag/corpus/bd_grid_methodology.md:29 | [Method A] | Disposition: review / check
+  Context: Method A calculates total greenhouse gas emissions generated by all power plants feeding the national grid divided by net national electrici
+inference/esg_rag/corpus/bd_grid_methodology.md:31 | [Method A] | Disposition: review / check
+  Context: $$\text{Factor}_{\text{Method A}} = \frac{\sum_{\text{fuels}} \text{Emissions}_{\text{domestic}} + \text{Emissions}_{\text{imports}}}{\text{
+inference/esg_rag/corpus/bd_grid_methodology.md:39 | [Method B] | Disposition: marked unverified
+  Context: ## 3. Method B (Cross-Check): Bottom-Up Generation by Technology [UNVERIFIED - agent-written]
+inference/esg_rag/corpus/bd_grid_methodology.md:41 | [Method B] | Disposition: marked unverified
+  Context: Method B acts as an unverified bottom-up cross-check [UNVERIFIED - agent-written]:
+inference/esg_rag/corpus/bd_grid_methodology.md:45 | [reconcil] | Disposition: marked unverified
+  Context: - **Status Rule [UNVERIFIED - agent-written]**: The 5% reconciliation threshold between Method A and Method B was formulated by an AI agent 
+inference/esg_rag/corpus/bd_grid_methodology.md:47 | [Monte Carlo] | Disposition: marked unverified
+  Context: ## 4. Monte Carlo Uncertainty Propagation [UNVERIFIED - agent-written]
+inference/esg_rag/corpus/bd_grid_methodology.md:50 | [Monte Carlo] | Disposition: marked unverified
+  Context: > The grid uncertainty bounds (±2.5% to ±2.8%) are mathematical model artifacts derived from synthetic Monte Carlo simulations [UNVERIFIED -
+inference/esg_rag/corpus/bd_grid_methodology.md:52 | [Monte Carlo] | Disposition: marked unverified
+  Context: Uncertainty is evaluated via 10,000 Monte Carlo draws [UNVERIFIED - agent-written]:
+inference/esg_rag/data_migrations/retire_withdrawn_grid_factor.py:2 | [withdrawn] | Disposition: review / check
+  Context: Data migration: retire the withdrawn 0.55 kg CO2e/kWh legacy grid factor.
+inference/esg_rag/data_migrations/retire_withdrawn_grid_factor.py:14 | [withdrawn] | Disposition: review / check
+  Context: python -m esg_rag.data_migrations.retire_withdrawn_grid_factor --database-url sqlite:///../backend/db.sqlite3
+inference/esg_rag/data_migrations/retire_withdrawn_grid_factor.py:15 | [withdrawn] | Disposition: review / check
+  Context: python -m esg_rag.data_migrations.retire_withdrawn_grid_factor --database-url ... --apply --actor <your id>
+inference/esg_rag/data_migrations/retire_withdrawn_grid_factor.py:31 | [WITHDRAWN] | Disposition: review / check
+  Context: WITHDRAWN_VALUE = 0.55  # kg CO2e/kWh, stored as a float in the legacy table
+inference/esg_rag/data_migrations/retire_withdrawn_grid_factor.py:33 | [Withdrawn] | Disposition: review / check
+  Context: REASON = (f"Withdrawn on branch {BRANCH} (commit fc64850): 0.55 kg CO2e/kWh is a CDM combined-margin value credited "
+inference/esg_rag/data_migrations/retire_withdrawn_grid_factor.py:55 | [WITHDRAWN] | Disposition: review / check
+  Context: return (row["factor_value"] == WITHDRAWN_VALUE and "grid" in (row["fuel_or_activity"] or "").lower()
+inference/esg_rag/data_migrations/retire_withdrawn_grid_factor.py:145 | [withdrawn] | Disposition: review / check
+  Context: parser = argparse.ArgumentParser(description="Retire the withdrawn 0.55 kg CO2e/kWh legacy grid factor.")
+inference/esg_rag/disclosures_catalog.py:5 | [official] | Disposition: legitimate
+  Context: checked against the official publications before a customer relies on them — every framework carries
+inference/esg_rag/eval.py:284 | [official] | Disposition: legitimate
+  Context: "status": "NOT EVALUABLE (no verbatim official corpus ingested)",
+inference/esg_rag/eval.py:286 | [official] | Disposition: legitimate
+  Context: "message": "Production mode excludes agent-authored corpus files; no verbatim official corpus has been ingested.",
+inference/esg_rag/eval.py:364 | [0.663] | Disposition: review / check
+  Context: # Wire bd-grid proposal factor into database (0.663096 kgCO2e/kWh)
+inference/esg_rag/eval.py:371 | [0.663] | Disposition: review / check
+  Context: factor_kwh = Decimal("0.663096")
+inference/esg_rag/eval.py:605 | [official] | Disposition: legitimate
+  Context: rag_gate_ok = retrieval_res["status"] in ("PASS", "NOT EVALUABLE (no verbatim official corpus ingested)")
+inference/esg_rag/eval.py:643 | [official] | Disposition: legitimate
+  Context: rag_gate_ok = results["quality_gates"]["rag_retrieval"] in ("PASS", "NOT EVALUABLE (no verbatim official corpus ingested)")
+inference/esg_rag/factor_registry.py:11 | [0.550] | Disposition: marked unverified
+  Context: # entry is UNVERIFIED. It holds no grid factor: the former 0.550 "combined margin" and 0.612 "operating
+inference/esg_rag/factor_registry.py:12 | [CDM] | Disposition: legitimate
+  Context: # margin" are CDM project-baseline metrics, never location-based Scope 2 factors.
+inference/esg_rag/grid_factor_service.py:46 | [Method A] | Disposition: review / check
+  Context: # Fallback to calibrated Method A derivation
+inference/esg_rag/grid_factor_service.py:75 | [Method A] | Disposition: marked unverified
+  Context: "CarbonOS Method A fuel balance [UNVERIFIED - agent-written]",
+inference/esg_rag/grid_factor_service.py:122 | [2.71] | Disposition: legitimate
+  Context: uncertainty_pct=Decimal(str(row.get("uncertainty_pct", "2.71"))),
+inference/esg_rag/grid_factor_service.py:125 | [Method A] | Disposition: marked unverified
+  Context: source_publisher=row.get("source_publisher", "CarbonOS derivation, Method A fuel balance [UNVERIFIED - agent-written]"),
+inference/esg_rag/grid_factor_service.py:126 | [Method A] | Disposition: marked unverified
+  Context: source_document=row.get("source_document", "CarbonOS Method A fuel balance [UNVERIFIED - agent-written]; see sources.json")[:300],
+inference/esg_rag/grid_factor_service.py:130 | [Method A] | Disposition: marked unverified
+  Context: licence_note=row.get("licence_note", "DRAFT provisional factor from Method A fuel balance [UNVERIFIED - agent-written]. Requires dual approv
+inference/esg_rag/ingest.py:353 | [official] | Disposition: legitimate
+  Context: def ingest_official_pdf(
+inference/esg_rag/ingest.py:363 | [official] | Disposition: legitimate
+  Context: """Ingestion path for official PDFs with verifiable provenance.
+inference/esg_rag/ingest.py:366 | [Official] | Disposition: legitimate
+  Context: raise IngestRejected("Official document must be a PDF file")
+inference/esg_rag/ingest.py:374 | [official] | Disposition: legitimate
+  Context: "is_official": True
+inference/esg_rag/ledger.py:437 | [CDM] | Disposition: legitimate
+  Context: raise DomainError(422, "A combined-margin factor is a CDM project-baseline metric, not a grid average; "
+inference/esg_rag/ledger_models.py:274 | [CDM] | Disposition: legitimate
+  Context: # Location-based Scope 2 is the grid AVERAGE rate; a CDM combined margin is never a Scope 2 factor.
+inference/esg_rag/models.py:107 | [withdrawn] | Disposition: review / check
+  Context: # Lifecycle (migration 0005). NULL = active. A withdrawn row is RETIRED with a reason, never deleted or
+inference/esg_rag/models.py:108 | [withdrawn] | Disposition: review / check
+  Context: # overwritten: see esg_rag/data_migrations/retire_withdrawn_grid_factor.py.
+inference/esg_rag/retriever.py:49 | [official] | Disposition: marked unverified (summary disclaimer)
+  Context: source = "CarbonOS summary (not the official text)"
+inference/esg_rag/router.py:341 | [withdrawn] | Disposition: review / check
+  Context: RETIRED rows (withdrawn, kept for audit) are left out unless include_retired is set.
+inference/esg_rag/router.py:554 | [CDM] | Disposition: legitimate
+  Context: "verification_standard": "UNFCCC CDM AMS-I.D & IoT Inverter Telemetry"
+inference/esg_rag/seed_data.py:3 | [official] | Disposition: legitimate
+  Context: 1. Source notes on Bangladesh rules (NDC 2021, ECR 2023 = S.R.O. No. 53) and EU CBAM; not official texts.
+inference/esg_rag/seed_data.py:90 | [official] | Disposition: legitimate
+  Context: Prepared by CarbonOS for retrieval. Not an official text: read the primary documents before relying on it.
+inference/esg_rag/seed_data.py:135 | [official] | Disposition: marked unverified
+  Context: Prepared by CarbonOS for retrieval. Not an official text. All historical claims below are UNVERIFIED - agent-written.
+inference/esg_rag/seed_data.py:138 | [official] | Disposition: marked unverified
+  Context: - [UNVERIFIED - agent-written] No officially published Bangladesh grid emission factor has been verified in government gazettes. Historical 
+inference/esg_rag/seed_data.py:139 | [combined margin] | Disposition: legitimate
+  Context: - A combined margin, operating margin or build margin (UNFCCC CDM "Tool to calculate the emission factor for an
+inference/esg_rag/seed_data.py:198 | [official] | Disposition: legitimate
+  Context: meta_info={"authority": "CarbonOS source notes (not an official text)", "jurisdiction": "Bangladesh", "year": 2026}
+inference/esg_rag/seed_data.py:209 | [official] | Disposition: legitimate
+  Context: meta_info={"authority": "CarbonOS status note (not an official source)", "year": 2026}
+plan.md:38 | [CDM] | Disposition: legitimate
+  Context: 1. **Grid factor rule**: Scope 2 location-based calculations use only an approved grid-average factor. A CDM combined margin is a project-ba
+public/Reevo.svg:10 | [2.71] | Disposition: legitimate
+  Context: <path id="logofiamfz1" class="cls-1" d="M135,35.971s-8.619,21.2-10.54,25.9H113.737c-1.122-2.715-9.346-22.772-10.661-25.848l9.972-.016c1.261,
+public/models/citrus_head_int8.onnx.data:2385 | [cdm] | Disposition: legitimate
+  Context: 9=cdm=B=`%Ͻ$=W=<o
+public/models/citrus_head_int8.onnx.data:36789 | [CdM] | Disposition: legitimate
+  Context: G<_;L;գT1W <h1RrQ;EB>:d 9u\<SC;a;ݱ;+;[C<I<f8=|:|r:88fA9>tu89ʊG|9y<9.^ݬM9:ȗcº.:[:!:80h:hϹ=@:H#9ږeM:59(T9-2r.L:ޭ
+public/models/citrus_head_int8.onnx.data:63995 | [cdm] | Disposition: legitimate
+  Context: '>aog#yZ>ټ>S]@#=d*e6 .ͼ\ՊU<]%z<W{8ToЄA߼ =<3lV=	7-R<R:S=o¼@M=h?=E(<r`>>Mܼh<ƭ?<;=zucdm<f<?t /=|=WN;<͕;J;>9,ᔁSFz!blȽm};?c;i>
+public/models/citrus_head_int8.onnx.data:75034 | [cDm] | Disposition: legitimate
+  Context: NۻUL5ֹcDm;n2Żpؼ]kV<0ǌ<x*:;;<s;KL_I;$<R<DbV;	ny;SQ;̀-4"<-ϡ<
+public/models/citrus_head_int8.onnx.data:79842 | [cdM] | Disposition: legitimate
+  Context: L}<cdM{;Fj8&<^O<׻;;OV;hX?;3<;4]T%;<:<
+public/models/citrus_head_int8.onnx.data:83241 | [cdm] | Disposition: legitimate
+  Context: >,F<"?o>>u]lZe>H >`q^?gdb>q g>Ʊ<0>I>I\xz1L>R=(b1=v==>q>I>;?]ξ2>M)[(>AI+?OO>;e;s)ž?K+2>wֽ^=āŴϾ>Ӕ;{d\w%0>(oBJ7O >k>>8r
+public/models/citrus_head_int8.onnx.data:102574 | [cdm] | Disposition: legitimate
+  Context: =@ࣽm\=L=-=Η2=C;WA(Tw=DGe=y<ܯ2>7=X===!<˙ucdm<*<2=7=|Ҽ%},<'ac=@='?阽
+public/models/citrus_head_int8.onnx.data:109203 | [cdm] | Disposition: legitimate
+  Context: ύv=0lRpͥ*o=$&/PI ;BZ꼓0Pdu>+=x|E;E=tg*<`Ňq,cӻxg=lxݳ	(<e@=Mg=/<sy ==PP=H#<-ݽ p<==H>m(_W1HR;cdm>xm/JpN=E>m=<fT):g+=/E=
+public/models/citrus_head_int8.onnx.data:118801 | [cdm] | Disposition: legitimate
+  Context: =%8=dٟ=>:\iْ*=;f<n<Exi2)>½p`ý&єssXcdm:>/>ӐԽAW'8|7&=(&*>0K>lCE"= YԽo=@mFc<*4R%J<Wɽ;1gr=;29=
+public/models/citrus_head_int8.onnx.data:138517 | [CDM] | Disposition: legitimate
+  Context: ?>{EL=gG=#2W/־	ç>w<!Td7:>$?H>R3>%RB>7HBAe=PB>,=>t9iX====脞>h^V=GE;a .2>ayiRbF>j>b9צo:vYPp>"8ye<IqB66=o<w=\=:Ĩ=޾߸;
+public/models/citrus_head_int8.onnx.data:157180 | [cdM] | Disposition: legitimate
+  Context: ?">eu#>cdM=4=R˶>>q>H>P?zԦ>Sr>V>=5>n'VqP>n>ܾ>SD>ZNL]OQxhN>A<_ٰ.5=SS>=ME=>-_>|./=P]=ϾR>L~	>/eh]T>>:vDj=qT=m>0:L7=>B=T>=w>d
+public/models/citrus_head_int8.onnx.data:167306 | [cDM] | Disposition: legitimate
+  Context: ?BcDMfG-U;i;ڹ<&<9:1;TF4<;A<I`~;8*d:S_.@GRc2 J^<N:"HHh; =&<;cBл5O;֟;LitU;Z;7;뒻w=:)<~<:Ql<
+public/models/citrus_head_int8.onnx.data:171976 | [cDm] | Disposition: legitimate
+  Context: >#=>Wb=T7=R==^	r=M{<x>rI>%7=z|s=$m>1>A9<z2<e:ʽ㛽"нcDm=qb	L==K=S>x@='\|=j;TȽFoV >ɽ4==_*>n(= |=M/Etl!>ч'1=7ǽ>F=K	>rG
+public/models/citrus_head_int8.onnx.data:173837 | [CDM] | Disposition: legitimate
+  Context: &{ \;=X1EuQ_=<)>>3b"=&)F>>e>)&-t<?=n=}==&9ŹgJ=b=nx8$?<A]Ј=<Y>gD#>e>On`p=FUCDM=4v0hŻS==ɈtLU_{
+public/models/citrus_head_int8.onnx.data:193165 | [CDM] | Disposition: legitimate
+  Context: <:?;[S)CDM{:Id:;!;E׺9ºJC)V"=:mc::ǈt^:`\o;֙:5:
+public/models/citrus_head_int8.onnx.data:218659 | [cDm] | Disposition: legitimate
+  Context: VRM˼iC:Dgx<;7!(y:ƼD|mX=܍xl\<L=0<fv<̼㼩1-=:gcDmּp"6X(!<&z~L;>G"<=pY;RF(bI<d=$hSjU;SU(F}<Ƣ[<<ߞ;c|<W8<ļѻ6Wvƺb.A;>k0<
+public/models/citrus_head_int8.onnx.data:247858 | [cdm] | Disposition: legitimate
+  Context: u<шcdm< u<,$Qn5<;8nX;p<Ɉ;	T+#[;y4d?;ވ;?y,<ɗ:)[;psB;,;|tżw.Iam<H-Lgӻ<8}i<OB
+public/models/citrus_head_int8.onnx.data:250838 | [cdm] | Disposition: legitimate
+  Context: E<Չ<:ƻ93;˪:4;0h;+:<;ݻ,oA;]8 k@<	$D:M:]Z"(_;Jٻ'.'<K[3<:s^i;M4z;طKJ;`Y<ߕ:xn6!9Ļgs8͆Ccdm5qr;wN:bF";O<@w+<^	9c;;L}q<
+public/models/citrus_head_int8.onnx.data:275600 | [cdm] | Disposition: legitimate
+  Context: =$F=WZ>=dh6><[5x	0>}I<.0>>T=(fe%C=r߸mx!~_)?b=.@=<P,b=ܝ贾U7q;፽>[=O;<T-}<r#E=<ཛ4=b<<7Hl#¼P=Cc>c۽{5m=->9~"/@=6XY,5Zq=Ԏ^
+public/models/guava_head_int8.onnx.data:7407 | [Cdm] | Disposition: legitimate
+  Context: <p^<ם*ݝ ӎ=Cdm<&m=e{TC,tTM;><n9=L>C9ʼ)K	7)====Ͱ)޻@n<Z\P<^>t=<
+public/models/guava_head_int8.onnx.data:9887 | [cdM] | Disposition: legitimate
+  Context: W=+m=7=LA=̛R!ͽ4E(5CwDc&>材rJ'{=W=)NȽw>4ļ;ǌHChE<Y=6,	αro<a<<lj;6;BW<;ɼ78:R<];k4u#==<n9Sg:	<be=Jh'׻,=<<M=l<X=a<z+=GGb/
+public/models/guava_head_int8.onnx.data:30298 | [cDm] | Disposition: legitimate
+  Context: <s<s:cDmρ;:8>6FpA#̻`<|:	;7uF;ˉ;;5S<;z48;2<=R:
+public/models/guava_head_int8.onnx.data:30528 | [cdM] | Disposition: legitimate
+  Context: 8Ν<YcdMd*;1W9K"7`;#: ߰5O ;;x;4(;ɺ"Xwc:x|;j@/:Ģ!;9:K;6 ;d<s4%<)ځ<&Ȼ scژʰ9ì;Z
+public/models/guava_head_int8.onnx.data:33807 | [CdM] | Disposition: legitimate
+  Context: ZCdMb(A6x;H'B;i<D==1~Oڼe7w
+public/models/guava_head_int8.onnx.data:37948 | [CDm] | Disposition: legitimate
+  Context: <6`?y'>7Xƿ$>H>/=N=<l>1=bS?Ԣ>Z@>60+/LB?/=>mľ|=B3<)6>;L>;>ն%nǾA=>oNLU<Ͼ#?bz0>->D>>®	.)m=CDmJE?@=D%>>p. ¾=B`HR>w=~
+public/models/guava_head_int8.onnx.data:39738 | [Cdm] | Disposition: legitimate
+  Context: ;;sߺG;CԺ.;ʻ:c<><գ;6;bHE;m:?&:IK;hS߻;Z:˻g;c>;p<	;M:vHo;hںm:i(I*:F';vW8%"k:Cdmr;:~F=&2kɺg\<"8=0X`
+public/models/guava_head_int8.onnx.data:66908 | [CDm] | Disposition: legitimate
+  Context: ގ'~m6H<=9ۡ:_v;|CDm;^낻9<̣;J<{(g<iy&<P;@r(Z:]i 6;?:)C}:;^;R;;.;
+public/models/guava_head_int8.onnx.data:72901 | [CDM] | Disposition: legitimate
+  Context: </@Y:<5<N" 	o.W'!:xCDMhk):ъ;H:^:W߱:fT;YO;dV ߺJWr:Fzy>:)):M:U~j;mq>I;<>;ࡻsDf;!e9D;+F9:. ;l;o}:~(;r;ɬ:TS;ɵ9 }bչ_P;$q;צ
+public/models/guava_head_int8.onnx.data:73936 | [cdM] | Disposition: legitimate
+  Context: *:W9:ꎑnR%9-o:Ժuո*cdMHJ:"*h8ιO:,ꊹ((/RW Tz^>9r+T9Omb:fe1H¶_k8Y:5X:Y9d9U
+public/models/guava_head_int8.onnx.data:76416 | [Cdm] | Disposition: legitimate
+  Context: >f6=!3#!><ٗ?3oB>˼\?j(B>"(_=w%C=,:C%½ =G=(y* #=QϏNP=HCʽȯ=>G|>=,NEV=z!#;>6<*<^B>=G]=$Nb=82>oE:^=lA>塾((֍c>B<=彅"==	u=i==
+public/models/guava_head_int8.onnx.data:77100 | [CDm] | Disposition: legitimate
+  Context: 1~ZU>Q">Dnd<b<I>;ٱ#>3=RL>>2=] e=vD>rCks;'y*F>ѭD<3#ϖ>&͚=5p,> t C_=&>?(%ڌ?8CDm$ܽeX?摽)ܾ9b>;Bĸ־Ѥ>¾q*߽:v=q>FnE= g=o?>G=:"&
+public/models/guava_head_int8.onnx.data:82066 | [cDm] | Disposition: legitimate
+  Context: ==o?*3ľ2N@Y.+',7>¿OYI8#9gB>v#XFY=D>K<d?e~)O>Iܢþ4/>>2=҄>dBzr>$z$=W<>P= _&>Ă{}15龩q>=>a>x#?4܂nB#>3e!mL=?)rrȣ*biZ=F+?Fx\>.
+public/models/guava_head_int8.onnx.data:106151 | [CDm] | Disposition: legitimate
+  Context:  !=_;*(UCDmΦ)lκeB<CW=ѡ;?Rf=m=3H:ŽBX<PNs7aN=pd)u"}콘Ζ\2>v}P027R<f=ju>>v=
+public/models/guava_head_int8.onnx.data:136050 | [Cdm] | Disposition: legitimate
+  Context: =58="/=b=Ȅ߼^}-t2Ob&=(]=<>z," >ۭ=(Ƽ4V=<fU;kx=Jx>ғ=Ѝ<ČκX =PO= =x<4_=^[i9[8=j`=W=6=ڼ{Cdm#ט&$*$
+public/models/guava_head_int8.onnx.data:155692 | [CdM] | Disposition: legitimate
+  Context: k>0hº=v>	(ehx[>՚ϽYtCdMV#Q>rP>e>d7==9.=3H,>vɛ=@c>>?<(V>%ǃI=JƾH:ķQ=jsY<k>TeX>:!=|g>qbOvSZ<
+public/models/guava_head_int8.onnx.data:174387 | [cdM] | Disposition: legitimate
+  Context: =a>i ?۳>ny>y)>s;S:SoE#=>(h>=Jibb=<cdMwѾ<vi*=*gO<6=
+public/models/guava_head_int8.onnx.data:178090 | [Cdm] | Disposition: legitimate
+  Context: <F'/T;8_zE%v!J%8u;iY+ȯD;lEI(_j;3;N[;%U<F;4$ET1::Q;,;FEҗk骐:Fo;ķ:&:_f9W䯻Uvc+ֻ@K;\;4:;=E@;wA;Һ9T=< 廒߄;ź_A;^j}97;k;
+public/models/guava_head_int8.onnx.data:193038 | [Cdm] | Disposition: legitimate
+  Context: vӓci-hVO;P(Z;I:7=9<VW8z"Om; ɸyry	Cdm+<;bBo11;fA-kdS޻·|:xނ;O:M:IJHź-;
+public/models/guava_head_int8.onnx.data:196097 | [CdM] | Disposition: legitimate
+  Context: <JЗZZ G$;:;;8;;MOOu;ѱ;Í)<m/ݗ;|~O(I*Lٻ =<RU<0\,<ԵR|<2<X5]<{5';c7<Hӻ<>;N%<Bi(<ik;u:Ï	7y<";>a&5t;o-'N	:FSs,5m<I:h߸qlA<r(<EP}c;
+public/models/guava_head_int8.onnx.data:201942 | [cDm] | Disposition: legitimate
+  Context: e')>cl"ۻ"<e40 ױQpcDm>=*:> a==1m>C>_r='6tqY=>tq>
+public/models/guava_head_int8.onnx.data:207078 | [CDM] | Disposition: legitimate
+  Context: >n->䴼=L:>#Î=	=	q5=L>=&fV3  a<B>uY=<zg<o=>=	>$7<M޾).D<=o<L>)pʴ:,<!CDM>VIΨͤzo
+public/models/guava_head_int8.onnx.data:219210 | [cDm] | Disposition: legitimate
+  Context: \<紬kQ<G<ǠE};qX<@<*;μ<.qI;*黦DT	Lbm<$ؼ_<hr<-3mHcDm;<޿:;d1U<<<l)= <K;}>Q)G:8 <:Gm;E <w;<HqJ<<v!)伹? <B I<1<rӟ;w/R<t.<W<2
+public/models/guava_head_int8.onnx.data:220598 | [CDM] | Disposition: legitimate
+  Context: %a=x~ͼhHrV&;~=l=;Fɞ9l:<;u-<LCDM<=;UI<I<<@]'=¹;&];v9=ԟ9?<!e*:g>s;!"4+U<};==J;n<x*}`9<<BF<+<F8q*7=2<żske<Sezκ:
+public/models/guava_head_int8.onnx.data:227366 | [cdm] | Disposition: legitimate
+  Context: <>	{2o<[uk<U]L;|<K=ʻ,P#F;(~|7O;;~<ZWt,<?iZq<dd<y$d<d;&<`Ej>q<;C߻0c!<º9j^܋4;);0H<2 <& !t<H=S=!=g:gI=<~;b;<>Ft@ܼG=B;(;bw=<J㋼\<
+public/models/guava_head_int8.onnx.data:249351 | [cdM] | Disposition: legitimate
+  Context: :<6<K̪<V;Yvl;u)ҵkC<Lj18D:9d<؂<Wgs:_<cdM<V<;=g*"i>;ĻxNu:6Ё/<V;jxSȋ:c8:<B
+public/models/jackfruit_head_int8.onnx.data:552 | [cdm] | Disposition: legitimate
+  Context: ܿǑ>nT>hOlzn5,cdm>nFٿ
+public/models/jackfruit_head_int8.onnx.data:13713 | [cDm] | Disposition: legitimate
+  Context: Bܴ?8@?Փ%<k"@k-@@:=cDm:?'@C?o2.%.KBBT'>R>=?D><,>ȡ?@?c>>-"?s1@ǫ?>>?۝?L?yƿ>]nlļN}rz>/ν=$սXOQ#>9?%@J??M4>2
+public/models/jackfruit_head_int8.onnx.data:16423 | [cDm] | Disposition: legitimate
+  Context: =ɻZ Q<#/Pc=a=h;F=ü<)1<ܺ%<;"iC<C̅WVrlN;'K=2Īлu=z9"v\=ӽD~<P-WνfqU𪼈<κ۪ݼUD=Ph=ҹ=0x<<==1	=cǼ0G=.=WK/d;/<0[j&_JL=< N<(̽W,n=<
+public/models/jackfruit_head_int8.onnx.data:41021 | [Cdm] | Disposition: legitimate
+  Context: =>>U"C7,Ͻp$Uiu>v>VMBF5?>pp>mɂ޶>_鑾">2-\<=>_>/==~>->dq>	FC>>A>ς>>ϽľLY>6>c=S??2Ս=žSȽw=&9X>ݪı)[f;orfw>>>->[[M914><=e>;&Cdm 
+public/models/jackfruit_head_int8.onnx.data:59032 | [CDM] | Disposition: legitimate
+  Context: FĢO%=lT;u>B	=ּ҂>x>m6;6=@=Dܼ3i[a4=ּTXg<5	=\TA:XruP=b;CDM
+public/models/jackfruit_head_int8.onnx.data:77342 | [cDM] | Disposition: legitimate
+  Context: =y1ֽͥ<[=>5=ɽ۽&=	fZ8>cn)ncDMm6K=?,j>&=ؠM=X<g=>0h@=o*΅Ͱ˼R>	u>ęb>M˽d=ALvI> 	>=lβjL]>6H>"A񥽰>ʾC<yĽ9><y<>kT>4=<= >@=Ҿ:==
+public/models/jackfruit_head_int8.onnx.data:102201 | [CDM] | Disposition: legitimate
+  Context: =ٽ1<ýI(=lZ;U:G<䶼8j5ϙ$P<?ۼbc=ˆ<ݒRx2:CDM<Cg<<>5<>Yj$>#Cg=v$)p^=꒾;v=XHཊōcf<=k<=Fi=c<$=EQ#==EU<gÊ@C;d<<gڼ\>$<^mB7:jV=
+public/models/jackfruit_head_int8.onnx.data:115474 | [CDM] | Disposition: legitimate
+  Context: ^< 绻mJvy;9;aǨ&<h;j<,-<˄gƻn9`5 <eDo<?t9<%л6ͺ|<dMO9ӷ<(<z;:ts["ף;d;RO+;X<;iM;_Lgٹ;<CDM;03KN:~;RJ#;<kׇ;[:;L<ɁN)-cDU7t<tl
+public/models/jackfruit_head_int8.onnx.data:124651 | [CdM] | Disposition: legitimate
+  Context: r>92I>W=mhL>yǶ=@->2n<>CdM)K>!=2 *;= 1>k^d> o=='D>cw=X>ׅ>,@>6U:
+public/models/jackfruit_head_int8.onnx.data:139192 | [cdm] | Disposition: legitimate
+  Context: x0ks>!O:6= ݬ>0{>"ٙɲ>7nM>D/>_>?v>8<s0cdmx>m>=[8=6=+ʒ1ýW>rjY>5}7X`f=c>|@F
+public/models/jackfruit_head_int8.onnx.data:148210 | [CDM] | Disposition: legitimate
+  Context: W;ϓ:7qר:ED<6!Fs</Ҽ<GTr:O.1:<<:y'<>	nIs-;t;Uo;SFCDM hKĻnn<p;vQ];NDs<l.jC:Pu' &:I<Fݻ#
+public/models/jackfruit_head_int8.onnx.data:148561 | [CDM] | Disposition: legitimate
+  Context: lR;)#LV};!ڻŻԥ&}i;kE;Y?<׻ȻZI;}P;wkraT$;npc; g;;<F&'<WPAY2;o8Y;<_h1;Ƿb;R11Ko";ݻe )$<BN<5继q@ӽջ<4ҥ;#\{rn81<ey'\x.t<:!Zm
+public/models/jackfruit_head_int8.onnx.data:156718 | [cDM] | Disposition: legitimate
+  Context: S/cDM=#O=Y9>ֽ!{R>ݷA;XV>v==H<E=y=-<ז=26dV=>P!%㒼g3p==Θ6b>N<"'q(=E
+public/models/jackfruit_head_int8.onnx.data:181655 | [cDM] | Disposition: legitimate
+  Context: !z;_R;'ACI8ߴ;>;f!<aʋ;7:}:β:;&;a5;Pi;#.;.s;I;Rݚ:]OV%.ĺ]::z;0 9V»UVǹK;3#!$UEjAz\;W	;E)<9 YLj& ;f;;r	9_ˬ<fh:#1;,0&{;|
+public/models/jackfruit_head_int8.onnx.data:200958 | [CDM] | Disposition: legitimate
+  Context: >ڌ*>Ji>+>>~CDM>=ڮkc<L=U]m'bMZ C1ҬĽa
+public/models/jackfruit_head_int8.onnx.data:202181 | [cDM] | Disposition: legitimate
+  Context: ={+>R>@!ˇ)Y=yP7E7q;!1=|:(<A=K>uQBO,=="1~+ m>CV=)1{;>=K!=^&Ӑ>^%0B>0=)=ýt5=?'>cDMr>D>z16t=>
+public/models/jackfruit_head_int8.onnx.data:230550 | [cdm] | Disposition: legitimate
+  Context: <ne+9@<8Tm<U9_7?LQnA<;Q!RU_U4rZ]f1+S;Jv:ĭ"<SL	9<Y<ϻe;+48#U:jz)<`;^t;J;;/-;[/<ݬ;q:cdm;r$@(ºyDdI:9Y-"r @9b!)5;u;J7<xt;
+public/models/jackfruit_head_int8.onnx.data:267167 | [CdM] | Disposition: legitimate
+  Context: {>JkES>.ss>	=7F>moe>r=,@nтT㼸e5>B<#- V>GFuoʧ?>nabq=%(3$>p2=lbC>U " >M=#~.> ѧ=(>uC0:<.ٽ7oJ>˙A$>3>`>;{">l=>>E%>">4B>!%!C
+public/models/jackfruit_head_int8.onnx.data:272939 | [CDm] | Disposition: legitimate
+  Context: =;58~>o=>>J d> @>=rn>qQ[;<f<L>$)ݽB9.νJ=`s>B%=*!=|C>lN?=CDmE+%>NX>ug;},>>O>H<2=
+public/models/jackfruit_head_int8.onnx.data:273355 | [CdM] | Disposition: legitimate
+  Context: }>	"CdM=@CO>2b>5=<,m$R>\>
+public/models/maize_head_int8.onnx.data:635 | [cDm] | Disposition: legitimate
+  Context: m?4xcȶ?z@cDm?6Y=6a\d?Y7?6t&@->?w?t$/ݤ;@p}{B>W #^=h?l̿(>an`_t@yF?[?->u}C	@tw$zK)? I ST#ϋП?dr?v>0&@rJ6T]&?>{O1?F#"D|濄þ{5
+public/models/maize_head_int8.onnx.data:16600 | [cdM] | Disposition: legitimate
+  Context: Sz4=#<;@;U=<vhkd<@l+1H!&=;yQ=>=⽵M>1)=#V:7=rP+<J?t_;3="=`|<:6!;= <KNP;<$ff:ۈ|="Oby<X}<ɚ<мz=U(<gt<S#<۴b;f7=$+؆=MU>"<s韊
+public/models/maize_head_int8.onnx.data:26200 | [cdM] | Disposition: legitimate
+  Context: >?享>,>y?eZT,??5?E>hB1A?cdMP;Y?~0D
+public/models/maize_head_int8.onnx.data:26438 | [cDM] | Disposition: legitimate
+  Context: K>ؒ0EA#|.齣MՂf'a	PA01(ɿ[}[M4Q@lhd(>@gLgC>	3RcDM>Dϒ?>?}??]?OĜ?h??z??&h|?t>,&?⒲?^0??W??r?^@?? ?3۱?S?6?q=Ə?>Id>?4wQLo??;O??H@
+public/models/maize_head_int8.onnx.data:26537 | [cdM] | Disposition: legitimate
+  Context: ??~?b?V>Of?IKcdM?!>>>=">@>R=DS>~>=4@e?x??8@k/>?@M?#}>?;>@@
+public/models/maize_head_int8.onnx.data:46557 | [cdm] | Disposition: legitimate
+  Context: ;%>^4<.Kģ%`D;{м5f7!=cdm;(b<n;;yȑǽ<?j=F<<Rj}&׼,0=h+xJ<VIϼ"
+public/models/maize_head_int8.onnx.data:55803 | [cdM] | Disposition: legitimate
+  Context: Pj<gb=Rn|s-<p?k-^4<sy=pc= ׬<Dir;z{W"=cdMY&`7<{Ne<\ =ñ\2	PybC=$z.r|O;ƻW<zJhy=Ž%n=096;<l/
+public/models/maize_head_int8.onnx.data:67491 | [cdm] | Disposition: legitimate
+  Context: Q:z<B<󓖽1$><dw㻢mCQH`@<Oʦ߸$<:Bʼ;Tn4<l::Z^{D;f<ӻ>=<[K< )<P<&<5=:EtK<ލQh<= m;KA,}7P<CQ漜=;z<3⼽Y!n;cdm*I[=~<7=㏝_K<8U<ɨWhn;1/
+public/models/maize_head_int8.onnx.data:79353 | [CdM] | Disposition: legitimate
+  Context: ;X`bI<ݘI< `CdMW<)<;b	ǻ]:L<U>o<NϻS{<'<U ;ӻș;?RX-/;.ԻF[A:<O5;a(0I;;&`;R^>;.C
+public/models/maize_head_int8.onnx.data:92583 | [cdM] | Disposition: legitimate
+  Context: <i߽X\֐>@>%'#>x=M>g/8* g;=_>EJY0x|ݩ;')O>G=tH7>@/?@X<s6s:.LV>}{M$A=N{>:9t=K$?=ֲ=2n=5Ž#Q?=`mϾR=`b<h=8=eҁ*վ ZA=S/=~oV_>z
+public/models/maize_head_int8.onnx.data:101366 | [cdM] | Disposition: legitimate
+  Context: p9=<`:*2;(g(<$i=W餕-W<<,z=Fx;ȣ=N=cdM=ҿ:Ww:W!=<"sAj=ͫ='<S¼R8[<t6fPڜ<  Sp<)=0<(yҽü&H}K* *=x 8"<Je=9{8d6<=i<j=V=:SD7jdy==
+public/models/maize_head_int8.onnx.data:104140 | [CdM] | Disposition: legitimate
+  Context: >r<W<)1/>j=BCdM =5p<<b?}=޽WG-,Y,=I=2T<ठ==U@=F_<X>$=R㼪wSd<ǃ=⪖T<J{;'Ebu&=:k>,<=<\<i=ϽV;="	_=sSR<\&=9m{c$=踽k=;&=;?6<ʉE
+public/models/maize_head_int8.onnx.data:110157 | [cDm] | Disposition: legitimate
+  Context: ;;a;b0oi;1£i:^ൺ>9;d1;̹'9RccDm;,:(X:g:&m:v:~#;w\;C3.9];#)'w|;޷;:彻;Fn:t:pH7;},!;.뻥G::?\;$;;::H:ͩ:I|9>{Az;k9;`;҉Y;*-:κ
+public/models/maize_head_int8.onnx.data:135511 | [CDM] | Disposition: legitimate
+  Context:  =׽FCDMv/:ݼ_~7痧=%I<ս;<W>[=V	>>Z9=3'i*jҽ'b8=P>!Wn引h2+>zuz*=9J>ҼƙU=WO=k?;
+public/models/maize_head_int8.onnx.data:150340 | [cDM] | Disposition: legitimate
+  Context: ;;:vt<ۥ;NN;$<oڄ:>j];9:;5<TU=9;;;W<0c]j^<v<GG<3<];D0Ԣ; ˻#;*;}$of;S^<֔	';f߮;[0<E<S;0-<n;v˻u9:E:7ݹ$ܼ'g35Z};	-<叿񯢻Jx;tV
+public/models/maize_head_int8.onnx.data:168569 | [cdm] | Disposition: legitimate
+  Context: 8>"m?*N>7^_>^+=a5qm>FP>OQ>x\,<gq<&boC16>ۏ<2*u=¥=ٲ>T<ԽB쵚>ֽ|>=]=h=ζ? >C(=,>)>y]?.$0M>f>#i$ Ծ̼vǉU5y=1*ȾN1l>g=T=pr=(ӽ
+public/models/maize_head_int8.onnx.data:210654 | [CDm] | Disposition: legitimate
+  Context: =pά>U>=V>Hq<>O1n;Vٻ=Z<+>:Sn9>ɋ;(|8>' }Neݼ;>V>-ZgC3T1>=˼9m;-=dsȽ<<Tӌ>:=5=ʡ=D'(>M=e=y>>N?U9Τ^=y\soߟ>q*>~6C>B
+public/models/maize_head_int8.onnx.data:263982 | [CDm] | Disposition: legitimate
+  Context: =k>AI>,=SM/Z6D>l_J<@>p>ciM>5>'0:KK>&[{DX ;>8ZI=[B>,átP>8u>j=ys7lul/ɽCDm&==|>F4>*P>)=Av>3q݀
+public/models/mango_head_int8.onnx.data:195 | [Cdm] | Disposition: legitimate
+  Context: "(9! yU?Cdm?BeҿXV?,"P?_
+public/models/mango_head_int8.onnx.data:4106 | [CdM] | Disposition: legitimate
+  Context: >C>ջ׾S3?Lsx^Wg4@~>$_S>9&?pr<>CdMYE*=\?Tْ?;?: u!>[en=:?` Z59=L>VC>?
+public/models/mango_head_int8.onnx.data:9653 | [cDm] | Disposition: legitimate
+  Context: :/	Bd=(Eϻ'#=_=q:YƱ	;]y=<JBJf<'=0<ym<s=F$=)==tTeӼ'A´=_m; 0dFQQ>:boV/e<q<"ya=ۯ/y<S;#C%9vhf67;8<i;cv}]</cDm=y<BEn>8=@؎
+public/models/mango_head_int8.onnx.data:14334 | [cDm] | Disposition: legitimate
+  Context: >):<>Gb@аM@J/9@?C?q?J8@?^?0P@>>OC=-T>N0;@rn9:v>9=l>bU??^k?S?+?Q??}Ay? @P3?ֺ?Uh@~L@:/@41@S@0s?g@4?|8Y1T;7r:CXbcDm!?6p>h?1J?j+A!У?@
+public/models/mango_head_int8.onnx.data:23251 | [cdm] | Disposition: legitimate
+  Context: @#!"@t@<鿹w:?h>Rjc,M5ԾK/;H=UW; D밽&=α<M쾛:ݾŽT>E>¥ocdmbG
+public/models/mango_head_int8.onnx.data:46655 | [cDM] | Disposition: legitimate
+  Context: E*<l9:ƋD C;-;>?3(>`#ׄ><vM<[ ;x߼6C<94V!=7ku.P=	w1#']>Id,$z%cDMKw=<@p[;[6<zU>Db<R/?=x/<®5B=Y=[;N<͑Z]>`>s5:vQ<1,/=
+public/models/mango_head_int8.onnx.data:49340 | [cDm] | Disposition: legitimate
+  Context: t<90c\4=Cك4\<T_Q"<%xn{=ާm<<={9=a,=uHC	t4ļs,S>n=Z= ;I>ý\QhȽE==cv>8F=;#%=5սŭ|=E==&%xwx=KQ;<50;mj<`t;~iZ1"e=W₽9x3S<i=b,o:
+public/models/mango_head_int8.onnx.data:107327 | [cDM] | Disposition: legitimate
+  Context: R $+7a!u˽mʽ}Gh	;礼fU<Pٽ1x=ﾘ*=(Ͻ6nXn=cXv)\sޘ  >ؽpя<36=.զG=_=طQ{>z</TfZc.;cDM:H=`$ĽP<>D=^w'>pw=<p=%8>B~=Bz=t<`\V|=jN=Ao
+public/models/mango_head_int8.onnx.data:121212 | [cDm] | Disposition: legitimate
+  Context: y5<DN>vE>h<0ƥ/>>!ڸ= a臽;}\|<k۾7m<%˽g=6O=מ=P.d%=?s3LA<gS=-:% Z羺H?8 -<cDms>T
+public/models/mango_head_int8.onnx.data:128481 | [CDm] | Disposition: legitimate
+  Context: x;k27:[M<de:@<[#޻̻<:ę;6;g;>|<'<A:D?Jp(hehH<$;P;[;J3^պݿ%1Od<)CDmO*&:[Py:n<w1<z<<h1j$wt6$<꠼黯.pɹ<sd<ٻfiҍ*<R:fs3;]-=<ɰ<</
+public/models/mango_head_int8.onnx.data:130935 | [cDm] | Disposition: legitimate
+  Context: ;J;<4ļF<r ;XkJ<"tPcDm d-8<[;8{;W v%X;&҇<&u=m	<W4H;W!<	,<^_;c:ќ:CL:_D;Fͺ5h+fL9SXE9Kh<);<<};b<;?;678#wx]<Ż2vҰ ;2|#<
+public/models/mango_head_int8.onnx.data:137533 | [CDM] | Disposition: legitimate
+  Context: }",XbIQ>	']=_E7a==QR= _=wdd==$f>;?Ѕ=2`>&<Y/>s%,>KW=l=<_ ȯ=Po?=unȾ>g>j>эC>a5W8hﾚZ=cd=>󽾠^7`k>lO]5>bn>)>6mh<]M>8ㄾMty/+ʲ=?>T
+public/models/mango_head_int8.onnx.data:141794 | [CDM] | Disposition: legitimate
+  Context: '>B%M=  G>E]w3>lW=Z'PkP>"">o#=mUkkվ>¨=8;M>g>;$>K>P>>k ~>CDM ?>[Shi:
+public/models/mango_head_int8.onnx.data:146005 | [cDm] | Disposition: legitimate
+  Context: 6V;~B#N;[;&;G;KU<*;!;;~h9AI<<U`Y<4w;h $;mK<z3X^*e^;@\;uYv:N<;꺍V+;/:Z{&;>/<{v$<NA<%nqd껶^=3e<;G:U7Uo;!I z0:W<Zٺb
+public/models/mango_head_int8.onnx.data:148809 | [CDm] | Disposition: legitimate
+  Context: !"놺t<PC<ݻS<-:98E/;QX;@s;@|;{˹=;;<:m;H#f;NS<):;CDm	;S<n$<Q);YkǙ<-;^\;;;P9*:_:V;wv;f7;d;%<;,8<:4!<x<i<O;tk&k:
+public/models/mango_head_int8.onnx.data:182301 | [CdM] | Disposition: legitimate
+  Context: ;:9}P;<(6,U85;C:*5::Cw:˥r>x;3%}9_W:Lκd6:кuaT:?@U+M[;T9q	8 >:0.08Q:`9;B"@fb?q2:U;(:CdM:^ºU;:g:D:<:S+cݎJ*\5ۼA2
+public/models/mango_head_int8.onnx.data:184801 | [CdM] | Disposition: legitimate
+  Context: t8(a>y޾-o	<ktܽC>E<>|c=*1=Bw=>TRm=Nč>=ü7ݳ=.ߑ)=k=jT7>cƼE=`#-<a0>SK%ߩ=6ѻI=՗<zJr`>xǽ:#>]L')>ySxcCdM:ڼ<>>}=>`>d.~.^
+public/models/mango_head_int8.onnx.data:193106 | [CDM] | Disposition: legitimate
+  Context: ;Ld ,eH9;n޼:x;:h69̺R;w%;::f8;;JB9֎; 0c&yz;#-@;;9Rx:	:9i;rCDM9;<	ZSԸ;Ϣ;ҳ;(Zru-;Z;Z93:F;^z9,fL;h_;i;LE=A:
+public/models/mango_head_int8.onnx.data:214054 | [CDM] | Disposition: legitimate
+  Context: 6<;H=4CDMG@>74=OCv4ԽG=iA=~dR
+public/models/mango_head_int8.onnx.data:237836 | [cdM] | Disposition: legitimate
+  Context: h&a/kzI3;M ъ;$+4;I;s;j;|\ԝ;S({3;G9Koz9o0'cdM9':8);ӽ:/5	n;84۷V_;	 {;6&;Fe; ;NN<Jc;@źh<_8Ϻ;J;zb-6V3/:|:p<Ի%9s?;b7:"[
+public/models/mango_head_int8.onnx.data:239945 | [cdm] | Disposition: legitimate
+  Context: ;+;e:;;E:po:TE0|ai:Ս/9_N:<#:wM+{%if:`o;]9-pr:@º0m:;3a;lbM{:cdmNٷ8H`NTZ&;D/;om;-9:!2:go#E9ڗ[_mQ
+public/models/mango_head_int8.onnx.data:251988 | [cDM] | Disposition: legitimate
+  Context: ˸;==Đ;;O=:F;κ(:R;VV:4>[oW;mU;Y"#;c;^T:	;C,:^;| gYxẎA:x!p#w; #I;\]g;!:@};裺 :':;nKF:x$:q ;`:?f68V: x;C6:5[H6:ضNe>v;?٠y	:
+public/models/mango_head_int8.onnx.data:264210 | [Cdm] | Disposition: legitimate
+  Context: =<no)l>=Vqu=ҽz7E=!K:M?Pf><DG>)=<'>{¼~6>J9W>/@>AA=Pt;V;a.XQ6.=L>˽iǈ}>@~yA;i=<>e4<S>-j>M[c-,>욾wy3^@(Y>,p=9>X=k=[V?==>d(~Cdm
+public/models/potato_head_int8.onnx.data:11093 | [CdM] | Disposition: legitimate
+  Context: ==<,?<6<M>P"΋:@>g>>,俣;`b@y0't\??ZII[o=D%?Y>?>3h=Yf?>:<ϔ=\=#:6>^o?C3?*>2	>4=B3?6>@>./ e;4>݁!RԾ:R;-;DEÿdp=00g3 8<Y/6]zp<2=͋
+public/models/potato_head_int8.onnx.data:53568 | [CdM] | Disposition: legitimate
+  Context: Q ջ8B-<]YI3<x1-H<ǼDc̼,2<f</=K=X<dI=b=/Ӽa#$==	=^]<=ikc=r<aI(L=5g<Y_qea=	A CyԽCdM<A<=]nu<=䞽cd󝛼1::!=t+<ԅZ<(i<-=ƽqxF+ ]bd=[Q=
+public/models/potato_head_int8.onnx.data:55523 | [cDM] | Disposition: legitimate
+  Context: Ꮍ	Q<u=i@8>xt-=3=6TF<uG=(	וn< ==[,I(gc=aO=94<<*MZ&g=Ҽ&B!=BѼҼcu=uŽ:Q#	=bb=1`<u9eϻ97u`<(,="?=ǽ,=@N/;<I=Pq="CR_<Q=<<t=<XNp˼
+public/models/potato_head_int8.onnx.data:57759 | [cdM] | Disposition: legitimate
+  Context: < =dW=MIYwU.;=BнȧFü[=_el,=1=w=u<j<Qh>U%9=ػͷ(;!Ҕ%<P=ۖ:=ecU6=Qv_D=O =cdM=I`~Y>g=Y90qN=q"C@e4e9M9<<bλGCWѻC0-.+bH-b?S;tʼưs$
+public/models/potato_head_int8.onnx.data:59428 | [cDm] | Disposition: legitimate
+  Context: 8S^;x1LHp#:/lh]/+̻=V<y;w:ݽAg=:]x4 =C<s=Jf|=%սl9 ~|m:<e9cDm;xk:6=缴qD=Jݻ_ռ
+public/models/potato_head_int8.onnx.data:60425 | [CDM] | Disposition: legitimate
+  Context: |Nc<;<gR=]pɀ^a=޽፼.ʽhβtx=hE;	ʽS=g27ܽffG<˿==֕=&֜b;Tjגv<T=<kns51^^:&%=CDM;V⽾N=nH#_:<᮪<5C=qc;]:k")N=g@<L=rQPn "=qoF޽U]
+public/models/potato_head_int8.onnx.data:84509 | [CDM] | Disposition: legitimate
+  Context: ;u1;X?;i;;;s<M{;!ZG;fx$s+Iۻ;?.~;,M0<Y;ȃnӚ;r;_,90<9a<h6<OLCDMJƔ1<$A; ϻ謹=;(k;/<::wc;H>T<LL<mA<C7<_;<ċ'D;n<=<ǑM
+public/models/potato_head_int8.onnx.data:88461 | [Cdm] | Disposition: legitimate
+  Context: TK&V0>{<z>ECdm=>>n=cӼ&?M>?EcQ?15?F?#?ys<?:?Vf?=N>׾:)/?_43>ݬ?8Ⱥ>OH&I?kT?@dl>2E>i>ޟlaؾMP>Z?C=>>>`_>>SZ<FBK=_'?$Y
+public/models/potato_head_int8.onnx.data:88625 | [cDM] | Disposition: legitimate
+  Context: ><Y׸?_Aھ;C(>EKLݽ{ ~`:3>0|d>7>= Tޘ>Oc=~=m>V|NX >m>z`⮽-u4	>=[=lq>+7cDMEZe:=YĽ{Kb6r>>{>>>N=
+public/models/potato_head_int8.onnx.data:92142 | [cdm] | Disposition: legitimate
+  Context: d<vw:O(<p<绻<;ʃ;^ڻ&{;&V<^(+]unEHY3;ዷg<!39S%ؼ8<cl&<s"кKò;;FxG<<<cdm;;:j<;<vgĈ? 鼶Mú' ;֋O2Rgоڦ;;,*<{;"<@59D<
+public/models/potato_head_int8.onnx.data:108117 | [cdM] | Disposition: legitimate
+  Context: 9Q$A;=]/7{MS=2~lXC:b+VG<(,ݻ.黐_Wk%=jļI3=Nt<9QkH`=a7d<.֍ʑz<!<=3E;SfcdM=)ü=_Ź(OKV=ͽX=C".˔Fżu1ly=P>x{<wē=5m$K%=;x0[
+public/models/potato_head_int8.onnx.data:128998 | [cDm] | Disposition: legitimate
+  Context: XW;r:9:;P9O<#<aI<.;cDm4e#FfhH.޽q.<:a<Jl<P;(`<W<@%*O);nߊ:-[
+public/models/potato_head_int8.onnx.data:134388 | [cDm] | Disposition: legitimate
+  Context: l>=>'C]ǖ>W=>@M)T)>'<<Ӷy>Uyg6ܼ?k9oSR=ZR>-_>93=p{7>Jg=Ѽ>S=x<u>rZI>P[>i/$>˟@YԤگ=t>t>.-=Q=ZW>=`">iE><EGXg>̼cDm>1=>;>շ~f*
+public/models/potato_head_int8.onnx.data:138247 | [cDm] | Disposition: legitimate
+  Context: 7=tqiȦ>(	>=s:/>>(Ǖ=z>gԠ=/12>eKV>s);=mN<nT@qJb>FmP9j8!=2ў~=37i>1- T>=A=aO=׽t>\<EȾ7nR>{h==cDml==+$=	=}>[
+public/models/potato_head_int8.onnx.data:139862 | [cdM] | Disposition: legitimate
+  Context: <e>8?6=X>96C#>2=}뎼^w;HH>cdMA;Cn4=[X9>}?FG=`>M.?aETR>7CNh>>U?g	>>p]=&`>r>s==pG=I	=6wEY%N?mIz=~='<y{?޽u=1=s=NI8LUö>NX
+public/models/potato_head_int8.onnx.data:150191 | [CdM] | Disposition: legitimate
+  Context: y0kһ2B,<%ֻu<>;9욑;{ХtI;(F;;;:[CdMoL;^;s,<J:ORA9<:;&y֫9Fmd(|;;V%_:Ndδ;dC<Gd6<
+public/models/potato_head_int8.onnx.data:152615 | [cDm] | Disposition: legitimate
+  Context: P=ڼO#>(S1s.Rv=h5 G>K>*cDmh1e=W/-=
+public/models/potato_head_int8.onnx.data:187884 | [CdM] | Disposition: legitimate
+  Context: J=SܽCkE>yZS3P>#CdM=>s={i<i<CPzO=s/<ds >=<8>H
+public/models/potato_head_int8.onnx.data:194077 | [Cdm] | Disposition: legitimate
+  Context: K@;Y:^:Oc]ɺ!%BM9ɨh;Cdm9]lZ]
+public/models/potato_head_int8.onnx.data:207826 | [cDM] | Disposition: legitimate
+  Context: T=ݽ2=[>f>>P}>fu7,>~8< 5==̽f>l3xƙ=[?jμq%^0="z{2H;h<>G{`v>[aN=x<a~l]=Ժk9\d{+埽iK<TƑ=Ƚf><J>>};<=ț-<>{ݔݽ nʼl<bf7.>JƐ,U
+public/models/potato_head_int8.onnx.data:209411 | [CdM] | Disposition: legitimate
+  Context: =G>iý[>G>CdMiPk>?꼅h==/X{=L,;˺+yr\F=!+'=^Q&=D=м1)>>i_=,_=l##a]>=Lb=oe#>
+public/models/potato_head_int8.onnx.data:223429 | [CDm] | Disposition: legitimate
+  Context: kd=ÍD=hz"<S"<5]z<ǥ&<a<72=:]2<nvk<ؼ5<%>< <bqc/=<;r<V<^<ZxռeklR;qj?<=<]:=\;=<<<.<b	=<LA<<2o =Y1=➼`zC Cf=Ȫ<#=VZY<19<$
+public/models/potato_head_int8.onnx.data:237617 | [cDM] | Disposition: legitimate
+  Context: 7ӻ<8<i:r3<<д;!伧<㋼`H<~Q=:]:׼'7<+z*쮼㉻t==*W<ڜ:ݞ<pD;itE̻,7μWtZ<Xd9<y˜;#<=~<:ߏm2ΥAAC<<<Aߜ<4<ScDM%;ڄ;aFx<ԏ?)dM<<><'<
+public/models/potato_head_int8.onnx.data:257496 | [cDM] | Disposition: legitimate
+  Context: ʽd<^y>հ=>췼>>:=^]L="B@>½޳O=#[>Z<>=pckj!/Eg=p<o=gC>vZjH>\Q>#j>h9T>=bֽj/&>5:69>յ޽}gTl;nʼv;=]ᗽُ=cDM{\>R<IM>86k޽V=0A6
+public/models/potato_head_int8.onnx.data:259567 | [cDM] | Disposition: legitimate
+  Context: ',>0>5b!,)>mx>S>׽<)>=>=RLJ$_>D=$=dݾ!* q,j cDM=|>򖆾2>yŘ:>hM>u0`>lh>7S>>&>kM=_;>=~*j=ڐn<=튿;`q>=l)\R<_L>>E=oj=/>=>*z;\~Ⱦ}JTR䭤=
+public/models/potato_head_int8.onnx.data:259951 | [cdM] | Disposition: legitimate
+  Context: =,NὯ <8grL cj>D>sz7!|ȁGg>wu==B>鼂>V:׸qBxHѸ;úcdM@T0>e>}=^}^J>R^DG=>c;nD	0]1>о%<^g`>->:Z"=M>Gs<>9-KG=đ޽{=]EtA%l˯=tu=?dZ
+public/models/potato_head_int8.onnx.data:260441 | [CdM] | Disposition: legitimate
+  Context: $p?~=xS߽؂>𧎽A=bG,7QĚ=!`uR>ޕ?>$34|z>%=dLѼ/>%Ž<=ؖ>(Ͻ=c%үbѽuN|yE=/>%7=I>>ټ<=>} iʡ>W&=ՑB䕾VV>(>%g=@=A'>Y,>,߳"~A-=iKʾy"?[8#;>
+public/models/potato_head_int8.onnx.data:269233 | [cdm] | Disposition: legitimate
+  Context: >>4>6y>"L\jQ|iw>ξi>@9=^c=F0 m)eW3W=O<=@odBDv*U=<<-e\=X>@_NK-W;<>==y5=pYe=b>it8e<8>טcdmr>C>a>=<<	]=6,B;W~ļg>,ZL>#'>W{[cE=أ
+public/models/potato_head_int8.onnx.data:273834 | [CdM] | Disposition: legitimate
+  Context: ЅYRݼ2CdM=t̾C>>hyqZ7>t2?=%ި>>GjgC>B>o{>	<c=p7Ȅ>0mw>I6=M+><D^oe> AsB9=0>>1Ѱa]6v<YW
+public/models/rice_head_int8.onnx.data:7117 | [CDm] | Disposition: legitimate
+  Context: *;#(+ѻ;~ǆ^BY<I!F";;F;;;.u;=:oK3L1;;j}QnL2<akS<D <3<q;nFλVA/< =+yv;<;Æ Z;r;5di<CDmg
+public/models/rice_head_int8.onnx.data:26559 | [cdM] | Disposition: legitimate
+  Context: @~*@s@tOb@FD@N+@8@@6?i<@	7K@f~p@MP/?@@3D?2?q?֚?M?H?*)??o??$@iF$}?k?\cdM?[@Y?*?+I?M?i?>c??j%?4:?
+public/models/rice_head_int8.onnx.data:75157 | [CDm] | Disposition: legitimate
+  Context: unv-6>p=E/T;Ke>H4~:QiJ1mG>=I<=T>vd$k>f&=p>s*=/*=>9>R=_>^Ũ>y1>!?=:`=pX/s=&7$̽SJ>2ݽ	?V7>Q=$>Cͦ)>Q->*>0{6>QD=Vw>d>$:R=,
+public/models/rice_head_int8.onnx.data:80744 | [cdm] | Disposition: legitimate
+  Context: Q>]=z0~8=>PN)>k=b^>yPtl!\ݜBᾋ= >⺈U>ʽ>eW>n>?>c;@#>[6>=җ%ocdm:<\$\>u>ɑ>ܽx!#= l7hY>h>iA>:>+â>c;;>4>MԊK>~>>
+public/models/rice_head_int8.onnx.data:82280 | [cdm] | Disposition: legitimate
+  Context: ?/@mp(;>>DhT<Z>>i6kXXT>>T.YI֛?TD>rq]>V?>c= +Mݾy<ҵ\>)ɍ>s?]=I>훤>؊=y>N޽,?sQ]˽\#>6>_ȳ>yomt>=QKR=>/>)>'(M[8y>U">#>
+public/models/rice_head_int8.onnx.data:110391 | [cdM] | Disposition: legitimate
+  Context: կ;=]K)<#*<4ڻ_T;B@KlzsD58}!;:Oav:|;;)p<	;s<M;w:	;VU:O;BG<Ph^Ҵ)Ո_;#k;趍hT{:2;%+໠yNջ<b=:*&ߺ7"S&vBn:I/<o%乑'<acdM<-VOaǻD;[:E:ݻ
+public/models/rice_head_int8.onnx.data:110689 | [cDm] | Disposition: legitimate
+  Context: Ut(S;"F);xZL*:%:%$;ٹșJ;w;xR;l9ܚ:$qURpcDm!9f:ZB:ʅ.;$AwhE$:}9}&;
+public/models/rice_head_int8.onnx.data:111900 | [CdM] | Disposition: legitimate
+  Context: Ul;p{ۻ:0ֺ9yk6h;g;VYsv;}+<@w:;<-<9;1K9TG:<^Vn	&<{h;r<alK~hd0	Ty;V.; :;CdM2ϻຑӺNS8;sp:82;q;0!I;!_]Ǩ:'.VwIֻEl;EN;UZ;hquF2e;G;٫d;pd9
+public/models/rice_head_int8.onnx.data:129475 | [cdm] | Disposition: legitimate
+  Context: <<5;цTYH;A\v<޸;㚇<A+<;=A<`컋<Վ!SN9$.<z;<)6A;y;Vf;f<~`;,Ҹ;.:({;̑;);e;F<7,l<*m:bi<`@;-;7wՑ<$}<_<d<:핻B\z<v:U:8*K<W9<j9˺<Ƽ<c
+public/models/rice_head_int8.onnx.data:178351 | [cDM] | Disposition: legitimate
+  Context: Ά;z<{*Ϻʞ#:ּ;mgE4Ǭ/;<$h;>y@[9}u%<0M<p .<P<5Zvav<ʀ:`<,ͯ=Q<U; o̽cDM;6<M;źn/D<ZK; RN8 <::;sûN<;-<޻<9><<ۼ	:D:2(:׼
+public/models/rice_head_int8.onnx.data:198533 | [CDM] | Disposition: legitimate
+  Context: j$"CDMr:7zV:/YP:9L`:%9{V
+public/models/rice_head_int8.onnx.data:208060 | [cdM] | Disposition: legitimate
+  Context: ĽI=8ڛ >:;=&I=~?=r =T>>,@=cdM
+public/models/rice_head_int8.onnx.data:210769 | [CDM] | Disposition: legitimate
+  Context: K>#)=%I>a3<ӽ=0>ꃶ:>CDM>W>sR[q;)G%>o=>ݼ&>=ۻLlT=zAҼQ =AasN<uN	J>)
+public/models/rice_head_int8.onnx.data:222557 | [cDM] | Disposition: legitimate
+  Context: 8==cDM<U@x=qƑ;}[< G߼༤盻<X>輱;n$@=<<<W<.t={h<x/<'+i;dc4</2<뷻a=G=e=;DlPa=G뛼X=0Jr	;:	=#ݻiQ<	;(ƻr&Zǜ/1:+9vt8w<;S=t<<.6
+public/models/rice_head_int8.onnx.data:228553 | [cDm] | Disposition: legitimate
+  Context: <]M<ˌ<z<=9q[mD<9@<*w̼cDm4=D;7=aƱ~<XVN&~&@+
+public/models/rice_head_int8.onnx.data:233167 | [CdM] | Disposition: legitimate
+  Context: YgDJJj<|;<υ};3:b<!<.;<,<EFYז+v;3&M89~bm[";Uq$U<3w<"<uby	n;L঻ɓ;Ɗ$%r2f;<Sʾ;h`E<v<a[9o D<;'	;Vg<{t2:ڼ:'8;r;Ea뢻ٻܥ]Ij
+public/models/rice_head_int8.onnx.data:256265 | [cDm] | Disposition: legitimate
+  Context: N>u$}?U䉾cDm ʷknQS >i=ѽ]=g>N0>!|#<lc>hGl>f0<|=ӕ;{blRFZq=o[sjQk>+=`Pm7=hL=vm=^(>r>xW=w:ȁ>΢=	ܑ=
+public/models/tomato_head_int8.onnx.data:2937 | [CDM] | Disposition: legitimate
+  Context: <="8me*<4QU>6b=èc=t7>CDMe%9t<hG<G>\*:j;V>OrCC;G-3u
+public/models/tomato_head_int8.onnx.data:21646 | [cDm] | Disposition: legitimate
+  Context: ]:҇9Dt<+.;L;;d;:B:Ny3";n:;#򌺋(a<8:l;'& ;"λE;30Mp	95r;cDm;+l8;_uB:}׻:Ś;F<;;rǻ<;?;x9-:ܙE;Za8;U);QeZ%;wHѭ;4<N8p麺6
+public/models/tomato_head_int8.onnx.data:77263 | [CDM] | Disposition: legitimate
+  Context: ܽg\=$>O<CF'>$>&<+T>sn޼QJI2>*v<%ݎN9i=&CDMAt>V)>
+public/models/tomato_head_int8.onnx.data:87189 | [cdM] | Disposition: legitimate
+  Context: cdM?,.޼ע-2>W 	>)=7$ǭý?!??eE<fRs>4>Pp>\S׾>c>rʾD,>R#?K
+public/models/tomato_head_int8.onnx.data:98378 | [cDm] | Disposition: legitimate
+  Context: <=YO;.>Z=ri;}ӜkAHj===7z==)U=p=ku.)m=\2Qv<4 >@cDmt@˽|yp<=Gbн@kj;칼Xλ<*=tZ˻1=8LD<V
+public/models/tomato_head_int8.onnx.data:103098 | [cDM] | Disposition: legitimate
+  Context: =CGNcDMm::\q,<Σ<FL<韼G9EԈxt<TW˽8X=M=v<THb;+?%=d=
+public/models/tomato_head_int8.onnx.data:126739 | [CdM] | Disposition: legitimate
+  Context: ;0;LV8:6>I<L<HP;"QD<˻ĻIɏ:J2":Z#[qDB	v#X5<5<;>A;7@CdM;1軮S@
+public/models/tomato_head_int8.onnx.data:132761 | [cDm] | Disposition: legitimate
+  Context: @;;1v<f;^M<4<t,1	<ɡ;OI[-pU7`tJ<eOuƻO;d޶;硼ң8tb<]^;7X<\<`;SCĺ49uu<60<<Ѡ;-rڹɷ4<ϑ9q	Vyl,=:)C;o&;N:d88":$<#cDm;^˼><_@>;
+public/models/tomato_head_int8.onnx.data:170634 | [CDm] | Disposition: legitimate
+  Context: ¾x>=_X=o`>V;E7>+?䛲=&>|мO싾O6Y"	u6?p.>,>$u>7>6N>s}=r	>,͞<2=ކA>o+>hbDLW0X6=4=>(9?M6?$>]^>0?KS{>m>	ɻоy><#(+Y>Pwξ:DU=fr
+public/models/tomato_head_int8.onnx.data:179018 | [CDM] | Disposition: legitimate
+  Context: g1<s닡;'j;<;;z7;`H;w<CDMnoF@K/Va;R<Q<@;);<U<ct:`C<ߋ;:ڇ;%<66<";E<?]F<2;$|:F;:*<|_v<mm>Ol/Di:&<E/9<D<YZ<Ƈ0\כ@|Z=i;IA
+public/models/tomato_head_int8.onnx.data:182062 | [Cdm] | Disposition: legitimate
+  Context: v: "(4<&<X+-[<:7];;k;ABs;F$ΰH;e<P3L<򯝼uOw:9=;<;;NO<'Z<qUe#;"YO0<) yB*;o|<⻥f`T<2R3g\q;?%;|LItzʻ.:3RCdm<_:Pp?h<}
+public/models/tomato_head_int8.onnx.data:202283 | [CdM] | Disposition: legitimate
+  Context: Pc,CdM>(_z<^L=_& *j_
+public/models/tomato_head_int8.onnx.data:206336 | [CDM] | Disposition: legitimate
+  Context: ̵:<+ǃ,u< 罋&.,H=#VA=]#=!	@Q=ْ;b><=ϐ>;#=o=ȣ>`9V3آ=<*żpi>hm/pJ<ϯ>*ݧ<L˰_*=M>=1 >eTP0r4jf'=ވ缄'>^ds=V5>ɧ>J`+aKs&=<t<6@=m9
+public/models/tomato_head_int8.onnx.data:210861 | [cDM] | Disposition: legitimate
+  Context: =Q,A=[<!r<*Rshi8S<= H>؊>Ƙ?8\lA3=i=K=[	8Ԉf!^=TB>͝m===R>Ll>u>$W>n<'0cDM,>=D5Z<|_G{E:>=W>=>B$>
+public/models/tomato_head_int8.onnx.data:218042 | [Cdm] | Disposition: legitimate
+  Context: Ǽϊr6	<o<Rp:ϼ;j7<s[:Gl;)<r<H<l<2A<i6:<bY<<8=<=R3+<ز/DC;Ӝ,<$v<<M'<Ma<f;[9s :"fW= *8<;<;Ѽ;Pһ3>:&Cdm V<l=j|<;A?=u<o2
+public/models/tomato_head_int8.onnx.data:235647 | [CDm] | Disposition: legitimate
+  Context: 얻(;8<+:<zl<C<0<@ͻ@ 7;T;Um#<0<;<Q";9;:yGiٻɼ<dth;t滔:&z<'<9C/;]);GȡD;K;Y9o)_@*;Lo;lP;Mϲ'H::;;҄;CDmz"<z;4])<2 :2@<2-< f<ջ;
+public/models/tomato_head_int8.onnx.data:261213 | [CDm] | Disposition: legitimate
+  Context: O>Ǿt-> ?H}>GX=NiȽdej=X0>9<(>JZ>|>5?q>CDm^`?0d-?)<<>P=PJ?~.*>7>0EP=.->v7>>ث'>荾DT=mauG[>3)>ulU>hI>-Q>;5(=A>>=>b.=?>>
+public/models/tomato_head_int8.onnx.data:274295 | [CDM] | Disposition: legitimate
+  Context: EQ>^U=jUf>B泾a+>CDM0!?*y'>lY=լ."}>0<q>A
+qa/baseline-raw.json:16293 | [2.71] | Disposition: legitimate
+  Context: "cls": 12.7156,
+scratch/claims_query_output.json:3 | [official] | Disposition: legitimate
+  Context: "no official Bangladesh grid factor": {
+scratch/claims_query_output.json:8 | [withdrawn] | Disposition: review / check
+  Context: "withdrawn combined margin": {
+scratch/claims_query_output.json:13 | [Method A] | Disposition: review / check
+  Context: "Method A Method B agreement": {
+scratch/claims_query_output.json:20 | [official] | Disposition: legitimate
+  Context: "no official Bangladesh grid factor": {
+scratch/claims_query_output.json:25 | [official] | Disposition: marked unverified (summary disclaimer)
+  Context: "source": "CarbonOS summary (not the official text)",
+scratch/claims_query_output.json:31 | [official] | Disposition: marked unverified (summary disclaimer)
+  Context: "source": "CarbonOS summary (not the official text)",
+scratch/claims_query_output.json:37 | [official] | Disposition: marked unverified (summary disclaimer)
+  Context: "source": "CarbonOS summary (not the official text)",
+scratch/claims_query_output.json:44 | [withdrawn] | Disposition: review / check
+  Context: "withdrawn combined margin": {
+scratch/claims_query_output.json:49 | [official] | Disposition: marked unverified (summary disclaimer)
+  Context: "source": "CarbonOS summary (not the official text)",
+scratch/claims_query_output.json:55 | [official] | Disposition: marked unverified (summary disclaimer)
+  Context: "source": "CarbonOS summary (not the official text)",
+scratch/claims_query_output.json:61 | [official] | Disposition: marked unverified (summary disclaimer)
+  Context: "source": "CarbonOS summary (not the official text)",
+scratch/claims_query_output.json:68 | [Method A] | Disposition: review / check
+  Context: "Method A Method B agreement": {
+scratch/claims_query_output.json:73 | [official] | Disposition: marked unverified (summary disclaimer)
+  Context: "source": "CarbonOS summary (not the official text)",
+scratch/claims_query_output.json:75 | [Method B] | Disposition: marked unverified
+  Context: "snippet": "### 3. Method B (Cross-Check): Bottom-Up Generation by Technology [UNVERIFIED - agent-written]\nMethod B acts as an unverified b
+scratch/claims_query_output.json:79 | [official] | Disposition: marked unverified (summary disclaimer)
+  Context: "source": "CarbonOS summary (not the official text)",
+scratch/claims_query_output.json:81 | [Method A] | Disposition: marked unverified
+  Context: "snippet": "### 2. Method A (Primary): Top-Down National Fuel Balance [UNVERIFIED - agent-written]\nMethod A calculates total greenhouse gas
+scratch/claims_query_output.json:85 | [official] | Disposition: marked unverified (summary disclaimer)
+  Context: "source": "CarbonOS summary (not the official text)",
+scratch/in_domain_negatives_report.json:165 | [official] | Disposition: legitimate
+  Context: "query": "What was the official Bangladesh grid emission factor published by DoE in 2018?",
+scratch/in_domain_negatives_report.json:219 | [official] | Disposition: legitimate
+  Context: "query": "What is the official nitrous oxide emission factor for Chittagong Urea Fertilizer Limited (CUFL) nitric acid plant?",
+scratch/in_domain_negatives_report.json:221 | [0.663] | Disposition: review / check
+  Context: "best_score": 0.663
+scratch/in_domain_negatives_report.json:563 | [Method A] | Disposition: review / check
+  Context: "query": "What is the primary calculation approach used in CarbonOS Method A for the Bangladesh grid factor?",
+scratch/in_domain_negatives_report.json:569 | [Method A] | Disposition: review / check
+  Context: "query": "What is the derived provisional grid emission factor for Bangladesh under Method A?",
+scratch/in_domain_negatives_report.json:575 | [0.550] | Disposition: review / check
+  Context: "query": "Why was the historical 0.550 grid emission factor withdrawn in Bangladesh?",
+scratch/in_domain_negatives_report.json:581 | [Method B] | Disposition: review / check
+  Context: "query": "How does Method B validate the Method A grid emission factor result?",
+scratch/in_domain_negatives_report.json:587 | [Monte Carlo] | Disposition: review / check
+  Context: "query": "What is the Monte Carlo 95% confidence interval uncertainty of the CarbonOS grid factor?",
+scratch/in_domain_negatives_report.json:599 | [Method A] | Disposition: review / check
+  Context: "query": "মেথড এ (Method A) অনুযায়ী বাংলাদেশের জাতীয় গ্রিড নির্গমন ফ্যাক্টর হিসাবের পদ্ধতি কী?",
+scratch/in_domain_negatives_report.json:617 | [Method B] | Disposition: review / check
+  Context: "query": "মেথড বি (Method B) কীভাবে মেথড এ এর ফলাফলকে ক্রস-চেক বা যাচাই করে?",
+scratch/in_domain_negatives_report.json:671 | [Method A] | Disposition: review / check
+  Context: "query": "What is the difference between gross generation and net delivered grid electricity in Method A?",
+scratch/query_claims.py:12 | [official] | Disposition: legitimate
+  Context: "no official Bangladesh grid factor",
+scratch/query_claims.py:13 | [withdrawn] | Disposition: review / check
+  Context: "withdrawn combined margin",
+scratch/query_claims.py:14 | [Method A] | Disposition: review / check
+  Context: "Method A Method B agreement"
+scripts/codemods/decompose_saas_dashboard.mjs:343 | [Official] | Disposition: legitimate
+  Context: syncOfficialFactors,
+scripts/create_paraphrase_review_fixture.py:33 | [combined margin] | Disposition: legitimate
+  Context: ("Why is the Clean Development Mechanism combined margin factor unsuitable for corporate Scope 2 reporting in Bangladesh?", "bd_grid_methodo
+scripts/create_paraphrase_review_fixture.py:34 | [Method A] | Disposition: review / check
+  Context: ("In the national grid factor estimation, how does Method A derive total fuel carbon from energy balances?", "bd_grid_methodology.md"),
+scripts/create_paraphrase_review_fixture.py:35 | [Method A] | Disposition: review / check
+  Context: ("What statistical threshold is required between Method A and Method B before a national grid factor is eligible for review?", "bd_grid_meth
+scripts/create_paraphrase_review_fixture.py:86 | [CDM] | Disposition: legitimate
+  Context: ("কর্পোরেট স্কোপ ২ হিসাবের ক্ষেত্রে সিডিএম (CDM) কম্বাইন্ড মার্জিন পদ্ধতি কেন গ্রহণযোগ্য নয়?", "bd_grid_methodology.md"),
+src/assets/typescript.svg:1 | [2.71] | Disposition: legitimate
+  Context: <svg xmlns="http://www.w3.org/2000/svg" aria-hidden="true" width="32" height="32" viewBox="0 0 256 256"><path fill="#007ACC" d="M0 128v128h2
+src/components/ClientShowcase.jsx:75 | [official] | Disposition: legitimate
+  Context: alt={`${client.name} official logo`}
+src/components/ClientShowcase.jsx:103 | [official] | Disposition: legitimate
+  Context: title={`Visit ${client.name} official website`}
+src/components/FrameworkAlignment.jsx:163 | [CDM] | Disposition: legitimate
+  Context: Verra VCS, Gold Standard, Article 6 and CDM methodologies are referenced, not integrated: CarbonOS has no registry connection or certificati
+src/components/FrameworkAlignment.jsx:169 | [CDM] | Disposition: legitimate
+  Context: <span className="font-mono text-xs text-registry bg-black/40 border border-emerald/20 px-3 py-1.5 rounded">[CDM]</span>
+src/components/Pricing.jsx:258 | [Reconcil] | Disposition: legitimate
+  Context: Institutional Billing & Regulatory Reconciliation
+src/components/payments/PurchaseConfirmModal.jsx:121 | [Official] | Disposition: legitimate
+  Context: certificate: 'Official Retirement Certificate'
+src/features/carbon-monitoring/constants/layerConfig.js:7 | [0.550] | Disposition: review / check
+  Context: { id: '2026-q1', label: '2026 Q1', ndvi: 0.712, biomass: 224.8, carbon: 106.8, baseline: 0.550, baselineBiomass: 175.0, baselineCarbon: 83.1
+src/features/saas/components/EsgHelpPanel.jsx:28 | [CDM] | Disposition: legitimate
+  Context: a: "Scope 2 accounts for greenhouse gas emissions from the generation of purchased electricity, steam, heating, and cooling consumed by the 
+src/features/saas/components/EsgSettingsPanel.jsx:21 | [Official] | Disposition: legitimate
+  Context: syncOfficialFactors,
+src/features/saas/components/EsgSettingsPanel.jsx:58 | [Official] | Disposition: legitimate
+  Context: onClick={syncOfficialFactors}
+src/features/saas/components/EsgSettingsPanel.jsx:103 | [CDM] | Disposition: legitimate
+  Context: title="Location-based Scope 2 uses the grid's average emission rate. A CDM combined margin is not allowed."
+src/features/saas/components/overview/EsgAiRagSection.jsx:49 | [official] | Disposition: legitimate
+  Context: "What is Bangladesh's official 2023 grid emission factor?",
+src/features/saas/hooks/useSaaSRagAndExtraction.js:137 | [Official] | Disposition: legitimate
+  Context: const syncOfficialFactors = async () => {
+src/features/saas/hooks/useSaaSRagAndExtraction.js:186 | [Official] | Disposition: legitimate
+  Context: syncOfficialFactors
+src/i18n.js:39 | [official] | Disposition: legitimate
+  Context: description: "Our AI checks the data against satellite pictures to make sure it's 100% accurate, then calculates your total official Carbon 
+src/i18n.js:58 | [Reconcil] | Disposition: legitimate
+  Context: stat2Label: "Data Reconciliation",
+src/lib/esgDemoFixtures.js:164 | [withdrawn] | Disposition: review / check
+  Context: { code: 'WAT-01', name: 'Total Fresh Water Withdrawal', pillar: 'environmental', unit: 'm3', description: 'Total municipal and groundwater w
+src/pages/company/About.jsx:31 | [Reconcil] | Disposition: legitimate
+  Context: <div className="font-sans text-xs text-mist">Data Reconciliation Delay</div>
+src/pages/company/FrameworkDocs.jsx:11 | [Official] | Disposition: legitimate
+  Context: description="Official documentation for the Bangladesh National Carbon Market Framework."
+src/pages/platform/SaaSLocalization.js:31 | [official] | Disposition: legitimate
+  Context: gazetteRef: "No official Bangladesh grid factor located",
+src/pages/platform/components/EsgReportGenerator.jsx:133 | [CDM] | Disposition: legitimate
+  Context: - **Grid Power (Bangladesh):** no approved grid-average factor yet; location-based Scope 2 excludes grid kWh until one is approved (a CDM co
+src/pages/platform/components/EsgReportGenerator.jsx:148 | [official] | Disposition: legitimate
+  Context: We hereby confirm that the GHG assertions contained in this report have been evaluated against ISO 14064-1:2018 criteria. Over 95% of materi
+src/pages/platform/components/EsgReportGenerator.jsx:218 | [Official] | Disposition: legitimate
+  Context: Official Corporate Filing
+src/pages/platform/components/activity-workspace/EvidenceDetailModal.jsx:20 | [Official] | Disposition: legitimate
+  Context: subtitle={`Official verification record under ISAE 3410 assurance for ${activeClient?.name || 'Client'}.`}
+src/pages/platform/components/activity-workspace/activitySeedData.js:46 | [reconcil] | Disposition: legitimate
+  Context: notes: "Service vehicles & dispatch mobility logs reconciled with odometer records."
+src/pages/platform/components/esg-report/BoundariesAndMethodologySection.jsx:77 | [official] | Disposition: legitimate
+  Context: <span className="text-[10px] text-gray-400 block mt-1">No official Bangladesh grid factor located; CarbonOS derives a DRAFT grid average fro
+src/pages/platform/components/utility-extractor/useUtilityExtractorState.js:151 | [reconcil] | Disposition: legitimate
+  Context: reason: editingSegment.reason || 'Auditor field reconciliation',
+src/pages/platform/components/verification-readiness/ReadinessHeader.jsx:42 | [Reconcil] | Disposition: legitimate
+  Context: <strong className="text-white font-semibold">{client.name}</strong>. Reconciles primary activity evidence, gap analyses, base-year recalcula
+src/pages/platform/components/verification-readiness/SignoffTab.jsx:46 | [Official] | Disposition: legitimate
+  Context: <span>Export Official PDF</span>
+src/pages/platform/components/verification-readiness/useVerificationReadinessState.js:93 | [official] | Disposition: legitimate
+  Context: response: 'No official Bangladesh grid factor has been located. The 0.550 kg CO₂e/kWh shown earlier was a CDM combined margin with an unloca
+src/pages/platform/esg/DisclosuresPanel.jsx:48 | [official] | Disposition: legitimate
+  Context: <span className="text-amber-300">references to be verified against the official standard</span></p>
+src/pages/platform/esg/FactorsPanel.jsx:58 | [CDM] | Disposition: legitimate
+  Context: hint="Location-based electricity must be the grid average. CDM combined margins are rejected."
+src/pages/platform/registry/RegistryAdjustmentsTab.jsx:16 | [official] | Disposition: legitimate
+  Context: Non-Negotiable Constraint #2: Corresponding adjustments are explicitly tracked with official
+src/pages/platform/registry/RegistryBtrTab.jsx:36 | [Official] | Disposition: legitimate
+  Context: <span>Download Official BTR (CSV)</span>
+src/pages/platform/registry/RegistryHeader.jsx:29 | [official] | Disposition: legitimate
+  Context: description="National sovereign client bridge linking CarbonOS continuous dMRV telemetry with Bangladesh's National Carbon Registry, UNDP Di
+src/pages/platform/registry/RegistryJcmTab.jsx:16 | [official] | Disposition: legitimate
+  Context: Built strictly per official JCM guidelines (JCM_BD_GL_MoR) and official monitoring spreadsheet (JCM_BD_F_MoR_Spreadsheet).
+src/pages/platform/registry/RegistryRulesTab.jsx:85 | [Official] | Disposition: legitimate
+  Context: {rule.regulatory_reference || 'Official Article 6 Guidance'}
+src/pages/platform/registry/registryData.js:199 | [reconcil] | Disposition: legitimate
+  Context: reconciliation_status: "adjusted_confirmed"
+src/pages/platform/registry/registryData.js:211 | [reconcil] | Disposition: legitimate
+  Context: reconciliation_status: "domestic_retention"
+src/pages/platform/registry/useRegistryState.js:234 | [reconcil] | Disposition: legitimate
+  Context: reconciliation_status: 'adjusted_confirmed'
+src/pages/sectors/BrickKilns.jsx:27 | [CDM] | Disposition: legitimate
+  Context: <div className="font-sans font-bold text-registry">CDM AMS-III.Z</div>
+src/pages/sectors/RiceMethane.jsx:27 | [CDM] | Disposition: legitimate
+  Context: <div className="font-sans font-bold text-registry">CDM AMS-III.AU</div>
+src/pages/sectors/SolarIrrigation.jsx:28 | [CDM] | Disposition: legitimate
+  Context: <div className="font-sans font-bold text-registry">VCS AM0026 / CDM AMS-I.A</div>
+src/pages/sectors/WasteToEnergy.jsx:27 | [CDM] | Disposition: legitimate
+  Context: <div className="font-sans font-bold text-registry">CDM ACM0022</div>
+templates/measurement-plan.template.md:42 | [reconcil] | Disposition: legitimate
+  Context: - Server/client reconciliation: {{}}
+tests/eval_results.json:14 | [official] | Disposition: legitimate
+  Context: "rag_retrieval": "NOT EVALUABLE (no verbatim official corpus ingested)",
+tests/eval_results.json:134 | [official] | Disposition: legitimate
+  Context: "status": "NOT EVALUABLE (no verbatim official corpus ingested)",
+tests/eval_results.json:136 | [official] | Disposition: legitimate
+  Context: "message": "Production mode excludes agent-authored corpus files; no verbatim official corpus has been ingested.",
+tests/eval_results.json:150 | [0.663] | Disposition: review / check
+  Context: "factor_used": "0.663096",
+tests/fixtures/rag_eval_in_domain_negatives.json:2 | [official] | Disposition: legitimate
+  Context: {"id": "UNANS-EN-01", "query": "What was the official Bangladesh grid emission factor published by DoE in 2018?", "language": "en", "is_unan
+tests/fixtures/rag_eval_in_domain_negatives.json:11 | [official] | Disposition: legitimate
+  Context: {"id": "UNANS-EN-10", "query": "What is the official nitrous oxide emission factor for Chittagong Urea Fertilizer Limited (CUFL) nitric acid
+tests/fixtures/rag_eval_pairs.json:489 | [Method A] | Disposition: review / check
+  Context: "question": "What is the primary calculation approach used in CarbonOS Method A for the Bangladesh grid factor?",
+tests/fixtures/rag_eval_pairs.json:491 | [Method A] | Disposition: review / check
+  Context: "expected_section": "2. Method A (Primary): Top-Down National Fuel Balance",
+tests/fixtures/rag_eval_pairs.json:494 | [Method A] | Disposition: review / check
+  Context: "Method A",
+tests/fixtures/rag_eval_pairs.json:502 | [Method A] | Disposition: review / check
+  Context: "question": "What is the derived provisional grid emission factor for Bangladesh under Method A?",
+tests/fixtures/rag_eval_pairs.json:504 | [Method A] | Disposition: review / check
+  Context: "expected_section": "2. Method A (Primary): Top-Down National Fuel Balance",
+tests/fixtures/rag_eval_pairs.json:507 | [0.663] | Disposition: review / check
+  Context: "0.663096",
+tests/fixtures/rag_eval_pairs.json:508 | [0.663] | Disposition: review / check
+  Context: "0.663",
+tests/fixtures/rag_eval_pairs.json:514 | [0.550] | Disposition: review / check
+  Context: "question": "Why was the historical 0.550 grid emission factor withdrawn in Bangladesh?",
+tests/fixtures/rag_eval_pairs.json:519 | [0.550] | Disposition: review / check
+  Context: "0.550",
+tests/fixtures/rag_eval_pairs.json:520 | [withdrawn] | Disposition: review / check
+  Context: "withdrawn",
+tests/fixtures/rag_eval_pairs.json:528 | [Method B] | Disposition: review / check
+  Context: "question": "How does Method B validate the Method A grid emission factor result?",
+tests/fixtures/rag_eval_pairs.json:530 | [Method B] | Disposition: review / check
+  Context: "expected_section": "3. Method B (Cross-Check): Bottom-Up Generation by Technology",
+tests/fixtures/rag_eval_pairs.json:533 | [Method B] | Disposition: review / check
+  Context: "Method B",
+tests/fixtures/rag_eval_pairs.json:542 | [Monte Carlo] | Disposition: review / check
+  Context: "question": "What is the Monte Carlo 95% confidence interval uncertainty of the CarbonOS grid factor?",
+tests/fixtures/rag_eval_pairs.json:544 | [Monte Carlo] | Disposition: review / check
+  Context: "expected_section": "4. Monte Carlo Uncertainty Propagation",
+tests/fixtures/rag_eval_pairs.json:547 | [2.71] | Disposition: legitimate
+  Context: "2.71%",
+tests/fixtures/rag_eval_pairs.json:548 | [Monte Carlo] | Disposition: review / check
+  Context: "Monte Carlo",
+tests/fixtures/rag_eval_pairs.json:557 | [Method A] | Disposition: review / check
+  Context: "expected_section": "2. Method A (Primary): Top-Down National Fuel Balance",
+tests/fixtures/rag_eval_pairs.json:568 | [Method A] | Disposition: review / check
+  Context: "question": "মেথড এ (Method A) অনুযায়ী বাংলাদেশের জাতীয় গ্রিড নির্গমন ফ্যাক্টর হিসাবের পদ্ধতি কী?",
+tests/fixtures/rag_eval_pairs.json:570 | [Method A] | Disposition: review / check
+  Context: "expected_section": "2. Method A (Primary): Top-Down National Fuel Balance",
+tests/fixtures/rag_eval_pairs.json:573 | [Method A] | Disposition: review / check
+  Context: "Method A",
+tests/fixtures/rag_eval_pairs.json:583 | [Method A] | Disposition: review / check
+  Context: "expected_section": "2. Method A (Primary): Top-Down National Fuel Balance",
+tests/fixtures/rag_eval_pairs.json:586 | [0.663] | Disposition: review / check
+  Context: "0.663096",
+tests/fixtures/rag_eval_pairs.json:598 | [0.550] | Disposition: review / check
+  Context: "0.550",
+tests/fixtures/rag_eval_pairs.json:601 | [withdrawn] | Disposition: review / check
+  Context: "withdrawn",
+tests/fixtures/rag_eval_pairs.json:607 | [Method B] | Disposition: review / check
+  Context: "question": "মেথড বি (Method B) কীভাবে মেথড এ এর ফলাফলকে ক্রস-চেক বা যাচাই করে?",
+tests/fixtures/rag_eval_pairs.json:609 | [Method B] | Disposition: review / check
+  Context: "expected_section": "3. Method B (Cross-Check): Bottom-Up Generation by Technology",
+tests/fixtures/rag_eval_pairs.json:612 | [Method B] | Disposition: review / check
+  Context: "Method B",
+tests/fixtures/rag_eval_pairs.json:622 | [Monte Carlo] | Disposition: review / check
+  Context: "expected_section": "4. Monte Carlo Uncertainty Propagation",
+tests/fixtures/rag_eval_pairs.json:625 | [2.71] | Disposition: legitimate
+  Context: "2.71%",
+tests/fixtures/rag_eval_pairs.json:627 | [Monte Carlo] | Disposition: review / check
+  Context: "Monte Carlo",
+tests/fixtures/rag_eval_pairs.json:635 | [Method A] | Disposition: review / check
+  Context: "expected_section": "2. Method A (Primary): Top-Down National Fuel Balance",
+tests/fixtures/rag_eval_pairs.json:725 | [Method A] | Disposition: review / check
+  Context: "question": "What is the difference between gross generation and net delivered grid electricity in Method A?",
+tests/fixtures/rag_eval_pairs.json:727 | [Method A] | Disposition: review / check
+  Context: "expected_section": "2. Method A (Primary): Top-Down National Fuel Balance",
+tests/fixtures/rag_eval_pairs.json:740 | [Method A] | Disposition: review / check
+  Context: "expected_section": "2. Method A (Primary): Top-Down National Fuel Balance",
+tests/fixtures/rag_eval_pairs.json:796 | [0.663] | Disposition: review / check
+  Context: "0.663096",
+tests/fixtures/rag_eval_paraphrase_review.json:132 | [combined margin] | Disposition: legitimate
+  Context: "query": "Why is the Clean Development Mechanism combined margin factor unsuitable for corporate Scope 2 reporting in Bangladesh?",
+tests/fixtures/rag_eval_paraphrase_review.json:140 | [Method A] | Disposition: review / check
+  Context: "query": "In the national grid factor estimation, how does Method A derive total fuel carbon from energy balances?",
+tests/fixtures/rag_eval_paraphrase_review.json:148 | [Method A] | Disposition: review / check
+  Context: "query": "What statistical threshold is required between Method A and Method B before a national grid factor is eligible for review?",
+tests/fixtures/rag_eval_paraphrase_review.json:452 | [CDM] | Disposition: legitimate
+  Context: "query": "কর্পোরেট স্কোপ ২ হিসাবের ক্ষেত্রে সিডিএম (CDM) কম্বাইন্ড মার্জিন পদ্ধতি কেন গ্রহণযোগ্য নয়?",
+tests/test_bd_grid.py:3 | [Monte Carlo] | Disposition: review / check
+  Context: BPC, BPDB or CEA data: they check the arithmetic, the status rules, Monte Carlo determinism, byte-identical
+tests/test_bd_grid.py:120 | [reconcil] | Disposition: legitimate
+  Context: def test_tool07_is_reconciliation_only_and_rows_are_grid_average(self):
+tests/test_bd_grid.py:121 | [cdm] | Disposition: legitimate
+  Context: t = year()["cdm_tool07_reconciliation_only"]
+tests/test_esg_accounting.py:185 | [CDM] | Disposition: legitimate
+  Context: """Regression: location-based Scope 2 is the grid AVERAGE rate. A CDM combined margin (a project
+tests/test_esg_accounting.py:186 | [0.550] | Disposition: review / check
+  Context: baseline metric, e.g. the 0.550 once hard-coded here) must never produce a Scope 2 line."""
+tests/test_esg_bill_estimate.py:131 | [0.663] | Disposition: review / check
+  Context: # 1000 kWh * 0.663096 kgCO2e/kWh = 663.096000 kgCO2e = 0.663 tCO2e
+tests/test_esg_bill_estimate.py:133 | [0.663] | Disposition: review / check
+  Context: self.assertEqual(emissions["scope2_location_tco2e"], "0.663")
+tests/test_esg_bill_estimate.py:134 | [0.663] | Disposition: review / check
+  Context: self.assertEqual(emissions["total_tco2e"], "0.663")
+tests/test_esg_bill_rules.py:28 | [reconcil] | Disposition: legitimate
+  Context: def test_reading_reconciliation(self):
+tests/test_esg_corpus_honesty.py:5 | [official] | Disposition: marked unverified (summary disclaimer)
+  Context: - Citation formatting: non-verbatim chunks display 'CarbonOS summary (not the official text)' and omit official filenames
+tests/test_esg_corpus_honesty.py:6 | [Official] | Disposition: legitimate
+  Context: - Official PDF ingestion path with file sha256 provenance and page indexing
+tests/test_esg_corpus_honesty.py:18 | [official] | Disposition: legitimate
+  Context: from esg_rag.ingest import ingest_official_pdf, IngestRejected
+tests/test_esg_corpus_honesty.py:66 | [official] | Disposition: marked unverified (summary disclaimer)
+  Context: """Chunks from non-verbatim / agent-authored files MUST show 'CarbonOS summary (not the official text)'."""
+tests/test_esg_corpus_honesty.py:74 | [official] | Disposition: marked unverified (summary disclaimer)
+  Context: self.assertEqual(citation["source"], "CarbonOS summary (not the official text)")
+tests/test_esg_corpus_honesty.py:80 | [official] | Disposition: legitimate
+  Context: def test_verbatim_official_citation_label(self):
+tests/test_esg_corpus_honesty.py:81 | [official] | Disposition: legitimate
+  Context: """Chunks from official verbatim documents display real filename, page, and file sha256."""
+tests/test_esg_corpus_honesty.py:82 | [official] | Disposition: legitimate
+  Context: official_sha = hashlib.sha256(b"official pdf bytes").hexdigest()
+tests/test_esg_corpus_honesty.py:84 | [Official] | Disposition: legitimate
+  Context: content="Official SRO No. 273-Law/2023 text",
+tests/test_esg_corpus_honesty.py:86 | [Official] | Disposition: legitimate
+  Context: metadata={"filename": "ECR_2023_Gazette_Official.pdf", "corpus": "regulatory", "page": 14,
+tests/test_esg_corpus_honesty.py:87 | [official] | Disposition: legitimate
+  Context: "verbatim": True, "file_sha256": official_sha, "is_official": True}
+tests/test_esg_corpus_honesty.py:90 | [Official] | Disposition: legitimate
+  Context: self.assertEqual(citation["source"], "ECR_2023_Gazette_Official.pdf")
+tests/test_esg_corpus_honesty.py:92 | [official] | Disposition: legitimate
+  Context: self.assertEqual(citation["file_sha256"], official_sha)
+tests/test_esg_corpus_honesty.py:94 | [official] | Disposition: legitimate
+  Context: def test_official_pdf_ingestion_path_validation(self):
+tests/test_esg_corpus_honesty.py:95 | [official] | Disposition: legitimate
+  Context: """ingest_official_pdf rejects non-PDF files and requires official metadata."""
+tests/test_esg_corpus_honesty.py:99 | [official] | Disposition: legitimate
+  Context: ingest_official_pdf(mock_db, b"not a pdf", "file.txt", "MOEFCC", 2023)
+tests/test_esg_data_migrations.py:2 | [withdrawn] | Disposition: review / check
+  Context: Data migration: retire the withdrawn 0.55 kg CO2e/kWh legacy grid factor. Dry run first; never delete or overwrite.
+tests/test_esg_data_migrations.py:13 | [withdrawn] | Disposition: review / check
+  Context: from esg_rag.data_migrations import retire_withdrawn_grid_factor as mig  # noqa: E402
+tests/test_esg_data_migrations.py:22 | [withdrawn] | Disposition: review / check
+  Context: ROWS = [("grid-055", "Scope 2", "Grid Electricity (Location-based)", 0.55, "kg CO2e / kWh", "TEST withdrawn citation"),
+tests/test_esg_data_migrations.py:47 | [Withdrawn] | Disposition: review / check
+  Context: class RetireWithdrawnGridFactorTest(unittest.TestCase):
+tests/test_esg_data_migrations.py:68 | [withdrawn] | Disposition: review / check
+  Context: self.assertEqual((r["factor_value"], r["source_citation"]), (0.55, "TEST withdrawn citation"))  # not overwritten
+tests/test_esg_data_migrations.py:128 | [withdrawn] | Disposition: review / check
+  Context: source_citation="TEST", status="RETIRED", status_reason="TEST withdrawn")])
+tests/test_esg_engine.py:31 | [CDM] | Disposition: legitimate
+  Context: # Regression: no CDM combined margin (formerly 0.550) stands in for the grid average.
+tests/test_esg_engine.py:64 | [0.550] | Disposition: review / check
+  Context: # The unsourced 0.12 "green tariff" market factor was removed with the 0.550 grid factor.
+tests/test_esg_factor_provenance.py:59 | [0.663] | Disposition: review / check
+  Context: "kgco2e_per_unit": "0.663096",
+tests/test_esg_gas_e2e.py:348 | [Official] | Disposition: legitimate
+  Context: "source_publisher": "Official Gazette",
+tests/test_esg_ledger.py:248 | [CDM] | Disposition: legitimate
+  Context: """Regression: location-based Scope 2 is the grid AVERAGE rate; a CDM combined margin can never
+tests/test_esg_rag_phase5.py:112 | [0.663] | Disposition: review / check
+  Context: self.assertIn("0.663096", data["answer"])
+tests/test_esg_security.py:78 | [official] | Disposition: marked unverified (summary disclaimer)
+  Context: self.assertNotEqual(c["source"], "CarbonOS summary (not the official text)")
+tests/test_tenant_isolation.py:119 | [Combined Margin] | Disposition: legitimate
+  Context: query="Bangladesh Department of Environment Combined Margin Factor",
+tests/test_tenant_isolation.py:124 | [Combined Margin] | Disposition: legitimate
+  Context: query="Bangladesh Department of Environment Combined Margin Factor",

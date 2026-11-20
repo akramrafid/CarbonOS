@@ -1,0 +1,114 @@
+{
+  "test_bd_grid": {
+    "status": "PASS",
+    "returncode": 0,
+    "tests_run": 13,
+    "elapsed_s": 0.6,
+    "skips": [],
+    "stdout_tail": "never_overwritten) ... ok\ntest_monte_carlo_is_seeded_and_brackets_both_methods (tests.test_bd_grid.UncertaintyAndRebuildTest.test_monte_carlo_is_seeded_and_brackets_both_methods) ... ok\ntest_rebuild_is_byte_identical_and_blocked_without_inputs (tests.test_bd_grid.UncertaintyAndRebuildTest.test_rebuild_is_byte_identical_and_blocked_without_inputs) ... BLOCKED: no extracted inputs under C:\\Users\\LENOVO\\AppData\\Local\\Temp\\tmppfg4tone\\empty (data/<FY>/method_a.json; see factors/bd_grid/README.md)\nok\n\n----------------------------------------------------------------------\nRan 13 tests in 0.239s\n\nOK\n"
+  },
+  "test_carbon_security": {
+    "status": "PASS",
+    "returncode": 0,
+    "tests_run": 12,
+    "elapsed_s": 0.98,
+    "skips": [],
+    "stdout_tail": "safety_isolated_executions (tests.test_carbon_security.TestCarbonSecuritySuite.test_gradcam_thread_safety_isolated_executions)\nVerify that multiple concurrent threads simulating forward/backward passes ... ok\ntest_ownership_allowed_for_owner_and_platform_operator (tests.test_carbon_security.TestCarbonSecuritySuite.test_ownership_allowed_for_owner_and_platform_operator) ... ok\ntest_valid_token_authenticated (tests.test_carbon_security.TestCarbonSecuritySuite.test_valid_token_authenticated) ... ok\n\n----------------------------------------------------------------------\nRan 12 tests in 0.063s\n\nOK\n"
+  },
+  "test_dmrv_allometry": {
+    "status": "TIMEOUT",
+    "returncode": -1,
+    "tests_run": 0,
+    "elapsed_s": 25.06,
+    "skips": [],
+    "stdout_tail": "Timed out after 25s (likely Windows loopback socket / AnyIO hang in sandbox)"
+  },
+  "test_dmrv_baseline": {
+    "status": "TIMEOUT",
+    "returncode": -1,
+    "tests_run": 0,
+    "elapsed_s": 25.06,
+    "skips": [],
+    "stdout_tail": "Timed out after 25s (likely Windows loopback socket / AnyIO hang in sandbox)"
+  },
+  "test_dmrv_dossier": {
+    "status": "TIMEOUT",
+    "returncode": -1,
+    "tests_run": 0,
+    "elapsed_s": 25.08,
+    "skips": [],
+    "stdout_tail": "Timed out after 25s (likely Windows loopback socket / AnyIO hang in sandbox)"
+  },
+  "test_dmrv_provenance": {
+    "status": "TIMEOUT",
+    "returncode": -1,
+    "tests_run": 0,
+    "elapsed_s": 25.07,
+    "skips": [],
+    "stdout_tail": "Timed out after 25s (likely Windows loopback socket / AnyIO hang in sandbox)"
+  },
+  "test_dmrv_satellite": {
+    "status": "FAIL",
+    "returncode": 1,
+    "tests_run": 5,
+    "elapsed_s": 0.5,
+    "skips": [],
+    "stdout_tail": "stion.test_03_satellite_engine_stac_live_run)\nVerify full SatelliteEngine live execution returns valid indices, SAR radar, and GEDI allometry.\n----------------------------------------------------------------------\nTraceback (most recent call last):\n  File \"C:\\projects\\CarbonOS\\tests\\test_dmrv_satellite.py\", line 96, in test_03_satellite_engine_stac_live_run\n    self.assertEqual(result[\"data_source\"], \"stac_live\")\nAssertionError: 'simulated' != 'stac_live'\n- simulated\n+ stac_live\n\n\n----------------------------------------------------------------------\nRan 5 tests in 0.218s\n\nFAILED (failures=3)\n"
+  },
+  "test_dmrv_uncertainty": {
+    "status": "TIMEOUT",
+    "returncode": -1,
+    "tests_run": 0,
+    "elapsed_s": 25.07,
+    "skips": [],
+    "stdout_tail": "Timed out after 25s (likely Windows loopback socket / AnyIO hang in sandbox)"
+  },
+  "test_dmrv_v2": {
+    "status": "TIMEOUT",
+    "returncode": -1,
+    "tests_run": 0,
+    "elapsed_s": 25.08,
+    "skips": [],
+    "stdout_tail": "Timed out after 25s (likely Windows loopback socket / AnyIO hang in sandbox)"
+  },
+  "test_esg_accounting": {
+    "status": "PASS",
+    "returncode": 0,
+    "tests_run": 19,
+    "elapsed_s": 3.26,
+    "skips": [],
+    "stdout_tail": "grid_average_fallback_is_disclosed) ... ok\ntest_all_parameters_yaml_units_have_conversion_paths (tests.test_esg_accounting.UnitTests.test_all_parameters_yaml_units_have_conversion_paths) ... ok\ntest_conversions (tests.test_esg_accounting.UnitTests.test_conversions) ... ok\ntest_gas_volume_conversions_cft_sm3_nm3 (tests.test_esg_accounting.UnitTests.test_gas_volume_conversions_cft_sm3_nm3) ... ok\ntest_incompatible_units_fail (tests.test_esg_accounting.UnitTests.test_incompatible_units_fail) ... ok\n\n----------------------------------------------------------------------\nRan 19 tests in 2.606s\n\nOK\n"
+  },
+  "test_esg_app": {
+    "status": "TIMEOUT",
+    "returncode": -1,
+    "tests_run": 0,
+    "elapsed_s": 25.05,
+    "skips": [],
+    "stdout_tail": "Timed out after 25s (likely Windows loopback socket / AnyIO hang in sandbox)"
+  },
+  "test_esg_authenticity": {
+    "status": "TIMEOUT",
+    "returncode": -1,
+    "tests_run": 0,
+    "elapsed_s": 25.04,
+    "skips": [],
+    "stdout_tail": "Timed out after 25s (likely Windows loopback socket / AnyIO hang in sandbox)"
+  },
+  "test_esg_authorization": {
+    "status": "TIMEOUT",
+    "returncode": -1,
+    "tests_run": 0,
+    "elapsed_s": 25.02,
+    "skips": [],
+    "stdout_tail": "Timed out after 25s (likely Windows loopback socket / AnyIO hang in sandbox)"
+  },
+  "test_esg_bill_cases": {
+    "status": "TIMEOUT",
+    "returncode": -1,
+    "tests_run": 0,
+    "elapsed_s": 25.04,
+    "skips": [],
+    "stdout_tail": "Timed out after 25s (likely Windows loopback socket / AnyIO hang in sandbox)"
+  }
+}

@@ -7,11 +7,11 @@ import { StatCard } from '../../components/ui/StatCard';
 
 const ProjectOnboarding = () => {
   return (
-    <div className="pt-12 pb-8 sm:pt-16 sm:pb-12 min-h-[80vh] flex flex-col items-center noise-overlay">
+    <div className="pt-12 pb-8 sm:pt-16 sm:pb-12 min-h-[80dvh] flex flex-col items-center noise-overlay">
       <div className="max-w-4xl w-full mx-auto px-6 lg:px-12">
         <PageHeader
           title="Project Onboarding"
-          description="Submit your PIN and design documents seamlessly into the National Framework."
+          description="Submit Project Idea Notes (PIN), GIS boundary polygons, and baseline documentation to the Bangladesh National Carbon Market Framework."
           badge={<Badge variant="emerald">PLATFORM</Badge>}
           align="center"
         />
@@ -22,12 +22,12 @@ const ProjectOnboarding = () => {
             Onboarding Portal
           </h2>
           <div className="space-y-6 font-sans text-mist text-base leading-relaxed">
-            <p>Welcome to the digital gateway for carbon project origination in Bangladesh. Upload your Project Idea Note (PIN) and GIS polygon boundaries securely.</p>
+            <p>Upload your Project Idea Note (PIN), methodology selection, and GeoJSON reserve boundaries for registry completeness review.</p>
             <div className="mt-8 grid grid-cols-1 md:grid-cols-2 gap-4">
               <StatCard
-                title="CURRENT PIPELINE"
+                title="CURRENT PIPELINE (DEMO DATA)"
                 value="142"
-                subtitle="Active Proposals"
+                subtitle="Illustrative Demo Proposals"
               />
               <div className="p-6 bg-bg-surface/50 border border-emerald/10 rounded-xl flex flex-col justify-center">
                 <Button variant="primary" size="lg" className="w-full">

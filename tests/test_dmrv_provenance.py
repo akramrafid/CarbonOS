@@ -86,8 +86,11 @@ class TestDMRVProvenanceExtension(unittest.TestCase):
         self.assertEqual(matching[0]["plot_name"], "Sundarbans Plot Sector 4B")
 
     def test_03_recalibration_pipeline_guard(self):
-        """Phase 3 Part (b): Confirm recalibration refuses to promote when below sample threshold or on simulated data."""
-        resp = self.client.post("/api/carbon/recalibrate")
+        """Phase 3 Part (b): Confirm recalibration refuses non-operators (403) and refuses to promote when below sample threshold."""
+        denied_resp = self.client.post("/api/carbon/recalibrate")
+        self.assertEqual(denied_resp.status_code, 403)
+        op_token = mint_carbon_token(sub="operator-prov", organization_id="org-prov", role="platform_operator", is_platform_operator=True)
+        resp = self.client.post("/api/carbon/recalibrate", headers={"Authorization": f"Bearer {op_token}"})
         self.assertEqual(resp.status_code, 200)
         res = resp.json()
         self.assertFalse(res.get("promoted"))

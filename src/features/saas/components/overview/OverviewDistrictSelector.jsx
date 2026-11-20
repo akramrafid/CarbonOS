@@ -32,6 +32,7 @@ export const OverviewDistrictSelector = ({
         <MapPin className="w-3.5 h-3.5 text-emerald" />
         <span className={`text-[11px] font-sans ${isLight ? 'text-fg-muted' : 'text-mist'}`}>District:</span>
         <select 
+          aria-label="Select Bangladesh branch district"
           value={selectedDistrict}
           onChange={(e) => {
             setSelectedDistrict(e.target.value);

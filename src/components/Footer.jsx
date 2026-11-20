@@ -3,6 +3,7 @@ import { Link } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { ArrowRight, ArrowUp, ChevronDown, Globe, Sun, Moon } from 'lucide-react';
 import { useTheme } from '../context/ThemeContext';
+import { ThemeToggle } from './ui/ThemeToggle';
 import { footerConfig } from '../config/footer.config';
 
 export const Footer = ({ variant = 'full' }) => {
@@ -58,7 +59,7 @@ export const Footer = ({ variant = 'full' }) => {
               <Link
                 key={link.id}
                 to={link.to}
-                className="text-fg-secondary hover:text-accent transition-colors focus-ring-standard rounded px-1 py-0.5"
+                className="text-fg-secondary hover:text-accent transition-colors focus-ring-standard rounded px-2 py-2 min-h-[44px] inline-flex items-center"
               >
                 {t(link.labelKey, link.defaultLabel)}
               </Link>
@@ -67,7 +68,7 @@ export const Footer = ({ variant = 'full' }) => {
               type="button"
               onClick={scrollToTop}
               aria-label={t('footer.backToTop', 'Back to top')}
-              className="inline-flex items-center gap-1 text-fg-secondary hover:text-fg-primary transition-colors cursor-pointer focus-ring-standard rounded px-2 py-1"
+              className="inline-flex items-center gap-1 text-fg-secondary hover:text-fg-primary transition-colors cursor-pointer focus-ring-standard rounded px-3 py-2 min-h-[44px]"
             >
               <span>{t('footer.backToTop', 'Back to top')}</span>
               <ArrowUp size={12} />
@@ -112,7 +113,7 @@ export const Footer = ({ variant = 'full' }) => {
         </p>
         <Link
           to={cta.to}
-          className="group inline-flex items-center gap-3 bg-accent hover:bg-accent-hover text-fg-primary font-sans font-bold text-sm sm:text-base px-8 py-4 rounded-full transition-all duration-300 shadow-lg hover:scale-[1.02] active:scale-[0.98] focus-ring-standard min-h-[44px]"
+          className="group inline-flex items-center gap-3 bg-accent hover:bg-accent-hover text-fg-inverse font-sans font-bold text-sm sm:text-base px-8 py-4 rounded-full transition-all duration-300 shadow-lg hover:scale-[1.02] active:scale-[0.98] focus-ring-standard min-h-[44px]"
         >
           <span>{t(cta.buttonKey, cta.buttonDefault)}</span>
           <ArrowRight size={16} className="group-hover:translate-x-1 transition-transform" />
@@ -172,6 +173,8 @@ export const Footer = ({ variant = 'full' }) => {
                 <Globe size={14} className="text-accent" />
                 <span>{i18n.language === 'en' ? 'বাংলা' : 'EN'}</span>
               </button>
+
+              <ThemeToggle variant="segmented" />
 
               <button
                 type="button"

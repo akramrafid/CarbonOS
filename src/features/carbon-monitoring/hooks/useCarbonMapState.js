@@ -11,7 +11,7 @@ export const useCarbonMapState = ({ selectedJob, showToast }) => {
   const [mapCenter, setMapCenter] = useState([22.15, 89.50]);
   const [mapZoom, setMapZoom] = useState(8);
   const [mapBounds, setMapBounds] = useState([[21.65, 89.02], [22.50, 89.85]]);
-  const [basemap, setBasemap] = useState('terrain');
+  const [basemap, setBasemap] = useState('dark');
   const [activeLayer, setActiveLayer] = useState('ndvi');
 
   const [storedLocations, setStoredLocations] = useState(() => {
@@ -87,32 +87,13 @@ export const useCarbonMapState = ({ selectedJob, showToast }) => {
   };
 
   useEffect(() => {
-    if (drawPoints.length >= 1) {
+    if (drawPoints.length >= 1 && drawPoints !== SUNDARBANS_RESERVE) {
       const avgLat = drawPoints.reduce((sum, p) => sum + p[0], 0) / drawPoints.length;
       const avgLng = drawPoints.reduce((sum, p) => sum + p[1], 0) / drawPoints.length;
-      
-      const resolveProjectName = async () => {
-        try {
-          const controller = new AbortController();
-          const tId = setTimeout(() => controller.abort(), 2000);
-          const res = await fetch(`https://nominatim.openstreetmap.org/reverse?format=json&lat=${avgLat}&lon=${avgLng}&zoom=12&addressdetails=1`, { signal: controller.signal });
-          clearTimeout(tId);
-          if (res.ok) {
-            const data = await res.json();
-            if (data && data.address) {
-              const district = data.address.district || data.address.state_district || data.address.county || data.address.city || "";
-              const suburb = data.address.suburb || data.address.village || data.address.neighbourhood || "";
-              const place = suburb || district || "Forest Block";
-              setProjectName(`${place} Carbon Project`);
-            }
-          }
-        } catch {
-          // Keep current projectName
-        }
-      };
-      
-      const timer = setTimeout(resolveProjectName, 800);
-      return () => clearTimeout(timer);
+      const eco = getBangladeshEcoZone(avgLat, avgLng);
+      if (eco?.zone) {
+        setProjectName(`${eco.zone} Carbon Project`);
+      }
     }
   }, [drawPoints]);
 

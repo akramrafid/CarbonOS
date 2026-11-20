@@ -1,0 +1,116 @@
+{
+  "embedding": {
+    "mode": "PRODUCTION",
+    "model_name": "all-MiniLM-L6-v2",
+    "is_fallback": false,
+    "dimension": 384
+  },
+  "corpus_mode": "PRODUCTION MODE",
+  "evaluation_label": "PRODUCTION EMBEDDING",
+  "fixture": "tests/fixtures/rag_eval_paraphrase_review.json",
+  "fixture_status": "needs_human_review",
+  "results": {
+    "en": {
+      "n": 40,
+      "hit@1": {
+        "point": 0.0,
+        "ci_95": [
+          0.0,
+          0.0876
+        ],
+        "count": "0/40"
+      },
+      "hit@3": {
+        "point": 0.0,
+        "ci_95": [
+          0.0,
+          0.0876
+        ],
+        "count": "0/40"
+      },
+      "hit@5": {
+        "point": 0.0,
+        "ci_95": [
+          0.0,
+          0.0876
+        ],
+        "count": "0/40"
+      },
+      "mrr": {
+        "point": 0.0,
+        "ci_95": [
+          0.0,
+          0.0
+        ]
+      }
+    },
+    "bn": {
+      "n": 40,
+      "hit@1": {
+        "point": 0.0,
+        "ci_95": [
+          0.0,
+          0.0876
+        ],
+        "count": "0/40"
+      },
+      "hit@3": {
+        "point": 0.0,
+        "ci_95": [
+          0.0,
+          0.0876
+        ],
+        "count": "0/40"
+      },
+      "hit@5": {
+        "point": 0.0,
+        "ci_95": [
+          0.0,
+          0.0876
+        ],
+        "count": "0/40"
+      },
+      "mrr": {
+        "point": 0.0,
+        "ci_95": [
+          0.0,
+          0.0
+        ]
+      }
+    },
+    "all": {
+      "n": 80,
+      "hit@1": {
+        "point": 0.0,
+        "ci_95": [
+          0.0,
+          0.0458
+        ],
+        "count": "0/80"
+      },
+      "hit@3": {
+        "point": 0.0,
+        "ci_95": [
+          0.0,
+          0.0458
+        ],
+        "count": "0/80"
+      },
+      "hit@5": {
+        "point": 0.0,
+        "ci_95": [
+          0.0,
+          0.0458
+        ],
+        "count": "0/80"
+      },
+      "mrr": {
+        "point": 0.0,
+        "ci_95": [
+          0.0,
+          0.0
+        ]
+      }
+    }
+  }
+}

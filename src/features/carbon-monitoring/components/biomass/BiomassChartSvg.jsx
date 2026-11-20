@@ -80,16 +80,16 @@ export function BiomassChartSvg({
         <svg viewBox={`0 0 ${chartW} ${chartH}`} className="w-full h-[270px] select-none">
           <defs>
             <linearGradient id="activeColGradLight" x1="0" y1="0" x2="0" y2="1">
-              <stop offset="0%" stopColor="#00C853" stopOpacity="0.95" />
-              <stop offset="100%" stopColor="#15803D" stopOpacity="0.45" />
+              <stop offset="0%" stopColor="var(--color-accent-hover)" stopOpacity="0.95" />
+              <stop offset="100%" stopColor="var(--color-accent-default)" stopOpacity="0.45" />
             </linearGradient>
             <linearGradient id="activeColGradDark" x1="0" y1="0" x2="0" y2="1">
-              <stop offset="0%" stopColor="#00E676" stopOpacity="0.9" />
-              <stop offset="100%" stopColor="#00C853" stopOpacity="0.25" />
+              <stop offset="0%" stopColor="var(--color-accent-hover)" stopOpacity="0.9" />
+              <stop offset="100%" stopColor="var(--color-accent-default)" stopOpacity="0.25" />
             </linearGradient>
             <linearGradient id="hoverColGrad" x1="0" y1="0" x2="0" y2="1">
-              <stop offset="0%" stopColor="#00E676" stopOpacity="1" />
-              <stop offset="100%" stopColor="#00C853" stopOpacity="0.75" />
+              <stop offset="0%" stopColor="var(--color-accent-hover)" stopOpacity="1" />
+              <stop offset="100%" stopColor="var(--color-accent-default)" stopOpacity="0.75" />
             </linearGradient>
           </defs>
 
@@ -103,7 +103,7 @@ export function BiomassChartSvg({
                   y1={y}
                   x2={chartW - padRight}
                   y2={y}
-                  stroke={isLight ? '#E2E8F0' : 'rgba(255,255,255,0.08)'}
+                  stroke="var(--color-border-subtle)"
                   strokeDasharray={idx === 4 ? 'none' : '4 4'}
                   strokeWidth={idx === 4 ? '1.5' : '1'}
                 />
@@ -113,7 +113,7 @@ export function BiomassChartSvg({
                   textAnchor="end"
                   fontSize="10"
                   fontWeight="600"
-                  fill={isLight ? '#64748B' : '#94A3B8'}
+                  fill="var(--color-fg-secondary)"
                   fontFamily="system-ui, sans-serif"
                 >
                   {selectedMetric === 'ndvi' ? step.toFixed(2) : Math.round(step)}
@@ -126,7 +126,7 @@ export function BiomassChartSvg({
           <path
             d={baselinePathString}
             fill="none"
-            stroke="#F59E0B"
+            stroke="var(--color-status-warning)"
             strokeWidth="2.5"
             strokeDasharray="6 4"
             strokeLinecap="round"
@@ -140,8 +140,8 @@ export function BiomassChartSvg({
               cx={p.x}
               cy={p.yBase}
               r="4"
-              fill={isLight ? '#FFFFFF' : '#080F0B'}
-              stroke="#F59E0B"
+              fill="var(--color-bg-surface)"
+              stroke="var(--color-status-warning)"
               strokeWidth="2.5"
             />
           ))}
@@ -186,7 +186,7 @@ export function BiomassChartSvg({
                   y1={p.yVal}
                   x2={p.x + colWidth / 2 - 2}
                   y2={p.yVal}
-                  stroke={isLight ? '#15803D' : '#00E676'}
+                  stroke="var(--color-accent-default)"
                   strokeWidth="2.5"
                   strokeLinecap="round"
                 />
@@ -197,7 +197,7 @@ export function BiomassChartSvg({
                   textAnchor="middle"
                   fontSize="10.5"
                   fontWeight="800"
-                  fill={isHovered ? '#00C853' : isLight ? '#0F291B' : '#E2E8F0'}
+                  fill={isHovered ? 'var(--color-accent-default)' : 'var(--color-fg-primary)'}
                   className="transition-colors"
                 >
                   {selectedMetric === 'ndvi' ? p.val.toFixed(2) : Math.round(p.val)}
@@ -209,15 +209,7 @@ export function BiomassChartSvg({
                   textAnchor="middle"
                   fontSize="11"
                   fontWeight={isHovered ? '800' : '600'}
-                  fill={
-                    isHovered
-                      ? isLight
-                        ? '#00873E'
-                        : '#00E676'
-                      : isLight
-                      ? '#64748B'
-                      : '#94A3B8'
-                  }
+                  fill={isHovered ? 'var(--color-accent-default)' : 'var(--color-fg-secondary)'}
                   className="transition-colors"
                 >
                   {p.q.label}

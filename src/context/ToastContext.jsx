@@ -1,4 +1,4 @@
-import React, { createContext, useContext, useState, useCallback, useMemo } from 'react';
+import React, { createContext, useContext, useState, useCallback, useMemo, useRef } from 'react';
 import { CheckCircle2, AlertCircle, AlertTriangle, Info, X } from 'lucide-react';
 
 const ToastContext = createContext(null);
@@ -13,27 +13,45 @@ export const useToast = () => {
 
 export const ToastProvider = ({ children }) => {
   const [toasts, setToasts] = useState([]);
+  const timersRef = useRef(new Map());
 
   const removeToast = useCallback((id) => {
+    const t = timersRef.current.get(id);
+    if (t) {
+      clearTimeout(t);
+      timersRef.current.delete(id);
+    }
     setToasts((prev) => prev.filter((toast) => toast.id !== id));
   }, []);
 
-  const addToast = useCallback((type, message, options = {}) => {
-    const id = options.id || `${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
-    const duration = options.duration !== undefined ? options.duration : 4000;
-    const title = options.title || null;
+  React.useEffect(() => {
+    const timers = timersRef.current;
+    return () => {
+      timers.forEach((t) => clearTimeout(t));
+      timers.clear();
+    };
+  }, []);
 
-    const newToast = { id, type, message, title, duration };
+  const addToast = useCallback(
+    (type, message, options = {}) => {
+      const id = options.id || `${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
+      const duration = options.duration !== undefined ? options.duration : 4000;
+      const title = options.title || null;
 
-    setToasts((prev) => [...prev.slice(-4), newToast]); // Keep maximum 5 toasts
+      const newToast = { id, type, message, title, duration };
 
-    if (duration > 0) {
-      setTimeout(() => {
-        removeToast(id);
-      }, duration);
-    }
-    return id;
-  }, [removeToast]);
+      setToasts((prev) => [...prev.slice(-4), newToast]); // Keep maximum 5 toasts
+
+      if (duration > 0) {
+        const timer = setTimeout(() => {
+          removeToast(id);
+        }, duration);
+        timersRef.current.set(id, timer);
+      }
+      return id;
+    },
+    [removeToast]
+  );
 
   const toast = useMemo(() => {
     const fn = (message, options) => addToast('info', message, options);
@@ -67,48 +85,88 @@ const TOAST_BORDER_COLORS = {
   info: 'border-cyan-400/40',
 };
 
+function SwipeableToastItem({ item, onDismiss }) {
+  const isAlert = item.type === 'error';
+  const startXRef = useRef(null);
+  const [dragX, setDragX] = useState(0);
+
+  const handlePointerDown = (e) => {
+    startXRef.current = e.clientX;
+  };
+
+  const handlePointerMove = (e) => {
+    if (startXRef.current === null) return;
+    const delta = e.clientX - startXRef.current;
+    if (delta > -20) {
+      setDragX(delta);
+    }
+  };
+
+  const handlePointerUp = () => {
+    if (dragX > 80) {
+      onDismiss(item.id);
+    } else {
+      setDragX(0);
+    }
+    startXRef.current = null;
+  };
+
+  return (
+    <div
+      role={isAlert ? 'alert' : 'status'}
+      aria-live={isAlert ? 'assertive' : 'polite'}
+      aria-atomic="true"
+      onPointerDown={handlePointerDown}
+      onPointerMove={handlePointerMove}
+      onPointerUp={handlePointerUp}
+      onPointerCancel={handlePointerUp}
+      style={
+        dragX !== 0
+          ? {
+              transform: `translate3d(${dragX}px, 0, 0)`,
+              opacity: Math.max(0.25, 1 - Math.abs(dragX) / 160),
+            }
+          : undefined
+      }
+      className={`pointer-events-auto toast-surface flex items-start gap-3 p-4 rounded-2xl bg-bg-surface/95 text-fg-primary border ${
+        TOAST_BORDER_COLORS[item.type] || 'border-border-subtle'
+      } shadow-2xl backdrop-blur-xl transition-all duration-200 touch-pan-y select-none`}
+    >
+      {TOAST_ICONS[item.type]}
+      <div className="flex-1 min-w-0">
+        {item.title && (
+          <p className="font-sans font-semibold text-xs tracking-wide uppercase text-fg-primary mb-0.5">
+            {item.title}
+          </p>
+        )}
+        <p className="font-sans text-xs text-fg-secondary leading-relaxed break-words">
+          {item.message}
+        </p>
+      </div>
+      <button
+        type="button"
+        onClick={() => onDismiss(item.id)}
+        className="text-fg-muted hover:text-fg-primary transition-colors p-1.5 -mr-1 -mt-1 rounded-lg focus-visible:ring-2 focus-visible:ring-emerald/60 focus:outline-none min-w-[44px] min-h-[44px] flex items-center justify-center"
+        aria-label="Close notification"
+      >
+        <X size={15} />
+      </button>
+    </div>
+  );
+}
+
 const ToastContainer = ({ toasts, onDismiss }) => {
   if (toasts.length === 0) return null;
 
   return (
-    <div 
+    <div
       className="fixed bottom-5 right-5 z-[100] flex flex-col gap-2.5 max-w-sm w-full pointer-events-none px-4 sm:px-0"
       role="region"
       aria-label="Notifications"
     >
-      {toasts.map((item) => {
-        const isAlert = item.type === 'error';
-        return (
-          <div
-            key={item.id}
-            role={isAlert ? 'alert' : 'status'}
-            aria-live={isAlert ? 'assertive' : 'polite'}
-            aria-atomic="true"
-            className={`pointer-events-auto toast-surface keep-white flex items-start gap-3 p-4 rounded-2xl bg-bg-canvas/95 dark:bg-bg-canvas/95 text-white border ${
-              TOAST_BORDER_COLORS[item.type] || 'border-white/10'
-            } shadow-[0_12px_40px_rgba(0,0,0,0.6)] backdrop-blur-xl transition-all duration-300 animate-in fade-in slide-in-from-bottom-5`}
-          >
-            {TOAST_ICONS[item.type]}
-            <div className="flex-1 min-w-0">
-              {item.title && (
-                <p className="font-sans font-semibold text-xs tracking-wide uppercase text-white/90 mb-0.5">
-                  {item.title}
-                </p>
-              )}
-              <p className="font-sans text-xs text-white/80 leading-relaxed break-words">
-                {item.message}
-              </p>
-            </div>
-            <button
-              onClick={() => onDismiss(item.id)}
-              className="text-white/40 hover:text-white transition-colors p-1.5 -mr-1 -mt-1 rounded-lg focus-visible:ring-2 focus-visible:ring-emerald/60 focus:outline-none min-w-[32px] min-h-[32px] flex items-center justify-center"
-              aria-label="Close notification"
-            >
-              <X size={15} />
-            </button>
-          </div>
-        );
-      })}
+      {toasts.map((item) => (
+        <SwipeableToastItem key={item.id} item={item} onDismiss={onDismiss} />
+      ))}
     </div>
   );
 };

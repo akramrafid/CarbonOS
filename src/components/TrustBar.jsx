@@ -11,7 +11,6 @@ const TrustBar = () => {
     { label: "97% Instant Settlement Rail", badge: "LIQUIDITY", icon: Layers }
   ];
 
-  // Duplicate the list for seamless continuous looping
   const duplicatedItems = [...items, ...items, ...items];
 
   return (

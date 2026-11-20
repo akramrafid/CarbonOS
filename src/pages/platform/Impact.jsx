@@ -10,22 +10,25 @@ import { VerificationCtaSection } from './impact/VerificationCtaSection';
 
 const Impact = () => {
   const rerfSectionRef = useRef(null);
+  const toastTimerRef = useRef(null);
   const [toast, setToast] = useState({ show: false, message: '', type: 'info' });
   const [activeSegment, setActiveSegment] = useState(null);
   const [payouts, setPayouts] = useState(INITIAL_PAYOUTS);
 
   const showToast = (message, type = 'info') => {
     setToast({ show: true, message, type });
-    setTimeout(() => setToast({ show: false, message: '', type: 'info' }), 4000);
+    if (toastTimerRef.current) clearTimeout(toastTimerRef.current);
+    toastTimerRef.current = setTimeout(() => setToast({ show: false, message: '', type: 'info' }), 4000);
   };
 
-  // Periodic simulator adding new mobile banking payments dynamically
+  // Periodic simulator adding new mobile banking payments dynamically (pauses when tab is hidden)
   useEffect(() => {
     const names = ["Abul Kalam", "Rasheda Begum", "Lutfur Rahman", "Sufia Khatun", "Mohammad Ali", "Jahanara Alam"];
     const districts = ["Dinajpur", "Rangpur", "Khulna", "Sylhet", "Rajshahi", "Chittagong"];
     const sectors = ["Solar Irrigation", "Biogas Generator", "Rooftop Solar", "Mangrove Carbon"];
     
     const interval = setInterval(() => {
+      if (typeof document !== 'undefined' && document.visibilityState === 'hidden') return;
       const randomName = names[Math.floor(Math.random() * names.length)];
       const randomDistrict = districts[Math.floor(Math.random() * districts.length)];
       const randomSector = sectors[Math.floor(Math.random() * sectors.length)];
@@ -55,7 +58,10 @@ const Impact = () => {
       showToast(`Disbursed ৳${randomAmount} BDT to ${randomName} (${randomDistrict}) via Mobile Wallet!`, "success");
     }, 12000);
 
-    return () => clearInterval(interval);
+    return () => {
+      clearInterval(interval);
+      if (toastTimerRef.current) clearTimeout(toastTimerRef.current);
+    };
   }, []);
 
   const handleScrollToRerf = () => {
@@ -64,9 +70,6 @@ const Impact = () => {
 
   return (
     <div className="bg-bg-canvas min-h-screen text-white pt-16 pb-12 px-6 lg:px-12 relative overflow-hidden">
-      {/* Decorative background glows */}
-      <div className="absolute top-20 left-10 w-96 h-96 bg-emerald/5 rounded-full filter blur-[100px] pointer-events-none"></div>
-      <div className="absolute bottom-20 right-10 w-[450px] h-[450px] bg-emerald/10 rounded-full filter blur-[120px] pointer-events-none"></div>
 
       {/* Float Toast Notification */}
       {toast.show && (

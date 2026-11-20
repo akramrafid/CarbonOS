@@ -28,40 +28,28 @@ const CameraCapture = ({ isInline = false, onBack = null, onScanComplete = null 
   const [deviceCoords, setDeviceCoords] = useState({ lat: '23.8103', lng: '90.4125' });
 
   useEffect(() => {
-    if (navigator.geolocation) {
-      navigator.geolocation.getCurrentPosition(
-        (position) => {
-          const latStr = position.coords.latitude.toFixed(4);
-          const lngStr = position.coords.longitude.toFixed(4);
-          setDeviceCoords({ lat: latStr, lng: lngStr });
-          if (import.meta.env?.DEV) console.debug(`Device location acquired: Lat ${latStr}, Lng ${lngStr}`);
-        },
-        (err) => {
-          console.warn("Geolocation permission denied or failed. Operating with default location:", err.message);
-        },
-        { enableHighAccuracy: true, timeout: 6000, maximumAge: 0 }
-      );
-    }
-  }, []);
-
-  useEffect(() => {
+    const wsUrl = import.meta.env.VITE_WS_URL;
+    if (!wsUrl) return undefined;
     let ws = null;
     try {
-      const wsUrl = `ws://${window.location.hostname}:8000/ws/inference/`;
       ws = new WebSocket(wsUrl);
       ws.onmessage = (event) => {
-        const data = JSON.parse(event.data);
-        if (data.status === 'processing') {
-          if (import.meta.env?.DEV) console.debug("Cloud Inference processing... (via WebSocket)");
-        } else if (data.status === 'done') {
-          if (import.meta.env?.DEV) console.debug("Cloud Inference done. (via WebSocket)");
+        try {
+          const data = JSON.parse(event.data);
+          if (data.status === 'processing' && import.meta.env?.DEV) {
+            console.debug('Cloud Inference processing... (via WebSocket)');
+          }
+        } catch {
+          // Ignore malformed WS message
         }
       };
-      ws.onerror = () => console.warn('WebSocket connection failed, continuing without real-time updates.');
-    } catch (e) {
-      console.warn('WebSocket not available:', e);
+      ws.onerror = () => {};
+    } catch {
+      // WebSocket unavailable
     }
-    return () => { if (ws) ws.close(); };
+    return () => {
+      if (ws) ws.close();
+    };
   }, []);
 
   const startCamera = async () => {
@@ -325,7 +313,7 @@ const CameraCapture = ({ isInline = false, onBack = null, onScanComplete = null 
           <AlertCircle size={18} className="shrink-0 text-amber-400 mt-0.5" />
           <div className="flex-1">
             <p className="text-amber-300 text-sm font-bold leading-tight">
-              ⚠️ Crop Auto-Corrected by AI
+              Crop Auto-Corrected by AI
             </p>
             <p className="text-amber-200/80 text-xs mt-1 leading-relaxed">
               You selected{' '}

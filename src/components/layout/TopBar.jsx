@@ -17,6 +17,7 @@ import {
   MoreVertical
 } from 'lucide-react';
 import { useTheme } from '../../context/ThemeContext';
+import { ThemeToggle } from '../ui/ThemeToggle';
 import { getBreadcrumbs } from '../../config/nav.config';
 import { Tooltip } from '../ui/Tooltip';
 
@@ -127,7 +128,7 @@ export function TopBar({ onOpenMobileDrawer, onOpenCommandPalette }) {
           type="button"
           onClick={onOpenCommandPalette}
           aria-label={t('nav.searchPlaceholder', 'Search (Ctrl+K)')}
-          className="flex items-center gap-2 px-3 py-1.5 rounded-lg border border-border-subtle bg-bg-canvas/60 text-fg-muted hover:text-fg-primary hover:border-border-strong text-xs font-mono transition-all min-h-[40px]"
+          className="flex items-center gap-2 px-3 py-1.5 rounded-lg border border-border-subtle bg-bg-canvas/60 text-fg-muted hover:text-fg-primary hover:border-border-strong text-xs font-mono transition-all min-h-[44px]"
         >
           <Search className="w-4 h-4 text-fg-muted" />
           <span className="hidden md:inline-block">Search...</span>
@@ -143,7 +144,7 @@ export function TopBar({ onOpenMobileDrawer, onOpenCommandPalette }) {
               type="button"
               onClick={() => setNotificationsOpen((prev) => !prev)}
               aria-label="View notifications"
-              className="relative p-2 rounded-lg border border-border-subtle text-fg-secondary hover:text-fg-primary hover:bg-bg-elevated min-w-[40px] min-h-[40px] flex items-center justify-center transition-colors"
+              className="relative p-2 rounded-lg border border-border-subtle text-fg-secondary hover:text-fg-primary hover:bg-bg-elevated min-w-[44px] min-h-[44px] flex items-center justify-center transition-colors"
             >
               <Bell className="w-4 h-4" />
               <span className="absolute top-1.5 right-1.5 w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
@@ -184,7 +185,7 @@ export function TopBar({ onOpenMobileDrawer, onOpenCommandPalette }) {
             type="button"
             onClick={toggleLanguage}
             aria-label="Switch Language"
-            className="px-2.5 py-1.5 rounded-lg border border-border-subtle text-xs font-mono font-medium hover:bg-bg-elevated min-w-[40px] min-h-[40px] flex items-center justify-center transition-colors"
+            className="px-2.5 py-1.5 rounded-lg border border-border-subtle text-xs font-mono font-medium hover:bg-bg-elevated min-w-[44px] min-h-[44px] flex items-center justify-center transition-colors"
           >
             {i18n.language === 'en' ? 'বাংলা' : 'EN'}
           </button>
@@ -196,7 +197,7 @@ export function TopBar({ onOpenMobileDrawer, onOpenCommandPalette }) {
             type="button"
             onClick={toggleTheme}
             aria-label={`Switch to ${theme === 'dark' ? 'light' : 'dark'} mode`}
-            className="p-2 rounded-lg border border-border-subtle text-fg-secondary hover:text-fg-primary hover:bg-bg-elevated min-w-[40px] min-h-[40px] flex items-center justify-center transition-colors"
+            className="p-2 rounded-lg border border-border-subtle text-fg-secondary hover:text-fg-primary hover:bg-bg-elevated min-w-[44px] min-h-[44px] flex items-center justify-center transition-colors"
           >
             {theme === 'dark' ? <Sun className="w-4 h-4 text-amber" /> : <Moon className="w-4 h-4 text-fg-secondary" />}
           </button>
@@ -208,7 +209,7 @@ export function TopBar({ onOpenMobileDrawer, onOpenCommandPalette }) {
             type="button"
             onClick={() => setUserMenuOpen((prev) => !prev)}
             aria-label="Open user menu"
-            className="flex items-center gap-2 p-1 pl-1.5 pr-2 rounded-full border border-border-subtle bg-bg-surface hover:bg-bg-elevated transition-colors min-h-[40px]"
+            className="flex items-center gap-2 p-1 pl-1.5 pr-2 rounded-full border border-border-subtle bg-bg-surface hover:bg-bg-elevated transition-colors min-h-[44px]"
           >
             <div className="w-7 h-7 rounded-full bg-accent/20 border border-accent/40 flex items-center justify-center text-accent font-mono font-bold text-xs">
               MR
@@ -220,10 +221,13 @@ export function TopBar({ onOpenMobileDrawer, onOpenCommandPalette }) {
           </button>
 
           {userMenuOpen && (
-            <div className="absolute right-0 mt-2 w-56 bg-bg-surface border border-border-subtle rounded-2xl shadow-2xl p-2 z-50 animate-fade-in text-sm">
+            <div className="absolute right-0 mt-2 w-64 bg-bg-surface border border-border-subtle rounded-2xl shadow-2xl p-2 z-50 animate-fade-in text-sm">
               <div className="px-3 py-2 border-b border-border-subtle mb-1">
                 <p className="font-semibold text-xs text-fg-primary">Auditor Admin</p>
                 <p className="text-[11px] text-fg-muted font-mono truncate">mrv-lead@carbonos.gov.bd</p>
+              </div>
+              <div className="px-2 py-2 border-b border-border-subtle mb-1 flex justify-center">
+                <ThemeToggle variant="segmented" />
               </div>
               <Link
                 to="/platform/verification-workflow"

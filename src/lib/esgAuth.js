@@ -87,6 +87,13 @@ export function createLocalOfflineDemoSession() {
 }
 
 export async function requestDemoSession() {
+  const hasExplicitBackend = Boolean(
+    typeof import.meta !== 'undefined' &&
+      (import.meta.env?.VITE_FASTAPI_API_URL || import.meta.env?.VITE_E2E_TEST_HOOK === 'true')
+  );
+  if (!hasExplicitBackend) {
+    return createLocalOfflineDemoSession();
+  }
   try {
     const controller = typeof AbortController !== 'undefined' ? new AbortController() : null;
     const timeout = controller ? setTimeout(() => controller.abort(), 4000) : null;
@@ -99,7 +106,6 @@ export async function requestDemoSession() {
     });
 
     if (!res.ok) {
-      console.warn(`Remote demo session unavailable (${res.status}), using resilient client-side demo session.`);
       return createLocalOfflineDemoSession();
     }
     const data = await res.json();
@@ -110,8 +116,7 @@ export async function requestDemoSession() {
     };
     saveDemoSession(sessionData);
     return sessionData;
-  } catch (err) {
-    console.warn('Backend service unreachable, activating resilient client-side demo session:', err);
+  } catch {
     return createLocalOfflineDemoSession();
   }
 }

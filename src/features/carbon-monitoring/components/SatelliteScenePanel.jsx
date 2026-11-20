@@ -23,6 +23,7 @@ import {
   calculateGeodesicMetrics
 } from '../constants';
 import { Button } from '../../../components/ui/Button';
+import { GradCamComparisonCard } from './GradCamComparisonCard';
 
 export function SatelliteScenePanel(props) {
   const {
@@ -306,6 +307,13 @@ export function SatelliteScenePanel(props) {
                 <h4 className="font-bold uppercase text-[10px] tracking-wider text-emerald">Model Extensibility</h4>
                 <p className={isLight ? 'text-fg-secondary' : 'text-mist'}>Designed using abstract estimation pipelines. Integrations under development: XGBoost, LightGBM, and Deep Learning U-Net architectures for spatial predictions.</p>
               </div>
+
+              {/* Phase 7: Self-Drawing Boundary Polygon, Layer Crossfade & Grad-CAM Opacity Slider */}
+              <GradCamComparisonCard
+                activeLayer={activeLayer}
+                drawPoints={drawPoints}
+                isLight={isLight}
+              />
             </div>
           </div>
         </div>

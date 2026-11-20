@@ -1,17 +1,8 @@
-import React, { Suspense, useEffect } from 'react';
-import { Routes, Route, useLocation } from 'react-router-dom';
+import React from 'react';
+import { Routes, Route } from 'react-router-dom';
 import MarketingLayout from './components/layout/MarketingLayout';
 import DashboardLayout from './components/layout/DashboardLayout';
-import LoadingSpinner from './components/LoadingSpinner';
 import OfflineBanner from './components/OfflineBanner';
-
-function ScrollToTop() {
-  const { pathname } = useLocation();
-  useEffect(() => {
-    window.scrollTo(0, 0);
-  }, [pathname]);
-  return null;
-}
 
 // Marketing & Brand Pages (Lazy-loaded)
 const Home = React.lazy(() => import('./pages/Home'));
@@ -63,70 +54,67 @@ const LocalRiskMap = React.lazy(() => import('./components/farmers-ai/LocalRiskM
 export function App() {
   return (
     <>
-      <ScrollToTop />
       <OfflineBanner />
-      <Suspense fallback={<LoadingSpinner />}>
-        <Routes>
-          {/* Brand & Marketing Shell (Navbar + Footer persistent across marketing navigation) */}
-          <Route element={<MarketingLayout />}>
-            <Route path="/" element={<Home />} />
-            <Route path="/how-it-works" element={<HowItWorks />} />
-            <Route path="/technology" element={<Technology />} />
+      <Routes>
+        {/* Brand & Marketing Shell (Navbar + Footer persistent across marketing navigation) */}
+        <Route element={<MarketingLayout />}>
+          <Route path="/" element={<Home />} />
+          <Route path="/how-it-works" element={<HowItWorks />} />
+          <Route path="/technology" element={<Technology />} />
 
-            {/* Sector Pages */}
-            <Route path="/sectors/solar-irrigation" element={<SolarIrrigation />} />
-            <Route path="/sectors/rice-methane" element={<RiceMethane />} />
-            <Route path="/sectors/clean-cookstoves" element={<CleanCookstoves />} />
-            <Route path="/sectors/waste-to-energy" element={<WasteToEnergy />} />
-            <Route path="/sectors/mangrove-carbon" element={<MangroveCarbon />} />
-            <Route path="/sectors/brick-kilns" element={<BrickKilns />} />
+          {/* Sector Pages */}
+          <Route path="/sectors/solar-irrigation" element={<SolarIrrigation />} />
+          <Route path="/sectors/rice-methane" element={<RiceMethane />} />
+          <Route path="/sectors/clean-cookstoves" element={<CleanCookstoves />} />
+          <Route path="/sectors/waste-to-energy" element={<WasteToEnergy />} />
+          <Route path="/sectors/mangrove-carbon" element={<MangroveCarbon />} />
+          <Route path="/sectors/brick-kilns" element={<BrickKilns />} />
 
-            {/* Company Pages */}
-            <Route path="/company/about" element={<About />} />
-            <Route path="/company/framework-docs" element={<FrameworkDocs />} />
-            <Route path="/company/api-docs" element={<APIDocs />} />
-            <Route path="/company/careers" element={<Careers />} />
-            <Route path="/company/privacy" element={<Privacy />} />
-            <Route path="/company/terms" element={<Terms />} />
+          {/* Company Pages */}
+          <Route path="/company/about" element={<About />} />
+          <Route path="/company/framework-docs" element={<FrameworkDocs />} />
+          <Route path="/company/api-docs" element={<APIDocs />} />
+          <Route path="/company/careers" element={<Careers />} />
+          <Route path="/company/privacy" element={<Privacy />} />
+          <Route path="/company/terms" element={<Terms />} />
 
-            {/* Access Restriction / Forbidden & 404 Routes */}
-            <Route path="/forbidden" element={<Forbidden />} />
-            <Route path="/unauthorized" element={<Forbidden />} />
-            <Route path="*" element={<NotFound />} />
-          </Route>
+          {/* Access Restriction / Forbidden & 404 Routes */}
+          <Route path="/forbidden" element={<Forbidden />} />
+          <Route path="/unauthorized" element={<Forbidden />} />
+          <Route path="*" element={<NotFound />} />
+        </Route>
 
-          {/* Product Dashboard Shell (Sidebar + Top Bar persistent across dashboard navigation) */}
-          <Route element={<DashboardLayout />}>
-            <Route path="/platform/project-onboarding" element={<ProjectOnboarding />} />
-            <Route path="/platform/mrv-dashboard" element={<MRVDashboard />} />
-            <Route path="/platform/carbon-registry" element={<CarbonRegistry />} />
-            <Route path="/carbon-registry" element={<CarbonRegistry />} />
-            <Route path="/platform/verification-workflow" element={<VerificationWorkflow />} />
-            <Route path="/platform/marketplace" element={<MarketplaceBrowse />} />
-            <Route path="/platform/ai-detection" element={<AIDetection />} />
-            <Route path="/platform/saas-dashboard" element={<SaaSDashboard />} />
-            <Route path="/platform/saas" element={<SaaSDashboard />} />
-            <Route path="/esg" element={<SaaSDashboard />} />
-            <Route path="/platform/esg" element={<EsgWorkspace />} />
-            <Route path="/platform/esg/callback" element={<EsgCallback />} />
-            <Route path="/platform/impact" element={<Impact />} />
-            <Route path="/carbon-monitoring" element={<CarbonMonitoring />} />
+        {/* Product Dashboard Shell (Sidebar + Top Bar persistent across dashboard navigation) */}
+        <Route element={<DashboardLayout />}>
+          <Route path="/platform/project-onboarding" element={<ProjectOnboarding />} />
+          <Route path="/platform/mrv-dashboard" element={<MRVDashboard />} />
+          <Route path="/platform/carbon-registry" element={<CarbonRegistry />} />
+          <Route path="/carbon-registry" element={<CarbonRegistry />} />
+          <Route path="/platform/verification-workflow" element={<VerificationWorkflow />} />
+          <Route path="/platform/marketplace" element={<MarketplaceBrowse />} />
+          <Route path="/platform/ai-detection" element={<AIDetection />} />
+          <Route path="/platform/saas-dashboard" element={<SaaSDashboard />} />
+          <Route path="/platform/saas" element={<SaaSDashboard />} />
+          <Route path="/esg" element={<SaaSDashboard />} />
+          <Route path="/platform/esg" element={<EsgWorkspace />} />
+          <Route path="/platform/esg/callback" element={<EsgCallback />} />
+          <Route path="/platform/impact" element={<Impact />} />
+          <Route path="/carbon-monitoring" element={<CarbonMonitoring />} />
 
-            {/* Farmer's AI & HarvestGuard */}
-            <Route path="/farmers-ai" element={<FarmersAILanding />} />
-            <Route path="/farmers-ai/camera" element={<CameraCapture />} />
-            <Route path="/farmers-ai/result" element={<DiagnosisResult />} />
-            <Route path="/harvestguard/dashboard" element={<HarvestGuardDashboard />} />
-            <Route path="/harvestguard/register-batch" element={<BatchRegistration />} />
-            <Route path="/harvestguard/risk-analysis/:batchId" element={<WeatherRiskWidget />} />
-            <Route path="/harvestguard/risk-map" element={<LocalRiskMap />} />
+          {/* Farmer's AI & HarvestGuard */}
+          <Route path="/farmers-ai" element={<FarmersAILanding />} />
+          <Route path="/farmers-ai/camera" element={<CameraCapture />} />
+          <Route path="/farmers-ai/result" element={<DiagnosisResult />} />
+          <Route path="/harvestguard/dashboard" element={<HarvestGuardDashboard />} />
+          <Route path="/harvestguard/register-batch" element={<BatchRegistration />} />
+          <Route path="/harvestguard/risk-analysis/:batchId" element={<WeatherRiskWidget />} />
+          <Route path="/harvestguard/risk-map" element={<LocalRiskMap />} />
 
-            {/* Direct Farmer Ledger */}
-            <Route path="/dashboard/farmer" element={<FarmerCreditsWidget />} />
-            <Route path="/dashboard/farmer/earnings" element={<FarmerEarnings />} />
-          </Route>
-        </Routes>
-      </Suspense>
+          {/* Direct Farmer Ledger */}
+          <Route path="/dashboard/farmer" element={<FarmerCreditsWidget />} />
+          <Route path="/dashboard/farmer/earnings" element={<FarmerEarnings />} />
+        </Route>
+      </Routes>
     </>
   );
 }

@@ -55,6 +55,7 @@ export const InvoiceUploadStep = ({
         <input 
           type="file" 
           id="drag-file-input"
+          aria-label="Upload utility invoices (PDF, XLSX, CSV, TXT)"
           onChange={handleFileDrop}
           className="hidden" 
           accept=".csv,.xlsx,.xls,.pdf,.txt"

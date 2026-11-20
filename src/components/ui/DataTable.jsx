@@ -13,38 +13,49 @@ export function DataTable({
   keyField = 'id',
   loading = false,
   emptyMessage = 'No records found',
+  stickyFirstColumn = false,
   className = ''
 }) {
   return (
-    <div className={`w-full min-w-0 rounded-xl border border-border-subtle bg-bg-surface ${className}`}>
+    <div className={`w-full min-w-0 rounded-xl border border-border-subtle bg-bg-surface relative ${className}`}>
       <div className="w-full min-w-0 overflow-x-auto touch-pan-x scrollbar-thin">
         <table className="w-full text-left text-sm border-collapse min-w-0">
           <thead>
             <tr className="border-b border-border-subtle bg-bg-elevated/50">
-              {columns.map((col) => (
-                <th
-                  key={col.key || col.header}
-                  scope="col"
-                  className={`
-                    py-3 px-4 text-xs font-mono font-medium text-mist uppercase tracking-wider
-                    ${col.align === 'right' ? 'text-right' : col.align === 'center' ? 'text-center' : 'text-left'}
-                    ${col.className || ''}
-                  `.trim()}
-                >
-                  {col.header}
-                </th>
-              ))}
+              {columns.map((col, cIdx) => {
+                const isSticky = (stickyFirstColumn && cIdx === 0) || col.sticky;
+                return (
+                  <th
+                    key={col.key || col.header}
+                    scope="col"
+                    className={`
+                      py-3 px-4 text-xs font-mono font-medium text-mist uppercase tracking-wider
+                      ${col.align === 'right' ? 'text-right' : col.align === 'center' ? 'text-center' : 'text-left'}
+                      ${isSticky ? 'sticky left-0 z-20 bg-bg-elevated/95 backdrop-blur-sm shadow-[2px_0_5px_-2px_rgba(0,0,0,0.15)]' : ''}
+                      ${col.className || ''}
+                    `.trim()}
+                  >
+                    {col.header}
+                  </th>
+                );
+              })}
             </tr>
           </thead>
           <tbody className="divide-y divide-carbon-border/40 dark:divide-[#1E3326]/40 font-sans">
             {loading ? (
               Array.from({ length: 4 }).map((_, rIdx) => (
                 <tr key={`loading-row-${rIdx}`} className="animate-pulse">
-                  {columns.map((col, cIdx) => (
-                    <td key={`loading-cell-${cIdx}`} className="py-3 px-4">
-                      <div className="h-4 bg-carbon-surface-raised rounded w-3/4 dark:bg-bg-elevated" />
-                    </td>
-                  ))}
+                  {columns.map((col, cIdx) => {
+                    const isSticky = (stickyFirstColumn && cIdx === 0) || col.sticky;
+                    return (
+                      <td 
+                        key={`loading-cell-${cIdx}`} 
+                        className={`py-3 px-4 ${isSticky ? 'sticky left-0 z-10 bg-bg-surface' : ''}`}
+                      >
+                        <div className="h-4 bg-carbon-surface-raised rounded w-3/4 dark:bg-bg-elevated" />
+                      </td>
+                    );
+                  })}
                 </tr>
               ))
             ) : data.length === 0 ? (
@@ -59,7 +70,8 @@ export function DataTable({
                   key={row[keyField] || `row-${rIdx}`}
                   className="transition-colors duration-100 hover:bg-carbon-surface-raised/40 dark:hover:bg-bg-elevated/40"
                 >
-                  {columns.map((col) => {
+                  {columns.map((col, cIdx) => {
+                    const isSticky = (stickyFirstColumn && cIdx === 0) || col.sticky;
                     const cellVal = col.key ? row[col.key] : undefined;
                     const value = col.render
                       ? (col.render.length === 1 ? col.render(row) : col.render(cellVal, row, rIdx))
@@ -71,6 +83,7 @@ export function DataTable({
                         className={`
                           py-3 px-4 text-registry dark:text-fg-primary
                           ${col.align === 'right' || isNumber ? 'text-right font-mono tabular-nums' : col.align === 'center' ? 'text-center' : 'text-left'}
+                          ${isSticky ? 'sticky left-0 z-10 bg-bg-surface shadow-[2px_0_5px_-2px_rgba(0,0,0,0.15)]' : ''}
                           ${col.cellClassName || ''}
                         `.trim()}
                       >

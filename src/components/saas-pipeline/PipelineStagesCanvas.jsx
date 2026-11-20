@@ -152,7 +152,7 @@ export function PipelineStagesCanvas({ activeStep, transitionState }) {
         </div>
       )}
 
-      {/* Stage 4: Seamless Export to Compliance Standards */}
+      {/* Stage 4: Structured Export to Compliance Standards */}
       {activeStep === 3 && (
         <div className={`w-full max-w-xl px-6 z-10 transition-all duration-500 ${
           transitionState === 'transitioning' ? 'opacity-0 scale-95' : 'opacity-100 scale-100'

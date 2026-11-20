@@ -1,30 +1,47 @@
+import csv
 import json
 import datetime
 import io
 import hashlib
 
+
+def _csv_cell(value) -> str:
+    text = "" if value is None else str(value)
+    if text and text[0] in ("=", "+", "-", "@", "\t", "\r"):
+        return "'" + text
+    return text
+
+
+def _pdf_text(value) -> str:
+    text = "" if value is None else str(value)
+    text = text.replace("\\", "\\\\").replace("(", "\\(").replace(")", "\\)")
+    return text.encode("latin-1", errors="replace").decode("latin-1")
+
+
 class ReportGenerator:
     @staticmethod
     def generate_csv(job_data, result_data):
         """
-        Generates CSV content of carbon estimates.
+        Generates CSV content of carbon estimates (formula-injection safe & RFC 4180 quoted).
         """
         csv_buffer = io.StringIO()
-        csv_buffer.write("CarbonZero AI Monitoring - Forest Carbon Stock Analysis Report\n")
-        csv_buffer.write(f"Project Name,{job_data.get('project_name', 'Unnamed Project')}\n")
-        csv_buffer.write(f"Analysis Job ID,{job_data.get('id')}\n")
-        csv_buffer.write(f"Analysis Date,{datetime.datetime.utcnow().strftime('%Y-%m-%d %H:%M:%S UTC')}\n")
-        csv_buffer.write(f"Satellite Source,{result_data.get('satellite_sources', 'Sentinel-2')}\n")
-        csv_buffer.write("\n")
-        csv_buffer.write("Metric,Value,Unit,Description\n")
-        csv_buffer.write(f"Estimated Biomass,{result_data.get('estimated_biomass')},Mg/ha,Above-ground dry biomass density\n")
-        csv_buffer.write(f"Estimated Carbon,{result_data.get('estimated_carbon')},tC/ha,Carbon stock density\n")
-        csv_buffer.write(f"Total CO2 Equivalent,{result_data.get('tonnes_co2e')},tCO2e,Total carbon dioxide equivalent mitigated\n")
-        csv_buffer.write(f"Average NDVI,{result_data.get('avg_ndvi')},Index,Normalized Difference Vegetation Index (0-1)\n")
-        csv_buffer.write(f"Forest Area,{result_data.get('forest_area_ha')},Hectares,Total canopy cover area analyzed\n")
-        csv_buffer.write(f"Confidence Score,{result_data.get('confidence') * 100}%,Percent,Statistical model confidence\n")
-        csv_buffer.write(f"Processing Time,{job_data.get('processing_time')},Seconds,Algorithm execution latency\n")
-        
+        writer = csv.writer(csv_buffer, lineterminator="\n")
+        writer.writerow(["CarbonZero AI Monitoring - Forest Carbon Stock Analysis Report"])
+        writer.writerow(["Project Name", _csv_cell(job_data.get("project_name", "Unnamed Project"))])
+        writer.writerow(["Analysis Job ID", _csv_cell(job_data.get("id"))])
+        writer.writerow(["Analysis Date", datetime.datetime.utcnow().strftime("%Y-%m-%d %H:%M:%S UTC")])
+        writer.writerow(["Satellite Source", _csv_cell(result_data.get("satellite_sources", "Sentinel-2"))])
+        writer.writerow([])
+        writer.writerow(["Metric", "Value", "Unit", "Description"])
+        conf_pct = (result_data.get("confidence") or 0) * 100
+        writer.writerow(["Estimated Biomass", _csv_cell(result_data.get("estimated_biomass")), "Mg/ha", "Above-ground dry biomass density"])
+        writer.writerow(["Estimated Carbon", _csv_cell(result_data.get("estimated_carbon")), "tC/ha", "Carbon stock density"])
+        writer.writerow(["Total CO2 Equivalent", _csv_cell(result_data.get("tonnes_co2e")), "tCO2e", "Total carbon dioxide equivalent mitigated"])
+        writer.writerow(["Average NDVI", _csv_cell(result_data.get("avg_ndvi")), "Index", "Normalized Difference Vegetation Index (0-1)"])
+        writer.writerow(["Forest Area", _csv_cell(result_data.get("forest_area_ha")), "Hectares", "Total canopy cover area analyzed"])
+        writer.writerow(["Confidence Score", f"{conf_pct}%", "Percent", "Statistical model confidence"])
+        writer.writerow(["Processing Time", _csv_cell(job_data.get("processing_time")), "Seconds", "Algorithm execution latency"])
+        # [COMMENTED OUT FOR PERSONAL REFERENCE — unescaped f-strings allowed CSV formula injection & broken commas]
         return csv_buffer.getvalue()
 
     @staticmethod
@@ -68,17 +85,17 @@ class ReportGenerator:
         Generates a valid, minimal PDF byte stream containing the report data.
         This provides a real downloadable PDF without external PDF compiler dependencies.
         """
-        project = job_data.get('project_name', 'Unnamed Project')
-        job_id = job_data.get('id')
-        date_str = datetime.datetime.utcnow().strftime('%Y-%m-%d %H:%M:%S UTC')
-        biomass = result_data.get('estimated_biomass', 0.0)
-        carbon = result_data.get('estimated_carbon', 0.0)
-        co2 = result_data.get('tonnes_co2e', 0.0)
-        ndvi = result_data.get('avg_ndvi', 0.0)
-        area = result_data.get('forest_area_ha', 0.0)
-        conf = result_data.get('confidence', 0.0)
-        sources = result_data.get('satellite_sources', 'Sentinel-2')
-        latency = job_data.get('processing_time', 0.0)
+        project = _pdf_text(job_data.get('project_name', 'Unnamed Project'))
+        job_id = _pdf_text(job_data.get('id'))
+        date_str = _pdf_text(datetime.datetime.utcnow().strftime('%Y-%m-%d %H:%M:%S UTC'))
+        biomass = _pdf_text(result_data.get('estimated_biomass', 0.0))
+        carbon = _pdf_text(result_data.get('estimated_carbon', 0.0))
+        co2 = _pdf_text(result_data.get('tonnes_co2e', 0.0))
+        ndvi = _pdf_text(result_data.get('avg_ndvi', 0.0))
+        area = _pdf_text(result_data.get('forest_area_ha', 0.0))
+        conf = float(result_data.get('confidence', 0.0) or 0.0)
+        sources = _pdf_text(result_data.get('satellite_sources', 'Sentinel-2'))
+        latency = float(job_data.get('processing_time', 0.0) or 0.0)
 
         # Basic PDF Format Structure
         pdf = (

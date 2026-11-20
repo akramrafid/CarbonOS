@@ -41,7 +41,7 @@ export const Input = React.forwardRef(function Input(
             transition-colors duration-150
             focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-offset-carbon
             disabled:opacity-50 disabled:cursor-not-allowed
-            dark:bg-bg-surface dark:text-fg-primary dark:placeholder-[#4B6B56]
+            dark:bg-bg-surface dark:text-fg-primary dark:placeholder-fg-muted
             ${leftIcon ? 'pl-9' : ''}
             ${rightIcon ? 'pr-9' : ''}
             ${error ? 'border-red-500 focus-visible:ring-red-500' : 'border-carbon-border focus-visible:ring-emerald dark:border-border-subtle'}

@@ -82,14 +82,12 @@ const WeatherRiskWidget = ({ isInline = false, onBack = null, inlineBatchId = nu
         </div>
       </div>
 
-      {/* 5-Day Hyper Local Weather (A3) */}
       <div className="bg-white/5 backdrop-blur-md border border-white/10 p-6 md:p-8 rounded-[32px] shadow-xl relative overflow-hidden group">
-        <div className="absolute top-0 right-0 w-32 h-32 bg-lime-400/5 blur-3xl rounded-full pointer-events-none" />
-        <h2 className="text-xl font-extrabold text-white mb-6 tracking-tight relative z-10">৫ দিনের পূর্বাভাস - {batch.district}</h2>
+        <h2 className="text-xl font-extrabold text-white mb-6 tracking-tight relative z-10">৫ দিনের পূর্বাভাস - {batch.district} (Demo data)</h2>
         
         <div className="grid grid-cols-1 sm:grid-cols-5 gap-4 relative z-10">
           {weather.map((day, idx) => (
-            <div key={idx} className={`bg-white/5 border border-white/10 rounded-2xl p-4 text-center transition-all duration-300 hover:border-lime-400/40 ${idx === 0 ? 'ring-2 ring-[#CCFF00]' : ''}`}>
+            <div key={idx} className={`bg-white/5 border border-white/10 rounded-2xl p-4 text-center transition-all duration-300 hover:border-lime-400/40 ${idx === 0 ? 'ring-2 ring-lime-400' : ''}`}>
               <div className={`font-bold mb-1 ${idx === 0 ? 'text-lime-400' : 'text-emerald'}`}>{idx === 0 ? 'আজ' : day.dayNameBn}</div>
               <div className="text-white/40 text-xs mb-4">{day.date}</div>
               

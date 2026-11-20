@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import { Button, Input, Notice, Select } from '../ui';
 
 export function Step3FillGaps({
@@ -12,6 +12,25 @@ export function Step3FillGaps({
   onBack,
   onNext
 }) {
+  const firstFormRef = useRef(null);
+  const [blurErrors, setBlurErrors] = useState({});
+
+  // Auto-focus first missing required input on mount / when missing fields change
+  useEffect(() => {
+    const firstInput = firstFormRef.current?.querySelector('input');
+    if (firstInput && typeof firstInput.focus === 'function') {
+      firstInput.focus({ preventScroll: true });
+    }
+  }, [gaps?.missing_required?.length]);
+
+  const handleFieldBlur = (fieldKey, value) => {
+    const trimmed = String(value || '').trim();
+    setBlurErrors((prev) => ({
+      ...prev,
+      [fieldKey]: trimmed.length === 0 ? 'Required field — please enter a valid value' : null,
+    }));
+  };
+
   return (
     <div className="space-y-6">
       <Notice error={enterAction.error || reviewAction.error} />
@@ -21,15 +40,22 @@ export function Step3FillGaps({
         <div className="p-4 bg-amber-500/10 border border-amber-500/20 rounded-xl space-y-4">
           <h3 className="text-sm font-semibold text-amber-300">{t.missingNotice}</h3>
           <div className="space-y-3">
-            {gaps.missing_required.map((f) => {
+            {gaps.missing_required.map((f, idx) => {
               const labelText = f.label?.[lang] || f.label?.en || f.field;
+              const fieldErr = blurErrors[f.field];
               return (
                 <form
                   key={f.field}
+                  ref={idx === 0 ? firstFormRef : undefined}
                   onSubmit={(e) => {
                     e.preventDefault();
                     const data = new FormData(e.currentTarget);
-                    onEnterValue(f.field, data.get('val'), data.get('unit'));
+                    const val = data.get('val');
+                    if (!String(val || '').trim()) {
+                      handleFieldBlur(f.field, '');
+                      return;
+                    }
+                    onEnterValue(f.field, val, data.get('unit'));
                   }}
                   className="grid grid-cols-1 sm:grid-cols-4 gap-2 items-end"
                 >
@@ -39,6 +65,9 @@ export function Step3FillGaps({
                       name="val"
                       type={f.type === 'date' ? 'date' : 'text'}
                       placeholder={`Enter ${labelText}`}
+                      hint={fieldErr || undefined}
+                      aria-invalid={Boolean(fieldErr)}
+                      onBlur={(e) => handleFieldBlur(f.field, e.target.value)}
                       required
                     />
                   </div>
@@ -51,7 +80,7 @@ export function Step3FillGaps({
                   ) : (
                     <div />
                   )}
-                  <Button type="submit" disabled={enterAction.busy} className="h-10">
+                  <Button type="submit" variant="secondary" disabled={enterAction.busy} className="h-10">
                     {t.btnEnterValue}
                   </Button>
                 </form>

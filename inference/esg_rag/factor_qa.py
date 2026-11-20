@@ -8,6 +8,7 @@ Always explicitly distinguishes between:
 """
 import re
 from typing import Optional, Dict, Any, Tuple
+from sqlalchemy import or_
 from sqlalchemy.orm import Session
 from .ledger_models import EmissionFactor
 
@@ -65,14 +66,27 @@ def query_factor_registry(
     Queries esg_emission_factor.
     Returns (factor_dict, status_category) where status_category is 'APPROVED', 'PROVISIONAL', or 'NOT_FOUND'.
     """
-    # 1. Check for APPROVED factor first
+    org_id = getattr(principal, "organization_id", None)
+    visibility = (
+        or_(EmissionFactor.organization_id == org_id, EmissionFactor.organization_id.is_(None))
+        if org_id is not None
+        else EmissionFactor.organization_id.is_(None)
+    )
+
+    # 1. Check for APPROVED factor first (tenant-scoped + platform factors only)
+    # [COMMENTED OUT FOR PERSONAL REFERENCE — previously queried EmissionFactor globally without tenant visibility]
+    # q_appr = db.query(EmissionFactor).filter(
+    #     EmissionFactor.activity_type == activity_type,
+    #     EmissionFactor.status == "APPROVED"
+    # )
     q_appr = db.query(EmissionFactor).filter(
+        visibility,
         EmissionFactor.activity_type == activity_type,
         EmissionFactor.status == "APPROVED"
     )
     if activity_type == "electricity":
         q_appr = q_appr.filter(EmissionFactor.factor_kind == "grid_average")
-    approved = q_appr.order_by(EmissionFactor.version.desc()).first()
+    approved = q_appr.order_by(EmissionFactor.organization_id.is_(None), EmissionFactor.version.desc()).first()
 
     if approved:
         return {
@@ -92,8 +106,13 @@ def query_factor_registry(
             "derivation_hash": approved.source_table_ref or "registry_verified"
         }, "APPROVED"
 
-    # 2. Check for PROVISIONAL (DRAFT) factor proposal
+    # 2. Check for PROVISIONAL (DRAFT) factor proposal (tenant-scoped + platform factors only)
+    # q_draft = db.query(EmissionFactor).filter(
+    #     EmissionFactor.activity_type == activity_type,
+    #     EmissionFactor.status == "DRAFT"
+    # )
     q_draft = db.query(EmissionFactor).filter(
+        visibility,
         EmissionFactor.activity_type == activity_type,
         EmissionFactor.status == "DRAFT"
     )

@@ -55,7 +55,7 @@ export function GisSidebarControls(props) {
             placeholder="Lat, Lng (e.g. 22.3, 89.6)"
             className={`flex-1 border rounded-xl px-3 py-2 text-sm focus:outline-none focus:border-emerald/50 transition-colors ${
               isLight
-                ? 'bg-bg-canvas border-border-subtle text-fg-primary placeholder-[#94A3B8]'
+                ? 'bg-bg-canvas border-border-subtle text-fg-primary placeholder-fg-muted'
                 : 'bg-white/5 border-white/10 text-white placeholder-mist/60'
             }`}
           />

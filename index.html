@@ -5,22 +5,29 @@
     <link rel="icon" type="image/svg+xml" href="/vite.svg" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     
-    <!-- Inline Theme Initializer (Anti-FOUC) -->
+    <!-- Inline Theme Initializer (Anti-FOUC, supports light / dark / system) -->
     <script>
       (function() {
         try {
-          var saved = localStorage.getItem('carbonos-theme');
-          var theme = saved || (window.matchMedia('(prefers-color-scheme: light)').matches ? 'light' : 'dark');
-          document.documentElement.setAttribute('data-theme', theme);
-          if (theme === 'dark') {
-            document.documentElement.classList.add('dark');
-            document.documentElement.classList.remove('light');
+          var saved = localStorage.getItem('carbonos-theme') || localStorage.getItem('theme');
+          var mode = (saved === 'light' || saved === 'dark' || saved === 'system') ? saved : 'dark';
+          var sysLight = window.matchMedia && window.matchMedia('(prefers-color-scheme: light)').matches;
+          var resolved = mode === 'system' ? (sysLight ? 'light' : 'dark') : mode;
+          var root = document.documentElement;
+          root.setAttribute('data-theme', resolved);
+          root.setAttribute('data-theme-mode', mode);
+          root.style.colorScheme = resolved;
+          if (resolved === 'dark') {
+            root.classList.add('dark');
+            root.classList.remove('light');
           } else {
-            document.documentElement.classList.remove('dark');
-            document.documentElement.classList.add('light');
+            root.classList.remove('dark');
+            root.classList.add('light');
           }
         } catch (e) {
           document.documentElement.setAttribute('data-theme', 'dark');
+          document.documentElement.setAttribute('data-theme-mode', 'dark');
+          document.documentElement.style.colorScheme = 'dark';
           document.documentElement.classList.add('dark');
         }
       })();

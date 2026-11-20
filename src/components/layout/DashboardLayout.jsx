@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useCallback } from 'react';
-import { Outlet, useLocation } from 'react-router-dom';
+import { useLocation } from 'react-router-dom';
 import DevGridOverlay from '../ui/DevGridOverlay';
 import OfflineBanner from '../OfflineBanner';
 import DashboardSidebar from './DashboardSidebar';
@@ -8,12 +8,15 @@ import MobileDrawer from './MobileDrawer';
 import MobileTabBar from './MobileTabBar';
 import CommandPalette from './CommandPalette';
 import Footer from '../Footer';
+import RouteTransitionOutlet from './RouteTransitionOutlet';
 
 /**
- * Persistent Dashboard Layout Shell (Phase 4)
+ * Persistent Dashboard Layout Shell (Phase 4 & Phase 6)
  * Architecture:
  * - DashboardSidebar: persistent, memoized, collapsible (Ctrl+B), accordion groups, fade masks
  * - TopBar: auto-breadcrumbs, search trigger (⌘K), notifications, language, theme, user menu
+ * - RouteTransitionOutlet: animates only the inner <Outlet /> with direction-aware Framer Motion,
+ *   scroll restoration, <h1> focus management, aria-live announcements, and layout skeleton
  * - MobileDrawer: full slide-in menu with focus trap & Esc dismissal
  * - MobileTabBar: sticky bottom navigation for mobile viewports (<768px)
  * - CommandPalette: global Ctrl+K / Cmd+K search palette across all 36 routes
@@ -94,9 +97,9 @@ export function DashboardLayout() {
           {/* Dynamic Page Outlet with bottom padding for mobile tab bar */}
           <main
             id="dashboard-main"
-            className="flex-1 p-4 sm:p-6 lg:p-8 pb-20 md:pb-8 max-w-[1600px] w-full mx-auto min-w-0"
+            className="flex-1 p-4 sm:p-6 lg:p-8 pb-20 md:pb-8 max-w-[1600px] w-full mx-auto min-w-0 flex flex-col"
           >
-            <Outlet />
+            <RouteTransitionOutlet mode="dashboard" />
           </main>
 
           {/* Slim Workspace Footer (Product Mode) */}

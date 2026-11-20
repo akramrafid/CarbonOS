@@ -150,20 +150,97 @@ export default function BillIntakeWizard({ facilities = [], periods = [] }) {
     setStep(1);
   };
 
+  // Phase 7: Real state-driven field completion & 6-stage semantic stepper
+  const presentCount = gaps?.present?.length || 0;
+  const missingCount = gaps?.missing_required?.length || 0;
+  const lowConfCount = gaps?.low_confidence?.length || 0;
+  const totalFieldsCount = presentCount + missingCount;
+  const isScanning = uploadAction.busy || gapsLoading;
+  const isCalculating = estimateAction.busy || postAction.busy;
+
+  const semanticStageIndex = postResult || step === 5
+    ? 5
+    : isCalculating
+      ? 4
+      : step === 3 || missingCount > 0 || lowConfCount > 0
+        ? (step >= 3 ? 3 : 2)
+        : isScanning
+          ? 1
+          : billId
+            ? 2
+            : 0;
+
+  const SEMANTIC_STAGES = [
+    'Uploaded',
+    'Reading',
+    'Gaps found',
+    'Needs your input',
+    'Calculating',
+    'Result',
+  ];
+
   return (
     <Panel
       title={t.title}
       description={t.desc}
       actions={
-        <Button
-          variant="secondary"
-          className="text-xs"
-          onClick={() => setLang(lang === 'en' ? 'bn' : 'en')}
-        >
-          {t.langSwitch}
-        </Button>
+        <div className="flex items-center gap-2">
+          {billId && totalFieldsCount > 0 && (
+            <span
+              className="px-2.5 py-1 rounded-full bg-emerald/15 border border-emerald/30 text-emerald-300 font-mono text-xs tabular-nums"
+              data-testid="esg-fields-progress"
+            >
+              {presentCount}/{totalFieldsCount} fields complete
+            </span>
+          )}
+          <Button
+            variant="secondary"
+            className="text-xs"
+            onClick={() => setLang(lang === 'en' ? 'bn' : 'en')}
+          >
+            {t.langSwitch}
+          </Button>
+        </div>
       }
     >
+      {/* Phase 7: 6-Stage Real State Semantic Stepper + Scan Shimmer */}
+      <div className="space-y-2" data-testid="esg-semantic-stepper">
+        <div className="grid grid-cols-2 sm:grid-cols-6 gap-1.5 text-[11px] font-mono">
+          {SEMANTIC_STAGES.map((stageLabel, idx) => {
+            const isDone = idx < semanticStageIndex;
+            const isCurrent = idx === semanticStageIndex;
+            return (
+              <div
+                key={stageLabel}
+                className={`px-2.5 py-1.5 rounded-lg border flex items-center justify-between transition-colors ${
+                  isCurrent
+                    ? 'bg-emerald/15 border-emerald/50 text-emerald-300 font-semibold'
+                    : isDone
+                      ? 'bg-forest/50 border-emerald/20 text-registry'
+                      : 'bg-carbon/40 border-mist/10 text-mist/60'
+                }`}
+              >
+                <span className="truncate">{stageLabel}</span>
+                <span className="ml-1 text-[10px]">
+                  {isDone ? '✓' : isCurrent ? '●' : `${idx + 1}`}
+                </span>
+              </div>
+            );
+          })}
+        </div>
+
+        {isScanning && (
+          <div
+            role="status"
+            aria-live="polite"
+            className="w-full h-1.5 rounded-full bg-forest overflow-hidden"
+            data-testid="esg-scan-shimmer"
+          >
+            <div className="h-full w-2/3 bg-emerald animate-pulse rounded-full" />
+          </div>
+        )}
+      </div>
+
       {/* Step Navigation Bar */}
       <nav className="flex items-center justify-between border-b border-emerald/10 pb-4 overflow-x-auto text-xs font-mono">
         {[
@@ -176,11 +253,11 @@ export default function BillIntakeWizard({ facilities = [], periods = [] }) {
           <Button
             key={s}
             type="button"
-            variant={step === s ? 'primary' : 'ghost'}
+            variant={step === s ? 'secondary' : 'ghost'}
             size="sm"
             disabled={s > step && (!billId || (s === 4 && gaps?.missing_required?.length > 0))}
             onClick={() => setStep(s)}
-            className="text-xs font-mono"
+            className={`text-xs font-mono ${step === s ? 'border-emerald/50 text-emerald-300' : ''}`}
           >
             {label}
           </Button>

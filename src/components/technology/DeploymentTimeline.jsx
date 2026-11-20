@@ -1,31 +1,32 @@
 import React from 'react';
+import { Target } from 'lucide-react';
 
 const DeploymentTimeline = () => {
   const phases = [
     {
       id: "Phase 1",
       timeframe: "Q1–Q2 2025",
-      title: "Pilot Deployment — Chittagong Hill Tracts",
+      title: "Pilot Deployment: Chittagong Hill Tracts",
       items: [
         "50 IoT sensor nodes across 5 agroforestry projects",
         "LoRaWAN network covering 200 hectares",
         "Google Earth Engine satellite integration live",
         "First 10 carbon credits issued on Carbon Zero BD registry"
       ],
-      milestone: "MoEFCC letter of support secured",
+      milestone: "Pilot Registry & Telemetry Validation (Demo data)",
       active: true
     },
     {
       id: "Phase 2",
       timeframe: "Q3–Q4 2025",
-      title: "National Scale-up — 8 Divisions",
+      title: "National Scale-up: 8 Divisions",
       items: [
         "500 sensor nodes, 8 district coverage",
         "Drone NDVI survey program launched",
         "Corporate buyer marketplace open (beta)",
-        "First verified credit sale completed"
+        "Verified credit batch settlement testing"
       ],
-      milestone: "৳5.8 Crore pilot revenue",
+      milestone: "Multi-Division dMRV Coverage Target (Demo data)",
       active: false
     },
     {
@@ -35,10 +36,10 @@ const DeploymentTimeline = () => {
       items: [
         "5,000+ sensor nodes nationally",
         "GHG flux analyzer network (paddy methane)",
-        "International credit standard certification (VCS/Gold Standard)",
-        "Bangladesh Carbon Exchange launch"
+        "International methodology alignment (Verra VCS / Gold Standard)",
+        "Article 6.2 CAD Trust metadata bridge"
       ],
-      milestone: "৳58 Crore ARR, Series A close",
+      milestone: "National Registry & Article 6.2 Readiness Target (Demo data)",
       active: false
     }
   ];
@@ -76,8 +77,8 @@ const DeploymentTimeline = () => {
               </ul>
               
               <div className="bg-bg-canvas border border-border-subtle p-4 rounded-lg flex items-center">
-                <div className="w-8 h-8 rounded-full bg-accent/10 flex items-center justify-center mr-3 shrink-0">
-                  <span className="text-accent">🎯</span>
+                <div className="w-8 h-8 rounded-full bg-accent/10 flex items-center justify-center mr-3 shrink-0 text-accent">
+                  <Target className="w-4 h-4" />
                 </div>
                 <div>
                   <p className="text-xs text-fg-secondary uppercase tracking-wider font-semibold">Key Milestone</p>

@@ -21,10 +21,10 @@ export const CorporateClientModal = (props) => {
       isOpen={isOpen}
       onClose={onClose}
       title="Select Client Workspace Profile"
-      subtitle="Seamlessly switch between our enterprise clients to inspect dedicated operational baselines."
+      subtitle="Demo data: Switch between illustrative Bangladesh enterprise profiles to inspect Scope 1, 2, and 3 operational baselines."
       size="xl"
     >
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-3.5 max-h-[60vh] overflow-y-auto pr-1">
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-3.5 max-h-[60dvh] overflow-y-auto pr-1">
         {profiles.map((client) => {
           const isSelected = client.id === activeClientId;
           return (

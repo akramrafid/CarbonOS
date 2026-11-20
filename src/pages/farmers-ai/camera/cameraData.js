@@ -10,14 +10,14 @@ export const DISEASE_MAPS = {
 };
 
 export const CROPS = [
-  { id: 'rice', name: 'Rice / ধান', icon: '🌾' },
-  { id: 'potato', name: 'Potato / আলু', icon: '🥔' },
-  { id: 'tomato', name: 'Tomato / টমেটো', icon: '🍅' },
-  { id: 'maize', name: 'Maize / ভুট্টা', icon: '🌽' },
-  { id: 'mango', name: 'Mango / আম', icon: '🥭' },
-  { id: 'jackfruit', name: 'Jackfruit / কাঁঠাল', icon: '🌳' },
-  { id: 'guava', name: 'Guava / পেয়ারা', icon: '🍏' },
-  { id: 'citrus', name: 'Citrus / লেবু', icon: '🍋' }
+  { id: 'rice', name: 'Rice / ধান', icon: 'Sprout' },
+  { id: 'potato', name: 'Potato / আলু', icon: 'Leaf' },
+  { id: 'tomato', name: 'Tomato / টমেটো', icon: 'Leaf' },
+  { id: 'maize', name: 'Maize / ভুট্টা', icon: 'Sprout' },
+  { id: 'mango', name: 'Mango / আম', icon: 'Trees' },
+  { id: 'jackfruit', name: 'Jackfruit / কাঁঠাল', icon: 'Trees' },
+  { id: 'guava', name: 'Guava / পেয়ারা', icon: 'Trees' },
+  { id: 'citrus', name: 'Citrus / লেবু', icon: 'Trees' }
 ];
 
 export function checkImageBlur(canvas) {

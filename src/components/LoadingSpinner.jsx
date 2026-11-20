@@ -38,7 +38,7 @@ export const LoadingSpinner = ({
       className={`w-full flex flex-col items-center justify-center font-sans relative overflow-hidden transition-colors ${
         isScreen
           ? 'fixed inset-0 z-[100] bg-carbon text-registry'
-          : 'min-h-[55vh] py-16 bg-transparent text-registry'
+          : 'min-h-[55dvh] py-16 bg-transparent text-registry'
       } ${className}`}
       role="status"
       aria-live="polite"

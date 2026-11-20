@@ -31,7 +31,7 @@ export const Forbidden = () => {
 
   return (
     <main
-      className={`min-h-[85vh] flex items-center justify-center px-4 sm:px-6 py-10 md:py-16 relative overflow-hidden font-sans transition-colors duration-300 ${
+      className={`min-h-[85dvh] flex items-center justify-center px-4 sm:px-6 py-10 md:py-16 relative overflow-hidden font-sans transition-colors duration-300 ${
         isLight ? 'bg-bg-canvas text-fg-primary' : 'bg-carbon text-registry'
       }`}
     >

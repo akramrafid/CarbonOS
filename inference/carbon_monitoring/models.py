@@ -99,6 +99,8 @@ class GroundTruthPlot(Base):
     measurement_method = Column(String(100), nullable=False)  # e.g. 'destructive_sampling', 'allometric_field_inventory'
     collected_by = Column(String(255), nullable=False)
     notes = Column(Text, nullable=True)
+    user_id = Column(String(100), nullable=True)
+    organization_id = Column(String(100), nullable=True)
     # Set true once this plot has been consumed by a successful recalibration run,
     # so re-running calibration doesn't need to guess what's new.
     used_in_training = Column(Boolean, default=False)
@@ -189,6 +191,8 @@ class CarbonAlert(Base):
     message = Column(Text, nullable=False)
     suggested_action = Column(Text, nullable=False)
     is_resolved = Column(Boolean, default=False)
+    user_id = Column(String(100), nullable=True)
+    organization_id = Column(String(100), nullable=True)
     created_at = Column(DateTime, default=datetime.datetime.utcnow)
 
 

@@ -48,7 +48,7 @@ export function MobileDrawer({ isOpen, onClose }) {
     >
       <div
         ref={drawerRef}
-        className="w-80 max-w-[85vw] bg-bg-surface h-full flex flex-col p-4 shadow-2xl border-r border-border-subtle animate-slide-in min-w-0"
+        className="w-80 max-w-[85vw] bg-bg-surface h-full flex flex-col p-4 pt-[max(1rem,env(safe-area-inset-top,1rem))] pb-[max(1rem,env(safe-area-inset-bottom,1rem))] shadow-2xl border-r border-border-subtle animate-slide-in min-w-0"
         onClick={(e) => e.stopPropagation()}
       >
         {/* Header */}

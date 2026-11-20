@@ -1,40 +1,70 @@
 import React from 'react';
-import { Inbox } from 'lucide-react';
-import Button from './Button';
+import { Button } from './Button';
 
 /**
- * Universal EmptyState Component
- * Follows Design Principle: Left-align by default; center only hero and empty states
+ * EmptyState (Phase 7.2)
+ * Purposeful empty state with an inline vector illustration, clear explanation,
+ * and at most ONE primary action.
  */
 export function EmptyState({
-  icon: Icon = Inbox,
-  title,
-  description,
+  title = 'No records found',
+  description = 'Get started by creating a new entry or adjusting your active filters.',
   actionLabel,
   onAction,
-  className = ''
+  icon,
+  className = '',
 }) {
   return (
-    <div className={`flex flex-col items-center justify-center text-center p-8 sm:p-12 rounded-2xl border border-dashed border-carbon-border dark:border-border-subtle bg-carbon-surface/30 dark:bg-bg-surface/30 ${className}`}>
-      <div className="w-12 h-12 rounded-xl bg-carbon-surface-raised flex items-center justify-center text-mist mb-4 border border-carbon-border/60 dark:bg-bg-elevated dark:border-border-subtle dark:text-fg-secondary" aria-hidden="true">
-        <Icon className="w-6 h-6" />
+    <div
+      className={`w-full rounded-2xl border border-border-subtle bg-bg-surface p-8 text-center flex flex-col items-center justify-center space-y-4 ${className}`.trim()}
+    >
+      <div
+        className="w-16 h-16 rounded-2xl bg-bg-elevated border border-border-subtle flex items-center justify-center text-accent"
+        aria-hidden="true"
+      >
+        {icon || (
+          <svg
+            viewBox="0 0 48 48"
+            fill="none"
+            className="w-9 h-9 text-accent"
+            xmlns="http://www.w3.org/2000/svg"
+          >
+            <rect
+              x="6"
+              y="10"
+              width="36"
+              height="28"
+              rx="5"
+              stroke="currentColor"
+              strokeWidth="2"
+              strokeDasharray="4 3"
+            />
+            <path
+              d="M16 24H32M24 16V32"
+              stroke="currentColor"
+              strokeWidth="2.2"
+              strokeLinecap="round"
+            />
+          </svg>
+        )}
       </div>
-      <h3 className="text-base sm:text-lg font-sans font-semibold text-registry mb-1 dark:text-fg-primary">
-        {title}
-      </h3>
-      {description && (
-        <p className="text-xs sm:text-sm text-mist max-w-sm mb-6 leading-relaxed dark:text-fg-secondary">
+
+      <div className="space-y-1.5 max-w-md">
+        <h3 className="text-base font-sans font-semibold text-fg-primary">{title}</h3>
+        <p className="text-xs sm:text-sm font-sans text-fg-secondary leading-relaxed">
           {description}
         </p>
-      )}
+      </div>
+
       {actionLabel && onAction && (
-        <Button variant="secondary" size="sm" onClick={onAction}>
-          {actionLabel}
-        </Button>
+        <div className="pt-1">
+          <Button variant="primary" size="md" onClick={onAction}>
+            {actionLabel}
+          </Button>
+        </div>
       )}
     </div>
   );
 }
 
 export default EmptyState;
-

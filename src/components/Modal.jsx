@@ -107,7 +107,7 @@ export const Modal = ({
       <div
         ref={modalRef}
         tabIndex={-1}
-        className={`relative w-full ${sizeClasses} bg-white dark:bg-bg-elevated text-gray-900 dark:text-white border border-border-strong dark:border-emerald/30 rounded-3xl shadow-[0_25px_70px_rgba(0,0,0,0.25)] dark:shadow-[0_25px_70px_rgba(0,0,0,0.65)] overflow-hidden flex flex-col max-h-[90vh] outline-none ${className}`}
+        className={`relative w-full ${sizeClasses} bg-white dark:bg-bg-elevated text-gray-900 dark:text-white border border-border-strong dark:border-emerald/30 rounded-3xl shadow-[0_25px_70px_rgba(0,0,0,0.25)] dark:shadow-[0_25px_70px_rgba(0,0,0,0.65)] overflow-hidden flex flex-col max-h-[90dvh] outline-none ${className}`}
         onClick={(e) => e.stopPropagation()} // Prevent backdrop click from inner content
       >
         {/* Modal Header */}

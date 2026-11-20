@@ -5,7 +5,7 @@ import SystemTelemetryCard from './mrv/SystemTelemetryCard';
 import IotStationCard from './mrv/IotStationCard';
 import AssetHealthAlertsCard from './mrv/AssetHealthAlertsCard';
 
-const DJANGO_API_URL = import.meta.env.VITE_DJANGO_API_URL || 'http://localhost:8001';
+const DJANGO_API_URL = import.meta.env.VITE_DJANGO_API_URL || '';
 
 const MRVDashboard = () => {
   const BLYNK_TOKEN = import.meta.env.VITE_BLYNK_AUTH_TOKEN || '';
@@ -32,6 +32,10 @@ const MRVDashboard = () => {
   const [leftTab, setLeftTab] = useState('sensor_logs');
 
   const fetchTrends = () => {
+    if (!DJANGO_API_URL) {
+      setTrendsLoading(false);
+      return;
+    }
     fetch(`${DJANGO_API_URL}/api/farmers-ai/mrv/carbon-health-trends/`)
       .then((res) => res.json())
       .then((data) => {
@@ -40,13 +44,24 @@ const MRVDashboard = () => {
         }
         setTrendsLoading(false);
       })
-      .catch((err) => {
-        console.error('Failed to fetch trends', err);
+      .catch(() => {
         setTrendsLoading(false);
       });
   };
 
   const fetchTelemetryHistory = async () => {
+    if (!DJANGO_API_URL) {
+      const localHistory = localStorage.getItem('carbonos_telemetry_history');
+      if (localHistory) {
+        try {
+          setTelemetryHistory(JSON.parse(localHistory));
+        } catch {
+          setTelemetryHistory([]);
+        }
+      }
+      setTelemetryLoading(false);
+      return;
+    }
     try {
       const res = await fetch(`${DJANGO_API_URL}/api/farmers-ai/mrv/telemetry/history/`);
       if (!res.ok) throw new Error('Failed to fetch history');
@@ -54,11 +69,14 @@ const MRVDashboard = () => {
       if (Array.isArray(data)) {
         setTelemetryHistory(data);
       }
-    } catch (err) {
-      console.error('Failed to fetch telemetry history from server:', err);
+    } catch {
       const localHistory = localStorage.getItem('carbonos_telemetry_history');
       if (localHistory) {
-        setTelemetryHistory(JSON.parse(localHistory));
+        try {
+          setTelemetryHistory(JSON.parse(localHistory));
+        } catch {
+          setTelemetryHistory([]);
+        }
       }
     } finally {
       setTelemetryLoading(false);
@@ -87,6 +105,11 @@ const MRVDashboard = () => {
     localHistory = [newReading, ...localHistory].slice(0, 50);
     localStorage.setItem('carbonos_telemetry_history', JSON.stringify(localHistory));
 
+    if (!DJANGO_API_URL) {
+      setTelemetryHistory(localHistory);
+      return;
+    }
+
     try {
       const res = await fetch(`${DJANGO_API_URL}/api/farmers-ai/mrv/telemetry/save/`, {
         method: 'POST',
@@ -103,8 +126,7 @@ const MRVDashboard = () => {
       } else {
         setTelemetryHistory(localHistory);
       }
-    } catch (err) {
-      console.error('Failed to save telemetry to server, using local fallback:', err);
+    } catch {
       setTelemetryHistory(localHistory);
     }
   };
@@ -149,8 +171,7 @@ const MRVDashboard = () => {
       if (!isNaN(temp) && !isNaN(hum) && !isNaN(air) && !isNaN(co2)) {
         await saveTelemetry(temp, hum, air, co2);
       }
-    } catch (err) {
-      console.error('Error fetching Blynk data:', err);
+    } catch {
       setBlynkError('Failed to sync with Blynk Cloud.');
     }
   };
@@ -193,7 +214,10 @@ const MRVDashboard = () => {
     fetchTelemetryHistory();
     fetchBlynkLive();
 
-    const interval = setInterval(fetchBlynkLive, 5000);
+    const interval = setInterval(() => {
+      if (typeof document !== 'undefined' && document.visibilityState === 'hidden') return;
+      fetchBlynkLive();
+    }, 5000);
     return () => clearInterval(interval);
   }, []);
 
@@ -201,6 +225,7 @@ const MRVDashboard = () => {
     let timer;
     if (deviceConnected) {
       timer = setInterval(() => {
+        if (typeof document !== 'undefined' && document.visibilityState === 'hidden') return;
         setMitigatedToday((prev) => prev + 0.00012);
       }, 1000);
     }
@@ -311,7 +336,7 @@ const MRVDashboard = () => {
   const hasAlerts = allAlerts.length > 0;
 
   return (
-    <div className="pt-12 pb-8 sm:pt-16 sm:pb-12 min-h-[80vh] flex flex-col items-center noise-overlay">
+    <div className="pt-12 pb-8 sm:pt-16 sm:pb-12 min-h-[80dvh] flex flex-col items-center noise-overlay">
       <div className="max-w-5xl w-full mx-auto px-6 lg:px-12 relative z-10 space-y-8">
         <PageHeader
           title="MRV Dashboard"

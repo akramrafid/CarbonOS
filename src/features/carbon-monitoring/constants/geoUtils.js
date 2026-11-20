@@ -18,6 +18,20 @@ export const getAuthHeaders = () => {
 };
 
 export const authFetch = (url, options = {}) => {
+  const configuredUrl = typeof import.meta !== 'undefined' ? import.meta.env?.VITE_FASTAPI_API_URL : '';
+  const hasExplicitBackend = Boolean(
+    (typeof window !== 'undefined' && window.__CARBONOS_LIVE_BACKEND__) ||
+    (typeof import.meta !== 'undefined' && import.meta.env?.VITE_ENABLE_LIVE_BACKEND === 'true') ||
+    (configuredUrl && !configuredUrl.includes('localhost:8000'))
+  );
+  if (!hasExplicitBackend && typeof url === 'string' && url.startsWith('http://localhost:8000')) {
+    return Promise.resolve({
+      ok: false,
+      status: 503,
+      json: async () => ({}),
+      text: async () => ''
+    });
+  }
   const headers = {
     ...getAuthHeaders(),
     ...(options.headers || {})

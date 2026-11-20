@@ -51,12 +51,21 @@ class CopernicusClient:
         """
         Searches CDSE catalogue for products overlapping a bounding box (min_lng, min_lat, max_lng, max_lat).
         """
+        import datetime as _dt
+        if platform not in {"Sentinel1", "Sentinel2"}:
+            raise ValueError(f"Unsupported platform '{platform}'")
+        if not isinstance(bbox, (list, tuple)) or len(bbox) != 4:
+            raise ValueError("bbox must be [min_lng, min_lat, max_lng, max_lat]")
+        b0, b1, b2, b3 = (float(x) for x in bbox)
+        _dt.date.fromisoformat(start_date)
+        _dt.date.fromisoformat(end_date)
+
         # Format dates to ISO
         s_date = f"{start_date}T00:00:00.000Z"
         e_date = f"{end_date}T23:59:59.999Z"
         
         # Bounding box as WKT Polygon: POLYGON((lng1 lat1, lng2 lat1, lng3 lat2, ...))
-        wkt_polygon = f"POLYGON(({bbox[0]} {bbox[1]}, {bbox[2]} {bbox[1]}, {bbox[2]} {bbox[3]}, {bbox[0]} {bbox[3]}, {bbox[0]} {bbox[1]}))"
+        wkt_polygon = f"POLYGON(({b0} {b1}, {b2} {b1}, {b2} {b3}, {b0} {b3}, {b0} {b1}))"
         
         query_filter = (
             f"ContentDate/Start gt {s_date} and ContentDate/Start lt {e_date} "
@@ -87,11 +96,17 @@ class CopernicusClient:
         """
         Downloads a product file by ID using OData stream endpoint.
         """
+        import uuid as _uuid
+        try:
+            validated_id = str(_uuid.UUID(str(product_id).strip()))
+        except ValueError:
+            raise ValueError(f"Invalid Copernicus product_id UUID: {product_id}")
+
         if not self.access_token:
             if not self.authenticate():
                 return False
                 
-        download_url = f"https://zipper.dataspace.copernicus.eu/odata/v1/Products({product_id})/$value"
+        download_url = f"https://zipper.dataspace.copernicus.eu/odata/v1/Products({validated_id})/$value"
         headers = {"Authorization": f"Bearer {self.access_token}"}
 
         try:
@@ -114,6 +129,19 @@ class CopernicusClient:
 from urllib.parse import urlparse
 
 
+def _is_trusted_earthdata_url(url: str) -> bool:
+    parsed = urlparse(url or "")
+    if parsed.scheme != "https":
+        return False
+    hostname = (parsed.hostname or "").lower()
+    return (
+        hostname == "earthdata.nasa.gov"
+        or hostname.endswith(".earthdata.nasa.gov")
+        or hostname == "earthdatacloud.nasa.gov"
+        or hostname.endswith(".earthdatacloud.nasa.gov")
+    )
+
+
 class EarthdataAuthSession(requests.Session):
     """
     Custom requests session preserving authentication across NASA Earthdata domain redirects.
@@ -121,8 +149,10 @@ class EarthdataAuthSession(requests.Session):
     (e.g., from data.lpdaac.earthdatacloud.nasa.gov to urs.earthdata.nasa.gov).
     """
     def rebuild_auth(self, prepared_request, response):
-        hostname = urlparse(prepared_request.url).hostname
-        if hostname and (hostname.endswith("earthdata.nasa.gov") or hostname.endswith("earthdatacloud.nasa.gov")):
+        # [COMMENTED OUT FOR PERSONAL REFERENCE — suffix without leading dot matched lookalike domains like badearthdata.nasa.gov]
+        # hostname = urlparse(prepared_request.url).hostname
+        # if hostname and (hostname.endswith("earthdata.nasa.gov") or hostname.endswith("earthdatacloud.nasa.gov")):
+        if _is_trusted_earthdata_url(prepared_request.url):
             prepared_request.prepare_auth(self.auth)
         elif "Authorization" in prepared_request.headers:
             del prepared_request.headers["Authorization"]
@@ -169,6 +199,9 @@ class EarthdataClient:
         """
         Downloads NASA HDF5/GeoTIFF files using Earthdata credentials.
         """
+        if not _is_trusted_earthdata_url(download_url):
+            print("[NASA Earthdata] Refusing untrusted or non-HTTPS download URL.")
+            return False
         if not self.username or not self.password:
             print("[NASA Earthdata] Credentials missing. Cannot download secure datasets.")
             return False

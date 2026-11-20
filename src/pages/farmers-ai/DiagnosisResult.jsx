@@ -20,6 +20,7 @@ const DiagnosisResult = ({ isInline = false, onBack = null, inlineResult = null,
   const { result: routeResult, imageBlob: routeImageBlob } = location.state || {};
   const [isPlaying, setIsPlaying] = useState(false);
   const [activeTab, setActiveTab] = useState('immediate');
+  const [gradCamOpacity, setGradCamOpacity] = useState(60);
 
   const result = isInline ? inlineResult : routeResult;
   const imageBlob = isInline ? inlineImageBlob : routeImageBlob;
@@ -119,33 +120,86 @@ const DiagnosisResult = ({ isInline = false, onBack = null, inlineResult = null,
         badge={isOffline ? <Badge variant="warning"><WifiOff className="w-3 h-3 mr-1 inline" /> Offline</Badge> : undefined}
       />
 
-      {/* Crop Image */}
-      <div className="relative rounded-[24px] overflow-hidden shadow-2xl ring-1 ring-white/10 aspect-video bg-black">
-        <img src={imageBlob} alt="Crop" className="absolute inset-0 w-full h-full object-cover" />
-        {heatmap_url ? (
-          <img src={heatmap_url} alt="Heatmap" className="absolute inset-0 w-full h-full object-cover opacity-60 mix-blend-screen" />
-        ) : (
-          !isHealthy && (
-            <div className="absolute inset-0 bg-[radial-gradient(circle_at_center,rgba(239,68,68,0.35)_0%,transparent_60%)] mix-blend-screen pointer-events-none animate-pulse" />
-          )
-        )}
-        {/* Species badge */}
-        <div className="absolute top-4 left-4 bg-black/75 backdrop-blur px-3.5 py-1 rounded-full text-xs font-bold text-white capitalize border border-white/10">
-          {species}
-        </div>
-        {/* Urgency badge */}
-        {!isHealthy && (
-          <div className={`absolute top-4 right-4 flex items-center gap-1.5 ${urgency.bg} border ${urgency.border} backdrop-blur px-3 py-1 rounded-full`}>
-            <span className={`w-1.5 h-1.5 rounded-full ${urgency.dot} animate-pulse`} />
-            <span className={`text-[11px] font-bold ${urgency.color}`}>{urgency.label}</span>
+      {/* Crop Image + Grad-CAM Opacity Comparison */}
+      <div className="space-y-2.5">
+        <div className="relative rounded-[24px] overflow-hidden shadow-2xl ring-1 ring-white/10 aspect-video bg-black">
+          <img src={imageBlob} alt="Crop" className="absolute inset-0 w-full h-full object-cover" />
+          {heatmap_url ? (
+            <img
+              src={heatmap_url}
+              alt="Grad-CAM Heatmap"
+              style={{ opacity: gradCamOpacity / 100 }}
+              className="absolute inset-0 w-full h-full object-cover mix-blend-screen transition-opacity duration-150"
+            />
+          ) : (
+            !isHealthy && (
+              <div
+                style={{ opacity: gradCamOpacity / 100 }}
+                className="absolute inset-0 bg-[radial-gradient(circle_at_center,rgba(239,68,68,0.45)_0%,transparent_60%)] mix-blend-screen pointer-events-none transition-opacity duration-150"
+              />
+            )
+          )}
+          {/* Species badge */}
+          <div className="absolute top-4 left-4 bg-black/75 backdrop-blur px-3.5 py-1 rounded-full text-xs font-bold text-white capitalize border border-white/10">
+            {species}
           </div>
-        )}
+          {/* Urgency badge */}
+          {!isHealthy && (
+            <div className={`absolute top-4 right-4 flex items-center gap-1.5 ${urgency.bg} border ${urgency.border} backdrop-blur px-3 py-1 rounded-full`}>
+              <span className={`w-1.5 h-1.5 rounded-full ${urgency.dot} animate-pulse`} />
+              <span className={`text-[11px] font-bold ${urgency.color}`}>{urgency.label}</span>
+            </div>
+          )}
+        </div>
+
+        {/* Phase 7: Grad-CAM Original-to-Heatmap Slider & Quick Toggles */}
+        <div className="flex flex-wrap items-center justify-between gap-3 px-4 py-2.5 rounded-2xl bg-white/5 border border-white/10 text-xs">
+          <div className="flex items-center gap-1.5">
+            <Button
+              type="button"
+              variant="ghost"
+              size="sm"
+              onClick={() => setGradCamOpacity(0)}
+              className="text-[11px] font-mono h-8 px-2.5"
+            >
+              Original
+            </Button>
+            <Button
+              type="button"
+              variant="ghost"
+              size="sm"
+              onClick={() => setGradCamOpacity(60)}
+              className="text-[11px] font-mono h-8 px-2.5"
+            >
+              Blend (60%)
+            </Button>
+            <Button
+              type="button"
+              variant="ghost"
+              size="sm"
+              onClick={() => setGradCamOpacity(100)}
+              className="text-[11px] font-mono h-8 px-2.5"
+            >
+              Grad-CAM
+            </Button>
+          </div>
+          <label className="flex items-center gap-2 flex-1 min-w-[160px] font-mono text-[11px] text-white/70">
+            <span>Heatmap:</span>
+            <input
+              type="range"
+              min="0"
+              max="100"
+              value={gradCamOpacity}
+              aria-label="Crop Grad-CAM heatmap opacity"
+              onChange={(e) => setGradCamOpacity(Number(e.target.value))}
+              className="flex-1 accent-emerald-500 cursor-pointer"
+            />
+            <span className="tabular-nums text-emerald-400 w-9 text-right">{gradCamOpacity}%</span>
+          </label>
+        </div>
       </div>
 
-      {/* Disease Header Card */}
       <div className="fade-in-up bg-white/5 border border-white/10 rounded-[24px] p-5 relative overflow-hidden">
-        <div className="absolute top-0 right-0 w-32 h-32 bg-lime-400/5 blur-3xl rounded-full pointer-events-none" />
-        
         <div className="flex items-start justify-between relative z-10">
           <div className="flex-1">
             <p className="text-white/50 text-xs font-semibold uppercase tracking-wider mb-1">Detected Condition</p>
@@ -201,8 +255,8 @@ const DiagnosisResult = ({ isInline = false, onBack = null, inlineResult = null,
 
         {isTierA && !isHealthy && (
           <div className="mt-3 flex items-center gap-2 bg-blue-500/10 border border-blue-400/20 px-4 py-2.5 rounded-xl relative z-10">
-            <span className="text-base">🛡️</span>
-            <p className="text-blue-300 text-xs font-semibold">Priority crop — early treatment protects your seasonal yield.</p>
+            <ShieldCheck className="w-4 h-4 text-blue-400 shrink-0" />
+            <p className="text-blue-300 text-xs font-semibold">Priority crop: early treatment protects your seasonal yield.</p>
           </div>
         )}
 
@@ -214,11 +268,7 @@ const DiagnosisResult = ({ isInline = false, onBack = null, inlineResult = null,
         )}
       </div>
 
-      {/* Treatment Plan Card */}
       <div className="fade-in-up bg-white/5 border border-white/10 rounded-[24px] p-5 relative overflow-hidden" style={{ animationDelay: '0.1s' }}>
-        <div className="absolute top-0 left-0 w-24 h-24 bg-lime-400/5 blur-2xl rounded-full pointer-events-none" />
-        
-        {/* Header */}
         <div className="flex items-center justify-between mb-5 relative z-10">
           <div>
             <div className="flex items-center gap-2 mb-0.5">
@@ -287,7 +337,7 @@ const DiagnosisResult = ({ isInline = false, onBack = null, inlineResult = null,
             {weather_risk.risk_index && (
               <div className="mt-2 flex items-center gap-2">
                 <div className="h-1.5 flex-1 bg-white/10 rounded-full overflow-hidden">
-                  <div className="h-full bg-gradient-to-r from-blue-400 to-blue-300 rounded-full transition-all" style={{ width: `${Math.min(100, weather_risk.risk_index * 10)}%` }} />
+                  <div className="h-full bg-blue-400 rounded-full transition-all" style={{ width: `${Math.min(100, weather_risk.risk_index * 10)}%` }} />
                 </div>
                 <span className="text-blue-300 text-xs font-bold">{weather_risk.risk_index}/10</span>
               </div>

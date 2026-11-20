@@ -2,114 +2,13 @@
 @tailwind components;
 @tailwind utilities;
 
-/* ===== DARK THEME (Default) ===== */
-:root,
-[data-theme="dark"] {
-  --color-forest: #0D2B1A;
-  --color-carbon: #080F0B;
-  --color-emerald: #00C853;
-  --color-amber: #FFB300;
-  --color-registry: #F0F4F1;
-  --color-mist: #B2C4B8;
-
-  /* Surface and Inverse tokens */
-  --color-surface-base: #080F0B;
-  --color-surface-muted: #0D2B1A;
-  --color-surface-strong: #0A1F13;
-  --color-text-inverse: #080F0B;
-
-  /* Semantic tokens */
-  --color-bg-primary: #080F0B;
-  --color-bg-secondary: #0D2B1A;
-  --color-bg-glass: rgba(255, 255, 255, 0.05);
-  --color-bg-glass-hover: rgba(255, 255, 255, 0.08);
-  --color-text-primary: #F0F4F1;
-  --color-text-secondary: rgba(255, 255, 255, 0.8);
-  --color-text-muted: rgba(255, 255, 255, 0.65);
-  --color-border: rgba(0, 200, 83, 0.15);
-  --color-border-subtle: rgba(255, 255, 255, 0.1);
-  --color-nav-bg: rgba(4, 10, 6, 0.85);
-  --color-nav-text: rgba(255, 255, 255, 0.8);
-  --color-nav-text-hover: #ffffff;
-  --color-card-bg: rgba(255, 255, 255, 0.05);
-  --color-card-border: rgba(255, 255, 255, 0.1);
-  --color-overlay: rgba(0, 0, 0, 0.2);
-  --shadow-glow: 0 0 20px rgba(0, 200, 83, 0.15);
-  --shadow-glow-hover: 0 0 40px rgba(0, 200, 83, 0.25);
-}
-
-/* ===== LIGHT THEME (Clean, Functional, Implementation-Oriented) ===== */
-[data-theme="light"] {
-  /* Style Foundations - Typography Tokens */
-  --font-family-primary: 'Instrument Sans', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
-  --font-family-stack: 'Instrument Sans', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
-
-  /* Style Foundations - Color Palette */
-  --color-surface-base: #f2f3ee;
-  --color-surface-muted: #f8faf8;
-  --color-surface-strong: #dbf0ea;
-  --color-text-primary: #181414;
-  --color-text-inverse: #ffffff;
-  --color-text-tertiary: #ffffff;
-
-  /* Style Foundations - Spacing Scale */
-  --space-1: 3px;
-  --space-2: 6px;
-  --space-3: 7px;
-  --space-4: 8px;
-  --space-5: 12px;
-  --space-6: 24px;
-  --space-7: 28px;
-  --space-8: 32px;
-
-  /* Style Foundations - Radius Tokens */
-  --radius-xs: 8px;
-  --radius-sm: 13px;
-  --radius-md: 16px;
-  --radius-lg: 100px;
-
-  /* Style Foundations - Shadow Tokens */
-  --shadow-1: rgba(4, 18, 38, 0.24) 0px 10px 26px 0px, rgba(0, 229, 255, 0) 0px 0px 0px 0px, rgba(255, 255, 255, 0.12) 0px 1px 0px 0px inset;
-
-  /* Style Foundations - Motion Tokens */
-  --motion-duration-instant: 100ms;
-  --motion-duration-fast: 280ms;
-  --motion-duration-normal: 400ms;
-  --motion-duration-slow: 500ms;
-
-  /* Semantic Color Tokens */
-  --color-forest: #dbf0ea;       /* Soft mint surface container */
-  --color-carbon: #f2f3ee;       /* Clean warm linen canvas */
-  --color-emerald: #166534;      /* Accessible forest emerald (WCAG AA 6.39:1) */
-  --color-amber: #b45309;        /* Warm amber */
-  --color-accent: #dbf0ea;       /* Mint highlight */
-  --color-registry: #413f3f;     /* Slate charcoal primary text */
-  --color-mist: #4b5563;         /* Slate secondary */
-
-  --color-bg-primary: #f2f3ee;   /* Clean linen canvas */
-  --color-bg-secondary: #dbf0ea; /* Mint strong container */
-  --color-bg-glass: rgba(242, 243, 238, 0.88);
-  --color-bg-glass-hover: rgba(219, 240, 234, 0.95);
-  --color-text-secondary: #413f3f;
-  --color-text-muted: rgba(65, 63, 63, 0.72);
-  --color-border: #dbf0ea;
-  --color-border-subtle: rgba(65, 63, 63, 0.12);
-  --color-nav-bg: rgba(242, 243, 238, 0.94);
-  --color-nav-text: #181414;
-  --color-nav-text-hover: #15803d;
-  --color-card-bg: #ffffff;
-  --color-card-border: #dbf0ea;
-  --color-overlay: rgba(24, 20, 20, 0.15);
-  --shadow-glow: 0 4px 20px rgba(4, 18, 38, 0.08);
-  --shadow-glow-hover: var(--shadow-1);
-}
+/* Canonical design tokens are defined in src/styles/tokens.css */
 
 body {
-  background-color: var(--color-carbon);
-  color: var(--color-registry);
+  background-color: var(--color-bg-canvas);
+  color: var(--color-fg-primary);
   font-family: 'Instrument Sans', sans-serif; /* impeccable-disable-line overused-font -- intentional primary brand typography */
   overflow-x: hidden;
-  transition: background-color var(--motion-duration-normal, 0.4s) ease, color var(--motion-duration-normal, 0.4s) ease;
 }
 
 /* Light Theme Base Surface & Text */
@@ -714,23 +613,7 @@ select option {
   background: rgba(0, 168, 68, 0.08);
 }
 
-/* ===== SMOOTH TRANSITION FOR THEME SWITCH ===== */
-*,
-*::before,
-*::after {
-  transition-property: background-color, border-color, color, box-shadow, opacity;
-  transition-duration: 0s;
-}
-
-[data-theme="light"] *,
-[data-theme="light"] *::before,
-[data-theme="light"] *::after,
-[data-theme="dark"] *,
-[data-theme="dark"] *::before,
-[data-theme="dark"] *::after {
-  transition-duration: 0.35s;
-  transition-timing-function: ease;
-}
+/* Theme switch ~200ms crossfade is scoped via html.theme-transitioning in src/styles/tokens.css */
 
 /* Hide scrollbar utility */
 .no-scrollbar::-webkit-scrollbar {

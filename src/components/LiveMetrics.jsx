@@ -64,8 +64,7 @@ const LiveMetrics = () => {
       setError(null);
       setLastUpdated(new Date().toLocaleTimeString());
       setPacketCount(prev => prev + 1);
-    } catch (err) {
-      console.warn("Blynk feed fallback to calibrated station model:", err);
+    } catch {
       setMetrics({
         temp: 29.2,
         hum: 68.5,
@@ -94,7 +93,10 @@ const LiveMetrics = () => {
   useEffect(() => {
     if (activeStation.isLiveFeed) {
       fetchLiveBlynkData();
-      const interval = setInterval(fetchLiveBlynkData, 6000);
+      const interval = setInterval(() => {
+        if (typeof document !== 'undefined' && document.visibilityState === 'hidden') return;
+        fetchLiveBlynkData();
+      }, 6000);
       return () => clearInterval(interval);
     }
   }, [activeStation]);
@@ -133,10 +135,6 @@ const LiveMetrics = () => {
       ref={containerRef} 
       className="w-full bg-bg-canvas text-white py-10 md:py-16 px-6 lg:px-12 relative overflow-hidden border-t border-white/10"
     >
-      {/* Background ambient radial illumination */}
-      <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[800px] h-[500px] bg-emerald-950/20 blur-[140px] pointer-events-none rounded-full" />
-      <div className="absolute top-0 right-0 w-[400px] h-[300px] bg-cyan-950/15 blur-[120px] pointer-events-none" />
-
       <div className="max-w-7xl mx-auto relative z-10">
         
         {/* Institutional Section Header */}
