@@ -114,7 +114,11 @@ export function GisInspectorDrawer(props) {
               size="sm"
               onClick={() => {
                 setStoredLocations([]);
-                localStorage.removeItem('carbonzero_stored_locations');
+                try {
+                  localStorage.removeItem('carbonzero_stored_locations');
+                } catch {
+                  // Ignore storage restrictions
+                }
               }}
               className="text-[10px] font-bold"
             >

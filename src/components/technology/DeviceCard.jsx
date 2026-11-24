@@ -2,17 +2,17 @@ import React from 'react';
 
 const DeviceCard = ({ name, model, measures, frequency, phase, status }) => {
   const phaseColor = 
-    phase.includes('1') ? 'bg-accent text-white' : 
-    phase.includes('2') ? 'bg-amber-500 text-white' : 
-    'bg-blue-500 text-white';
+    phase.includes('1') ? 'bg-accent text-fg-inverse' : 
+    phase.includes('2') ? 'bg-amber-500 text-fg-inverse' : 
+    'bg-blue-500 text-fg-inverse';
 
   const statusColor = 
     status.toLowerCase() === 'deployed' ? 'bg-accent/10 text-accent border-border-strong/20' : 
     status.toLowerCase() === 'pilot' ? 'bg-amber-500/10 text-amber-500 border-amber-500/20' : 
-    'bg-slate-100 text-fg-secondary border-border-subtle';
+    'bg-bg-muted text-fg-secondary border-border-subtle';
 
   return (
-    <div className="bg-white border border-border-subtle rounded-xl p-6 transition-all duration-300 hover:-translate-y-1 hover:shadow-[0_8px_24px_rgba(0,0,0,0.08)] flex flex-col h-full">
+    <div className="bg-bg-surface border border-border-subtle rounded-xl p-6 transition-all duration-300 hover:-translate-y-1 hover:shadow-[0_8px_24px_rgba(0,0,0,0.08)] flex flex-col h-full">
       <div className="flex justify-between items-start mb-6">
         <div className="w-16 h-16 bg-bg-canvas rounded-lg border border-border-subtle flex items-center justify-center shrink-0">
           <svg className="w-8 h-8 text-accent" fill="none" viewBox="0 0 24 24" stroke="currentColor">

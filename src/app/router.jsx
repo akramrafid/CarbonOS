@@ -1,3 +1,4 @@
+/* [COMMENTED OUT FOR PERSONAL REFERENCE — unused duplicate router; src/App.jsx owns the active route tree]
 import React from 'react';
 import { Routes, Route } from 'react-router-dom';
 import MarketingLayout from '../components/layout/MarketingLayout';
@@ -53,35 +54,26 @@ const LocalRiskMap = React.lazy(() => import('../components/farmers-ai/LocalRisk
 export function AppRouter() {
   return (
     <Routes>
-      {/* Brand & Marketing Shell (Navbar + Footer persistent across transitions) */}
       <Route element={<MarketingLayout />}>
         <Route path="/" element={<Home />} />
         <Route path="/how-it-works" element={<HowItWorks />} />
         <Route path="/technology" element={<Technology />} />
-
-        {/* Sector Pages */}
         <Route path="/sectors/solar-irrigation" element={<SolarIrrigation />} />
         <Route path="/sectors/rice-methane" element={<RiceMethane />} />
         <Route path="/sectors/clean-cookstoves" element={<CleanCookstoves />} />
         <Route path="/sectors/waste-to-energy" element={<WasteToEnergy />} />
         <Route path="/sectors/mangrove-carbon" element={<MangroveCarbon />} />
         <Route path="/sectors/brick-kilns" element={<BrickKilns />} />
-
-        {/* Company Pages */}
         <Route path="/company/about" element={<About />} />
         <Route path="/company/framework-docs" element={<FrameworkDocs />} />
         <Route path="/company/api-docs" element={<APIDocs />} />
         <Route path="/company/careers" element={<Careers />} />
         <Route path="/company/privacy" element={<Privacy />} />
         <Route path="/company/terms" element={<Terms />} />
-
-        {/* Error / Edge Pages */}
         <Route path="/forbidden" element={<Forbidden />} />
         <Route path="/unauthorized" element={<Forbidden />} />
         <Route path="*" element={<NotFound />} />
       </Route>
-
-      {/* Product Dashboard Shell (Sidebar + Top Bar persistent across transitions) */}
       <Route element={<DashboardLayout />}>
         <Route path="/platform/project-onboarding" element={<ProjectOnboarding />} />
         <Route path="/platform/mrv-dashboard" element={<MRVDashboard />} />
@@ -97,8 +89,6 @@ export function AppRouter() {
         <Route path="/platform/esg/callback" element={<EsgCallback />} />
         <Route path="/platform/impact" element={<Impact />} />
         <Route path="/carbon-monitoring" element={<CarbonMonitoring />} />
-
-        {/* Farmer's AI & HarvestGuard */}
         <Route path="/farmers-ai" element={<FarmersAILanding />} />
         <Route path="/farmers-ai/camera" element={<CameraCapture />} />
         <Route path="/farmers-ai/result" element={<DiagnosisResult />} />
@@ -106,8 +96,6 @@ export function AppRouter() {
         <Route path="/harvestguard/register-batch" element={<BatchRegistration />} />
         <Route path="/harvestguard/risk-analysis/:batchId" element={<WeatherRiskWidget />} />
         <Route path="/harvestguard/risk-map" element={<LocalRiskMap />} />
-
-        {/* Direct Farmer Ledger */}
         <Route path="/dashboard/farmer" element={<FarmerCreditsWidget />} />
         <Route path="/dashboard/farmer/earnings" element={<FarmerEarnings />} />
       </Route>
@@ -116,4 +104,5 @@ export function AppRouter() {
 }
 
 export default AppRouter;
+*/
 

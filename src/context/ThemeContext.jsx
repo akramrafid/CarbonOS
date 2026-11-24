@@ -7,8 +7,10 @@ export const VALID_THEME_MODES = ['light', 'dark', 'system'];
 export const THEME_TRANSITION_MS = 200;
 
 export function getSystemTheme() {
-  if (typeof window === 'undefined' || !window.matchMedia) return 'dark';
-  return window.matchMedia('(prefers-color-scheme: light)').matches ? 'light' : 'dark';
+  // [COMMENTED OUT FOR PERSONAL REFERENCE — defaulted OS-query fallback to dark; light-first follows prefers-color-scheme: dark]
+  // return window.matchMedia('(prefers-color-scheme: light)').matches ? 'light' : 'dark';
+  if (typeof window === 'undefined' || !window.matchMedia) return 'light';
+  return window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
 }
 
 export function resolveThemeMode(mode, systemTheme = getSystemTheme()) {
@@ -49,9 +51,12 @@ export const ThemeProvider = ({ children }) => {
     try {
       const saved = localStorage.getItem(THEME_STORAGE_KEY) || localStorage.getItem('theme');
       if (saved === 'light' || saved === 'dark' || saved === 'system') return saved;
-      return 'dark';
+      // [COMMENTED OUT FOR PERSONAL REFERENCE — defaulted initial theme to 'dark' instead of 'system']
+      // return 'dark';
+      return 'system';
     } catch {
-      return 'dark';
+      // return 'dark';
+      return 'system';
     }
   });
 

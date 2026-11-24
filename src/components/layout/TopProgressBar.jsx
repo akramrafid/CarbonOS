@@ -58,8 +58,9 @@ export function TopProgressBar({ isPending = false }) {
       className="fixed top-0 left-0 right-0 h-0.5 z-[9999] pointer-events-none overflow-hidden bg-transparent"
     >
       <div
-        className="h-full bg-accent transition-all duration-150 ease-out motion-reduce:transition-none"
-        style={{ width: `${progress}%` }}
+        /* [COMMENTED OUT FOR PERSONAL REFERENCE — animated layout width replaced with GPU scaleX transform] */
+        className="h-full w-full origin-left bg-accent transition-transform duration-150 ease-out motion-reduce:transition-none"
+        style={{ transform: `scaleX(${Math.max(0, Math.min(100, progress)) / 100})` }}
       />
     </div>
   );

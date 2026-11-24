@@ -1,12 +1,10 @@
-import threading
-from carbon_monitoring.auth import CarbonUser, get_current_user
-from carbon_monitoring.rate_limiter import rate_limit_predict
-from fastapi import HTTPException, Depends
 import sys
 import os
 import io
 import base64
 import json
+import logging
+import threading
 import requests
 import torch
 import torch.nn.functional as F
@@ -15,15 +13,11 @@ import cv2
 from PIL import Image
 Image.MAX_IMAGE_PIXELS = 10_000_000
 import torchvision.transforms as transforms
-from fastapi import FastAPI, File, UploadFile, Form
+from fastapi import FastAPI, File, UploadFile, Form, HTTPException, Depends
 from fastapi.middleware.cors import CORSMiddleware
 from dotenv import load_dotenv
 
-# Load environment variables from .env
-env_path = os.path.join(os.path.dirname(__file__), '.env')
-load_dotenv(dotenv_path=env_path)
-
-# Add inference directory and backend directory to sys.path
+# Add inference directory and backend directory to sys.path BEFORE local package imports
 inference_dir = os.path.dirname(os.path.abspath(__file__))
 if inference_dir not in sys.path:
     sys.path.insert(0, inference_dir)
@@ -31,6 +25,13 @@ if inference_dir not in sys.path:
 backend_dir = os.path.join(inference_dir, '../backend')
 if backend_dir not in sys.path:
     sys.path.append(backend_dir)
+
+# Load environment variables from .env
+env_path = os.path.join(inference_dir, '.env')
+load_dotenv(dotenv_path=env_path)
+
+from carbon_monitoring.auth import CarbonUser, get_current_user
+from carbon_monitoring.rate_limiter import rate_limit_predict
 from ml_pipeline.model import MultiHeadFarmerAIModel
 from carbon_monitoring.router import router as carbon_router
 from carbon_monitoring.database import init_db
@@ -43,18 +44,37 @@ from esg_rag.database import init_db as init_esg_db
 init_db()
 init_esg_db()
 
-app = FastAPI(title="Farmer's AI Inference Service")
+is_prod = os.getenv("ESG_ENV") == "production" or os.getenv("CARBON_ENV") == "production"
+if os.getenv("ESG_ENV") == "production":
+    from esg_app import validate_config as validate_esg_config
+    validate_esg_config()
 
-# Startup check for required environment variables
+app = FastAPI(
+    title="Farmer's AI Inference Service",
+    docs_url=None if is_prod else "/docs",
+    redoc_url=None,
+)
+
+log = logging.getLogger("carbonos.inference")
+
+# Startup validation for environment configuration
 @app.on_event("startup")
 async def startup_event():
-    required_env_vars = ["GEMINI_API_KEY"]
-    for var in required_env_vars:
-        if not os.getenv(var):
-            raise RuntimeError(f"Missing critical environment variable: {var}")
-    print("Startup validation completed: All critical environment variables are set.")
+    # [COMMENTED OUT FOR PERSONAL REFERENCE — hard crash when GEMINI_API_KEY was absent broke offline/local checkpoint inference]
+    # required_env_vars = ["GEMINI_API_KEY"]
+    # for var in required_env_vars:
+    #     if not os.getenv(var):
+    #         raise RuntimeError(f"Missing critical environment variable: {var}")
+    if not os.getenv("GEMINI_API_KEY"):
+        if os.getenv("REQUIRE_GEMINI_KEY", "").lower() == "true":
+            raise RuntimeError("Missing required environment variable: GEMINI_API_KEY")
+        log.warning("GEMINI_API_KEY is unset; cloud LLM/vision fallback unavailable unless local checkpoint or deterministic RAG fallback serves.")
+    if is_prod:
+        from carbon_monitoring.auth import get_jwt_secret
+        if not get_jwt_secret() and not os.getenv("ESG_AUTH_JWKS_URL"):
+            raise RuntimeError("Production deployment requires CARBON_AUTH_JWT_SECRET or ESG_AUTH_JWKS_URL")
 
-# Tighten CORS: Allow specific origins instead of wildcard when credentials are true
+# Tighten CORS: bearer-token API, disallow wildcard/cookies and expose download headers
 allowed_origins_str = os.getenv(
     "ALLOWED_ORIGINS", 
     "http://localhost:5173,http://127.0.0.1:5173,http://localhost:3000,https://carbon-os-beta.vercel.app"
@@ -67,16 +87,17 @@ async def add_security_headers(request, call_next):
     response = await call_next(request)
     response.headers["X-Content-Type-Options"] = "nosniff"
     response.headers["X-Frame-Options"] = "DENY"
-    response.headers["X-XSS-Protection"] = "1; mode=block"
     response.headers["Strict-Transport-Security"] = "max-age=31536000; includeSubDomains"
     return response
 
 app.add_middleware(
     CORSMiddleware,
     allow_origins=allowed_origins,
-    allow_credentials=True,
-    allow_methods=["*"],
-    allow_headers=["*"],
+    # allow_credentials=True,  # [COMMENTED OUT FOR PERSONAL REFERENCE — unnecessary with Authorization Bearer headers]
+    allow_credentials=False,
+    allow_methods=["GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"],
+    allow_headers=["Authorization", "Content-Type", "X-Organization-Id", "X-Request-Id"],
+    expose_headers=["X-Request-Id", "X-Content-SHA256", "Content-Disposition"],
 )
 
 app.include_router(carbon_router)
@@ -154,7 +175,8 @@ def predict_with_gemini(pil_img: Image.Image, selected_species: str) -> dict:
     Classify the plant disease using the Google Gemini 2.5 Flash API.
     Auto-detects species and falls back if there's a mismatch.
     """
-    if not GEMINI_API_KEY:
+    api_key = os.getenv("GEMINI_API_KEY") or GEMINI_API_KEY
+    if not api_key:
         raise ValueError("GEMINI_API_KEY is not configured.")
 
     # Convert PIL Image to base64 jpeg
@@ -191,8 +213,9 @@ Return your response in JSON format matching this schema:
     parsed = None
 
     for model_name in models:
-        url = f"https://generativelanguage.googleapis.com/v1beta/models/{model_name}:generateContent?key={GEMINI_API_KEY}"
-        headers = {"Content-Type": "application/json"}
+        # url = f"https://generativelanguage.googleapis.com/v1beta/models/{model_name}:generateContent?key={GEMINI_API_KEY}"  # [COMMENTED OUT FOR PERSONAL REFERENCE]
+        url = f"https://generativelanguage.googleapis.com/v1beta/models/{model_name}:generateContent"
+        headers = {"Content-Type": "application/json", "x-goog-api-key": api_key}
         payload = {
             "contents": [{
                 "parts": [
@@ -259,8 +282,9 @@ async def predict(
     if species not in SPECIES_COUNTS:
         raise HTTPException(status_code=400, detail=f"Species '{species}' not supported.")
 
-    # Enforce maximum image size limit of 10MB
-    contents = await image.read()
+    # Enforce maximum image size limit of 10MB (bounded read prevents OOM)
+    # contents = await image.read()  # [COMMENTED OUT FOR PERSONAL REFERENCE]
+    contents = await image.read(10 * 1024 * 1024 + 1)
     if len(contents) > 10 * 1024 * 1024:
         raise HTTPException(status_code=413, detail="Image file exceeds maximum limit of 10MB.")
 
@@ -337,42 +361,43 @@ async def predict(
     except ValueError:
         predicted_idx = 0
 
-    # Thread-safe Grad-CAM inference execution
+    # Thread-safe Grad-CAM inference execution (only when trained local checkpoint is loaded; avoid random-weight heatmaps)
     heatmap_url = None
-    with _model_lock:
-        with GradCamExtractor(model.features[-1]) as cam:
-            model.zero_grad()
-            outputs = model(input_tensor, species_name=best_species)
-            probabilities = F.softmax(outputs, dim=1)[0]
+    if checkpoint_loaded:
+        with _model_lock:
+            with GradCamExtractor(model.features[-1]) as cam:
+                model.zero_grad()
+                outputs = model(input_tensor, species_name=best_species)
+                probabilities = F.softmax(outputs, dim=1)[0]
 
-            if not gemini_success:
-                conf_val = probabilities[predicted_idx].item()
+                if not gemini_success:
+                    conf_val = probabilities[predicted_idx].item()
 
-            outputs[0, predicted_idx].backward()
+                outputs[0, predicted_idx].backward()
 
-            cam_gradients = cam.gradients
-            cam_activations = cam.activations
+                cam_gradients = cam.gradients
+                cam_activations = cam.activations
 
-            if cam_gradients is not None and cam_activations is not None:
-                pooled_gradients = torch.mean(cam_gradients, dim=[0, 2, 3])
-                act_cloned = cam_activations.clone()
-                for i in range(act_cloned.shape[1]):
-                    act_cloned[:, i, :, :] *= pooled_gradients[i]
+                if cam_gradients is not None and cam_activations is not None:
+                    pooled_gradients = torch.mean(cam_gradients, dim=[0, 2, 3])
+                    act_cloned = cam_activations.clone()
+                    for i in range(act_cloned.shape[1]):
+                        act_cloned[:, i, :, :] *= pooled_gradients[i]
 
-                heatmap = torch.mean(act_cloned, dim=1).squeeze().detach().numpy()
-                heatmap = np.maximum(heatmap, 0)
-                heatmap /= (np.max(heatmap) + 1e-8)
+                    heatmap = torch.mean(act_cloned, dim=1).squeeze().detach().numpy()
+                    heatmap = np.maximum(heatmap, 0)
+                    heatmap /= (np.max(heatmap) + 1e-8)
 
-                heatmap = cv2.resize(heatmap, (pil_img.width, pil_img.height))
-                heatmap = np.uint8(255 * heatmap)
-                heatmap = cv2.applyColorMap(heatmap, cv2.COLORMAP_JET)
+                    heatmap = cv2.resize(heatmap, (pil_img.width, pil_img.height))
+                    heatmap = np.uint8(255 * heatmap)
+                    heatmap = cv2.applyColorMap(heatmap, cv2.COLORMAP_JET)
 
-                original_img = np.array(pil_img)[:, :, ::-1]
-                superimposed_img = heatmap * 0.4 + original_img * 0.6
+                    original_img = np.array(pil_img)[:, :, ::-1]
+                    superimposed_img = heatmap * 0.4 + original_img * 0.6
 
-                _, buffer = cv2.imencode('.jpg', superimposed_img)
-                dummy_heatmap_b64 = base64.b64encode(buffer).decode('utf-8')
-                heatmap_url = f"data:image/jpeg;base64,{dummy_heatmap_b64}" 
+                    _, buffer = cv2.imencode('.jpg', superimposed_img)
+                    dummy_heatmap_b64 = base64.b64encode(buffer).decode('utf-8')
+                    heatmap_url = f"data:image/jpeg;base64,{dummy_heatmap_b64}" 
 
     severity = "mild"
     if conf_val > 0.8: severity = "moderate"

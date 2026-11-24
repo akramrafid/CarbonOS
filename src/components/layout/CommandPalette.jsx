@@ -20,10 +20,12 @@ export function CommandPalette({ isOpen, onClose }) {
 
   const allItems = useMemo(() => getAllSearchableItems(), []);
 
-  // Filter items based on query
+  // Filter items based on query (show all searchable items without silent truncation)
   const filteredItems = useMemo(() => {
     const q = query.trim().toLowerCase();
-    if (!q) return allItems.slice(0, 12);
+    // [COMMENTED OUT FOR PERSONAL REFERENCE — truncated list at 12 items when query was empty]
+    // if (!q) return allItems.slice(0, 12);
+    if (!q) return allItems;
 
     return allItems.filter((item) => {
       const matchLabel = item.label.toLowerCase().includes(q);
@@ -102,6 +104,10 @@ export function CommandPalette({ isOpen, onClose }) {
           <input
             ref={inputRef}
             type="text"
+            role="combobox"
+            aria-expanded="true"
+            aria-controls="command-palette-listbox"
+            aria-activedescendant={filteredItems[selectedIndex] ? `cmd-option-${selectedIndex}` : undefined}
             value={query}
             onChange={(e) => setQuery(e.target.value)}
             placeholder={t('nav.searchPlaceholder', 'Search routes, tools, telemetry (⌘K)...')}
@@ -124,7 +130,13 @@ export function CommandPalette({ isOpen, onClose }) {
         </div>
 
         {/* Results List */}
-        <div ref={listRef} className="flex-1 overflow-y-auto p-2 space-y-1 scrollbar-thin">
+        <div
+          id="command-palette-listbox"
+          ref={listRef}
+          role="listbox"
+          aria-label="Navigation results"
+          className="flex-1 overflow-y-auto p-2 space-y-1 scrollbar-thin"
+        >
           {filteredItems.length === 0 ? (
             <div className="py-12 text-center text-fg-muted text-sm flex flex-col items-center gap-2">
               <Sparkles className="w-6 h-6 text-fg-muted/60" />
@@ -138,6 +150,9 @@ export function CommandPalette({ isOpen, onClose }) {
               return (
                 <div
                   key={item.id + item.route}
+                  id={`cmd-option-${index}`}
+                  role="option"
+                  aria-selected={isSelected}
                   data-index={index}
                   onClick={() => {
                     navigate(item.route);

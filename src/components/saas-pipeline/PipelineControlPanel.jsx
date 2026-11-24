@@ -28,14 +28,14 @@ export function PipelineControlPanel({
             <div className="flex items-center space-x-3">
               <button 
                 onClick={onPrev}
-                className="w-11 h-11 rounded-full border border-white/15 bg-white/5 flex items-center justify-center text-white/70 hover:text-emerald hover:border-emerald/40 hover:bg-white/10 transition-all cursor-pointer shadow-sm"
+                className="w-11 h-11 rounded-full border border-white/15 bg-white/5 flex items-center justify-center text-white/70 hover:text-emerald hover:border-emerald/40 hover:bg-white/10 transition-colors cursor-pointer shadow-sm"
                 aria-label="Previous step"
               >
                 <ArrowLeft size={18} />
               </button>
               <button 
                 onClick={onNext}
-                className="w-11 h-11 rounded-full border border-white/15 bg-white/5 flex items-center justify-center text-white/70 hover:text-emerald hover:border-emerald/40 hover:bg-white/10 transition-all cursor-pointer shadow-sm"
+                className="w-11 h-11 rounded-full border border-white/15 bg-white/5 flex items-center justify-center text-white/70 hover:text-emerald hover:border-emerald/40 hover:bg-white/10 transition-colors cursor-pointer shadow-sm"
                 aria-label="Next step"
               >
                 <ArrowRight size={18} />
@@ -45,7 +45,7 @@ export function PipelineControlPanel({
         </div>
 
         {/* Dynamic Description Box */}
-        <div className={`transition-all duration-300 min-h-[180px] ${
+        <div className={`transition-[opacity,transform] duration-300 min-h-[180px] ${
           transitionState === 'transitioning' ? 'opacity-0 translate-y-2' : 'opacity-100 translate-y-0'
         }`}>
           <h4 className="text-xl font-semibold text-white mb-4">
@@ -63,7 +63,7 @@ export function PipelineControlPanel({
           <div className="flex items-center space-x-3">
             <button
               onClick={onTogglePlay}
-              className="w-10 h-10 rounded-full bg-emerald/10 border border-emerald/20 text-emerald flex items-center justify-center hover:bg-emerald/20 transition-all shadow-[0_0_15px_rgba(16,185,129,0.1)] cursor-pointer"
+              className="w-10 h-10 rounded-full bg-emerald/10 border border-emerald/20 text-emerald flex items-center justify-center hover:bg-emerald/20 transition-colors shadow-[0_0_15px_rgba(16,185,129,0.1)] cursor-pointer"
               title={isPlaying ? "Pause autoplay" : "Play autoplay"}
             >
               {isPlaying ? <Pause size={18} /> : <Play size={18} />}
@@ -76,9 +76,10 @@ export function PipelineControlPanel({
           {!isPlaying && (
             <button
               onClick={onResume}
-              className="text-xs font-mono text-emerald hover:underline hover:text-emerald/80 flex items-center space-x-1 cursor-pointer font-bold"
+              className="group text-xs font-mono text-emerald hover:underline hover:text-emerald/80 flex items-center space-x-1 cursor-pointer font-bold"
             >
-              <RefreshCw size={14} className="animate-spin" style={{ animationDuration: '4s' }} />
+              {/* [COMMENTED OUT FOR PERSONAL REFERENCE — stopped continuous animate-spin while autoplay is paused] */}
+              <RefreshCw size={14} className="group-hover:rotate-180 transition-transform duration-300 motion-reduce:transform-none" />
               <span>Resume</span>
             </button>
           )}

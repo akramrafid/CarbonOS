@@ -9,8 +9,8 @@ import {
 } from 'lucide-react';
 import { navConfig } from '../../config/nav.config';
 import { Tooltip } from '../ui/Tooltip';
-import { motion } from 'framer-motion';
-import { getSharedElementLayoutId, EASINGS } from '../../lib/motion';
+import { LayoutGroup, m } from 'framer-motion';
+import { getSharedElementLayoutId, EASINGS, getPrefersReducedMotion } from '../../lib/motion';
 
 /**
  * DashboardSidebar Component
@@ -65,7 +65,10 @@ export const DashboardSidebar = memo(function DashboardSidebar({
   // Scroll active item into view on mount or route change
   useEffect(() => {
     if (activeLinkRef.current && navContainerRef.current) {
-      activeLinkRef.current.scrollIntoView({ block: 'nearest', behavior: 'smooth' });
+      activeLinkRef.current.scrollIntoView({
+        block: 'nearest',
+        behavior: getPrefersReducedMotion() ? 'auto' : 'smooth',
+      });
     }
   }, [location.pathname, collapsed]);
 
@@ -74,7 +77,7 @@ export const DashboardSidebar = memo(function DashboardSidebar({
       aria-label="Dashboard navigation"
       className={`
         hidden md:flex flex-col border-r border-border-subtle bg-bg-surface
-        transition-all duration-200 select-none shrink-0 sticky top-0 h-screen z-40 min-w-0
+        transition-[width] duration-200 select-none shrink-0 sticky top-0 h-screen z-40 min-w-0
         ${collapsed ? 'w-16' : 'w-64'}
       `.trim()}
     >
@@ -115,6 +118,7 @@ export const DashboardSidebar = memo(function DashboardSidebar({
         ref={navContainerRef}
         className="flex-1 overflow-y-auto p-3 space-y-6 scrollbar-thin [mask-image:linear-gradient(to_bottom,transparent,black_12px,black_calc(100%-12px),transparent)] min-w-0"
       >
+        <LayoutGroup id="dashboard-sidebar">
         {navConfig.groups.map((group) => {
           const isOpen = openGroups[group.id] !== false;
 
@@ -165,7 +169,7 @@ export const DashboardSidebar = memo(function DashboardSidebar({
                         `.trim()}
                       >
                         {isItemActive && (
-                          <motion.span
+                          <m.span
                             layoutId={getSharedElementLayoutId('sidebar', 'active-pill')}
                             transition={EASINGS.spring}
                             className="absolute inset-0 rounded-xl bg-accent shadow-sm -z-0"
@@ -206,6 +210,7 @@ export const DashboardSidebar = memo(function DashboardSidebar({
             </div>
           );
         })}
+        </LayoutGroup>
       </div>
 
       {/* Sidebar Footer */}

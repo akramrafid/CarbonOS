@@ -65,7 +65,7 @@ const FarmerEarnings = () => {
     <div className="min-h-screen bg-bg-canvas font-sans relative overflow-hidden">
       {/* Background Graphic Effects */}
       <div className="absolute inset-0 bg-[linear-gradient(to_right,#00C85308_1px,transparent_1px),linear-gradient(to_bottom,#00C85308_1px,transparent_1px)] bg-[size:4rem_4rem] z-0 pointer-events-none"></div>
-      <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[800px] h-[400px] bg-emerald/5 rounded-full blur-[120px] pointer-events-none z-0"></div>
+      {/* [COMMENTED OUT FOR PERSONAL REFERENCE — removed decorative ambient blur element] */}
 
       <div className="pt-16 pb-16 px-4 sm:px-6 lg:px-8 relative z-10">
         <div className="max-w-7xl mx-auto">

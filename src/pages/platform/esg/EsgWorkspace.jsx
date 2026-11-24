@@ -66,25 +66,45 @@ export default function EsgWorkspace() {
     }
   }, [loadOrgs]);
 
+  const [pendingInvite, setPendingInvite] = useState(null);
+
   useEffect(() => {
     const invite = new URLSearchParams(window.location.search).get('invite');
-    if (invite) safeStorage(() => sessionStorage.setItem(INVITE_KEY, invite));
+    if (invite) {
+      safeStorage(() => sessionStorage.setItem(INVITE_KEY, invite));
+      window.history.replaceState(null, '', '/platform/esg');
+    }
     (async () => {
       let u = null;
       try { u = await loadSession(); } catch { u = null; }
       setUser(u);
       if (!u || !hasEsgToken()) return;
       setMe(await action.run(() => esgGet('/api/esg/me')));
+      // Require explicit user confirmation before accepting organization invitations
       const pending = safeStorage(() => sessionStorage.getItem(INVITE_KEY));
       if (pending) {
-        safeStorage(() => sessionStorage.removeItem(INVITE_KEY));
-        window.history.replaceState(null, '', '/platform/esg');
-        await action.run(() => esgSend('POST', '/api/esg/invitations/accept', { token: pending }),
-          (r) => `You joined ${r.organization_name} as ${r.role}.`);
+        setPendingInvite(pending);
       }
       await loadOrgs();
     })();
   }, [loadOrgs]);
+
+  const handleConfirmInvite = async () => {
+    if (!pendingInvite) return;
+    const token = pendingInvite;
+    safeStorage(() => sessionStorage.removeItem(INVITE_KEY));
+    setPendingInvite(null);
+    await action.run(
+      () => esgSend('POST', '/api/esg/invitations/accept', { token }),
+      (r) => `You joined ${r.organization_name} as ${r.role}.`
+    );
+    await loadOrgs();
+  };
+
+  const handleDismissInvite = () => {
+    safeStorage(() => sessionStorage.removeItem(INVITE_KEY));
+    setPendingInvite(null);
+  };
 
   const loadRef = useCallback(async () => {
     if (!orgId) return;
@@ -131,7 +151,7 @@ export default function EsgWorkspace() {
   };
 
   const shell = (children) => (
-    <main className="mx-auto max-w-6xl space-y-6 px-4 pb-16 pt-16 sm:px-6">
+    <div className="mx-auto max-w-6xl space-y-6 px-4 pb-16 pt-16 sm:px-6">
       <PageHeader
         title="GHG accounting workspace"
         badge="CarbonOS ESG"
@@ -145,8 +165,19 @@ export default function EsgWorkspace() {
         }
       />
       <Notice error={action.error || loadError} message={action.message} />
+      {pendingInvite && (
+        <aside aria-label="Pending organization invitation" className="rounded-xl border border-emerald/40 bg-emerald/10 p-4 flex flex-wrap items-center justify-between gap-3 text-xs">
+          <span className="text-fg-primary font-medium">
+            You have a pending organization invitation link. Accept to join the organization?
+          </span>
+          <div className="flex items-center gap-2">
+            <Button size="sm" onClick={handleConfirmInvite} disabled={action.busy}>Accept Invitation</Button>
+            <Button size="sm" variant="secondary" onClick={handleDismissInvite} disabled={action.busy}>Dismiss</Button>
+          </div>
+        </aside>
+      )}
       {children}
-    </main>
+    </div>
   );
 
   if (user === undefined) return shell(<p role="status" className="text-mist">Loading workspace…</p>);
@@ -281,8 +312,8 @@ export function EsgCallback() {
     completeSignIn().then(() => navigate('/platform/esg', { replace: true }), (e) => setError(e.message));
   }, [navigate]);
   return (
-    <main className="mx-auto max-w-xl px-4 pt-16">
+    <div className="mx-auto max-w-xl px-4 pt-16">
       {error ? <p role="alert" className="text-red-300">Sign-in failed: {error}</p> : <p role="status" className="text-mist">Completing sign-in…</p>}
-    </main>
+    </div>
   );
 }

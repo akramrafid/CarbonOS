@@ -1,7 +1,9 @@
 export { Button } from './Button';
 export { IconButton } from './IconButton';
 export { Input } from './Input';
-export { Card, CardHeader, CardTitle, CardDescription, CardContent, CardFooter } from './Card';
+// [COMMENTED OUT FOR PERSONAL REFERENCE — Card.jsx only exports Card; sub-exports caused broken barrel imports]
+// export { Card, CardHeader, CardTitle, CardDescription, CardContent, CardFooter } from './Card';
+export { Card } from './Card';
 export { PageHeader } from './PageHeader';
 export { Section, SectionHeader } from './Section';
 export { StatCard } from './StatCard';

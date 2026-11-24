@@ -80,7 +80,7 @@ export function GisLeafletViewer(props) {
   } = props;
 
   return (
-    <div className="relative rounded-3xl overflow-hidden border border-gray-200 dark:border-white/10 h-[500px] z-10">
+    <div className="isolate relative rounded-3xl overflow-hidden border border-gray-200 dark:border-white/10 h-[500px] z-0">
       <MapContainer
         center={mapCenter}
         zoom={mapZoom}

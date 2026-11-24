@@ -9,6 +9,7 @@ Tenant IDs and roles are NEVER accepted from client input.
 """
 import datetime
 import logging
+import os
 import uuid
 from decimal import Decimal
 from typing import Optional
@@ -116,7 +117,8 @@ def seed_demo_organization(
         organization_id=org.id,
         family=f"grid-electricity-bd-{org_suffix}",
         version=1,
-        activity_type="electricity_grid",
+        # activity_type="electricity_grid",  # [COMMENTED OUT FOR PERSONAL REFERENCE — non-canonical type caused UNKNOWN_ACTIVITY_TYPE in accounting.py]
+        activity_type="electricity",
         unit="kWh",
         kgco2e_per_unit=Decimal("0.6400000000"),
         region="BD-NATIONAL-GRID",
@@ -140,8 +142,10 @@ def seed_demo_organization(
         organization_id=org.id,
         family=f"diesel-stationary-bd-{org_suffix}",
         version=1,
-        activity_type="diesel_generator",
-        unit="liter",
+        # activity_type="diesel_generator",  # [COMMENTED OUT FOR PERSONAL REFERENCE]
+        # unit="liter",  # [COMMENTED OUT FOR PERSONAL REFERENCE — accounting.py canonical unit is 'L']
+        activity_type="diesel",
+        unit="L",
         kgco2e_per_unit=Decimal("2.6800000000"),
         region="GLOBAL",
         gwp_basis="AR5",
@@ -163,7 +167,8 @@ def seed_demo_organization(
         organization_id=org.id,
         family=f"natural-gas-boiler-bd-{org_suffix}",
         version=1,
-        activity_type="natural_gas_boiler",
+        # activity_type="natural_gas_boiler",  # [COMMENTED OUT FOR PERSONAL REFERENCE]
+        activity_type="natural_gas",
         unit="m3",
         kgco2e_per_unit=Decimal("2.0200000000"),
         region="GLOBAL",
@@ -188,7 +193,8 @@ def seed_demo_organization(
         organization_id=org.id,
         facility_id=facility.id,
         period_id=period.id,
-        activity_type="electricity_grid",
+        # activity_type="electricity_grid",  # [COMMENTED OUT FOR PERSONAL REFERENCE]
+        activity_type="electricity",
         quantity_raw=Decimal("125000.0000000000"),
         unit_raw="kWh",
         quantity=Decimal("125000.0000000000"),
@@ -212,11 +218,14 @@ def seed_demo_organization(
         organization_id=org.id,
         facility_id=facility.id,
         period_id=period.id,
-        activity_type="diesel_generator",
+        # activity_type="diesel_generator",  # [COMMENTED OUT FOR PERSONAL REFERENCE]
+        activity_type="diesel",
         quantity_raw=Decimal("4500.0000000000"),
-        unit_raw="liter",
+        # unit_raw="liter",  # [COMMENTED OUT FOR PERSONAL REFERENCE]
+        unit_raw="L",
         quantity=Decimal("4500.0000000000"),
-        unit="liter",
+        # unit="liter",
+        unit="L",
         activity_start=datetime.date(2024, 7, 1),
         activity_end=datetime.date(2024, 9, 30),
         meter_ref="GENSET-SAVAR-01",
@@ -304,10 +313,34 @@ def clean_demo_organization(db: Session, org_id: str, delete_org: bool = True):
     org = db.query(ESGOrganization).filter(ESGOrganization.id == org_id, ESGOrganization.is_demo.is_(True)).first()
     if not org:
         return
+    from .ledger_models import (
+        Bill, BillProfile, BillValue, ContractualInstrument,
+        DisclosureResponse, Equipment, EquipmentEvent, GasCertificate, Invitation,
+    )
+    from .models import ESGChunk, ESGDocument, ESGQueryLog
+
     # Delete child records in dependency order
     run_ids = [r.id for r in db.query(CalculationRun.id).filter(CalculationRun.organization_id == org_id).all()]
     if run_ids:
         db.query(CalculationLine).filter(CalculationLine.run_id.in_(run_ids)).delete(synchronize_session=False)
+    bill_ids = [b.id for b in db.query(Bill.id).filter(Bill.organization_id == org_id).all()]
+    if bill_ids:
+        db.query(BillValue).filter(BillValue.bill_id.in_(bill_ids)).delete(synchronize_session=False)
+    db.query(Bill).filter(Bill.organization_id == org_id).delete(synchronize_session=False)
+    db.query(BillProfile).filter(BillProfile.organization_id == org_id).delete(synchronize_session=False)
+    eq_ids = [e.id for e in db.query(Equipment.id).filter(Equipment.organization_id == org_id).all()]
+    if eq_ids:
+        db.query(EquipmentEvent).filter(EquipmentEvent.equipment_id.in_(eq_ids)).delete(synchronize_session=False)
+    db.query(Equipment).filter(Equipment.organization_id == org_id).delete(synchronize_session=False)
+    doc_ids = [d.id for d in db.query(ESGDocument.id).filter(ESGDocument.tenant_id == org_id).all()]
+    if doc_ids:
+        db.query(ESGChunk).filter(ESGChunk.document_id.in_(doc_ids)).delete(synchronize_session=False)
+    db.query(ESGDocument).filter(ESGDocument.tenant_id == org_id).delete(synchronize_session=False)
+    db.query(ESGQueryLog).filter(ESGQueryLog.tenant_id == org_id).delete(synchronize_session=False)
+    db.query(DisclosureResponse).filter(DisclosureResponse.organization_id == org_id).delete(synchronize_session=False)
+    db.query(ContractualInstrument).filter(ContractualInstrument.organization_id == org_id).delete(synchronize_session=False)
+    db.query(GasCertificate).filter(GasCertificate.organization_id == org_id).delete(synchronize_session=False)
+    db.query(Invitation).filter(Invitation.organization_id == org_id).delete(synchronize_session=False)
     db.query(CalculationRun).filter(CalculationRun.organization_id == org_id).delete(synchronize_session=False)
     db.query(ReportSnapshot).filter(ReportSnapshot.organization_id == org_id).delete(synchronize_session=False)
     db.query(AuditEvent).filter(AuditEvent.organization_id == org_id).delete(synchronize_session=False)
@@ -321,6 +354,12 @@ def clean_demo_organization(db: Session, org_id: str, delete_org: bool = True):
     if delete_org:
         db.delete(org)
     db.commit()
+
+
+# [COMMENTED OUT FOR PERSONAL REFERENCE — decoupled from carbon_monitoring so standalone esg_app runs cleanly]
+# from carbon_monitoring.rate_limiter import SlidingWindowRateLimiter as _RateLimiter
+from .ratelimit import SlidingWindow as _SlidingWindow
+_demo_session_limiter = _SlidingWindow(limit=10, seconds=60.0)
 
 
 @router.get("/status")
@@ -344,6 +383,15 @@ def create_demo_session(request: Request, db: Session = Depends(get_db)):
     mode = get_access_mode()
     if mode not in ("isolated_demo", "local_dev"):
         raise HTTPException(403, "Demo session provisioning is disabled on this deployment.")
+
+    client_ip = request.client.host if (request.client and request.client.host) else "127.0.0.1"
+    if os.getenv("TRUST_PROXY_HEADERS", "false").lower() == "true":
+        forwarded = request.headers.get("X-Forwarded-For", "")
+        hops = [h.strip() for h in forwarded.split(",") if h.strip()]
+        if hops:
+            client_ip = hops[-1]
+    if not _demo_session_limiter.hit(client_ip):
+        raise HTTPException(429, "Too many demo sessions created; retry in a minute", headers={"Retry-After": "60"})
 
     sub = f"demo-{uuid.uuid4().hex[:12]}"
     reviewer_sub = f"{sub}-reviewer"

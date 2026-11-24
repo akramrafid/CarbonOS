@@ -44,14 +44,14 @@ const SatelliteLayer = () => {
     <div className="overflow-x-auto pb-4">
       <div className="flex space-x-6 min-w-max">
         {satellites.map((sat, idx) => (
-          <div key={idx} className="w-80 bg-white border border-border-subtle rounded-xl overflow-hidden shadow-sm flex flex-col shrink-0">
+          <div key={idx} className="w-80 bg-bg-surface border border-border-subtle rounded-xl overflow-hidden shadow-sm flex flex-col shrink-0">
             <div className="h-32 bg-slate-900 relative p-4 flex flex-col justify-between">
               <div className="absolute inset-0 opacity-20 bg-[radial-gradient(ellipse_at_center,_var(--tw-gradient-stops))] from-white via-transparent to-transparent"></div>
               <div className="relative z-10 flex justify-between items-start">
                 <div className="font-mono font-bold text-white tracking-widest">{sat.logoText}</div>
                 <span className={`text-[10px] uppercase font-bold tracking-wider px-2 py-1 rounded-full ${
-                  sat.status === 'Live' ? 'bg-accent text-white' : 
-                  sat.status === 'Integrated' ? 'bg-accent text-white' : 
+                  sat.status === 'Live' ? 'bg-accent text-fg-inverse' : 
+                  sat.status === 'Integrated' ? 'bg-accent text-fg-inverse' : 
                   'bg-white/20 text-white backdrop-blur-sm'
                 }`}>
                   {sat.status}
@@ -77,7 +77,7 @@ const SatelliteLayer = () => {
               </div>
               <div className="pt-4 border-t border-border-subtle">
                 <p className="text-[10px] uppercase font-semibold text-fg-secondary mb-1">Integration</p>
-                <p className="text-xs font-mono text-fg-secondary bg-slate-100 p-2 rounded">{sat.integration}</p>
+                <p className="text-xs font-mono text-fg-secondary bg-bg-muted p-2 rounded">{sat.integration}</p>
               </div>
             </div>
           </div>

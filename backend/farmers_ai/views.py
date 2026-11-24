@@ -1,7 +1,12 @@
-from rest_framework.decorators import api_view, parser_classes
+from rest_framework.decorators import api_view, parser_classes, permission_classes, throttle_classes
 from rest_framework.parsers import MultiPartParser, FormParser
+from rest_framework.permissions import AllowAny, IsAuthenticated, IsAdminUser
 from rest_framework.response import Response
+from rest_framework.throttling import AnonRateThrottle
 from rest_framework import status
+from django.conf import settings as django_settings
+from django.contrib.auth.password_validation import validate_password
+from django.core.exceptions import ValidationError as DjangoValidationError
 import os
 import requests
 from .models import Diagnosis, WeatherRiskSnapshot, AgronomistReview, CarbonTelemetry
@@ -10,17 +15,26 @@ from channels.layers import get_channel_layer
 from asgiref.sync import async_to_sync
 from .risk_engine import calculate_disease_risk
 
-FASTAPI_URL = os.getenv("FASTAPI_URL", "http://127.0.0.1:8000/predict")
+_BASE_INF = os.getenv("INFERENCE_SERVICE_URL") or os.getenv("FASTAPI_URL") or "http://127.0.0.1:8000"
+FASTAPI_URL = _BASE_INF.rstrip("/") if _BASE_INF.rstrip("/").endswith("/predict") else f"{_BASE_INF.rstrip('/')}/predict"
+MAX_IMAGE_UPLOAD_BYTES = 10 * 1024 * 1024
+
+
+class AuthRateThrottle(AnonRateThrottle):
+    scope = 'auth'
+
 
 @api_view(['POST'])
+@permission_classes([IsAuthenticated])
 @parser_classes([MultiPartParser, FormParser])
 def diagnose(request):
-    # Phase 9: Broadcast processing status
+    # Phase 9: Broadcast processing status scoped to authenticated user
     channel_layer = get_channel_layer()
+    ws_group = f"inference_updates_user_{request.user.id}"
     if channel_layer:
         try:
             async_to_sync(channel_layer.group_send)(
-                'inference_updates',
+                ws_group,
                 {'type': 'send_status', 'status': 'processing'}
             )
         except Exception:
@@ -35,16 +49,27 @@ def diagnose(request):
     if not image or not species:
         return Response({"error": "image and species are required"}, status=status.HTTP_400_BAD_REQUEST)
 
+    if getattr(image, "size", 0) > MAX_IMAGE_UPLOAD_BYTES:
+        return Response({"error": "Image file exceeds maximum limit of 10MB."}, status=status.HTTP_413_REQUEST_ENTITY_TOO_LARGE)
+
     try:
-        # Forward the image to the FastAPI service with authorization header
-        files = {'image': (image.name, image.read(), image.content_type or 'image/jpeg')}
+        image_bytes = image.read(MAX_IMAGE_UPLOAD_BYTES + 1)
+        if len(image_bytes) > MAX_IMAGE_UPLOAD_BYTES:
+            return Response({"error": "Image file exceeds maximum limit of 10MB."}, status=status.HTTP_413_REQUEST_ENTITY_TOO_LARGE)
+        # Forward the image to the FastAPI service with verified authorization header (never forge operator token)
+        files = {'image': (image.name, image_bytes, image.content_type or 'image/jpeg')}
         data = {'species': species}
         headers = {}
         client_auth = request.headers.get("Authorization")
+        service_token = os.getenv("INTERNAL_INFERENCE_BEARER_TOKEN", "").strip()
         if client_auth and client_auth.startswith("Bearer "):
             headers["Authorization"] = client_auth
+        elif service_token:
+            headers["Authorization"] = f"Bearer {service_token}"
         else:
-            headers["Authorization"] = "Bearer demo-token-operator"
+            # [COMMENTED OUT FOR PERSONAL REFERENCE — hardcoded fallback minted operator access on inference service]
+            # headers["Authorization"] = "Bearer demo-token-operator"
+            return Response({"error": "Missing Authorization bearer token for inference service."}, status=status.HTTP_401_UNAUTHORIZED)
         
         fastapi_response = requests.post(FASTAPI_URL, files=files, data=data, headers=headers, timeout=20)
         
@@ -110,7 +135,7 @@ def diagnose(request):
         )
         
         # Phase 10: Structuring exact API contract payload
-        host = request.get_host()
+        # host = request.get_host()  # [COMMENTED OUT FOR PERSONAL REFERENCE — Host header interpolation + dead HTTP audio link removed]
         
         # Calculate dynamic weather risk using device current coordinates (gps_lat, gps_lng)
         risk_index = 0.0
@@ -119,8 +144,8 @@ def diagnose(request):
         if gps_lat and gps_lng:
             try:
                 risk_index, summary_bn, _ = calculate_disease_risk(float(gps_lat), float(gps_lng), diag.species)
-            except Exception as e:
-                print(f"Error calculating dynamic risk: {e}")
+            except Exception:
+                pass
         elif weather_snapshot:
             risk_index = weather_snapshot.risk_index
             summary_bn = weather_snapshot.summary_bn
@@ -131,11 +156,13 @@ def diagnose(request):
             'disease': diag.disease,
             'confidence': diag.confidence,
             'severity': diag.severity,
-            'needs_agronomist_review': diag.confidence < 80.0,
-            'heatmap_url': result.get('heatmap_url', f"/media/heatmaps/{diag.id}.png"), 
+            # 'needs_agronomist_review': diag.confidence < 80.0,  # [COMMENTED OUT FOR PERSONAL REFERENCE — confidence is normalized 0..1]
+            'needs_agronomist_review': diag.confidence < 0.80,
+            'heatmap_url': result.get('heatmap_url'),
             'treatment_plan': {
                 'text_bn': "জৈব পদ্ধতি: আক্রান্ত পাতা পুড়িয়ে ফেলুন এবং নিম পাতার নির্যাস ব্যবহার করুন।",
-                'voice_url': f"http://{host}/media/voice/treatment_dummy.mp3"
+                # 'voice_url': f"http://{host}/media/voice/treatment_dummy.mp3"
+                'voice_url': None
             },
             'weather_risk': {
                 'index': risk_index,
@@ -144,11 +171,11 @@ def diagnose(request):
             }
         }
         
-        # Phase 9: Broadcast done status
+        # Phase 9: Broadcast done status to authenticated user group
         if channel_layer:
             try:
                 async_to_sync(channel_layer.group_send)(
-                    'inference_updates',
+                    ws_group,
                     {'type': 'send_status', 'status': 'done'}
                 )
             except Exception:
@@ -156,17 +183,21 @@ def diagnose(request):
             
         return Response(contract_payload, status=status.HTTP_200_OK)
         
-    except requests.exceptions.RequestException as e:
-        return Response({"error": f"Failed to connect to inference service: {str(e)}"}, status=status.HTTP_503_SERVICE_UNAVAILABLE)
+    except requests.exceptions.RequestException:
+        return Response({"error": "Failed to connect to inference service."}, status=status.HTTP_503_SERVICE_UNAVAILABLE)
 
 @api_view(['GET'])
+@permission_classes([IsAuthenticated])
 def get_journal(request):
     """
     Returns a list of past diagnoses for the current farmer/field.
     Acts as a crop health journal showing diagnosis history.
     """
     field_id = request.query_params.get('field_id', None)
-    limit = int(request.query_params.get('limit', 20))
+    try:
+        limit = max(1, min(int(request.query_params.get('limit', 20)), 100))
+    except (TypeError, ValueError):
+        return Response({"error": "limit must be an integer"}, status=status.HTTP_400_BAD_REQUEST)
     
     queryset = Diagnosis.objects.all().order_by('-created_at')
     if field_id:
@@ -207,6 +238,7 @@ def get_journal(request):
     }, status=status.HTTP_200_OK)
 
 @api_view(['POST'])
+@permission_classes([IsAdminUser])
 def agronomist_review(request, diagnosis_id):
     """
     Allows an agronomist to submit a review/correction for a diagnosis.
@@ -369,8 +401,13 @@ def get_current_weather(request):
     }
 
     selected_coords = CITY_COORDS.get(location.lower(), {"lat": 23.8103, "lon": 90.4125})
-    resolved_lat = float(lat) if lat else selected_coords["lat"]
-    resolved_lon = float(lon) if lon else selected_coords["lon"]
+    try:
+        resolved_lat = float(lat) if lat is not None and lat != "" else selected_coords["lat"]
+        resolved_lon = float(lon) if lon is not None and lon != "" else selected_coords["lon"]
+    except (TypeError, ValueError):
+        return Response({"error": "Invalid lat/lon coordinates"}, status=status.HTTP_400_BAD_REQUEST)
+    if not (-90.0 <= resolved_lat <= 90.0 and -180.0 <= resolved_lon <= 180.0):
+        return Response({"error": "Coordinates out of valid latitude/longitude bounds"}, status=status.HTTP_400_BAD_REQUEST)
 
     api_key = os.getenv("OPENWEATHER_API_KEY", "")
     weather_payload = None
@@ -441,6 +478,8 @@ from django.contrib.auth import authenticate, login, logout
 from django.contrib.auth.models import User
 
 @api_view(['POST'])
+@permission_classes([AllowAny])
+@throttle_classes([AuthRateThrottle])
 def register_farmer(request):
     """
     Registers a farmer account with secure salted password hashing (PBKDF2/argon2).
@@ -454,8 +493,10 @@ def register_farmer(request):
     if not name or not phone or not password:
         return Response({"error": "name, phone, and password are required"}, status=status.HTTP_400_BAD_REQUEST)
 
-    if len(password) < 6:
-        return Response({"error": "Password must be at least 6 characters long"}, status=status.HTTP_400_BAD_REQUEST)
+    try:
+        validate_password(password)
+    except DjangoValidationError as exc:
+        return Response({"error": " ".join(exc.messages)}, status=status.HTTP_400_BAD_REQUEST)
 
     user = User.objects.filter(username=phone).first()
     if user:
@@ -481,6 +522,8 @@ def register_farmer(request):
 
 
 @api_view(['POST'])
+@permission_classes([AllowAny])
+@throttle_classes([AuthRateThrottle])
 def login_farmer(request):
     """
     Authenticates a farmer using phone number and password.
@@ -507,6 +550,7 @@ def login_farmer(request):
 
 
 @api_view(['GET'])
+@permission_classes([AllowAny])
 def get_farmer_me(request):
     """
     Returns current authenticated farmer profile from session.

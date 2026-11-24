@@ -19,10 +19,10 @@ export function SignoffTab({
         <div>
           <div className="flex items-center space-x-2 text-[10px] font-mono uppercase tracking-widest text-accent font-bold">
             <Award className="w-4 h-4" />
-            <span>Third-Party Verification Opinion Document</span>
+            <span>Illustrative Assurance Template (Demo — Not Externally Assured)</span>
           </div>
-          <h3 className="font-bold text-xl mt-0.5">Independent Limited Assurance Statement</h3>
-          <p className="text-xs text-gray-400 mt-0.5">Formal assurance letter prepared in accordance with ISAE 3410 and ISO 14064-3:2019.</p>
+          <h3 className="font-bold text-xl mt-0.5">Sample Limited Assurance Statement</h3>
+          <p className="text-xs text-gray-400 mt-0.5">Illustrative ISAE 3410 / ISO 14064-3:2019 draft template — not externally verified until an accredited verifier signs.</p>
         </div>
 
         <div className="flex items-center gap-2">
@@ -33,17 +33,24 @@ export function SignoffTab({
             className="flex items-center space-x-1.5 font-mono text-xs"
           >
             {copiedKey === 'opinion' ? <Check className="w-3.5 h-3.5 text-emerald-400" /> : <Copy className="w-3.5 h-3.5" />}
-            <span>Copy Text</span>
+            <span>Copy Template Text</span>
           </Button>
 
+          {/* [COMMENTED OUT FOR PERSONAL REFERENCE — fake Export Official PDF toast claiming printed signed PDF]
+          <Button variant="primary" size="sm" onClick={() => showToast('Formal assurance letter printed to PDF with sovereign digital signature', 'success')}>
+            Export Official PDF
+          </Button>
+          */}
           <Button
-            variant="primary"
+            variant="secondary"
             size="sm"
-            onClick={() => showToast('Formal assurance letter printed to PDF with sovereign digital signature', 'success')}
+            disabled
+            aria-disabled="true"
+            title="Demo template only — connect an accredited VVB workflow to issue signed PDFs"
             className="flex items-center space-x-1.5 font-mono text-xs font-bold"
           >
-            <Download className="w-3.5 h-3.5 text-white" />
-            <span>Export Official PDF</span>
+            <Download className="w-3.5 h-3.5" />
+            <span>Demo Template — No VVB PDF</span>
           </Button>
         </div>
       </div>
@@ -52,9 +59,9 @@ export function SignoffTab({
       <div className="p-8 rounded-2xl bg-black/40 border border-white/10 space-y-6 font-serif text-xs leading-relaxed text-gray-200">
         <div className="flex justify-between items-start border-b border-white/10 pb-4 font-sans not-italic">
           <div>
-            <h4 className="font-bold text-sm text-white">CarbonZero BD Independent Assurance Practice</h4>
-            <p className="text-[11px] text-gray-400">Gulshan-2 Carbon Exchange Tower, Dhaka-1212, Bangladesh</p>
-            <p className="text-[10px] text-gray-500 font-mono mt-0.5">Accreditation: ISO 14065 / DoE Recognized GHG Verification Body</p>
+            <h4 className="font-bold text-sm text-white">Illustrative Assurance Body (Demo Template Only)</h4>
+            <p className="text-[11px] text-gray-400">Sample Verification Workspace — Not an Accredited VVB Opinion</p>
+            <p className="text-[10px] text-amber-400 font-mono mt-0.5">Status: Unverified Demo Template (ISAE 3410 / ISO 14064-3 Reference Format)</p>
           </div>
           <div className="text-right font-mono text-[10px] text-gray-400">
             <span>Date: April 18, 2026</span><br />
@@ -83,18 +90,18 @@ export function SignoffTab({
         {/* Signature & Seal Block */}
         <div className="pt-6 border-t border-white/10 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 font-sans not-italic">
           <div>
-            <div className="font-bold text-white text-xs">Engr. Kazi Tariqul Islam, Lead Verifier</div>
-            <div className="text-[11px] text-gray-400">Senior Partner, Climate Assurance &amp; Carbon Accounting</div>
-            <div className="text-[10px] text-emerald-400 font-mono mt-0.5">Cert ID: ISO14064-LEAD-BD-88219</div>
+            <div className="font-bold text-white text-xs">[Sample Verifier Signature Placeholder]</div>
+            <div className="text-[11px] text-gray-400">Pending Accredited Third-Party VVB Sign-Off</div>
+            <div className="text-[10px] text-amber-400 font-mono mt-0.5">Demo Reference: DEMO-DRAFT-{client.id.toUpperCase()}</div>
           </div>
 
-          <div className="p-3 rounded-xl bg-black/40 border border-emerald-500/30 font-mono text-[10px] text-right space-y-0.5">
-            <div className="text-emerald-400 font-bold flex items-center justify-end gap-1">
+          <div className="p-3 rounded-xl bg-black/40 border border-amber-500/30 font-mono text-[10px] text-right space-y-0.5">
+            <div className="text-amber-400 font-bold flex items-center justify-end gap-1">
               <ShieldCheck className="w-3.5 h-3.5" />
-              <span>SHA-256 DIGITAL VERIFICATION SEAL</span>
+              <span>DEMO TEMPLATE SEAL (NOT SIGNED)</span>
             </div>
-            <div className="text-gray-400 truncate max-w-xs">e4a9c8b7f2d1e0a3b6c5d4e8f1a2b3c4d5e6f7a8b9c0d1e2</div>
-            <div className="text-gray-500">Immutable Block Verification Timestamp: 2026-04-18T10:14:22Z</div>
+            <div className="text-gray-400 truncate max-w-xs">Awaiting live VVB cryptographic attestation</div>
+            <div className="text-gray-500">Demo Reference Draft Only</div>
           </div>
         </div>
       </div>

@@ -1,7 +1,9 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { useLocation } from 'react-router-dom';
 import DevGridOverlay from '../ui/DevGridOverlay';
-import OfflineBanner from '../OfflineBanner';
+import ErrorBoundary from '../ErrorBoundary';
+// [COMMENTED OUT FOR PERSONAL REFERENCE — OfflineBanner is mounted globally once in src/App.jsx]
+// import OfflineBanner from '../OfflineBanner';
 import DashboardSidebar from './DashboardSidebar';
 import TopBar from './TopBar';
 import MobileDrawer from './MobileDrawer';
@@ -9,6 +11,7 @@ import MobileTabBar from './MobileTabBar';
 import CommandPalette from './CommandPalette';
 import Footer from '../Footer';
 import RouteTransitionOutlet from './RouteTransitionOutlet';
+import { safeGetItem, safeSetItem } from '../../lib/safeStorage';
 
 /**
  * Persistent Dashboard Layout Shell (Phase 4 & Phase 6)
@@ -24,7 +27,7 @@ import RouteTransitionOutlet from './RouteTransitionOutlet';
 export function DashboardLayout() {
   const [collapsed, setCollapsed] = useState(() => {
     try {
-      const saved = localStorage.getItem('carbonos-sidebar-collapsed');
+      const saved = safeGetItem('carbonos-sidebar-collapsed');
       if (saved !== null) return saved === 'true';
       if (typeof window !== 'undefined' && window.innerWidth < 1280) return true;
       return false;
@@ -40,9 +43,7 @@ export function DashboardLayout() {
   const toggleCollapsed = useCallback(() => {
     setCollapsed((prev) => {
       const next = !prev;
-      try {
-        localStorage.setItem('carbonos-sidebar-collapsed', String(next));
-      } catch {}
+      safeSetItem('carbonos-sidebar-collapsed', String(next));
       return next;
     });
   }, []);
@@ -69,7 +70,7 @@ export function DashboardLayout() {
 
   return (
     <div className="min-h-screen bg-bg-canvas text-fg-primary font-sans flex flex-col antialiased selection:bg-accent selection:text-bg-canvas min-w-0 overflow-x-clip">
-      <OfflineBanner />
+      {/* <OfflineBanner /> [COMMENTED OUT FOR PERSONAL REFERENCE — rendered once globally in src/App.jsx] */}
 
       {/* Accessibility: Skip to Content */}
       <a
@@ -99,7 +100,9 @@ export function DashboardLayout() {
             id="dashboard-main"
             className="flex-1 p-4 sm:p-6 lg:p-8 pb-20 md:pb-8 max-w-[1600px] w-full mx-auto min-w-0 flex flex-col"
           >
-            <RouteTransitionOutlet mode="dashboard" />
+            <ErrorBoundary>
+              <RouteTransitionOutlet mode="dashboard" />
+            </ErrorBoundary>
           </main>
 
           {/* Slim Workspace Footer (Product Mode) */}

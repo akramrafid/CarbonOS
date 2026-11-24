@@ -1,19 +1,25 @@
-import { useState } from 'react';
+import { useCallback } from 'react';
 import { CLIENT_PROFILES } from '../../pages/platform/clientProfiles';
 import { computeCategoryMatrix } from './constants';
 import { useSaaSClientState } from './hooks/useSaaSClientState';
 import { useSaaSEmissionsCalculator } from './hooks/useSaaSEmissionsCalculator';
 import { useSaaSRagAndExtraction } from './hooks/useSaaSRagAndExtraction';
 import { useSaaSOperationsState } from './hooks/useSaaSOperationsState';
+import { useToast } from '../../context/ToastContext';
 
 export const useSaaSDashboardState = () => {
-  // Floating Toast state
-  const [toast, setToast] = useState({ show: false, message: '', type: 'success' });
+  const appToast = useToast();
 
-  const showToast = (message, type = 'success') => {
-    setToast({ show: true, message, type });
-    setTimeout(() => setToast({ show: false, message: '', type: 'success' }), 4000);
-  };
+  // [COMMENTED OUT FOR PERSONAL REFERENCE — uncleaned local setTimeout toast replaced with ToastContext]
+  // const [toast, setToast] = useState({ show: false, message: '', type: 'success' });
+  // const showToast = (message, type = 'success') => {
+  //   setToast({ show: true, message, type });
+  //   setTimeout(() => setToast({ show: false, message: '', type: 'success' }), 4000);
+  // };
+  const showToast = useCallback((message, type = 'success') => {
+    const fn = appToast?.[type] || appToast?.info || appToast;
+    if (typeof fn === 'function') fn(message);
+  }, [appToast]);
 
   // Modular state hooks
   const clientState = useSaaSClientState(showToast);
@@ -61,7 +67,7 @@ export const useSaaSDashboardState = () => {
     ...calcState,
     ...opsState,
     ...ragState,
-    toast,
+    // toast,
     showToast,
     handleSelectClient,
     activeMatrix

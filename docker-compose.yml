@@ -8,7 +8,7 @@ services:
     environment:
       POSTGRES_DB: carbonos_db
       POSTGRES_USER: carbonos_admin
-      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-change_in_production_secure_pwd}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?Set POSTGRES_PASSWORD in .env}
     volumes:
       - postgres_data:/var/lib/postgresql/data
     healthcheck:
@@ -23,11 +23,11 @@ services:
     image: redis:7-alpine
     container_name: carbonos-redis
     restart: unless-stopped
-    command: redis-server --appendonly yes
+    command: redis-server --appendonly yes --requirepass ${REDIS_PASSWORD:?Set REDIS_PASSWORD in .env}
     volumes:
       - redis_data:/data
     healthcheck:
-      test: ["CMD", "redis-cli", "ping"]
+      test: ["CMD-SHELL", "redis-cli -a $${REDIS_PASSWORD} ping"]
       interval: 10s
       timeout: 5s
       retries: 5
@@ -42,15 +42,24 @@ services:
     restart: unless-stopped
     environment:
       - PORT=8000
+      - ESG_ENV=${ESG_ENV:-production}
+      - CARBON_ENV=${CARBON_ENV:-production}
+      - ESG_ACCESS_MODE=${ESG_ACCESS_MODE:-protected}
+      - DATABASE_URL=postgresql://carbonos_admin:${POSTGRES_PASSWORD}@db:5432/carbonos_db
+      - ESG_AUTH_JWT_SECRET=${ESG_AUTH_JWT_SECRET:-}
+      - CARBON_AUTH_JWT_SECRET=${CARBON_AUTH_JWT_SECRET:-}
+      - ALLOWED_ORIGINS=${ALLOWED_ORIGINS:-https://carbon-os-beta.vercel.app}
       - CHROMA_PERSIST_DIR=/app/data/chroma
       - GEMINI_API_KEY=${GEMINI_API_KEY:-}
-      - REDIS_URL=redis://redis:6379/0
+      - REDIS_URL=redis://:${REDIS_PASSWORD}@redis:6379/0
     volumes:
       - chroma_data:/app/data/chroma
       - ./inference/models:/app/inference/models:ro
     ports:
-      - "8000:8000"
+      - "127.0.0.1:8000:8000"
     depends_on:
+      db:
+        condition: service_healthy
       redis:
         condition: service_healthy
     networks:
@@ -64,13 +73,14 @@ services:
     restart: unless-stopped
     environment:
       - DJANGO_DEBUG=False
-      - DJANGO_SECRET_KEY=${DJANGO_SECRET_KEY:-insecure_dev_key_must_override_in_prod_64char_long_string_12345}
-      - ALLOWED_HOSTS=localhost,127.0.0.1,backend,carbonos.bd
-      - DATABASE_URL=postgres://carbonos_admin:${POSTGRES_PASSWORD:-change_in_production_secure_pwd}@db:5432/carbonos_db
-      - REDIS_URL=redis://redis:6379/1
+      - DJANGO_SECRET_KEY=${DJANGO_SECRET_KEY:?Set DJANGO_SECRET_KEY in .env}
+      - ALLOWED_HOSTS=${ALLOWED_HOSTS:-localhost,127.0.0.1,backend,carbonos.bd}
+      - CORS_ALLOWED_ORIGINS=${ALLOWED_ORIGINS:-https://carbon-os-beta.vercel.app}
+      - DATABASE_URL=postgres://carbonos_admin:${POSTGRES_PASSWORD}@db:5432/carbonos_db
+      - REDIS_URL=redis://:${REDIS_PASSWORD}@redis:6379/1
       - INFERENCE_SERVICE_URL=http://inference:8000
     ports:
-      - "8001:8000"
+      - "127.0.0.1:8001:8000"
     depends_on:
       db:
         condition: service_healthy

@@ -5,6 +5,7 @@ import { ArrowRight, ArrowUp, ChevronDown, Globe, Sun, Moon } from 'lucide-react
 import { useTheme } from '../context/ThemeContext';
 import { ThemeToggle } from './ui/ThemeToggle';
 import { footerConfig } from '../config/footer.config';
+import { getPrefersReducedMotion } from '../lib/motion';
 
 export const Footer = ({ variant = 'full' }) => {
   const { t, i18n } = useTranslation();
@@ -18,7 +19,11 @@ export const Footer = ({ variant = 'full' }) => {
 
   const scrollToTop = () => {
     if (typeof window !== 'undefined') {
-      window.scrollTo({ top: 0, behavior: 'smooth' });
+      if (getPrefersReducedMotion()) {
+        window.scrollTo(0, 0);
+      } else {
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+      }
     }
   };
 
@@ -122,6 +127,7 @@ export const Footer = ({ variant = 'full' }) => {
 
       {/* Main Glassmorphic Footer Body */}
       <footer
+        id="footer-section"
         aria-label="Site footer"
         className="relative z-10 w-full bg-bg-surface/90 backdrop-blur-2xl pt-10 sm:pt-14 rounded-t-[2.5rem]"
       >
@@ -176,6 +182,7 @@ export const Footer = ({ variant = 'full' }) => {
 
               <ThemeToggle variant="segmented" />
 
+              {/* [COMMENTED OUT FOR PERSONAL REFERENCE — duplicate theme toggle button next to ThemeToggle segmented control]
               <button
                 type="button"
                 onClick={toggleTheme}
@@ -194,6 +201,7 @@ export const Footer = ({ variant = 'full' }) => {
                   </>
                 )}
               </button>
+              */}
 
               <button
                 type="button"

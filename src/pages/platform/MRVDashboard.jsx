@@ -4,11 +4,13 @@ import Badge from '@/components/ui/Badge';
 import SystemTelemetryCard from './mrv/SystemTelemetryCard';
 import IotStationCard from './mrv/IotStationCard';
 import AssetHealthAlertsCard from './mrv/AssetHealthAlertsCard';
+import { escapeCsvCell, safeGetItem, safeSetItem } from '@/lib/safeStorage';
 
 const DJANGO_API_URL = import.meta.env.VITE_DJANGO_API_URL || '';
 
 const MRVDashboard = () => {
-  const BLYNK_TOKEN = import.meta.env.VITE_BLYNK_AUTH_TOKEN || '';
+  // [COMMENTED OUT FOR PERSONAL REFERENCE — third-party IoT API tokens must never ship in VITE_* client bundles]
+  // const BLYNK_TOKEN = import.meta.env.VITE_BLYNK_AUTH_TOKEN || '';
 
   const [trends, setTrends] = useState([]);
   const [trendsLoading, setTrendsLoading] = useState(true);
@@ -51,7 +53,7 @@ const MRVDashboard = () => {
 
   const fetchTelemetryHistory = async () => {
     if (!DJANGO_API_URL) {
-      const localHistory = localStorage.getItem('carbonos_telemetry_history');
+      const localHistory = safeGetItem('carbonos_telemetry_history');
       if (localHistory) {
         try {
           setTelemetryHistory(JSON.parse(localHistory));
@@ -70,7 +72,7 @@ const MRVDashboard = () => {
         setTelemetryHistory(data);
       }
     } catch {
-      const localHistory = localStorage.getItem('carbonos_telemetry_history');
+      const localHistory = safeGetItem('carbonos_telemetry_history');
       if (localHistory) {
         try {
           setTelemetryHistory(JSON.parse(localHistory));
@@ -94,7 +96,7 @@ const MRVDashboard = () => {
     };
 
     let localHistory = [];
-    const stored = localStorage.getItem('carbonos_telemetry_history');
+    const stored = safeGetItem('carbonos_telemetry_history');
     if (stored) {
       try {
         localHistory = JSON.parse(stored);
@@ -103,7 +105,7 @@ const MRVDashboard = () => {
       }
     }
     localHistory = [newReading, ...localHistory].slice(0, 50);
-    localStorage.setItem('carbonos_telemetry_history', JSON.stringify(localHistory));
+    safeSetItem('carbonos_telemetry_history', JSON.stringify(localHistory));
 
     if (!DJANGO_API_URL) {
       setTelemetryHistory(localHistory);
@@ -132,47 +134,43 @@ const MRVDashboard = () => {
   };
 
   const fetchBlynkLive = async () => {
-    if (!BLYNK_TOKEN) {
+    // [COMMENTED OUT FOR PERSONAL REFERENCE — direct client Blynk Cloud fetches exposed auth token; telemetry is polled via backend]
+    // if (!BLYNK_TOKEN) { ... }
+    // const connRes = await fetch(`https://blynk.cloud/external/api/isHardwareConnected?token=...`);
+    // const res = await fetch(`https://blynk.cloud/external/api/getAll?token=...`);
+    if (!DJANGO_API_URL) {
       setDeviceConnected(false);
-      setBlynkError('Blynk auth token not configured (Sandbox telemetry mode).');
+      setBlynkError('Hardware telemetry proxy offline (local archive mode).');
       setMetrics({ temp: null, hum: null, air: null, co2: null });
       setTelemetryLoading(false);
       return;
     }
     try {
-      const connRes = await fetch(
-        `https://blynk.cloud/external/api/isHardwareConnected?token=${BLYNK_TOKEN}`
-      );
-      if (!connRes.ok) throw new Error('Failed to query hardware status');
-      const connText = await connRes.text();
-      const isConnected = connText.trim() === 'true';
-
-      setDeviceConnected(isConnected);
-      setLastSyncTime(new Date().toLocaleTimeString());
-
-      if (!isConnected) {
-        setBlynkError('Blynk device is offline.');
+      const res = await fetch(`${DJANGO_API_URL}/api/farmers-ai/mrv/telemetry/history/`);
+      if (!res.ok) throw new Error('Telemetry proxy unavailable');
+      const rows = await res.json();
+      if (Array.isArray(rows) && rows.length > 0) {
+        const latest = rows[0];
+        setTelemetryHistory(rows);
+        setMetrics({
+          temp: Number.isFinite(Number(latest.temperature)) ? Number(latest.temperature) : null,
+          hum: Number.isFinite(Number(latest.humidity)) ? Number(latest.humidity) : null,
+          air: Number.isFinite(Number(latest.air_quality)) ? Number(latest.air_quality) : null,
+          co2: Number.isFinite(Number(latest.co2)) ? Number(latest.co2) : null
+        });
+        setDeviceConnected(true);
+        setLastSyncTime(new Date().toLocaleTimeString());
+        setBlynkError(null);
+      } else {
+        setDeviceConnected(false);
+        setBlynkError('No server-proxied telemetry packets recorded yet.');
         setMetrics({ temp: null, hum: null, air: null, co2: null });
-        return;
-      }
-
-      const res = await fetch(`https://blynk.cloud/external/api/getAll?token=${BLYNK_TOKEN}`);
-      if (!res.ok) throw new Error(`HTTP error! status: ${res.status}`);
-      const data = await res.json();
-
-      const temp = parseFloat(data.v0);
-      const hum = parseFloat(data.v1);
-      const air = parseInt(data.v2);
-      const co2 = parseInt(data.v3);
-
-      setMetrics({ temp, hum, air, co2 });
-      setBlynkError(null);
-
-      if (!isNaN(temp) && !isNaN(hum) && !isNaN(air) && !isNaN(co2)) {
-        await saveTelemetry(temp, hum, air, co2);
       }
     } catch {
-      setBlynkError('Failed to sync with Blynk Cloud.');
+      setDeviceConnected(false);
+      setBlynkError('Unable to reach server telemetry feed.');
+    } finally {
+      setTelemetryLoading(false);
     }
   };
 
@@ -187,14 +185,17 @@ const MRVDashboard = () => {
       'CO2 Level (ppm)'
     ];
     const rows = telemetryHistory.map((item) => [
-      `"${new Date(item.timestamp).toLocaleString()}"`,
+      new Date(item.timestamp).toLocaleString(),
       item.temperature,
       item.humidity,
       item.air_quality,
       item.co2
     ]);
 
-    const csvContent = [headers.join(','), ...rows.map((e) => e.join(','))].join('\n');
+    const csvContent = [
+      headers.map(escapeCsvCell).join(','),
+      ...rows.map((row) => row.map(escapeCsvCell).join(','))
+    ].join('\n');
     const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
     const url = URL.createObjectURL(blob);
     const link = document.createElement('a');

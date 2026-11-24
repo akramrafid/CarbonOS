@@ -38,6 +38,9 @@ def validate_config():
     origins = os.getenv("ALLOWED_ORIGINS", "")
     if not origins or "*" in origins or "localhost" in origins:
         problems.append("ALLOWED_ORIGINS must list the production web origins only")
+    access_mode = os.getenv("ESG_ACCESS_MODE", "protected").strip().lower()
+    if access_mode and access_mode != "protected":
+        problems.append("ESG_ACCESS_MODE must be 'protected' (or unset) in production")
     if os.getenv("ESG_LLM_EXTRACTION_ENABLED", "").lower() == "true" and not os.getenv("ESG_LLM_PROCESSING_TERMS_REF"):
         problems.append("ESG_LLM_PROCESSING_TERMS_REF must reference the signed data-processing terms before enabling LLM extraction")
     if os.getenv("ESG_OCR_REQUIRED", "").lower() in ("true", "1") or os.getenv("ESG_REQUIRE_OCR", "").lower() in ("true", "1"):
@@ -57,7 +60,7 @@ app.add_middleware(
     CORSMiddleware,
     allow_origins=[o.strip() for o in os.getenv("ALLOWED_ORIGINS", "http://localhost:5173,http://127.0.0.1:3000").split(",") if o.strip()],
     allow_credentials=False,  # bearer tokens, no cookies
-    allow_methods=["GET", "POST", "PATCH", "DELETE"],
+    allow_methods=["GET", "POST", "PUT", "PATCH", "DELETE"],
     allow_headers=["Authorization", "Content-Type", "X-Organization-Id", "X-Request-Id"],
     expose_headers=["X-Request-Id", "X-Content-SHA256", "Content-Disposition"],
 )
@@ -75,6 +78,8 @@ async def request_context(request: Request, call_next):
         response = JSONResponse({"detail": "Internal error", "request_id": request_id}, status_code=500)
     response.headers["X-Request-Id"] = request_id
     response.headers["X-Content-Type-Options"] = "nosniff"
+    response.headers["X-Frame-Options"] = "DENY"
+    response.headers["Strict-Transport-Security"] = "max-age=31536000; includeSubDomains"
     response.headers["Cache-Control"] = "no-store"
     # Logs carry method, path, status and timing only — never bodies, tokens or document text.
     log.info("request_id=%s %s %s %s %.1fms", request_id, request.method, request.url.path,

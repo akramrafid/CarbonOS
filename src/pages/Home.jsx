@@ -1,4 +1,7 @@
 import React from 'react';
+import EditorialLanding from '../components/editorial/EditorialLanding';
+
+/* [COMMENTED OUT FOR PERSONAL REFERENCE — previous multi-section landing replaced by ZERO editorial landing]
 import Hero from '../components/Hero';
 import TrustBar from '../components/TrustBar';
 import ClientShowcase from '../components/ClientShowcase';
@@ -10,10 +13,13 @@ import SectorFocus from '../components/SectorFocus';
 import Philosophy from '../components/Philosophy';
 import FrameworkAlignment from '../components/FrameworkAlignment';
 import Pricing from '../components/Pricing';
+*/
 
 function Home() {
   return (
     <>
+      <EditorialLanding />
+      {/* [COMMENTED OUT FOR PERSONAL REFERENCE — previous landing sections kept archived]
       <section id="hero"><Hero /></section>
       <TrustBar />
       <section id="clients"><ClientShowcase /></section>
@@ -25,6 +31,7 @@ function Home() {
       <section id="philosophy"><Philosophy /></section>
       <section id="framework"><FrameworkAlignment /></section>
       <section id="pricing"><Pricing /></section>
+      */}
     </>
   );
 }

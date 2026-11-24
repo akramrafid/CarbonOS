@@ -12,17 +12,10 @@ const NotFound = () => {
   const isLight = theme === 'light';
 
   return (
-    <main className={`min-h-[85dvh] flex items-center justify-center px-4 sm:px-6 py-10 md:py-16 relative overflow-hidden font-sans transition-colors duration-300 ${
+    <div className={`min-h-[85dvh] flex items-center justify-center px-4 sm:px-6 py-10 md:py-16 relative overflow-hidden font-sans transition-colors duration-300 ${
       isLight ? 'bg-bg-canvas text-fg-primary' : 'bg-carbon text-registry'
     }`}>
-      
-      {/* Ambient Radial Mesh Gradients */}
-      <div className={`absolute top-1/4 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[600px] rounded-full blur-[120px] pointer-events-none ${
-        isLight ? 'bg-emerald-500/5' : 'bg-emerald/10'
-      }`}></div>
-      <div className={`absolute bottom-10 right-10 w-80 h-80 rounded-full blur-[100px] pointer-events-none ${
-        isLight ? 'bg-amber-500/5' : 'bg-amber/5'
-      }`}></div>
+      {/* [COMMENTED OUT FOR PERSONAL REFERENCE — removed decorative ambient blur layers & nested main wrapper] */}
 
       <div className="max-w-2xl w-full text-center relative z-10">
         
@@ -48,8 +41,8 @@ const NotFound = () => {
         </div>
 
         <PageHeader
-          title="Sovereign Registry Node Not Found"
-          description="The requested asset pathway, smart contract ledger node, or platform view does not exist or has been migrated."
+          title="Page Not Found"
+          description="The requested page or workspace route does not exist or has been moved."
           align="center"
           className="border-none mb-4 pb-0"
         />
@@ -78,7 +71,7 @@ const NotFound = () => {
 
           <Link
             to="/"
-            className="keep-white inline-flex items-center space-x-2 px-6 py-3 rounded-full bg-accent hover:bg-accent-active dark:bg-emerald dark:hover:bg-emerald/90 text-white dark:text-fg-primary text-sm font-bold shadow-[0_0_25px_rgba(0,200,83,0.3)] transition-all hover:scale-[1.02] active:scale-[0.98]"
+            className="keep-white inline-flex items-center space-x-2 px-6 py-3 rounded-full bg-accent hover:bg-accent-active dark:bg-emerald dark:hover:bg-emerald/90 text-white dark:text-fg-inverse text-sm font-bold shadow-[0_0_25px_rgba(0,200,83,0.3)] transition-[background-color,transform] hover:scale-[1.02] active:scale-[0.98]"
           >
             <Home size={16} />
             <span>Return to Home</span>
@@ -86,7 +79,7 @@ const NotFound = () => {
 
           <Link
             to="/platform/marketplace"
-            className={`inline-flex items-center space-x-2 px-5 py-3 rounded-full text-sm font-semibold transition-all hover:scale-[1.02] active:scale-[0.98] ${
+            className={`inline-flex items-center space-x-2 px-5 py-3 rounded-full text-sm font-semibold transition-[background-color,transform] hover:scale-[1.02] active:scale-[0.98] ${
               isLight
                 ? 'bg-white hover:bg-slate-50 text-slate-800 border border-slate-300 shadow-xs'
                 : 'bg-white/[0.06] hover:bg-white/[0.12] text-white border border-white/15'
@@ -103,7 +96,7 @@ const NotFound = () => {
         }`}>
           <Link
             to="/platform/saas-dashboard"
-            className={`p-4 rounded-2xl border transition-all group flex items-center space-x-3.5 ${
+            className={`p-4 rounded-2xl border transition-colors group flex items-center space-x-3.5 ${
               isLight
                 ? 'bg-white hover:bg-slate-50 border-border-strong hover:border-border-strong/40 shadow-xs'
                 : 'bg-white/[0.03] hover:bg-white/[0.07] border-white/10 hover:border-emerald/30'
@@ -119,14 +112,14 @@ const NotFound = () => {
                 Enterprise ESG Portal
               </div>
               <div className={`font-mono text-[11px] ${isLight ? 'text-slate-600' : 'text-mist'}`}>
-                Corporate GHG accounting & audit
+                Corporate GHG accounting &amp; audit
               </div>
             </div>
           </Link>
 
           <Link
             to="/platform/carbon-registry"
-            className={`p-4 rounded-2xl border transition-all group flex items-center space-x-3.5 ${
+            className={`p-4 rounded-2xl border transition-colors group flex items-center space-x-3.5 ${
               isLight
                 ? 'bg-white hover:bg-slate-50 border-border-strong hover:border-border-strong/40 shadow-xs'
                 : 'bg-white/[0.03] hover:bg-white/[0.07] border-white/10 hover:border-emerald/30'
@@ -142,14 +135,14 @@ const NotFound = () => {
                 National Registry Terminal
               </div>
               <div className={`font-mono text-[11px] ${isLight ? 'text-slate-600' : 'text-mist'}`}>
-                Live telemetry & verified serials
+                Live telemetry &amp; verified serials
               </div>
             </div>
           </Link>
         </div>
 
       </div>
-    </main>
+    </div>
   );
 };
 

@@ -49,11 +49,11 @@ const DeploymentTimeline = () => {
       <div className="relative border-l-2 border-border-subtle ml-4 md:ml-0">
         {phases.map((phase, idx) => (
           <div key={phase.id} className="mb-12 ml-8 relative group">
-            <div className={`absolute -left-[41px] w-6 h-6 rounded-full border-4 border-white ${
+            <div className={`absolute -left-[41px] w-6 h-6 rounded-full border-4 border-bg-canvas ${
               phase.active ? 'bg-accent' : 'bg-bg-muted'
             } shadow-sm transition-colors duration-300 group-hover:bg-accent`}></div>
             
-            <div className="bg-white p-6 rounded-xl border border-border-subtle shadow-sm hover:shadow-md transition-shadow">
+            <div className="bg-bg-surface p-6 rounded-xl border border-border-subtle shadow-sm hover:shadow-md transition-shadow">
               <div className="flex flex-col md:flex-row md:items-center justify-between mb-4">
                 <span className={`text-xs font-mono px-3 py-1 rounded-full ${
                   phase.id === 'Phase 1' ? 'bg-accent/10 text-accent' :

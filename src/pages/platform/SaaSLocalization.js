@@ -142,7 +142,9 @@ export const SaaSLocales = {
 
     // DuckDB Engine
     duckdbTitle: "ডাকডিবি ইন-প্রসেস ওল্যাপ ইঞ্জিন",
-    duckdbSubtitle: "সাব-২৫ মিলিমিটার ক্যালকুলেশন পাইপলাইন (অ্যাক্টিভিটি ও ব্যয়ভিত্তিক EEIO মডেল)",
+    // [COMMENTED OUT FOR PERSONAL REFERENCE — fixed mistranslated "মিলিমিটার" (millimeter) -> "মিলিসেকেন্ড" (millisecond)]
+    // duckdbSubtitle: "সাব-২৫ মিলিমিটার ক্যালকুলেশন পাইপলাইন (অ্যাক্টিভিটি ও ব্যয়ভিত্তিক EEIO মডেল)",
+    duckdbSubtitle: "সাব-২৫ মিলিসেকেন্ড ক্যালকুলেশন পাইপলাইন (অ্যাক্টিভিটি ও ব্যয়ভিত্তিক EEIO মডেল)",
     activityMode: "ভৌত কার্যক্রম হিসাব (Activity)",
     spendMode: "ব্যয়ভিত্তিক ইইআইও (CEDA মডেল)",
     queryLatency: "গণনার গতি",

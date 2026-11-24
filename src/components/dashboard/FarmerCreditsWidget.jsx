@@ -92,8 +92,8 @@ export const FarmerCreditsWidget = () => {
   return (
     <div className="bg-bg-canvas rounded-[2rem] p-6 lg:p-8 registry-border">
       <div className="flex justify-between items-center mb-6">
-        <h2 className="font-sans font-bold text-2xl text-registry">My Credits</h2>
-        <span className="font-mono text-xs bg-emerald/10 text-emerald px-3 py-1 rounded-full border border-emerald/20">Live Pipeline</span>
+        <h1 className="font-sans font-bold text-2xl text-registry">My Credits</h1>
+        <span className="font-mono text-xs bg-emerald/10 text-emerald px-3 py-1 rounded-full border border-emerald/20">Demo Pipeline</span>
       </div>
 
       <div className="space-y-2">

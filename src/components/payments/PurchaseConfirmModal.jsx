@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useMemo, useState } from 'react';
 import { useTheme } from '../../context/ThemeContext';
 import Modal from '@/components/ui/Modal';
 import PaymentStatusTracker from './PaymentStatusTracker';
@@ -38,19 +38,26 @@ export const PurchaseConfirmModal = ({ credit, creditId, onClose, onPurchaseComp
   // Payment State
   const [paymentMethod, setPaymentMethod] = useState('mfs');
   const [mfsProvider, setMfsProvider] = useState('bKash');
-  const [mfsNumber, setMfsNumber] = useState('01712984521');
+  // [COMMENTED OUT FOR PERSONAL REFERENCE — removed prefilled real-looking mobile number & CVC]
+  const [mfsNumber, setMfsNumber] = useState('');
   const [mfsOTP, setMfsOTP] = useState('');
   const [mfsStep, setMfsStep] = useState('number');
 
   // Card details
-  const [cardName, setCardName] = useState('Apex Corporate Treasury');
+  const [cardName, setCardName] = useState('Apex Corporate Treasury (Demo)');
   const [cardNumber, setCardNumber] = useState('4532 •••• •••• 8921');
   const [cardExpiry, setCardExpiry] = useState('08/28');
-  const [cardCvc, setCardCvc] = useState('782');
+  const [cardCvc, setCardCvc] = useState('');
 
-  // Certificate generated details
-  const certificateSerial = `DEMO-CZBD-RET-2026-${Math.random().toString(36).substring(2, 9).toUpperCase()}`;
-  const verificationHash = `0x${Array.from({ length: 40 }, () => Math.floor(Math.random() * 16).toString(16)).join('')}`;
+  // Memoize demo receipt identifiers so keystrokes in modal inputs do not regenerate random values during render
+  const { certificateSerial, verificationHash } = useMemo(() => {
+    const token = Date.now().toString(36).toUpperCase().slice(-6);
+    const idSlug = String(activeCredit.id || 'DEMO').replace(/[^A-Za-z0-9]/g, '').slice(-6);
+    return {
+      certificateSerial: `DEMO-CZBD-RET-2026-${idSlug}-${token}`,
+      verificationHash: `DEMO-HASH-${idSlug}-${token}-UNVERIFIED`,
+    };
+  }, [activeCredit.id]);
   const settlementDate = new Date().toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' });
 
   // 97% direct farmer remittance
@@ -117,8 +124,8 @@ export const PurchaseConfirmModal = ({ credit, creditId, onClose, onPurchaseComp
   const stepTitles = {
     configure: 'Corporate Settlement: Configure Allocation',
     payment: 'Corporate Settlement: Payment Authorization',
-    tracking: 'Real-Time Settlement Pipeline',
-    certificate: 'Official Retirement Certificate'
+    tracking: 'Demo Settlement Simulation',
+    certificate: 'Simulated Demo Retirement Receipt'
   };
 
   return (
@@ -179,7 +186,7 @@ export const PurchaseConfirmModal = ({ credit, creditId, onClose, onPurchaseComp
         <div className="py-2 space-y-6">
           <div className="text-center">
             <span className="font-mono text-xs text-emerald tracking-widest uppercase">
-              SMART CONTRACT EXECUTION PIPELINE
+              DEMO SETTLEMENT SIMULATION
             </span>
             <h3 className={`text-xl font-bold mt-1 ${isLight ? 'text-fg-primary' : 'text-white'}`}>
               Settling 97% to Farmer Wallet

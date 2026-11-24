@@ -12,7 +12,8 @@ export const getEvidenceTemplates = (client, elecQty, dieselQty, petrolQty, truc
     date: "2026-06-15",
     period: "May 2026 - June 2026",
     amountBdt: Math.round(elecQty * 11.85),
-    sha256: "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    // [COMMENTED OUT FOR PERSONAL REFERENCE — replaced empty-string SHA-256 test constant]
+    sha256: "DEMO-SAMPLE-DIGEST-001",
     verifiedBy: client.assignedAuditor || "Senior ESG Assurance Lead",
     status: "Reviewed",
     notes: "Substation meter reading. Grid-average factor pending approval, so no emissions are calculated yet."
@@ -26,7 +27,7 @@ export const getEvidenceTemplates = (client, elecQty, dieselQty, petrolQty, truc
     date: "2026-06-10",
     period: "Q2 2026",
     amountBdt: Math.round(dieselQty * 108.5),
-    sha256: "a8f5f167f44f4964e6c998dee827110c0800b4b2450d6046e75a50787e742878",
+    sha256: "DEMO-SAMPLE-DIGEST-002",
     verifiedBy: client.assignedAuditor || "Senior ESG Assurance Lead",
     status: "Verified",
     notes: "Captive diesel generators maintenance log & fuel delivery challan."
@@ -40,7 +41,7 @@ export const getEvidenceTemplates = (client, elecQty, dieselQty, petrolQty, truc
     date: "2026-06-05",
     period: "June 2026",
     amountBdt: Math.round(petrolQty * 125.0),
-    sha256: "c5d2e737c35e3fbcf7eb9808e08d13038d82d41b539c366ff5b62e49c7161b2a",
+    sha256: "DEMO-SAMPLE-DIGEST-003",
     verifiedBy: client.assignedAuditor || "Senior ESG Assurance Lead",
     status: "Verified",
     notes: "Service vehicles & dispatch mobility logs reconciled with odometer records."
@@ -54,7 +55,7 @@ export const getEvidenceTemplates = (client, elecQty, dieselQty, petrolQty, truc
     date: "2026-05-28",
     period: "May 2026",
     amountBdt: Math.round(truckQty * 4.2),
-    sha256: "7d793037a0760186574b0282f2f435e7090a6ffcd0c8db6738980b18f0249216",
+    sha256: "DEMO-SAMPLE-DIGEST-004",
     verifiedBy: client.assignedAuditor || "Senior ESG Assurance Lead",
     status: "Reviewed",
     notes: "Heavy freight truck ton-km dispatch manifests from port & distribution outposts."
@@ -68,7 +69,8 @@ export const getEvidenceTemplates = (client, elecQty, dieselQty, petrolQty, truc
     date: "2026-04-12",
     period: "FY 2026",
     amountBdt: 0,
-    sha256: "5e884898da28047151d0e56f8dc6292773603d0d6aabbdd62a11ef721d1542d8",
+    // [COMMENTED OUT FOR PERSONAL REFERENCE — replaced sha256("password") placeholder hash]
+    sha256: "DEMO-SAMPLE-DIGEST-005",
     verifiedBy: client.assignedAuditor || "Senior ESG Assurance Lead",
     status: "Verified",
     notes: "Aggregated survey covering transit mode distribution and average radial distance."

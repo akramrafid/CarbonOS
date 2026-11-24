@@ -10,7 +10,7 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     libgomp1 \
     && rm -rf /var/lib/apt/lists/*
 
-COPY requirements.txt .
+COPY inference/requirements.txt .
 RUN pip install --no-cache-dir --user -r requirements.txt
 
 # Final runtime image
@@ -25,12 +25,17 @@ ENV PATH=/home/carbonos/.local/bin:$PATH \
 RUN apt-get update && apt-get install -y --no-install-recommends \
     libgomp1 \
     curl \
+    tesseract-ocr \
+    tesseract-ocr-eng \
+    tesseract-ocr-ben \
     && rm -rf /var/lib/apt/lists/* \
     && useradd --create-home --uid 10001 --shell /bin/bash carbonos
 
 COPY --from=builder /root/.local /home/carbonos/.local
 COPY --chown=carbonos:carbonos inference/ /app/inference/
-COPY --chown=carbonos:carbonos requirements.txt /app/
+COPY --chown=carbonos:carbonos factors/ /app/factors/
+COPY --chown=carbonos:carbonos backend/ml_pipeline/ /app/backend/ml_pipeline/
+COPY --chown=carbonos:carbonos inference/requirements.txt /app/requirements.txt
 
 USER carbonos
 

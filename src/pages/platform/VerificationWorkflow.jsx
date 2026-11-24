@@ -1,10 +1,12 @@
 import React from 'react';
+import { useNavigate } from 'react-router-dom';
 import { PageHeader } from '../../components/ui/PageHeader';
 import { Badge } from '../../components/ui/Badge';
 import { Button } from '../../components/ui/Button';
 import { Card } from '../../components/ui/Card';
 
 const VerificationWorkflow = () => {
+  const navigate = useNavigate();
   return (
     <div className="pt-12 pb-8 sm:pt-16 sm:pb-12 min-h-[80dvh] flex flex-col items-center noise-overlay">
       <div className="max-w-4xl w-full mx-auto px-6 lg:px-12">
@@ -26,25 +28,26 @@ const VerificationWorkflow = () => {
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mt-8">
               <Card className="p-5 flex flex-col justify-between">
                 <div>
-                  <div className="font-mono text-[10px] text-mist mb-1">TASK ID: VVB-2025-881</div>
+                  <div className="font-mono text-[10px] text-mist mb-1">SAMPLE TASK: VVB-2025-881</div>
                   <div className="font-sans font-bold text-registry text-lg mb-2">Solar Risk Assessment</div>
                   <div className="font-sans text-xs text-mist mb-4">Cross-check inverter logs vs claimed MWh.</div>
                 </div>
                 <div>
-                  <Button variant="ghost" size="sm" className="text-emerald hover:text-white p-0">
-                    Start Audit →
+                  {/* [COMMENTED OUT FOR PERSONAL REFERENCE — un-wired Start Audit button; routed to live MRV Workspace] */}
+                  <Button variant="ghost" size="sm" className="text-emerald hover:text-white p-0 min-h-[44px]" onClick={() => navigate('/platform/carbon-registry')}>
+                    Open Registry Audit →
                   </Button>
                 </div>
               </Card>
               <Card className="p-5 flex flex-col justify-between">
                 <div>
-                  <div className="font-mono text-[10px] text-mist mb-1">TASK ID: VVB-2025-882</div>
+                  <div className="font-mono text-[10px] text-mist mb-1">SAMPLE TASK: VVB-2025-882</div>
                   <div className="font-sans font-bold text-registry text-lg mb-2">GIS Boundary Audit</div>
                   <div className="font-sans text-xs text-mist mb-4">Verify mangrove reforestation polygons.</div>
                 </div>
                 <div>
-                  <Button variant="ghost" size="sm" className="text-emerald hover:text-white p-0">
-                    Start Audit →
+                  <Button variant="ghost" size="sm" className="text-emerald hover:text-white p-0 min-h-[44px]" onClick={() => navigate('/carbon-monitoring')}>
+                    Open GIS Verification →
                   </Button>
                 </div>
               </Card>

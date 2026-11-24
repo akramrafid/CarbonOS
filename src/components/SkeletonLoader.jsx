@@ -1,11 +1,8 @@
+/* [COMMENTED OUT FOR PERSONAL REFERENCE — unused SkeletonLoader component; PageSkeleton/LoadingSpinner handle active loading states]
 import React from 'react';
 
-/**
- * Dual-theme accessible skeleton placeholder.
- * Automatically adapts pulse animations and respect prefers-reduced-motion.
- */
 export const SkeletonLoader = ({
-  variant = 'text', // 'text' | 'card' | 'table' | 'metric' | 'circle'
+  variant = 'text',
   className = '',
   rows = 3,
   height,
@@ -53,9 +50,7 @@ export const SkeletonLoader = ({
   if (variant === 'table') {
     return (
       <div className={`space-y-3 w-full ${className}`} aria-hidden="true">
-        {/* Table Header Placeholder */}
         <div className={`h-10 w-full ${baseClasses} ${pulseClasses} rounded-lg`} />
-        {/* Table Rows Placeholder */}
         {Array.from({ length: rows }).map((_, i) => (
           <div key={i} className={`h-12 w-full ${baseClasses} ${pulseClasses} rounded-lg flex items-center px-4 space-x-4`}>
             <div className="h-3 w-1/6 bg-gray-300 dark:bg-white/10 rounded" />
@@ -68,7 +63,6 @@ export const SkeletonLoader = ({
     );
   }
 
-  // Default: text variant
   return (
     <div className={`space-y-2 ${className}`} aria-hidden="true">
       {Array.from({ length: rows }).map((_, i) => (
@@ -83,4 +77,5 @@ export const SkeletonLoader = ({
 };
 
 export default SkeletonLoader;
+*/
 

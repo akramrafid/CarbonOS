@@ -6,6 +6,7 @@ import {
   calculateGeodesicMetrics,
   getBangladeshEcoZone
 } from '../constants';
+import { safeGetItem, safeSetItem } from '../../../lib/safeStorage';
 
 export const useCarbonMapState = ({ selectedJob, showToast }) => {
   const [mapCenter, setMapCenter] = useState([22.15, 89.50]);
@@ -16,7 +17,7 @@ export const useCarbonMapState = ({ selectedJob, showToast }) => {
 
   const [storedLocations, setStoredLocations] = useState(() => {
     try {
-      const saved = localStorage.getItem('carbonzero_stored_locations') || localStorage.getItem('carbonos_stored_locations');
+      const saved = safeGetItem('carbonzero_stored_locations') || safeGetItem('carbonos_stored_locations');
       return saved ? JSON.parse(saved) : [];
     } catch {
       return [];
@@ -24,11 +25,7 @@ export const useCarbonMapState = ({ selectedJob, showToast }) => {
   });
 
   useEffect(() => {
-    try {
-      localStorage.setItem('carbonzero_stored_locations', JSON.stringify(storedLocations));
-    } catch (e) {
-      console.error("Failed to save locations to localStorage", e);
-    }
+    safeSetItem('carbonzero_stored_locations', JSON.stringify(storedLocations));
   }, [storedLocations]);
 
   const [isDrawing, setIsDrawing] = useState(false);
@@ -164,8 +161,9 @@ export const useCarbonMapState = ({ selectedJob, showToast }) => {
     let ndvi = ecoZone.baseNdvi;
 
     let usedJobData = false;
-    if (selectedJob && selectedJob.result) {
-      const bounds = getJobBounds(selectedJob);
+    const activeJob = selectedJob && 'current' in selectedJob ? selectedJob.current : selectedJob;
+    if (activeJob && activeJob.result) {
+      const bounds = getJobBounds(activeJob);
       const minLat = bounds[0][0];
       const maxLat = bounds[1][0];
       const minLng = bounds[0][1];
@@ -177,9 +175,9 @@ export const useCarbonMapState = ({ selectedJob, showToast }) => {
         const lngFraction = (parsedLng - minLng) / (maxLng - minLng || 1);
         const distSeed = Math.sin(latFraction * Math.PI) * Math.cos(lngFraction * Math.PI);
         const ndviDeviation = distSeed * 0.18;
-        const avgNdvi = selectedJob.result.avg_ndvi || ecoZone.baseNdvi;
+        const avgNdvi = activeJob.result.avg_ndvi || ecoZone.baseNdvi;
         ndvi = Math.min(0.92, Math.max(0.08, avgNdvi + ndviDeviation));
-        estimatedBiomass = (selectedJob.result.estimated_biomass || estimatedBiomass) * (ndvi / (avgNdvi || 1));
+        estimatedBiomass = (activeJob.result.estimated_biomass || estimatedBiomass) * (ndvi / (avgNdvi || 1));
         estimatedCarbon = estimatedBiomass * 0.475;
         forestType = ndvi > 0.6 ? `${ecoZone.forestType} Canopy` : "Secondary Canopy / Mixed Growth";
       }

@@ -1,13 +1,15 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { WifiOff, Wifi, RefreshCw, AlertTriangle } from 'lucide-react';
 import { useTheme } from '../context/ThemeContext';
 import { subscribeDemoDataActive } from '../lib/esgApi';
 
 export const OfflineBanner = () => {
-  const [isOffline, setIsOffline] = useState(!navigator.onLine);
+  const [isOffline, setIsOffline] = useState(typeof navigator !== 'undefined' ? !navigator.onLine : false);
   const [showRestored, setShowRestored] = useState(false);
   const [isChecking, setIsChecking] = useState(false);
   const [isDemoData, setIsDemoData] = useState(false);
+  const restoreTimerRef = useRef(null);
+  const checkTimerRef = useRef(null);
   const { theme } = useTheme();
   const isLight = theme === 'light';
 
@@ -19,15 +21,16 @@ export const OfflineBanner = () => {
     const handleOnline = () => {
       setIsOffline(false);
       setShowRestored(true);
-      const timer = setTimeout(() => {
+      if (restoreTimerRef.current) clearTimeout(restoreTimerRef.current);
+      restoreTimerRef.current = setTimeout(() => {
         setShowRestored(false);
       }, 3500);
-      return () => clearTimeout(timer);
     };
 
     const handleOffline = () => {
       setIsOffline(true);
       setShowRestored(false);
+      if (restoreTimerRef.current) clearTimeout(restoreTimerRef.current);
     };
 
     window.addEventListener('online', handleOnline);
@@ -35,6 +38,8 @@ export const OfflineBanner = () => {
 
     return () => {
       unsub();
+      if (restoreTimerRef.current) clearTimeout(restoreTimerRef.current);
+      if (checkTimerRef.current) clearTimeout(checkTimerRef.current);
       window.removeEventListener('online', handleOnline);
       window.removeEventListener('offline', handleOffline);
     };
@@ -47,12 +52,14 @@ export const OfflineBanner = () => {
       if (navigator.onLine) {
         setIsOffline(false);
         setShowRestored(true);
-        setTimeout(() => setShowRestored(false), 3000);
+        if (restoreTimerRef.current) clearTimeout(restoreTimerRef.current);
+        restoreTimerRef.current = setTimeout(() => setShowRestored(false), 3000);
       } else {
         setIsOffline(true);
       }
     } finally {
-      setTimeout(() => setIsChecking(false), 600);
+      if (checkTimerRef.current) clearTimeout(checkTimerRef.current);
+      checkTimerRef.current = setTimeout(() => setIsChecking(false), 600);
     }
   };
 
@@ -63,7 +70,7 @@ export const OfflineBanner = () => {
   if (isDemoData && !isOffline && !showRestored) {
     return (
       <div
-        className={`w-full z-[99] px-4 py-2 transition-all duration-300 font-sans border-b shadow-sm ${
+        className={`w-full z-[99] px-4 py-2 transition-colors duration-300 font-sans border-b shadow-sm ${
           isLight
             ? 'bg-amber-100 border-amber-300 text-amber-950'
             : 'bg-amber-950/80 border-amber-500/40 text-amber-200'
@@ -96,7 +103,7 @@ export const OfflineBanner = () => {
   if (showRestored) {
     return (
       <div
-        className={`w-full z-[99] px-4 py-2.5 transition-all duration-300 font-sans border-b shadow-sm ${
+        className={`w-full z-[99] px-4 py-2.5 transition-colors duration-300 font-sans border-b shadow-sm ${
           isLight
             ? 'bg-emerald-50 border-emerald-200 text-accent'
             : 'bg-emerald/15 border-emerald/30 text-emerald'
@@ -110,7 +117,7 @@ export const OfflineBanner = () => {
               <Wifi size={14} className={isLight ? 'text-accent' : 'text-emerald'} />
             </span>
             <span>
-              <strong>Connection restored:</strong> Sovereign ledger and telemetry synchronization active.
+              <strong>Connection restored:</strong> Ledger and telemetry synchronization active.
             </span>
           </div>
           <span className="font-mono text-[11px] opacity-75 hidden sm:inline">ONLINE</span>
@@ -121,7 +128,7 @@ export const OfflineBanner = () => {
 
   return (
     <div
-      className={`w-full z-[99] px-4 py-2.5 transition-all duration-300 font-sans border-b shadow-sm ${
+      className={`w-full z-[99] px-4 py-2.5 transition-colors duration-300 font-sans border-b shadow-sm ${
         isLight
           ? 'bg-amber-50 border-amber-200 text-amber-900'
           : 'bg-amber-950/60 border-amber-500/30 text-amber-200'

@@ -1,3 +1,4 @@
+/* [COMMENTED OUT FOR PERSONAL REFERENCE — unused Marketplace placeholder page; App.jsx routes /platform/marketplace to components/marketplace/MarketplaceBrowse.jsx]
 import React from 'react';
 import { PageHeader } from '../../components/ui/PageHeader';
 import { Badge } from '../../components/ui/Badge';
@@ -57,3 +58,7 @@ const Marketplace = () => {
 };
 
 export default Marketplace;
+*/
+export default function MarketplaceArchived() {
+  return null;
+}

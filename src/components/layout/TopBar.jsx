@@ -1,5 +1,5 @@
 import React, { useState, useRef, useEffect } from 'react';
-import { Link, useLocation } from 'react-router-dom';
+import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { 
   Menu, 
@@ -20,6 +20,8 @@ import { useTheme } from '../../context/ThemeContext';
 import { ThemeToggle } from '../ui/ThemeToggle';
 import { getBreadcrumbs } from '../../config/nav.config';
 import { Tooltip } from '../ui/Tooltip';
+import { clearAllUserStorage } from '../../lib/safeStorage';
+import { signOut } from '../../lib/esgAuth';
 
 /**
  * TopBar Component
@@ -37,6 +39,17 @@ export function TopBar({ onOpenMobileDrawer, onOpenCommandPalette }) {
   const { theme, toggleTheme } = useTheme();
   const { t, i18n } = useTranslation();
   const location = useLocation();
+  const navigate = useNavigate();
+
+  const handleSignOut = async () => {
+    setUserMenuOpen(false);
+    clearAllUserStorage();
+    try {
+      await signOut();
+    } catch {
+      navigate('/');
+    }
+  };
 
   const breadcrumbs = getBreadcrumbs(location.pathname);
 
@@ -102,19 +115,23 @@ export function TopBar({ onOpenMobileDrawer, onOpenCommandPalette }) {
         {/* Auto Breadcrumbs */}
         <nav aria-label="Breadcrumb" className="hidden sm:flex items-center gap-1.5 text-xs font-mono text-fg-muted min-w-0">
           {breadcrumbs.map((crumb, idx) => (
-            <React.Fragment key={crumb.route + idx}>
+            <React.Fragment key={(crumb.route || crumb.label) + idx}>
               {idx > 0 && <ChevronRight className="w-3.5 h-3.5 text-fg-muted/60 shrink-0" />}
               {crumb.isCurrent ? (
                 <span className="text-fg-primary font-semibold truncate max-w-[180px] lg:max-w-xs" aria-current="page">
                   {crumb.label}
                 </span>
-              ) : (
+              ) : crumb.route ? (
                 <Link
                   to={crumb.route}
                   className="hover:text-accent transition-colors truncate max-w-[140px]"
                 >
                   {crumb.label}
                 </Link>
+              ) : (
+                <span className="truncate max-w-[140px] text-fg-muted">
+                  {crumb.label}
+                </span>
               )}
             </React.Fragment>
           ))}
@@ -167,7 +184,8 @@ export function TopBar({ onOpenMobileDrawer, onOpenCommandPalette }) {
                     {n.type === 'info' && <ShieldCheck className="w-4 h-4 text-sky-500 shrink-0 mt-0.5" />}
                     <div className="flex-1 min-w-0">
                       <div className="flex items-center justify-between gap-1">
-                        <h5 className="font-medium text-xs text-fg-primary truncate">{n.title}</h5>
+                        {/* <h5 className="font-medium text-xs text-fg-primary truncate">{n.title}</h5> [COMMENTED OUT FOR PERSONAL REFERENCE — avoided h1->h5 heading skip] */}
+                        <span className="font-medium text-xs text-fg-primary truncate block">{n.title}</span>
                         <span className="text-[10px] text-fg-muted font-mono shrink-0">{n.time}</span>
                       </div>
                       <p className="text-[11px] text-fg-secondary mt-0.5 line-clamp-2">{n.desc}</p>
@@ -215,16 +233,16 @@ export function TopBar({ onOpenMobileDrawer, onOpenCommandPalette }) {
               MR
             </div>
             <div className="hidden lg:flex flex-col text-left">
-              <span className="text-xs font-semibold text-fg-primary leading-tight">MRV Auditor</span>
-              <span className="text-[10px] font-mono text-fg-muted leading-tight">Dhaka Central</span>
+              <span className="text-xs font-semibold text-fg-primary leading-tight">Workspace Session</span>
+              <span className="text-[10px] font-mono text-fg-muted leading-tight">Tenant Operator</span>
             </div>
           </button>
 
           {userMenuOpen && (
             <div className="absolute right-0 mt-2 w-64 bg-bg-surface border border-border-subtle rounded-2xl shadow-2xl p-2 z-50 animate-fade-in text-sm">
               <div className="px-3 py-2 border-b border-border-subtle mb-1">
-                <p className="font-semibold text-xs text-fg-primary">Auditor Admin</p>
-                <p className="text-[11px] text-fg-muted font-mono truncate">mrv-lead@carbonos.gov.bd</p>
+                <p className="font-semibold text-xs text-fg-primary">Active Workspace</p>
+                <p className="text-[11px] text-fg-muted font-mono truncate">Session scoped via Bearer / Demo</p>
               </div>
               <div className="px-2 py-2 border-b border-border-subtle mb-1 flex justify-center">
                 <ThemeToggle variant="segmented" />
@@ -246,14 +264,15 @@ export function TopBar({ onOpenMobileDrawer, onOpenCommandPalette }) {
                 <span>Workspace Settings</span>
               </Link>
               <div className="border-t border-border-subtle my-1" />
-              <Link
-                to="/"
-                onClick={() => setUserMenuOpen(false)}
-                className="flex items-center gap-2.5 px-3 py-2 rounded-lg text-xs text-rose-500 hover:bg-rose-500/10 transition-colors"
+              {/* [COMMENTED OUT FOR PERSONAL REFERENCE — previously fake Link to="/", now clears all storage & OIDC/demo sessions] */}
+              <button
+                type="button"
+                onClick={handleSignOut}
+                className="w-full text-left flex items-center gap-2.5 px-3 py-2 rounded-lg text-xs text-rose-500 hover:bg-rose-500/10 transition-colors min-h-[44px]"
               >
                 <LogOut className="w-4 h-4" />
                 <span>Sign Out</span>
-              </Link>
+              </button>
             </div>
           )}
         </div>

@@ -12,29 +12,58 @@ import { navConfig } from '../../config/nav.config';
 export function MobileDrawer({ isOpen, onClose }) {
   const { t } = useTranslation();
   const drawerRef = useRef(null);
+  const previousFocusRef = useRef(null);
 
-  // Close on Escape key
+  // Close on Escape key and trap Tab focus inside open drawer
   useEffect(() => {
+    if (!isOpen) {
+      document.body.style.overflow = '';
+      if (previousFocusRef.current && typeof previousFocusRef.current.focus === 'function') {
+        previousFocusRef.current.focus();
+        previousFocusRef.current = null;
+      }
+      return undefined;
+    }
+
+    previousFocusRef.current = document.activeElement;
+    document.body.style.overflow = 'hidden';
+
+    const focusTimer = setTimeout(() => {
+      const firstFocusable = drawerRef.current?.querySelector(
+        'button:not([disabled]), a[href], [tabindex]:not([tabindex="-1"])'
+      );
+      firstFocusable?.focus();
+    }, 30);
+
     const handleKeyDown = (e) => {
-      if (e.key === 'Escape' && isOpen) {
+      if (e.key === 'Escape') {
         onClose();
+        return;
+      }
+      if (e.key === 'Tab' && drawerRef.current) {
+        const focusable = drawerRef.current.querySelectorAll(
+          'button:not([disabled]), a[href], input:not([disabled]), select:not([disabled]), [tabindex]:not([tabindex="-1"])'
+        );
+        if (focusable.length === 0) return;
+        const first = focusable[0];
+        const last = focusable[focusable.length - 1];
+        if (e.shiftKey && document.activeElement === first) {
+          e.preventDefault();
+          last.focus();
+        } else if (!e.shiftKey && document.activeElement === last) {
+          e.preventDefault();
+          first.focus();
+        }
       }
     };
-    window.addEventListener('keydown', handleKeyDown);
-    return () => window.removeEventListener('keydown', handleKeyDown);
-  }, [isOpen, onClose]);
 
-  // Lock body scroll when drawer is open
-  useEffect(() => {
-    if (isOpen) {
-      document.body.style.overflow = 'hidden';
-    } else {
-      document.body.style.overflow = '';
-    }
+    window.addEventListener('keydown', handleKeyDown);
     return () => {
+      clearTimeout(focusTimer);
+      window.removeEventListener('keydown', handleKeyDown);
       document.body.style.overflow = '';
     };
-  }, [isOpen]);
+  }, [isOpen, onClose]);
 
   if (!isOpen) return null;
 
@@ -74,9 +103,9 @@ export function MobileDrawer({ isOpen, onClose }) {
         <div className="flex-1 overflow-y-auto space-y-4 pr-1 scrollbar-thin">
           {navConfig.groups.map((group) => (
             <div key={group.id} className="space-y-1">
-              <h4 className="text-[11px] font-mono font-semibold uppercase text-fg-muted px-2 mb-1 tracking-wider">
+              <h2 className="text-[11px] font-mono font-semibold uppercase text-fg-muted px-2 mb-1 tracking-wider">
                 {group.titleKey ? t(group.titleKey, group.title) : group.title}
-              </h4>
+              </h2>
               {group.items.map((item) => {
                 const Icon = item.icon;
                 const label = item.labelKey ? t(item.labelKey, item.label) : item.label;

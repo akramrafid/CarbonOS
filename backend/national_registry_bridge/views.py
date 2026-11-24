@@ -41,9 +41,10 @@ class RegistryProjectViewSet(viewsets.ModelViewSet):
     def get_queryset(self):
         user = getattr(self.request, "user", None)
         if not user or not getattr(user, "is_authenticated", False):
-            from django.conf import settings
-            if getattr(settings, "DEBUG", False):
-                return RegistryProject.objects.all()
+            # [COMMENTED OUT FOR PERSONAL REFERENCE — DEBUG bypass leaked all tenant projects anonymously]
+            # from django.conf import settings
+            # if getattr(settings, "DEBUG", False):
+            #     return RegistryProject.objects.all()
             return RegistryProject.objects.none()
 
         if getattr(user, "is_superuser", False) or getattr(user, "is_staff", False) or getattr(user, "is_platform_operator", False):
@@ -52,7 +53,8 @@ class RegistryProjectViewSet(viewsets.ModelViewSet):
         tax_id = getattr(user, "company_tax_id", None) or getattr(user, "organization_id", None)
         if tax_id:
             return RegistryProject.objects.filter(company_tax_id=tax_id)
-        return RegistryProject.objects.all()
+        # Fail closed when caller lacks company/organization identifier
+        return RegistryProject.objects.none()
 
     def perform_create(self, serializer):
         # Automatically evaluate Positive/Negative list eligibility upon creation
@@ -92,21 +94,15 @@ class RegistryProjectViewSet(viewsets.ModelViewSet):
         except Exception:
             pass
 
-        # Fallback to dictionaries if specific IDs not found in ORM
+        # [COMMENTED OUT FOR PERSONAL REFERENCE — fabricated fallback carbon_results removed; require real ORM CarbonResult records]
+        # if not carbon_results:
+        #     for cid in carbon_result_ids:
+        #         carbon_results.append({...})
         if not carbon_results:
-            for cid in carbon_result_ids:
-                carbon_results.append({
-                    "id": cid,
-                    "estimated_biomass": 142.5,
-                    "estimated_carbon": 67.2,
-                    "tonnes_co2e": 246.4,
-                    "forest_area_ha": 25.0,
-                    "avg_ndvi": 0.74,
-                    "carbon_lower_90": 58.0,
-                    "carbon_upper_90": 76.5,
-                    "carbon_agb_tc_ha": 35.0,
-                    "carbon_soc_tc_ha": 20.0
-                })
+            return Response(
+                {"error": "No matching verified CarbonResult records found for supplied carbon_result_ids."},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
 
         client = NationalRegistryClient()
         try:
@@ -181,6 +177,7 @@ class PositiveNegativeRuleViewSet(viewsets.ModelViewSet):
     """
     queryset = PositiveNegativeRule.objects.all()
     serializer_class = PositiveNegativeRuleSerializer
+    permission_classes = [permissions.IsAdminUser]
 
     @action(detail=False, methods=["post"], url_path="bootstrap")
     def bootstrap(self, request):
@@ -199,6 +196,7 @@ class MonitoringReportSubmissionViewSet(viewsets.ReadOnlyModelViewSet):
     """
     queryset = MonitoringReportSubmission.objects.all()
     serializer_class = MonitoringReportSubmissionSerializer
+    permission_classes = [permissions.IsAdminUser]
 
 
 class CorrespondingAdjustmentViewSet(viewsets.ModelViewSet):
@@ -207,6 +205,7 @@ class CorrespondingAdjustmentViewSet(viewsets.ModelViewSet):
     """
     queryset = CorrespondingAdjustment.objects.all()
     serializer_class = CorrespondingAdjustmentSerializer
+    permission_classes = [permissions.IsAdminUser]
 
     @action(detail=True, methods=["post"], url_path="confirm")
     def confirm_adjustment(self, request, pk=None):
@@ -233,6 +232,7 @@ class NationalBTRSummaryView(APIView):
     Consolidated Article 6.2 Structured Summary for Bangladesh Biennial Transparency Report.
     Supports ?format=json (default) or ?format=csv.
     """
+    permission_classes = [permissions.IsAdminUser]
     def perform_content_negotiation(self, request, force=False):
         try:
             return super().perform_content_negotiation(request, force=force)

@@ -21,8 +21,13 @@ const Privacy = () => {
             <p>We collect project coordinates (GIS data), IoT telemetry (inverter logs, flow meters), and corporate identification documents necessary for project onboarding.</p>
             <h2 className="text-registry font-bold text-lg mt-6">2. How We Use Data</h2>
             <p>Data is used exclusively for MRV (Measurement, Reporting, and Verification), fraud detection via AI, and national registry tracking. We do not sell data to third parties.</p>
-            <h2 className="text-registry font-bold text-lg mt-6">3. Data Residency</h2>
+            <h2 className="text-registry font-bold text-lg mt-6">3. Data Residency &amp; Client Storage</h2>
+            {/* [COMMENTED OUT FOR PERSONAL REFERENCE — removed outdated Digital Security Act & inaccurate "all sensitive national carbon data is hosted on sovereign servers physically located within Bangladesh" claim]
             <p>All sensitive national carbon data is hosted on sovereign servers physically located within Bangladesh in compliance with the Digital Security Act.</p>
+            */}
+            <p>
+              Carbon Zero BD aligns its data-handling practices with Bangladesh&apos;s Cyber Security Act 2023 (CSA 2023). The web application is served statically (for example via Vercel CDN), while UI theme/workspace preferences and OIDC session tokens may be stored locally in browser storage (`localStorage` / `sessionStorage`) and are cleared on sign-out. Uploaded documents or telemetry submitted for verification are transmitted only to the configured backend API endpoints and enabled third-party providers documented in your deployment configuration.
+            </p>
           </div>
         </div>
       </div>

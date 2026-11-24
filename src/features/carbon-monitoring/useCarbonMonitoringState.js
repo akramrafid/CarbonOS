@@ -26,9 +26,15 @@ export function useCarbonMonitoringState() {
     };
   }, []);
 
+  // Keep latest selectedJob in a ref so mapState callbacks never read stale null
+  const selectedJobRef = useRef(null);
+
   // Modular state hooks
-  const mapState = useCarbonMapState({ selectedJob: null, showToast });
+  // [COMMENTED OUT FOR PERSONAL REFERENCE — passed selectedJob: null because telemetryState initializes after mapState]
+  // const mapState = useCarbonMapState({ selectedJob: null, showToast });
+  const mapState = useCarbonMapState({ selectedJob: selectedJobRef, showToast });
   const telemetryState = useCarbonTelemetryData({ mapState, showToast });
+  selectedJobRef.current = telemetryState.selectedJob;
   const verraState = useCarbonVerraProvenance({
     selectedJob: telemetryState.selectedJob,
     dashboardData: telemetryState.dashboardData,

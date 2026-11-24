@@ -102,7 +102,7 @@ const SectorFocus = () => {
       
       {/* Background Graphic Grid */}
       <div className="absolute inset-0 bg-[linear-gradient(to_right,rgba(16,185,129,0.04)_1px,transparent_1px),linear-gradient(to_bottom,rgba(16,185,129,0.04)_1px,transparent_1px)] bg-[size:4rem_4rem] z-0 pointer-events-none" />
-      <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[800px] h-[800px] bg-emerald-950/20 rounded-full blur-[140px] pointer-events-none z-0" />
+      {/* [COMMENTED OUT FOR PERSONAL REFERENCE — removed full-section decorative ambient gradient layer] */}
 
       <div className="max-w-7xl mx-auto relative z-10">
         
@@ -122,10 +122,9 @@ const SectorFocus = () => {
             return (
               <div 
                 key={index} 
-                className={`relative bg-white/[0.02] backdrop-blur-xl border border-white/10 ${sector.borderColor} rounded-[2rem] p-8 transition-all duration-300 hover:bg-white/[0.04] hover:-translate-y-1.5 group flex flex-col justify-between shadow-2xl overflow-hidden`}
+                className={`relative bg-white/[0.02] backdrop-blur-xl border border-white/10 ${sector.borderColor} rounded-[2rem] p-8 transition-[background-color,border-color,transform] duration-300 hover:bg-white/[0.04] hover:-translate-y-1.5 group flex flex-col justify-between shadow-2xl overflow-hidden`}
               >
-                {/* Subtle top corner gradient bloom */}
-                <div className={`absolute -top-16 -right-16 w-36 h-36 bg-gradient-to-br ${sector.color} rounded-full blur-2xl group-hover:scale-125 transition-transform duration-500 pointer-events-none`} />
+                {/* [COMMENTED OUT FOR PERSONAL REFERENCE — removed corner ambient blur layer] */}
 
                 {/* Top Section */}
                 <div>

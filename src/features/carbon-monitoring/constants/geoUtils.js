@@ -1,25 +1,42 @@
+import { safeGetItem } from '../../../lib/safeStorage';
+
 export const FASTAPI_API_URL = (typeof import.meta !== 'undefined' && import.meta.env?.VITE_FASTAPI_API_URL) || 'http://localhost:8000';
 
 export const getAuthHeaders = () => {
   let token = null;
   try {
-    const raw = sessionStorage.getItem('carbonos.esg.demo_session');
+    const raw = safeGetItem('carbonos.esg.demo_session', null, 'session');
     if (raw) {
       const parsed = JSON.parse(raw);
       if (parsed?.access_token) token = parsed.access_token;
     }
   } catch {}
   if (!token) {
-    token = localStorage.getItem('token') || sessionStorage.getItem('token') || 'demo-token-operator';
+    // [COMMENTED OUT FOR PERSONAL REFERENCE — never synthesize hardcoded 'demo-token-operator' fallback in client bundles]
+    token = safeGetItem('carbonos_jwt') || safeGetItem('token', null, 'session') || safeGetItem('token');
   }
-  return {
-    'Authorization': `Bearer ${token}`
-  };
+  return token ? { Authorization: `Bearer ${token}` } : {};
 };
+
+function isTrustedAuthTarget(url) {
+  if (typeof url !== 'string' || !url) return false;
+  if (url.startsWith('/')) return true;
+  try {
+    const target = new URL(url, typeof window !== 'undefined' ? window.location.origin : 'http://localhost:5173');
+    const apiOrigin = new URL(FASTAPI_API_URL, typeof window !== 'undefined' ? window.location.origin : 'http://localhost:5173').origin;
+    const pageOrigin = typeof window !== 'undefined' ? window.location.origin : '';
+    return target.origin === apiOrigin || (pageOrigin && target.origin === pageOrigin);
+  } catch {
+    return false;
+  }
+}
 
 export const authFetch = (url, options = {}) => {
   const configuredUrl = typeof import.meta !== 'undefined' ? import.meta.env?.VITE_FASTAPI_API_URL : '';
+  const hostname = typeof window !== 'undefined' ? window.location.hostname : '';
+  const isLocalHostOrigin = !hostname || hostname === 'localhost' || hostname === '127.0.0.1';
   const hasExplicitBackend = Boolean(
+    isLocalHostOrigin ||
     (typeof window !== 'undefined' && window.__CARBONOS_LIVE_BACKEND__) ||
     (typeof import.meta !== 'undefined' && import.meta.env?.VITE_ENABLE_LIVE_BACKEND === 'true') ||
     (configuredUrl && !configuredUrl.includes('localhost:8000'))
@@ -32,8 +49,9 @@ export const authFetch = (url, options = {}) => {
       text: async () => ''
     });
   }
+  const authHdrs = isTrustedAuthTarget(url) ? getAuthHeaders() : {};
   const headers = {
-    ...getAuthHeaders(),
+    ...authHdrs,
     ...(options.headers || {})
   };
   return fetch(url, { ...options, headers });

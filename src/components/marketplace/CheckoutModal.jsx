@@ -1,15 +1,13 @@
+/* [COMMENTED OUT FOR PERSONAL REFERENCE — unused CheckoutModal component; replaced by PurchaseConfirmModal in payments/]
 import React, { useState } from 'react';
 import { Loader2, ShieldCheck } from 'lucide-react';
 import { Modal } from '../Modal';
 
 export const CheckoutModal = ({ credit, onClose, onSuccess }) => {
-  const [step, setStep] = useState('review'); // review -> processing -> success
+  const [step, setStep] = useState('review');
 
   const handleCheckout = () => {
     setStep('processing');
-    
-    // Simulate the API call to /api/credits/[id]/purchase
-    // and subsequent webhook resolution
     setTimeout(() => {
       setStep('success');
       setTimeout(() => {
@@ -46,7 +44,6 @@ export const CheckoutModal = ({ credit, onClose, onSuccess }) => {
                 <span className="font-mono text-sm text-gray-900 dark:text-white font-medium">{credit.tonnage} tCO₂e</span>
               </div>
             </div>
-
             <div className="border-t border-gray-200 dark:border-white/10 pt-4 mb-6">
               <div className="flex justify-between items-center mb-2">
                 <span className="font-sans text-gray-600 dark:text-mist">Subtotal</span>
@@ -61,11 +58,7 @@ export const CheckoutModal = ({ credit, onClose, onSuccess }) => {
                 <span className="font-mono font-bold text-emerald-600 dark:text-emerald text-xl">৳{credit.price}</span>
               </div>
             </div>
-
-            <button 
-              onClick={handleCheckout}
-              className="w-full bg-emerald-600 dark:bg-emerald text-white dark:text-carbon font-bold py-3.5 rounded-xl flex items-center justify-center space-x-2 hover:bg-emerald-700 dark:hover:bg-emerald/90 transition-colors shadow-sm"
-            >
+            <button onClick={handleCheckout} className="w-full bg-emerald-600 dark:bg-emerald text-white dark:text-carbon font-bold py-3.5 rounded-xl flex items-center justify-center space-x-2 hover:bg-emerald-700 dark:hover:bg-emerald/90 transition-colors shadow-sm">
               <ShieldCheck size={20} />
               <span>Pay & Retire Credit</span>
             </button>
@@ -74,7 +67,6 @@ export const CheckoutModal = ({ credit, onClose, onSuccess }) => {
             </p>
           </>
         )}
-
         {step === 'processing' && (
           <div className="flex flex-col items-center justify-center py-8 text-center">
             <Loader2 className="w-12 h-12 text-emerald-600 dark:text-emerald animate-spin mb-4" />
@@ -82,7 +74,6 @@ export const CheckoutModal = ({ credit, onClose, onSuccess }) => {
             <p className="font-mono text-xs text-amber-600 dark:text-amber animate-pulse">Securing credit on registry & routing funds to farmer.</p>
           </div>
         )}
-
         {step === 'success' && (
           <div className="flex flex-col items-center justify-center py-8 text-center">
             <div className="w-16 h-16 bg-emerald-50 dark:bg-emerald/20 rounded-full flex items-center justify-center border border-emerald-500/30 text-emerald-600 dark:text-emerald mb-4">
@@ -99,3 +90,4 @@ export const CheckoutModal = ({ credit, onClose, onSuccess }) => {
 };
 
 export default CheckoutModal;
+*/

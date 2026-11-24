@@ -34,11 +34,12 @@ const EsgSettingsPanel = lazy(() => import('../../features/saas/components/EsgSe
 const EsgHelpPanel = lazy(() => import('../../features/saas/components/EsgHelpPanel'));
 
 // Lazy-loaded Core Studios & Modals
-const DuckDBEngineView = lazy(() => import('./components/DuckDBEngineView').then(m => ({ default: m.DuckDBEngineView })));
-const SatelliteMRVStudio = lazy(() => import('./components/SatelliteMRVStudio').then(m => ({ default: m.SatelliteMRVStudio })));
-const FactorRegistryStudio = lazy(() => import('./components/FactorRegistryStudio').then(m => ({ default: m.FactorRegistryStudio })));
-const AtlasBenchmarkStudio = lazy(() => import('./components/AtlasBenchmarkStudio').then(m => ({ default: m.AtlasBenchmarkStudio })));
-const ConglomerateTreeStudio = lazy(() => import('./components/ConglomerateTreeStudio').then(m => ({ default: m.ConglomerateTreeStudio })));
+// [COMMENTED OUT FOR PERSONAL REFERENCE — unbacked mock studio modules omitted from active workspace tabs]
+// const DuckDBEngineView = lazy(() => import('./components/DuckDBEngineView').then(m => ({ default: m.DuckDBEngineView })));
+// const SatelliteMRVStudio = lazy(() => import('./components/SatelliteMRVStudio').then(m => ({ default: m.SatelliteMRVStudio })));
+// const FactorRegistryStudio = lazy(() => import('./components/FactorRegistryStudio').then(m => ({ default: m.FactorRegistryStudio })));
+// const AtlasBenchmarkStudio = lazy(() => import('./components/AtlasBenchmarkStudio').then(m => ({ default: m.AtlasBenchmarkStudio })));
+// const ConglomerateTreeStudio = lazy(() => import('./components/ConglomerateTreeStudio').then(m => ({ default: m.ConglomerateTreeStudio })));
 const UniversalUtilityExtractor = lazy(() => import('./components/UniversalUtilityExtractor').then(m => ({ default: m.UniversalUtilityExtractor })));
 const ActivityEvidenceWorkspace = lazy(() => import('./components/ActivityEvidenceWorkspace').then(m => ({ default: m.ActivityEvidenceWorkspace })));
 const EsgReportGenerator = lazy(() => import('./components/EsgReportGenerator').then(m => ({ default: m.EsgReportGenerator })));
@@ -78,8 +79,9 @@ export const SaaSDashboard = () => {
     inputs,
     ef,
     calculateEmissions,
+    setCustomItems,
     showToast,
-    toast,
+    // toast,
     openTasksCount,
     isAddProjectOpen,
     setIsAddProjectOpen,
@@ -111,12 +113,13 @@ export const SaaSDashboard = () => {
     },
     { id: 'Calendar', label: lang === 'bn' ? 'ক্যালেন্ডার' : 'Calendar', icon: <CalendarIcon className="w-4 h-4" /> },
     { id: 'Analytics', label: lang === 'bn' ? 'অ্যানালিটিক্স' : 'Analytics', icon: <BarChart2 className="w-4 h-4" /> },
-    { id: 'DuckDB Engine', label: 'DuckDB Engine', icon: <Database className="w-4 h-4" /> },
+    // [COMMENTED OUT FOR PERSONAL REFERENCE — unbacked mock studio tabs]
+    // { id: 'DuckDB Engine', label: 'DuckDB Engine', icon: <Database className="w-4 h-4" /> },
     { id: 'Utility Invoices', label: 'Utility Invoices', icon: <FileText className="w-4 h-4" /> },
-    { id: 'Satellite MRV', label: 'Satellite MRV', icon: <Sliders className="w-4 h-4" /> },
-    { id: 'Factor Registry', label: 'Factor Registry', icon: <Layers className="w-4 h-4" /> },
-    { id: 'ATLAS Benchmark', label: 'ATLAS Benchmark', icon: <BarChart2 className="w-4 h-4" /> },
-    { id: 'Entity Tree', label: 'Entity Tree', icon: <Building className="w-4 h-4" /> },
+    // { id: 'Satellite MRV', label: 'Satellite MRV', icon: <Sliders className="w-4 h-4" /> },
+    // { id: 'Factor Registry', label: 'Factor Registry', icon: <Layers className="w-4 h-4" /> },
+    // { id: 'ATLAS Benchmark', label: 'ATLAS Benchmark', icon: <BarChart2 className="w-4 h-4" /> },
+    // { id: 'Entity Tree', label: 'Entity Tree', icon: <Building className="w-4 h-4" /> },
     { id: 'Activity & Evidence', label: 'Evidence', icon: <FileText className="w-4 h-4" /> },
     { id: 'ESG Reports', label: 'Reports', icon: <FileText className="w-4 h-4" /> },
     { id: 'Team', label: lang === 'bn' ? 'টিম' : 'Team', icon: <Users className="w-4 h-4" /> },
@@ -126,17 +129,12 @@ export const SaaSDashboard = () => {
 
   return (
     <div className="w-full max-w-[1780px] mx-auto flex flex-col space-y-6">
-      {/* Toast Notification Container */}
+      {/* [COMMENTED OUT FOR PERSONAL REFERENCE — replaced local fixed toast box with ToastContext]
       {toast.show && (
-        <div 
-          role="status" 
-          aria-live="polite"
-          className="fixed bottom-6 right-6 z-[100] px-4 py-2.5 rounded-xl bg-carbon-surface-raised border border-emerald/40 text-registry text-sm shadow-2xl flex items-center gap-2 dark:bg-bg-elevated dark:text-fg-primary"
-        >
-          <span className="w-2 h-2 rounded-full bg-emerald" />
+        <div role="status" aria-live="polite" className="fixed bottom-6 right-6 z-[100] ...">
           <span>{toast.message}</span>
         </div>
-      )}
+      )} */}
 
       {/* Page Header (Design Principle 1: Exactly 1 H1 per page) */}
       <PageHeader
@@ -151,25 +149,26 @@ export const SaaSDashboard = () => {
           { label: 'Platform', path: '/platform/mrv-dashboard' },
           { label: 'ESG Workspace', path: '/platform/saas-dashboard' }
         ]}
-        actions={
-          <div className="flex items-center gap-2">
-            <Button 
-              variant="secondary" 
-              size="sm" 
-              className="min-h-[44px] min-w-[44px]"
-              onClick={() => setIsClientModalOpen(true)}
-            >
-              Switch Client
-            </Button>
-            <Button 
-              variant="primary" 
-              size="sm" 
-              className="min-h-[44px] min-w-[44px]"
-              onClick={() => setIsEsgAuditModalOpen(true)}
-            >
-              24-Capsule Audit
-            </Button>
-          </div>
+        /* [COMMENTED OUT FOR PERSONAL REFERENCE — PageHeader ignored unsupported 'actions' prop; split into secondaryActions + primaryAction] */
+        secondaryActions={
+          <Button
+            variant="secondary"
+            size="sm"
+            className="min-h-[44px] min-w-[44px]"
+            onClick={() => setIsClientModalOpen(true)}
+          >
+            Switch Client
+          </Button>
+        }
+        primaryAction={
+          <Button
+            variant="primary"
+            size="sm"
+            className="min-h-[44px] min-w-[44px]"
+            onClick={() => setIsEsgAuditModalOpen(true)}
+          >
+            24-Capsule Audit
+          </Button>
         }
       />
 
@@ -204,42 +203,45 @@ export const SaaSDashboard = () => {
           {activeMenu === 'Help' && <EsgHelpPanel {...state} />}
 
           {/* Studios */}
-          {activeMenu === 'DuckDB Engine' && (
-            <DuckDBEngineView 
-              isLight={isLight} 
-              locale={locale} 
-              currency={currency}
-              activityInputs={inputs}
-              activityResults={results}
-              onRecalculate={() => calculateEmissions(inputs, ef)}
-            />
-          )}
+          {/* [COMMENTED OUT FOR PERSONAL REFERENCE — unbacked mock studio components disabled from tabs]
+          {activeMenu === 'DuckDB Engine' && <DuckDBEngineView ... />}
+          {activeMenu === 'Satellite MRV' && <SatelliteMRVStudio ... />}
+          {activeMenu === 'Factor Registry' && <FactorRegistryStudio ... />}
+          {activeMenu === 'ATLAS Benchmark' && <AtlasBenchmarkStudio ... />}
+          {activeMenu === 'Entity Tree' && <ConglomerateTreeStudio ... />}
+          */}
           {activeMenu === 'Utility Invoices' && (
             <UniversalUtilityExtractor 
               isLight={isLight} 
               locale={locale} 
               activeClientId={state.activeClientId}
               onApplyToLedger={(extractedData) => {
+                const segs = Array.isArray(extractedData?.segments) ? extractedData.segments : [];
+                if (segs.length > 0 && typeof setCustomItems === 'function') {
+                  const mapped = segs.map((seg, idx) => ({
+                    id: `util-${Date.now()}-${idx}`,
+                    name: `${seg.name || 'Utility Line Item'} (${extractedData.invoice || 'Invoice'})`,
+                    categoryId: seg.scope === 'Scope 1' ? 'fuel' : seg.scope === 'Scope 2' ? 'electricity' : 'other',
+                    scope: seg.scope || 'Scope 2',
+                    spendBdt: Number(seg.cost_bdt) || 0,
+                    quantity: Number(seg.qty) || 0,
+                    unit: seg.unit || 'Units',
+                    factor: Number(seg.factor) || 0,
+                    carbonKg: seg.emissions_t != null ? Math.round(Number(seg.emissions_t) * 1000) : 0
+                  }));
+                  setCustomItems((prev) => [...prev, ...mapped]);
+                  if (typeof calculateEmissions === 'function') {
+                    calculateEmissions(inputs, ef);
+                  }
+                }
                 showToast(
                   lang === 'bn'
-                    ? `ইউটিলিটি লেজার আপডেট সম্পন্ন: ${extractedData.segments?.length || 0} টি সেগমেন্ট অন্তর্ভুক্ত`
-                    : `Universal utility ledger updated: ${extractedData.segments?.length || 0} segments committed with SHA-256 seal.`, 
+                    ? `ইউটিলিটি লেজার আপডেট সম্পন্ন: ${segs.length} টি সেগমেন্ট অন্তর্ভুক্ত`
+                    : `Universal utility ledger updated: ${segs.length} segments applied (${extractedData.audit_seal || 'local session'}).`,
                   "success"
                 );
               }}
             />
-          )}
-          {activeMenu === 'Satellite MRV' && (
-            <SatelliteMRVStudio isLight={isLight} locale={locale} />
-          )}
-          {activeMenu === 'Factor Registry' && (
-            <FactorRegistryStudio isLight={isLight} locale={locale} />
-          )}
-          {activeMenu === 'ATLAS Benchmark' && (
-            <AtlasBenchmarkStudio isLight={isLight} locale={locale} />
-          )}
-          {activeMenu === 'Entity Tree' && (
-            <ConglomerateTreeStudio isLight={isLight} locale={locale} />
           )}
           {activeMenu === 'Activity & Evidence' && (
             <ActivityEvidenceWorkspace 

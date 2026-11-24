@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import { escapeCsvCell, safeGetItem, safeSetItem } from './safeStorage';
 
 // Secure HarvestStore Hook (Real server-side auth + zero credentials in localStorage)
 export const useHarvestStore = () => {
@@ -7,10 +8,10 @@ export const useHarvestStore = () => {
   const [badges, setBadges] = useState([]);
 
   useEffect(() => {
-    // Load from LocalStorage on mount with automatic security migration
-    const storedProfile = localStorage.getItem('hg_profile');
-    const storedBatches = localStorage.getItem('hg_batches');
-    const storedBadges = localStorage.getItem('hg_badges');
+    // Load from storage on mount with automatic security migration
+    const storedProfile = safeGetItem('hg_profile');
+    const storedBatches = safeGetItem('hg_batches');
+    const storedBadges = safeGetItem('hg_badges');
 
     if (storedProfile) {
       try {
@@ -18,7 +19,7 @@ export const useHarvestStore = () => {
         // Security migration: Remove any legacy unsalted passwordHash from localStorage
         if (p && p.passwordHash) {
           delete p.passwordHash;
-          localStorage.setItem('hg_profile', JSON.stringify(p));
+          safeSetItem('hg_profile', JSON.stringify(p));
         }
         setProfile(p);
       } catch (e) {
@@ -61,7 +62,7 @@ export const useHarvestStore = () => {
     // NEVER store passwords or hashes in localStorage!
     const newProfile = { name, phone, language, registeredAt: new Date().toISOString() };
     setProfile(newProfile);
-    localStorage.setItem('hg_profile', JSON.stringify(newProfile));
+    safeSetItem('hg_profile', JSON.stringify(newProfile));
   };
 
   const addBatch = (cropType, weight, date, district, storageType) => {
@@ -78,13 +79,13 @@ export const useHarvestStore = () => {
     
     const updatedBatches = [newBatch, ...batches];
     setBatches(updatedBatches);
-    localStorage.setItem('hg_batches', JSON.stringify(updatedBatches));
+    safeSetItem('hg_batches', JSON.stringify(updatedBatches));
 
     // Gamification Logic
     if (updatedBatches.length === 1 && !badges.includes('First Harvest Logged')) {
       const newBadges = [...badges, 'First Harvest Logged'];
       setBadges(newBadges);
-      localStorage.setItem('hg_badges', JSON.stringify(newBadges));
+      safeSetItem('hg_badges', JSON.stringify(newBadges));
     }
   };
 
@@ -112,8 +113,8 @@ export const useHarvestStore = () => {
     ]);
     
     const csvContent = [
-      headers.join(','),
-      ...rows.map(e => e.join(','))
+      headers.map(escapeCsvCell).join(','),
+      ...rows.map((row) => row.map(escapeCsvCell).join(','))
     ].join('\n');
 
     const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });

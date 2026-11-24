@@ -11,7 +11,9 @@ const TrustBar = () => {
     { label: "97% Instant Settlement Rail", badge: "LIQUIDITY", icon: Layers }
   ];
 
-  const duplicatedItems = [...items, ...items, ...items];
+  // [COMMENTED OUT FOR PERSONAL REFERENCE — 3x array caused a seam jump because .marquee-track translates -50% (expects 2x loop)]
+  // const duplicatedItems = [...items, ...items, ...items];
+  const duplicatedItems = [...items, ...items];
 
   return (
     <div className="w-full bg-bg-canvas border-y border-white/[0.08] relative overflow-hidden py-3.5 z-20">

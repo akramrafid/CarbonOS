@@ -37,16 +37,23 @@ export class ErrorBoundary extends React.Component {
 
   handleCopyDetails = () => {
     const isProd = typeof import.meta !== 'undefined' && import.meta.env?.PROD;
-    const errorDetails = [
-      `CarbonOS Diagnostic Report`,
-      `Reference: ${this.state.errorId || 'N/A'}`,
-      `Timestamp: ${new Date().toISOString()}`,
-      `URL: ${window.location.href}`,
-      `UserAgent: ${navigator.userAgent}`,
-      `Error: ${this.state.error?.toString() || 'Unknown'}`,
-      `Component Stack:`,
-      this.state.errorInfo?.componentStack || 'No component stack recorded'
-    ].join('\n');
+    const errorDetails = isProd
+      ? [
+          `CarbonOS Diagnostic Report`,
+          `Reference: ${this.state.errorId || 'N/A'}`,
+          `Timestamp: ${new Date().toISOString()}`,
+          `Path: ${window.location.pathname}`
+        ].join('\n')
+      : [
+          `CarbonOS Diagnostic Report`,
+          `Reference: ${this.state.errorId || 'N/A'}`,
+          `Timestamp: ${new Date().toISOString()}`,
+          `URL: ${window.location.pathname}`,
+          `UserAgent: ${navigator.userAgent}`,
+          `Error: ${this.state.error?.toString() || 'Unknown'}`,
+          `Component Stack:`,
+          this.state.errorInfo?.componentStack || 'No component stack recorded'
+        ].join('\n');
 
     navigator.clipboard?.writeText(errorDetails).then(() => {
       this.setState({ copied: true });
@@ -67,18 +74,13 @@ export class ErrorBoundary extends React.Component {
           role="alert"
         >
           <div
-            className={`max-w-xl w-full rounded-3xl p-6 sm:p-10 backdrop-blur-xl relative overflow-hidden transition-all shadow-2xl ${
+            className={`max-w-xl w-full rounded-3xl p-6 sm:p-10 backdrop-blur-xl relative overflow-hidden transition-colors shadow-2xl ${
               isLight
                 ? 'bg-white border border-slate-200/90 shadow-[0_20px_50px_rgba(0,0,0,0.06)]'
                 : 'bg-bg-surface/85 border border-emerald/30 shadow-[0_20px_60px_rgba(0,0,0,0.6)]'
             }`}
           >
-            {/* Ambient Corner Glow */}
-            <div
-              className={`absolute top-0 right-0 w-48 h-48 rounded-full blur-3xl pointer-events-none ${
-                isLight ? 'bg-rose-500/10' : 'bg-rose-500/15'
-              }`}
-            ></div>
+            {/* [COMMENTED OUT FOR PERSONAL REFERENCE — decorative blur orb removed per design system audit] */}
 
             {/* Error Header */}
             <div className="flex items-center space-x-3.5 mb-6 relative z-10">
@@ -140,7 +142,7 @@ export class ErrorBoundary extends React.Component {
             <div className="flex flex-wrap gap-2.5 sm:gap-3 items-center relative z-10">
               <button
                 onClick={this.handleReset}
-                className="inline-flex items-center justify-center bg-accent hover:bg-accent-active text-white dark:bg-emerald dark:hover:bg-emerald/90 dark:text-fg-primary font-sans font-bold text-xs sm:text-sm px-5 py-2.5 rounded-xl transition-all shadow-[0_0_20px_rgba(0,200,83,0.3)] active:scale-95"
+                className="inline-flex items-center justify-center bg-accent hover:bg-accent-active text-white dark:bg-emerald dark:hover:bg-emerald/90 dark:text-slate-950 font-sans font-bold text-xs sm:text-sm px-5 py-2.5 rounded-xl transition-transform shadow-[0_0_20px_rgba(0,200,83,0.3)] active:scale-95"
               >
                 <RotateCcw size={15} className="mr-2" />
                 <span>Try Again</span>

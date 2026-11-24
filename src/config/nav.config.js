@@ -221,21 +221,23 @@ export function getBreadcrumbs(pathname) {
 
   if (match) {
     if (match.groupTitle && match.groupTitle !== 'Dashboard') {
-      crumbs.push({ label: match.groupTitle, route: match.route });
+      // Non-routable group headers must not link directly to the child page URL
+      crumbs.push({ label: match.groupTitle, route: null });
     }
     if (match.parentLabel) {
-      crumbs.push({ label: match.parentLabel, route: match.route });
+      crumbs.push({ label: match.parentLabel, route: null });
     }
     crumbs.push({ label: match.label, route: match.route, isCurrent: true });
   } else {
-    // Fallback: humanize path segments
+    // Fallback: humanize path segments, linking only resolved routes
     const segments = pathname.split('/').filter(Boolean);
     let accumulated = '';
     segments.forEach((seg, idx) => {
       accumulated += `/${seg}`;
       const isLast = idx === segments.length - 1;
       const formatted = seg.replace(/-/g, ' ').replace(/\b\w/g, (c) => c.toUpperCase());
-      crumbs.push({ label: formatted, route: accumulated, isCurrent: isLast });
+      const resolved = isLast || findNavItemByRoute(accumulated) ? accumulated : null;
+      crumbs.push({ label: formatted, route: resolved, isCurrent: isLast });
     });
   }
 

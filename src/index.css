@@ -18,12 +18,12 @@ body {
   color: #413f3f !important;
 }
 
-[data-theme="light"] h1,
-[data-theme="light"] h2,
-[data-theme="light"] h3,
-[data-theme="light"] h4,
-[data-theme="light"] h5,
-[data-theme="light"] h6 {
+[data-theme="light"] h1:not(.ed-inverted):not(.ed-inverted *):not(#footer-section *):not(.keep-white):not(.keep-white *),
+[data-theme="light"] h2:not(.ed-inverted):not(.ed-inverted *):not(#footer-section *):not(.keep-white):not(.keep-white *),
+[data-theme="light"] h3:not(.ed-inverted):not(.ed-inverted *):not(#footer-section *):not(.keep-white):not(.keep-white *),
+[data-theme="light"] h4:not(.ed-inverted):not(.ed-inverted *):not(#footer-section *):not(.keep-white):not(.keep-white *),
+[data-theme="light"] h5:not(.ed-inverted):not(.ed-inverted *):not(#footer-section *):not(.keep-white):not(.keep-white *),
+[data-theme="light"] h6:not(.ed-inverted):not(.ed-inverted *):not(#footer-section *):not(.keep-white):not(.keep-white *) {
   color: #181414 !important;
 }
 
@@ -98,8 +98,8 @@ select option {
   border-color: #dbf0ea !important;
 }
 
-/* Navigation bar - when scrolled */
-[data-theme="light"] nav {
+/* Navigation bar - scoped so editorial, breadcrumb, dashboard, and footer navs keep their own tokens */
+[data-theme="light"] nav:not(.ed-root nav):not([aria-label="Breadcrumb"]):not([aria-label="Footer navigation"]):not([aria-label="Mobile footer navigation"]):not([aria-label="Dashboard navigation"]):not([aria-label="Mobile Bottom Navigation"]) {
   background-color: rgba(242, 243, 238, 0.94) !important; /* Linen with blur */
   backdrop-filter: blur(20px) saturate(180%) !important;
   border-bottom-color: #dbf0ea !important; /* Mint strong surface */
@@ -316,8 +316,10 @@ select option {
 [data-theme="light"] a[class*="bg-black"],
 [data-theme="light"] button[class*="bg-carbon"],
 [data-theme="light"] a[class*="bg-carbon"],
+/* [COMMENTED OUT FOR PERSONAL REFERENCE — forced destructive red buttons to green in light mode]
 [data-theme="light"] button[class*="bg-[#EF4444]"],
 [data-theme="light"] a[class*="bg-[#EF4444]"],
+*/
 [data-theme="light"] .btn-primary,
 [data-theme="light"] .btn-magnetic {
   background-color: #15803d !important; /* Forest Emerald */
@@ -368,10 +370,12 @@ select option {
 [data-theme="light"] [class*="bg-emerald-500/20"] {
   background-color: rgba(219, 240, 234, 0.55) !important; /* Mint strong tint */
 }
+/* [COMMENTED OUT FOR PERSONAL REFERENCE — forced amber warning badges to mint/charcoal in light mode]
 [data-theme="light"] [class*="bg-amber"] {
   background-color: #dbf0ea !important;
   color: #181414 !important;
 }
+*/
 
 /* ---- SHADOWS (Featuring shadow.1 token) ---- */
 [data-theme="light"] .shadow-2xl {
@@ -633,20 +637,21 @@ select option {
   color: #99B7A5 !important; /* Sage tone with 6.2:1 contrast against #080F0B */
 }
 
-/* ===== PLATFORM SAAS DASHBOARD DARK THEME OVERRIDES ===== */
+/* [COMMENTED OUT FOR PERSONAL REFERENCE — unused .platform-saas-dashboard CSS overrides (outer block comment with inner markers bracketed for valid CSS)]
+===== PLATFORM SAAS DASHBOARD DARK THEME OVERRIDES =====
 [data-theme="dark"] .platform-saas-dashboard {
   background-color: #040A06 !important;
   color: #F0F4F1 !important;
 }
 
-/* Sidebar and Main Cards */
+[ Sidebar and Main Cards ]
 [data-theme="dark"] .platform-saas-dashboard aside,
 [data-theme="dark"] .platform-saas-dashboard .bg-white {
   background-color: #080F0B !important;
   border-color: rgba(0, 200, 83, 0.15) !important;
 }
 
-/* Text Colors */
+[ Text Colors ]
 [data-theme="dark"] .platform-saas-dashboard .text-\[\#0F291B\],
 [data-theme="dark"] .platform-saas-dashboard h1,
 [data-theme="dark"] .platform-saas-dashboard h2,
@@ -667,7 +672,7 @@ select option {
   color: #B2C4B8 !important;
 }
 
-/* High-Contrast Action Buttons matching Reference Image 2: #00C853 background with pure #FFFFFF text */
+[ High-Contrast Action Buttons matching Reference Image 2: #00C853 background with pure #FFFFFF text ]
 .platform-saas-dashboard button[class*="bg-[#00C853]"],
 .platform-saas-dashboard button[class*="bg-[#00c853]"],
 .platform-saas-dashboard a[class*="bg-[#00C853]"],
@@ -701,18 +706,18 @@ select option {
   stroke: #ffffff !important;
 }
 
-/* Borders and lines */
+[ Borders and lines ]
 [data-theme="dark"] .platform-saas-dashboard .border-\[\#E2E8F0\],
 [data-theme="dark"] .platform-saas-dashboard .border-\[\#F1F5F9\] {
   border-color: rgba(255, 255, 255, 0.08) !important;
 }
 
-/* Active links / badges */
+[ Active links / badges ]
 [data-theme="dark"] .platform-saas-dashboard [class*="bg-\[\#F1F5F9\]"] {
   background-color: rgba(0, 200, 83, 0.12) !important;
 }
 
-/* Inputs and Forms */
+[ Inputs and Forms ]
 [data-theme="dark"] .platform-saas-dashboard input,
 [data-theme="dark"] .platform-saas-dashboard select,
 [data-theme="dark"] .platform-saas-dashboard textarea,
@@ -727,7 +732,7 @@ select option {
   border-color: #00C853 !important;
 }
 
-/* Specific elements */
+[ Specific elements ]
 [data-theme="dark"] .platform-saas-dashboard .text-\[\#EF4444\],
 [data-theme="dark"] .platform-saas-dashboard .text-rose-500 {
   color: #EF4444 !important;
@@ -740,17 +745,17 @@ select option {
   color: #00C853 !important;
 }
 
-/* ===== PLATFORM SAAS DASHBOARD LIGHT THEME OVERRIDES (Clean, Functional, Implementation-Oriented) ===== */
+===== PLATFORM SAAS DASHBOARD LIGHT THEME OVERRIDES (Clean, Functional, Implementation-Oriented) =====
 [data-theme="light"] .platform-saas-dashboard {
-  background-color: #f2f3ee !important; /* Linen canvas */
-  color: #413f3f !important; /* Charcoal primary text */
+  background-color: #f2f3ee !important;
+  color: #413f3f !important;
   font-family: Helvetica, Arial, sans-serif !important;
 }
 
-/* Sidebar and Main Cards */
+[ Sidebar and Main Cards ]
 [data-theme="light"] .platform-saas-dashboard aside {
-  background-color: #ffffff !important; /* Crisp white sidebar */
-  border-color: #dbf0ea !important; /* Mint strong surface */
+  background-color: #ffffff !important;
+  border-color: #dbf0ea !important;
   box-shadow: 0 4px 20px rgba(4, 18, 38, 0.04) !important;
 }
 
@@ -767,11 +772,11 @@ select option {
 [data-theme="light"] .platform-saas-dashboard [class*="bg-gradient-to-br"],
 [data-theme="light"] .platform-saas-dashboard .bg-white {
   background: #ffffff !important;
-  border-color: #dbf0ea !important; /* Mint strong surface */
+  border-color: #dbf0ea !important;
   box-shadow: rgba(4, 18, 38, 0.08) 0px 4px 20px 0px !important;
 }
 
-/* Text Colors */
+[ Text Colors ]
 [data-theme="light"] .platform-saas-dashboard h1,
 [data-theme="light"] .platform-saas-dashboard h2,
 [data-theme="light"] .platform-saas-dashboard h3,
@@ -779,37 +784,37 @@ select option {
 [data-theme="light"] .platform-saas-dashboard strong,
 [data-theme="light"] .platform-saas-dashboard .text-white,
 [data-theme="light"] .platform-saas-dashboard .text-\[\#E0EFE7\] {
-  color: #181414 !important; /* Deep crisp inverse black for headings */
+  color: #181414 !important;
 }
 
 [data-theme="light"] .platform-saas-dashboard p,
 [data-theme="light"] .platform-saas-dashboard .text-\[\#7C9A88\],
 [data-theme="light"] .platform-saas-dashboard .text-\[\#557361\],
 [data-theme="light"] .platform-saas-dashboard span:not([class*="text-"]):not(.text-white) {
-  color: #413f3f !important; /* Charcoal primary text */
+  color: #413f3f !important;
 }
 
-/* Active navigation buttons in sidebar */
+[ Active navigation buttons in sidebar ]
 [data-theme="light"] .platform-saas-dashboard aside button[class*="bg-[#0D2B1A]"] {
-  background-color: #dbf0ea !important; /* Mint strong surface */
-  color: #181414 !important; /* Deep black text */
-  border-color: #15803d !important; /* Forest emerald accent border */
+  background-color: #dbf0ea !important;
+  color: #181414 !important;
+  border-color: #15803d !important;
 }
 
 [data-theme="light"] .platform-saas-dashboard aside button:not([class*="bg-[#0D2B1A]"]) {
-  color: #413f3f !important; /* Charcoal primary text */
+  color: #413f3f !important;
 }
 
 [data-theme="light"] .platform-saas-dashboard aside button:not([class*="bg-[#0D2B1A]"]):hover {
-  background-color: #f2f3ee !important; /* Linen canvas hover */
-  color: #181414 !important; /* Deep black */
+  background-color: #f2f3ee !important;
+  color: #181414 !important;
 }
 
-/* Badges, Pills and Small Accent Containers */
+[ Badges, Pills and Small Accent Containers ]
 [data-theme="light"] .platform-saas-dashboard [class*="bg-[#0D2B1A]"]:not(aside button) {
-  background-color: #dbf0ea !important; /* Mint strong container */
+  background-color: #dbf0ea !important;
   border-color: #dbf0ea !important;
-  color: #181414 !important; /* Deep black */
+  color: #181414 !important;
 }
 
 [data-theme="light"] .platform-saas-dashboard [class*="from-[#0D2B1A]"],
@@ -822,32 +827,32 @@ select option {
 [data-theme="light"] .platform-saas-dashboard [class*="text-emerald"],
 [data-theme="light"] .platform-saas-dashboard [class*="text-emerald-400"],
 [data-theme="light"] .platform-saas-dashboard [class*="text-emerald-500"] {
-  color: #15803d !important; /* Forest emerald */
+  color: #15803d !important;
 }
 
 [data-theme="light"] .platform-saas-dashboard [class*="text-amber-400"],
 [data-theme="light"] .platform-saas-dashboard [class*="text-[#FFB300]"],
 [data-theme="light"] .platform-saas-dashboard [class*="text-orange-400"] {
-  color: #b45309 !important; /* Deep amber */
+  color: #b45309 !important;
 }
 
 [data-theme="light"] .platform-saas-dashboard [class*="text-cyan-400"],
 [data-theme="light"] .platform-saas-dashboard [class*="text-teal-300"],
 [data-theme="light"] .platform-saas-dashboard [class*="text-teal-400"] {
-  color: #0369a1 !important; /* Deep ocean */
+  color: #0369a1 !important;
 }
 
 [data-theme="light"] .platform-saas-dashboard [class*="text-[#EF4444]"],
 [data-theme="light"] .platform-saas-dashboard [class*="text-rose-500"] {
-  color: #b91c1c !important; /* Deep red */
+  color: #b91c1c !important;
 }
 
 [data-theme="light"] .platform-saas-dashboard [class*="bg-white/10"] {
-  background-color: rgba(219, 240, 234, 0.7) !important; /* Mint strong tint */
+  background-color: rgba(219, 240, 234, 0.7) !important;
   border-color: #dbf0ea !important;
 }
 
-/* Dropzone / Upload area in AI Document Extractor */
+[ Dropzone / Upload area in AI Document Extractor ]
 [data-theme="light"] .platform-saas-dashboard [class*="border-dashed"] {
   background-color: #f8f9f6 !important;
   border-color: #dbf0ea !important;
@@ -857,7 +862,7 @@ select option {
   border-color: #15803d !important;
 }
 
-/* Borders and lines */
+[ Borders and lines ]
 [data-theme="light"] .platform-saas-dashboard [class*="border-[#1"],
 [data-theme="light"] .platform-saas-dashboard .border-\[\#122418\],
 [data-theme="light"] .platform-saas-dashboard .border-\[\#152B1D\],
@@ -867,17 +872,17 @@ select option {
 [data-theme="light"] .platform-saas-dashboard .border-\[\#1B3B26\],
 [data-theme="light"] .platform-saas-dashboard .border-\[\#E2E8F0\],
 [data-theme="light"] .platform-saas-dashboard .border-\[\#F1F5F9\] {
-  border-color: #dbf0ea !important; /* Mint strong surface */
+  border-color: #dbf0ea !important;
 }
 
-/* Inputs, Selects and Forms */
+[ Inputs, Selects and Forms ]
 [data-theme="light"] .platform-saas-dashboard input,
 [data-theme="light"] .platform-saas-dashboard select,
 [data-theme="light"] .platform-saas-dashboard textarea,
 [data-theme="light"] .platform-saas-dashboard [class*="bg-[#F8F9FA]"] {
   background-color: #ffffff !important;
-  color: #413f3f !important; /* Charcoal primary text */
-  border-color: #dbf0ea !important; /* Mint strong surface */
+  color: #413f3f !important;
+  border-color: #dbf0ea !important;
 }
 
 [data-theme="light"] .platform-saas-dashboard input:focus,
@@ -887,7 +892,7 @@ select option {
   box-shadow: 0 0 0 2px rgba(219, 240, 234, 0.8) !important;
 }
 
-/* Action Buttons */
+[ Action Buttons ]
 [data-theme="light"] .platform-saas-dashboard button[class*="bg-[#00C853]"],
 [data-theme="light"] .platform-saas-dashboard a[class*="bg-[#00C853]"],
 [data-theme="light"] .platform-saas-dashboard [class*="bg-[#00C853]"]:not(span):not(div),
@@ -895,8 +900,8 @@ select option {
 [data-theme="light"] .platform-saas-dashboard a[class*="bg-emerald"],
 [data-theme="light"] .platform-saas-dashboard button[class*="bg-[#15803d]"],
 [data-theme="light"] .platform-saas-dashboard a[class*="bg-[#15803d]"] {
-  background-color: #15803d !important; /* Forest emerald */
-  color: #ffffff !important; /* White tertiary text */
+  background-color: #15803d !important;
+  color: #ffffff !important;
 }
 
 [data-theme="light"] .platform-saas-dashboard button[class*="bg-[#00C853]"] *,
@@ -917,6 +922,7 @@ select option {
   background-color: #166534 !important;
   color: #ffffff !important;
 }
+*/
 
 /* Modals & Dialogs */
 [data-theme="light"] .fixed.inset-0 [class*="bg-[#08130C]"],
@@ -929,13 +935,14 @@ select option {
   box-shadow: rgba(4, 18, 38, 0.24) 0px 10px 26px 0px, rgba(0, 229, 255, 0) 0px 0px 0px 0px, rgba(255, 255, 255, 0.12) 0px 1px 0px 0px inset !important;
 }
 
-/* Table styling */
+/* [COMMENTED OUT FOR PERSONAL REFERENCE — unused .platform-saas-dashboard table overrides]
+[ Table styling ]
 [data-theme="light"] .platform-saas-dashboard table {
   color: #413f3f !important;
 }
 [data-theme="light"] .platform-saas-dashboard th {
-  background-color: #dbf0ea !important; /* Mint strong surface */
-  color: #181414 !important; /* Deep black text */
+  background-color: #dbf0ea !important;
+  color: #181414 !important;
   border-color: #dbf0ea !important;
 }
 [data-theme="light"] .platform-saas-dashboard td {
@@ -948,8 +955,9 @@ select option {
 [data-theme="light"] .platform-saas-dashboard .text-emerald,
 [data-theme="light"] .platform-saas-dashboard .text-\[\#4ADE80\],
 [data-theme="light"] .platform-saas-dashboard .text-\[\#00C853\] {
-  color: #15803d !important; /* Forest emerald */
+  color: #15803d !important;
 }
+*/
 
 /* Force elements to render as white, overriding dark/light overrides */
 .force-white,
@@ -1217,9 +1225,25 @@ textarea:focus {
   100% { stroke-dashoffset: 0; opacity: 0; }
 }
 
+@keyframes slide-in-left {
+  from { opacity: 0; transform: translateX(-16px); }
+  to { opacity: 1; transform: translateX(0); }
+}
+
+@keyframes slide-up {
+  from { opacity: 0; transform: translateY(12px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+/* [COMMENTED OUT FOR PERSONAL REFERENCE — growBarAnim animated height layout; switched to GPU scaleY]
 @keyframes growBarAnim {
   from { height: 0; }
   to { height: 100%; }
+}
+*/
+@keyframes growBarAnim {
+  from { transform: scaleY(0); }
+  to { transform: scaleY(1); }
 }
 
 @keyframes pulseDashedLine {
@@ -1283,6 +1307,16 @@ textarea:focus {
 .mismatch-banner {
   animation: slide-in-down 0.3s ease-out;
 }
+.animate-fade-in,
+.animate-fadeIn {
+  animation: fadeIn 0.2s ease-out both;
+}
+.animate-slide-in {
+  animation: slide-in-left 0.25s cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+.animate-slide-up {
+  animation: slide-up 0.25s cubic-bezier(0.22, 1, 0.36, 1) both;
+}
 .crop-scroll-container::-webkit-scrollbar {
   display: none !important;
 }
@@ -1324,6 +1358,15 @@ textarea:focus {
   .animate-spin,
   .animate-shake,
   .animate-pulse,
+  .marquee-track,
+  .pulse-dot,
+  .pulse-dot-amber,
+  .pulse-dot-red,
+  .grow-bar,
+  .animate-fade-in,
+  .animate-fadeIn,
+  .animate-slide-in,
+  .animate-slide-up,
   .btn-press,
   .flow-path-scope1,
   .flow-path-scope2,
@@ -1346,11 +1389,10 @@ textarea:focus {
   }
 
   /* Replace heavy motion with clean opacity-only transitions */
+  /* [COMMENTED OUT FOR PERSONAL REFERENCE — global button, a { transform: none !important } could strip layout transforms; scoped to animated control classes] */
   .theme-toggle,
   .btn-magnetic,
-  .ghost-btn,
-  button,
-  a {
+  .ghost-btn {
     transition-property: opacity, background-color, color, border-color !important;
     transition-duration: 0.15s !important;
     transform: none !important;

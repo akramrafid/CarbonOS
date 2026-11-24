@@ -28,11 +28,17 @@ SECRET_KEY = os.getenv('DJANGO_SECRET_KEY', INSECURE_DEV_KEY)
 # DEBUG defaults to True in local development; set DJANGO_DEBUG=False in production
 DEBUG = os.getenv('DJANGO_DEBUG', 'False').lower() in ('true', '1') or os.getenv('DJANGO_ENV') == 'development'
 
-# In production (DEBUG=False), enforce secret key and host constraints
+# In production (DEBUG=False), enforce strong secret key and explicit hosts
 if not DEBUG:
-    if SECRET_KEY == INSECURE_DEV_KEY:
+    weak_prefixes = ("django-insecure-", "changeme", "secret", "default")
+    if (
+        not SECRET_KEY
+        or SECRET_KEY == INSECURE_DEV_KEY
+        or len(SECRET_KEY) < 50
+        or any(SECRET_KEY.lower().startswith(p) for p in weak_prefixes)
+    ):
         raise ImproperlyConfigured(
-            "CRITICAL SECURITY CONFIGURATION ERROR: DJANGO_SECRET_KEY must be set in production when DEBUG=False."
+            "CRITICAL SECURITY CONFIGURATION ERROR: A strong DJANGO_SECRET_KEY (>=50 chars) must be set when DEBUG=False."
         )
 
 # Strip unsafe wildcards; explicitly parse allowed hosts
@@ -75,10 +81,17 @@ MIDDLEWARE = [
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
 ]
 
-CORS_ALLOWED_ORIGINS = os.getenv(
-    'CORS_ALLOWED_ORIGINS', 
-    'http://localhost:5173,http://127.0.0.1:5173,http://localhost:3000,https://carbon-os-beta.vercel.app'
-).split(',')
+raw_cors_origins = os.getenv("CORS_ALLOWED_ORIGINS", "")
+if raw_cors_origins:
+    CORS_ALLOWED_ORIGINS = [o.strip() for o in raw_cors_origins.split(",") if o.strip() and o.strip() != "*"]
+elif not DEBUG:
+    CORS_ALLOWED_ORIGINS = []
+else:
+    CORS_ALLOWED_ORIGINS = [
+        "http://localhost:5173",
+        "http://127.0.0.1:5173",
+        "http://localhost:3000",
+    ]
 CORS_ALLOW_CREDENTIALS = True
 
 
@@ -102,11 +115,22 @@ TEMPLATES = [
 WSGI_APPLICATION = 'farmers_ai_project.wsgi.application'
 ASGI_APPLICATION = 'farmers_ai_project.asgi.application'
 
-CHANNEL_LAYERS = {
-    "default": {
-        "BACKEND": "channels.layers.InMemoryChannelLayer"
+REDIS_URL = os.getenv("REDIS_URL", "").strip()
+if REDIS_URL:
+    CHANNEL_LAYERS = {
+        "default": {
+            "BACKEND": "channels_redis.core.RedisChannelLayer",
+            "CONFIG": {"hosts": [REDIS_URL]},
+        }
     }
-}
+else:
+    CHANNEL_LAYERS = {
+        "default": {
+            "BACKEND": "channels.layers.InMemoryChannelLayer"
+        }
+    }
+
+DATA_UPLOAD_MAX_MEMORY_SIZE = int(os.getenv("DJANGO_DATA_UPLOAD_MAX_MEMORY_SIZE", str(12 * 1024 * 1024)))
 
 
 import dj_database_url
@@ -155,22 +179,24 @@ USE_TZ = True
 
 STATIC_URL = 'static/'
 
-# REST Framework Configuration
+# REST Framework Configuration (always fail closed; public endpoints explicitly opt in with @permission_classes([AllowAny]))
 REST_FRAMEWORK = {
     'DEFAULT_PERMISSION_CLASSES': [
-        'rest_framework.permissions.AllowAny' if DEBUG else 'rest_framework.permissions.IsAuthenticated',
+        # 'rest_framework.permissions.AllowAny' if DEBUG else 'rest_framework.permissions.IsAuthenticated',  # [COMMENTED OUT FOR PERSONAL REFERENCE — DEBUG no longer disables default auth]
+        'rest_framework.permissions.IsAuthenticated',
     ],
     'DEFAULT_AUTHENTICATION_CLASSES': [
         'rest_framework.authentication.SessionAuthentication',
-        'rest_framework.authentication.BasicAuthentication',
+        # 'rest_framework.authentication.BasicAuthentication',  # [COMMENTED OUT FOR PERSONAL REFERENCE — raw credentials per request avoided]
     ],
     'DEFAULT_THROTTLE_CLASSES': [
         'rest_framework.throttling.AnonRateThrottle',
         'rest_framework.throttling.UserRateThrottle',
     ],
     'DEFAULT_THROTTLE_RATES': {
-        'anon': '120/minute',
-        'user': '1200/minute',
+        'anon': '60/minute',
+        'user': '600/minute',
+        'auth': '10/minute',
     }
 }
 

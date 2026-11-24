@@ -19,33 +19,23 @@ export const Forbidden = () => {
     switch (reason) {
       case 'unauthenticated':
       case 'auth_required':
-        return 'Cryptographic authentication is required to access this sovereign endpoint.';
+        return 'Sign-in is required to access this workspace.';
       case 'token_expired':
         return 'Your active authentication token has expired. Please re-authenticate.';
       case 'role_unauthorized':
       case 'insufficient_clearance':
       default:
-        return 'Your sovereign persona lacks the cryptographic signature or authorization level required for this registry partition.';
+        return 'Your account does not have permission to access this workspace.';
     }
   };
 
   return (
-    <main
+    <div
       className={`min-h-[85dvh] flex items-center justify-center px-4 sm:px-6 py-10 md:py-16 relative overflow-hidden font-sans transition-colors duration-300 ${
         isLight ? 'bg-bg-canvas text-fg-primary' : 'bg-carbon text-registry'
       }`}
     >
-      {/* Ambient Radial Mesh Gradients */}
-      <div
-        className={`absolute top-1/4 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[600px] rounded-full blur-[120px] pointer-events-none ${
-          isLight ? 'bg-amber-500/10' : 'bg-amber/10'
-        }`}
-      ></div>
-      <div
-        className={`absolute bottom-10 right-10 w-80 h-80 rounded-full blur-[100px] pointer-events-none ${
-          isLight ? 'bg-rose-500/5' : 'bg-rose-500/10'
-        }`}
-      ></div>
+      {/* [COMMENTED OUT FOR PERSONAL REFERENCE — removed decorative ambient blur layers & nested main wrapper] */}
 
       <div className="max-w-2xl w-full text-center relative z-10">
         {/* Terminal Header Tag */}
@@ -72,7 +62,7 @@ export const Forbidden = () => {
         </div>
 
         <PageHeader
-          title="Cryptographic Clearance Required"
+          title="Access Restricted"
           description={getReasonText()}
           align="center"
           className="border-none mb-4 pb-0"
@@ -110,7 +100,7 @@ export const Forbidden = () => {
 
           <Link
             to="/"
-            className="keep-white inline-flex items-center space-x-2 px-6 py-3 rounded-full bg-accent hover:bg-accent-active dark:bg-emerald dark:hover:bg-emerald/90 text-white dark:text-fg-primary text-sm font-bold shadow-[0_0_25px_rgba(0,200,83,0.3)] transition-all hover:scale-[1.02] active:scale-[0.98]"
+            className="keep-white inline-flex items-center space-x-2 px-6 py-3 rounded-full bg-accent hover:bg-accent-active dark:bg-emerald dark:hover:bg-emerald/90 text-white dark:text-fg-inverse text-sm font-bold shadow-[0_0_25px_rgba(0,200,83,0.3)] transition-[background-color,transform] hover:scale-[1.02] active:scale-[0.98]"
           >
             <Home size={16} />
             <span>Return to Home</span>
@@ -118,7 +108,7 @@ export const Forbidden = () => {
 
           <Link
             to="/platform/esg"
-            className={`inline-flex items-center space-x-2 px-5 py-3 rounded-full text-sm font-semibold transition-all hover:scale-[1.02] active:scale-[0.98] ${
+            className={`inline-flex items-center space-x-2 px-5 py-3 rounded-full text-sm font-semibold transition-[background-color,transform] hover:scale-[1.02] active:scale-[0.98] ${
               isLight
                 ? 'bg-white hover:bg-slate-50 text-slate-800 border border-slate-300 shadow-xs'
                 : 'bg-white/[0.06] hover:bg-white/[0.12] text-white border border-white/15'
@@ -137,7 +127,7 @@ export const Forbidden = () => {
         >
           <Link
             to="/platform/saas-dashboard"
-            className={`p-4 rounded-2xl border transition-all group flex items-center space-x-3.5 ${
+            className={`p-4 rounded-2xl border transition-colors group flex items-center space-x-3.5 ${
               isLight
                 ? 'bg-white hover:bg-slate-50 border-slate-200 hover:border-slate-300 shadow-xs'
                 : 'bg-white/[0.03] hover:bg-white/[0.07] border-white/10 hover:border-emerald/30'
@@ -155,14 +145,14 @@ export const Forbidden = () => {
                 Enterprise Overview
               </div>
               <div className={`font-mono text-[11px] ${isLight ? 'text-slate-600' : 'text-mist'}`}>
-                Scope 1, 2 & 3 Emissions Workspace
+                Scope 1, 2 &amp; 3 Emissions Workspace
               </div>
             </div>
           </Link>
 
           <Link
             to="/platform/carbon-registry"
-            className={`p-4 rounded-2xl border transition-all group flex items-center space-x-3.5 ${
+            className={`p-4 rounded-2xl border transition-colors group flex items-center space-x-3.5 ${
               isLight
                 ? 'bg-white hover:bg-slate-50 border-slate-200 hover:border-slate-300 shadow-xs'
                 : 'bg-white/[0.03] hover:bg-white/[0.07] border-white/10 hover:border-emerald/30'
@@ -180,13 +170,13 @@ export const Forbidden = () => {
                 Public Registry Terminal
               </div>
               <div className={`font-mono text-[11px] ${isLight ? 'text-slate-600' : 'text-mist'}`}>
-                Open telemetry & authorized serials
+                Open telemetry &amp; authorized serials
               </div>
             </div>
           </Link>
         </div>
       </div>
-    </main>
+    </div>
   );
 };
 

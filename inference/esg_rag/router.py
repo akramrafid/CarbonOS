@@ -1,3 +1,4 @@
+import os
 import time
 import datetime
 from fastapi import APIRouter, Depends, HTTPException, UploadFile, File, Form, Body
@@ -56,6 +57,10 @@ def create_organization(
     db: Session = Depends(get_db),
 ):
     """Create a tenant organization; the caller becomes its owner."""
+    if identity.is_demo:
+        raise HTTPException(403, "Demo identities cannot provision new persistent organizations")
+    if os.getenv("ESG_ENV") == "production" and body.is_demo:
+        raise HTTPException(403, "Demo organizations cannot be created in production")
     org = ESGOrganization(name=body.name.strip(), is_demo=body.is_demo, created_by_sub=identity.sub)
     db.add(org)
     db.flush()
@@ -137,7 +142,8 @@ def esg_query(
             citations=citations_data,
             latency_ms=latency,
             llm_model="carbonos-factor-registry",
-            verified_by_audit=(status_cat == "APPROVED")
+            # verified_by_audit=(status_cat == "APPROVED")  # [COMMENTED OUT FOR PERSONAL REFERENCE — AI Q&A response is not an external audit assurance]
+            verified_by_audit=False
         )
         db.add(log)
         db.commit()
@@ -165,7 +171,7 @@ def esg_query(
         latency = round((time.time() - start_time) * 1000, 2)
         honest_answer = (
             f"I cannot find guidance on '{request.query}' in the verified corpus. "
-            f"Please refer to your regulatory authority or enter the value manually in the bill intake form (/platform/esg/intake)."
+            f"Please refer to your regulatory authority or enter the value manually in the ESG workspace (/platform/esg)."
         )
         log = ESGQueryLog(
             tenant_id=tenant_id,
@@ -224,8 +230,8 @@ def esg_query(
 @router.post("/extract-footprint", response_model=ExtractionResponse)
 async def extract_footprint(
     file: Optional[UploadFile] = File(None),
-    raw_text: Optional[str] = Form(None),
-    filename: Optional[str] = Form("pasted_text"),
+    raw_text: Optional[str] = Form(None, max_length=250_000),
+    filename: Optional[str] = Form("pasted_text", max_length=255),
     principal: Principal = Depends(limited("upload", "write")),
     db: Session = Depends(get_db)
 ):
@@ -442,6 +448,8 @@ def duckdb_calculate(
     factors = payload.get("factors", None)
     currency = payload.get("currency", "BDT")
     exchange_rate = float(payload.get("exchange_rate", 120.0))
+    if exchange_rate <= 0:
+        raise HTTPException(422, "exchange_rate must be greater than zero")
 
     act_res = calculate_activity_footprint(activities, factors)
     spend_res = calculate_spend_eeio_footprint(spend_items, currency=currency, usd_bdt_exchange_rate=exchange_rate)

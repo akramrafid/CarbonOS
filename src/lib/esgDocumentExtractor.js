@@ -15,6 +15,32 @@ export function cleanNumber(str) {
   return isNaN(val) ? 0 : val;
 }
 
+const MAX_CLIENT_FILE_BYTES = 25 * 1024 * 1024;
+const MAX_DECOMPRESSED_BYTES = 30 * 1024 * 1024;
+
+async function readBoundedStream(stream) {
+  const reader = stream.getReader();
+  const chunks = [];
+  let total = 0;
+  while (true) {
+    const { done, value } = await reader.read();
+    if (done) break;
+    total += value.byteLength;
+    if (total > MAX_DECOMPRESSED_BYTES) {
+      await reader.cancel();
+      throw new Error('Decompressed document stream exceeds 30 MB safety limit');
+    }
+    chunks.push(value);
+  }
+  const merged = new Uint8Array(total);
+  let offset = 0;
+  for (const c of chunks) {
+    merged.set(c, offset);
+    offset += c.byteLength;
+  }
+  return merged;
+}
+
 // Universal FlateDecode decompressor using browser native DecompressionStream with Node fallback
 async function decompressStreamBytes(bytes) {
   // 1. Node.js runtime fallback
@@ -25,10 +51,10 @@ async function decompressStreamBytes(bytes) {
         const inflateSync = zlib.inflateSync || zlib.default.inflateSync;
         const inflateRawSync = zlib.inflateRawSync || zlib.default.inflateRawSync;
         try {
-          return new Uint8Array(inflateSync(Buffer.from(bytes)));
+          return new Uint8Array(inflateSync(Buffer.from(bytes), { maxOutputLength: MAX_DECOMPRESSED_BYTES }));
         } catch {
           try {
-            return new Uint8Array(inflateRawSync(Buffer.from(bytes)));
+            return new Uint8Array(inflateRawSync(Buffer.from(bytes), { maxOutputLength: MAX_DECOMPRESSED_BYTES }));
           } catch {
             // fall through
           }
@@ -39,23 +65,17 @@ async function decompressStreamBytes(bytes) {
     }
   }
 
-  // 2. Browser native DecompressionStream
+  // 2. Browser native DecompressionStream with output byte budget
   if (typeof DecompressionStream !== 'undefined') {
     try {
       const ds = new DecompressionStream('deflate');
       const blob = new Blob([bytes]);
-      const stream = blob.stream().pipeThrough(ds);
-      const response = new Response(stream);
-      const arrayBuffer = await response.arrayBuffer();
-      return new Uint8Array(arrayBuffer);
+      return await readBoundedStream(blob.stream().pipeThrough(ds));
     } catch {
       try {
         const dsRaw = new DecompressionStream('deflate-raw');
         const blob = new Blob([bytes]);
-        const stream = blob.stream().pipeThrough(dsRaw);
-        const response = new Response(stream);
-        const arrayBuffer = await response.arrayBuffer();
-        return new Uint8Array(arrayBuffer);
+        return await readBoundedStream(blob.stream().pipeThrough(dsRaw));
       } catch {
         return bytes;
       }
@@ -595,6 +615,9 @@ export function parseDocumentTextToEsgParams(text, fileName = 'sample.pdf') {
 export async function extractESGFromDocument(file) {
   if (!file) {
     throw new Error("No file provided for ESG extraction");
+  }
+  if (typeof file.size === 'number' && file.size > MAX_CLIENT_FILE_BYTES) {
+    throw new Error("Document exceeds 25 MB browser extraction safety limit");
   }
 
   const fileName = file.name || "uploaded_statement.pdf";

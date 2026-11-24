@@ -78,7 +78,8 @@ const DiagnosisResult = ({ isInline = false, onBack = null, inlineResult = null,
     if ('speechSynthesis' in window) {
       if (isPlaying) { window.speechSynthesis.cancel(); setIsPlaying(false); return; }
       const utterance = new SpeechSynthesisUtterance(text);
-      utterance.lang = 'bn-BD';
+      // Match utterance language to script instead of forcing bn-BD on English text
+      utterance.lang = /[\u0980-\u09FF]/.test(text) ? 'bn-BD' : 'en-US';
       utterance.onend = () => setIsPlaying(false);
       setIsPlaying(true);
       window.speechSynthesis.speak(utterance);
@@ -133,10 +134,15 @@ const DiagnosisResult = ({ isInline = false, onBack = null, inlineResult = null,
             />
           ) : (
             !isHealthy && (
-              <div
-                style={{ opacity: gradCamOpacity / 100 }}
-                className="absolute inset-0 bg-[radial-gradient(circle_at_center,rgba(239,68,68,0.45)_0%,transparent_60%)] mix-blend-screen pointer-events-none transition-opacity duration-150"
-              />
+              <>
+                <div
+                  style={{ opacity: gradCamOpacity / 100 }}
+                  className="absolute inset-0 bg-[radial-gradient(circle_at_center,rgba(239,68,68,0.45)_0%,transparent_60%)] mix-blend-screen pointer-events-none transition-opacity duration-150"
+                />
+                <span className="absolute bottom-2.5 left-3 px-2 py-0.5 rounded bg-black/75 border border-white/10 text-[10px] font-mono text-white/75 pointer-events-none">
+                  Illustrative offline overlay — connect server for Grad-CAM map
+                </span>
+              </>
             )
           )}
           {/* Species badge */}

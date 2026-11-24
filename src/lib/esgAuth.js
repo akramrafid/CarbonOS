@@ -5,31 +5,26 @@
 // preserving tenant isolation and segregation of duties.
 import { UserManager, WebStorageStateStore } from 'oidc-client-ts';
 import { clearEsgSession, setEsgSession } from './esgApi';
+import { clearAllUserStorage, safeGetItem, safeRemoveItem, safeSetItem } from './safeStorage';
 
 const issuer = typeof import.meta !== 'undefined' ? import.meta.env?.VITE_OIDC_ISSUER : undefined;
 const clientId = typeof import.meta !== 'undefined' ? import.meta.env?.VITE_OIDC_CLIENT_ID : undefined;
 const audience = typeof import.meta !== 'undefined' ? import.meta.env?.VITE_OIDC_AUDIENCE : undefined;
 const API_BASE = (typeof import.meta !== 'undefined' && import.meta.env?.VITE_FASTAPI_API_URL) || 'http://localhost:8000';
+const OFFLINE_DEMO_ALLOWED =
+  (typeof import.meta === 'undefined' || !import.meta.env?.PROD || import.meta.env?.VITE_ALLOW_OFFLINE_DEMO === 'true');
 
 export const authConfigured = Boolean(issuer && clientId);
 export const DEMO_SESSION_KEY = 'carbonos.esg.demo_session';
 
-function safeStorage(fn) {
-  try {
-    return fn();
-  } catch {
-    return null;
-  }
-}
-
 export function getStoredDemoSession() {
-  const raw = safeStorage(() => sessionStorage.getItem(DEMO_SESSION_KEY));
+  const raw = safeGetItem(DEMO_SESSION_KEY, null, 'session');
   if (!raw) return null;
   try {
     const s = JSON.parse(raw);
     if (!s || !s.access_token) return null;
     if (s.expires_at && Math.floor(Date.now() / 1000) > s.expires_at) {
-      safeStorage(() => sessionStorage.removeItem(DEMO_SESSION_KEY));
+      safeRemoveItem(DEMO_SESSION_KEY, 'session');
       return null;
     }
     return s;
@@ -39,14 +34,17 @@ export function getStoredDemoSession() {
 }
 
 export function saveDemoSession(sessionData) {
-  safeStorage(() => sessionStorage.setItem(DEMO_SESSION_KEY, JSON.stringify(sessionData)));
+  safeSetItem(DEMO_SESSION_KEY, JSON.stringify(sessionData), 'session');
 }
 
 export function clearStoredDemoSession() {
-  safeStorage(() => sessionStorage.removeItem(DEMO_SESSION_KEY));
+  safeRemoveItem(DEMO_SESSION_KEY, 'session');
 }
 
 export function createLocalOfflineDemoSession() {
+  if (!OFFLINE_DEMO_ALLOWED) {
+    return null;
+  }
   const demoId = `offline-${Math.random().toString(36).slice(2, 10)}`;
   const tenantId = 'org-demo-bangladesh-benchmark';
   const ownerToken = `demo-offline-owner-${demoId}`;
@@ -126,7 +124,9 @@ export async function resetDemoSession() {
   if (current?.isOfflineDemo) {
     clearStoredDemoSession();
     const newSession = createLocalOfflineDemoSession();
-    setEsgSession({ token: newSession.access_token, organizationId: newSession.tenant_id });
+    if (newSession) {
+      setEsgSession({ token: newSession.access_token, organizationId: newSession.tenant_id });
+    }
     return newSession;
   }
   const token = current?.access_token;
@@ -155,7 +155,9 @@ export async function resetDemoSession() {
     }
   }
   const newSession = await requestDemoSession();
-  setEsgSession({ token: newSession.access_token, organizationId: newSession.tenant_id });
+  if (newSession) {
+    setEsgSession({ token: newSession.access_token, organizationId: newSession.tenant_id });
+  }
   return newSession;
 }
 
@@ -231,9 +233,9 @@ export async function loadSession() {
     try {
       demo = await requestDemoSession();
     } catch (err) {
-      console.warn('Could not auto-provision remote ESG demo session, falling back to local offline demo:', err);
+      console.warn('Could not auto-provision remote ESG demo session:', err);
       demo = createLocalOfflineDemoSession();
-      saveDemoSession(demo);
+      if (demo) saveDemoSession(demo);
     }
   }
 
@@ -253,6 +255,9 @@ export async function loadSession() {
   }
 
   demo = createLocalOfflineDemoSession();
+  if (!demo) {
+    return null;
+  }
   saveDemoSession(demo);
   setEsgSession({ token: demo.access_token, organizationId: demo.tenant_id });
   return {
@@ -270,6 +275,7 @@ export const signIn = () => getManager()?.signinRedirect();
 export async function signOut() {
   clearStoredDemoSession();
   clearEsgSession();
+  clearAllUserStorage();
   const m = getManager();
   if (m) {
     try {
@@ -284,5 +290,11 @@ export async function signOut() {
   }
 }
 
-export const completeSignIn = () => getManager().signinRedirectCallback();
+export const completeSignIn = () => {
+  const m = getManager();
+  if (!m) {
+    return Promise.reject(new Error('OIDC authentication is not configured for this environment.'));
+  }
+  return m.signinRedirectCallback();
+};
 

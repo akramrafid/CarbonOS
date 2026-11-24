@@ -97,6 +97,18 @@ def compute_embedding(text: str, model_name: Optional[str] = None) -> List[float
         vec = vec / norm
     return vec.tolist()
 
+MAX_INGEST_PAGES = int(os.getenv("ESG_MAX_INGEST_PAGES", "100"))
+MAX_UNCOMPRESSED_ZIP_BYTES = 50 * 1024 * 1024
+
+
+def _verify_zip_bounds(file_path: str) -> None:
+    import zipfile
+    with zipfile.ZipFile(file_path, "r") as zf:
+        total_uncompressed = sum(info.file_size for info in zf.infolist())
+        if total_uncompressed > MAX_UNCOMPRESSED_ZIP_BYTES:
+            raise ValueError(f"Compressed office archive exceeds {MAX_UNCOMPRESSED_ZIP_BYTES} uncompressed bytes")
+
+
 def extract_text_from_file(file_path: str, filename: str) -> List[Dict[str, Any]]:
     """
     Extracts text and page numbers from PDF, XLSX, CSV, TXT, or MD files.
@@ -110,12 +122,16 @@ def extract_text_from_file(file_path: str, filename: str) -> List[Dict[str, Any]
             # Scanned PDFs yield no text: callers must report that, not parse raw bytes.
             import pdfplumber
             with pdfplumber.open(file_path) as pdf:
+                if len(pdf.pages) > MAX_INGEST_PAGES:
+                    raise IngestRejected(f"PDF exceeds maximum page limit ({MAX_INGEST_PAGES})")
                 for i, p in enumerate(pdf.pages):
                     txt = p.extract_text() or ""
                     if txt.strip():
                         pages_data.append({"page": i + 1, "text": txt})
 
         elif ext in [".xlsx", ".xls"]:
+            if ext == ".xlsx":
+                _verify_zip_bounds(file_path)
             import pandas as pd
             excel = pd.ExcelFile(file_path)
             for i, sheet_name in enumerate(excel.sheet_names):
@@ -129,6 +145,7 @@ def extract_text_from_file(file_path: str, filename: str) -> List[Dict[str, Any]
             pages_data.append({"page": 1, "text": df.to_string()})
 
         elif ext == ".docx":
+            _verify_zip_bounds(file_path)
             import docx
             doc = docx.Document(file_path)
             full_text = "\n".join([p.text for p in doc.paragraphs if p.text.strip()])

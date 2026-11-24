@@ -160,6 +160,7 @@ export const Modal = ({
     : modalContent;
 };
 
+/* [COMMENTED OUT FOR PERSONAL REFERENCE — unused ConfirmDialog export; zero active imports across src/]
 export const ConfirmDialog = ({
   isOpen,
   onClose,
@@ -204,5 +205,6 @@ export const ConfirmDialog = ({
     </Modal>
   );
 };
+*/
 
 export default Modal;

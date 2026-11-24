@@ -1,6 +1,7 @@
-import React, { useMemo, useState } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import { Eye, Layers } from 'lucide-react';
 import { Button } from '../../../components/ui/Button';
+import { getPrefersReducedMotion } from '../../../lib/motion';
 import { LAYER_CONFIG } from '../constants';
 
 /**
@@ -16,6 +17,7 @@ export function GradCamComparisonCard({
 }) {
   const [gradCamOpacity, setGradCamOpacity] = useState(65);
   const [viewMode, setViewMode] = useState('blend'); // 'original' | 'blend' | 'heatmap'
+  const [polygonDrawn, setPolygonDrawn] = useState(() => getPrefersReducedMotion());
 
   const effectiveOpacity =
     viewMode === 'original' ? 0 : viewMode === 'heatmap' ? 100 : gradCamOpacity;
@@ -42,6 +44,18 @@ export function GradCamComparisonCard({
       })
       .join(' ');
   }, [drawPoints]);
+
+  useEffect(() => {
+    if (getPrefersReducedMotion()) {
+      setPolygonDrawn(true);
+      return undefined;
+    }
+    setPolygonDrawn(false);
+    const rafId = window.requestAnimationFrame(() => {
+      setPolygonDrawn(true);
+    });
+    return () => window.cancelAnimationFrame(rafId);
+  }, [svgPolygonPoints]);
 
   const layerGradient =
     LAYER_CONFIG[activeLayer]?.gradientCSS ||
@@ -77,7 +91,7 @@ export function GradCamComparisonCard({
 
         {/* Crossfading Spectral / Grad-CAM Heatmap Overlay */}
         <div
-          className="absolute inset-0 transition-all duration-300 ease-out"
+          className="absolute inset-0 transition-opacity duration-300 ease-out"
           style={{
             background: layerGradient,
             opacity: (effectiveOpacity / 100) * 0.72,
@@ -100,7 +114,7 @@ export function GradCamComparisonCard({
             stroke="var(--color-accent-default)"
             strokeWidth="2"
             strokeDasharray="600"
-            strokeDashoffset="0"
+            strokeDashoffset={polygonDrawn ? 0 : 600}
             style={{
               transition: 'stroke-dashoffset 0.6s cubic-bezier(0.22, 1, 0.36, 1)',
             }}
@@ -162,6 +176,9 @@ export function GradCamComparisonCard({
           }}
           className="w-full accent-emerald-500 cursor-pointer"
         />
+        <p className={`text-[10px] font-mono ${isLight ? 'text-fg-secondary' : 'text-mist/80'}`}>
+          Schematic boundary &amp; layer blend preview (illustrative UI; pixel Grad-CAM comes from inference server).
+        </p>
       </div>
     </div>
   );

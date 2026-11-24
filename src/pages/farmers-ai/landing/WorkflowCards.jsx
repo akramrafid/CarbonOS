@@ -1,6 +1,6 @@
 import React from 'react';
 import { Database, ShieldAlert, Sprout, ShieldCheck, ArrowUpRight, ArrowRight } from 'lucide-react';
-import { motion } from 'framer-motion';
+import { m } from 'framer-motion';
 import { WORKFLOW_DETAILS } from './cropsData';
 
 export function WorkflowCards({
@@ -17,30 +17,30 @@ export function WorkflowCards({
   ];
 
   return (
-    <motion.div 
+    <m.div 
       initial="hidden"
       whileInView="visible"
       viewport={{ once: true }}
       variants={containerVariants}
       className="mb-32 relative"
     >
-      <div className="absolute inset-0 bg-lime-400/5 blur-[120px] rounded-full pointer-events-none" />
+      {/* [COMMENTED OUT FOR PERSONAL REFERENCE — removed full-section ambient blur blob] */}
       
-      <motion.h2 variants={itemVariants} className="text-3xl md:text-5xl font-extrabold text-center text-white mb-4 tracking-tight">
+      <m.h2 variants={itemVariants} className="text-3xl md:text-5xl font-extrabold text-center text-white mb-4 tracking-tight">
         {text.solutionTitle}
-      </motion.h2>
-      <motion.p variants={itemVariants} className="text-lg text-white/60 text-center max-w-2xl mx-auto mb-16 leading-relaxed">
+      </m.h2>
+      <m.p variants={itemVariants} className="text-lg text-white/60 text-center max-w-2xl mx-auto mb-16 leading-relaxed">
         {text.solutionDesc}
-      </motion.p>
+      </m.p>
 
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 relative z-10">
         {workflowSteps.map((step, idx) => {
           const isSolidCard = idx === 2;
           return (
-            <motion.div 
+            <m.div 
               key={idx}
               variants={itemVariants}
-              className={`p-8 rounded-[28px] text-left transition-all duration-300 relative flex flex-col justify-between min-h-[280px] group border
+              className={`p-8 rounded-[28px] text-left transition-[background-color,border-color,box-shadow,transform] duration-300 relative flex flex-col justify-between min-h-[280px] group border
                 ${isSolidCard 
                   ? 'bg-lime-400 text-black border-transparent shadow-[0_15px_30px_rgba(204,255,0,0.15)] hover:scale-[1.02] hover:shadow-[0_20px_40px_rgba(204,255,0,0.25)]' 
                   : 'bg-white/5 border-white/10 hover:border-lime-400/40 hover:scale-[1.02] hover:bg-white/10 text-white'
@@ -51,7 +51,7 @@ export function WorkflowCards({
                   <div className={`text-sm font-black tracking-widest uppercase ${isSolidCard ? 'text-black/50' : 'text-white/40'}`}>
                     {idx + 1 === 1 ? '01' : idx + 1 === 2 ? '02' : idx + 1 === 3 ? '03' : '04'}
                   </div>
-                  <div className={`p-2.5 rounded-full ${isSolidCard ? 'bg-black text-lime-400' : 'bg-white/5 text-lime-400 border border-white/10 group-hover:bg-lime-400 group-hover:text-black group-hover:border-transparent'} transition-all duration-300`}>
+                  <div className={`p-2.5 rounded-full ${isSolidCard ? 'bg-black text-lime-400' : 'bg-white/5 text-lime-400 border border-white/10 group-hover:bg-lime-400 group-hover:text-black group-hover:border-transparent'} transition-colors duration-300`}>
                     {isSolidCard ? <ArrowUpRight size={18} /> : step.icon}
                   </div>
                 </div>
@@ -71,11 +71,11 @@ export function WorkflowCards({
                 </span>
                 <ArrowRight size={14} className="transform group-hover:translate-x-1 transition-transform" />
               </div>
-            </motion.div>
+            </m.div>
           );
         })}
       </div>
-    </motion.div>
+    </m.div>
   );
 }
 

@@ -124,8 +124,12 @@ const LocalRiskMap = ({ isEmbedded = false }) => {
 
       <div className="flex flex-col md:flex-row items-start md:items-center justify-between mb-6">
         <div>
-          <h2 className="text-3xl font-extrabold text-gray-900 dark:text-white mb-2 tracking-tight">Local Risk Map</h2>
-          <p className="text-gray-600 dark:text-white/60 text-sm">Community spoilage threats around {activeDistrict}</p>
+          {!isEmbedded ? (
+            <h1 className="text-3xl font-extrabold text-gray-900 dark:text-white mb-2 tracking-tight">Local Risk Map</h1>
+          ) : (
+            <h2 className="text-3xl font-extrabold text-gray-900 dark:text-white mb-2 tracking-tight">Local Risk Map</h2>
+          )}
+          <p className="text-gray-600 dark:text-white/60 text-sm">Illustrative community spoilage risk pins around {activeDistrict}</p>
         </div>
         
         <div className="flex flex-wrap items-center gap-4 mt-4 md:mt-0 bg-white/90 dark:bg-white/5 border border-gray-200 dark:border-white/10 p-3 rounded-2xl text-xs font-bold text-gray-800 dark:text-white/80 shadow-sm backdrop-blur-md">
@@ -136,12 +140,12 @@ const LocalRiskMap = ({ isEmbedded = false }) => {
         </div>
       </div>
 
-      <div className="bg-white/90 dark:bg-white/5 backdrop-blur-md border border-gray-200 dark:border-white/10 p-2.5 rounded-[32px] relative overflow-hidden shadow-2xl" style={{ height: '550px' }}>
+      <div className="isolate bg-white/90 dark:bg-white/5 backdrop-blur-md border border-gray-200 dark:border-white/10 p-2.5 rounded-[32px] relative z-0 overflow-hidden shadow-2xl" style={{ height: '550px' }}>
         <MapContainer 
           center={center} 
           zoom={11} 
           scrollWheelZoom={true} 
-          className="w-full h-full rounded-[24px] z-10"
+          className="w-full h-full rounded-[24px] z-0"
         >
           <TileLayer
             key={isLight ? 'carto-light' : 'carto-dark'}
@@ -191,10 +195,10 @@ const LocalRiskMap = ({ isEmbedded = false }) => {
           ))}
         </MapContainer>
         
-        {/* Privacy Disclaimer Overlay */}
+        {/* Privacy & Demo Disclaimer Overlay */}
         <div className="absolute bottom-6 left-6 z-20 bg-white/95 dark:bg-black/85 backdrop-blur-md border border-gray-200 dark:border-white/10 px-4 py-2.5 rounded-xl flex items-center text-xs text-gray-700 dark:text-white/80 max-w-sm shadow-md">
           <ShieldAlert size={16} className="text-emerald-600 dark:text-lime-400 mr-2 shrink-0 animate-pulse" />
-          <p><strong>Privacy Protected:</strong> All neighbor data is completely anonymous. Personal identifiers are never shared.</p>
+          <p><strong>Demo Risk Overlay:</strong> Neighbor pins on this map are illustrative simulated data, not live farm telemetry.</p>
         </div>
       </div>
     </div>

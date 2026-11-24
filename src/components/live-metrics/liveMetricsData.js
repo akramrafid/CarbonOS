@@ -46,8 +46,11 @@ export const STATIONS = [
 
 export const AIR_GOOD_MAX = 250;
 export const AIR_WARN_MAX = 450;
-export const CO2_GOOD_MAX = 5000;
-export const CO2_WARN_MAX = 10000;
+// [COMMENTED OUT FOR PERSONAL REFERENCE — 5000 ppm is the OSHA 8-hour hazardous PEL, not "AMBIENT OPTIMAL"]
+// export const CO2_GOOD_MAX = 5000;
+// export const CO2_WARN_MAX = 10000;
+export const CO2_GOOD_MAX = 1000;
+export const CO2_WARN_MAX = 2000;
 
 export const getAirStatus = (raw) => {
   if (raw === null || isNaN(raw)) return { text: "STANDBY", badge: "bg-mist/10 text-mist border-mist/20", tone: "neutral" };

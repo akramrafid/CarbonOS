@@ -13,6 +13,7 @@ PROD_OK = {
     "ESG_AUTH_JWKS_URL": "https://idp.example/.well-known/jwks.json", "ESG_AUTH_ISSUER": "https://idp.example/",
     "ESG_AUTH_AUDIENCE": "carbonos-esg", "DATABASE_URL": "postgresql+psycopg2://u@db/esg",
     "ALLOWED_ORIGINS": "https://app.carbonos.example",
+    "ESG_ACCESS_MODE": "protected",
 }
 
 
@@ -22,7 +23,7 @@ class AppConfigTest(unittest.TestCase):
             with mock.patch.dict(os.environ, PROD_OK):
                 esg_app.validate_config()
             for key, bad in (("ESG_AUTH_JWKS_URL", ""), ("ALLOWED_ORIGINS", "*"), ("DATABASE_URL", "sqlite:///x"),
-                             ("ALLOWED_ORIGINS", "http://localhost:5173")):
+                             ("ALLOWED_ORIGINS", "http://localhost:5173"), ("ESG_ACCESS_MODE", "isolated_demo")):
                 with mock.patch.dict(os.environ, {**PROD_OK, key: bad}), self.assertRaises(RuntimeError):
                     esg_app.validate_config()
             with mock.patch.dict(os.environ, {**PROD_OK, "ESG_LLM_EXTRACTION_ENABLED": "true"}), \

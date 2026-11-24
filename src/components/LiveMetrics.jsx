@@ -1,5 +1,6 @@
 import { getPrefersReducedMotion } from '../lib/motion';
 import React, { useState, useEffect, useRef } from 'react';
+import { Link } from 'react-router-dom';
 import gsap from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
 import { 
@@ -20,7 +21,8 @@ gsap.registerPlugin(ScrollTrigger);
 
 const LiveMetrics = () => {
   const containerRef = useRef(null);
-  const BLYNK_TOKEN = import.meta.env.VITE_BLYNK_AUTH_TOKEN || "";
+  // [COMMENTED OUT FOR PERSONAL REFERENCE — client-side Blynk token removed to prevent bundle exposure]
+  // const BLYNK_TOKEN = import.meta.env.VITE_BLYNK_AUTH_TOKEN || "";
 
   const [activeStation, setActiveStation] = useState(STATIONS[0]);
   const [metrics, setMetrics] = useState({
@@ -37,46 +39,19 @@ const LiveMetrics = () => {
 
   const fetchLiveBlynkData = async () => {
     setIsRefreshing(true);
-    if (!BLYNK_TOKEN) {
-      setMetrics({
-        temp: 29.2,
-        hum: 68.5,
-        air: 114,
-        co2: 424
-      });
-      setError("Hardware telemetry gateway offline. Displaying reference baseline (Simulated).");
-      setLastUpdated(new Date().toLocaleTimeString());
-      setLoading(false);
-      setIsRefreshing(false);
-      return;
-    }
-    try {
-      const res = await fetch(`https://blynk.cloud/external/api/getAll?token=${BLYNK_TOKEN}`);
-      if (!res.ok) throw new Error(`HTTP error! status: ${res.status}`);
-      const data = await res.json();
-
-      setMetrics({
-        temp: parseFloat(data.v0) || 28.6,
-        hum: parseFloat(data.v1) || 68.4,
-        air: parseInt(data.v2) || 112,
-        co2: parseInt(data.v3) || 422
-      });
-      setError(null);
-      setLastUpdated(new Date().toLocaleTimeString());
-      setPacketCount(prev => prev + 1);
-    } catch {
-      setMetrics({
-        temp: 29.2,
-        hum: 68.5,
-        air: 114,
-        co2: 424
-      });
-      setError("Direct Blynk gateway ping returned timeout. Displaying reference baseline (Simulated).");
-      setLastUpdated(new Date().toLocaleTimeString());
-    } finally {
-      setLoading(false);
-      setIsRefreshing(false);
-    }
+    // [COMMENTED OUT FOR PERSONAL REFERENCE — direct client Blynk cloud fetch disabled; uses reference station sample data unless proxied]
+    // if (!BLYNK_TOKEN) { ... }
+    // const res = await fetch(`https://blynk.cloud/external/api/getAll?token=${BLYNK_TOKEN}`);
+    setMetrics({
+      temp: 29.2,
+      hum: 68.5,
+      air: 114,
+      co2: 424
+    });
+    setError("Showing reference environmental baseline (Direct hardware stream requires server telemetry proxy).");
+    setLastUpdated(new Date().toLocaleTimeString());
+    setLoading(false);
+    setIsRefreshing(false);
   };
 
   const handleStationChange = (station) => {
@@ -203,25 +178,25 @@ const LiveMetrics = () => {
             </div>
             <div>
               <div className="font-sans font-bold text-xs text-white tracking-wide">
-                Hardware-Attested Ecological Integrity Ledger
+                Simulated &amp; Reference Telemetry Preview
               </div>
               <div className="text-[11px] font-mono text-white/50">
-                Data signed via hardware ECDSA keypair • Ingested directly to the Carbon Zero BD clearing ledger
+                Demo station parameters; connect signed MRV backend for live hardware-attested ingestion
               </div>
             </div>
           </div>
 
           <div className="flex items-center gap-3 text-xs font-mono text-white/60">
             <span className="px-3 py-1 rounded-lg bg-black/40 border border-white/5 text-white/70">
-              Total Ingested: <strong className="text-emerald-400">{packetCount.toLocaleString()}</strong> frames
+              Demo frames sampled: <strong className="text-emerald-400">{packetCount.toLocaleString()}</strong>
             </span>
-            <a 
-              href="/platform/mrv-dashboard" 
+            <Link 
+              to="/platform/mrv-dashboard" 
               className="inline-flex items-center gap-1 text-emerald-400 hover:text-emerald-300 font-semibold transition-colors"
             >
               <span>Full MRV Terminal</span>
               <ArrowUpRight size={14} />
-            </a>
+            </Link>
           </div>
         </div>
 

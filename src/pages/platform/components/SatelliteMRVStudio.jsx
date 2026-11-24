@@ -94,8 +94,8 @@ export const SatelliteMRVStudio = ({
   const [selectedProject, setSelectedProject] = useState(SATELLITE_PROJECTS[0]);
   const [retireAmount, setRetireAmount] = useState(50);
   const [retiredLog, setRetiredLog] = useState([
-    { id: "RET-901", project: "Sundarbans Mangrove Blue Carbon", amount: 150, date: "2026-08-14", certHash: "SHA256-SUN-8841" },
-    { id: "RET-902", project: "Northern Agrarian Solar Irrigation", amount: 100, date: "2026-09-02", certHash: "SHA256-SOL-2940" }
+    { id: "DEMO-RET-901", project: "Sundarbans Mangrove Blue Carbon", amount: 150, date: "2026-08-14", certHash: "DEMO-SUN-8841" },
+    { id: "DEMO-RET-902", project: "Northern Agrarian Solar Irrigation", amount: 100, date: "2026-09-02", certHash: "DEMO-SOL-2940" }
   ]);
   const [showCertificate, setShowCertificate] = useState(false);
 
@@ -103,12 +103,13 @@ export const SatelliteMRVStudio = ({
   const netFootprint = Math.max(0, grossEmissions - totalRetired);
 
   const handleRetire = () => {
+    const seq = String(Date.now()).slice(-4);
     const newEntry = {
-      id: `RET-${Math.floor(100 + Math.random() * 900)}`,
+      id: `DEMO-RET-${seq}`,
       project: selectedProject.name,
       amount: parseFloat(retireAmount) || 10,
       date: new Date().toISOString().substring(0, 10),
-      certHash: `SHA256-${selectedProject.id.substring(7, 10)}-${Math.floor(1000 + Math.random() * 9000)}`
+      certHash: `DEMO-${selectedProject.id.substring(7, 10)}-${seq}`
     };
     setRetiredLog([newEntry, ...retiredLog]);
     if (onRetireInset) onRetireInset(newEntry.amount);
@@ -132,8 +133,8 @@ export const SatelliteMRVStudio = ({
               <h2 className={`text-xl font-bold font-sans ${isLight ? 'text-gray-900' : 'text-white'}`}>
                 {locale.satelliteTitle}
               </h2>
-              <span className="px-2.5 py-0.5 rounded-full text-[10px] font-mono font-bold bg-cyan-500/15 text-cyan-600 dark:text-cyan-400 border border-cyan-500/30">
-                Sentinel-2 + GEDI LiDAR
+              <span className="px-2.5 py-0.5 rounded-full text-[10px] font-mono font-bold bg-amber-500/15 text-amber-400 border border-amber-500/30">
+                Demo Simulation (Local Session Only — Not an Immutable Registry)
               </span>
             </div>
             <p className={`text-xs ${isLight ? 'text-gray-600' : 'text-fg-secondary'}`}>
@@ -290,10 +291,10 @@ export const SatelliteMRVStudio = ({
               <div className="p-3 rounded-2xl bg-emerald-500/10 border border-emerald-500/30 text-[11px] font-mono text-emerald-400 space-y-1">
                 <div className="flex items-center space-x-1.5 font-bold">
                   <CheckCircle2 className="w-3.5 h-3.5 text-emerald-400" />
-                  <span>Retirement Certificate Issued</span>
+                  <span>Demo Simulation Entry Added (Local Session Only)</span>
                 </div>
                 <p className="text-[10px] text-gray-400">
-                  Ledger Hash: SHA256-{Math.floor(100000 + Math.random() * 900000)}
+                  Demo Ref: {retiredLog[0]?.certHash || 'DEMO-RET-LOCAL'}
                 </p>
               </div>
             )}
@@ -303,7 +304,7 @@ export const SatelliteMRVStudio = ({
         {/* Ledger Log */}
         <div className="mt-6 pt-6 border-t border-gray-100 dark:border-gray-800">
           <h4 className="text-xs font-mono font-bold uppercase tracking-wider text-gray-500 mb-3">
-            Recent Inset Retirement Transactions (Immutable Carbon Ledger)
+            Simulated Retirement Log (Local Session Only)
           </h4>
           <div className="space-y-2">
             {retiredLog.map((log) => (

@@ -2,6 +2,7 @@ import React, { useState, useEffect, useRef } from 'react';
 import { Info } from 'lucide-react';
 import { PageHeader } from '../../components/ui/PageHeader';
 import { Badge } from '../../components/ui/Badge';
+import { getPrefersReducedMotion } from '../../lib/motion';
 import { INITIAL_PAYOUTS } from './impact/impactData';
 import { ImpactStatCards } from './impact/ImpactStatCards';
 import { LivePayoutLedger } from './impact/LivePayoutLedger';
@@ -55,7 +56,7 @@ const Impact = () => {
         return updated.slice(0, 5);
       });
 
-      showToast(`Disbursed ৳${randomAmount} BDT to ${randomName} (${randomDistrict}) via Mobile Wallet!`, "success");
+      showToast(`[Demo Simulation] Illustrative payout: ৳${randomAmount} BDT to ${randomName} (${randomDistrict})`, "info");
     }, 12000);
 
     return () => {
@@ -65,7 +66,10 @@ const Impact = () => {
   }, []);
 
   const handleScrollToRerf = () => {
-    rerfSectionRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    rerfSectionRef.current?.scrollIntoView({
+      behavior: getPrefersReducedMotion() ? 'auto' : 'smooth',
+      block: 'start',
+    });
   };
 
   return (
@@ -73,7 +77,7 @@ const Impact = () => {
 
       {/* Float Toast Notification */}
       {toast.show && (
-        <div className={`fixed bottom-6 right-6 z-50 flex items-center space-x-3 px-4.5 py-3.5 rounded-2xl shadow-xl border text-white transition-all transform duration-300 animate-fade-in ${
+        <div className={`fixed bottom-6 right-6 z-50 flex items-center space-x-3 px-4.5 py-3.5 rounded-2xl shadow-xl border text-white transition-opacity transform duration-300 animate-fade-in ${
           toast.type === 'success' 
             ? 'bg-bg-surface border-border-strong/30' 
             : 'bg-bg-elevated border-border-subtle/20'
@@ -88,8 +92,8 @@ const Impact = () => {
         <div className="max-w-3xl mx-auto">
           <PageHeader
             title="Realized Carbon Impact Outcomes"
-            description="Carbon Zero BD monitors, registers, and monetizes verified carbon emissions reductions while directing funding into local rural communities in Bangladesh."
-            badge={<Badge variant="emerald">ECOLOGICAL & SOCIAL IMPACT LOG</Badge>}
+            description="Illustrative monitoring & disbursement model showing how Carbon Zero BD routes climate revenue to participating farmers in Bangladesh (demo simulation)."
+            badge={<Badge variant="warning">DEMO IMPACT PREVIEW (SIMULATED)</Badge>}
             align="center"
           />
         </div>

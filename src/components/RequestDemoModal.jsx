@@ -40,21 +40,16 @@ export const RequestDemoModal = ({ isOpen, onClose }) => {
     setStatus('submitting');
     setErrorMessage('');
 
-    try {
-      const response = await fetch('/api/request-demo/', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(formData),
-      });
-
-      if (!response.ok) {
-        throw new Error('Failed to submit demo request.');
-      }
-
-      setStatus('success');
-    } catch {
-      setStatus('success');
-    }
+    // [COMMENTED OUT FOR PERSONAL REFERENCE — /api/request-demo/ endpoint does not exist; prepare transparent local mailto draft instead of faking submission]
+    // try {
+    //   const response = await fetch('/api/request-demo/', {
+    //     method: 'POST', ...
+    //   });
+    //   ...
+    // } catch {
+    //   setStatus('success');
+    // }
+    setStatus('success');
   };
 
   const handleReset = () => {
@@ -80,14 +75,20 @@ export const RequestDemoModal = ({ isOpen, onClose }) => {
             <ShieldCheck size={32} />
           </div>
           <h3 className="font-sans font-bold text-xl text-white">
-            Demo Request Ingested
+            Briefing Inquiry Prepared Locally
           </h3>
           <p className="font-sans text-sm text-mist max-w-md mx-auto">
-            Our technical onboarding team has received your organization profile ({formData.company || 'Enterprise'}). We will establish contact within 4 business hours.
+            This demo UI does not auto-transmit form leads to a CRM server. Open your email client below to send the pre-filled inquiry for {formData.company || 'your organization'}.
           </p>
-          <div className="pt-4">
-            <Button variant="primary" onClick={handleReset}>
-              Return to Platform
+          <div className="pt-4 flex flex-wrap justify-center gap-3">
+            <a
+              href={`mailto:contact@carbonzerobd.com?subject=${encodeURIComponent(`CarbonOS Briefing Request — ${formData.company || formData.fullName}`)}&body=${encodeURIComponent(`Name: ${formData.fullName}\nWork Email: ${formData.workEmail}\nOrganization: ${formData.company}\nInterest: ${formData.interest}\nScale: ${formData.scale}\nNotes: ${formData.details}`)}`}
+              className="inline-flex items-center justify-center rounded-xl bg-emerald px-5 py-2.5 text-xs font-semibold text-fg-inverse hover:bg-emerald/90 transition-colors"
+            >
+              Open Pre-filled Email
+            </a>
+            <Button variant="secondary" onClick={handleReset}>
+              Close
             </Button>
           </div>
         </div>

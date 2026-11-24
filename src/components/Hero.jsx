@@ -1,16 +1,16 @@
 import React, { useEffect, useRef, useState } from 'react';
 import gsap from 'gsap';
-import { 
-  Zap, 
-  ShieldCheck, 
-  CheckCircle2, 
-  ArrowRight, 
-  Activity, 
-  TrendingUp, 
-  Radio, 
-  Terminal, 
-  Lock, 
-  Globe, 
+import {
+  Zap,
+  ShieldCheck,
+  CheckCircle2,
+  ArrowRight,
+  Activity,
+  TrendingUp,
+  Radio,
+  Terminal,
+  Lock,
+  Globe,
   Layers,
   Sparkles
 } from 'lucide-react';
@@ -18,29 +18,23 @@ import { useTranslation } from 'react-i18next';
 import { Link } from 'react-router-dom';
 import { BangladeshSatelliteScanSvg } from './hero/BangladeshSatelliteScanSvg';
 import { KpiTicker } from './ui/KpiTicker';
+import { HeroPipelineCard } from './hero/HeroPipelineCard';
 
 const Hero = () => {
   const containerRef = useRef(null);
   const { t } = useTranslation();
-  const [activeStreamIndex, setActiveStreamIndex] = useState(0);
-
-  const tradeStreams = [
-    { time: "14:22 BST", desc: "1,200 tCO₂e AWD Rice Rangpur cleared @ ৳15,000/t", detail: "৳17.46M direct to 410 bKash farmer wallets" },
-    { time: "13:58 BST", desc: "3,500 tCO₂e Sundarbans Blue Carbon listed", detail: "Sentinel-2 NDVI 0.82 · not registered with any standard" },
-    { time: "12:40 BST", desc: "800 tCO₂e Solar Irrigation Khulna retired", detail: "Corporate buyer retirement" },
-    { time: "11:15 BST", desc: "2,400 tCO₂e Biogas Waste-to-Energy Dhaka minted", detail: "IoT sensor telemetry consensus (99.8%)" }
-  ];
+  const [, setTelemetryTick] = useState(0);
 
   useEffect(() => {
-    const streamTimer = setInterval(() => {
+    const timer = setInterval(() => {
       if (typeof document !== 'undefined' && document.visibilityState === 'hidden') return;
-      setActiveStreamIndex(prev => (prev + 1) % tradeStreams.length);
+      setTelemetryTick(prev => (prev + 1) % 100);
     }, 4500);
-    return () => clearInterval(streamTimer);
-  }, [tradeStreams.length]);
+    return () => clearInterval(timer);
+  }, []);
 
   useEffect(() => {
-    const prefersReducedMotion = typeof window !== 'undefined' && 
+    const prefersReducedMotion = typeof window !== 'undefined' &&
       window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 
     let ctx = gsap.context(() => {
@@ -57,9 +51,9 @@ const Hero = () => {
       const tl = gsap.timeline();
 
       // Background fade & subtle zoom
-      tl.fromTo('.hero-bg', 
-        { scale: 1.06, opacity: 0 }, 
-        { scale: 1, opacity: 1, duration: 1.6, ease: 'power2.out' }, 
+      tl.fromTo('.hero-bg',
+        { scale: 1.06, opacity: 0 },
+        { scale: 1, opacity: 1, duration: 1.6, ease: 'power2.out' },
         0
       );
 
@@ -71,39 +65,39 @@ const Hero = () => {
       );
 
       // Pill
-      tl.fromTo('.hero-pill', 
-        { y: 20, opacity: 0 }, 
-        { y: 0, opacity: 1, duration: 0.8, ease: 'power3.out' }, 
+      tl.fromTo('.hero-pill',
+        { y: 20, opacity: 0 },
+        { y: 0, opacity: 1, duration: 0.8, ease: 'power3.out' },
         0.4
       );
 
       // Headline
-      tl.fromTo('.hero-h1', 
-        { y: 35, opacity: 0 }, 
-        { y: 0, opacity: 1, duration: 0.9, ease: 'power3.out', stagger: 0.12 }, 
+      tl.fromTo('.hero-h1',
+        { y: 35, opacity: 0 },
+        { y: 0, opacity: 1, duration: 0.9, ease: 'power3.out', stagger: 0.12 },
         0.5
       );
 
       // Body & CTA
-      tl.fromTo(['.hero-body', '.hero-cta'], 
-        { y: 20, opacity: 0 }, 
-        { y: 0, opacity: 1, duration: 0.8, ease: 'power3.out', stagger: 0.1 }, 
+      tl.fromTo(['.hero-body', '.hero-cta'],
+        { y: 20, opacity: 0 },
+        { y: 0, opacity: 1, duration: 0.8, ease: 'power3.out', stagger: 0.1 },
         0.75
       );
 
       const isMobile = typeof window !== 'undefined' && window.innerWidth < 768;
 
       // Terminal Card (pure vertical entrance on mobile to prevent clipping)
-      tl.fromTo('.hero-terminal-card', 
-        { x: isMobile ? 0 : 30, y: isMobile ? 25 : 0, opacity: 0, scale: 0.98 }, 
-        { x: 0, y: 0, opacity: 1, scale: 1, duration: 0.8, ease: 'power3.out' }, 
+      tl.fromTo('.hero-terminal-card',
+        { x: isMobile ? 0 : 30, y: isMobile ? 25 : 0, opacity: 0, scale: 0.98 },
+        { x: 0, y: 0, opacity: 1, scale: 1, duration: 0.8, ease: 'power3.out' },
         0.6
       );
 
       // Trust Badges
-      tl.fromTo('.hero-trust-badge', 
-        { y: 15, opacity: 0 }, 
-        { y: 0, opacity: 1, duration: 0.6, ease: 'power3.out', stagger: 0.08 }, 
+      tl.fromTo('.hero-trust-badge',
+        { y: 15, opacity: 0 },
+        { y: 0, opacity: 1, duration: 0.6, ease: 'power3.out', stagger: 0.08 },
         1.0
       );
 
@@ -113,20 +107,20 @@ const Hero = () => {
   }, []);
 
   return (
-    <section 
+    <section
       ref={containerRef}
       className="relative min-h-[100dvh] w-full flex items-center justify-center overflow-hidden bg-bg-canvas"
     >
       {/* Background Photography with Modern Composite Layering */}
-      <div 
+      <div
         className="hero-bg absolute inset-0 z-0 bg-cover bg-center"
         style={{ backgroundImage: 'url("/hero_landscape.png")' }}
       ></div>
-      
+
       {/* High-End Dark Gradient & Contrast Overlays */}
       <div className="absolute inset-0 z-0 bg-gradient-to-t from-bg-canvas via-bg-canvas/75 to-bg-canvas/60"></div>
       <div className="absolute inset-0 z-0 bg-[radial-gradient(ellipse_80%_80%_at_50%_-20%,rgba(0,200,83,0.15),rgba(255,255,255,0))]"></div>
-      
+
       {/* Subtle Precision Grid Lines */}
       <div className="absolute inset-0 z-0 bg-[linear-gradient(to_right,#00c85308_1px,transparent_1px),linear-gradient(to_bottom,#00c85308_1px,transparent_1px)] bg-[size:4rem_4rem] [mask-image:radial-gradient(ellipse_60%_50%_at_50%_40%,#000_70%,transparent_100%)]"></div>
 
@@ -138,14 +132,14 @@ const Hero = () => {
       </div>
 
       <div className="relative z-10 container mx-auto px-3 sm:px-6 lg:px-12 pt-12 sm:pt-16 pb-16 w-full flex flex-col justify-between min-h-[100dvh] min-w-0">
-        
+
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-8 items-center my-auto min-w-0">
-          
+
           {/* Left Column: Brand Statement & Primary Actions */}
           <div className="lg:col-span-7 flex flex-col items-start text-left pt-6 lg:pt-0 min-w-0">
-            
+
             {/* Live Protocol Status Pill */}
-            <div className="hero-pill inline-flex flex-wrap items-center gap-2 sm:gap-2.5 bg-black/40 hover:bg-black/60 backdrop-blur-xl border border-emerald/30 hover:border-emerald/60 rounded-full py-1.5 px-3 sm:px-4 mb-6 max-w-full shadow-[0_0_20px_rgba(0,200,83,0.15)] transition-all duration-300">
+            <div className="hero-pill inline-flex flex-wrap items-center gap-2 sm:gap-2.5 bg-black/40 hover:bg-black/60 backdrop-blur-xl border border-emerald/30 hover:border-emerald/60 rounded-full py-1.5 px-3 sm:px-4 mb-6 max-w-full shadow-[0_0_20px_rgba(0,200,83,0.15)] transition-colors duration-300">
               <span className="flex h-2 w-2 relative">
                 <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-accent opacity-75"></span>
                 <span className="relative inline-flex rounded-full h-2 w-2 bg-accent"></span>
@@ -182,17 +176,17 @@ const Hero = () => {
 
             {/* Action Buttons & Fast Proof */}
             <div className="hero-cta flex flex-wrap gap-4 items-center mb-10 w-full min-w-0">
-              <Link 
-                to="/platform/marketplace" 
-                className="group relative inline-flex items-center justify-center bg-accent hover:bg-accent-hover text-fg-inverse font-sans font-bold text-sm sm:text-base px-7 py-4 rounded-full transition-all duration-300 shadow-[0_0_30px_rgba(0,200,83,0.35)] hover:shadow-[0_0_45px_rgba(0,200,83,0.55)] hover:scale-[1.02] active:scale-[0.98]"
+              <Link
+                to="/platform/marketplace"
+                className="group relative inline-flex items-center justify-center bg-accent hover:bg-accent-hover text-fg-inverse font-sans font-bold text-sm sm:text-base px-7 py-4 rounded-full transition-[background-color,border-color,box-shadow,transform] duration-300 shadow-[0_0_30px_rgba(0,200,83,0.35)] hover:shadow-[0_0_45px_rgba(0,200,83,0.55)] hover:scale-[1.02] active:scale-[0.98]"
               >
                 <span>Explore Credit Listings</span>
                 <ArrowRight size={18} className="ml-2 group-hover:translate-x-1 transition-transform" />
               </Link>
-              
-              <Link 
-                to="/platform/carbon-registry" 
-                className="inline-flex items-center justify-center bg-white/[0.06] hover:bg-white/[0.12] text-white border border-white/15 hover:border-emerald/40 font-sans font-medium text-sm sm:text-base px-6 py-4 rounded-full backdrop-blur-md transition-all duration-300 hover:scale-[1.02] active:scale-[0.98]"
+
+              <Link
+                to="/platform/carbon-registry"
+                className="inline-flex items-center justify-center bg-white/[0.06] hover:bg-white/[0.12] text-white border border-white/15 hover:border-emerald/40 font-sans font-medium text-sm sm:text-base px-6 py-4 rounded-full backdrop-blur-md transition-[background-color,border-color,transform] duration-300 hover:scale-[1.02] active:scale-[0.98]"
               >
                 <Terminal size={16} className="mr-2 text-emerald" />
                 <span>Registry Terminal</span>
@@ -225,113 +219,15 @@ const Hero = () => {
 
           </div>
 
-          {/* Right Column: Sovereign Exchange Terminal Card */}
+          {/* Right Column: Corporate SaaS Pipeline replacing the dashboard */}
           <div className="lg:col-span-5 w-full min-w-0">
-            <div className="hero-terminal-card bg-bg-canvas/90 backdrop-blur-2xl border border-white/15 rounded-[2rem] p-3.5 sm:p-6 lg:p-7 shadow-[0_20px_60px_rgba(0,0,0,0.7)] relative min-w-0">
-              
-              {/* Terminal Header */}
-              <div className="flex items-center justify-between border-b border-white/10 pb-4 mb-5 min-w-0 gap-2">
-                <div className="flex items-center space-x-2 min-w-0">
-                  <div className="w-2.5 h-2.5 rounded-full bg-emerald animate-pulse shrink-0"></div>
-                  <span className="font-mono text-[10px] sm:text-[11px] uppercase tracking-widest text-white/80 font-semibold truncate">
-                    Live Clearing // Dhaka
-                  </span>
-                </div>
-                <div className="flex items-center space-x-1 font-mono text-[10px] text-emerald bg-emerald/10 border border-emerald/20 px-2 py-0.5 rounded shrink-0">
-                  <Activity size={12} />
-                  <span>42ms</span>
-                </div>
-              </div>
-
-              {/* Interactive Satellite Scan & 4-Stage Pipeline Visual */}
-              <BangladeshSatelliteScanSvg />
-
-              {/* 4 Core Metrics Grid */}
-              <div className="grid grid-cols-2 gap-2.5 sm:gap-3 mb-5 min-w-0">
-                
-                {/* Metric 1 */}
-                <div className="bg-white/[0.03] border border-white/10 rounded-2xl p-2.5 sm:p-4 flex flex-col justify-between min-w-0">
-                  <div className="flex items-center justify-between text-white/50 text-[10px] sm:text-[11px] font-mono">
-                    <span className="truncate">TOTAL REDUCTION</span>
-                    <TrendingUp size={14} className="text-emerald shrink-0 ml-1" />
-                  </div>
-                  <div className="mt-2 truncate">
-                    <KpiTicker value="10.42M" className="font-mono font-bold text-lg sm:text-2xl lg:text-3xl text-white" />
-                    <span className="font-mono text-xs text-emerald ml-1 font-semibold">tCO₂e</span>
-                  </div>
-                  <span className="font-sans text-[10px] text-emerald/80 mt-1 font-medium truncate">+18.4% YoY</span>
-                </div>
-
-                {/* Metric 2 */}
-                <div className="bg-white/[0.03] border border-white/10 rounded-2xl p-2.5 sm:p-4 flex flex-col justify-between min-w-0">
-                  <div className="flex items-center justify-between text-white/50 text-[10px] sm:text-[11px] font-mono">
-                    <span className="truncate">FARMER PAYOUT</span>
-                    <span className="text-[10px] text-emerald font-mono font-bold shrink-0 ml-1">97%</span>
-                  </div>
-                  <div className="mt-2 truncate">
-                    <KpiTicker value="৳412.8M" className="font-mono font-bold text-lg sm:text-2xl lg:text-3xl text-emerald" />
-                  </div>
-                  <span className="font-sans text-[10px] text-white/60 mt-1 truncate">bKash / Nagad</span>
-                </div>
-
-                {/* Metric 3 */}
-                <div className="bg-white/[0.03] border border-white/10 rounded-2xl p-2.5 sm:p-4 flex flex-col justify-between min-w-0">
-                  <div className="flex items-center justify-between text-white/50 text-[10px] sm:text-[11px] font-mono">
-                    <span className="truncate">LIVE LIQUIDITY</span>
-                    <Layers size={14} className="text-cyan-400 shrink-0 ml-1" />
-                  </div>
-                  <div className="mt-2 truncate">
-                    <KpiTicker value="42,850" className="font-mono font-bold text-lg sm:text-2xl lg:text-3xl text-white" />
-                    <span className="font-mono text-xs text-white/50 ml-1">tCO₂e</span>
-                  </div>
-                  <span className="font-sans text-[10px] text-cyan-400 mt-1 truncate">For Settlement</span>
-                </div>
-
-                {/* Metric 4 */}
-                <div className="bg-white/[0.03] border border-white/10 rounded-2xl p-2.5 sm:p-4 flex flex-col justify-between min-w-0">
-                  <div className="flex items-center justify-between text-white/50 text-[10px] sm:text-[11px] font-mono">
-                    <span className="truncate">AVG CLEARING</span>
-                    <span className="font-mono text-[10px] text-white/40 shrink-0 ml-1">BDT/t</span>
-                  </div>
-                  <div className="mt-2 truncate">
-                    <KpiTicker value="৳14,920" className="font-mono font-bold text-lg sm:text-2xl lg:text-3xl text-white" />
-                  </div>
-                  <span className="font-sans text-[10px] text-white/60 mt-1 truncate">Spot reference</span>
-                </div>
-
-              </div>
-
-              {/* Streaming Real-Time Transaction Ribbon */}
-              <div className="bg-black/50 border border-white/10 rounded-xl p-3 sm:p-3.5 mb-5 relative min-w-0">
-                <div className="flex items-center justify-between mb-1.5 min-w-0 gap-2">
-                  <span className="font-mono text-[10px] text-emerald uppercase tracking-wider font-semibold flex items-center gap-1.5 min-w-0 truncate">
-                    <Radio size={12} className="text-emerald animate-pulse shrink-0" />
-                    <span className="truncate">Settlement Feed</span>
-                  </span>
-                  <span className="font-mono text-[10px] text-white/40 shrink-0">
-                    {tradeStreams[activeStreamIndex].time}
-                  </span>
-                </div>
-                <p className="font-mono text-xs text-white font-medium truncate">
-                  {tradeStreams[activeStreamIndex].desc}
-                </p>
-                <p className="font-mono text-[11px] text-emerald/80 truncate mt-0.5">
-                  → {tradeStreams[activeStreamIndex].detail}
-                </p>
-              </div>
-
-              {/* No registry integration or third-party certification is claimed. */}
-              <p className="pt-2 border-t border-white/10 font-sans text-[10px] text-white/50">
-                No registry integration or third-party certification is claimed.
-              </p>
-
-            </div>
+            <HeroPipelineCard />
           </div>
 
         </div>
 
       </div>
-      
+
       {/* Sentinel for Navbar */}
       <div id="hero-sentinel" className="absolute bottom-0 w-full h-1"></div>
     </section>

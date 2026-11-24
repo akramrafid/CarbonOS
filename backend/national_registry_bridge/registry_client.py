@@ -64,12 +64,13 @@ class NationalRegistryClient:
         self.api_key = api_key or os.getenv("NATIONAL_REGISTRY_API_KEY", "sandbox-api-key-carbonos-bd")
         self.timeout = timeout
 
-        # Enable sandbox mock mode if explicitly requested or if set via env / dummy URL
+        # Enable sandbox mock mode ONLY when explicitly configured or hitting local/test URLs
         if sandbox_mode is not None:
             self.sandbox_mode = sandbox_mode
         else:
             env_sandbox = os.getenv("NATIONAL_REGISTRY_SANDBOX_MODE", "").lower() in ("true", "1", "yes")
-            is_mock_url = "example.com" in self.base_url or "sandbox" in self.base_url or "localhost" in self.base_url or "doe.gov.bd" in self.base_url
+            # is_mock_url = "example.com" in self.base_url or "sandbox" in self.base_url or "localhost" in self.base_url or "doe.gov.bd" in self.base_url  # [COMMENTED OUT FOR PERSONAL REFERENCE — live doe.gov.bd domain was treated as sandbox mock]
+            is_mock_url = "example.com" in self.base_url or "sandbox" in self.base_url or "localhost" in self.base_url
             self.sandbox_mode = env_sandbox or is_mock_url
 
     def _get_headers(self) -> Dict[str, str]:

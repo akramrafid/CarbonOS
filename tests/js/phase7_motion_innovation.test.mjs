@@ -42,7 +42,7 @@ test('Phase 7.1: motion.js tokens, spring presets, and bounded stagger (<=50ms, 
 test('Phase 7.1b: main.jsx wraps app in MotionConfig reducedMotion="user" and LazyMotion', () => {
   const mainSrc = fs.readFileSync(path.join(ROOT, 'src/main.jsx'), 'utf8');
   assert.match(mainSrc, /MotionConfig\s+reducedMotion="user"/);
-  assert.match(mainSrc, /LazyMotion\s+features=\{domAnimation\}/);
+  assert.match(mainSrc, /LazyMotion\s+strict\s+features=\{domMax\}/);
 });
 
 test('Phase 7.2: KpiTicker parses formatted telemetry values and exposes sr-only final announcement', () => {

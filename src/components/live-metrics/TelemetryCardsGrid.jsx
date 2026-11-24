@@ -9,7 +9,7 @@ export const TelemetryCardsGrid = ({ metrics, activeStation }) => {
   return (
     <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
       {/* Card 1: Ambient Temperature */}
-      <div className="mrv-telemetry-card relative group rounded-2xl p-6 bg-white/[0.03] border border-white/10 hover:border-emerald-500/30 backdrop-blur-xl transition-all duration-300 shadow-xl overflow-hidden">
+      <div className="mrv-telemetry-card relative group rounded-2xl p-6 bg-white/[0.03] border border-white/10 hover:border-emerald-500/30 backdrop-blur-xl transition-colors duration-300 shadow-xl overflow-hidden">
         <div className="absolute top-0 right-0 w-28 h-28 bg-cyan-500/5 rounded-full blur-2xl group-hover:bg-cyan-500/10 transition-colors" />
         <div className="flex items-center justify-between mb-4">
           <span className="text-[11px] font-mono uppercase tracking-widest text-white/50 font-bold">
@@ -32,7 +32,7 @@ export const TelemetryCardsGrid = ({ metrics, activeStation }) => {
       </div>
 
       {/* Card 2: Relative Humidity */}
-      <div className="mrv-telemetry-card relative group rounded-2xl p-6 bg-white/[0.03] border border-white/10 hover:border-emerald-500/30 backdrop-blur-xl transition-all duration-300 shadow-xl overflow-hidden">
+      <div className="mrv-telemetry-card relative group rounded-2xl p-6 bg-white/[0.03] border border-white/10 hover:border-emerald-500/30 backdrop-blur-xl transition-colors duration-300 shadow-xl overflow-hidden">
         <div className="absolute top-0 right-0 w-28 h-28 bg-emerald-500/5 rounded-full blur-2xl group-hover:bg-emerald-500/10 transition-colors" />
         <div className="flex items-center justify-between mb-4">
           <span className="text-[11px] font-mono uppercase tracking-widest text-white/50 font-bold">
@@ -55,7 +55,7 @@ export const TelemetryCardsGrid = ({ metrics, activeStation }) => {
       </div>
 
       {/* Card 3: Air Quality Index */}
-      <div className="mrv-telemetry-card relative group rounded-2xl p-6 bg-white/[0.03] border border-white/10 hover:border-emerald-500/30 backdrop-blur-xl transition-all duration-300 shadow-xl overflow-hidden">
+      <div className="mrv-telemetry-card relative group rounded-2xl p-6 bg-white/[0.03] border border-white/10 hover:border-emerald-500/30 backdrop-blur-xl transition-colors duration-300 shadow-xl overflow-hidden">
         <div className="flex items-center justify-between mb-4">
           <span className="text-[11px] font-mono uppercase tracking-widest text-white/50 font-bold">
             Air Quality Raw / AQI
@@ -79,7 +79,7 @@ export const TelemetryCardsGrid = ({ metrics, activeStation }) => {
       </div>
 
       {/* Card 4: CO2 Concentration */}
-      <div className="mrv-telemetry-card relative group rounded-2xl p-6 bg-white/[0.03] border border-white/10 hover:border-emerald-500/30 backdrop-blur-xl transition-all duration-300 shadow-xl overflow-hidden">
+      <div className="mrv-telemetry-card relative group rounded-2xl p-6 bg-white/[0.03] border border-white/10 hover:border-emerald-500/30 backdrop-blur-xl transition-colors duration-300 shadow-xl overflow-hidden">
         <div className="flex items-center justify-between mb-4">
           <span className="text-[11px] font-mono uppercase tracking-widest text-white/50 font-bold">
             CO₂ Concentration

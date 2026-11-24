@@ -36,56 +36,46 @@ export const useCarbonDroneVerification = ({ showToast }) => {
     e.preventDefault();
     if (!selectedTaskForDrone) return;
     setSubmittingDrone(true);
+    const biomassMgHa = parseFloat(droneFormData.surveyed_biomass);
+    const carbonTcHa = Number.isFinite(biomassMgHa) ? Number((biomassMgHa * 0.475).toFixed(3)) : 0;
     try {
-      const res = await authFetch(`${FASTAPI_API_URL}/api/carbon/verification-tasks/${selectedTaskForDrone.id}/complete`, {
+      const res = await authFetch(`${FASTAPI_API_URL}/api/carbon/verification-tasks/${encodeURIComponent(selectedTaskForDrone.id)}/complete`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          drone_chm_path: droneFormData.drone_chm_path,
-          surveyed_biomass: parseFloat(droneFormData.surveyed_biomass),
-          sensor_model: droneFormData.sensor_model,
-          resolution_cm: parseFloat(droneFormData.resolution_cm),
-          operator_id: droneFormData.operator_id,
-          survey_notes: droneFormData.survey_notes
+          measured_biomass_mg_ha: biomassMgHa,
+          measured_carbon_tc_ha: carbonTcHa,
+          survey_date: new Date().toISOString().slice(0, 10),
+          drone_platform: droneFormData.sensor_model,
+          raw_imagery_path: droneFormData.drone_chm_path,
+          collected_by: droneFormData.operator_id,
+          data_source: 'drone_lidar',
         })
       });
       if (res.ok) {
-        const completedTask = await res.json();
-        setVerificationTasks(prev => prev.map(t => t.id === completedTask.id ? completedTask : t));
-        showToast(`UAV LiDAR data ingested for parcel ${selectedTaskForDrone.parcel_id}! Uncertainty recalibrated.`, 'success');
-      } else {
+        const completed = await res.json();
         setVerificationTasks(prev => prev.map(t => t.id === selectedTaskForDrone.id ? {
           ...t,
-          status: 'completed',
+          status: completed.status || 'completed',
           priority: 'RESOLVED',
-          recommended_action: `UAV LiDAR survey ingested (${droneFormData.sensor_model}). Conformal bounds tightened.`,
+          recommended_action: `UAV LiDAR survey ingested (${droneFormData.sensor_model}).`,
           survey_result: {
             sensor_model: droneFormData.sensor_model,
-            surveyed_biomass: parseFloat(droneFormData.surveyed_biomass),
-            resolution_cm: parseFloat(droneFormData.resolution_cm),
+            measured_biomass_mg_ha: completed.measured_biomass_mg_ha ?? biomassMgHa,
+            measured_carbon_tc_ha: completed.measured_carbon_tc_ha ?? carbonTcHa,
             operator_id: droneFormData.operator_id,
-            calibrated_at: new Date().toISOString()
+            calibrated_at: new Date().toISOString(),
           }
         } : t));
         showToast(`UAV LiDAR data ingested for parcel ${selectedTaskForDrone.parcel_id}!`, 'success');
+        setSelectedTaskForDrone(null);
+      } else {
+        const err = await res.json().catch(() => ({}));
+        showToast(err.detail || `Failed to complete verification task (HTTP ${res.status}).`, 'error');
       }
-      setSelectedTaskForDrone(null);
     } catch {
-      setVerificationTasks(prev => prev.map(t => t.id === selectedTaskForDrone.id ? {
-        ...t,
-        status: 'completed',
-        priority: 'RESOLVED',
-        recommended_action: `UAV LiDAR survey ingested (${droneFormData.sensor_model}). Conformal bounds tightened.`,
-        survey_result: {
-          sensor_model: droneFormData.sensor_model,
-          surveyed_biomass: parseFloat(droneFormData.surveyed_biomass),
-          resolution_cm: parseFloat(droneFormData.resolution_cm),
-          operator_id: droneFormData.operator_id,
-          calibrated_at: new Date().toISOString()
-        }
-      } : t));
-      showToast(`UAV LiDAR data ingested for parcel ${selectedTaskForDrone.parcel_id}!`, 'success');
-      setSelectedTaskForDrone(null);
+      // [COMMENTED OUT FOR PERSONAL REFERENCE — never fake verification task completion on network failure]
+      showToast('Failed to reach verification backend to submit drone survey.', 'error');
     } finally {
       setSubmittingDrone(false);
     }

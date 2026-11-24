@@ -68,10 +68,11 @@ export const ROUTE_CHUNK_LOADERS = {
 
 const prefetchedRoutes = new Set();
 const inFlightPromises = new Map();
+const visibleLoadingRoutes = new Set();
 const loadingListeners = new Set();
 
 function notifyListeners() {
-  const isBusy = inFlightPromises.size > 0;
+  const isBusy = visibleLoadingRoutes.size > 0;
   loadingListeners.forEach((fn) => {
     try {
       fn(isBusy);
@@ -137,9 +138,11 @@ export function isRoutePrefetched(rawHref) {
  * Prefetches the JS chunk for a given internal route path.
  * Safe and idempotent; returns a Promise resolving to the module or null.
  */
-export function prefetchRoute(rawHref) {
+export function prefetchRoute(rawHref, options = {}) {
   const key = normalizeRoutePath(rawHref);
   if (!key) return Promise.resolve(null);
+
+  const notify = options?.notify !== false;
 
   if (prefetchedRoutes.has(key)) {
     return Promise.resolve(null);
@@ -154,6 +157,11 @@ export function prefetchRoute(rawHref) {
     return Promise.resolve(null);
   }
 
+  if (notify) {
+    visibleLoadingRoutes.add(key);
+    notifyListeners();
+  }
+
   const promise = Promise.resolve()
     .then(() => loader())
     .then((mod) => {
@@ -163,11 +171,11 @@ export function prefetchRoute(rawHref) {
     .catch(() => null)
     .finally(() => {
       inFlightPromises.delete(key);
-      notifyListeners();
+      visibleLoadingRoutes.delete(key);
+      if (notify) notifyListeners();
     });
 
   inFlightPromises.set(key, promise);
-  notifyListeners();
   return promise;
 }
 
@@ -219,7 +227,8 @@ export function useRoutePrefetcher(currentPathname) {
             const href = anchor.getAttribute('href');
             if (href && href.startsWith('/')) {
               const cancel = scheduleIdle(() => {
-                prefetchRoute(href);
+                // Background viewport prefetches must not flash TopProgressBar
+                prefetchRoute(href, { notify: false });
               });
               cancelPendingIdle.push(cancel);
             }

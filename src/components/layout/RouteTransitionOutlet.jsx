@@ -10,7 +10,9 @@ import {
   useNavigationType,
   useOutlet,
 } from 'react-router-dom';
-import { AnimatePresence, motion, useReducedMotion } from 'framer-motion';
+// [COMMENTED OUT FOR PERSONAL REFERENCE — switched motion -> m for LazyMotion strict bundle compatibility]
+// import { AnimatePresence, motion, useReducedMotion } from 'framer-motion';
+import { AnimatePresence, m, useReducedMotion } from 'framer-motion';
 import {
   computeRouteDirection,
   createRouteTransitionVariants,
@@ -21,23 +23,49 @@ import TopProgressBar from './TopProgressBar';
 import PageSkeleton from './PageSkeleton';
 
 const SCROLL_STORAGE_KEY = 'carbonos-scroll-positions';
+const MAX_SCROLL_ENTRIES = 30;
+let scrollCache = null;
+let scrollWriteTimer = null;
 
 function readScrollMap() {
+  if (scrollCache) return scrollCache;
   try {
     const raw = sessionStorage.getItem(SCROLL_STORAGE_KEY);
-    return raw ? JSON.parse(raw) : {};
+    scrollCache = raw ? JSON.parse(raw) : {};
+    return scrollCache;
   } catch {
-    return {};
+    scrollCache = {};
+    return scrollCache;
   }
 }
 
-function saveScrollPosition(key, pathname, y) {
+function flushScrollMap() {
+  if (!scrollCache) return;
   try {
-    const map = readScrollMap();
-    if (key) map[`key:${key}`] = y;
-    if (pathname) map[`path:${pathname}`] = y;
-    sessionStorage.setItem(SCROLL_STORAGE_KEY, JSON.stringify(map));
+    const keys = Object.keys(scrollCache);
+    if (keys.length > MAX_SCROLL_ENTRIES) {
+      const dropCount = keys.length - MAX_SCROLL_ENTRIES;
+      for (let i = 0; i < dropCount; i += 1) {
+        delete scrollCache[keys[i]];
+      }
+    }
+    sessionStorage.setItem(SCROLL_STORAGE_KEY, JSON.stringify(scrollCache));
   } catch {}
+}
+
+function saveScrollPosition(key, pathname, y) {
+  /* [COMMENTED OUT FOR PERSONAL REFERENCE — synchronous JSON.parse+setItem on every scroll event replaced with in-memory cache + 180ms debounced bounded persist]
+  const map = readScrollMap();
+  sessionStorage.setItem(SCROLL_STORAGE_KEY, JSON.stringify(map));
+  */
+  const map = readScrollMap();
+  if (key) map[`key:${key}`] = y;
+  if (pathname) map[`path:${pathname}`] = y;
+  if (scrollWriteTimer) clearTimeout(scrollWriteTimer);
+  scrollWriteTimer = setTimeout(() => {
+    scrollWriteTimer = null;
+    flushScrollMap();
+  }, 180);
 }
 
 function getSavedScrollPosition(key, pathname) {
@@ -92,7 +120,10 @@ function RouteMountEffect({
     window.scrollTo({ top: targetY, left: 0, behavior: 'instant' });
 
     // 2. Focus primary <h1> and announce route change via aria-live once the new route DOM settles
+    let settled = false;
     const syncScrollAndFocus = () => {
+      if (settled) return;
+      settled = true;
       window.scrollTo({ top: targetY, left: 0, behavior: 'instant' });
       isRestoringScrollRef.current = false;
 
@@ -187,7 +218,10 @@ export function RouteTransitionOutlet({ mode = 'dashboard' }) {
       saveScrollPosition(displayedLocation.key, displayedLocation.pathname, window.scrollY || 0);
     };
     window.addEventListener('scroll', handleScroll, { passive: true });
-    return () => window.removeEventListener('scroll', handleScroll);
+    return () => {
+      window.removeEventListener('scroll', handleScroll);
+      flushScrollMap();
+    };
   }, [location.pathname, displayedLocation.key, displayedLocation.pathname]);
 
   // Transition outlet using React startTransition so previous view stays mounted until next chunk is ready
@@ -236,7 +270,7 @@ export function RouteTransitionOutlet({ mode = 'dashboard' }) {
       {/* Content Outlet Transition Container (Shell remains mounted outside this boundary) */}
       <div ref={containerRef} className="w-full flex-1 flex flex-col min-w-0">
         <AnimatePresence mode="wait" initial={false}>
-          <motion.div
+          <m.div
             key={displayedLocation.pathname}
             variants={variants}
             initial="initial"
@@ -257,7 +291,7 @@ export function RouteTransitionOutlet({ mode = 'dashboard' }) {
               />
               {displayedOutlet}
             </Suspense>
-          </motion.div>
+          </m.div>
         </AnimatePresence>
       </div>
     </>

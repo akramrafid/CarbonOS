@@ -6,8 +6,8 @@ export function MarketplaceHero({ isLight = false }) {
   return (
     <div className="space-y-6">
       {/* Hero Header */}
-      <div className="relative overflow-hidden rounded-3xl border p-8 md:p-12 transition-all duration-300">
-        <div className="absolute top-0 right-0 -mr-24 -mt-24 w-96 h-96 bg-emerald/10 rounded-full blur-3xl pointer-events-none" />
+      <div className="relative overflow-hidden rounded-3xl border p-8 md:p-12 transition-colors duration-300">
+        {/* [COMMENTED OUT FOR PERSONAL REFERENCE — removed decorative ambient blur element] */}
 
         <div className="relative z-10 flex flex-col lg:flex-row justify-between items-start lg:items-end gap-6">
           <div className="max-w-3xl space-y-4">
@@ -34,8 +34,8 @@ export function MarketplaceHero({ isLight = false }) {
                 isLight ? 'text-fg-secondary' : 'text-slate-300'
               }`}
             >
-              Acquire carbon credits directly from Bangladesh's rural climate stewards. Full on-chain telemetry, zero double-counting, and{' '}
-              <strong className="text-emerald">97% direct liquidity</strong> disbursed to farmer mobile wallets.
+              Illustrative demo credit listings (not registered on-chain or externally verified), modeling a{' '}
+              <strong className="text-emerald">97% direct liquidity</strong> target to farmer mobile wallets.
             </p>
           </div>
 

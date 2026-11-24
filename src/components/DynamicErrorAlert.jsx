@@ -1,3 +1,4 @@
+/* [COMMENTED OUT FOR PERSONAL REFERENCE — unused DynamicErrorAlert component; zero active imports across src/]
 import React from 'react';
 import { AlertCircle, RotateCcw, X } from 'lucide-react';
 
@@ -53,3 +54,4 @@ export const DynamicErrorAlert = ({
 };
 
 export default DynamicErrorAlert;
+*/

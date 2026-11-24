@@ -1,6 +1,8 @@
 import { useState } from 'react';
 import { CLIENT_PROFILES } from '../../clientProfiles';
 import { PRELOADED_INVOICE_TEMPLATES } from './invoiceTemplates';
+import { FASTAPI_API_URL, authFetch } from '../../../../features/carbon-monitoring/constants';
+import { extractESGFromDocument } from '../../../../lib/esgDocumentExtractor';
 
 export function useUtilityExtractorState(activeClientId = 'east-delta-university', onApplyToLedger = () => {}) {
   const activeClient = CLIENT_PROFILES.find((c) => c.id === activeClientId) || CLIENT_PROFILES[0];
@@ -59,17 +61,28 @@ export function useUtilityExtractorState(activeClientId = 'east-delta-university
     formData.append('tenant_id', activeClientId);
 
     try {
-      const response = await fetch('/api/esg/extract-utility', {
+      let rawText = '';
+      if (file.type === 'text/plain' || /\.(txt|csv|md)$/i.test(file.name || '')) {
+        rawText = await file.text();
+      } else {
+        const extracted = await extractESGFromDocument(file).catch(() => null);
+        rawText = extracted?.rawText || '';
+      }
+
+      // [COMMENTED OUT FOR PERSONAL REFERENCE — /api/esg/extract-utility did not exist; use documented JSON endpoint /api/esg/detect-utility-segments]
+      // const response = await fetch('/api/esg/extract-utility', { method: 'POST', body: formData });
+      const response = await authFetch(`${FASTAPI_API_URL}/api/esg/detect-utility-segments`, {
         method: 'POST',
-        body: formData
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ raw_text: rawText, client_id: activeClientId })
       });
 
       if (response.ok) {
         const data = await response.json();
         const detected = (data.segments || []).map((seg, i) => ({
-          id: `seg_${Date.now()}_${i}`,
-          name: seg.name || 'Detected Utility Segment',
-          type: seg.type || 'Electricity',
+          id: seg.segment_id ? `${seg.segment_id}_${i}` : `seg_${Date.now()}_${i}`,
+          name: seg.segment_name || seg.name || 'Detected Utility Segment',
+          type: seg.utility_type || seg.type || 'Electricity',
           scope: seg.scope || 'Scope 2',
           qty: seg.quantity || 0,
           unit: seg.unit || 'kWh',
@@ -77,8 +90,8 @@ export function useUtilityExtractorState(activeClientId = 'east-delta-university
           citation: seg.factor_citation || seg.citation || 'Factor required',
           emissions_t: seg.emissions_tco2e ?? null,
           cost_bdt: seg.cost_bdt || 0,
-          confidence: seg.confidence || 0.95,
-          snippet: seg.snippet || `Extracted from ${file.name}`,
+          confidence: seg.confidence || null,
+          snippet: seg.raw_snippet || seg.snippet || `Extracted from ${file.name}`,
           status: 'PENDING_AUDIT'
         }));
 
@@ -250,6 +263,7 @@ export function useUtilityExtractorState(activeClientId = 'east-delta-university
       scope1: scope1Total,
       scope2: scope2Missing ? null : scope2Total,
       scope3: scope3Total,
+      segments: activeSegments,
       invoice: activeInvoice.filename,
       audit_seal: seal,
       verified_by: 'Sustainability Manager'

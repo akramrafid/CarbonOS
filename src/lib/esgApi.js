@@ -119,11 +119,15 @@ function handleOfflineRequest(path, options = {}) {
 
   // 2. Current User Profile
   if (pathname === '/api/esg/me') {
+    const sub = isReviewer ? 'demo-user-reviewer' : 'demo-user';
     return mockResponse({
-      id: isReviewer ? 'demo-user-reviewer' : 'demo-user',
+      id: sub,
+      sub,
+      verified_email: isReviewer ? 'auditor@demo.carbonos.io' : 'submitter@demo.carbonos.io',
       email: isReviewer ? 'auditor@demo.carbonos.io' : 'submitter@demo.carbonos.io',
       name: isReviewer ? 'Demo Auditor (Reviewer)' : 'Demo Submitter (Owner)',
       role: isReviewer ? 'auditor' : 'org_owner',
+      is_platform_operator: false,
       organization_id: session.organizationId || DEMO_ORG_ID,
     });
   }
@@ -270,18 +274,24 @@ function handleOfflineRequest(path, options = {}) {
       return mockResponse({ items: offlineStore.factors, total: offlineStore.factors.length });
     }
     if (method === 'POST') {
+      const rate = String(body?.kgco2e_per_unit || body?.co2e_factor || '1.000000');
       const factor = {
         id: `fac-${Date.now()}`,
         family: body?.family || 'custom-factor',
         version: 1,
-        activity_type: body?.activity_type || 'electricity_grid',
+        activity_type: body?.activity_type || 'electricity',
         unit: body?.unit || 'kWh',
-        co2e_factor: String(body?.co2e_factor || '1.000000'),
-        co2_factor: String(body?.co2_factor || '1.000000'),
+        kgco2e_per_unit: rate,
+        co2e_factor: rate,
+        co2_factor: String(body?.co2_factor || rate),
         ch4_factor: String(body?.ch4_factor || '0.000000'),
         n2o_factor: String(body?.n2o_factor || '0.000000'),
+        method: body?.method || 'location',
+        gwp_basis: body?.gwp_basis || 'AR6',
+        region: body?.region || 'BD-NATIONAL-GRID',
         source: body?.source || 'Custom factor entry',
-        status: 'draft',
+        status: 'DRAFT',
+        created_by: 'demo-user',
         first_approved_by: 'demo-user',
       };
       offlineStore.factors.unshift(factor);
@@ -293,7 +303,7 @@ function handleOfflineRequest(path, options = {}) {
     const factorId = RegExp.$1;
     const f = offlineStore.factors.find((x) => x.id === factorId);
     if (f) {
-      f.status = 'approved';
+      f.status = 'APPROVED';
       f.second_approved_by = 'auditor';
     }
     return mockResponse(f || { message: 'Approved' });
@@ -303,7 +313,7 @@ function handleOfflineRequest(path, options = {}) {
   if (pathname === '/api/esg/activities') {
     if (method === 'GET') {
       const pId = searchParams.get('period_id');
-      const items = pId ? offlineStore.activities.filter((a) => a.reporting_period_id === pId) : offlineStore.activities;
+      const items = pId ? offlineStore.activities.filter((a) => (a.reporting_period_id || a.period_id) === pId) : offlineStore.activities;
       return mockResponse({ items, total: items.length });
     }
     if (method === 'POST') {
@@ -312,16 +322,21 @@ function handleOfflineRequest(path, options = {}) {
         id: `act-${Date.now()}`,
         facility_id: body?.facility_id || 'fac-demo-1',
         facility_name: fac?.name || 'Savar Spinning Unit 1 [SAMPLE DATA]',
-        reporting_period_id: body?.reporting_period_id || 'prd-demo-1',
-        activity_type: body?.activity_type || 'electricity_grid',
+        reporting_period_id: body?.period_id || body?.reporting_period_id || 'prd-demo-1',
+        period_id: body?.period_id || body?.reporting_period_id || 'prd-demo-1',
+        activity_type: body?.activity_type || 'electricity',
         scope: body?.scope || 'Scope 2',
         date: body?.date || new Date().toISOString().slice(0, 10),
+        activity_start: body?.activity_start || '2024-10-01',
+        activity_end: body?.activity_end || '2024-10-31',
         quantity: String(body?.quantity || '1000'),
         unit: body?.unit || 'kWh',
-        emission_factor_id: body?.emission_factor_id || 'fac-f-1',
+        emission_factor_id: body?.factor_id || body?.emission_factor_id || 'fac-f-1',
+        factor_id: body?.factor_id || body?.emission_factor_id || 'fac-f-1',
         co2e_tonnes: ((Number(body?.quantity || 1000) * 0.634) / 1000).toFixed(4),
-        status: 'draft',
+        status: 'DRAFT',
         evidence_ref: body?.evidence_ref || 'MANUAL-ENTRY',
+        created_by: 'demo-user',
         created_by_sub: 'demo-user',
       };
       offlineStore.activities.unshift(act);
@@ -334,7 +349,7 @@ function handleOfflineRequest(path, options = {}) {
     const verb = RegExp.$2;
     const act = offlineStore.activities.find((a) => a.id === actId);
     if (act) {
-      act.status = verb === 'submit' ? 'submitted' : verb === 'approve' ? 'approved' : 'rejected';
+      act.status = verb === 'submit' ? 'SUBMITTED' : verb === 'approve' ? 'APPROVED' : 'REJECTED';
     }
     return mockResponse(act || { message: 'Updated' });
   }
@@ -386,7 +401,7 @@ function handleOfflineRequest(path, options = {}) {
         pillar: body?.pillar || 'environmental',
         value: String(body?.value || '0'),
         unit: body?.unit || 'tCO2e',
-        status: 'draft',
+        status: 'DRAFT',
         comment: body?.comment || '',
       };
       offlineStore.metrics.unshift(met);
@@ -399,7 +414,7 @@ function handleOfflineRequest(path, options = {}) {
     const verb = RegExp.$2;
     const met = offlineStore.metrics.find((m) => m.id === metId);
     if (met) {
-      met.status = verb === 'submit' ? 'submitted' : verb === 'approve' ? 'approved' : 'rejected';
+      met.status = verb === 'submit' ? 'SUBMITTED' : verb === 'approve' ? 'APPROVED' : 'REJECTED';
     }
     return mockResponse(met || { message: 'Updated' });
   }
@@ -493,8 +508,12 @@ async function request(path, { headers = {}, ...options } = {}) {
     throw new EsgApiError(401, 'Sign in to an organization to use the ESG workspace.');
   }
 
-  // If session is explicitly marked as offline demo, bypass network directly
+  // Gate offline local demo mocks strictly out of production unless explicitly opted in
+  const allowOfflineDemo = !import.meta.env?.PROD || import.meta.env?.VITE_ALLOW_OFFLINE_DEMO === 'true';
   if (session.token.startsWith('demo-offline-')) {
+    if (!allowOfflineDemo) {
+      throw new EsgApiError(401, 'Offline demo mode is disabled in production builds.');
+    }
     notifyDemoDataActive(path, 'explicit_offline_demo');
     return handleOfflineRequest(path, options);
   }
@@ -569,4 +588,17 @@ export const esgSend = (method, path, body) => esgFetch(path, {
 export async function esgDownload(path) {
   const res = await request(path);
   return { text: await res.text(), sha256: res.headers.get('X-Content-SHA256') };
+}
+
+// Authenticated binary download (source PDFs / evidence): sends Bearer header & parses filename.
+export async function esgDownloadBlob(path) {
+  const res = await request(path);
+  const blob = await res.blob();
+  const disp = res.headers.get('Content-Disposition') || '';
+  const match = disp.match(/filename="([^"]+)"/i);
+  return {
+    blob,
+    sha256: res.headers.get('X-Content-SHA256'),
+    filename: match ? match[1] : null,
+  };
 }

@@ -149,6 +149,13 @@ def generate_btr_structured_summary(
     return structured_summary
 
 
+def _csv_cell(value) -> str:
+    text = "" if value is None else str(value)
+    if text and text[0] in ("=", "+", "-", "@", "\t", "\r"):
+        return "'" + text
+    return text
+
+
 def export_btr_csv(structured_summary: Dict[str, Any]) -> str:
     """
     Exports the Structured Summary ITMO Table to CSV format suitable for official
@@ -160,9 +167,9 @@ def export_btr_csv(structured_summary: Dict[str, Any]) -> str:
     # Header metadata
     meta = structured_summary.get("btr_metadata", {})
     writer.writerow(["# UNFCCC Article 6.2 Structured Summary Table - Bangladesh BTR"])
-    writer.writerow(["# Submitting Party", meta.get("submitting_party")])
-    writer.writerow(["# Reporting Year", meta.get("reporting_year")])
-    writer.writerow(["# Generated At", meta.get("generated_at")])
+    writer.writerow(["# Submitting Party", _csv_cell(meta.get("submitting_party"))])
+    writer.writerow(["# Reporting Year", _csv_cell(meta.get("reporting_year"))])
+    writer.writerow(["# Generated At", _csv_cell(meta.get("generated_at"))])
     writer.writerow([])
 
     # Table columns
@@ -187,21 +194,21 @@ def export_btr_csv(structured_summary: Dict[str, Any]) -> str:
 
     for row in structured_summary.get("table_structured_summary_itmos", []):
         writer.writerow([
-            row.get("unique_identifier"),
-            row.get("project_name"),
-            row.get("external_project_id"),
-            row.get("sector"),
-            row.get("ndc_inventory_sector"),
-            row.get("vintage_year"),
-            row.get("metric"),
-            row.get("quantity"),
-            row.get("authorization_status"),
-            row.get("authorized_entity_acquiring"),
+            _csv_cell(row.get("unique_identifier")),
+            _csv_cell(row.get("project_name")),
+            _csv_cell(row.get("external_project_id")),
+            _csv_cell(row.get("sector")),
+            _csv_cell(row.get("ndc_inventory_sector")),
+            _csv_cell(row.get("vintage_year")),
+            _csv_cell(row.get("metric")),
+            _csv_cell(row.get("quantity")),
+            _csv_cell(row.get("authorization_status")),
+            _csv_cell(row.get("authorized_entity_acquiring")),
             "YES" if row.get("corresponding_adjustment_applied") else "NO",
-            row.get("adjustment_confirmation_ref"),
-            row.get("adjustment_date") or "",
-            row.get("reconciliation_status"),
-            row.get("provenance_chain_hash")
+            _csv_cell(row.get("adjustment_confirmation_ref")),
+            _csv_cell(row.get("adjustment_date") or ""),
+            _csv_cell(row.get("reconciliation_status")),
+            _csv_cell(row.get("provenance_chain_hash"))
         ])
 
     return output.getvalue()

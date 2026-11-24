@@ -2,6 +2,7 @@ import React from 'react';
 import { Routes, Route } from 'react-router-dom';
 import MarketingLayout from './components/layout/MarketingLayout';
 import DashboardLayout from './components/layout/DashboardLayout';
+import ErrorBoundary from './components/ErrorBoundary';
 import OfflineBanner from './components/OfflineBanner';
 
 // Marketing & Brand Pages (Lazy-loaded)
@@ -56,9 +57,21 @@ export function App() {
     <>
       <OfflineBanner />
       <Routes>
-        {/* Brand & Marketing Shell (Navbar + Footer persistent across marketing navigation) */}
+        {/* Editorial ZERO Landing owns "/" directly so persistent Navbar/Footer are not duplicated */}
+        <Route
+          path="/"
+          element={
+            <ErrorBoundary>
+              <React.Suspense fallback={null}>
+                <Home />
+              </React.Suspense>
+            </ErrorBoundary>
+          }
+        />
+
+        {/* Brand & Marketing Shell (Navbar + Footer persistent across inner marketing pages) */}
         <Route element={<MarketingLayout />}>
-          <Route path="/" element={<Home />} />
+          {/* [COMMENTED OUT FOR PERSONAL REFERENCE — root "/" moved directly into Routes above so MarketingLayout does not wrap EditorialLanding in a second Navbar/Footer] */}
           <Route path="/how-it-works" element={<HowItWorks />} />
           <Route path="/technology" element={<Technology />} />
 

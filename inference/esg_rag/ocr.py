@@ -8,6 +8,7 @@ Customer documents are processed locally in memory only; never transmitted to an
 from typing import Tuple, List, Optional, Set
 import os
 import io
+import time
 import shutil
 from PIL import Image
 
@@ -155,11 +156,19 @@ def ocr_pdf_to_document(source, lang: str = "ben+eng", max_pages: Optional[int] 
         pytesseract.pytesseract.tesseract_cmd = cmd
 
     pages = []
+    started = time.monotonic()
+    doc_timeout = max(OCR_TIMEOUT_S * 3, 60)
     with pdfplumber.open(_source(source)) as pdf:
         if max_pages is not None and len(pdf.pages) > max_pages:
             raise ValueError(f"A bill may have at most {max_pages} pages")
 
         for n, page in enumerate(pdf.pages, start=1):
+            if (time.monotonic() - started) > doc_timeout:
+                raise TimeoutError(f"PDF OCR exceeded total timeout of {doc_timeout}s")
+            est_w = float(page.width or 0) * 300.0 / 72.0
+            est_h = float(page.height or 0) * 300.0 / 72.0
+            if est_w * est_h > MAX_OCR_PIXELS:
+                raise ValueError(f"PDF page {n} rendered dimensions exceed {MAX_OCR_PIXELS} pixels")
             rendered_pil = render_pdf_page_at_300_dpi(page)
             if preprocess:
                 processed_pil, _ = preprocess_image_for_ocr(rendered_pil)

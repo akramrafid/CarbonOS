@@ -29,10 +29,14 @@ const ProjectOnboarding = () => {
                 value="142"
                 subtitle="Illustrative Demo Proposals"
               />
-              <div className="p-6 bg-bg-surface/50 border border-emerald/10 rounded-xl flex flex-col justify-center">
-                <Button variant="primary" size="lg" className="w-full">
-                  Submit New PIN
+              <div className="p-6 bg-bg-surface/50 border border-emerald/10 rounded-xl flex flex-col justify-center gap-2">
+                {/* [COMMENTED OUT FOR PERSONAL REFERENCE — dead un-wired primary Submit New PIN button replaced with honest disabled state until backend intake endpoint exists] */}
+                <Button variant="secondary" size="lg" className="w-full min-h-[44px]" disabled aria-disabled="true">
+                  Submit New PIN (Intake Offline)
                 </Button>
+                <p className="text-[11px] font-mono text-mist text-center">
+                  Demo preview only: backend PIN submission endpoint not yet enabled.
+                </p>
               </div>
             </div>
           </div>

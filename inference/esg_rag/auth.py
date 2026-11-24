@@ -27,11 +27,12 @@ _ephemeral_demo_secret: Optional[str] = None
 
 
 def get_access_mode() -> str:
+    # Check production first so stray ESG_ACCESS_MODE=demo/isolated_demo can never downgrade production
+    if os.getenv("ESG_ENV") == "production":
+        return "protected"
     env_mode = os.getenv("ESG_ACCESS_MODE", "").strip().lower()
     if env_mode in ("protected", "isolated_demo", "demo", "local_dev", "private_single_tenant", "oidc"):
         return "isolated_demo" if env_mode == "demo" else env_mode
-    if os.getenv("ESG_ENV") == "production":
-        return "protected"
     # When ESG_ACCESS_MODE is not specified, fail-closed to protected
     return "protected"
 
@@ -102,6 +103,7 @@ class Identity:
     is_platform_operator: bool
     # Only set when the identity provider asserts the address is verified (OIDC email_verified).
     verified_email: Optional[str] = None
+    is_demo: bool = False
 
 
 def _operator_subs() -> set:
@@ -145,9 +147,13 @@ def get_identity(authorization: Optional[str] = Header(None)) -> Identity:
         log.info("rejected ESG token: %s", type(e).__name__)
         raise HTTPException(401, "Invalid or expired token", headers={"WWW-Authenticate": "Bearer"})
     sub = str(claims["sub"])
+    is_demo = bool(claims.get("is_demo", False))
+    if os.getenv("ESG_ENV") == "production" and is_demo:
+        raise HTTPException(401, "Demo tokens are rejected in production", headers={"WWW-Authenticate": "Bearer"})
     email = claims.get("email") if claims.get("email_verified") is True else None
     return Identity(sub=sub, is_platform_operator=sub in _operator_subs(),
-                    verified_email=email.strip().lower() if isinstance(email, str) else None)
+                    verified_email=email.strip().lower() if isinstance(email, str) else None,
+                    is_demo=is_demo)
 
 
 def get_principal(

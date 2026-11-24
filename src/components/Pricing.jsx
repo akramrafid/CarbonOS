@@ -9,8 +9,7 @@ const Pricing = () => {
 
   return (
     <section id="pricing" className="w-full bg-bg-canvas text-white py-10 md:py-16 px-6 lg:px-12 relative overflow-hidden border-t border-white/10">
-      {/* Background ambient lighting */}
-      <div className="absolute top-1/3 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[850px] h-[550px] bg-emerald-950/20 blur-[150px] pointer-events-none rounded-full" />
+      {/* [COMMENTED OUT FOR PERSONAL REFERENCE — removed large decorative ambient blur layer for GPU performance] */}
 
       <div className="max-w-7xl mx-auto relative z-10">
         

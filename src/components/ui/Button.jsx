@@ -94,7 +94,7 @@ export const Button = React.forwardRef(function Button(
       onPointerLeave={handlePointerLeave}
       style={mergedStyle}
       className={`
-        relative inline-flex items-center justify-center gap-2 rounded-lg font-sans transition-all duration-150 select-none
+        relative inline-flex items-center justify-center gap-2 rounded-lg font-sans transition-[background-color,border-color,color,box-shadow,opacity] duration-150 select-none
         focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-offset-carbon
         disabled:opacity-50 disabled:cursor-not-allowed disabled:pointer-events-none
         ${sizeClasses}

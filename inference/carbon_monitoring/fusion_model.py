@@ -188,7 +188,7 @@ class CarbonFusionEstimator:
         if os.path.exists(self.model_path):
             try:
                 # checkpoint = torch.load(self.model_path, map_location=torch.device("cpu"))  # [COMMENTED OUT FOR PERSONAL REFERENCE — weights_only=False risked pickle execution]
-            checkpoint = torch.load(self.model_path, map_location=torch.device("cpu"), weights_only=True)
+                checkpoint = torch.load(self.model_path, map_location=torch.device("cpu"), weights_only=True)
                 self.net.load_state_dict(checkpoint["state_dict"])
                 self.net.eval()
                 self.is_loaded = True

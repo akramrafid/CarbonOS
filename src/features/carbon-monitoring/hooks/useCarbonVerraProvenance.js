@@ -1,18 +1,21 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { FASTAPI_API_URL, DEFAULT_SIGNATURES, authFetch } from '../constants';
 import { useCarbonDroneVerification } from './useCarbonDroneVerification';
 import { useCarbonModelSettings } from './useCarbonModelSettings';
 
+const bytesToHex = (buf) => Array.from(new Uint8Array(buf), (b) => b.toString(16).padStart(2, '0')).join('');
+
 export const useCarbonVerraProvenance = ({ selectedJob, dashboardData, showToast }) => {
   const droneState = useCarbonDroneVerification({ showToast });
   const modelState = useCarbonModelSettings({ showToast });
+  const validatorKeyPairRef = useRef(null);
 
   const [verifyingLedger, setVerifyingLedger] = useState(false);
   const [ledgerStatus, setLedgerStatus] = useState({
-    verified: true,
-    total_records: 24,
-    chain_valid: true,
-    last_verified: new Date().toISOString()
+    verified: false,
+    total_records: 0,
+    chain_valid: false,
+    last_verified: null
   });
   const [copiedHash, setCopiedHash] = useState(false);
 
@@ -25,9 +28,26 @@ export const useCarbonVerraProvenance = ({ selectedJob, dashboardData, showToast
     }
   };
 
-  const triggerDossierDownload = (jobId, format = 'pdf') => {
-    window.open(`${FASTAPI_API_URL}/api/carbon/report/audit-dossier/${jobId}?format=${format}`);
-    showToast(`Downloading Verra VM0047 Audit Dossier (${format.toUpperCase()})...`, 'info');
+  const triggerDossierDownload = async (jobId, format = 'pdf') => {
+    try {
+      const res = await authFetch(`${FASTAPI_API_URL}/api/carbon/report/audit-dossier/${encodeURIComponent(jobId)}?format=${encodeURIComponent(format)}`);
+      if (!res.ok) {
+        showToast(`Failed to download Audit Dossier (HTTP ${res.status}).`, 'error');
+        return;
+      }
+      const blob = await res.blob();
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `VVB_Audit_Dossier_${String(jobId).slice(0, 8)}.${format === 'md' || format === 'markdown' ? 'md' : 'pdf'}`;
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      URL.revokeObjectURL(url);
+      showToast(`Downloaded Verra VM0047 Audit Dossier (${format.toUpperCase()}).`, 'success');
+    } catch {
+      showToast('Audit dossier download requires live backend connectivity.', 'error');
+    }
   };
 
   const handleVerifyChain = async () => {
@@ -36,22 +56,27 @@ export const useCarbonVerraProvenance = ({ selectedJob, dashboardData, showToast
       const res = await authFetch(`${FASTAPI_API_URL}/api/carbon/provenance/verify-chain`);
       if (res.ok) {
         const data = await res.json();
+        const isValid = Boolean(data.valid);
+        const count = Number(data.records_checked ?? 0);
         setLedgerStatus({
-          verified: data.chain_valid,
-          total_records: data.total_records || 24,
-          chain_valid: data.chain_valid,
-          last_verified: data.verification_timestamp || new Date().toISOString()
+          verified: isValid,
+          total_records: count,
+          chain_valid: isValid,
+          last_verified: new Date().toISOString()
         });
-        if (data.chain_valid) {
-          showToast(`SHA-256 Ledger Verified: All ${data.total_records || 24} blocks cryptographically intact!`, 'success');
+        if (isValid) {
+          showToast(`SHA-256 Ledger Verified: All ${count} blocks cryptographically intact!`, 'success');
         } else {
-          showToast(`Integrity warning: Discrepancy at block #${data.broken_at_result_id}`, 'error');
+          showToast(`Integrity warning at block ${data.broken_at || 'unknown'}: ${data.reason || 'hash mismatch'}`, 'error');
         }
       } else {
-        showToast('SHA-256 Ledger verified: Cryptographic chain intact (0 tampered blocks).', 'success');
+        setLedgerStatus({ verified: false, total_records: 0, chain_valid: false, last_verified: new Date().toISOString() });
+        showToast(`Verification refused by server (HTTP ${res.status}). Cannot confirm chain integrity.`, 'error');
       }
     } catch {
-      showToast('SHA-256 Ledger verified: Cryptographic chain intact (0 tampered blocks).', 'success');
+      // [COMMENTED OUT FOR PERSONAL REFERENCE — never claim chain intact on network failure]
+      setLedgerStatus({ verified: false, total_records: 0, chain_valid: false, last_verified: new Date().toISOString() });
+      showToast('Chain verification failed: verification service unreachable.', 'error');
     } finally {
       setVerifyingLedger(false);
     }
@@ -107,26 +132,24 @@ export const useCarbonVerraProvenance = ({ selectedJob, dashboardData, showToast
   const handleGenerateKeypair = async () => {
     setGeneratingKeys(true);
     try {
-      const res = await authFetch(`${FASTAPI_API_URL}/api/carbon/provenance/generate-keys`, { method: 'POST' });
-      if (res.ok) {
-        const data = await res.json();
-        setSignFormData(prev => ({ ...prev, private_key_hex: data.private_key }));
-        setGeneratedPublicKey(data.public_key);
-        copyToClipboard(data.public_key, 'Generated Public Key');
-        showToast('Ed25519 Keypair generated! Public key copied to clipboard.', 'success');
-      } else {
-        const mockKey = Array.from({ length: 32 }, () => Math.floor(Math.random() * 256).toString(16).padStart(2, '0')).join('');
-        const mockPub = 'ed25519_pub_' + Array.from({ length: 16 }, () => Math.floor(Math.random() * 256).toString(16).padStart(2, '0')).join('');
-        setSignFormData(prev => ({ ...prev, private_key_hex: mockKey }));
-        setGeneratedPublicKey(mockPub);
-        showToast('Generated Ed25519 demonstration keypair.', 'info');
+      if (!globalThis.crypto?.subtle?.generateKey) {
+        throw new Error('WebCrypto API unavailable');
       }
+      // Generate Ed25519 keypair locally in browser WebCrypto so private keys never traverse the wire
+      const kp = await globalThis.crypto.subtle.generateKey({ name: 'Ed25519' }, true, ['sign', 'verify']);
+      const rawPub = await globalThis.crypto.subtle.exportKey('raw', kp.publicKey);
+      const pkcs8Priv = await globalThis.crypto.subtle.exportKey('pkcs8', kp.privateKey);
+      const pubHex = bytesToHex(rawPub);
+      // Last 32 bytes of PKCS8 Ed25519 wrapper hold raw scalar seed; keep CryptoKey in memory ref
+      const rawPrivSeedHex = bytesToHex(pkcs8Priv.slice(-32));
+      validatorKeyPairRef.current = kp;
+      setSignFormData(prev => ({ ...prev, private_key_hex: rawPrivSeedHex }));
+      setGeneratedPublicKey(pubHex);
+      copyToClipboard(pubHex, 'Client Ed25519 Public Key');
+      showToast('Client-side Ed25519 keypair generated via WebCrypto! Public key copied.', 'success');
     } catch {
-      const mockKey = Array.from({ length: 32 }, () => Math.floor(Math.random() * 256).toString(16).padStart(2, '0')).join('');
-      const mockPub = 'ed25519_pub_' + Array.from({ length: 16 }, () => Math.floor(Math.random() * 256).toString(16).padStart(2, '0')).join('');
-      setSignFormData(prev => ({ ...prev, private_key_hex: mockKey }));
-      setGeneratedPublicKey(mockPub);
-      showToast('Generated Ed25519 demonstration keypair.', 'info');
+      // [COMMENTED OUT FOR PERSONAL REFERENCE — server private key generation & Math.random fake keys removed]
+      showToast('Browser WebCrypto Ed25519 key generation unavailable in this context.', 'error');
     } finally {
       setGeneratingKeys(false);
     }
@@ -134,50 +157,62 @@ export const useCarbonVerraProvenance = ({ selectedJob, dashboardData, showToast
 
   const handleSubmitSignature = async (e) => {
     e.preventDefault();
-    if (!signFormData.private_key_hex) {
-      showToast('Private key hex is required to sign.', 'error');
+    if (!signFormData.private_key_hex && !validatorKeyPairRef.current) {
+      showToast('Generate or load an Ed25519 signing key first.', 'error');
       return;
     }
     setSigningLedger(true);
     const rId = selectedJob?.id || 'res_sundarbans_001';
     try {
-      const res = await authFetch(`${FASTAPI_API_URL}/api/carbon/provenance/${rId}/sign`, {
+      // Fetch authoritative record_hash to sign locally without sending private key to backend
+      const provRes = await authFetch(`${FASTAPI_API_URL}/api/carbon/provenance/${encodeURIComponent(rId)}`);
+      if (!provRes.ok) {
+        showToast(`Could not load provenance record to sign (HTTP ${provRes.status}).`, 'error');
+        return;
+      }
+      const provData = await provRes.json();
+      const recordHash = provData.record_hash;
+      if (!recordHash || !validatorKeyPairRef.current?.privateKey || !generatedPublicKey) {
+        showToast('Generate a browser WebCrypto Ed25519 keypair before submitting signature.', 'error');
+        return;
+      }
+      const sigBuf = await globalThis.crypto.subtle.sign(
+        { name: 'Ed25519' },
+        validatorKeyPairRef.current.privateKey,
+        new TextEncoder().encode(recordHash)
+      );
+      const res = await authFetch(`${FASTAPI_API_URL}/api/carbon/provenance/${encodeURIComponent(rId)}/sign`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(signFormData)
+        body: JSON.stringify({
+          validator_id: signFormData.validator_id,
+          validator_name: signFormData.validator_name,
+          validator_organization: signFormData.organization,
+          public_key_hex: generatedPublicKey,
+          signature_hex: bytesToHex(sigBuf),
+        })
       });
       if (res.ok) {
         const data = await res.json();
-        setProvenanceSignatures(prev => [data.signature, ...prev]);
+        setProvenanceSignatures(prev => [{
+          id: data.signature_id,
+          validator_id: data.validator_id,
+          validator_name: signFormData.validator_name,
+          validator_organization: signFormData.organization,
+          public_key: generatedPublicKey,
+          signature: bytesToHex(sigBuf),
+          signed_at: data.signed_at,
+          cryptographically_verified: true,
+        }, ...prev]);
         showToast(`Ed25519 signature verified & affixed by ${signFormData.validator_name}!`, 'success');
         setShowSignModal(false);
       } else {
-        const newSig = {
-          validator_id: signFormData.validator_id,
-          validator_name: signFormData.validator_name,
-          organization: signFormData.organization,
-          public_key_hex: signFormData.private_key_hex.slice(0, 32) + 'pub',
-          signature_hex: 'ed25519_' + Array.from({ length: 32 }, () => Math.floor(Math.random() * 256).toString(16).padStart(2, '0')).join(''),
-          signed_at: new Date().toISOString(),
-          algorithm: 'Ed25519'
-        };
-        setProvenanceSignatures(prev => [newSig, ...prev]);
-        showToast(`Ed25519 signature recorded for ${signFormData.validator_name}!`, 'success');
-        setShowSignModal(false);
+        const errBody = await res.json().catch(() => ({}));
+        showToast(errBody.detail || `Signature rejected (HTTP ${res.status}).`, 'error');
       }
     } catch {
-      const newSig = {
-        validator_id: signFormData.validator_id,
-        validator_name: signFormData.validator_name,
-        organization: signFormData.organization,
-        public_key_hex: signFormData.private_key_hex.slice(0, 32) + 'pub',
-        signature_hex: 'ed25519_' + Array.from({ length: 32 }, () => Math.floor(Math.random() * 256).toString(16).padStart(2, '0')).join(''),
-        signed_at: new Date().toISOString(),
-        algorithm: 'Ed25519'
-      };
-      setProvenanceSignatures(prev => [newSig, ...prev]);
-      showToast(`Ed25519 signature recorded for ${signFormData.validator_name}!`, 'success');
-      setShowSignModal(false);
+      // [COMMENTED OUT FOR PERSONAL REFERENCE — fake offline signatures & derived public key slicing removed]
+      showToast('Failed to submit Ed25519 signature to verification server.', 'error');
     } finally {
       setSigningLedger(false);
     }

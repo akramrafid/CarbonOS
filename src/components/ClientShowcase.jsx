@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { Link } from 'react-router-dom';
 import { 
   ShieldCheck, 
   Leaf, 
@@ -44,7 +45,7 @@ const ClientShowcase = () => {
     return (
       <div
         key={client.id}
-        className={`group relative rounded-2xl sm:rounded-3xl p-5 sm:p-6 xl:p-6 2xl:p-7 transition-all duration-300 flex flex-col justify-between h-full min-h-[440px] sm:min-h-[460px] overflow-hidden ${
+        className={`group relative rounded-2xl sm:rounded-3xl p-5 sm:p-6 xl:p-6 2xl:p-7 transition-[background-color,border-color,box-shadow,transform] duration-300 flex flex-col justify-between h-full min-h-[440px] sm:min-h-[460px] overflow-hidden ${
           isLight
             ? 'bg-white border border-border-strong shadow-[0_4px_25px_rgba(4,18,38,0.06)] hover:shadow-[0_12px_35px_rgba(4,18,38,0.12)] hover:border-border-strong/40'
             : 'bg-gradient-to-b from-bg-surface/95 via-bg-surface/95 to-bg-canvas hover:bg-bg-elevated border border-border-subtle/75 hover:border-border-strong/80 shadow-[0_12px_40px_rgba(0,0,0,0.6)] hover:shadow-[0_20px_60px_rgba(0,200,83,0.18)]'
@@ -62,7 +63,7 @@ const ClientShowcase = () => {
           <div className="flex items-center justify-between gap-3 mb-5 h-14">
             {/* Enhanced Logo Container with fluid width */}
             <div 
-              className={`h-12 sm:h-13.5 max-w-[115px] sm:max-w-[135px] xl:max-w-[130px] 2xl:max-w-[145px] px-3 py-1.5 rounded-xl sm:rounded-2xl flex items-center justify-center shrink-0 transition-all duration-300 group-hover:scale-105 ${
+              className={`h-12 sm:h-13.5 max-w-[115px] sm:max-w-[135px] xl:max-w-[130px] 2xl:max-w-[145px] px-3 py-1.5 rounded-xl sm:rounded-2xl flex items-center justify-center shrink-0 transition-transform duration-300 group-hover:scale-105 ${
                 isDarkLogo
                   ? 'bg-bg-elevated border border-border-strong shadow-[0_0_20px_rgba(0,200,83,0.2)] ring-1 ring-emerald-500/30'
                   : 'bg-white border border-slate-200 shadow-xs ring-1 ring-black/5'
@@ -78,7 +79,7 @@ const ClientShowcase = () => {
 
             {/* Verified Badge & Live Domain: compact, zero horizontal overflow */}
             <div className="flex flex-col items-end shrink-0 gap-1.5 min-w-0">
-              <div className={`inline-flex items-center space-x-1.5 px-2.5 py-1 rounded-full transition-all shadow-xs ${
+              <div className={`inline-flex items-center space-x-1.5 px-2.5 py-1 rounded-full transition-colors shadow-xs ${
                 isLight
                   ? 'bg-accent-muted border border-border-strong/30 text-accent'
                   : 'bg-accent/12 group-hover:bg-accent/20 border border-border-strong/35 text-accent-hover'
@@ -219,23 +220,23 @@ const ClientShowcase = () => {
                 <button
                   key={sec.id}
                   onClick={() => setSelectedCategory(sec.id)}
-                  className={`group px-4 sm:px-5 py-2 sm:py-2.5 rounded-xl sm:rounded-full text-xs sm:text-[13px] font-sans font-semibold transition-all duration-200 cursor-pointer flex items-center space-x-2.5 border ${
+                  className={`group px-4 sm:px-5 py-2 sm:py-2.5 rounded-xl sm:rounded-full text-xs sm:text-[13px] font-sans font-semibold transition-[background-color,border-color,color,box-shadow,transform] duration-200 cursor-pointer flex items-center space-x-2.5 border ${
                     isActive
                       ? isLight
                         ? 'bg-accent text-white font-extrabold border-border-strong shadow-md scale-[1.02]'
-                        : 'bg-gradient-to-r from-accent via-accent-hover to-accent text-fg-primary font-extrabold border-border-strong shadow-[0_0_24px_rgba(0,200,83,0.35)] scale-[1.02]'
+                        : 'bg-gradient-to-r from-accent via-accent-hover to-accent text-fg-inverse font-extrabold border-border-strong shadow-[0_0_24px_rgba(0,200,83,0.35)] scale-[1.02]'
                       : isLight
                         ? 'bg-transparent hover:bg-slate-100 text-fg-secondary border-transparent hover:border-slate-200'
                         : 'bg-bg-surface/60 hover:bg-bg-surface text-gray-300 hover:text-white border-border-subtle hover:border-emerald-500/40'
                   }`}
                 >
                   <IconComponent className={`w-3.5 h-3.5 sm:w-4 sm:h-4 shrink-0 transition-transform group-hover:scale-110 ${
-                    isActive ? (isLight ? 'text-white' : 'text-fg-primary') : (isLight ? 'text-accent' : 'text-emerald-400/90')
+                    isActive ? (isLight ? 'text-white' : 'text-fg-inverse') : (isLight ? 'text-accent' : 'text-emerald-400/90')
                   }`} />
                   <span className="tracking-tight">{sec.label}</span>
                   <span className={`text-[11px] font-mono font-bold px-2.5 py-0.5 rounded-full transition-colors ${
                     isActive 
-                      ? (isLight ? 'bg-white/20 text-white' : 'bg-bg-canvas/20 text-fg-primary')
+                      ? (isLight ? 'bg-white/20 text-white' : 'bg-bg-canvas/20 text-fg-inverse')
                       : (isLight ? 'bg-slate-100 text-slate-700' : 'bg-white/[0.06] text-gray-300')
                   }`}>
                     {sec.count}
@@ -289,13 +290,14 @@ const ClientShowcase = () => {
           </div>
 
           <div className="flex items-center space-x-3 shrink-0">
-            <a
-              href="/platform"
-              className="keep-white bg-accent hover:bg-accent dark:bg-accent dark:hover:bg-accent-hover text-white dark:text-fg-primary font-sans font-extrabold text-sm px-7 py-3.5 rounded-full transition-all shadow-lg flex items-center space-x-2 cursor-pointer"
+            {/* [COMMENTED OUT FOR PERSONAL REFERENCE — dead <a href="/platform"> 404 link replaced with SPA Link] */}
+            <Link
+              to="/platform/saas-dashboard"
+              className="keep-white bg-accent hover:bg-accent-hover dark:bg-accent dark:hover:bg-accent-hover text-white dark:text-fg-inverse font-sans font-extrabold text-sm px-7 py-3.5 rounded-full transition-colors shadow-lg flex items-center space-x-2 cursor-pointer"
             >
               <span>Explore Client Dashboard</span>
               <ArrowUpRight className="w-4 h-4" />
-            </a>
+            </Link>
           </div>
         </div>
 

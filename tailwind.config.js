@@ -39,7 +39,16 @@ export default {
         nagad: 'var(--color-brand-nagad)',
         rocket: 'var(--color-brand-rocket)',
         forest: 'var(--color-forest)',
-        carbon: 'var(--color-carbon)',
+        // [COMMENTED OUT FOR PERSONAL REFERENCE — single string token left 54 carbon-* utility classes unmapped]
+        // carbon: 'var(--color-carbon)',
+        carbon: {
+          DEFAULT: 'var(--color-carbon)',
+          surface: 'var(--color-bg-surface)',
+          'surface-raised': 'var(--color-bg-elevated)',
+          border: 'var(--color-border-subtle)',
+          text: 'var(--color-fg-primary)',
+          'text-muted': 'var(--color-fg-muted)',
+        },
         emerald: {
           ...colors.emerald,
           DEFAULT: 'var(--color-emerald)',

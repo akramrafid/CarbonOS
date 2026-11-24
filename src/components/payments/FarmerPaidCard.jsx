@@ -8,7 +8,7 @@ const FarmerPaidCard = ({ amount, txHash }) => {
   }, []);
 
   return (
-    <div className="relative overflow-hidden rounded-xl bg-white border border-border-subtle p-6 shadow-[0_8px_24px_rgba(0,0,0,0.08)] transform transition-transform duration-500 translate-y-0 opacity-100">
+    <div className="relative overflow-hidden rounded-xl bg-bg-surface border border-border-subtle p-6 shadow-[0_8px_24px_rgba(0,0,0,0.08)] transform transition-transform duration-500 translate-y-0 opacity-100">
       
       {/* CSS Confetti Animation */}
       {showConfetti && (
@@ -21,7 +21,7 @@ const FarmerPaidCard = ({ amount, txHash }) => {
 
       <div className="flex items-start space-x-4">
         {/* Placeholder Avatar */}
-        <div className="w-16 h-16 rounded-full bg-slate-200 overflow-hidden shrink-0 border-2 border-border-strong">
+        <div className="w-16 h-16 rounded-full bg-bg-muted overflow-hidden shrink-0 border-2 border-border-strong">
           <img 
             src="https://images.unsplash.com/photo-1596700676450-93cf02157c96?q=80&w=200&auto=format&fit=crop" 
             alt="Farmer profile"
@@ -47,7 +47,7 @@ const FarmerPaidCard = ({ amount, txHash }) => {
           </div>
           
           <div className="mt-3 flex items-center justify-between text-xs text-fg-secondary">
-            <span className="font-mono bg-slate-100 px-2 py-1 rounded">TX: {txHash.substring(0, 10)}...</span>
+            <span className="font-mono bg-bg-muted px-2 py-1 rounded">TX: {txHash.substring(0, 10)}...</span>
             <span className="text-accent font-medium">Verified by Carbon Zero BD</span>
           </div>
         </div>

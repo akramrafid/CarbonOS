@@ -18,7 +18,10 @@ MAX_ALLOWED_PIXELS = 40_000_000
 
 
 def render_pdf_page_at_300_dpi(pdfplumber_page) -> Image.Image:
-    """Render a pdfplumber PDF page to a PIL Image at 300 DPI."""
+    """Render a pdfplumber PDF page to a PIL Image at 300 DPI (bounded by MAX_ALLOWED_PIXELS)."""
+    est_pixels = (float(pdfplumber_page.width or 0) * TARGET_DPI / 72.0) * (float(pdfplumber_page.height or 0) * TARGET_DPI / 72.0)
+    if est_pixels > MAX_ALLOWED_PIXELS:
+        raise ValueError(f"PDF page exceeds maximum render size of {MAX_ALLOWED_PIXELS} pixels")
     return pdfplumber_page.to_image(resolution=TARGET_DPI).original
 
 

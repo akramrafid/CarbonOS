@@ -1,6 +1,7 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { Button, Notice, StatusBadge, Table } from '../ui';
 import { BoundingBoxViewer } from './BoundingBoxViewer';
+import { esgDownloadBlob } from '../../../../lib/esgApi';
 
 export function Step2Found({
   t,
@@ -14,6 +15,28 @@ export function Step2Found({
   onNext,
   onSkipToConfirm
 }) {
+  const [downloadingDoc, setDownloadingDoc] = useState(false);
+
+  const handleDownloadDocument = async () => {
+    if (!billId) return;
+    setDownloadingDoc(true);
+    try {
+      const { blob, filename } = await esgDownloadBlob(`/api/esg/bills/${encodeURIComponent(billId)}/document`);
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = filename || `bill-${billId}.pdf`;
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      URL.revokeObjectURL(url);
+    } catch {
+      // Download failed (401/404 or offline)
+    } finally {
+      setDownloadingDoc(false);
+    }
+  };
+
   if (gapsLoading) {
     return <p className="text-sm text-mist">Loading gap analysis…</p>;
   }
@@ -80,14 +103,16 @@ export function Step2Found({
             <div className="text-xs font-mono text-mist">Evidence Retention Status:</div>
             {gaps?.has_source_document ? (
               <div className="flex flex-wrap gap-2 items-center">
-                <a
-                  href={`/api/esg/bills/${billId}/document`}
-                  target="_blank"
-                  rel="noreferrer"
-                  className="px-3 py-1.5 rounded-lg bg-emerald/20 text-emerald-300 font-mono text-xs hover:bg-emerald/30 transition-colors"
+                {/* [COMMENTED OUT FOR PERSONAL REFERENCE — raw anchor omitted Bearer token -> always returned 401] */}
+                <Button
+                  type="button"
+                  variant="secondary"
+                  disabled={downloadingDoc}
+                  onClick={handleDownloadDocument}
+                  className="text-xs font-mono text-emerald-300"
                 >
-                  ↓ {t.downloadDoc}
-                </a>
+                  ↓ {downloadingDoc ? '...' : t.downloadDoc}
+                </Button>
                 <Button
                   variant="secondary"
                   className="text-xs text-red-300 hover:text-red-200 border-red-500/30"

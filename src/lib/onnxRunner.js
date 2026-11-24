@@ -9,7 +9,9 @@ async function getOrt() {
     if (!ort) {
         ort = await import('onnxruntime-web');
         ort.env.wasm.numThreads = 4;
-        ort.env.wasm.wasmPaths = 'https://cdn.jsdelivr.net/npm/onnxruntime-web/dist/';
+        // Serve self-hosted WASM binaries from /ort/ instead of CDN to satisfy strict CSP and offline execution
+        // ort.env.wasm.wasmPaths = 'https://cdn.jsdelivr.net/npm/onnxruntime-web/dist/';  // [COMMENTED OUT FOR PERSONAL REFERENCE]
+        ort.env.wasm.wasmPaths = '/ort/';
     }
     return ort;
 }

@@ -130,7 +130,7 @@ function SwipeableToastItem({ item, onDismiss }) {
       }
       className={`pointer-events-auto toast-surface flex items-start gap-3 p-4 rounded-2xl bg-bg-surface/95 text-fg-primary border ${
         TOAST_BORDER_COLORS[item.type] || 'border-border-subtle'
-      } shadow-2xl backdrop-blur-xl transition-all duration-200 touch-pan-y select-none`}
+      } shadow-2xl backdrop-blur-xl transition-colors duration-200 touch-pan-y select-none`}
     >
       {TOAST_ICONS[item.type]}
       <div className="flex-1 min-w-0">
