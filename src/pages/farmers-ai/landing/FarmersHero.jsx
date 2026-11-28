@@ -10,10 +10,10 @@ export function FarmersHero({ lang, text }) {
     >
       <div className="absolute inset-0 pointer-events-none" style={{ background: 'linear-gradient(to right, rgba(8,15,11,0.92), rgba(8,15,11,0.75), rgba(8,15,11,0.35))' }} />
 
-          <div className="relative z-10 max-w-6xl mx-auto px-6 md:px-12 py-12 md:py-16 grid grid-cols-1 lg:grid-cols-12 gap-8 items-center w-full">
-            <div className="lg:col-span-7 text-left space-y-6 rounded-3xl p-4 sm:p-6" style={{ backgroundColor: 'rgba(8, 15, 11, 0.72)' }}>
-              <PageHeader
-                badge={
+      <div className="relative z-10 max-w-6xl mx-auto px-6 md:px-12 py-12 md:py-16 grid grid-cols-1 lg:grid-cols-12 gap-8 items-center w-full">
+        <div className="lg:col-span-7 text-left space-y-6 rounded-3xl p-4 sm:p-6" style={{ backgroundColor: 'rgba(8, 15, 11, 0.72)' }}>
+          <PageHeader
+            badge={
               <div className="inline-flex items-center space-x-2 bg-red-500/20 border border-red-400/40 px-4 py-2 rounded-full">
                 <span className="w-2 h-2 rounded-full bg-red-400 animate-pulse"></span>
                 <span className="text-red-300 font-sans text-xs font-semibold uppercase tracking-wider">{text.problemTitle}</span>
@@ -24,18 +24,18 @@ export function FarmersHero({ lang, text }) {
             className="border-none mb-0 pb-0"
             titleClassName="!text-3xl sm:!text-4xl md:!text-6xl font-sans !font-extrabold !text-white !leading-tight !tracking-tight"
           />
-          
+
           <div className="flex flex-wrap gap-4 pt-4">
-            <a 
-              href="#ai-scanner" 
+            <a
+              href="#ai-scanner"
               className="inline-flex items-center justify-center space-x-2 bg-accent hover:bg-accent-hover text-fg-inverse font-sans font-bold text-base px-8 py-4 rounded-full transition-all hover:scale-105 shadow-lg cursor-pointer"
             >
               <Camera size={20} />
               <span>{text.ctaCamera}</span>
             </a>
-            
-            <a 
-              href="#harvestguard-dashboard" 
+
+            <a
+              href="#harvestguard-dashboard"
               className="inline-flex items-center justify-center space-x-2 text-white border border-white/25 font-sans font-bold text-base px-8 py-4 rounded-full transition-all hover:border-lime-400 cursor-pointer"
               style={{ backgroundColor: 'rgba(8, 15, 11, 0.78)' }}
             >
@@ -67,7 +67,7 @@ export function FarmersHero({ lang, text }) {
         </div>
       </div>
     </div>
-            );
+  );
 }
 
-            export default FarmersHero;
+export default FarmersHero;

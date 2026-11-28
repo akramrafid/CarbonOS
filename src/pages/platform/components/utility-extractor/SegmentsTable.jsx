@@ -11,16 +11,16 @@ export function SegmentsTable({
 }) {
   return (
     <div className="space-y-4">
-        <div className="flex flex-wrap justify-between items-center gap-2">
-          <div className="flex items-center space-x-2">
-            <Sparkles className="w-4 h-4 text-accent" />
-              <h3 className="font-sans font-bold text-base text-fg-primary">
-                Detected Utility Segments ({segments.length} Line Items)
-              </h3>
-          </div>
+      <div className="flex flex-wrap justify-between items-center gap-2">
+        <div className="flex items-center space-x-2">
+          <Sparkles className="w-4 h-4 text-accent" />
+          <h3 className="font-sans font-bold text-base text-fg-primary">
+            Detected Utility Segments ({segments.length} Line Items)
+          </h3>
+        </div>
 
-            <div className="text-[11px] font-mono text-fg-secondary flex items-center space-x-2">
-              {auditSeal ? (
+        <div className="text-[11px] font-mono text-fg-secondary flex items-center space-x-2">
+          {auditSeal ? (
             <span className="px-2 py-0.5 rounded-full bg-emerald-500/20 text-emerald-700 dark:text-emerald-300 border border-emerald-500/40 flex items-center gap-1 font-bold">
               <Lock className="w-3 h-3" />
               {auditSeal}
@@ -58,15 +58,13 @@ export function SegmentsTable({
               return (
                 <tr
                   key={idx}
-                  className={`hover:bg-bg-elevated/50 transition-colors ${
-                    isRejected ? 'opacity-40 bg-red-950/10' : ''
-                  }`}
+                  className={`hover:bg-bg-elevated/50 transition-colors ${isRejected ? 'opacity-40 bg-red-950/10' : ''
+                    }`}
                 >
                   <td className="p-3.5">
                     <div
-                      className={`font-bold flex items-center space-x-2 ${
-                        isRejected ? 'line-through text-fg-muted' : 'text-fg-primary'
-                      }`}
+                      className={`font-bold flex items-center space-x-2 ${isRejected ? 'line-through text-fg-muted' : 'text-fg-primary'
+                        }`}
                     >
                       <span>{seg.name}</span>
                       {isCorrected && (
@@ -83,13 +81,12 @@ export function SegmentsTable({
 
                   <td className="p-3.5">
                     <span
-                      className={`px-2 py-0.5 rounded-full text-[10px] font-mono font-bold ${
-                        seg.scope.includes('Scope 1')
-                          ? 'bg-amber-500/15 text-amber-800 dark:text-amber-400 border border-amber-500/30'
-                          : seg.scope.includes('Scope 2')
+                      className={`px-2 py-0.5 rounded-full text-[10px] font-mono font-bold ${seg.scope.includes('Scope 1')
+                        ? 'bg-amber-500/15 text-amber-800 dark:text-amber-400 border border-amber-500/30'
+                        : seg.scope.includes('Scope 2')
                           ? 'bg-cyan-500/15 text-cyan-800 dark:text-cyan-400 border border-cyan-500/30'
                           : 'bg-purple-500/15 text-purple-800 dark:text-purple-400 border border-purple-500/30'
-                      }`}
+                        }`}
                     >
                       {seg.scope}
                     </span>
@@ -113,8 +110,8 @@ export function SegmentsTable({
                         isRejected
                           ? 'line-through text-fg-muted'
                           : seg.emissions_t < 0
-                          ? 'text-emerald-700 dark:text-emerald-400'
-                          : 'text-fg-primary'
+                            ? 'text-emerald-700 dark:text-emerald-400'
+                            : 'text-fg-primary'
                       }
                     >
                       {seg.emissions_t == null ? '—' : `${seg.emissions_t.toFixed(2)} t`}
@@ -127,13 +124,12 @@ export function SegmentsTable({
 
                   <td className="p-3.5 text-center">
                     <span
-                      className={`px-2 py-0.5 rounded-full text-[10px] font-mono border ${
-                        isRejected
-                          ? 'bg-red-500/15 text-red-700 dark:text-red-400 border-red-500/30'
-                          : isCorrected
+                      className={`px-2 py-0.5 rounded-full text-[10px] font-mono border ${isRejected
+                        ? 'bg-red-500/15 text-red-700 dark:text-red-400 border-red-500/30'
+                        : isCorrected
                           ? 'bg-amber-500/15 text-amber-800 dark:text-amber-400 border-amber-500/30'
                           : 'bg-accent/15 text-accent border-border-strong/30'
-                      }`}
+                        }`}
                     >
                       {isRejected ? 'REJECTED' : isCorrected ? 'MODIFIED' : 'AI EXTRACTED'}
                     </span>
@@ -166,7 +162,7 @@ export function SegmentsTable({
         </table>
       </div>
     </div>
-            );
+  );
 }
 
-            export default SegmentsTable;
+export default SegmentsTable;
