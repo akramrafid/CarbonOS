@@ -34,14 +34,14 @@ export const DeepTelemetryRow = ({
         </div>
 
         <div className="flex flex-col items-center justify-center py-2">
-          <SemiCircularGauge 
-            score={Math.min(100, Math.max(30, Math.round(((activeClient.activeInsets || 0) / (results.total || 1)) * 100 + 48)))} 
-            max={100} 
+          <SemiCircularGauge
+            score={Math.min(100, Math.max(30, Math.round(((activeClient.activeInsets || 0) / (results.total || 1)) * 100 + 48)))}
+            max={100}
             label=""
-            sublabel="target progress" 
-            isLight={isLight} 
+            sublabel="target progress"
+            isLight={isLight}
           />
-          
+
           <div className="mt-3 text-center">
             <div className={`font-sans font-extrabold text-2xl tracking-tight ${isLight ? 'text-fg-primary' : 'text-white'}`}>
               {results.total} <span className="text-xs font-mono font-normal text-emerald">tCO2e</span>
@@ -57,9 +57,8 @@ export const DeepTelemetryRow = ({
           </div>
         </div>
 
-        <div className={`mt-3 p-2.5 rounded-2xl border text-center text-xs font-sans font-semibold flex items-center justify-center space-x-2 ${
-          isLight ? 'bg-bg-muted border-carbon-border text-fg-primary' : 'bg-bg-canvas border-border-subtle text-white'
-        }`}>
+        <div className={`mt-3 p-2.5 rounded-2xl border text-center text-xs font-sans font-semibold flex items-center justify-center space-x-2 ${isLight ? 'bg-bg-muted border-carbon-border text-fg-primary' : 'bg-bg-canvas border-border-subtle text-white'
+          }`}>
           <span className="w-2 h-2 rounded-full bg-emerald animate-pulse" />
           <span>Intensity: {esgMetrics.actualIntensity} t/FTE (Target: {esgMetrics.benchmarkIntensity})</span>
         </div>
@@ -140,10 +139,9 @@ export const DeepTelemetryRow = ({
           <SegmentedProgressBar totalBars={24} activeBars={esgMetrics.activeCapsulesCount} isLight={isLight} />
         </div>
 
-        <div className={`pt-3 border-t text-[10px] font-mono flex items-center justify-between ${
-          isLight ? 'border-carbon-border text-fg-muted' : 'border-border-subtle text-mist'
-        }`}>
-          <Button 
+        <div className={`pt-3 border-t text-[10px] font-mono flex items-center justify-between ${isLight ? 'border-carbon-border text-fg-muted' : 'border-border-subtle text-mist'
+          }`}>
+          <Button
             type="button"
             variant="link"
             size="sm"

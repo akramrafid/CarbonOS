@@ -1,13 +1,13 @@
 import React, { useState } from 'react';
-import { 
-  Database, 
-  Cpu, 
-  Zap, 
-  Clock, 
-  ShieldCheck, 
-  TrendingUp, 
-  CheckCircle, 
-  DollarSign, 
+import {
+  Database,
+  Cpu,
+  Zap,
+  Clock,
+  ShieldCheck,
+  TrendingUp,
+  CheckCircle,
+  DollarSign,
   RefreshCw,
   Layers,
   ArrowRight,
@@ -28,13 +28,13 @@ const EEIO_SECTOR_DEFAULTS = {
   catering_canteen: 950000     // 9.5 Lakh BDT
 };
 
-export const DuckDBEngineView = ({ 
-  isLight, 
-  locale = {}, 
-  currency = 'BDT', 
-  activityInputs, 
+export const DuckDBEngineView = ({
+  isLight,
+  locale = {},
+  currency = 'BDT',
+  activityInputs,
   activityResults,
-  onRecalculate 
+  onRecalculate
 }) => {
   const defaultInputs = {
     diesel: '10000',
@@ -131,11 +131,10 @@ export const DuckDBEngineView = ({
   return (
     <div className="space-y-6">
       {/* Top Banner: Engine Specs */}
-      <div className={`p-6 rounded-3xl border transition-all ${
-        isLight 
-          ? 'bg-gradient-to-r from-emerald-50/70 to-teal-50/40 border-emerald-200/80 shadow-sm' 
-          : 'bg-gradient-to-r from-bg-surface to-bg-canvas border-border-subtle'
-      }`}>
+      <div className={`p-6 rounded-3xl border transition-all ${isLight
+        ? 'bg-gradient-to-r from-emerald-50/70 to-teal-50/40 border-emerald-200/80 shadow-sm'
+        : 'bg-gradient-to-r from-bg-surface to-bg-canvas border-border-subtle'
+        }`}>
         <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
           <div className="space-y-1">
             <div className="flex items-center space-x-2">
@@ -293,7 +292,7 @@ export const DuckDBEngineView = ({
             <div className={`p-4 rounded-2xl border ${isLight ? 'bg-white border-gray-200' : 'bg-bg-elevated border-border-subtle'}`}>
               <span className="text-xs font-mono text-gray-500 block mb-1">Total Scope 3 Spend</span>
               <span className="text-xl font-bold font-mono">
-                {selectedCurrency === 'BDT' 
+                {selectedCurrency === 'BDT'
                   ? `৳ ${(eeioResult.totalSpendBDT / 10000000).toFixed(2)} Crore`
                   : `$ ${(eeioResult.totalSpendUSD).toLocaleString()}`}
               </span>
@@ -318,39 +317,38 @@ export const DuckDBEngineView = ({
               Input Enterprise Expenditure Across Sectors (Comprehensive Environmental Data Archive)
             </h3>
             <div className="overflow-x-auto touch-pan-x">
-            <table className="w-full min-w-[620px] text-xs font-sans">
-              <thead>
-                <tr className={`border-b text-left ${isLight ? 'border-gray-200 text-gray-500' : 'border-border-subtle text-gray-400'}`}>
-                  <th className="pb-3 font-semibold">Procurement Sector</th>
-                  <th className="pb-3 font-semibold">Scope 3 Category</th>
-                  <th className="pb-3 font-semibold">Expenditure ({selectedCurrency})</th>
-                  <th className="pb-3 font-semibold">EEIO Factor (kg/USD)</th>
-                  <th className="pb-3 font-semibold text-right">Emissions (tCO₂e)</th>
-                </tr>
-              </thead>
-              <tbody className="divide-y divide-gray-100 dark:divide-gray-800">
-                {eeioResult.items.map(item => (
-                  <tr key={item.key} className="hover:bg-emerald-500/5 transition-colors">
-                    <td className="py-3 font-medium">{item.name}</td>
-                    <td className="py-3 font-mono text-gray-500">{item.cat}</td>
-                    <td className="py-3">
-                      <input
-                        type="number"
-                        value={spendInputs[item.key] || ''}
-                        onChange={(e) => handleSpendChange(item.key, e.target.value)}
-                        className={`w-36 px-2.5 py-1 rounded-lg border font-mono text-xs ${
-                          isLight ? 'bg-gray-50 border-gray-300' : 'bg-bg-canvas border-border-subtle text-white'
-                        }`}
-                      />
-                    </td>
-                    <td className="py-3 font-mono text-gray-500">{item.factor}</td>
-                    <td className="py-3 font-mono font-bold text-right text-emerald-500">
-                      {item.tco2e.toFixed(2)} t
-                    </td>
+              <table className="w-full min-w-[620px] text-xs font-sans">
+                <thead>
+                  <tr className={`border-b text-left ${isLight ? 'border-gray-200 text-gray-500' : 'border-border-subtle text-gray-400'}`}>
+                    <th className="pb-3 font-semibold">Procurement Sector</th>
+                    <th className="pb-3 font-semibold">Scope 3 Category</th>
+                    <th className="pb-3 font-semibold">Expenditure ({selectedCurrency})</th>
+                    <th className="pb-3 font-semibold">EEIO Factor (kg/USD)</th>
+                    <th className="pb-3 font-semibold text-right">Emissions (tCO₂e)</th>
                   </tr>
-                ))}
-              </tbody>
-            </table>
+                </thead>
+                <tbody className="divide-y divide-gray-100 dark:divide-gray-800">
+                  {eeioResult.items.map(item => (
+                    <tr key={item.key} className="hover:bg-emerald-500/5 transition-colors">
+                      <td className="py-3 font-medium">{item.name}</td>
+                      <td className="py-3 font-mono text-gray-500">{item.cat}</td>
+                      <td className="py-3">
+                        <input
+                          type="number"
+                          value={spendInputs[item.key] || ''}
+                          onChange={(e) => handleSpendChange(item.key, e.target.value)}
+                          className={`w-36 px-2.5 py-1 rounded-lg border font-mono text-xs ${isLight ? 'bg-gray-50 border-gray-300' : 'bg-bg-canvas border-border-subtle text-white'
+                            }`}
+                        />
+                      </td>
+                      <td className="py-3 font-mono text-gray-500">{item.factor}</td>
+                      <td className="py-3 font-mono font-bold text-right text-emerald-500">
+                        {item.tco2e.toFixed(2)} t
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
             </div>
           </div>
         </div>

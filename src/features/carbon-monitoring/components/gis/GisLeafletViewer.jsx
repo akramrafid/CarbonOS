@@ -138,113 +138,112 @@ export function GisLeafletViewer(props) {
           !isNaN(parseFloat(inspectedPixel.lng)) && (
             <Marker position={[parseFloat(inspectedPixel.lat), parseFloat(inspectedPixel.lng)]}>
               <Popup>
-                <div className="text-xs p-1 max-w-xs leading-tight text-fg-primary">
-                  <div className="font-bold text-accent">
-                    {inspectedPixel.forestType || 'Inspected Pixel'}
-                  </div>
-                  <div className="text-fg-muted font-mono text-[10px] mt-0.5">
-                    {inspectedPixel.lat}, {inspectedPixel.lng}
-                  </div>
-                  <div className="mt-1.5 font-medium text-fg-secondary">
-                    Biomass: <span className="font-bold text-fg-primary">{inspectedPixel.biomass} Mg/ha</span>
-                  </div>
-                  <div className="mt-1.5 font-medium text-fg-secondary">
-                    Carbon: <span className="font-bold text-fg-primary">{inspectedPixel.carbon} tC/ha</span>
-                  </div>
-                  <div className="text-[10px] text-fg-muted mt-1">
-                    NDVI: {inspectedPixel.ndvi} • {inspectedPixel.confidence}
-                  </div>
-                </div>
-              </Popup>
-            </Marker>
+                  <div className="text-xs p-1 max-w-xs leading-tight text-fg-primary">
+                    <div className="font-bold text-accent">
+                      {inspectedPixel.forestType || 'Inspected Pixel'}
+                    </div>
+                      <div className="text-fg-muted font-mono text-[10px] mt-0.5">
+                        {inspectedPixel.lat}, {inspectedPixel.lng}
+                      </div>
+                        <div className="mt-1.5 font-medium text-fg-secondary">
+                          Biomass: <span className="font-bold text-fg-primary">{inspectedPixel.biomass} Mg/ha</span>
+                        </div>
+                          <div className="mt-1.5 font-medium text-fg-secondary">
+                            Carbon: <span className="font-bold text-fg-primary">{inspectedPixel.carbon} tC/ha</span>
+                          </div>
+                            <div className="text-[10px] text-fg-muted mt-1">
+                              NDVI: {inspectedPixel.ndvi} • {inspectedPixel.confidence}
+                            </div>
+                          </div>
+                        </Popup>
+                      </Marker>
           )}
 
-        {selectedJob &&
-          selectedJob.result &&
-          selectedJob.layers &&
-          selectedJob.layers.length > 0 &&
-          getJobBounds && (
-            selectedJob.layers
-              .filter((l) => l.layer_type === activeLayer)
-              .map((layer, idx) => (
-                <ImageOverlay
-                  key={idx}
-                  url={layer.layer_url}
-                  bounds={getJobBounds(selectedJob)}
-                  opacity={0.65}
-                />
-              ))
-          )}
+                      {selectedJob &&
+                        selectedJob.result &&
+                        selectedJob.layers &&
+                        selectedJob.layers.length > 0 &&
+                        getJobBounds && (
+                          selectedJob.layers
+                            .filter((l) => l.layer_type === activeLayer)
+                            .map((layer, idx) => (
+                              <ImageOverlay
+                                key={idx}
+                                url={layer.layer_url}
+                                bounds={getJobBounds(selectedJob)}
+                                opacity={0.65}
+                              />
+                            ))
+                        )}
 
-        <RecenterMap bounds={mapBounds} center={mapCenter} zoom={mapZoom} />
+                      <RecenterMap bounds={mapBounds} center={mapCenter} zoom={mapZoom} />
 
-        <MapEventHandler
-          isDrawing={isDrawing}
-          drawPoints={drawPoints}
-          setDrawPoints={setDrawPoints}
-          onPixelClick={handlePixelClick}
-          setHoverCoords={setHoverCoords}
-        />
-      </MapContainer>
+                      <MapEventHandler
+                        isDrawing={isDrawing}
+                        drawPoints={drawPoints}
+                        setDrawPoints={setDrawPoints}
+                        onPixelClick={handlePixelClick}
+                        setHoverCoords={setHoverCoords}
+                      />
+                    </MapContainer>
 
-      <div className="absolute bottom-4 left-4 bg-carbon/80 backdrop-blur-md border border-white/10 px-3 py-1.5 rounded-lg text-[10px] text-mist font-mono z-20">
-        Lat: {hoverCoords.lat.toFixed(5)}, Lng: {hoverCoords.lng.toFixed(5)}
-      </div>
+                    <div className="absolute bottom-4 left-4 bg-carbon/80 backdrop-blur-md border border-white/10 px-3 py-1.5 rounded-lg text-[10px] text-mist font-mono z-20">
+                      Lat: {hoverCoords.lat.toFixed(5)}, Lng: {hoverCoords.lng.toFixed(5)}
+                    </div>
 
-      {analyzing && (
-        <div className="absolute inset-0 bg-carbon/80 backdrop-blur-sm z-30 flex flex-col items-center justify-center space-y-4">
-          <div className="w-12 h-12 border-4 border-emerald border-t-transparent rounded-full animate-spin"></div>
-          <h3 className="font-bold font-sans text-lg text-white">Generating Median Sentinel-2 Composite...</h3>
-          <p className="text-xs text-mist max-w-sm text-center">
-            Processing cloud masking filters and running Random Forest Carbon estimations on the AI Inference service.
-          </p>
-        </div>
-      )}
+                    {analyzing && (
+                      <div className="absolute inset-0 bg-carbon/80 backdrop-blur-sm z-30 flex flex-col items-center justify-center space-y-4">
+                        <div className="w-12 h-12 border-4 border-emerald border-t-transparent rounded-full animate-spin"></div>
+                        <h3 className="font-bold font-sans text-lg text-white">Generating Median Sentinel-2 Composite...</h3>
+                        <p className="text-xs text-mist max-w-sm text-center">
+                          Processing cloud masking filters and running Random Forest Carbon estimations on the AI Inference service.
+                        </p>
+                      </div>
+                    )}
 
-      <div className="absolute top-4 right-4 bg-bg-surface/95 backdrop-blur-md border border-border-subtle p-3.5 rounded-2xl max-w-[210px] z-20 space-y-2.5 shadow-xl">
-        <div className="flex items-center justify-between gap-2">
-          <h4 className="text-[10px] font-bold uppercase tracking-wider text-fg-secondary truncate">
-            {LAYER_CONFIG[activeLayer]?.title || 'INDEX RANGE'}
-          </h4>
-          <span
-            className={`text-[9px] px-1.5 py-0.5 rounded font-bold shrink-0 ${
+                      <div className="absolute top-4 right-4 bg-bg-surface/95 backdrop-blur-md border border-border-subtle p-3.5 rounded-2xl max-w-[210px] z-20 space-y-2.5 shadow-xl">
+                        <div className="flex items-center justify-between gap-2">
+                            <h4 className="text-[10px] font-bold uppercase tracking-wider text-fg-secondary truncate">
+                              {LAYER_CONFIG[activeLayer]?.title || 'INDEX RANGE'}
+                            </h4>
+                            <span
               LAYER_CONFIG[activeLayer]?.badgeClass || 'bg-accent text-fg-inverse'
             }`}
           >
-            {LAYER_CONFIG[activeLayer]?.id?.toUpperCase()}
-          </span>
-        </div>
+                            {LAYER_CONFIG[activeLayer]?.id?.toUpperCase()}
+                          </span>
+                        </div>
 
-        <div className="flex items-center space-x-3">
-          <div
-            className="w-3 h-20 rounded shadow-inner"
-            style={{
-              background:
-                LAYER_CONFIG[activeLayer]?.gradientCSS ||
-                'linear-gradient(to top, #78350F, #F59E0B, #84CC16, #00C853)'
-            }}
-          ></div>
-          <div className="flex flex-col justify-between h-20 text-[10px] text-fg-secondary font-mono">
-            {LAYER_CONFIG[activeLayer]?.ticks?.map((tick, i) => (
-              <span key={i} className={i === 0 ? 'text-fg-primary font-semibold' : ''}>
-                {tick}
-              </span>
-            )) || (
-              <>
-                <span>High (0.85)</span>
-                <span>Med (0.50)</span>
-                <span>Low (0.15)</span>
-              </>
+                        <div className="flex items-center space-x-3">
+                          <div
+                            className="w-3 h-20 rounded shadow-inner"
+                            style={{
+                              background:
+                                LAYER_CONFIG[activeLayer]?.gradientCSS ||
+                                'linear-gradient(to top, #78350F, #F59E0B, #84CC16, #00C853)'
+                            }}
+                          ></div>
+                            <div className="flex flex-col justify-between h-20 text-[10px] text-fg-secondary font-mono">
+                              {LAYER_CONFIG[activeLayer]?.ticks?.map((tick, i) => (
+                                  <span key={i} className={i === 0 ? 'text-fg-primary font-semibold' : ''}>
+                                    {tick}
+                                  </span>
+                                  )) || (
+                                  <>
+                                    <span>High (0.85)</span>
+                                    <span>Med (0.50)</span>
+                                    <span>Low (0.15)</span>
+                                  </>
             )}
-          </div>
+                                </div>
         </div>
 
-        <p className="text-[9px] text-fg-muted border-t border-border-subtle pt-1.5 leading-tight">
-          {LAYER_CONFIG[activeLayer]?.description}
-        </p>
-      </div>
-    </div>
-  );
+                              <p className="text-[9px] text-fg-muted border-t border-border-subtle pt-1.5 leading-tight">
+                                {LAYER_CONFIG[activeLayer]?.description}
+                              </p>
+                          </div>
+                        </div>
+                        );
 }
 
-export default GisLeafletViewer;
+                        export default GisLeafletViewer;

@@ -1,13 +1,13 @@
 import React, { useState } from 'react';
-import { 
-  CheckCircle2, 
-  Play, 
-  FileText, 
-  Zap, 
-  Activity, 
-  Award, 
-  Clock, 
-  Check, 
+import {
+  CheckCircle2,
+  Play,
+  FileText,
+  Zap,
+  Activity,
+  Award,
+  Clock,
+  Check,
   AlertCircle,
   RefreshCw,
   Search,
@@ -132,11 +132,10 @@ export const AtlasBenchmarkStudio = ({ isLight, locale }) => {
   return (
     <div className="space-y-6">
       {/* Header */}
-      <div className={`p-6 rounded-3xl border ${
-        isLight 
-          ? 'bg-gradient-to-r from-cyan-50 to-emerald-50/50 border-cyan-200' 
-          : 'bg-gradient-to-r from-bg-surface to-bg-canvas border-border-subtle'
-      }`}>
+      <div className={`p-6 rounded-3xl border ${isLight
+        ? 'bg-gradient-to-r from-cyan-50 to-emerald-50/50 border-cyan-200'
+        : 'bg-gradient-to-r from-bg-surface to-bg-canvas border-border-subtle'
+        }`}>
         <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
           <div className="space-y-1">
             <div className="flex flex-wrap items-center gap-2">

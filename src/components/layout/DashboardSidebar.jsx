@@ -1,11 +1,11 @@
 import React, { useState, useEffect, useRef, memo } from 'react';
 import { NavLink, useLocation, Link } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
-import { 
-  ChevronLeft, 
-  ChevronRight, 
-  ChevronDown, 
-  ExternalLink 
+import {
+  ChevronLeft,
+  ChevronRight,
+  ChevronDown,
+  ExternalLink
 } from 'lucide-react';
 import { navConfig } from '../../config/nav.config';
 import { Tooltip } from '../ui/Tooltip';
@@ -119,102 +119,100 @@ export const DashboardSidebar = memo(function DashboardSidebar({
         className="flex-1 overflow-y-auto p-3 space-y-6 scrollbar-thin [mask-image:linear-gradient(to_bottom,transparent,black_12px,black_calc(100%-12px),transparent)] min-w-0"
       >
         <LayoutGroup id="dashboard-sidebar">
-        {navConfig.groups.map((group) => {
-          const isOpen = openGroups[group.id] !== false;
+          {navConfig.groups.map((group) => {
+            const isOpen = openGroups[group.id] !== false;
 
-          return (
-            <div key={group.id} className="space-y-1">
-              {/* Group Accordion Header (Expanded mode only) */}
-              {!collapsed && (
-                <button
-                  type="button"
-                  onClick={() => toggleGroup(group.id)}
-                  className="w-full flex items-center justify-between px-2 py-2 min-h-[40px] text-[11px] font-mono font-semibold uppercase tracking-wider text-fg-muted hover:text-fg-primary transition-colors mb-1 rounded focus-ring-standard"
-                  aria-expanded={isOpen}
-                >
-                  <span className="truncate">
-                    {group.titleKey ? t(group.titleKey, group.title) : group.title}
-                  </span>
-                  <ChevronDown
-                    className={`w-3.5 h-3.5 text-fg-muted/70 transition-transform duration-200 shrink-0 ${
-                      isOpen ? 'rotate-0' : '-rotate-90'
-                    }`}
-                  />
-                </button>
-              )}
+            return (
+              <div key={group.id} className="space-y-1">
+                {/* Group Accordion Header (Expanded mode only) */}
+                {!collapsed && (
+                  <button
+                    type="button"
+                    onClick={() => toggleGroup(group.id)}
+                    className="w-full flex items-center justify-between px-2 py-2 min-h-[40px] text-[11px] font-mono font-semibold uppercase tracking-wider text-fg-muted hover:text-fg-primary transition-colors mb-1 rounded focus-ring-standard"
+                    aria-expanded={isOpen}
+                  >
+                    <span className="truncate">
+                      {group.titleKey ? t(group.titleKey, group.title) : group.title}
+                    </span>
+                    <ChevronDown
+                      className={`w-3.5 h-3.5 text-fg-muted/70 transition-transform duration-200 shrink-0 ${isOpen ? 'rotate-0' : '-rotate-90'
+                        }`}
+                    />
+                  </button>
+                )}
 
-              {/* Group Items */}
-              {(isOpen || collapsed) && (
-                <div className="space-y-0.5">
-                  {group.items.map((item) => {
-                    const Icon = item.icon;
-                    const isItemActive = location.pathname === item.route;
-                    const itemLabel = item.labelKey ? t(item.labelKey, item.label) : item.label;
+                {/* Group Items */}
+                {(isOpen || collapsed) && (
+                  <div className="space-y-0.5">
+                    {group.items.map((item) => {
+                      const Icon = item.icon;
+                      const isItemActive = location.pathname === item.route;
+                      const itemLabel = item.labelKey ? t(item.labelKey, item.label) : item.label;
 
-                    const navLinkElement = (
-                      <NavLink
-                        key={item.id}
-                        to={item.route}
-                        ref={isItemActive ? activeLinkRef : undefined}
-                        aria-current={isItemActive ? 'page' : undefined}
-                        className={({ isActive }) => `
+                      const navLinkElement = (
+                        <NavLink
+                          key={item.id}
+                          to={item.route}
+                          ref={isItemActive ? activeLinkRef : undefined}
+                          aria-current={isItemActive ? 'page' : undefined}
+                          className={({ isActive }) => `
                           group relative flex items-center gap-3 px-3 py-2 rounded-xl text-sm font-medium transition-colors duration-150 min-h-[40px]
                           focus-ring-standard min-w-0
-                          ${
-                            isActive
+                          ${isActive
                               ? 'bg-accent text-fg-inverse font-semibold shadow-sm'
                               : 'text-fg-secondary hover:text-fg-primary hover:bg-bg-elevated'
-                          }
+                            }
                           ${collapsed ? 'justify-center px-0' : ''}
                         `.trim()}
-                      >
-                        {isItemActive && (
-                          <m.span
-                            layoutId={getSharedElementLayoutId('sidebar', 'active-pill')}
-                            transition={EASINGS.spring}
-                            className="absolute inset-0 rounded-xl bg-accent shadow-sm -z-0"
-                            aria-hidden="true"
-                          />
-                        )}
-                        <Icon className="relative z-10 w-4 h-4 shrink-0 transition-transform group-hover:scale-105" aria-hidden="true" />
-                        
-                        {!collapsed && (
-                          <span className="relative z-10 truncate flex-1 text-left">
-                            {itemLabel}
-                          </span>
-                        )}
+                        >
+                          {isItemActive && (
+                            <m.span
+                              layoutId={getSharedElementLayoutId('sidebar', 'active-pill')}
+                              transition={EASINGS.spring}
+                              className="absolute inset-0 rounded-xl bg-accent shadow-sm -z-0"
+                              aria-hidden="true"
+                            />
+                          )}
+                          <Icon className="relative z-10 w-4 h-4 shrink-0 transition-transform group-hover:scale-105" aria-hidden="true" />
 
-                        {!collapsed && item.badge && (
-                          <span
-                            data-badge="live"
-                            className={`relative z-10 ml-auto text-[10px] font-mono px-1.5 py-0.5 rounded font-semibold ${
-                              isItemActive
+                          {!collapsed && (
+                            <span className="relative z-10 truncate flex-1 text-left">
+                              {itemLabel}
+                            </span>
+                          )}
+
+                          {!collapsed && item.badge && (
+                            <span
+                              data-badge="live"
+                              className={`relative z-10 ml-auto text-[10px] font-mono px-1.5 py-0.5 rounded font-semibold ${isItemActive
                                 ? 'bg-fg-inverse/20 text-fg-inverse border border-fg-inverse/30'
                                 : 'bg-accent/15 text-accent'
-                            }`}
-                          >
-                            {item.badge}
-                          </span>
-                        )}
-                      </NavLink>
-                    );
-
-                    // In rail mode, wrap in portaled Tooltip
-                    if (collapsed) {
-                      return (
-                        <Tooltip key={item.id} content={itemLabel} position="right">
-                          {navLinkElement}
-                        </Tooltip>
+                                }`}
+                            >
+                              {item.badge}
+                            </span>
+                          )}
+                        </NavLink>
                       );
-                    }
 
-                    return navLinkElement;
-                  })}
-                </div>
-              )}
-            </div>
-          );
-        })}
+                      // In rail mode, wrap in portaled Tooltip
+                      if (collapsed) {
+                        return (
+                          <Tooltip key={item.id} content={itemLabel} position="right">
+                            {navLinkElement}
+                          </Tooltip>
+                        );
+                      }
+
+                      return navLinkElement;
+                    })}
+                  </div>
+                )
+                }
+              </div>
+            );
+          })}
         </LayoutGroup>
       </div>
 

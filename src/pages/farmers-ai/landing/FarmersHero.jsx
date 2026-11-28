@@ -4,16 +4,16 @@ import { PageHeader } from '../../../components/ui/PageHeader';
 
 export function FarmersHero({ lang, text }) {
   return (
-    <div 
+    <div
       className="keep-white relative rounded-[32px] overflow-hidden mb-12 bg-cover bg-center min-h-[520px] md:min-h-[600px] flex items-center border border-white/10 shadow-3xl"
       style={{ backgroundImage: 'url(/farmers_hero_banner.png)' }}
     >
       <div className="absolute inset-0 pointer-events-none" style={{ background: 'linear-gradient(to right, rgba(8,15,11,0.92), rgba(8,15,11,0.75), rgba(8,15,11,0.35))' }} />
-      
-      <div className="relative z-10 max-w-6xl mx-auto px-6 md:px-12 py-12 md:py-16 grid grid-cols-1 lg:grid-cols-12 gap-8 items-center w-full">
-        <div className="lg:col-span-7 text-left space-y-6 rounded-3xl p-4 sm:p-6" style={{ backgroundColor: 'rgba(8, 15, 11, 0.72)' }}>
-          <PageHeader
-            badge={
+
+          <div className="relative z-10 max-w-6xl mx-auto px-6 md:px-12 py-12 md:py-16 grid grid-cols-1 lg:grid-cols-12 gap-8 items-center w-full">
+            <div className="lg:col-span-7 text-left space-y-6 rounded-3xl p-4 sm:p-6" style={{ backgroundColor: 'rgba(8, 15, 11, 0.72)' }}>
+              <PageHeader
+                badge={
               <div className="inline-flex items-center space-x-2 bg-red-500/20 border border-red-400/40 px-4 py-2 rounded-full">
                 <span className="w-2 h-2 rounded-full bg-red-400 animate-pulse"></span>
                 <span className="text-red-300 font-sans text-xs font-semibold uppercase tracking-wider">{text.problemTitle}</span>
@@ -67,7 +67,7 @@ export function FarmersHero({ lang, text }) {
         </div>
       </div>
     </div>
-  );
+            );
 }
 
-export default FarmersHero;
+            export default FarmersHero;

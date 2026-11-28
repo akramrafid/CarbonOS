@@ -11,16 +11,16 @@ export function SegmentsTable({
 }) {
   return (
     <div className="space-y-4">
-      <div className="flex flex-wrap justify-between items-center gap-2">
-        <div className="flex items-center space-x-2">
-          <Sparkles className="w-4 h-4 text-accent" />
-          <h3 className="font-sans font-bold text-base text-fg-primary">
-            Detected Utility Segments ({segments.length} Line Items)
-          </h3>
-        </div>
+        <div className="flex flex-wrap justify-between items-center gap-2">
+          <div className="flex items-center space-x-2">
+            <Sparkles className="w-4 h-4 text-accent" />
+              <h3 className="font-sans font-bold text-base text-fg-primary">
+                Detected Utility Segments ({segments.length} Line Items)
+              </h3>
+          </div>
 
-        <div className="text-[11px] font-mono text-fg-secondary flex items-center space-x-2">
-          {auditSeal ? (
+            <div className="text-[11px] font-mono text-fg-secondary flex items-center space-x-2">
+              {auditSeal ? (
             <span className="px-2 py-0.5 rounded-full bg-emerald-500/20 text-emerald-700 dark:text-emerald-300 border border-emerald-500/40 flex items-center gap-1 font-bold">
               <Lock className="w-3 h-3" />
               {auditSeal}
@@ -166,7 +166,7 @@ export function SegmentsTable({
         </table>
       </div>
     </div>
-  );
+            );
 }
 
-export default SegmentsTable;
+            export default SegmentsTable;

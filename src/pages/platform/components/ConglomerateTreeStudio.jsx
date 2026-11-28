@@ -1,12 +1,12 @@
 import React, { useState } from 'react';
-import { 
-  Building, 
-  Network, 
-  Layers, 
-  TrendingUp, 
-  Users, 
-  DollarSign, 
-  MapPin, 
+import {
+  Building,
+  Network,
+  Layers,
+  TrendingUp,
+  Users,
+  DollarSign,
+  MapPin,
   ArrowRight,
   ChevronRight,
   ShieldCheck,
@@ -83,23 +83,22 @@ export const ConglomerateTreeStudio = ({ isLight, locale }) => {
 
   return (
     <div className="space-y-6">
-      <div className={`p-6 rounded-3xl border ${
-        isLight 
-          ? 'bg-bg-surface border-border-strong' 
+      <div className={`p-6 rounded-3xl border ${isLight
+          ? 'bg-bg-surface border-border-strong'
           : 'bg-gradient-to-r from-bg-surface to-bg-elevated border-border-subtle'
-      }`}>
+        }`}>
         <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
           <div className="space-y-1">
             <div className="flex items-center space-x-2">
               <div className="w-8 h-8 rounded-xl bg-accent/10 border border-accent/30 flex items-center justify-center text-accent">
                 <Network className="w-4 h-4" />
               </div>
-              <h2 className="text-xl font-bold font-sans text-fg-primary">
-                {locale.entityTitle}
-              </h2>
-              <span className="px-2.5 py-0.5 rounded-full text-[10px] font-mono font-bold bg-accent/15 text-accent border border-accent/30">
-                Sweep Trees Model · Demo data
-              </span>
+                <h2 className="text-xl font-bold font-sans text-fg-primary">
+                  {locale.entityTitle}
+                </h2>
+                <span className="px-2.5 py-0.5 rounded-full text-[10px] font-mono font-bold bg-accent/15 text-accent border border-accent/30">
+                  Sweep Trees Model · Demo data
+                </span>
             </div>
             <p className={`text-xs ${isLight ? 'text-gray-600' : 'text-fg-secondary'}`}>
               {locale.entitySubtitle}
@@ -164,11 +163,10 @@ export const ConglomerateTreeStudio = ({ isLight, locale }) => {
               <div
                 key={ent.id}
                 onClick={() => setSelectedEntity(ent)}
-                className={`p-4 rounded-3xl border transition-all cursor-pointer ${
-                  isSelected 
-                    ? 'border-emerald-500 ring-2 ring-emerald-500/20 bg-emerald-500/5' 
+                className={`p-4 rounded-3xl border transition-all cursor-pointer ${isSelected
+                    ? 'border-emerald-500 ring-2 ring-emerald-500/20 bg-emerald-500/5'
                     : (isLight ? 'bg-white border-gray-200 hover:border-gray-300' : 'bg-bg-elevated border-border-subtle hover:border-border-strong')
-                }`}
+                  }`}
               >
                 <div className="flex items-start justify-between">
                   <div>
@@ -189,9 +187,8 @@ export const ConglomerateTreeStudio = ({ isLight, locale }) => {
         </div>
 
         {/* Right 2/3: Selected Entity Deep Dive */}
-        <div className={`lg:col-span-2 p-6 rounded-3xl border space-y-6 ${
-          isLight ? 'bg-white border-gray-200' : 'bg-bg-elevated border-border-subtle'
-        }`}>
+        <div className={`lg:col-span-2 p-6 rounded-3xl border space-y-6 ${isLight ? 'bg-white border-gray-200' : 'bg-bg-elevated border-border-subtle'
+          }`}>
           <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 border-b border-gray-100 dark:border-gray-800 pb-4">
             <div>
               <div className="flex items-center space-x-2">
@@ -213,56 +210,55 @@ export const ConglomerateTreeStudio = ({ isLight, locale }) => {
           </div>
 
           {/* Scope Breakdown */}
-          <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
-            <div className={`p-4 rounded-2xl border ${isLight ? 'bg-gray-50 border-gray-200' : 'bg-bg-canvas border-border-subtle'}`}>
-              <span className="text-[10px] font-mono text-amber-800 dark:text-amber-400 uppercase block">Scope 1 Direct</span>
-              <span className="text-lg font-bold font-mono text-amber-800 dark:text-amber-400 mt-1 block">
-                {selectedEntity.emissions.scope1.toFixed(2)} t
-              </span>
-              <span className="text-[10px] text-fg-secondary block mt-1">Fuels & generators</span>
-            </div>
-            <div className={`p-4 rounded-2xl border ${isLight ? 'bg-gray-50 border-gray-200' : 'bg-bg-canvas border-border-subtle'}`}>
-              <span className="text-[10px] font-mono text-cyan-700 dark:text-cyan-400 uppercase block">Scope 2 Grid</span>
-              <span className="text-lg font-bold font-mono text-cyan-700 dark:text-cyan-400 mt-1 block">
-                {selectedEntity.emissions.scope2.toFixed(2)} t
-              </span>
-              <span className="text-[10px] text-fg-secondary block mt-1">Purchased power</span>
-            </div>
-            <div className={`p-4 rounded-2xl border ${isLight ? 'bg-gray-50 border-gray-200' : 'bg-bg-canvas border-border-subtle'}`}>
-              <span className="text-[10px] font-mono text-emerald-700 dark:text-emerald-400 uppercase block">Scope 3 Value Chain</span>
-              <span className="text-lg font-bold font-mono text-emerald-700 dark:text-emerald-400 mt-1 block">
-                {selectedEntity.emissions.scope3.toFixed(2)} t
-              </span>
-              <span className="text-[10px] text-fg-secondary block mt-1">Yarn & transport</span>
-            </div>
-          </div>
-
-          {/* Intensity Benchmarks */}
-          <div className={`p-4 rounded-2xl border space-y-3 ${
-            isLight ? 'bg-gray-50 border-gray-200' : 'bg-bg-canvas border-border-subtle'
-          }`}>
-            <h4 className="text-xs font-mono font-bold uppercase tracking-wider text-gray-500">
-              Subsidiary Operational Benchmarks
-            </h4>
-            <div className="grid grid-cols-2 gap-4 text-xs font-mono">
-              <div>
-                <span className="text-gray-500 block">Carbon Intensity / Turnover:</span>
-                <span className="font-bold text-sm text-gray-800 dark:text-gray-200">
-                  {selectedEntity.intensity_tco2e_per_crore} tCO₂e / Crore BDT
-                </span>
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+              <div className={`p-4 rounded-2xl border ${isLight ? 'bg-gray-50 border-gray-200' : 'bg-bg-canvas border-border-subtle'}`}>
+                  <span className="text-[10px] font-mono text-amber-800 dark:text-amber-400 uppercase block">Scope 1 Direct</span>
+                  <span className="text-lg font-bold font-mono text-amber-800 dark:text-amber-400 mt-1 block">
+                    {selectedEntity.emissions.scope1.toFixed(2)} t
+                  </span>
+                  <span className="text-[10px] text-fg-secondary block mt-1">Fuels & generators</span>
               </div>
-              <div>
-                <span className="text-gray-500 block">Emissions Per Employee:</span>
-                <span className="font-bold text-sm text-gray-800 dark:text-gray-200">
-                  {(selectedEntity.emissions.total / selectedEntity.headcount).toFixed(2)} tCO₂e / FTE
-                </span>
+              <div className={`p-4 rounded-2xl border ${isLight ? 'bg-gray-50 border-gray-200' : 'bg-bg-canvas border-border-subtle'}`}>
+                  <span className="text-[10px] font-mono text-cyan-700 dark:text-cyan-400 uppercase block">Scope 2 Grid</span>
+                  <span className="text-lg font-bold font-mono text-cyan-700 dark:text-cyan-400 mt-1 block">
+                    {selectedEntity.emissions.scope2.toFixed(2)} t
+                  </span>
+                  <span className="text-[10px] text-fg-secondary block mt-1">Purchased power</span>
+              </div>
+              <div className={`p-4 rounded-2xl border ${isLight ? 'bg-gray-50 border-gray-200' : 'bg-bg-canvas border-border-subtle'}`}>
+                  <span className="text-[10px] font-mono text-emerald-700 dark:text-emerald-400 uppercase block">Scope 3 Value Chain</span>
+                  <span className="text-lg font-bold font-mono text-emerald-700 dark:text-emerald-400 mt-1 block">
+                    {selectedEntity.emissions.scope3.toFixed(2)} t
+                  </span>
+                  <span className="text-[10px] text-fg-secondary block mt-1">Yarn & transport</span>
+              </div>
+            </div>
+
+            {/* Intensity Benchmarks */}
+            <div className={`p-4 rounded-2xl border space-y-3 ${isLight ? 'bg-gray-50 border-gray-200' : 'bg-bg-canvas border-border-subtle'
+              }`}>
+              <h4 className="text-xs font-mono font-bold uppercase tracking-wider text-gray-500">
+                Subsidiary Operational Benchmarks
+              </h4>
+              <div className="grid grid-cols-2 gap-4 text-xs font-mono">
+                <div>
+                  <span className="text-gray-500 block">Carbon Intensity / Turnover:</span>
+                  <span className="font-bold text-sm text-gray-800 dark:text-gray-200">
+                    {selectedEntity.intensity_tco2e_per_crore} tCO₂e / Crore BDT
+                  </span>
+                </div>
+                <div>
+                  <span className="text-gray-500 block">Emissions Per Employee:</span>
+                  <span className="font-bold text-sm text-gray-800 dark:text-gray-200">
+                    {(selectedEntity.emissions.total / selectedEntity.headcount).toFixed(2)} tCO₂e / FTE
+                  </span>
+                </div>
               </div>
             </div>
           </div>
         </div>
       </div>
-    </div>
-  );
+      );
 };
 
-export default ConglomerateTreeStudio;
+      export default ConglomerateTreeStudio;
