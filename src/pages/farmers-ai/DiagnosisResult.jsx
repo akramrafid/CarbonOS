@@ -16,7 +16,7 @@ import { TREATMENT_DB, URGENCY_CONFIG } from './treatmentDb';
 const DiagnosisResult = ({ isInline = false, onBack = null, inlineResult = null, inlineImageBlob = null }) => {
   const location = useLocation();
   const navigate = useNavigate();
-  
+
   const { result: routeResult, imageBlob: routeImageBlob } = location.state || {};
   const [isPlaying, setIsPlaying] = useState(false);
   const [activeTab, setActiveTab] = useState('immediate');
@@ -115,11 +115,18 @@ const DiagnosisResult = ({ isInline = false, onBack = null, inlineResult = null,
         )
       )}
 
-      {/* Page Header */}
-      <PageHeader
-        title="Diagnosis Result"
-        badge={isOffline ? <Badge variant="warning"><WifiOff className="w-3 h-3 mr-1 inline" /> Offline</Badge> : undefined}
-      />
+      {/* Page Header (suppress second <h1> when embedded inline on FarmersAILanding) */}
+      {!isInline ? (
+        <PageHeader
+          title="Diagnosis Result"
+          badge={isOffline ? <Badge variant="warning"><WifiOff className="w-3 h-3 mr-1 inline" /> Offline</Badge> : undefined}
+        />
+      ) : (
+        <div className="flex flex-wrap items-center justify-between gap-2 pb-3 border-b border-border-subtle">
+          <h2 className="text-2xl font-bold text-fg-primary tracking-tight">Diagnosis Result</h2>
+          {isOffline && <Badge variant="warning"><WifiOff className="w-3 h-3 mr-1 inline" /> Offline</Badge>}
+        </div>
+      )}
 
       {/* Crop Image + Grad-CAM Opacity Comparison */}
       <div className="space-y-2.5">
@@ -189,105 +196,105 @@ const DiagnosisResult = ({ isInline = false, onBack = null, inlineResult = null,
               Grad-CAM
             </Button>
           </div>
-          <label className="flex items-center gap-2 flex-1 min-w-[160px] font-mono text-[11px] text-white/70">
-            <span>Heatmap:</span>
-            <input
-              type="range"
-              min="0"
-              max="100"
-              value={gradCamOpacity}
-              aria-label="Crop Grad-CAM heatmap opacity"
-              onChange={(e) => setGradCamOpacity(Number(e.target.value))}
-              className="flex-1 accent-emerald-500 cursor-pointer"
-            />
-            <span className="tabular-nums text-emerald-400 w-9 text-right">{gradCamOpacity}%</span>
-          </label>
+            <label className="flex items-center gap-2 flex-1 min-w-[160px] font-mono text-[11px] text-fg-secondary">
+              <span>Heatmap:</span>
+              <input
+                type="range"
+                min="0"
+                max="100"
+                value={gradCamOpacity}
+                aria-label="Crop Grad-CAM heatmap opacity"
+                onChange={(e) => setGradCamOpacity(Number(e.target.value))}
+                className="flex-1 accent-emerald-500 cursor-pointer"
+              />
+              <span className="tabular-nums text-emerald-700 dark:text-emerald-400 w-9 text-right">{gradCamOpacity}%</span>
+            </label>
         </div>
       </div>
 
-      <div className="fade-in-up bg-white/5 border border-white/10 rounded-[24px] p-5 relative overflow-hidden">
-        <div className="flex items-start justify-between relative z-10">
-          <div className="flex-1">
-            <p className="text-white/50 text-xs font-semibold uppercase tracking-wider mb-1">Detected Condition</p>
-            <h2 className="text-2xl font-extrabold text-white capitalize tracking-tight leading-tight">
-              {treatment.name || disease?.replace(/_/g, ' ')}
-            </h2>
-            {treatment.nameBn && (
-              <p className="text-lime-400/80 text-sm font-semibold mt-0.5">{treatment.nameBn}</p>
-            )}
-          </div>
-          <div className={`ml-4 px-3 py-1.5 rounded-xl ${urgency.bg} border ${urgency.border} text-center`}>
-            {isHealthy
-              ? <CheckCircle className={`w-6 h-6 mx-auto ${urgency.color}`} />
-              : treatment.urgency === 'critical'
-                ? <TriangleAlert className={`w-6 h-6 mx-auto ${urgency.color}`} />
-                : <AlertTriangle className={`w-6 h-6 mx-auto ${urgency.color}`} />
-            }
-            <span className={`text-[10px] mt-1 font-bold uppercase block ${urgency.color}`}>{severity || 'mild'}</span>
-          </div>
-        </div>
-
-        {/* Confidence Meter */}
-        <div className="mt-4 relative z-10">
-          <div className="flex justify-between items-center mb-1.5">
-            <span className="text-white/40 text-xs font-medium">Diagnostic Confidence</span>
-            <span className={`text-sm font-extrabold ${pct >= 75 ? 'text-lime-400' : pct >= 50 ? 'text-yellow-400' : 'text-orange-400'}`}>{pct}%</span>
-          </div>
-          <div className="h-2 bg-white/10 rounded-full overflow-hidden">
-            <div
-              className={`h-full rounded-full bar-fill ${pct >= 75 ? 'bg-gradient-to-r from-lime-400 to-lime-500' : pct >= 50 ? 'bg-gradient-to-r from-yellow-400 to-amber-400' : 'bg-gradient-to-r from-orange-400 to-red-400'}`}
-              style={{ '--target-width': `${pct}%`, width: `${pct}%` }}
-            />
-          </div>
-          <p className="text-white/30 text-[10px] mt-1.5">
-            {pct >= 80 ? 'High confidence — proceed with treatment plan below'
-              : pct >= 60 ? 'Moderate confidence — treatment is recommended; monitor response'
-              : 'Lower confidence — specialist field verification is advised before chemical application'}
-          </p>
-        </div>
-
-        {/* Alert Banners */}
-        {needs_agronomist_review && (
-          <div className="mt-4 flex items-start gap-2.5 bg-amber-500/10 border border-amber-400/25 px-4 py-3 rounded-xl relative z-10">
-            <AlertCircle className="w-4 h-4 text-amber-400 shrink-0 mt-0.5" />
-            <div>
-              <p className="text-amber-300 text-sm font-bold">Specialist Field Verification Recommended</p>
-              <p className="text-amber-200/70 text-xs mt-0.5 leading-relaxed">
-                Due to the visual complexity of this case, a field visit by your local DAE agronomist is advised before heavy chemical treatment. The general treatment guidance below is still applicable.
-              </p>
+        <div className="fade-in-up bg-bg-surface border border-border-subtle rounded-[24px] p-5 relative overflow-hidden">
+          <div className="flex items-start justify-between relative z-10">
+            <div className="flex-1">
+                <p className="text-fg-secondary text-xs font-semibold uppercase tracking-wider mb-1">Detected Condition</p>
+                <h2 className="text-2xl font-extrabold text-fg-primary capitalize tracking-tight leading-tight">
+                  {treatment.name || disease?.replace(/_/g, ' ')}
+                </h2>
+                {treatment.nameBn && (
+              <p className="text-emerald-700 dark:text-lime-400 text-sm font-semibold mt-0.5">{treatment.nameBn}</p>
+                )}
+            </div>
+            <div className={`ml-4 px-3 py-1.5 rounded-xl ${urgency.bg} border ${urgency.border} text-center`}>
+              {isHealthy
+                ? <CheckCircle className={`w-6 h-6 mx-auto ${urgency.color}`} />
+                : treatment.urgency === 'critical'
+                  ? <TriangleAlert className={`w-6 h-6 mx-auto ${urgency.color}`} />
+                  : <AlertTriangle className={`w-6 h-6 mx-auto ${urgency.color}`} />
+              }
+              <span className={`text-[10px] mt-1 font-bold uppercase block ${urgency.color}`}>{severity || 'mild'}</span>
             </div>
           </div>
+
+          {/* Confidence Meter */}
+          <div className="mt-4 relative z-10">
+            <div className="flex justify-between items-center mb-1.5">
+              <span className="text-fg-secondary text-xs font-medium">Diagnostic Confidence</span>
+              <span className={`text-sm font-extrabold ${pct >= 75 ? 'text-emerald-700 dark:text-lime-400' : pct >= 50 ? 'text-amber-700 dark:text-yellow-400' : 'text-orange-700 dark:text-orange-400'}`}>{pct}%</span>
+            </div>
+              <div className="h-2 bg-bg-muted rounded-full overflow-hidden">
+                <div
+                  className={`h-full rounded-full bar-fill ${pct >= 75 ? 'bg-gradient-to-r from-lime-400 to-lime-500' : pct >= 50 ? 'bg-gradient-to-r from-yellow-400 to-amber-400' : 'bg-gradient-to-r from-orange-400 to-red-400'}`}
+                  style={{ '--target-width': `${pct}%`, width: `${pct}%` }}
+                />
+              </div>
+                <p className="text-fg-muted text-[10px] mt-1.5">
+                  {pct >= 80 ? 'High confidence — proceed with treatment plan below'
+                    : pct >= 60 ? 'Moderate confidence — treatment is recommended; monitor response'
+                      : 'Lower confidence — specialist field verification is advised before chemical application'}
+                </p>
+            </div>
+
+            {/* Alert Banners */}
+            {needs_agronomist_review && (
+                <div className="mt-4 flex items-start gap-2.5 bg-amber-500/10 border border-amber-500/30 px-4 py-3 rounded-xl relative z-10">
+                  <AlertCircle className="w-4 h-4 text-amber-700 dark:text-amber-400 shrink-0 mt-0.5" />
+                  <div>
+                      <p className="text-amber-800 dark:text-amber-300 text-sm font-bold">Specialist Field Verification Recommended</p>
+                      <p className="text-amber-800/80 dark:text-amber-200/80 text-xs mt-0.5 leading-relaxed">
+                        Due to the visual complexity of this case, a field visit by your local DAE agronomist is advised before heavy chemical treatment. The general treatment guidance below is still applicable.
+                      </p>
+                  </div>
+                </div>
         )}
 
-        {isTierA && !isHealthy && (
-          <div className="mt-3 flex items-center gap-2 bg-blue-500/10 border border-blue-400/20 px-4 py-2.5 rounded-xl relative z-10">
-            <ShieldCheck className="w-4 h-4 text-blue-400 shrink-0" />
-            <p className="text-blue-300 text-xs font-semibold">Priority crop: early treatment protects your seasonal yield.</p>
-          </div>
+                {isTierA && !isHealthy && (
+                    <div className="mt-3 flex items-center gap-2 bg-blue-500/10 border border-blue-500/25 px-4 py-2.5 rounded-xl relative z-10">
+                      <ShieldCheck className="w-4 h-4 text-blue-700 dark:text-blue-400 shrink-0" />
+                      <p className="text-blue-800 dark:text-blue-300 text-xs font-semibold">Priority crop: early treatment protects your seasonal yield.</p>
+                    </div>
         )}
 
-        {isTierB && !isHealthy && (severity === 'moderate' || severity === 'severe') && (
-          <div className="mt-3 flex items-start gap-2 bg-purple-500/10 border border-purple-400/20 px-4 py-2.5 rounded-xl relative z-10">
-            <AlertTriangle className="w-4 h-4 text-purple-400 shrink-0 mt-0.5" />
-            <p className="text-purple-300 text-xs font-semibold">Carbon Asset Risk: This perennial tree is a registered carbon asset — timely treatment protects long-term carbon stock value.</p>
+                    {isTierB && !isHealthy && (severity === 'moderate' || severity === 'severe') && (
+          <div className="mt-3 flex items-start gap-2 bg-purple-500/10 border border-purple-500/25 px-4 py-2.5 rounded-xl relative z-10">
+            <AlertTriangle className="w-4 h-4 text-purple-700 dark:text-purple-400 shrink-0 mt-0.5" />
+            <p className="text-purple-800 dark:text-purple-300 text-xs font-semibold">Carbon Asset Risk: This perennial tree is a registered carbon asset — timely treatment protects long-term carbon stock value.</p>
           </div>
         )}
       </div>
 
-      <div className="fade-in-up bg-white/5 border border-white/10 rounded-[24px] p-5 relative overflow-hidden" style={{ animationDelay: '0.1s' }}>
+      <div className="fade-in-up bg-bg-surface border border-border-subtle rounded-[24px] p-5 relative overflow-hidden" style={{ animationDelay: '0.1s' }}>
         <div className="flex items-center justify-between mb-5 relative z-10">
           <div>
             <div className="flex items-center gap-2 mb-0.5">
-              <ClipboardList className="w-4.5 h-4.5 text-lime-400" size={16} />
-              <h3 className="text-lg font-extrabold text-lime-400 tracking-tight">Treatment Plan / চিকিৎসা পরিকল্পনা</h3>
+              <ClipboardList className="w-5 h-5 text-emerald-700 dark:text-lime-400" size={16} />
+              <h3 className="text-lg font-extrabold text-emerald-700 dark:text-lime-400 tracking-tight">Treatment Plan / চিকিৎসা পরিকল্পনা</h3>
             </div>
-            <p className="text-white/40 text-[11px] ml-6">Follow these steps in order for best results</p>
+            <p className="text-fg-muted text-[11px] ml-6">Follow these steps in order for best results</p>
           </div>
           <IconButton
             icon={isPlaying ? <VolumeX size={18} /> : <Volume2 size={18} />}
             aria-label="Play voice instructions"
             onClick={() => playBanglaVoice(voiceText)}
-            className="text-lime-400"
+            className="text-emerald-700 dark:text-lime-400"
           />
         </div>
 
@@ -308,26 +315,26 @@ const DiagnosisResult = ({ isInline = false, onBack = null, inlineResult = null,
         {/* Tab Content */}
         <div className="relative z-10 space-y-3">
           {(TABS.find(t => t.id === activeTab)?.items || []).map((item, idx) => (
-            <div key={idx} className="flex items-start gap-3 bg-white/[0.03] border border-white/[0.06] rounded-2xl p-3.5">
+            <div key={idx} className="flex items-start gap-3 bg-bg-elevated/60 border border-border-subtle rounded-2xl p-3.5">
               <div className={`w-6 h-6 rounded-full flex items-center justify-center text-[11px] font-extrabold shrink-0 mt-0.5 ${
-                activeTab === 'immediate' ? 'bg-red-400/20 text-red-400' :
-                activeTab === 'organic' ? 'bg-lime-400/15 text-lime-400' :
-                activeTab === 'chemical' ? 'bg-blue-400/15 text-blue-400' :
-                'bg-purple-400/15 text-purple-400'
+                activeTab === 'immediate' ? 'bg-red-500/15 text-red-700 dark:text-red-400' :
+                activeTab === 'organic' ? 'bg-emerald-500/15 text-emerald-700 dark:text-lime-400' :
+                activeTab === 'chemical' ? 'bg-blue-500/15 text-blue-700 dark:text-blue-400' :
+                'bg-purple-500/15 text-purple-700 dark:text-purple-400'
               }`}>
                 {idx + 1}
               </div>
-              <p className="text-white/85 text-sm leading-relaxed">{item}</p>
+              <p className="text-fg-primary text-sm leading-relaxed">{item}</p>
             </div>
           ))}
         </div>
 
         {/* DAE Disclaimer */}
-        <div className="mt-5 flex items-start gap-2.5 bg-white/[0.03] border border-white/[0.07] rounded-xl p-3.5 relative z-10">
-          <ShieldCheck className="w-4 h-4 text-lime-400/70 shrink-0 mt-0.5" />
-          <p className="text-white/40 text-[11px] leading-relaxed">
+        <div className="mt-5 flex items-start gap-2.5 bg-bg-elevated/60 border border-border-subtle rounded-xl p-3.5 relative z-10">
+          <ShieldCheck className="w-4 h-4 text-emerald-700 dark:text-lime-400 shrink-0 mt-0.5" />
+          <p className="text-fg-muted text-[11px] leading-relaxed">
             For chemical applications, always follow label instructions and consult your nearest{' '}
-            <span className="text-lime-400/70 font-semibold">Department of Agricultural Extension (DAE)</span>{' '}
+            <span className="text-emerald-700 dark:text-lime-400 font-semibold">Department of Agricultural Extension (DAE)</span>{' '}
             office. Doses may vary by crop variety and regional conditions.
           </p>
         </div>
@@ -335,17 +342,17 @@ const DiagnosisResult = ({ isInline = false, onBack = null, inlineResult = null,
 
       {/* Weather Risk */}
       {weather_risk && (
-        <div className="fade-in-up bg-blue-500/10 border border-blue-400/25 p-4 rounded-2xl flex items-start gap-3" style={{ animationDelay: '0.2s' }}>
-          <ThermometerSun className="w-5 h-5 text-blue-400 shrink-0 mt-0.5" />
+        <div className="fade-in-up bg-blue-500/10 border border-blue-500/25 p-4 rounded-2xl flex items-start gap-3" style={{ animationDelay: '0.2s' }}>
+          <ThermometerSun className="w-5 h-5 text-blue-700 dark:text-blue-400 shrink-0 mt-0.5" />
           <div>
-            <h3 className="font-bold text-blue-300 text-sm mb-1">Weather Risk / আবহাওয়া সতর্কতা</h3>
-            <p className="text-blue-200/75 text-sm leading-relaxed">{weather_risk.summary_bn}</p>
+            <h3 className="font-bold text-blue-800 dark:text-blue-300 text-sm mb-1">Weather Risk / আবহাওয়া সতর্কতা</h3>
+            <p className="text-blue-800/80 dark:text-blue-200/80 text-sm leading-relaxed">{weather_risk.summary_bn}</p>
             {weather_risk.risk_index && (
               <div className="mt-2 flex items-center gap-2">
-                <div className="h-1.5 flex-1 bg-white/10 rounded-full overflow-hidden">
-                  <div className="h-full bg-blue-400 rounded-full transition-all" style={{ width: `${Math.min(100, weather_risk.risk_index * 10)}%` }} />
+                <div className="h-1.5 flex-1 bg-bg-muted rounded-full overflow-hidden">
+                  <div className="h-full bg-blue-500 dark:bg-blue-400 rounded-full transition-all" style={{ width: `${Math.min(100, weather_risk.risk_index * 10)}%` }} />
                 </div>
-                <span className="text-blue-300 text-xs font-bold">{weather_risk.risk_index}/10</span>
+                <span className="text-blue-800 dark:text-blue-300 text-xs font-bold">{weather_risk.risk_index}/10</span>
               </div>
             )}
           </div>
@@ -359,7 +366,7 @@ const DiagnosisResult = ({ isInline = false, onBack = null, inlineResult = null,
   }
 
   return (
-    <div className="pt-16 pb-12 px-4 max-w-lg mx-auto min-h-screen flex flex-col space-y-5">
+    <div className="max-w-lg mx-auto w-full flex flex-col space-y-5">
       {mainResultContent}
     </div>
   );

@@ -1,0 +1,8 @@
+CARBONOS SYNTHETIC DEMO BILL
+Not an actual utility invoice. Do not use for regulatory reporting.
+Facility: Savar Spinning Unit 1 [SAMPLE DATA]
+Reporting period: 2024-07-01 to 2024-09-30
+Electricity consumption: 125,000 kWh
+Meter reference: SAMPLE-METER-01
+Purpose: document extraction and human review demonstration.
+No customer data is included in this file.

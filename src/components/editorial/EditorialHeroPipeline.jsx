@@ -3,8 +3,23 @@ import { Link } from 'react-router-dom';
 import { Upload, FileText, Cpu, ShieldCheck, Download, Layers, Satellite } from 'lucide-react';
 import { PIPELINE_STEPS } from '../saas-pipeline/pipelineStepsData';
 import { getPrefersReducedMotion } from '../../lib/motion';
+import AnimatedNumber from './AnimatedNumber';
 
 const BANGLADESH_SCAN_NODES = [
+  {
+    id: 'national-all',
+    name: 'National Corridor Aggregate',
+    shortLabel: 'National',
+    sector: 'Bangladesh Verified Pipeline',
+    cx: 158,
+    cy: 132,
+    ndvi: '0.79 NDVI',
+    metric: '21,420 ha · 5 Active Hubs',
+    reductionMt: 10.42,
+    payoutMillion: 412.8,
+    farmersCount: 104200,
+    ndviScore: 0.79,
+  },
   {
     id: 'rangpur-awd',
     name: 'Rangpur AWD Rice Corridor',
@@ -14,6 +29,10 @@ const BANGLADESH_SCAN_NODES = [
     cy: 64,
     ndvi: '0.78 NDVI',
     metric: '1,200 tCO₂e · IoT Piezometer',
+    reductionMt: 2.18,
+    payoutMillion: 98.4,
+    farmersCount: 41200,
+    ndviScore: 0.78,
   },
   {
     id: 'sylhet-solar',
@@ -24,6 +43,10 @@ const BANGLADESH_SCAN_NODES = [
     cy: 88,
     ndvi: '0.71 NDVI',
     metric: '940 MWh · Smart Inverter',
+    reductionMt: 1.46,
+    payoutMillion: 64.2,
+    farmersCount: 18500,
+    ndviScore: 0.71,
   },
   {
     id: 'dhaka-esg',
@@ -34,6 +57,10 @@ const BANGLADESH_SCAN_NODES = [
     cy: 132,
     ndvi: 'DESCO / Titas',
     metric: 'Dual-Control Ledger Active',
+    reductionMt: 2.84,
+    payoutMillion: 82.0,
+    farmersCount: 940,
+    ndviScore: 0.64,
   },
   {
     id: 'sundarbans-blue',
@@ -44,6 +71,10 @@ const BANGLADESH_SCAN_NODES = [
     cy: 204,
     ndvi: '0.84 NDVI',
     metric: '3,800 ha · Sentinel-2 L2A',
+    reductionMt: 2.65,
+    payoutMillion: 112.5,
+    farmersCount: 28900,
+    ndviScore: 0.84,
   },
   {
     id: 'cht-forestry',
@@ -54,6 +85,10 @@ const BANGLADESH_SCAN_NODES = [
     cy: 196,
     ndvi: '0.81 NDVI',
     metric: '5,420 ha · SAR + Optical',
+    reductionMt: 1.29,
+    payoutMillion: 55.7,
+    farmersCount: 14660,
+    ndviScore: 0.81,
   },
 ];
 
@@ -195,31 +230,45 @@ export function EditorialHeroPipeline() {
 
       {activeView === 'pipeline' ? (
         <div className="ed-pipe-body">
-          {/* 4-Step Hairline Stepper */}
-          <div className="ed-pipe-steps" role="tablist" aria-label="Pipeline stages">
-            {steps.map((step, idx) => {
-              const isActive = activeStep === idx;
-              return (
-                <button
-                  key={step.title}
-                  type="button"
-                  role="tab"
-                  aria-selected={isActive}
-                  onClick={() => handleSelectStep(idx)}
-                  className={`ed-pipe-step-btn ${isActive ? 'is-active' : ''}`}
-                >
-                  <span className="ed-mono ed-pipe-step-num">{`0${idx + 1}`}</span>
-                  <span className="ed-pipe-step-name">{step.title}</span>
-                </button>
-              );
-            })}
+          {/* 4-Step Hairline Stepper + Alive Traveling Progress Connector */}
+          <div className="ed-pipe-stepper-wrap">
+            <div className="ed-pipe-connector" aria-hidden="true">
+              <div
+                className="ed-pipe-connector-fill"
+                style={{ width: `${((activeStep + 1) / steps.length) * 100}%` }}
+              />
+              <span
+                className="ed-pipe-connector-packet"
+                style={{ left: `${(activeStep / Math.max(1, steps.length - 1)) * 92 + 4}%` }}
+              />
+            </div>
+
+            <div className="ed-pipe-steps" role="tablist" aria-label="Pipeline stages">
+              {steps.map((step, idx) => {
+                const isActive = activeStep === idx;
+                const isPassed = idx < activeStep;
+                return (
+                  <button
+                    key={step.title}
+                    type="button"
+                    role="tab"
+                    aria-selected={isActive}
+                    onClick={() => handleSelectStep(idx)}
+                    className={`ed-pipe-step-btn ${isActive ? 'is-active' : isPassed ? 'is-passed' : ''}`}
+                  >
+                    <span className="ed-mono ed-pipe-step-num">{`0${idx + 1}`}</span>
+                    <span className="ed-pipe-step-name">{step.title}</span>
+                  </button>
+                );
+              })}
+            </div>
           </div>
 
-          {/* Interactive Stage Diagram Canvas (Zero Bounce / Zero Shake / Responsive Diagrams) */}
+          {/* Interactive Stage Diagram Canvas (Zero Bounce / Zero Shake / Alive Inner Loops) */}
           <div className="ed-pipe-stage" aria-live="polite">
             {/* Stage 1: Document Dropzone & File Intake Visualization */}
             {activeStep === 0 && (
-              <div className="ed-pipe-panel ed-viz-stage">
+              <div key="stage-upload" className="ed-pipe-panel ed-pipe-panel--alive ed-viz-stage">
                 <div className="ed-viz-upload-scene">
                   <div className="ed-viz-doc-fan" aria-hidden="true">
                     <div className="ed-viz-back-doc ed-viz-back-doc--left">
@@ -259,7 +308,7 @@ export function EditorialHeroPipeline() {
 
             {/* Stage 2: AI OCR & Scope 1-3 Branching Diagram */}
             {activeStep === 1 && (
-              <div className="ed-pipe-panel ed-viz-stage">
+              <div key="stage-process" className="ed-pipe-panel ed-pipe-panel--alive ed-viz-stage">
                 <div className="ed-viz-ocr-diagram">
                   {/* Left: Extracting Core Node */}
                   <div className="ed-viz-cpu-node">
@@ -323,7 +372,7 @@ export function EditorialHeroPipeline() {
 
             {/* Stage 3: Reviewed Source Doc -> Scope 1/2/3 Bar Chart Visualization */}
             {activeStep === 2 && (
-              <div className="ed-pipe-panel ed-viz-stage">
+              <div key="stage-audit" className="ed-pipe-panel ed-pipe-panel--alive ed-viz-stage">
                 <div className="ed-viz-audit-diagram">
                   <div className="ed-viz-reviewed-node">
                     <ShieldCheck size={18} className="ed-accent-text" aria-hidden="true" />
@@ -379,7 +428,7 @@ export function EditorialHeroPipeline() {
 
             {/* Stage 4: One-Click Report -> Compliance Standards Branching Diagram */}
             {activeStep === 3 && (
-              <div className="ed-pipe-panel ed-viz-stage">
+              <div key="stage-export" className="ed-pipe-panel ed-pipe-panel--alive ed-viz-stage">
                 <div className="ed-viz-export-diagram">
                   <div className="ed-viz-report-hub">
                     <Download size={22} className="ed-accent-text" aria-hidden="true" />
@@ -518,16 +567,25 @@ export function EditorialHeroPipeline() {
               ))}
             </div>
 
-            <div className="ed-pipe-metrics-pair">
+            <div className="ed-pipe-metrics-pair ed-pipe-metrics-pair--triple">
               <div className="ed-pipe-metric-cell">
-                <span className="ed-mono ed-pipe-muted">TOTAL REDUCTION</span>
+                <span className="ed-mono ed-pipe-muted">CORRIDOR ABATEMENT</span>
                 <strong className="ed-pipe-metric-val">
-                  10.42M <span className="ed-accent-text">tCO₂e</span>
+                  <AnimatedNumber value={selectedNode.reductionMt} decimals={2} suffix="M " />
+                  <span className="ed-accent-text">tCO₂e</span>
                 </strong>
               </div>
               <div className="ed-pipe-metric-cell">
-                <span className="ed-mono ed-pipe-muted">FARMER PAYOUT RAIL</span>
-                <strong className="ed-pipe-metric-val ed-accent-text">৳412.8M</strong>
+                <span className="ed-mono ed-pipe-muted">GROWER PAYOUT RAIL</span>
+                <strong className="ed-pipe-metric-val ed-accent-text">
+                  <AnimatedNumber value={selectedNode.payoutMillion} decimals={1} prefix="৳" suffix="M" />
+                </strong>
+              </div>
+              <div className="ed-pipe-metric-cell">
+                <span className="ed-mono ed-pipe-muted">ACTIVE PARTICIPANTS</span>
+                <strong className="ed-pipe-metric-val">
+                  <AnimatedNumber value={selectedNode.farmersCount} decimals={0} />
+                </strong>
               </div>
             </div>
 

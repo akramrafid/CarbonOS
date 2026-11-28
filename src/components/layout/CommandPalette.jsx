@@ -165,22 +165,21 @@ export function CommandPalette({ isOpen, onClose }) {
                   `.trim()}
                 >
                   <div className="flex items-center gap-3 min-w-0">
-                    <div className={`p-1.5 rounded-lg shrink-0 ${isSelected ? 'bg-white/20 text-fg-inverse' : 'bg-bg-canvas text-accent'}`}>
-                      <Icon className="w-4 h-4" />
+                      <div className={`p-1.5 rounded-lg shrink-0 ${isSelected ? 'bg-black/20 text-fg-inverse' : 'bg-bg-canvas text-accent'}`}>
+                        <Icon className="w-4 h-4" />
+                      </div>
+                      <div className="flex flex-col min-w-0">
+                        <span className="truncate text-sm">
+                          {item.labelKey ? t(item.labelKey, item.label) : item.label}
+                        </span>
+                        <span className={`text-[11px] font-mono truncate ${isSelected ? 'text-fg-inverse/80' : 'text-fg-muted'}`}>
+                          {item.route}
+                        </span>
+                      </div>
                     </div>
-                    <div className="flex flex-col min-w-0">
-                      <span className="truncate text-sm">
-                        {item.labelKey ? t(item.labelKey, item.label) : item.label}
-                      </span>
-                      <span className={`text-[11px] font-mono truncate ${isSelected ? 'text-fg-inverse/80' : 'text-fg-muted'}`}>
-                        {item.route}
-                      </span>
-                    </div>
-                  </div>
 
-                  <div className="flex items-center gap-2 shrink-0">
-                    <span className={`text-[10px] font-mono px-2 py-0.5 rounded-full border ${
-                      isSelected ? 'border-white/30 text-fg-inverse' : 'border-border-subtle text-fg-muted bg-bg-canvas'
+                    <div className="flex items-center gap-2 shrink-0">
+                      isSelected ? 'border-fg-inverse/35 text-fg-inverse' : 'border-border-subtle text-fg-muted bg-bg-canvas'
                     }`}>
                       {item.category}
                     </span>

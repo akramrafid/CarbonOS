@@ -13,7 +13,7 @@ export const UniversalUtilityExtractor = ({
   isLight = false,
   locale = {},
   activeClientId = 'east-delta-university',
-  onApplyToLedger = () => {}
+  onApplyToLedger = () => { }
 }) => {
   const {
     activeClient,
@@ -52,9 +52,8 @@ export const UniversalUtilityExtractor = ({
 
   return (
     <div
-      className={`space-y-8 rounded-3xl p-6 lg:p-8 border transition-all duration-300 ${
-        isLight ? 'bg-white border-border-subtle text-fg-primary' : 'bg-bg-elevated border-border-subtle text-white'
-      }`}
+      className={`space-y-8 rounded-3xl p-6 lg:p-8 border transition-all duration-300 ${isLight ? 'bg-white border-border-subtle text-fg-primary' : 'bg-bg-elevated border-border-subtle text-white'
+        }`}
     >
       {/* Header Banner & 4 StatCards */}
       <ExtractorHeader
@@ -101,54 +100,54 @@ export const UniversalUtilityExtractor = ({
       />
 
       {/* Action Footer: Approve & Commit */}
-      <div className="flex flex-col sm:flex-row items-center justify-between gap-4 pt-4 border-t border-white/10">
-        <div className="flex items-center space-x-2 text-xs text-gray-400">
-          <ShieldCheck className="w-4 h-4 text-accent" />
-          <span>Line items follow the GHG Protocol Corporate Standard. Nothing here is audited, verified or assured.</span>
+          <div className="flex flex-col sm:flex-row items-center justify-between gap-4 pt-4 border-t border-border-subtle">
+            <div className="flex items-center space-x-2 text-xs text-fg-secondary">
+              <ShieldCheck className="w-4 h-4 text-accent" />
+              <span>Line items follow the GHG Protocol Corporate Standard. Nothing here is audited, verified or assured.</span>
+            </div>
+
+            <Button
+              variant="primary"
+              size="md"
+              onClick={handleCommitToLedger}
+              disabled={isCommitted}
+              className="flex items-center space-x-2"
+            >
+              {isCommitted ? (
+                <>
+                  <Check className="w-4 h-4" />
+                  <span>Sealed to {activeClient.name} Ledger ({auditSeal || 'SEALED'})</span>
+                </>
+              ) : (
+                <>
+                  <CheckCircle2 className="w-4 h-4" />
+                  <span>
+                    Sign Off &amp; Seal to Ledger ({scope2Missing ? 'Scope 2 factor pending' : `${grandTotal.toFixed(2)} tCO₂e`})
+                  </span>
+                </>
+              )}
+            </Button>
+          </div>
+
+          {/* Human-in-the-Loop Edit Modal */}
+          <EditSegmentModal
+            isOpen={showEditModal}
+            onClose={() => setShowEditModal(false)}
+            editingSegment={editingSegment}
+            setEditingSegment={setEditingSegment}
+            onSave={handleSaveCorrection}
+          />
+
+          {/* Add Custom Segment Modal */}
+          <AddSegmentModal
+            isOpen={showAddSegmentModal}
+            onClose={() => setShowAddSegmentModal(false)}
+            newSegment={newSegment}
+            setNewSegment={setNewSegment}
+            onAdd={handleAddCustomSegment}
+          />
         </div>
-
-        <Button
-          variant="primary"
-          size="md"
-          onClick={handleCommitToLedger}
-          disabled={isCommitted}
-          className="flex items-center space-x-2"
-        >
-          {isCommitted ? (
-            <>
-              <Check className="w-4 h-4" />
-              <span>Sealed to {activeClient.name} Ledger ({auditSeal || 'SEALED'})</span>
-            </>
-          ) : (
-            <>
-              <CheckCircle2 className="w-4 h-4" />
-              <span>
-                Sign Off &amp; Seal to Ledger ({scope2Missing ? 'Scope 2 factor pending' : `${grandTotal.toFixed(2)} tCO₂e`})
-              </span>
-            </>
-          )}
-        </Button>
-      </div>
-
-      {/* Human-in-the-Loop Edit Modal */}
-      <EditSegmentModal
-        isOpen={showEditModal}
-        onClose={() => setShowEditModal(false)}
-        editingSegment={editingSegment}
-        setEditingSegment={setEditingSegment}
-        onSave={handleSaveCorrection}
-      />
-
-      {/* Add Custom Segment Modal */}
-      <AddSegmentModal
-        isOpen={showAddSegmentModal}
-        onClose={() => setShowAddSegmentModal(false)}
-        newSegment={newSegment}
-        setNewSegment={setNewSegment}
-        onAdd={handleAddCustomSegment}
-      />
-    </div>
-  );
+        );
 };
 
-export default UniversalUtilityExtractor;
+        export default UniversalUtilityExtractor;

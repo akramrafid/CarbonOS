@@ -1,7 +1,35 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { STATIONS, getAirStatus, getCO2Status } from '../live-metrics/liveMetricsData';
 import { CLIENT_PROFILES, CLIENT_SECTORS } from '../../pages/platform/clientProfiles';
+import AnimatedNumber from './AnimatedNumber';
+import EditorialStationMap from './EditorialStationMap';
+import EditorialPortfolioSlider from './EditorialPortfolioSlider';
+
+function computeClientScopeShares(client) {
+  const b = client?.baselineInputs || {};
+  const dieselKg = Number(b.diesel || 0) * 2.68;
+  const petrolKg = Number(b.petrol || 0) * 2.31;
+  const lpgKg = Number(b.lpg || 0) * 2.98;
+  const scope1 = Math.max(4, Math.round((dieselKg + petrolKg + lpgKg) / 1000));
+  const scope2 = Math.max(8, Math.round((Number(b.electricity || 0) * 0.634) / 1000));
+  const scope3 = Math.max(
+    12,
+    Math.round(
+      (Number(b.truckTransport || 0) * 0.14 + Number(b.airTravel || 0) * 0.18 + Number(b.rawMaterials || 0) * 1.4) /
+        1000
+    )
+  );
+  const total = scope1 + scope2 + scope3 || 1;
+  return {
+    scope1,
+    scope2,
+    scope3,
+    s1Pct: Math.round((scope1 / total) * 100),
+    s2Pct: Math.round((scope2 / total) * 100),
+    s3Pct: Math.max(4, 100 - Math.round((scope1 / total) * 100) - Math.round((scope2 / total) * 100)),
+  };
+}
 
 const SECTORS_LIST = [
   {
@@ -249,7 +277,7 @@ export function EditorialLiveTelemetry() {
           </div>
         )}
 
-        {/* 4 Telemetry Readout Cells */}
+        {/* 4 Telemetry Readout Cells with Live Count-Up Numbers */}
         <div className="ed-metrics-grid">
           <div className="ed-metric-cell">
             <div className="ed-metric-top">
@@ -257,7 +285,7 @@ export function EditorialLiveTelemetry() {
               <span className="ed-mono ed-accent-text">CALIBRATED</span>
             </div>
             <div className="ed-metric-num">
-              {metrics.temp !== null ? metrics.temp.toFixed(1) : '--'}
+              {metrics.temp !== null ? <AnimatedNumber value={metrics.temp} decimals={1} /> : '--'}
               <span className="ed-metric-unit">°C</span>
             </div>
             <span className="ed-mono ed-muted-text">Diurnal: 24.2° – 32.8°</span>
@@ -269,7 +297,7 @@ export function EditorialLiveTelemetry() {
               <span className="ed-mono ed-accent-text">NOMINAL</span>
             </div>
             <div className="ed-metric-num">
-              {metrics.hum !== null ? metrics.hum.toFixed(1) : '--'}
+              {metrics.hum !== null ? <AnimatedNumber value={metrics.hum} decimals={1} /> : '--'}
               <span className="ed-metric-unit">%</span>
             </div>
             <span className="ed-mono ed-muted-text">Vapor Density: 18.4 g/m³</span>
@@ -281,7 +309,7 @@ export function EditorialLiveTelemetry() {
               <span className="ed-mono ed-accent-text">{airStatus.text}</span>
             </div>
             <div className="ed-metric-num">
-              {metrics.air !== null ? metrics.air : '--'}
+              {metrics.air !== null ? <AnimatedNumber value={metrics.air} decimals={0} /> : '--'}
               <span className="ed-metric-unit">raw</span>
             </div>
             <span className="ed-mono ed-muted-text">Sensor: MQ-135 · Baseline: modelled</span>
@@ -293,7 +321,7 @@ export function EditorialLiveTelemetry() {
               <span className="ed-mono ed-accent-text">{co2Status.text}</span>
             </div>
             <div className="ed-metric-num">
-              {metrics.co2 !== null ? metrics.co2 : '--'}
+              {metrics.co2 !== null ? <AnimatedNumber value={metrics.co2} decimals={0} /> : '--'}
               <span className="ed-metric-unit">ppm</span>
             </div>
             <span className="ed-mono ed-muted-text">
@@ -301,6 +329,13 @@ export function EditorialLiveTelemetry() {
             </span>
           </div>
         </div>
+
+        {/* Alive NASA Earthdata / Sentinel-2 Satellite Viewport synced to Station */}
+        <EditorialStationMap
+          stations={STATIONS}
+          activeStation={activeStation}
+          onSelectStation={handleStationChange}
+        />
 
         <div className="ed-band-foot">
           <div>
@@ -322,11 +357,33 @@ export function EditorialLiveTelemetry() {
 
 export function EditorialClientShowcase() {
   const [selectedCategory, setSelectedCategory] = useState('all');
+  const [expandedClientId, setExpandedClientId] = useState(null);
+  const hoverTimerRef = useRef(null);
 
   const filteredClients =
     selectedCategory === 'all'
       ? CLIENT_PROFILES
       : CLIENT_PROFILES.filter((c) => c.category === selectedCategory);
+
+  const handleEnterClient = (id) => {
+    if (hoverTimerRef.current) window.clearTimeout(hoverTimerRef.current);
+    hoverTimerRef.current = window.setTimeout(() => {
+      setExpandedClientId(id);
+    }, 110);
+  };
+
+  const handleLeaveClient = () => {
+    if (hoverTimerRef.current) window.clearTimeout(hoverTimerRef.current);
+    hoverTimerRef.current = window.setTimeout(() => {
+      setExpandedClientId(null);
+    }, 120);
+  };
+
+  useEffect(() => {
+    return () => {
+      if (hoverTimerRef.current) window.clearTimeout(hoverTimerRef.current);
+    };
+  }, []);
 
   return (
     <section id="clients" className="ed-band">
@@ -340,6 +397,7 @@ export function EditorialClientShowcase() {
             <p className="ed-section-sub">
               Explore illustrative Scope 1, 2, and 3 operational baselines modeled across electric
               mobility, student transit, circular jute biopolymers, and higher education campuses.
+              Hover or tap any profile to expand its full-width operational impact dossier.
             </p>
           </div>
           <span className="ed-mono ed-muted-text">{filteredClients.length} PROFILES SHOWN</span>
@@ -352,7 +410,10 @@ export function EditorialClientShowcase() {
               <button
                 key={sec.id}
                 type="button"
-                onClick={() => setSelectedCategory(sec.id)}
+                onClick={() => {
+                  setSelectedCategory(sec.id);
+                  setExpandedClientId(null);
+                }}
                 className={`ed-pill ed-pill--subtle ${isActive ? 'is-filter-active' : ''}`}
               >
                 <span>{sec.label}</span>
@@ -365,19 +426,42 @@ export function EditorialClientShowcase() {
         <div className="ed-clients-grid">
           {filteredClients.map((client) => {
             const cleanUrl = client.website.replace(/^https?:\/\/(www\.)?/, '').replace(/\/$/, '');
+            const isExpanded = expandedClientId === client.id;
+            const scopes = computeClientScopeShares(client);
+
             return (
-              <article key={client.id} className="ed-client-cell">
+              <article
+                key={client.id}
+                className={`ed-client-cell ${isExpanded ? 'is-expanded' : ''}`}
+              >
                 <div className="ed-client-head">
-                  <span className="ed-mono ed-accent-text">DEMO PROFILE</span>
-                  <a
-                    href={client.website}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="ed-client-url ed-mono"
-                    title={`Visit ${client.name} official website`}
-                  >
-                    {cleanUrl} ↗
-                  </a>
+                  <div className={`ed-client-logo-box ${client.logoTheme === 'dark' ? 'is-dark-logo' : ''}`}>
+                    <img
+                      src={client.logo}
+                      alt={`${client.name} logo`}
+                      loading="lazy"
+                      className={`ed-client-logo ${client.logoTheme === 'light' ? 'is-light-logo' : ''}`}
+                    />
+                  </div>
+                  <div className="ed-client-head-meta">
+                    <a
+                      href={client.website}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="ed-client-url ed-mono"
+                      title={`Visit ${client.name} official website`}
+                    >
+                      {cleanUrl} ↗
+                    </a>
+                    <button
+                      type="button"
+                      onClick={() => setExpandedClientId((prev) => (prev === client.id ? null : client.id))}
+                      aria-expanded={isExpanded}
+                      className="ed-pill ed-pill--subtle ed-pill--compact ed-mono"
+                    >
+                      {isExpanded ? 'Collapse −' : 'Impact +'}
+                    </button>
+                  </div>
                 </div>
 
                 <div>
@@ -388,13 +472,57 @@ export function EditorialClientShowcase() {
                 <p className="ed-client-hq ed-mono ed-muted-text">{client.headquarters}</p>
                 <p className="ed-client-highlight">{client.sustainabilityHighlight}</p>
 
+                {isExpanded && (
+                  <div className="ed-client-impact-drawer">
+                    <div className="ed-client-impact-col">
+                      <span className="ed-mono ed-accent-text">HOW CARBONOS CREATES IMPACT</span>
+                      <p className="ed-client-impact-copy">
+                        Digitizes {client.sampleInvoiceType?.toLowerCase() || 'utility billing'} across{' '}
+                        <strong>{client.facilities.length} facility nodes</strong> using{' '}
+                        <strong>{client.reportingStandard}</strong>. Every activity intake ({client.sampleInvoiceName}) is SHA-256 digested and reviewed by {client.assignedAuditor}.
+                      </p>
+                      <ul className="ed-client-facility-list ed-mono">
+                        {client.facilities.map((fac) => (
+                          <li key={fac.name}>
+                            <span>{fac.name}</span>
+                            <span className="ed-muted-text">({fac.location})</span>
+                          </li>
+                        ))}
+                      </ul>
+                    </div>
+
+                    <div className="ed-client-impact-col">
+                      <span className="ed-mono ed-accent-text">MODELED SCOPE 1–3 FOOTPRINT</span>
+                      <div className="ed-client-scope-bars">
+                        <div className="ed-client-scope-row">
+                          <span className="ed-mono">Scope 1 ({scopes.scope1}t)</span>
+                          <div className="ed-mod-bar"><span style={{ width: `${scopes.s1Pct}%` }} /></div>
+                        </div>
+                        <div className="ed-client-scope-row">
+                          <span className="ed-mono">Scope 2 ({scopes.scope2}t)</span>
+                          <div className="ed-mod-bar"><span style={{ width: `${scopes.s2Pct}%` }} /></div>
+                        </div>
+                        <div className="ed-client-scope-row">
+                          <span className="ed-mono">Scope 3 ({scopes.scope3}t)</span>
+                          <div className="ed-mod-bar"><span style={{ width: `${scopes.s3Pct}%` }} /></div>
+                        </div>
+                      </div>
+                      <div className="ed-client-cta-row">
+                        <Link to="/platform/saas-dashboard" className="ed-pill ed-pill--accent ed-pill--compact">
+                          Inspect Baseline in SaaS →
+                        </Link>
+                      </div>
+                    </div>
+                  </div>
+                )}
+
                 <div className="ed-client-foot">
                   <span className="ed-mono ed-muted-text">
-                    {client.facilities.length} Active Sites
+                    {client.facilities.length} Active Sites · {client.reportingStandard}
                   </span>
                   <div className="ed-client-baseline">
                     <span className="ed-mono ed-accent-text">
-                      {client.activeInsets.toLocaleString()} tCO₂e
+                      <AnimatedNumber value={client.activeInsets} decimals={0} suffix=" tCO₂e" />
                     </span>
                     <span className="ed-mono ed-muted-text">Demo Baseline</span>
                   </div>
@@ -423,169 +551,119 @@ export function EditorialClientShowcase() {
 }
 
 export function EditorialSectorFocus() {
-  return (
-    <section id="sectors" className="ed-band">
-      <div className="ed-container">
-        <div className="ed-section-header">
-          <div>
-            <span className="ed-mono ed-accent-text">CARBONOS PRIORITY SECTORS</span>
-            <h2 className="ed-section-title">HIGH-INTEGRITY CARBON PORTFOLIOS</h2>
-            <p className="ed-section-sub">
-              Six priority sectors where Bangladeshi projects can show measurable reductions and
-              direct social co-benefits.
-            </p>
-          </div>
-          <span className="ed-mono ed-muted-text">06 PRIORITY CORRIDORS</span>
-        </div>
-
-        <div className="ed-sectors-grid">
-          {SECTORS_LIST.map((sector) => (
-            <article key={sector.idx} className="ed-sector-cell">
-              <div className="ed-sector-top">
-                <span className="ed-mono ed-muted-text">{sector.idx} · {sector.methodology}</span>
-                <span className="ed-mono ed-accent-text">{sector.funding}</span>
-              </div>
-
-              <h3 className="ed-sector-name">{sector.name}</h3>
-              <p className="ed-sector-desc">{sector.desc}</p>
-
-              <div className="ed-sector-metrics">
-                <div>
-                  <span className="ed-mono ed-muted-text">ANNUAL ABATEMENT</span>
-                  <strong className="ed-sector-val">{sector.market}</strong>
-                </div>
-                <div>
-                  <span className="ed-mono ed-muted-text">ADDITIONALITY</span>
-                  <strong className="ed-sector-val ed-accent-text">{sector.additionality}</strong>
-                </div>
-              </div>
-
-              <div className="ed-sector-actions">
-                <Link to={sector.route} className="ed-pill ed-pill--subtle">
-                  Sector Dossier →
-                </Link>
-                <Link to="/platform/marketplace" className="ed-pill ed-pill--subtle">
-                  Browse Credits
-                </Link>
-              </div>
-            </article>
-          ))}
-        </div>
-
-        <p className="ed-footnote ed-mono ed-muted-text">
-          Sector listings are informational. No project here has been registered or verified by a
-          regulator or a third party.
-        </p>
-      </div>
-    </section>
-  );
+  return <EditorialPortfolioSlider />;
 }
 
 export function EditorialPricing() {
   const [isAnnual, setIsAnnual] = useState(true);
 
   return (
-    <section id="pricing" className="ed-band">
+    <section id="pricing" className="ed-band ed-pricing-band">
       <div className="ed-container">
-        <div className="ed-section-header">
-          <div>
-            <span className="ed-mono ed-accent-text">
-              SOVEREIGN INFRASTRUCTURE SAAS &amp; NODE LICENSURE
-            </span>
-            <h2 className="ed-section-title">PREDICTABLE SCALING FOR DEVELOPERS</h2>
-            <p className="ed-section-sub">
-              Deploy automated MRV, satellite data pipelines, and sovereign ledger registry nodes
-              with zero hidden transaction tariffs.
-            </p>
+        <div className="ed-pricing-frame">
+          <div className="ed-section-header">
+            <div>
+              <span className="ed-mono ed-accent-text">
+                SOVEREIGN INFRASTRUCTURE SAAS &amp; NODE LICENSURE
+              </span>
+              <h2 className="ed-section-title">PREDICTABLE SCALING FOR DEVELOPERS</h2>
+              <p className="ed-section-sub">
+                Deploy automated MRV, satellite data pipelines, and sovereign ledger registry nodes
+                with zero hidden transaction tariffs.
+              </p>
+            </div>
+
+            <div className="ed-billing-toggle" role="group" aria-label="Billing interval">
+              <button
+                type="button"
+                onClick={() => setIsAnnual(false)}
+                className={`ed-pill ed-pill--subtle ${!isAnnual ? 'is-filter-active' : ''}`}
+              >
+                Monthly Billing
+              </button>
+              <button
+                type="button"
+                onClick={() => setIsAnnual(true)}
+                className={`ed-pill ed-pill--subtle ${isAnnual ? 'is-filter-active' : ''}`}
+              >
+                <span>Annual Settlement</span>
+                <span className="ed-mono">(Save 20%)</span>
+              </button>
+            </div>
           </div>
 
-          <div className="ed-billing-toggle" role="group" aria-label="Billing interval">
-            <button
-              type="button"
-              onClick={() => setIsAnnual(false)}
-              className={`ed-pill ed-pill--subtle ${!isAnnual ? 'is-filter-active' : ''}`}
-            >
-              Monthly Billing
-            </button>
-            <button
-              type="button"
-              onClick={() => setIsAnnual(true)}
-              className={`ed-pill ed-pill--subtle ${isAnnual ? 'is-filter-active' : ''}`}
-            >
-              <span>Annual Settlement</span>
-              <span className="ed-mono">(Save 20%)</span>
-            </button>
-          </div>
-        </div>
+          <div className="ed-pricing-grid">
+            {PRICING_TIERS.map((tier) => (
+              <article
+                key={tier.id}
+                className={`ed-pricing-cell ${tier.featured ? 'is-featured' : ''}`}
+              >
+                <div className="ed-pricing-head">
+                  <div className="ed-pricing-badge-row">
+                    <span className="ed-mono ed-accent-text">{tier.kicker}</span>
+                    {tier.featured && <span className="ed-mono ed-pricing-rec-badge">POPULAR TIER</span>}
+                  </div>
+                  <h3 className="ed-pricing-name">{tier.name}</h3>
+                  <p className="ed-pricing-desc">{tier.desc}</p>
+                </div>
 
-        <div className="ed-pricing-grid">
-          {PRICING_TIERS.map((tier) => (
-            <article
-              key={tier.id}
-              className={`ed-pricing-cell ${tier.featured ? 'is-featured' : ''}`}
-            >
-              <div className="ed-pricing-head">
-                <span className="ed-mono ed-accent-text">{tier.kicker}</span>
-                <h3 className="ed-pricing-name">{tier.name}</h3>
-                <p className="ed-pricing-desc">{tier.desc}</p>
-              </div>
+                <div className="ed-pricing-cost">
+                  <div className="ed-pricing-price-row">
+                    <strong className="ed-pricing-amount">
+                      {isAnnual ? tier.annualPrice : tier.monthlyPrice}
+                    </strong>
+                    {tier.monthlyPrice !== 'Bespoke SLA' && (
+                      <span className="ed-mono ed-muted-text">/ month</span>
+                    )}
+                  </div>
+                  <span className="ed-mono ed-muted-text">
+                    {isAnnual ? tier.annualNote : tier.monthlyNote}
+                  </span>
+                </div>
 
-              <div className="ed-pricing-cost">
-                <div className="ed-pricing-price-row">
-                  <strong className="ed-pricing-amount">
-                    {isAnnual ? tier.annualPrice : tier.monthlyPrice}
-                  </strong>
-                  {tier.monthlyPrice !== 'Bespoke SLA' && (
-                    <span className="ed-mono ed-muted-text">/ month</span>
+                <ul className="ed-pricing-list">
+                  {tier.items.map((item) => (
+                    <li
+                      key={item.label}
+                      className={`ed-pricing-item ${item.included ? '' : 'is-excluded'}`}
+                    >
+                      <span className="ed-mono ed-accent-text" aria-hidden="true">
+                        {item.included ? '✓' : '✕'}
+                      </span>
+                      <span>{item.label}</span>
+                    </li>
+                  ))}
+                </ul>
+
+                <div className="ed-pricing-cta">
+                  {tier.href ? (
+                    <a href={tier.href} className="ed-pill">
+                      {tier.ctaLabel}
+                    </a>
+                  ) : (
+                    <Link
+                      to={tier.to}
+                      className={`ed-pill ${tier.featured ? 'ed-pill--accent' : ''}`}
+                    >
+                      {tier.ctaLabel}
+                    </Link>
                   )}
                 </div>
-                <span className="ed-mono ed-muted-text">
-                  {isAnnual ? tier.annualNote : tier.monthlyNote}
-                </span>
-              </div>
-
-              <ul className="ed-pricing-list">
-                {tier.items.map((item) => (
-                  <li
-                    key={item.label}
-                    className={`ed-pricing-item ${item.included ? '' : 'is-excluded'}`}
-                  >
-                    <span className="ed-mono ed-accent-text" aria-hidden="true">
-                      {item.included ? '✓' : '✕'}
-                    </span>
-                    <span>{item.label}</span>
-                  </li>
-                ))}
-              </ul>
-
-              <div className="ed-pricing-cta">
-                {tier.href ? (
-                  <a href={tier.href} className="ed-pill">
-                    {tier.ctaLabel}
-                  </a>
-                ) : (
-                  <Link
-                    to={tier.to}
-                    className={`ed-pill ${tier.featured ? 'ed-pill--accent' : ''}`}
-                  >
-                    {tier.ctaLabel}
-                  </Link>
-                )}
-              </div>
-            </article>
-          ))}
-        </div>
-
-        <div className="ed-band-foot">
-          <div>
-            <strong className="ed-foot-strong">
-              Institutional Billing &amp; Regulatory Reconciliation
-            </strong>
-            <span className="ed-mono ed-muted-text ed-foot-sub">
-              Bangladesh Bank RTGS, BEFTN, SWIFT, and Mushak-6.3 VAT invoicing supported
-            </span>
+              </article>
+            ))}
           </div>
-          <span className="ed-mono ed-accent-text">99.98% SLA</span>
+
+          <div className="ed-band-foot">
+            <div>
+              <strong className="ed-foot-strong">
+                Institutional Billing &amp; Regulatory Reconciliation
+              </strong>
+              <span className="ed-mono ed-muted-text ed-foot-sub">
+                Bangladesh Bank RTGS, BEFTN, SWIFT, and Mushak-6.3 VAT invoicing supported
+              </span>
+            </div>
+            <span className="ed-mono ed-accent-text">99.98% SLA · BDT / USD INVOICING</span>
+          </div>
         </div>
       </div>
     </section>

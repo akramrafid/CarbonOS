@@ -62,100 +62,99 @@ export const EmissionsTrendChart = ({ isLight = false, total = 2450 }) => {
   return (
     <div className="relative w-full h-full flex flex-col justify-between">
       {hoveredPoint && (
-        <div 
-          className={`absolute -top-3 z-20 px-2.5 py-1 rounded-lg text-[10px] font-mono font-bold shadow-md border pointer-events-none transform -translate-x-1/2 transition-transform duration-150 ${
-            isLight 
-              ? 'bg-white text-fg-primary border-border-subtle' 
-              : 'bg-bg-surface text-emerald-400 border-border-subtle'
-          }`}
-          style={{ left: `${(hoveredPoint.x / 620) * 100}%` }}
+        <div
+                  ? 'bg-bg-surface text-fg-primary border-border-subtle'
+                  : 'bg-bg-surface text-accent border-border-subtle'
+              }`}
+          style={{ left: `${Math.min(88, Math.max(12, (hoveredPoint.x / 620) * 100))}%` }}
         >
-          {hoveredPoint.month}: {hoveredPoint.val.toLocaleString()} tCO₂e
-        </div>
-      )}
-
-      <svg viewBox="0 0 620 170" className="w-full h-auto overflow-visible select-none" preserveAspectRatio="none">
-        <defs>
-          <linearGradient id="emissionsSplineArea" x1="0%" y1="0%" x2="0%" y2="100%">
-            <stop offset="0%" stopColor="#00C853" stopOpacity={isLight ? 0.35 : 0.45} />
-            <stop offset="50%" stopColor="#00E676" stopOpacity={isLight ? 0.15 : 0.20} />
-            <stop offset="100%" stopColor="#00C853" stopOpacity={0.0} />
-          </linearGradient>
-        </defs>
-
-        {gridTicks.map((grid, idx) => (
-          <g key={idx}>
-            <text 
-              x="8" 
-              y={grid.y + 3} 
-              fill={isLight ? '#8BA192' : '#557361'} 
-              fontSize="8" 
-              fontFamily="monospace"
-            >
-              {grid.label}
-            </text>
-            <line 
-              x1="35" 
-              y1={grid.y} 
-              x2="600" 
-              y2={grid.y} 
-              stroke={isLight ? '#E5ECE5' : '#122418'} 
-              strokeDasharray="3 3" 
-              strokeWidth="1" 
-            />
-          </g>
-        ))}
-
-        <path
-          d={targetCurve}
-          fill="none"
-          stroke={isLight ? '#7C9A88' : '#385443'}
-          strokeWidth="1.5"
-          strokeDasharray="4 4"
-          strokeOpacity="0.7"
-        />
-
-        <path
-          d={areaPath}
-          fill="url(#emissionsSplineArea)"
-        />
-
-        <path
-          d={actualCurve}
-          fill="none"
-          stroke="#00C853"
-          strokeWidth="2.5"
-          strokeLinecap="round"
-          strokeLinejoin="round"
-        />
-
-        {actualPoints.map((pt, i) => (
-          <g key={i}>
-            <text
-              x={pt.x}
-              y="160"
-              textAnchor="middle"
-              fill={isLight ? '#557361' : '#7C9A88'}
-              fontSize="8.5"
-              fontFamily="sans-serif"
-              fontWeight={hoveredPoint?.month === pt.month ? 'bold' : 'normal'}
-            >
-              {pt.month}
-            </text>
-            <circle
-              cx={pt.x}
-              cy={pt.y}
-              r={hoveredPoint?.month === pt.month ? 5 : 3}
-              fill={hoveredPoint?.month === pt.month ? '#00E676' : '#00C853'}
-              stroke={isLight ? '#FFFFFF' : '#040906'}
-              strokeWidth="1.5"
-              className="transition-all duration-150 cursor-pointer"
-              onMouseEnter={() => setHoveredPoint(pt)}
-              onMouseLeave={() => setHoveredPoint(null)}
-            />
-          </g>
-        ))}
-      </svg>
+      {hoveredPoint.month}: {hoveredPoint.val.toLocaleString()} tCO₂e
     </div>
+  )
+}
+
+<svg viewBox="0 0 620 170" className="w-full h-auto overflow-visible select-none" preserveAspectRatio="none">
+  <defs>
+    <linearGradient id="emissionsSplineArea" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" stopColor="#00C853" stopOpacity={isLight ? 0.35 : 0.45} />
+      <stop offset="50%" stopColor="#00E676" stopOpacity={isLight ? 0.15 : 0.20} />
+      <stop offset="100%" stopColor="#00C853" stopOpacity={0.0} />
+    </linearGradient>
+  </defs>
+
+  {gridTicks.map((grid, idx) => (
+    <g key={idx}>
+      <text
+        x="8"
+        y={grid.y + 3}
+        fill={isLight ? '#8BA192' : '#557361'}
+        fontSize="8"
+        fontFamily="monospace"
+      >
+        {grid.label}
+      </text>
+      <line
+        x1="35"
+        y1={grid.y}
+        x2="600"
+        y2={grid.y}
+        stroke={isLight ? '#E5ECE5' : '#122418'}
+        strokeDasharray="3 3"
+        strokeWidth="1"
+      />
+    </g>
+  ))}
+
+  <path
+    d={targetCurve}
+    fill="none"
+    stroke={isLight ? '#7C9A88' : '#385443'}
+    strokeWidth="1.5"
+    strokeDasharray="4 4"
+    strokeOpacity="0.7"
+  />
+
+  <path
+    d={areaPath}
+    fill="url(#emissionsSplineArea)"
+  />
+
+  <path
+    d={actualCurve}
+    fill="none"
+    stroke="#00C853"
+    strokeWidth="2.5"
+    strokeLinecap="round"
+    strokeLinejoin="round"
+  />
+
+  {actualPoints.map((pt, i) => (
+    <g key={i}>
+      <text
+        x={pt.x}
+        y="160"
+        textAnchor="middle"
+        fill={isLight ? '#557361' : '#7C9A88'}
+        fontSize="8.5"
+        fontFamily="sans-serif"
+        fontWeight={hoveredPoint?.month === pt.month ? 'bold' : 'normal'}
+      >
+        {pt.month}
+      </text>
+      <circle
+        cx={pt.x}
+        cy={pt.y}
+        r={hoveredPoint?.month === pt.month ? 5 : 3}
+        fill={hoveredPoint?.month === pt.month ? '#00E676' : '#00C853'}
+        stroke={isLight ? '#FFFFFF' : '#040906'}
+        strokeWidth="1.5"
+        className="transition-all duration-150 cursor-pointer"
+        onMouseEnter={() => setHoveredPoint(pt)}
+        onMouseLeave={() => setHoveredPoint(null)}
+      />
+    </g>
+  ))}
+</svg>
+    </div >
   );
 };

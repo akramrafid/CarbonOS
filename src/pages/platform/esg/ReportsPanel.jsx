@@ -72,11 +72,11 @@ export default function ReportsPanel({ can, me, periods, facilities, onPeriodsCh
       <Notice error={action.error} message={action.message} />
       <Panel title="Calculation" description="Scope 1 and Scope 2 from APPROVED records only. Every line shows its formula and factor version."
         actions={<div className="flex flex-wrap items-end gap-3">
-          <div className="w-56"><Select label="Reporting period" value={periodId} onChange={(e) => { setPeriodId(e.target.value); setRun(null); }}
+          <div className="w-full sm:w-56"><Select label="Reporting period" value={periodId} onChange={(e) => { setPeriodId(e.target.value); setRun(null); }}
             options={periods.map((p) => [p.id, `${p.name} (${p.status})`])} /></div>
           {can.write && period?.status === 'OPEN' && <Button onClick={calculate} disabled={action.busy}>Run calculation</Button>}
         </div>}>
-        {period?.status === 'LOCKED' && <p className="text-sm text-mist">This period is locked (revision {period.revision}). Its reports are below.</p>}
+        {period?.status === 'LOCKED' && <p className="text-sm text-fg-secondary">This period is locked (revision {period.revision}). Its reports are below.</p>}
         {run && (
           <div className="space-y-4">
             <div className="grid gap-3 sm:grid-cols-3">
@@ -88,18 +88,18 @@ export default function ReportsPanel({ can, me, periods, facilities, onPeriodsCh
                     ? 'Grid-average fallback for some electricity (no qualifying instrument, supplier rate or residual mix); disclosed in the report.'
                     : null} />
             </div>
-            <p className="text-xs text-mist">Prepared by {run.created_by} at {run.created_at}{run.period_revision !== period?.revision ? ' (earlier revision)' : ''}.</p>
-            <p className="text-xs text-mist">Boundary: {run.boundary_method.replace('_', ' ')} · Methodology {run.methodology_version} · GWP {run.gwp_basis || 'not recorded'} · Inputs {run.input_sha256.slice(0, 12)}… · Scope 3 not included.</p>
+            <p className="text-xs text-fg-secondary">Prepared by {run.created_by} at {run.created_at}{run.period_revision !== period?.revision ? ' (earlier revision)' : ''}.</p>
+            <p className="text-xs text-fg-secondary">Boundary: {run.boundary_method.replace('_', ' ')} · Methodology {run.methodology_version} · GWP {run.gwp_basis || 'not recorded'} · Inputs {run.input_sha256.slice(0, 12)}… · Scope 3 not included.</p>
             {run.exceptions.length > 0 && (
               <Table caption="Data-quality exceptions" rowKey="key" rows={run.exceptions.map((x, i) => ({ ...x, key: i }))} columns={[
-                { key: 'code', label: 'Exception', render: (x) => <span className={x.blocking ? 'text-red-300' : 'text-amber-300'}>{x.code}{x.blocking ? ' (blocks lock)' : ''}</span> },
+                { key: 'code', label: 'Exception', render: (x) => <span className={x.blocking ? 'text-red-700 dark:text-red-300' : 'text-amber-800 dark:text-amber-300'}>{x.code}{x.blocking ? ' (blocks lock)' : ''}</span> },
                 { key: 'activity_type', label: 'Activity' },
                 { key: 'facility_id', label: 'Facility', render: (x) => facilityName[x.facility_id] },
                 { key: 'detail', label: 'Detail' },
               ]} />
             )}
-            {Object.keys(run.memo).length > 0 && <p className="text-sm text-mist">Memo items (not in totals): {Object.entries(run.memo).map(([k, v]) => `${k} ${Number(v).toLocaleString()} kWh`).join(', ')}</p>}
-            {run.excluded.length > 0 && <p className="text-sm text-mist">Excluded by boundary: {run.excluded.map((x) => facilityName[x.facility_id]).join(', ')}</p>}
+            {Object.keys(run.memo).length > 0 && <p className="text-sm text-fg-secondary">Memo items (not in totals): {Object.entries(run.memo).map(([k, v]) => `${k} ${Number(v).toLocaleString()} kWh`).join(', ')}</p>}
+            {run.excluded.length > 0 && <p className="text-sm text-fg-secondary">Excluded by boundary: {run.excluded.map((x) => facilityName[x.facility_id]).join(', ')}</p>}
             <Table caption="Calculation lines" rows={run.lines} columns={[
               { key: 'facility_id', label: 'Facility', render: (l) => facilityName[l.facility_id] },
               { key: 'scope', label: 'Scope', render: (l) => `${l.scope} (${l.method})` },
@@ -109,8 +109,8 @@ export default function ReportsPanel({ can, me, periods, facilities, onPeriodsCh
             {can.admin && (
               <div className="flex flex-wrap items-center gap-3">
                 <Button onClick={lock} disabled={action.busy || blocking.length > 0 || run.created_by === me}>Approve & lock period</Button>
-                {blocking.length > 0 && <span className="text-xs text-red-300">Resolve blocking exceptions first.</span>}
-                {run.created_by === me && <span className="text-xs text-mist">Another admin must approve a calculation you ran.</span>}
+                {blocking.length > 0 && <span className="text-xs text-red-700 dark:text-red-300">Resolve blocking exceptions first.</span>}
+                {run.created_by === me && <span className="text-xs text-fg-secondary">Another admin must approve a calculation you ran.</span>}
               </div>
             )}
           </div>

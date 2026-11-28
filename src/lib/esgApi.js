@@ -488,13 +488,115 @@ function handleOfflineRequest(path, options = {}) {
     return mockResponse({ items: offlineStore.auditEvents, total: offlineStore.auditEvents.length });
   }
 
-  // 15. AI Query / Assistant
-  if (pathname === '/api/esg/query') {
+  // 15. Indexed Evidence Documents, Chunks, RAG Query & Extraction Benchmark
+  if (pathname === '/api/esg/documents') {
+    const docs = offlineStore.documents || [
+      {
+        id: 'doc-demo-policy',
+        filename: 'factory-policy-demo.txt',
+        corpus: 'tenant_docs',
+        chunk_count: 1,
+        file_size: 349,
+        created_at: new Date().toISOString(),
+        meta_info: { source_status: 'UNREVIEWED' },
+      },
+      {
+        id: 'doc-demo-grid',
+        filename: 'bd_grid_methodology.md',
+        corpus: 'regulatory',
+        chunk_count: 1,
+        file_size: 1240,
+        created_at: new Date().toISOString(),
+        meta_info: { source_status: 'SUMMARY_ONLY' },
+      },
+    ];
+    return mockResponse(docs);
+  }
+
+  if (/^\/api\/esg\/documents\/([^/]+)\/chunks\/([^/]+)$/.test(pathname)) {
+    const docId = RegExp.$1;
+    const chunkId = RegExp.$2;
+    const content = docId === 'doc-demo-grid'
+      ? 'Bangladesh national grid emission factor methodology reference for Scope 2 location-based reporting under GHG Protocol.'
+      : 'Synthetic boiler inspection policy: inspect facility steam boilers every 12 months and archive Titas meter calibration logs.';
     return mockResponse({
-      answer: "Based on Dhaka Apparel Mills' FY2024-25 records, total GHG emissions are 36.957 tCO2e across Scope 1 (12.202 tCO2e), Scope 2 (20.605 tCO2e from DPDC national grid electricity), and Scope 3 (4.150 tCO2e from upstream logistics). Operational control boundary applied in accordance with GHG Protocol and Bangladesh Bank Sustainable Finance Policy.",
-      sources: [
-        { title: 'FY2024-25 Emissions Calculation Run', ref: 'calc-demo-1' },
-        { title: 'Demo placeholder grid factor (not published)', ref: 'fac-f-1' },
+      document_id: docId,
+      chunk_id: chunkId,
+      source: docId === 'doc-demo-grid' ? 'bd_grid_methodology.md' : 'factory-policy-demo.txt',
+      corpus: docId === 'doc-demo-grid' ? 'regulatory' : 'tenant_docs',
+      page: 1,
+      section: 'Corpus passage preview',
+      source_status: 'UNREVIEWED',
+      content,
+      content_sha256: '4a7f2c90b1d4e33159b8c78a1243ef11092a3b4c5d6e7f8091a2b3c4d5e6f708',
+      document_sha256: '8b1d4e33159b8c78a1243ef11092a3b4c5d6e7f8091a2b3c4d5e6f7084a7f2c90',
+    });
+  }
+
+  if (pathname === '/api/esg/ingest') {
+    const uploadedDoc = {
+      document_id: `doc-demo-${Date.now()}`,
+      filename: 'uploaded-evidence.txt',
+      corpus: 'tenant_docs',
+      chunks_created: 1,
+      tenant_id: session.organizationId || DEMO_ORG_ID,
+      duplicate: false,
+      message: 'Document indexed in offline evaluation store.',
+    };
+    return mockResponse(uploadedDoc, 200);
+  }
+
+  if (pathname === '/api/esg/atlas-benchmark/run') {
+    return mockResponse({
+      benchmark_version: 'atlas-synth-1.0',
+      tested_at: new Date().toISOString(),
+      total_test_cases: 10,
+      extraction_method: 'deterministic_rules_v1',
+      metrics: { parameter_accuracy_pct: 90.0 },
+      test_results: [
+        { case_id: 'SYNTH-01', ground_truth: { value: 4321, unit: 'kWh' }, extracted: { value: 4321, unit: 'kWh' }, value_exact_match: true, raw_snippet: 'DESCO Electricity: 4,321 kWh' },
+        { case_id: 'SYNTH-02', ground_truth: { value: 1850, unit: 'm3' }, extracted: { value: 1850, unit: 'm3' }, value_exact_match: true, raw_snippet: 'Titas Gas Consumption: 1,850 m3' },
+      ],
+    });
+  }
+
+  if (pathname === '/api/esg/query') {
+    const qText = body?.query || '';
+    const docIds = Array.isArray(body?.document_ids) ? body.document_ids : null;
+    const primaryDoc = docIds?.[0] || 'doc-demo-policy';
+    const isGrid = primaryDoc === 'doc-demo-grid';
+    return mockResponse({
+      query_id: `q-${Date.now()}`,
+      document_ids: docIds,
+      query: qText,
+      answer: isGrid
+        ? 'Retrieved regulatory excerpt: Bangladesh national grid emission factor methodology applies location-based Scope 2 accounting per GHG Protocol Corporate Standard.'
+        : "Based on Dhaka Apparel Mills' FY2024-25 records, total GHG emissions are 36.957 tCO2e across Scope 1 (12.202 tCO2e) and Scope 2 (20.605 tCO2e from DPDC national grid electricity). Retrieved demo excerpt requires human review.",
+      confidence: 0.78,
+      corpus: body?.corpus || 'all',
+      model_used: 'retrieval-only',
+      insufficient_data: false,
+      latency_ms: 14.2,
+      answer_mode: 'retrieval_only',
+      retrieval_method: 'bm25_vector_rrf',
+      candidate_count: 2,
+      candidate_limit_reached: false,
+      score_kind: 'ranking_score_not_probability',
+      review_required: true,
+      citations: [
+        {
+          source: isGrid ? 'bd_grid_methodology.md' : 'factory-policy-demo.txt',
+          document_id: primaryDoc,
+          chunk_id: `${primaryDoc}_0`,
+          content_sha256: '4a7f2c90b1d4e33159b8c78a1243ef11092a3b4c5d6e7f8091a2b3c4d5e6f708',
+          source_status: 'UNREVIEWED',
+          page: 1,
+          section: isGrid ? 'Corpus: regulatory' : 'Corpus: tenant_docs',
+          snippet: isGrid
+            ? 'Bangladesh national grid emission factor methodology reference for Scope 2 location-based reporting...'
+            : 'Synthetic boiler inspection policy: inspect facility steam boilers every 12 months...',
+          relevance_score: 0.78,
+        },
       ],
     });
   }

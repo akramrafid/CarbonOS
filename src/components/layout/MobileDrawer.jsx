@@ -123,19 +123,19 @@ export function MobileDrawer({ isOpen, onClose }) {
                     <Icon className="w-4 h-4 shrink-0" aria-hidden="true" />
                     <span className="truncate flex-1">{label}</span>
                     {item.badge && (
-                      <span className="text-[10px] font-mono px-1.5 py-0.5 rounded bg-white/20 text-fg-inverse">
-                        {item.badge}
-                      </span>
+                        <span className="text-[10px] font-mono px-1.5 py-0.5 rounded bg-bg-elevated text-fg-secondary border border-border-subtle shrink-0">
+                          {item.badge}
+                        </span>
                     )}
-                  </NavLink>
-                );
+                      </NavLink>
+                    );
               })}
+                  </div>
+                ))}
             </div>
-          ))}
-        </div>
 
-        {/* Drawer Footer */}
-        <div className="pt-3 border-t border-border-subtle mt-2 flex items-center justify-between text-xs text-fg-muted shrink-0">
+        {/* Drawer Footer */ }
+            < div className = "pt-3 border-t border-border-subtle mt-2 flex items-center justify-between text-xs text-fg-muted shrink-0" >
           <span className="font-mono text-[11px]">v2.4.0 • Dhaka MRV</span>
           <Link
             to="/"

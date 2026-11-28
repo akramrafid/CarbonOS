@@ -130,6 +130,7 @@ export function BiomassChartSvg({
             strokeWidth="2.5"
             strokeDasharray="6 4"
             strokeLinecap="round"
+            className="chart-animate-line"
             opacity={isLight ? '0.9' : '0.85'}
           />
 
@@ -177,7 +178,8 @@ export function BiomassChartSvg({
                       ? 'url(#activeColGradLight)'
                       : 'url(#activeColGradDark)'
                   }
-                  className="transition-all duration-200"
+                  className="transition-all duration-200 chart-animate-bar"
+                  style={{ animationDelay: `${idx * 45}ms` }}
                   opacity={hoveredQuarter && !isHovered ? '0.45' : '1'}
                 />
 

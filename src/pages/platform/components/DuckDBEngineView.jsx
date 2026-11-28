@@ -142,29 +142,25 @@ export const DuckDBEngineView = ({
               <div className="w-8 h-8 rounded-xl bg-emerald-500/10 border border-emerald-500/30 flex items-center justify-center text-emerald-500">
                 <Database className="w-4 h-4" />
               </div>
-              <h2 className={`text-xl font-bold font-sans ${isLight ? 'text-gray-900' : 'text-white'}`}>
+              <h2 className="text-xl font-bold font-sans text-fg-primary">
                 {locale?.duckdbTitle || 'DuckDB In-Process OLAP Engine'}
               </h2>
-              <span className="px-2.5 py-0.5 rounded-full text-[10px] font-mono font-bold bg-emerald-500/15 text-emerald-600 dark:text-emerald-400 border border-emerald-500/30">
+              <span className="px-2.5 py-0.5 rounded-full text-[10px] font-mono font-bold bg-emerald-500/15 text-emerald-700 dark:text-emerald-400 border border-emerald-500/30">
                 OLAP v2026.2
               </span>
             </div>
-            <p className={`text-xs ${isLight ? 'text-gray-600' : 'text-fg-secondary'}`}>
+            <p className="text-xs text-fg-secondary">
               {locale?.duckdbSubtitle || 'Sub-25ms calculation pipeline supporting Activity-based & Spend-based (EEIO) accounting'}
             </p>
           </div>
 
           <div className="flex flex-wrap items-center gap-2 text-xs font-mono">
-            <div className={`px-3 py-1.5 rounded-2xl border flex items-center space-x-2 ${
-              isLight ? 'bg-white/80 border-gray-200 text-gray-700' : 'bg-bg-canvas border-border-subtle text-emerald-400'
-            }`}>
-              <Clock className="w-3.5 h-3.5 text-emerald-500" />
+            <div className="px-3 py-1.5 rounded-2xl border flex items-center space-x-2 bg-bg-canvas border-border-subtle text-emerald-700 dark:text-emerald-400">
+              <Clock className="w-3.5 h-3.5 text-emerald-600 dark:text-emerald-500" />
               <span>Latency: <strong>{latencyMs} ms</strong></span>
             </div>
-            <div className={`px-3 py-1.5 rounded-2xl border flex items-center space-x-2 ${
-              isLight ? 'bg-white/80 border-gray-200 text-gray-700' : 'bg-bg-canvas border-border-subtle text-cyan-400'
-            }`}>
-              <Server className="w-3.5 h-3.5 text-cyan-500" />
+            <div className="px-3 py-1.5 rounded-2xl border flex items-center space-x-2 bg-bg-canvas border-border-subtle text-cyan-700 dark:text-cyan-400">
+              <Server className="w-3.5 h-3.5 text-cyan-600 dark:text-cyan-500" />
               <span>Routing: <strong>30GB Microservice Tier</strong></span>
             </div>
             <Button
@@ -212,24 +208,24 @@ export const DuckDBEngineView = ({
           {/* Scope 1 Panel */}
           <div className={`p-5 rounded-3xl border ${isLight ? 'bg-white border-gray-200' : 'bg-bg-elevated border-border-subtle'}`}>
             <div className="flex items-center justify-between mb-4">
-              <span className="text-xs font-mono font-bold text-amber-500 uppercase tracking-wider">Scope 1 Direct</span>
-              <span className="text-lg font-bold font-mono text-emerald-500">{safeResults?.scope1 || 0} tCO₂e</span>
+              <span className="text-xs font-mono font-bold text-amber-800 dark:text-amber-400 uppercase tracking-wider">Scope 1 Direct</span>
+              <span className="text-lg font-bold font-mono text-emerald-700 dark:text-emerald-400">{safeResults?.scope1 || 0} tCO₂e</span>
             </div>
-            <p className={`text-xs mb-4 ${isLight ? 'text-gray-500' : 'text-gray-400'}`}>
+            <p className="text-xs mb-4 text-fg-secondary">
               Stationary diesel generators, corporate fleet vehicles, and canteen LPG.
             </p>
             <div className="space-y-2.5 text-xs font-mono">
-              <div className="flex justify-between py-1 border-b border-gray-100 dark:border-gray-800">
-                <span className={isLight ? 'text-gray-600' : 'text-gray-400'}>Diesel ({safeInputs.diesel} L × 2.68)</span>
-                <span className="font-bold">{((parseFloat(safeInputs.diesel) || 0) * 2.68 / 1000).toFixed(2)} t</span>
+              <div className="flex justify-between py-1 border-b border-border-subtle">
+                <span className="text-fg-secondary">Diesel ({safeInputs.diesel} L × 2.68)</span>
+                <span className="font-bold text-fg-primary">{((parseFloat(safeInputs.diesel) || 0) * 2.68 / 1000).toFixed(2)} t</span>
               </div>
-              <div className="flex justify-between py-1 border-b border-gray-100 dark:border-gray-800">
-                <span className={isLight ? 'text-gray-600' : 'text-gray-400'}>Petrol ({safeInputs.petrol} L × 2.31)</span>
-                <span className="font-bold">{((parseFloat(safeInputs.petrol) || 0) * 2.31 / 1000).toFixed(2)} t</span>
+              <div className="flex justify-between py-1 border-b border-border-subtle">
+                <span className="text-fg-secondary">Petrol ({safeInputs.petrol} L × 2.31)</span>
+                <span className="font-bold text-fg-primary">{((parseFloat(safeInputs.petrol) || 0) * 2.31 / 1000).toFixed(2)} t</span>
               </div>
               <div className="flex justify-between py-1">
-                <span className={isLight ? 'text-gray-600' : 'text-gray-400'}>LPG ({safeInputs.lpg} kg × 2.98)</span>
-                <span className="font-bold">{((parseFloat(safeInputs.lpg) || 0) * 2.98 / 1000).toFixed(2)} t</span>
+                <span className="text-fg-secondary">LPG ({safeInputs.lpg} kg × 2.98)</span>
+                <span className="font-bold text-fg-primary">{((parseFloat(safeInputs.lpg) || 0) * 2.98 / 1000).toFixed(2)} t</span>
               </div>
             </div>
           </div>
@@ -237,24 +233,28 @@ export const DuckDBEngineView = ({
           {/* Scope 2 Panel */}
           <div className={`p-5 rounded-3xl border ${isLight ? 'bg-white border-gray-200' : 'bg-bg-elevated border-border-subtle'}`}>
             <div className="flex items-center justify-between mb-4">
-              <span className="text-xs font-mono font-bold text-cyan-500 uppercase tracking-wider">Scope 2 Grid</span>
-              <span className="text-lg font-bold font-mono text-cyan-500">{safeResults?.scope2 ?? '—'} tCO₂e</span>
+              <span className="text-xs font-mono font-bold text-cyan-700 dark:text-cyan-400 uppercase tracking-wider">Scope 2 Grid</span>
+              <span className="text-lg font-bold font-mono text-cyan-700 dark:text-cyan-400">{safeResults?.scope2 ?? '—'} tCO₂e</span>
             </div>
-            <p className={`text-xs mb-4 ${isLight ? 'text-gray-500' : 'text-gray-400'}`}>
+            <p className="text-xs mb-4 text-fg-secondary">
               Grid electricity × an approved grid-average factor (location-based). No default factor is applied.
             </p>
             <div className="space-y-2.5 text-xs font-mono">
-              <div className="flex justify-between py-1 border-b border-gray-100 dark:border-gray-800">
-                <span className={isLight ? 'text-gray-600' : 'text-gray-400'}>Electricity Consumption</span>
-                <span className="font-bold">{safeInputs.electricity} kWh</span>
+              <div className="flex justify-between py-1 border-b border-border-subtle">
+                <span className="text-fg-secondary">Electricity Consumption</span>
+                <span className="font-bold text-fg-primary">{safeInputs.electricity} kWh</span>
               </div>
-              <div className="flex justify-between py-1 border-b border-gray-100 dark:border-gray-800">
-                <span className={isLight ? 'text-gray-600' : 'text-gray-400'}>Location factor (grid average)</span>
-                <span className="font-bold text-amber-500">Not set: needs approval</span>
+              <div className="flex justify-between py-1 border-b border-border-subtle">
+                <span className={isLight ? 'text-gray-700' : 'text-fg-secondary'}>Location factor (grid average)</span>
+                <span className={`font-bold ${safeResults?.scope2 != null ? 'text-emerald' : 'text-amber-700 dark:text-amber-400'}`}>
+                  {safeResults?.scope2 != null ? `${safeResults.scope2} tCO₂e calculated` : 'Not set: needs approval'}
+                </span>
               </div>
               <div className="flex justify-between py-1">
-                <span className={isLight ? 'text-gray-600' : 'text-gray-400'}>Market factor</span>
-                <span className="font-bold text-amber-500">None: grid-average fallback</span>
+                <span className={isLight ? 'text-gray-700' : 'text-fg-secondary'}>Market factor</span>
+                <span className={`font-bold ${safeResults?.scope2Market != null ? 'text-emerald' : 'text-amber-700 dark:text-amber-400'}`}>
+                  {safeResults?.scope2Market != null ? `${safeResults.scope2Market} tCO₂e (contractual)` : 'None: grid-average fallback'}
+                </span>
               </div>
             </div>
           </div>
@@ -313,11 +313,12 @@ export const DuckDBEngineView = ({
           </div>
 
           {/* Spend Items Table */}
-          <div className={`p-6 rounded-3xl border overflow-x-auto ${isLight ? 'bg-white border-gray-200' : 'bg-bg-elevated border-border-subtle'}`}>
+          <div className={`p-6 rounded-3xl border ${isLight ? 'bg-white border-gray-200' : 'bg-bg-elevated border-border-subtle'}`}>
             <h3 className={`text-sm font-bold font-sans mb-4 ${isLight ? 'text-gray-900' : 'text-white'}`}>
               Input Enterprise Expenditure Across Sectors (Comprehensive Environmental Data Archive)
             </h3>
-            <table className="w-full text-xs font-sans">
+            <div className="overflow-x-auto touch-pan-x">
+            <table className="w-full min-w-[620px] text-xs font-sans">
               <thead>
                 <tr className={`border-b text-left ${isLight ? 'border-gray-200 text-gray-500' : 'border-border-subtle text-gray-400'}`}>
                   <th className="pb-3 font-semibold">Procurement Sector</th>
@@ -350,6 +351,7 @@ export const DuckDBEngineView = ({
                 ))}
               </tbody>
             </table>
+            </div>
           </div>
         </div>
       )}

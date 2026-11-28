@@ -1,16 +1,16 @@
 import React, { useState } from 'react';
-import { 
-  Trees, 
-  Satellite, 
-  ShieldCheck, 
-  Award, 
-  Layers, 
-  TrendingUp, 
-  MapPin, 
-  CheckCircle2, 
-  ArrowRight, 
-  Sparkles, 
-  Flame, 
+import {
+  Trees,
+  Satellite,
+  ShieldCheck,
+  Award,
+  Layers,
+  TrendingUp,
+  MapPin,
+  CheckCircle2,
+  ArrowRight,
+  /* [COMMENTED OUT FOR PERSONAL REFERENCE — removed unused decorative icon import] */
+  Flame,
   Eye,
   Check,
   RefreshCw
@@ -84,12 +84,12 @@ const SATELLITE_PROJECTS = [
   }
 ];
 
-export const SatelliteMRVStudio = ({ 
-  isLight, 
-  locale, 
+export const SatelliteMRVStudio = ({
+  isLight,
+  locale,
   grossEmissions = 1667.64,
   retiredInsets = 250,
-  onRetireInset 
+  onRetireInset
 }) => {
   const [selectedProject, setSelectedProject] = useState(SATELLITE_PROJECTS[0]);
   const [retireAmount, setRetireAmount] = useState(50);
@@ -99,7 +99,8 @@ export const SatelliteMRVStudio = ({
   ]);
   const [showCertificate, setShowCertificate] = useState(false);
 
-  const totalRetired = retiredLog.reduce((acc, curr) => acc + curr.amount, 0);
+  const logTotal = retiredLog.reduce((acc, curr) => acc + curr.amount, 0);
+  const totalRetired = Math.max(logTotal, Number(retiredInsets) || 0);
   const netFootprint = Math.max(0, grossEmissions - totalRetired);
 
   const handleRetire = () => {
@@ -119,217 +120,210 @@ export const SatelliteMRVStudio = ({
   return (
     <div className="space-y-6">
       {/* Header Banner */}
-      <div className={`p-6 rounded-3xl border ${
-        isLight 
-          ? 'bg-gradient-to-r from-emerald-50 to-teal-50/50 border-emerald-200' 
+      <div className={`p-6 rounded-3xl border ${isLight
+          ? 'bg-gradient-to-r from-emerald-50 to-teal-50/50 border-emerald-200'
           : 'bg-gradient-to-r from-bg-surface to-bg-canvas border-border-subtle'
-      }`}>
+        }`}>
         <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
           <div className="space-y-1">
-            <div className="flex items-center space-x-2">
-              <div className="w-8 h-8 rounded-xl bg-emerald-500/10 border border-emerald-500/30 flex items-center justify-center text-emerald-500">
-                <Satellite className="w-4 h-4" />
-              </div>
-              <h2 className={`text-xl font-bold font-sans ${isLight ? 'text-gray-900' : 'text-white'}`}>
-                {locale.satelliteTitle}
-              </h2>
-              <span className="px-2.5 py-0.5 rounded-full text-[10px] font-mono font-bold bg-amber-500/15 text-amber-400 border border-amber-500/30">
-                Demo Simulation (Local Session Only — Not an Immutable Registry)
-              </span>
-            </div>
-            <p className={`text-xs ${isLight ? 'text-gray-600' : 'text-fg-secondary'}`}>
-              {locale.satelliteSubtitle}
-            </p>
-          </div>
-
-          <div className="flex items-center space-x-4">
-            <div className={`p-3 rounded-2xl border text-center ${
-              isLight ? 'bg-white/80 border-gray-200' : 'bg-bg-canvas border-border-subtle'
-            }`}>
-              <span className="text-[10px] font-mono text-gray-500 block uppercase">Gross Footprint</span>
-              <span className="text-base font-bold font-mono text-gray-700 dark:text-gray-300">{grossEmissions.toFixed(1)} t</span>
-            </div>
-            <div className={`p-3 rounded-2xl border text-center ${
-              isLight ? 'bg-white/80 border-gray-200' : 'bg-bg-canvas border-border-subtle'
-            }`}>
-              <span className="text-[10px] font-mono text-emerald-500 block uppercase">Retired Insets</span>
-              <span className="text-base font-bold font-mono text-emerald-500">-{totalRetired} t</span>
-            </div>
-            <div className={`p-3 rounded-2xl border text-center bg-emerald-500/10 border-emerald-500/30`}>
-              <span className="text-[10px] font-mono text-emerald-600 dark:text-emerald-400 block uppercase font-bold">Net Balance</span>
-              <span className="text-base font-bold font-mono text-emerald-600 dark:text-emerald-400">{netFootprint.toFixed(1)} t</span>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      {/* Project Cards Grid */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-        {SATELLITE_PROJECTS.map(proj => {
-          const isSelected = selectedProject.id === proj.id;
-          return (
-            <div 
-              key={proj.id}
-              onClick={() => setSelectedProject(proj)}
-              className={`rounded-3xl border overflow-hidden transition-all cursor-pointer ${
-                isSelected 
-                  ? 'border-emerald-500 ring-2 ring-emerald-500/20 shadow-lg' 
-                  : (isLight ? 'bg-white border-gray-200 hover:border-gray-300' : 'bg-bg-elevated border-border-subtle hover:border-border-strong')
-              }`}
-            >
-              <div className="h-32 w-full relative overflow-hidden">
-                <img src={proj.img} alt={proj.name} className="w-full h-full object-cover" />
-                <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent" />
-                <div className="absolute top-2.5 right-2.5 px-2 py-0.5 rounded-full text-[10px] font-bold font-mono bg-emerald-500 text-white shadow-sm flex items-center space-x-1">
-                  <Award className="w-3 h-3" />
-                  <span>{proj.rating} Rating</span>
+                <div className="flex flex-wrap items-center gap-2">
+                  <div className="w-8 h-8 rounded-xl bg-emerald-500/10 border border-emerald-500/30 flex items-center justify-center text-emerald-500 shrink-0">
+                    <Satellite className="w-4 h-4" />
+                  </div>
+                  <h2 className={`text-xl font-bold font-sans ${isLight ? 'text-gray-900' : 'text-white'}`}>
+                    {locale.satelliteTitle}
+                  </h2>
+                    <span className="px-2.5 py-0.5 rounded-full text-[10px] font-mono font-bold bg-amber-500/15 text-amber-800 dark:text-amber-300 border border-amber-500/30">
+                      Demo Simulation (Local Session Only — Not an Immutable Registry)
+                    </span>
                 </div>
-                <div className="absolute bottom-2.5 left-2.5 text-white">
-                  <span className="text-[10px] font-mono text-emerald-300 block">{proj.ecosystem}</span>
-                  <h4 className="text-xs font-bold leading-tight line-clamp-1">{proj.name}</h4>
-                </div>
-              </div>
-
-              <div className="p-3.5 space-y-2 text-xs font-sans">
-                <div className="flex justify-between items-center text-[11px] font-mono">
-                  <span className="text-gray-500">Biomass Density:</span>
-                  <span className="font-bold text-emerald-500">{proj.biomass_tc_ha} tC/ha</span>
-                </div>
-                <div className="flex justify-between items-center text-[11px] font-mono">
-                  <span className="text-gray-500">Available Insets:</span>
-                  <span className="font-bold">{proj.available_insets.toLocaleString()} tCO₂e</span>
-                </div>
-                <div className="flex justify-between items-center text-[11px] font-mono">
-                  <span className="text-gray-500">Permanence Score:</span>
-                  <span className="font-bold text-cyan-400">{proj.permanence}%</span>
-                </div>
-                <div className="pt-2 border-t border-gray-100 dark:border-gray-800 flex items-center justify-between text-[10px] text-gray-500">
-                  <span className="truncate">{proj.region}</span>
-                  {isSelected && <Check className="w-3.5 h-3.5 text-emerald-500 shrink-0" />}
-                </div>
-              </div>
-            </div>
-          );
-        })}
-      </div>
-
-      {/* Selected Project Detailed Inset Retirement Panel */}
-      <div className={`p-6 rounded-3xl border ${isLight ? 'bg-white border-gray-200' : 'bg-bg-elevated border-border-subtle'}`}>
-        <div className="flex flex-col lg:flex-row items-start justify-between gap-6">
-          <div className="space-y-3 max-w-xl">
-            <div className="flex items-center space-x-2">
-              <span className="px-2.5 py-0.5 rounded-full text-[10px] font-mono font-bold bg-emerald-500/15 text-emerald-600 dark:text-emerald-400 border border-emerald-500/30">
-                Selected Project Inset
-              </span>
-              <span className="text-xs font-mono text-gray-500">{selectedProject.coordinates}</span>
-            </div>
-            <h3 className={`text-lg font-bold font-sans ${isLight ? 'text-gray-900' : 'text-white'}`}>
-              {selectedProject.name}
-            </h3>
-            <p className={`text-xs leading-relaxed ${isLight ? 'text-gray-600' : 'text-gray-400'}`}>
-              Verified through GEDI satellite LiDAR waveform returns and Sentinel-2 optical multi-spectral vegetation indices.
-              Carbon insets from this ecosystem are certified under {selectedProject.standard} with an audit rating of {selectedProject.rating}.
-            </p>
-
-            <div className="grid grid-cols-3 gap-3 pt-2">
-              <div className={`p-3 rounded-2xl border ${isLight ? 'bg-gray-50 border-gray-200' : 'bg-bg-canvas border-border-subtle'}`}>
-                <span className="text-[10px] font-mono text-gray-500 block">Additionality</span>
-                <span className="text-sm font-bold font-mono text-emerald-500">{selectedProject.additionality}%</span>
-              </div>
-              <div className={`p-3 rounded-2xl border ${isLight ? 'bg-gray-50 border-gray-200' : 'bg-bg-canvas border-border-subtle'}`}>
-                <span className="text-[10px] font-mono text-gray-500 block">Annual Removal</span>
-                <span className="text-sm font-bold font-mono text-cyan-400">{(selectedProject.annual_removal / 1000).toFixed(1)}k t</span>
-              </div>
-              <div className={`p-3 rounded-2xl border ${isLight ? 'bg-gray-50 border-gray-200' : 'bg-bg-canvas border-border-subtle'}`}>
-                <span className="text-[10px] font-mono text-gray-500 block">Vintage Year</span>
-                <span className="text-sm font-bold font-mono text-gray-300">{selectedProject.vintage}</span>
-              </div>
-            </div>
-          </div>
-
-          {/* Retirement Action Box */}
-          <div className={`w-full lg:w-96 p-5 rounded-3xl border space-y-4 ${
-            isLight ? 'bg-emerald-50/50 border-emerald-200' : 'bg-bg-canvas border-border-subtle'
-          }`}>
-            <h4 className="text-xs font-bold font-mono uppercase tracking-wider text-emerald-500">
-              Retire Nature Insets To Corporate Ledger
-            </h4>
-            <div className="space-y-1.5">
-              <div className="flex justify-between text-xs font-sans">
-                <span className="text-gray-500">Retirement Amount:</span>
-                <span className="font-bold font-mono">{retireAmount} tCO₂e</span>
-              </div>
-              <input 
-                type="range"
-                min="10"
-                max="500"
-                step="10"
-                value={retireAmount}
-                onChange={(e) => setRetireAmount(e.target.value)}
-                className="w-full accent-emerald-500 cursor-pointer"
-              />
-              <div className="flex justify-between text-[10px] font-mono text-gray-500">
-                <span>10 t</span>
-                <span>250 t</span>
-                <span>500 t</span>
-              </div>
-            </div>
-
-            <div className="pt-2">
-              <Button
-                variant="primary"
-                size="md"
-                onClick={handleRetire}
-                className="w-full"
-                leftIcon={<ShieldCheck className="w-4 h-4" />}
-              >
-                Retire {retireAmount} tCO₂e Insets Now
-              </Button>
-            </div>
-
-            {showCertificate && (
-              <div className="p-3 rounded-2xl bg-emerald-500/10 border border-emerald-500/30 text-[11px] font-mono text-emerald-400 space-y-1">
-                <div className="flex items-center space-x-1.5 font-bold">
-                  <CheckCircle2 className="w-3.5 h-3.5 text-emerald-400" />
-                  <span>Demo Simulation Entry Added (Local Session Only)</span>
-                </div>
-                <p className="text-[10px] text-gray-400">
-                  Demo Ref: {retiredLog[0]?.certHash || 'DEMO-RET-LOCAL'}
+                <p className={`text-xs ${isLight ? 'text-gray-600' : 'text-fg-secondary'}`}>
+                  {locale.satelliteSubtitle}
                 </p>
               </div>
-            )}
-          </div>
-        </div>
 
-        {/* Ledger Log */}
-        <div className="mt-6 pt-6 border-t border-gray-100 dark:border-gray-800">
-          <h4 className="text-xs font-mono font-bold uppercase tracking-wider text-gray-500 mb-3">
-            Simulated Retirement Log (Local Session Only)
-          </h4>
-          <div className="space-y-2">
-            {retiredLog.map((log) => (
-              <div 
-                key={log.id} 
-                className={`p-3 rounded-xl border flex items-center justify-between text-xs font-mono ${
-                  isLight ? 'bg-gray-50 border-gray-200' : 'bg-bg-canvas border-border-subtle'
-                }`}
-              >
-                <div className="flex items-center space-x-3">
-                  <span className="font-bold text-emerald-500">{log.id}</span>
-                  <span className="text-gray-600 dark:text-gray-300 font-sans">{log.project}</span>
-                </div>
-                <div className="flex items-center space-x-4">
-                  <span className="text-gray-500">{log.date}</span>
-                  <span className="font-bold text-cyan-400">{log.certHash}</span>
-                  <span className="font-bold text-emerald-500">-{log.amount} tCO₂e</span>
+                <div className="flex flex-wrap items-center gap-3">
+                  <div className={`p-3 rounded-2xl border text-center ${isLight ? 'bg-white/80 border-gray-200' : 'bg-bg-canvas border-border-subtle'
+                    }`}>
+                    <span className="text-[10px] font-mono text-gray-500 block uppercase">Gross Footprint</span>
+                    <span className="text-base font-bold font-mono text-gray-700 dark:text-gray-300">{grossEmissions.toFixed(1)} t</span>
+                  </div>
+                  <div className={`p-3 rounded-2xl border text-center ${isLight ? 'bg-white/80 border-gray-200' : 'bg-bg-canvas border-border-subtle'
+                    }`}>
+                    <span className="text-[10px] font-mono text-emerald-500 block uppercase">Retired Insets</span>
+                    <span className="text-base font-bold font-mono text-emerald-500">-{totalRetired} t</span>
+                  </div>
+                  <div className={`p-3 rounded-2xl border text-center bg-emerald-500/10 border-emerald-500/30`}>
+                    <span className="text-[10px] font-mono text-emerald-600 dark:text-emerald-400 block uppercase font-bold">Net Balance</span>
+                    <span className="text-base font-bold font-mono text-emerald-600 dark:text-emerald-400">{netFootprint.toFixed(1)} t</span>
+                  </div>
                 </div>
               </div>
-            ))}
-          </div>
+            </div>
+
+            {/* Project Cards Grid */}
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+              {SATELLITE_PROJECTS.map(proj => {
+                const isSelected = selectedProject.id === proj.id;
+                return (
+                  <div
+                    key={proj.id}
+                    onClick={() => setSelectedProject(proj)}
+                    className={`rounded-3xl border overflow-hidden transition-all cursor-pointer ${isSelected
+                        ? 'border-emerald-500 ring-2 ring-emerald-500/20 shadow-lg'
+                        : (isLight ? 'bg-white border-gray-200 hover:border-gray-300' : 'bg-bg-elevated border-border-subtle hover:border-border-strong')
+                      }`}
+                  >
+                    <div className="h-32 w-full relative overflow-hidden">
+                      <img src={proj.img} alt={proj.name} className="w-full h-full object-cover" />
+                      <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent" />
+                        <div className="absolute top-2.5 right-2.5 px-2 py-0.5 rounded-full text-[10px] font-bold font-mono bg-accent text-fg-inverse shadow-sm flex items-center space-x-1">
+                          <Award className="w-3 h-3" />
+                          <span>{proj.rating} Rating</span>
+                        </div>
+                        <div className="absolute bottom-2.5 left-2.5 text-white">
+                          <span className="text-[10px] font-mono text-emerald-300 block">{proj.ecosystem}</span>
+                          <h4 className="text-xs font-bold leading-tight line-clamp-1">{proj.name}</h4>
+                        </div>
+                      </div>
+
+                      <div className="p-3.5 space-y-2 text-xs font-sans">
+                        <div className="flex justify-between items-center text-[11px] font-mono">
+                          <span className="text-gray-500">Biomass Density:</span>
+                          <span className="font-bold text-emerald-500">{proj.biomass_tc_ha} tC/ha</span>
+                        </div>
+                        <div className="flex justify-between items-center text-[11px] font-mono">
+                          <span className="text-gray-500">Available Insets:</span>
+                          <span className="font-bold">{proj.available_insets.toLocaleString()} tCO₂e</span>
+                        </div>
+                        <div className="flex justify-between items-center text-[11px] font-mono">
+                          <span className="text-gray-500">Permanence Score:</span>
+                          <span className="font-bold text-cyan-400">{proj.permanence}%</span>
+                        </div>
+                        <div className="pt-2 border-t border-gray-100 dark:border-gray-800 flex items-center justify-between text-[10px] text-gray-500">
+                          <span className="truncate">{proj.region}</span>
+                          {isSelected && <Check className="w-3.5 h-3.5 text-emerald-500 shrink-0" />}
+                        </div>
+                      </div>
+                    </div>
+                    );
+        })}
+                  </div>
+
+      {/* Selected Project Detailed Inset Retirement Panel */ }
+                <div className={`p-6 rounded-3xl border ${isLight ? 'bg-white border-gray-200' : 'bg-bg-elevated border-border-subtle'}`}>
+                  <div className="flex flex-col lg:flex-row items-start justify-between gap-6">
+                    <div className="space-y-3 max-w-xl">
+                      <div className="flex items-center space-x-2">
+                        <span className="px-2.5 py-0.5 rounded-full text-[10px] font-mono font-bold bg-emerald-500/15 text-emerald-600 dark:text-emerald-400 border border-emerald-500/30">
+                          Selected Project Inset
+                        </span>
+                        <span className="text-xs font-mono text-fg-secondary">{selectedProject.coordinates}</span>
+                      </div>
+                        <h3 className="text-lg font-bold font-sans text-fg-primary">
+                          {selectedProject.name}
+                        </h3>
+                          <p className="text-xs leading-relaxed text-fg-secondary">
+                            Verified through GEDI satellite LiDAR waveform returns and Sentinel-2 optical multi-spectral vegetation indices.
+                            Carbon insets from this ecosystem are certified under {selectedProject.standard} with an audit rating of {selectedProject.rating}.
+                          </p>
+
+                              <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 pt-2">
+                                <div className="p-3 rounded-2xl border bg-bg-canvas border-border-subtle">
+                                  <span className="text-[10px] font-mono text-fg-secondary block">Additionality</span>
+                                  <span className="text-sm font-bold font-mono text-emerald-700 dark:text-emerald-400">{selectedProject.additionality}%</span>
+                                </div>
+                                  <div className="p-3 rounded-2xl border bg-bg-canvas border-border-subtle">
+                                    <span className="text-[10px] font-mono text-fg-secondary block">Annual Removal</span>
+                                    <span className="text-sm font-bold font-mono text-cyan-700 dark:text-cyan-400">{(selectedProject.annual_removal / 1000).toFixed(1)}k t</span>
+                                  </div>
+                                    <div className="p-3 rounded-2xl border bg-bg-canvas border-border-subtle">
+                                      <span className="text-[10px] font-mono text-fg-secondary block">Vintage Year</span>
+                                      <span className="text-sm font-bold font-mono text-fg-primary">{selectedProject.vintage}</span>
+                                    </div>
+                                  </div>
+                                </div>
+
+                                {/* Retirement Action Box */}
+                                <div className={`w-full lg:w-96 p-5 rounded-3xl border space-y-4 ${isLight ? 'bg-emerald-50/50 border-emerald-200' : 'bg-bg-canvas border-border-subtle'
+                                  }`}>
+                                    <h4 className="text-xs font-bold font-mono uppercase tracking-wider text-emerald-700 dark:text-emerald-400">
+                                      Retire Nature Insets To Corporate Ledger
+                                    </h4>
+                                    <div className="space-y-1.5">
+                                      <div className="flex justify-between text-xs font-sans">
+                                        <span className="text-fg-secondary">Retirement Amount:</span>
+                                        <span className="font-bold font-mono text-fg-primary">{retireAmount} tCO₂e</span>
+                                      </div>
+                                      <input
+                                        type="range"
+                                        min="10"
+                                        max="500"
+                                        step="10"
+                                        value={retireAmount}
+                                        onChange={(e) => setRetireAmount(e.target.value)}
+                                        className="w-full accent-emerald-500 cursor-pointer"
+                                      />
+                                        <div className="flex justify-between text-[10px] font-mono text-fg-secondary">
+                                          <span>10 t</span>
+                                          <span>250 t</span>
+                                          <span>500 t</span>
+                                        </div>
+                                      </div>
+
+                                      <div className="pt-2">
+                                        <Button
+                                          variant="primary"
+                                          size="md"
+                                          onClick={handleRetire}
+                                          className="w-full"
+                                          leftIcon={<ShieldCheck className="w-4 h-4" />}
+                                        >
+                                          Retire {retireAmount} tCO₂e Insets Now
+                                        </Button>
+                                      </div>
+
+                                      {showCertificate && (
+                                          <div className="p-3 rounded-2xl bg-emerald-500/10 border border-emerald-500/30 text-[11px] font-mono text-emerald-700 dark:text-emerald-400 space-y-1">
+                                            <div className="flex items-center space-x-1.5 font-bold">
+                                              <CheckCircle2 className="w-3.5 h-3.5 text-emerald-700 dark:text-emerald-400" />
+                                              <span>Demo Simulation Entry Added (Local Session Only)</span>
+                                            </div>
+                                              <p className="text-[10px] text-fg-secondary">
+                                                Demo Ref: {retiredLog[0]?.certHash || 'DEMO-RET-LOCAL'}
+                                              </p>
+                                          </div>
+            )}
+                                        </div>
         </div>
-      </div>
-    </div>
-  );
+
+                                    {/* Ledger Log */}
+                                        <div className="mt-6 pt-6 border-t border-border-subtle">
+                                          <h4 className="text-xs font-mono font-bold uppercase tracking-wider text-fg-secondary mb-3">
+                                            Simulated Retirement Log (Local Session Only)
+                                          </h4>
+                                          <div className="space-y-2">
+                                            {retiredLog.map((log) => (
+                                              <div
+                                                key={log.id}
+                                                className="p-3 rounded-xl border flex flex-wrap items-center justify-between gap-2 text-xs font-mono bg-bg-canvas border-border-subtle"
+                                              >
+                                                <div className="flex items-center space-x-3">
+                                                  <span className="font-bold text-emerald-700 dark:text-emerald-400">{log.id}</span>
+                                                  <span className="text-fg-primary font-sans">{log.project}</span>
+                                                </div>
+                                                  <div className="flex flex-wrap items-center gap-3 sm:gap-4">
+                                                    <span className="text-fg-secondary">{log.date}</span>
+                                                    <span className="font-bold text-cyan-700 dark:text-cyan-400">{log.certHash}</span>
+                                                    <span className="font-bold text-emerald-700 dark:text-emerald-400">-{log.amount} tCO₂e</span>
+                                                  </div>
+                                                </div>
+            ))}
+                                              </div>
+        </div>
+                                        </div>
+                                    </div>
+                                    );
 };
 
-export default SatelliteMRVStudio;
+                                    export default SatelliteMRVStudio;

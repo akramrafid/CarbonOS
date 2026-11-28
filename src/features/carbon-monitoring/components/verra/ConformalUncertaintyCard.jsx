@@ -11,11 +11,10 @@ export function ConformalUncertaintyCard({
   conservativeVolume
 }) {
   return (
-    <Card className={`rounded-2xl p-5 border-2 transition-all ${
-      isLight 
-        ? 'bg-emerald-50/60 border-emerald-500/40 shadow-sm' 
+    <Card className={`rounded-2xl p-5 border-2 transition-all ${isLight
+        ? 'bg-emerald-50/60 border-emerald-500/40 shadow-sm'
         : 'bg-emerald/[0.04] border-emerald/35 shadow-[0_0_24px_rgba(0,200,83,0.08)]'
-    }`}>
+      }`}>
       <div className="flex items-center justify-between pb-3 border-b border-emerald-500/20 mb-3.5">
         <div className="flex items-center space-x-2">
           <Scale size={15} className="text-emerald" />
@@ -24,14 +23,13 @@ export function ConformalUncertaintyCard({
           </h3>
         </div>
         <div className="flex items-center space-x-1.5">
-          <span className={`text-[10px] font-mono px-2 py-0.5 rounded font-bold ${
-            isLight ? 'bg-emerald-100 text-emerald-800' : 'bg-emerald/20 text-emerald'
-          }`}>
+          <span className={`text-[10px] font-mono px-2 py-0.5 rounded font-bold ${isLight ? 'bg-emerald-100 text-emerald-800' : 'bg-emerald/20 text-emerald'
+            }`}>
             VM0047 Sec 8.3
           </span>
-          <span className="hidden sm:inline-flex text-[10px] font-mono font-extrabold px-2 py-0.5 rounded-full bg-emerald text-fg-primary">
-            PASSED
-          </span>
+            <span className="hidden sm:inline-flex text-[10px] font-mono font-extrabold px-2 py-0.5 rounded-full bg-accent text-fg-inverse">
+              PASSED
+            </span>
         </div>
       </div>
 
@@ -42,7 +40,7 @@ export function ConformalUncertaintyCard({
             [{lower90}, {upper90}] tC/ha
           </span>
         </div>
-        
+
         {/* RME VISUAL COMPLIANCE GAUGE */}
         <div className="pb-1.5 border-b border-inherit space-y-1.5">
           <div className="flex items-center justify-between">
@@ -65,8 +63,8 @@ export function ConformalUncertaintyCard({
           </div>
           {/* Visual meter */}
           <div className="w-full bg-black/10 dark:bg-white/10 h-1.5 rounded-full overflow-hidden">
-            <div 
-              className="bg-emerald h-full rounded-full transition-all duration-700" 
+            <div
+              className="bg-emerald h-full rounded-full transition-all duration-700"
               style={{ width: `${Math.min((rme / 15.0) * 100, 100)}%` }}
               title={`RME: ${rme}% (Cap: 15.0%)`}
             />
@@ -84,9 +82,8 @@ export function ConformalUncertaintyCard({
         </div>
 
         {/* CONSERVATIVE VOLUME RESULT */}
-        <div className={`p-3 rounded-xl border ${
-          isLight ? 'bg-white border-emerald-300 shadow-xs' : 'bg-black/30 border-emerald/30'
-        }`}>
+        <div className={`p-3 rounded-xl border ${isLight ? 'bg-white border-emerald-300 shadow-xs' : 'bg-black/30 border-emerald/30'
+          }`}>
           <div className="flex items-center justify-between">
             <span className={`font-extrabold text-xs ${isLight ? 'text-accent' : 'text-emerald'}`}>
               Conservative Creditable Volume

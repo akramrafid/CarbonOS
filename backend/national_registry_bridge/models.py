@@ -1,4 +1,5 @@
 import uuid
+from django.conf import settings
 from django.db import models
 
 
@@ -21,6 +22,19 @@ class RegistryProject(models.Model):
     ]
 
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
+    organization_id = models.CharField(
+        max_length=64,
+        db_index=True,
+        default="default-org",
+        help_text="Tenant organization identifier owning this registry project",
+    )
+    owner = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        null=True,
+        blank=True,
+        on_delete=models.SET_NULL,
+        related_name="registry_projects",
+    )
     external_project_id = models.CharField(
         max_length=64, 
         null=True, 
@@ -48,6 +62,22 @@ class RegistryProject(models.Model):
         max_length=50,
         help_text="Standard under which credits are verified: Verra / Gold Standard / PACM / JCM"
     )
+    polygon_geojson = models.TextField(
+        blank=True,
+        default="",
+        help_text="Project AOI Polygon GeoJSON (EPSG:4326) used for double-counting overlap guard",
+    )
+    LOA_STATUS_CHOICES = [
+        ("PENDING", "Pending DNA Authorization"),
+        ("ACTIVE", "Active Authorized LoA"),
+        ("REVOKED", "Revoked"),
+    ]
+    article62_loa_reference = models.CharField(max_length=128, blank=True, default="")
+    article62_loa_sha256 = models.CharField(max_length=64, blank=True, default="")
+    article62_loa_issued_at = models.DateTimeField(null=True, blank=True)
+    article62_loa_status = models.CharField(max_length=16, choices=LOA_STATUS_CHOICES, default="PENDING")
+    article62_loa_revoked_at = models.DateTimeField(null=True, blank=True)
+    cad_trust_warehouse_id = models.CharField(max_length=128, blank=True, default="")
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 
@@ -264,3 +294,37 @@ class CorrespondingAdjustment(models.Model):
         ser = self.credit_serial_number or "Pending Serial"
         status = "ADJUSTED" if self.adjustment_applied else "UNADJUSTED"
         return f"CA {ser} - {self.metric_tonnes_co2e} tCO2e ({status})"
+
+
+class AuthorizationAndAEFExport(models.Model):
+    """
+    UNFCCC Decision 2/CMA.3 & 6/CMA.6 Agreed Electronic Format (AEF) registry entry tracking
+    host-country Article 6.2 authorizations, first transfers, and CAD Trust synchronization.
+    """
+    ACTION_CHOICES = [
+        ("AUTHORIZATION", "Authorization"),
+        ("FIRST_TRANSFER", "First Transfer"),
+        ("ACQUISITION", "Acquisition"),
+        ("RETIREMENT", "Retirement"),
+        ("CANCELLATION", "Cancellation"),
+    ]
+    id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
+    registry_project = models.ForeignKey(
+        RegistryProject,
+        on_delete=models.CASCADE,
+        related_name="aef_entries",
+    )
+    authorization_id = models.CharField(max_length=128, db_index=True)
+    action_type = models.CharField(max_length=32, choices=ACTION_CHOICES, default="AUTHORIZATION")
+    coop_approach_id = models.CharField(max_length=128)
+    acquiring_party = models.CharField(max_length=64, default="Japan")
+    vintage_year = models.IntegerField(default=2025)
+    quantity_tco2e = models.DecimalField(max_digits=14, decimal_places=4)
+    first_transfer_trigger = models.CharField(max_length=64, default="authorization_issuance")
+    corresponding_adjustment_status = models.CharField(max_length=64, default="pending_national_ledger")
+    cad_trust_sync_status = models.CharField(max_length=32, default="UNSYNCED")
+    aef_payload = models.JSONField(default=dict)
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        ordering = ["-created_at"]

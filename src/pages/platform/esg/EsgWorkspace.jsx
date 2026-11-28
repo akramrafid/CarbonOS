@@ -5,6 +5,8 @@ import { useNavigate } from 'react-router-dom';
 import { esgGet, esgSend, hasEsgToken, resetOfflineStore, setEsgSession } from '../../../lib/esgApi';
 import { authConfigured, completeSignIn, createLocalOfflineDemoSession, loadSession, resetDemoSession, saveDemoSession, signIn, signOut, switchDemoPersona } from '../../../lib/esgAuth';
 import { Button, Input, Notice, Panel, Select, useAction } from './ui';
+import OverviewPanel from './OverviewPanel';
+import EvidenceAssistantPanel from './EvidenceAssistantPanel';
 import SetupPanel from './SetupPanel';
 import FactorsPanel from './FactorsPanel';
 import LedgerPanel from './LedgerPanel';
@@ -33,7 +35,7 @@ export default function EsgWorkspace() {
   const [me, setMe] = useState(null);
   const [orgs, setOrgs] = useState(null);
   const [orgId, setOrgId] = useState(null);
-  const [tab, setTab] = useState('setup');
+  const [tab, setTab] = useState('overview');
   const [ref, setRef] = useState({ types: null, periods: null, facilities: null });
   const action = useAction();
 
@@ -120,7 +122,7 @@ export default function EsgWorkspace() {
     setEsgSession({ organizationId: id });
     safeStorage(() => localStorage.setItem(ORG_KEY, id));
     setOrgId(id);
-    setTab('setup');
+    setTab('overview');
   };
 
   const createOrg = async (e) => {
@@ -151,7 +153,7 @@ export default function EsgWorkspace() {
   };
 
   const shell = (children) => (
-    <div className="mx-auto max-w-6xl space-y-6 px-4 pb-16 pt-16 sm:px-6">
+    <div className="mx-auto max-w-7xl space-y-4">
       <PageHeader
         title="GHG accounting workspace"
         badge="CarbonOS ESG"
@@ -166,95 +168,128 @@ export default function EsgWorkspace() {
       />
       <Notice error={action.error || loadError} message={action.message} />
       {pendingInvite && (
-        <aside aria-label="Pending organization invitation" className="rounded-xl border border-emerald/40 bg-emerald/10 p-4 flex flex-wrap items-center justify-between gap-3 text-xs">
-          <span className="text-fg-primary font-medium">
-            You have a pending organization invitation link. Accept to join the organization?
-          </span>
-          <div className="flex items-center gap-2">
-            <Button size="sm" onClick={handleConfirmInvite} disabled={action.busy}>Accept Invitation</Button>
-            <Button size="sm" variant="secondary" onClick={handleDismissInvite} disabled={action.busy}>Dismiss</Button>
-          </div>
-        </aside>
+          <aside aria-label="Pending organization invitation" className="rounded-xl border border-emerald-500/40 bg-emerald-500/10 p-4 flex flex-wrap items-center justify-between gap-3 text-xs">
+            <span className="text-fg-primary font-medium">
+              You have a pending organization invitation link. Accept to join the organization?
+            </span>
+            <div className="flex items-center gap-2">
+              <Button size="sm" onClick={handleConfirmInvite} disabled={action.busy}>Accept Invitation</Button>
+              <Button size="sm" variant="secondary" onClick={handleDismissInvite} disabled={action.busy}>Dismiss</Button>
+            </div>
+          </aside>
       )}
-      {children}
-    </div>
-  );
+          {children}
+        </div>
+      );
 
-  if (user === undefined) return shell(<p role="status" className="text-mist">Loading workspace…</p>);
+      if (user === undefined) return shell(<p role="status" className="text-fg-secondary">Loading workspace…</p>);
 
-  if (!user) {
+      if (!user) {
     return shell(
       <Panel title="ESG Workspace Offline" description="Unable to connect to the remote ESG cloud service.">
-        <p className="text-sm text-amber-300">
-          The remote API server ({import.meta.env?.VITE_FASTAPI_API_URL || 'https://carbonos-inference.onrender.com'}) is currently cold-starting or unreachable.
-        </p>
-        <p className="mt-2 text-xs text-mist">
-          You can immediately launch the interactive client-side demo workspace with Bangladesh manufacturing benchmark data, dual-control persona switching, and GHG Protocol calculation engine.
-        </p>
-        <div className="mt-4 flex flex-wrap gap-3">
-          <Button
-            onClick={async () => {
-              const demo = createLocalOfflineDemoSession();
-              saveDemoSession(demo);
-              await refreshAll();
-              await loadRef();
-            }}
-          >
-            Launch Demo Workspace
-          </Button>
-          <Button variant="secondary" onClick={() => window.location.reload()}>Retry remote connection</Button>
-          {authConfigured && <Button variant="secondary" onClick={signIn}>Sign in with SSO</Button>}
-        </div>
-      </Panel>,
-    );
+          <p className="text-sm text-amber-800 dark:text-amber-300">
+            The remote API server ({import.meta.env?.VITE_FASTAPI_API_URL || 'https://carbonos-inference.onrender.com'}) is currently cold-starting or unreachable.
+          </p>
+            <p className="mt-2 text-xs text-fg-secondary">
+              You can immediately launch the interactive client-side demo workspace with Bangladesh manufacturing benchmark data, dual-control persona switching, and GHG Protocol calculation engine.
+            </p>
+            <div className="mt-4 flex flex-wrap gap-3">
+              <Button
+                onClick={async () => {
+                  const demo = createLocalOfflineDemoSession();
+                  saveDemoSession(demo);
+                  await refreshAll();
+                  await loadRef();
+                }}
+              >
+                Launch Demo Workspace
+              </Button>
+              <Button variant="secondary" onClick={() => window.location.reload()}>Retry remote connection</Button>
+              {authConfigured && <Button variant="secondary" onClick={signIn}>Sign in with SSO</Button>}
+            </div>
+          </Panel>,
+          );
   }
 
-  if (orgs && orgs.length === 0) {
+          if (orgs && orgs.length === 0) {
     return shell(
-      <Panel title="Create your organization" description="You become its owner and can invite colleagues afterwards.">
-        <form onSubmit={createOrg} className="grid gap-3 sm:grid-cols-[1fr_auto_auto] sm:items-end">
-          <Input label="Organization name" name="name" required maxLength={200} />
-          <label className="flex items-center gap-2 text-sm text-mist"><input type="checkbox" name="is_demo" /> Demo workspace (sample data only)</label>
-          <Button type="submit" disabled={action.busy}>Create organization</Button>
-        </form>
-      </Panel>,
-    );
+          <Panel title="Create your organization" description="You become its owner and can invite colleagues afterwards.">
+            <form onSubmit={createOrg} className="grid gap-3 sm:grid-cols-[1fr_auto_auto] sm:items-end">
+              <Input label="Organization name" name="name" required maxLength={200} />
+              <label className="flex items-center gap-2 text-sm text-mist"><input type="checkbox" name="is_demo" /> Demo workspace (sample data only)</label>
+              <Button type="submit" disabled={action.busy}>Create organization</Button>
+            </form>
+          </Panel>,
+          );
   }
 
   const org = orgs?.find((o) => o.id === orgId);
-  if (!org) return shell(<p role="status" className="text-mist">Loading organizations…</p>);
-  const perms = PERMS[org.role] || [];
-  const can = { write: perms.includes('write'), review: perms.includes('review'), admin: perms.includes('admin') };
-  const tabs = [
-    ['setup', 'Setup'], ['factors', 'Emission factors'], ['ledger', 'Activity ledger'], ['metrics', 'E/S/G metrics'], ['reports', 'Calculation & reports'], ['bills', 'Bill analysis'], ['disclosures', 'Disclosures'],
-    ...(can.admin ? [['members', 'Members']] : []), ...(can.review ? [['audit', 'Audit trail']] : []),
-  ];
+          if (!org) return shell(<p role="status" className="text-mist">Loading organizations…</p>);
+          const perms = PERMS[org.role] || [];
+          const can = {write: perms.includes('write'), review: perms.includes('review'), admin: perms.includes('admin') };
+          const tabGroups = [
+          {
+            id: 'overview-intake',
+          label: 'Overview & Intake',
+          tabs: [
+          {id: 'overview', label: 'Overview' },
+          {id: 'bills', label: 'Bill Intake & Analysis' },
+          {id: 'setup', label: 'Setup' },
+          ],
+    },
+          {
+            id: 'accounting-factors',
+          label: 'Accounting & Factors',
+          tabs: [
+          {id: 'ledger', label: 'Activity Ledger' },
+          {id: 'factors', label: 'Emission Factors' },
+          {id: 'metrics', label: 'E/S/G Metrics' },
+          {id: 'reports', label: 'Calculations & Reports' },
+          {id: 'disclosures', label: 'Disclosures' },
+          ],
+    },
+          {
+            id: 'rag-evidence',
+          label: 'RAG Evidence AI',
+          tabs: [{id: 'evidence', label: 'Evidence AI & Compare' }],
+    },
+          ...(can.admin || can.review
+          ? [{
+            id: 'governance',
+          label: 'Governance',
+          tabs: [
+          ...(can.admin ? [{id: 'members', label: 'Members' }] : []),
+          ...(can.review ? [{id: 'audit', label: 'Audit trail' }] : []),
+          ],
+        }]
+          : []),
+          ];
 
-  return shell(
+          return shell(
     <>
-      {(user?.isDemo || org.is_demo) && (
-        <aside aria-label="Demo notice" className="rounded-xl border border-amber-500/30 bg-amber-950/20 p-4 text-xs">
-          <div className="flex flex-wrap items-center justify-between gap-3">
-            <div className="space-y-1">
-              <div className="flex items-center gap-2">
-                <span className="inline-block rounded bg-amber-400/20 px-2 py-0.5 font-mono text-[11px] font-semibold uppercase tracking-wider text-amber-300">
-                  DEMO WORKSPACE — SAMPLE DATA / NOT ASSURED
-                </span>
-                <span className="font-mono text-[11px] text-amber-200/70">
-                  {user?.isOfflineDemo ? 'Interactive client-side evaluation' : 'Ephemeral zero-friction evaluation'}
-                </span>
-                {user?.isOfflineDemo && (
-                  <span className="inline-block rounded bg-emerald-500/20 px-2 py-0.5 font-mono text-[11px] font-semibold uppercase tracking-wider text-emerald-400">
+            {(user?.isDemo || org.is_demo) && (
+                <aside aria-label="Demo notice" className="rounded-xl border border-amber-500/30 bg-amber-500/10 p-4 text-xs">
+                  <div className="flex flex-wrap items-center justify-between gap-3">
+                    <div className="space-y-1">
+                          <div className="flex flex-wrap items-center gap-2">
+                            <span className="inline-block rounded bg-amber-500/20 px-2 py-0.5 font-mono text-[11px] font-semibold uppercase tracking-wider text-amber-800 dark:text-amber-300">
+                              DEMO WORKSPACE — SAMPLE DATA / NOT ASSURED
+                            </span>
+                              <span className="font-mono text-[11px] text-amber-800/80 dark:text-amber-200/80">
+                                {user?.isOfflineDemo ? 'Interactive client-side evaluation' : 'Ephemeral zero-friction evaluation'}
+                              </span>
+                              {user?.isOfflineDemo && (
+                  <span className="inline-block rounded bg-emerald-500/20 px-2 py-0.5 font-mono text-[11px] font-semibold uppercase tracking-wider text-emerald-700 dark:text-emerald-400">
                     Offline Resilient
                   </span>
                 )}
               </div>
-              <p className="text-mist">
+              <p className="text-fg-secondary">
                 Synthetic Bangladesh spinning & manufacturing benchmarks. Backend tenant isolation and segregation of duties are strictly enforced.
               </p>
             </div>
             <div className="flex flex-wrap items-center gap-2">
-              <span className="text-[11px] text-mist">Dual-control persona:</span>
+              <span className="text-[11px] text-fg-secondary">Dual-control persona:</span>
               <Tabs
                 tabs={[
                   { id: 'owner', label: 'Submitter (Owner)' },
@@ -269,51 +304,59 @@ export default function EsgWorkspace() {
               </Button>
             </div>
           </div>
-        </aside>
+                        </aside>
       )}
 
-      <div className="flex flex-wrap items-end gap-4">
-        {orgs.length > 1
-          ? <div className="w-72"><Select label="Organization" value={orgId} onChange={(e) => switchOrg(e.target.value)} options={orgs.map((o) => [o.id, o.name])} /></div>
-          : <p className="text-lg text-registry">{org.name}</p>}
-        <span className="rounded bg-mist/15 px-2 py-1 font-mono text-[11px] text-mist">Role: {org.role}</span>
-        {org.is_demo && !user?.isDemo && (
-          <span className="rounded bg-amber/20 px-2 py-1 font-mono text-[11px] text-amber-300">DEMO WORKSPACE — NOT PRODUCTION DATA</span>
-        )}
-      </div>
+                        <div className="flex flex-wrap items-end gap-4">
+                          {orgs.length > 1
+                          ? <div className="w-full sm:w-72"><Select label="Organization" value={orgId} onChange={(e) => switchOrg(e.target.value)} options={orgs.map((o) => [o.id, o.name])} /></div>
+                          : <p className="text-lg text-fg-primary">{org.name}</p>}
+                          <span className="rounded bg-bg-muted px-2 py-1 font-mono text-[11px] text-fg-secondary">Role: {org.role}</span>
+                          {org.is_demo && !user?.isDemo && (
+          <span className="rounded bg-amber-500/20 px-2 py-1 font-mono text-[11px] text-amber-800 dark:text-amber-300">DEMO WORKSPACE — NOT PRODUCTION DATA</span>
+                          )}
+                        </div>
 
-      <nav aria-label="ESG workspace sections" className="overflow-x-auto pb-1">
-        <Tabs
-          tabs={tabs.map(([key, label]) => ({ id: key, label }))}
-          activeTab={tab}
-          onChange={setTab}
-          size="sm"
-        />
-      </nav>
-      <div key={orgId + tab}>
-        {tab === 'setup' && <SetupPanel canAdmin={can.admin} />}
-        {tab === 'factors' && <FactorsPanel canAdmin={can.admin} me={me?.sub} types={ref.types} />}
-        {tab === 'ledger' && <LedgerPanel me={me?.sub} can={can} types={ref.types} periods={ref.periods} facilities={ref.facilities} />}
-        {tab === 'reports' && <ReportsPanel me={me?.sub} can={can} periods={ref.periods} facilities={ref.facilities} onPeriodsChanged={loadRef} />}
-        {tab === 'metrics' && <MetricsPanel me={me?.sub} can={can} periods={ref.periods} facilities={ref.facilities} />}
-        {tab === 'bills' && <BillAnalysisPanel facilities={ref.facilities} periods={ref.periods} />}
-        {tab === 'disclosures' && <DisclosuresPanel me={me?.sub} can={can} periods={ref.periods} />}
-        {tab === 'members' && <MembersPanel />}
-        {tab === 'audit' && <AuditPanel />}
-      </div>
-    </>,
-  );
+                          <nav aria-label="ESG workspace sections" data-internal-nav="true" className="w-full">
+                            <Tabs
+                              groups={tabGroups}
+                              activeTab={tab}
+                              onChange={setTab}
+                            />
+                          </nav>
+                          <div key={orgId + tab}>
+                            {tab === 'overview' && (
+                              <OverviewPanel
+                                periods={ref.periods}
+                                facilities={ref.facilities}
+                                onNavigateTab={setTab}
+                                isDemoWorkspace={Boolean(user?.isDemo || org.is_demo)}
+                              />
+                            )}
+                            {tab === 'setup' && <SetupPanel canAdmin={can.admin} />}
+                            {tab === 'factors' && <FactorsPanel canAdmin={can.admin} me={me?.sub} types={ref.types} />}
+                            {tab === 'ledger' && <LedgerPanel me={me?.sub} can={can} types={ref.types} periods={ref.periods} facilities={ref.facilities} />}
+                            {tab === 'reports' && <ReportsPanel me={me?.sub} can={can} periods={ref.periods} facilities={ref.facilities} onPeriodsChanged={loadRef} />}
+                            {tab === 'metrics' && <MetricsPanel me={me?.sub} can={can} periods={ref.periods} facilities={ref.facilities} />}
+                            {tab === 'bills' && <BillAnalysisPanel facilities={ref.facilities} periods={ref.periods} />}
+                            {tab === 'disclosures' && <DisclosuresPanel me={me?.sub} can={can} periods={ref.periods} />}
+                            {tab === 'evidence' && <EvidenceAssistantPanel canWrite={can.write} />}
+                            {tab === 'members' && <MembersPanel />}
+                            {tab === 'audit' && <AuditPanel />}
+                          </div>
+                        </>,
+                        );
 }
 
-export function EsgCallback() {
+                        export function EsgCallback() {
   const navigate = useNavigate();
-  const [error, setError] = useState(null);
+                        const [error, setError] = useState(null);
   useEffect(() => {
-    completeSignIn().then(() => navigate('/platform/esg', { replace: true }), (e) => setError(e.message));
+                          completeSignIn().then(() => navigate('/platform/esg', { replace: true }), (e) => setError(e.message));
   }, [navigate]);
-  return (
-    <div className="mx-auto max-w-xl px-4 pt-16">
-      {error ? <p role="alert" className="text-red-300">Sign-in failed: {error}</p> : <p role="status" className="text-mist">Completing sign-in…</p>}
-    </div>
-  );
+                        return (
+                        <div className="mx-auto max-w-xl px-4 pt-16">
+                          {error ? <p role="alert" className="text-red-700 dark:text-red-300">Sign-in failed: {error}</p> : <p role="status" className="text-fg-secondary">Completing sign-in…</p>}
+                        </div>
+                        );
 }

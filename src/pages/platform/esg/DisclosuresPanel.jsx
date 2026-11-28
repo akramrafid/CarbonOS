@@ -37,51 +37,52 @@ export default function DisclosuresPanel({ me, can, periods }) {
       <Notice error={action.error} message={action.message} />
       <Panel title="Disclosure coverage" description="Which requirements have supporting data and reviewed responses. This is not a compliance determination and does not replace external assurance."
         actions={<div className="flex flex-wrap items-end gap-3">
-          <div className="w-44"><Select label="Reporting period" value={periodId} onChange={(e) => setPeriodId(e.target.value)} options={periods.map((p) => [p.id, p.name])} /></div>
-          <div className="w-64"><Select label="Framework" value={framework} onChange={(e) => setFramework(e.target.value)}
-            options={(frameworks.data || [{ framework: 'GRI', name: 'GRI' }]).map((f) => [f.framework, f.name])} /></div>
-          <Button variant="secondary" onClick={downloadGap}>Gap report (CSV)</Button>
-        </div>}>
-        {r && (
-          <div className="space-y-2 text-sm text-mist">
-            <p>Template {r.template_version} · {r.materiality_perspective} materiality perspective ·{' '}
-              <span className="text-amber-300">references to be verified against the official standard</span></p>
-            <p role="status">{Object.entries(r.counts).map(([k, v]) => `${v} ${k.replace(/_/g, ' ').toLowerCase()}`).join(' · ')}
-              {r.all_requirements_addressed ? ' — every requirement has an approved response or a recorded non-applicability decision.' : ' — gaps remain.'}</p>
-          </div>
-        )}
-        <Loading state={report} empty="No requirements.">
-          <Table caption="Disclosure requirements" rowKey="ref" rows={r?.requirements || []} columns={[
-            { key: 'ref', label: 'Requirement', render: (q) => <span><span className="font-mono text-xs">{q.ref}</span><span className="block">{q.title}</span></span> },
-            { key: 'status', label: 'Status', render: (q) => <StatusBadge status={q.status} /> },
-            { key: 'missing', label: 'Gaps / evidence', render: (q) => (q.missing.length
-              ? <ul className="list-disc pl-4 text-xs text-red-300">{q.missing.map((m) => <li key={m}>{m}</li>)}</ul>
-              : <span className="text-xs text-mist">{Object.entries(q.evidence).filter(([k]) => k !== 'ghg_snapshot').map(([k, v]) => (Array.isArray(v) ? `${k}: ${v.length} approved value(s)` : `${k}: ${v}`)).join('; ') || (q.data_status === 'NARRATIVE_ONLY' ? 'Narrative only' : '')}</span>) },
-            { key: 'narrative', label: 'Response', render: (q) => (
-              <div className="space-y-2 text-xs">
-                {q.narrative && <p className="max-w-xs text-registry">{q.narrative}</p>}
-                {q.applicability_rationale && <p className="max-w-xs text-mist">Not applicable: {q.applicability_rationale}</p>}
-                {editing === q.ref && (
-                  <form onSubmit={save(q.ref)} className="space-y-2" aria-label={`Edit response ${q.ref}`}>
-                    <label className="block">Status
-                      <select name="status" defaultValue={q.response_status === 'NOT_STARTED' ? 'DRAFT' : q.response_status} className="ml-2 rounded border border-mist/30 bg-carbon px-2 py-1">
+          <div className="w-full sm:w-44"><Select label="Reporting period" value={periodId} onChange={(e) => setPeriodId(e.target.value)} options={periods.map((p) => [p.id, p.name])} /></div>
+            <div className="w-full sm:w-64"><Select label="Framework" value={framework} onChange={(e) => setFramework(e.target.value)}
+              options={(frameworks.data || [{ framework: 'GRI', name: 'GRI' }]).map((f) => [f.framework, f.name])} /></div>
+            <Button variant="secondary" onClick={downloadGap}>Gap report (CSV)</Button>
+          </div>}>
+          {r && (
+              <div className="space-y-2 text-sm text-fg-secondary">
+                <p>Template {r.template_version} · {r.materiality_perspective} materiality perspective ·{' '}
+                <span className="text-amber-800 dark:text-amber-300">references to be verified against the official standard</span></p>
+              <p role="status">{Object.entries(r.counts).map(([k, v]) => `${v} ${k.replace(/_/g, ' ').toLowerCase()}`).join(' · ')}
+                {r.all_requirements_addressed ? ' — every requirement has an approved response or a recorded non-applicability decision.' : ' — gaps remain.'}</p>
+            </div>
+          )}
+          <Loading state={report} empty="No requirements.">
+            <Table caption="Disclosure requirements" rowKey="ref" rows={r?.requirements || []} columns={[
+              { key: 'ref', label: 'Requirement', render: (q) => <span><span className="font-mono text-xs">{q.ref}</span><span className="block">{q.title}</span></span> },
+              { key: 'status', label: 'Status', render: (q) => <StatusBadge status={q.status} /> },
+              {
+                key: 'missing', label: 'Gaps / evidence', render: (q) => (q.missing.length
+              ? <ul className="list-disc pl-4 text-xs text-red-700 dark:text-red-300">{q.missing.map((m, idx) => <li key={`${idx}-${m}`}>{m}</li>)}</ul>
+              : <span className="text-xs text-fg-secondary">{Object.entries(q.evidence).filter(([k]) => k !== 'ghg_snapshot').map(([k, v]) => (Array.isArray(v) ? `${k}: ${v.length} approved value(s)` : `${k}: ${v}`)).join('; ') || (q.data_status === 'NARRATIVE_ONLY' ? 'Narrative only' : '')}</span>) },
+            {key: 'narrative', label: 'Response', render: (q) => (
+            <div className="space-y-2 text-xs">
+              {q.narrative && <p className="max-w-xs text-fg-primary">{q.narrative}</p>}
+              {q.applicability_rationale && <p className="max-w-xs text-fg-secondary">Not applicable: {q.applicability_rationale}</p>}
+              {editing === q.ref && (
+                <form onSubmit={save(q.ref)} className="space-y-2" aria-label={`Edit response ${q.ref}`}>
+                  <label className="block">Status
+                      <select name="status" defaultValue={q.response_status === 'NOT_STARTED' ? 'DRAFT' : q.response_status} className="ml-2 rounded border border-border-subtle bg-bg-canvas px-2 py-1 text-fg-primary">
                         <option value="DRAFT">Draft</option><option value="IN_REVIEW">Send for review</option><option value="NOT_APPLICABLE">Not applicable</option>
                       </select></label>
-                    <label className="block">Narrative<textarea name="narrative" defaultValue={q.narrative || ''} rows={3} className="mt-1 w-full rounded border border-mist/30 bg-carbon p-2" /></label>
-                    <label className="block">Reason if not applicable<input name="rationale" defaultValue={q.applicability_rationale || ''} className="mt-1 w-full rounded border border-mist/30 bg-carbon p-2" /></label>
-                    <div className="flex gap-2"><Button type="submit">Save</Button><Button variant="secondary" onClick={() => setEditing(null)}>Cancel</Button></div>
-                  </form>
-                )}
-              </div>) },
-            { key: 'actions', label: '', render: (q) => (
-              <div className="flex flex-wrap gap-2">
-                {can.write && q.response_status !== 'PUBLISHED' && editing !== q.ref && <Button variant="secondary" onClick={() => setEditing(q.ref)}>Edit</Button>}
-                {can.review && q.response_status === 'IN_REVIEW' && q.updated_by !== me && !q.missing.length && <Button onClick={step(q.ref, 'approve')}>Approve</Button>}
-                {can.admin && q.response_status === 'APPROVED' && <Button onClick={step(q.ref, 'publish')}>Publish</Button>}
-              </div>) },
+                  <label className="block">Narrative<textarea name="narrative" defaultValue={q.narrative || ''} rows={3} className="mt-1 w-full rounded border border-border-subtle bg-bg-canvas p-2 text-fg-primary" /></label>
+                  <label className="block">Reason if not applicable<input name="rationale" defaultValue={q.applicability_rationale || ''} className="mt-1 w-full rounded border border-border-subtle bg-bg-canvas p-2 text-fg-primary" /></label>
+                  <div className="flex gap-2"><Button type="submit">Save</Button><Button variant="secondary" onClick={() => setEditing(null)}>Cancel</Button></div>
+                </form>
+              )}
+            </div>) },
+            {key: 'actions', label: '', render: (q) => (
+            <div className="flex flex-wrap gap-2">
+              {can.write && q.response_status !== 'PUBLISHED' && editing !== q.ref && <Button variant="secondary" onClick={() => setEditing(q.ref)}>Edit</Button>}
+              {can.review && q.response_status === 'IN_REVIEW' && q.updated_by !== me && !q.missing.length && <Button onClick={step(q.ref, 'approve')}>Approve</Button>}
+              {can.admin && q.response_status === 'APPROVED' && <Button onClick={step(q.ref, 'publish')}>Publish</Button>}
+            </div>) },
           ]} />
-        </Loading>
-      </Panel>
+          </Loading>
+        </Panel>
     </div>
   );
 }

@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { createContext, useState, useEffect, useCallback } from 'react';
 import { useLocation } from 'react-router-dom';
 import DevGridOverlay from '../ui/DevGridOverlay';
 import ErrorBoundary from '../ErrorBoundary';
@@ -12,6 +12,8 @@ import CommandPalette from './CommandPalette';
 import Footer from '../Footer';
 import RouteTransitionOutlet from './RouteTransitionOutlet';
 import { safeGetItem, safeSetItem } from '../../lib/safeStorage';
+
+export const DashboardLayoutContext = createContext(false);
 
 /**
  * Persistent Dashboard Layout Shell (Phase 4 & Phase 6)
@@ -95,14 +97,16 @@ export function DashboardLayout() {
             onOpenCommandPalette={() => setCommandPaletteOpen(true)}
           />
 
-          {/* Dynamic Page Outlet with bottom padding for mobile tab bar */}
+          {/* Dynamic Page Outlet with compact density padding */}
           <main
             id="dashboard-main"
-            className="flex-1 p-4 sm:p-6 lg:p-8 pb-20 md:pb-8 max-w-[1600px] w-full mx-auto min-w-0 flex flex-col"
+            className="flex-1 px-4 pt-3 sm:px-5 sm:pt-4 lg:px-6 lg:pt-4 pb-20 md:pb-6 max-w-[1600px] w-full mx-auto min-w-0 flex flex-col"
           >
-            <ErrorBoundary>
-              <RouteTransitionOutlet mode="dashboard" />
-            </ErrorBoundary>
+            <DashboardLayoutContext.Provider value={true}>
+              <ErrorBoundary>
+                <RouteTransitionOutlet mode="dashboard" />
+              </ErrorBoundary>
+            </DashboardLayoutContext.Provider>
           </main>
 
           {/* Slim Workspace Footer (Product Mode) */}

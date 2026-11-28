@@ -25,9 +25,11 @@ export default function MetricsPanel({ me, can, periods, facilities }) {
     const form = e.currentTarget;
     const f = new FormData(form);
     const dimensions = Object.fromEntries(Object.keys(def.dimensions).map((d) => [d, f.get(`dim_${d}`)]).filter(([, v]) => v));
-    const body = { period_id: periodId, metric_key: def.metric_key, value: f.get('value'), dimensions,
-                   ...(f.get('facility_id') ? { facility_id: f.get('facility_id') } : {}),
-                   ...(f.get('evidence_ref') ? { evidence_ref: f.get('evidence_ref') } : {}) };
+    const body = {
+      period_id: periodId, metric_key: def.metric_key, value: f.get('value'), dimensions,
+      ...(f.get('facility_id') ? { facility_id: f.get('facility_id') } : {}),
+      ...(f.get('evidence_ref') ? { evidence_ref: f.get('evidence_ref') } : {})
+    };
     if (await action.run(() => esgSend('POST', '/api/esg/metrics', body), 'Saved as DRAFT. Submit it for review.')) { form.reset(); obs.reload(); }
   };
 
@@ -40,8 +42,8 @@ export default function MetricsPanel({ me, can, periods, facilities }) {
       <Notice error={action.error} message={action.message} />
       <Panel title="E/S/G metrics" description="Aggregated figures only — never records about individual people. Self-reported values are not external certification."
         actions={<div className="flex flex-wrap gap-3">
-          <div className="w-48"><Select label="Reporting period" value={periodId} onChange={(e) => setPeriodId(e.target.value)} options={periods.map((p) => [p.id, p.name])} /></div>
-          <div className="w-44"><Select label="Pillar" value={pillar} onChange={(e) => { setPillar(e.target.value); setMetricKey(''); }} options={PILLARS} /></div>
+          <div className="w-full sm:w-48"><Select label="Reporting period" value={periodId} onChange={(e) => setPeriodId(e.target.value)} options={periods.map((p) => [p.id, p.name])} /></div>
+          <div className="w-full sm:w-44"><Select label="Pillar" value={pillar} onChange={(e) => { setPillar(e.target.value); setMetricKey(''); }} options={PILLARS} /></div>
         </div>}>
         <Loading state={obs} empty="No observations for this pillar and period yet.">
           <Table caption="Metric observations" rows={obs.data?.items || []} columns={[
@@ -51,11 +53,13 @@ export default function MetricsPanel({ me, can, periods, facilities }) {
             { key: 'value', label: 'Value', render: (o) => `${Number(o.value).toLocaleString()} ${o.unit}` },
             { key: 'evidence_ref', label: 'Evidence' },
             { key: 'status', label: 'Status', render: (o) => <StatusBadge status={o.status} /> },
-            { key: 'actions', label: '', render: (o) => (
-              <div className="flex gap-2">
-                {can.write && ['DRAFT', 'REJECTED'].includes(o.status) && <Button variant="secondary" onClick={act(o.id, 'submit')}>Submit</Button>}
-                {can.review && o.status === 'SUBMITTED' && o.created_by !== me && <Button onClick={act(o.id, 'approve', {})}>Approve</Button>}
-              </div>) },
+            {
+              key: 'actions', label: '', render: (o) => (
+                <div className="flex gap-2">
+                  {can.write && ['DRAFT', 'REJECTED'].includes(o.status) && <Button variant="secondary" onClick={act(o.id, 'submit')}>Submit</Button>}
+                  {can.review && o.status === 'SUBMITTED' && o.created_by !== me && <Button onClick={act(o.id, 'approve', {})}>Approve</Button>}
+                </div>)
+            },
           ]} />
         </Loading>
       </Panel>
@@ -68,7 +72,7 @@ export default function MetricsPanel({ me, can, periods, facilities }) {
             {def.kind === 'boolean'
               ? <Select label="Answer" name="value" options={[['1', 'Yes'], ['0', 'No']]} />
               : <Input label={`Value (${def.unit})`} name="value" type="number" min="0" max={def.kind === 'percent' ? 100 : undefined}
-                  step={def.kind === 'integer' ? 1 : 'any'} required />}
+                step={def.kind === 'integer' ? 1 : 'any'} required />}
             {Object.entries(def.dimensions).map(([d, values]) => (
               <Select key={d} label={`Breakdown: ${d}`} name={`dim_${d}`} options={[['', 'Total (no breakdown)'], ...values.map((v) => [v, v.replace(/_/g, ' ')])]} />
             ))}

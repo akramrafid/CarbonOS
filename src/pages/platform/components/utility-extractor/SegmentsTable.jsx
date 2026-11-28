@@ -11,22 +11,22 @@ export function SegmentsTable({
 }) {
   return (
     <div className="space-y-4">
-      <div className="flex justify-between items-center">
+      <div className="flex flex-wrap justify-between items-center gap-2">
         <div className="flex items-center space-x-2">
           <Sparkles className="w-4 h-4 text-accent" />
-          <h3 className="font-sans font-bold text-base">
+          <h3 className="font-sans font-bold text-base text-fg-primary">
             Detected Utility Segments ({segments.length} Line Items)
           </h3>
         </div>
 
-        <div className="text-[11px] font-mono text-gray-400 flex items-center space-x-2">
+        <div className="text-[11px] font-mono text-fg-secondary flex items-center space-x-2">
           {auditSeal ? (
-            <span className="px-2 py-0.5 rounded-full bg-emerald-500/20 text-accent-hover border border-emerald-500/40 flex items-center gap-1 font-bold">
+            <span className="px-2 py-0.5 rounded-full bg-emerald-500/20 text-emerald-700 dark:text-emerald-300 border border-emerald-500/40 flex items-center gap-1 font-bold">
               <Lock className="w-3 h-3" />
               {auditSeal}
             </span>
           ) : (
-            <span className="text-amber-400 flex items-center gap-1">
+            <span className="text-amber-800 dark:text-amber-400 flex items-center gap-1">
               <AlertTriangle className="w-3 h-3" />
               Pending Auditor Sign-Off
             </span>
@@ -34,12 +34,10 @@ export function SegmentsTable({
         </div>
       </div>
 
-      <div className="overflow-x-auto rounded-2xl border border-white/10">
+      <div className="overflow-x-auto rounded-2xl border border-border-subtle">
         <table className="w-full text-left text-xs font-sans">
           <thead
-            className={`text-[10px] font-mono uppercase tracking-wider ${
-              isLight ? 'bg-bg-muted text-gray-600' : 'bg-bg-canvas text-gray-400'
-            }`}
+            className="text-[10px] font-mono uppercase tracking-wider bg-bg-muted text-fg-secondary"
           >
             <tr>
               <th className="p-3.5">Segment &amp; Utility Type</th>
@@ -52,7 +50,7 @@ export function SegmentsTable({
               <th className="p-3.5 text-center">Auditor Actions</th>
             </tr>
           </thead>
-          <tbody className="divide-y divide-white/5">
+          <tbody className="divide-y divide-border-subtle">
             {segments.map((seg, idx) => {
               const isRejected = seg.status === 'REJECTED_BY_AUDITOR';
               const isCorrected = seg.status === 'CORRECTED_BY_AUDITOR';
@@ -60,25 +58,25 @@ export function SegmentsTable({
               return (
                 <tr
                   key={idx}
-                  className={`hover:bg-white/[0.02] transition-colors ${
+                  className={`hover:bg-bg-elevated/50 transition-colors ${
                     isRejected ? 'opacity-40 bg-red-950/10' : ''
                   }`}
                 >
                   <td className="p-3.5">
                     <div
                       className={`font-bold flex items-center space-x-2 ${
-                        isRejected ? 'line-through text-gray-500' : 'text-white'
+                        isRejected ? 'line-through text-fg-muted' : 'text-fg-primary'
                       }`}
                     >
                       <span>{seg.name}</span>
                       {isCorrected && (
-                        <span className="px-1.5 py-0.2 rounded text-[9px] font-mono bg-amber-500/20 text-amber-300 border border-amber-500/40">
+                        <span className="px-1.5 py-0.2 rounded text-[9px] font-mono bg-amber-500/20 text-amber-800 dark:text-amber-300 border border-amber-500/40">
                           Edited
                         </span>
                       )}
                     </div>
-                    <span className="text-[10px] font-mono text-gray-400 block">{seg.type}</span>
-                    <span className="text-[9px] text-gray-500 italic block mt-0.5 truncate max-w-xs">
+                    <span className="text-[10px] font-mono text-fg-secondary block">{seg.type}</span>
+                    <span className="text-[9px] text-fg-muted italic block mt-0.5 truncate max-w-xs">
                       {seg.snippet}
                     </span>
                   </td>
@@ -87,10 +85,10 @@ export function SegmentsTable({
                     <span
                       className={`px-2 py-0.5 rounded-full text-[10px] font-mono font-bold ${
                         seg.scope.includes('Scope 1')
-                          ? 'bg-amber-500/15 text-amber-400 border border-amber-500/30'
+                          ? 'bg-amber-500/15 text-amber-800 dark:text-amber-400 border border-amber-500/30'
                           : seg.scope.includes('Scope 2')
-                          ? 'bg-cyan-500/15 text-cyan-400 border border-cyan-500/30'
-                          : 'bg-purple-500/15 text-purple-400 border border-purple-500/30'
+                          ? 'bg-cyan-500/15 text-cyan-800 dark:text-cyan-400 border border-cyan-500/30'
+                          : 'bg-purple-500/15 text-purple-800 dark:text-purple-400 border border-purple-500/30'
                       }`}
                     >
                       {seg.scope}
@@ -99,31 +97,31 @@ export function SegmentsTable({
 
                   <td className="p-3.5 font-mono font-bold">
                     {Number(seg.qty || 0).toLocaleString()}{' '}
-                    <span className="text-gray-400 font-normal text-[10px]">{seg.unit}</span>
+                    <span className="text-fg-secondary font-normal text-[10px]">{seg.unit}</span>
                   </td>
 
                   <td className="p-3.5 max-w-xs">
-                    <div className="font-mono text-[11px] text-emerald-400 font-semibold">
+                    <div className="font-mono text-[11px] text-emerald-700 dark:text-emerald-400 font-semibold">
                       {seg.factor == null ? 'Factor required' : `${seg.factor} kgCO₂e/${seg.unit}`}
                     </div>
-                    <div className="text-[9px] text-gray-400 truncate">{seg.citation}</div>
+                    <div className="text-[9px] text-fg-secondary truncate">{seg.citation}</div>
                   </td>
 
                   <td className="p-3.5 text-right font-mono font-bold text-sm">
                     <span
                       className={
                         isRejected
-                          ? 'line-through text-gray-500'
+                          ? 'line-through text-fg-muted'
                           : seg.emissions_t < 0
-                          ? 'text-emerald-400'
-                          : 'text-white'
+                          ? 'text-emerald-700 dark:text-emerald-400'
+                          : 'text-fg-primary'
                       }
                     >
                       {seg.emissions_t == null ? '—' : `${seg.emissions_t.toFixed(2)} t`}
                     </span>
                   </td>
 
-                  <td className="p-3.5 text-right font-mono text-gray-300">
+                  <td className="p-3.5 text-right font-mono text-fg-secondary">
                     ৳{Number(seg.cost_bdt || 0).toLocaleString()}
                   </td>
 
@@ -131,10 +129,10 @@ export function SegmentsTable({
                     <span
                       className={`px-2 py-0.5 rounded-full text-[10px] font-mono border ${
                         isRejected
-                          ? 'bg-red-500/15 text-red-400 border-red-500/30'
+                          ? 'bg-red-500/15 text-red-700 dark:text-red-400 border-red-500/30'
                           : isCorrected
-                          ? 'bg-amber-500/15 text-amber-400 border-amber-500/30'
-                          : 'bg-accent/15 text-accent-hover border-border-strong/30'
+                          ? 'bg-amber-500/15 text-amber-800 dark:text-amber-400 border-amber-500/30'
+                          : 'bg-accent/15 text-accent border-border-strong/30'
                       }`}
                     >
                       {isRejected ? 'REJECTED' : isCorrected ? 'MODIFIED' : 'AI EXTRACTED'}

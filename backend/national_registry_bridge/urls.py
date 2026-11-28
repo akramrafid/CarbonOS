@@ -6,7 +6,8 @@ from .views import (
     PositiveNegativeRuleViewSet,
     MonitoringReportSubmissionViewSet,
     CorrespondingAdjustmentViewSet,
-    NationalBTRSummaryView
+    NationalBTRSummaryView,
+    NationalAEFExportView,
 )
 
 router = DefaultRouter()
@@ -17,5 +18,6 @@ router.register(r"adjustments", CorrespondingAdjustmentViewSet, basename="corres
 
 urlpatterns = [
     path("btr-summary/", NationalBTRSummaryView.as_view(), name="national-btr-summary"),
+    path("aef-export/", NationalAEFExportView.as_view(), name="national-aef-export"),
     path("", include(router.urls)),
 ]

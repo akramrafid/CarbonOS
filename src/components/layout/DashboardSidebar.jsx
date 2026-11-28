@@ -82,7 +82,7 @@ export const DashboardSidebar = memo(function DashboardSidebar({
       `.trim()}
     >
       {/* Brand & Collapse Header */}
-      <div className="h-16 flex items-center justify-between px-4 border-b border-border-subtle shrink-0">
+      <div className={`h-16 flex items-center border-b border-border-subtle shrink-0 ${collapsed ? 'justify-center px-1.5 gap-1' : 'justify-between px-4'}`}>
         {!collapsed ? (
           <Link to="/" className="flex items-center gap-2.5 font-bold tracking-tight text-fg-primary min-w-0">
             <div className="w-8 h-8 rounded-lg bg-accent flex items-center justify-center text-bg-canvas font-mono font-bold text-base shadow-sm shrink-0">
@@ -94,9 +94,9 @@ export const DashboardSidebar = memo(function DashboardSidebar({
             </div>
           </Link>
         ) : (
-          <Tooltip content="CarbonOS Home" side="right">
-            <Link to="/" className="mx-auto" aria-label="CarbonOS Home">
-              <div className="w-8 h-8 rounded-lg bg-accent flex items-center justify-center text-bg-canvas font-mono font-bold text-base shadow-sm">
+          <Tooltip content="CarbonOS Home" position="right">
+            <Link to="/" className="shrink-0" aria-label="CarbonOS Home">
+              <div className="w-7 h-7 rounded-lg bg-accent flex items-center justify-center text-bg-canvas font-mono font-bold text-sm shadow-sm">
                 C
               </div>
             </Link>
@@ -107,7 +107,7 @@ export const DashboardSidebar = memo(function DashboardSidebar({
           type="button"
           onClick={onToggleCollapse}
           aria-label={collapsed ? t('nav.expandSidebar', 'Expand sidebar (Ctrl+B)') : t('nav.collapseSidebar', 'Collapse sidebar (Ctrl+B)')}
-          className="hidden lg:flex min-w-[44px] min-h-[44px] items-center justify-center p-1.5 rounded-lg text-fg-secondary hover:text-fg-primary hover:bg-bg-elevated transition-colors focus-ring-standard"
+          className={`flex items-center justify-center rounded-lg text-fg-secondary hover:text-fg-primary hover:bg-bg-elevated transition-colors focus-ring-standard ${collapsed ? 'min-w-[26px] min-h-[36px] p-1' : 'min-w-[44px] min-h-[44px] p-1.5'}`}
         >
           {collapsed ? <ChevronRight className="w-4 h-4" /> : <ChevronLeft className="w-4 h-4" />}
         </button>
@@ -162,7 +162,7 @@ export const DashboardSidebar = memo(function DashboardSidebar({
                           focus-ring-standard min-w-0
                           ${
                             isActive
-                              ? 'text-fg-inverse font-semibold'
+                              ? 'bg-accent text-fg-inverse font-semibold shadow-sm'
                               : 'text-fg-secondary hover:text-fg-primary hover:bg-bg-elevated'
                           }
                           ${collapsed ? 'justify-center px-0' : ''}
@@ -185,9 +185,14 @@ export const DashboardSidebar = memo(function DashboardSidebar({
                         )}
 
                         {!collapsed && item.badge && (
-                          <span className={`relative z-10 ml-auto text-[10px] font-mono px-1.5 py-0.5 rounded ${
-                            isItemActive ? 'bg-white/20 text-fg-inverse' : 'bg-accent/15 text-accent'
-                          }`}>
+                          <span
+                            data-badge="live"
+                            className={`relative z-10 ml-auto text-[10px] font-mono px-1.5 py-0.5 rounded font-semibold ${
+                              isItemActive
+                                ? 'bg-fg-inverse/20 text-fg-inverse border border-fg-inverse/30'
+                                : 'bg-accent/15 text-accent'
+                            }`}
+                          >
                             {item.badge}
                           </span>
                         )}
@@ -197,7 +202,7 @@ export const DashboardSidebar = memo(function DashboardSidebar({
                     // In rail mode, wrap in portaled Tooltip
                     if (collapsed) {
                       return (
-                        <Tooltip key={item.id} content={itemLabel} side="right">
+                        <Tooltip key={item.id} content={itemLabel} position="right">
                           {navLinkElement}
                         </Tooltip>
                       );
@@ -230,7 +235,7 @@ export const DashboardSidebar = memo(function DashboardSidebar({
         </div>
       ) : (
         <div className="p-2 border-t border-border-subtle flex justify-center shrink-0">
-          <Tooltip content="Exit to Landing" side="right">
+          <Tooltip content="Exit to Landing" position="right">
             <Link to="/" className="p-2 rounded-lg text-fg-muted hover:text-accent hover:bg-bg-elevated transition-colors" aria-label="Exit to landing">
               <ExternalLink className="w-4 h-4" />
             </Link>

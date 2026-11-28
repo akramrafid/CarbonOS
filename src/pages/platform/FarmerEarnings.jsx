@@ -4,8 +4,10 @@ import { Badge } from '../../components/ui/Badge';
 import { Button } from '../../components/ui/Button';
 import { StatCard } from '../../components/ui/StatCard';
 import { DataTable } from '../../components/ui/DataTable';
+import { useToast } from '../../context/ToastContext';
 
 const FarmerEarnings = () => {
+  const { showToast } = useToast();
   const transactions = [
     {
       id: 'BD-2026-CR-000142',
@@ -36,8 +38,8 @@ const FarmerEarnings = () => {
       header: 'Project / Credit ID',
       render: (_, row) => (
         <div>
-          <p className="font-bold text-white group-hover:text-emerald transition-colors">{row?.projectName}</p>
-          <p className="text-[11px] font-mono text-mist/60 mt-0.5">{row?.creditId}</p>
+          <p className="font-bold text-fg-primary group-hover:text-emerald transition-colors">{row?.projectName}</p>
+          <p className="text-[11px] font-mono text-fg-muted mt-0.5">{row?.creditId}</p>
         </div>
       )
     },
@@ -61,67 +63,74 @@ const FarmerEarnings = () => {
     }
   ];
 
+  const handleDownloadCsv = () => {
+    const header = 'ID,Date,Project,Buyer,Gross,NetPayout,Status';
+    const rows = transactions.map((t) =>
+      [t.id, t.date, t.projectName, t.buyer, t.gross, t.netPayout, t.status]
+        .map((cell) => `"${String(cell).replace(/"/g, '""')}"`)
+        .join(',')
+    );
+    const blob = new Blob([[header, ...rows].join('\n')], { type: 'text/csv;charset=utf-8;' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = 'carbonos-farmer-earnings.csv';
+    a.click();
+    URL.revokeObjectURL(url);
+    showToast?.('Farmer earnings CSV downloaded.', 'success');
+  };
+
   return (
-    <div className="min-h-screen bg-bg-canvas font-sans relative overflow-hidden">
-      {/* Background Graphic Effects */}
-      <div className="absolute inset-0 bg-[linear-gradient(to_right,#00C85308_1px,transparent_1px),linear-gradient(to_bottom,#00C85308_1px,transparent_1px)] bg-[size:4rem_4rem] z-0 pointer-events-none"></div>
-      {/* [COMMENTED OUT FOR PERSONAL REFERENCE — removed decorative ambient blur element] */}
+      <div className="w-full max-w-[1600px] mx-auto font-sans space-y-6">
+        <PageHeader
+          title="Earnings Dashboard"
+          description="Track your carbon credit sales and instant payouts."
+          badge={<Badge variant="emerald">FARMER PORTAL</Badge>}
+        />
 
-      <div className="pt-16 pb-16 px-4 sm:px-6 lg:px-8 relative z-10">
-        <div className="max-w-7xl mx-auto">
-          <div className="mb-12">
-            <PageHeader
-              title="Earnings Dashboard"
-              description="Track your carbon credit sales and instant payouts."
-              badge={<Badge variant="emerald">FARMER PORTAL</Badge>}
-            />
-          </div>
+            {/* Summary Cards */}
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
+                <StatCard
+                  title="Total Earned (BDT)"
+                  value="৳ 124,500"
+                  trend="up"
+                  featured
+                />
+                <StatCard
+                  title="Credits Sold"
+                  value="8"
+                  unit="tCO₂e"
+                  trend="neutral"
+                />
+                <StatCard
+                  title="Pending Settlements"
+                  value="0"
+                  trend="neutral"
+                />
+                <StatCard
+                  title="Earned This Month"
+                  value="৳ 15,400"
+                  trend="up"
+                />
+              </div>
 
-          {/* Summary Cards */}
-          <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-12">
-            <StatCard
-              title="Total Earned (BDT)"
-              value="৳ 124,500"
-              trend="up"
-              featured
-            />
-            <StatCard
-              title="Credits Sold"
-              value="8"
-              unit="tCO₂e"
-              trend="neutral"
-            />
-            <StatCard
-              title="Pending Settlements"
-              value="0"
-              trend="neutral"
-            />
-            <StatCard
-              title="Earned This Month"
-              value="৳ 15,400"
-              trend="up"
-            />
-          </div>
-
-          {/* Transaction History Table */}
-          <div className="bg-bg-canvas/80 rounded-2xl border border-white/10 shadow-2xl overflow-hidden backdrop-blur-xl">
-            <div className="px-6 py-6 border-b border-white/5 flex justify-between items-center">
-              <h3 className="text-xl font-bold text-white">Transaction History</h3>
-              <Button variant="secondary" size="sm" className="font-mono text-xs">
-                DOWNLOAD CSV
-              </Button>
+              {/* Transaction History Table */}
+                    <div className="bg-bg-surface rounded-2xl border border-border-subtle shadow-sm overflow-hidden">
+                      <div className="px-6 py-4 border-b border-border-subtle flex flex-wrap justify-between items-center gap-3">
+                        <h3 className="text-lg font-bold text-fg-primary">Transaction History</h3>
+                        <Button variant="secondary" size="sm" onClick={handleDownloadCsv} className="font-mono text-xs">
+                          DOWNLOAD CSV
+                        </Button>
+                      </div>
+                      <DataTable
+                        columns={columns}
+                        data={transactions}
+                        keyField="id"
+                        className="border-0 rounded-none bg-transparent"
+                      />
+                    </div>
             </div>
-            <DataTable
-              columns={columns}
-              data={transactions}
-              keyField="id"
-              className="border-0 rounded-none bg-transparent"
-            />
-          </div>
-        </div>
-      </div>
-    </div>
-  );
+            );
 };
 
-export default FarmerEarnings;
+            export default FarmerEarnings;

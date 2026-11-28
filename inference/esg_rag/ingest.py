@@ -73,6 +73,10 @@ def get_embedding_info(model_name: Optional[str] = None) -> Dict[str, Any]:
     }
 
 
+def embedding_space() -> str:
+    return EMBEDDING_MODEL if get_embedding_model() is not None else "feature-hash-384-v1"
+
+
 def compute_embedding(text: str, model_name: Optional[str] = None) -> List[float]:
     """Generates 384-dimensional dense embedding vector."""
     model = get_embedding_model(model_name)
@@ -321,6 +325,7 @@ def ingest_document(
         embeddings.append(vec)
         documents.append(c["content"])
         meta_entry = {
+            "embedding_space": embedding_space(),
             "doc_id": doc_rec.id,
             "tenant_id": tenant_id,
             "filename": filename,

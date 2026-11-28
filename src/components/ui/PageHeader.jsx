@@ -1,6 +1,7 @@
-import React from 'react';
+import React, { useContext } from 'react';
 import { ChevronRight } from 'lucide-react';
 import { Link } from 'react-router-dom';
+import { DashboardLayoutContext } from '../layout/DashboardLayout';
 
 /**
  * Universal PageHeader Component
@@ -8,7 +9,7 @@ import { Link } from 'react-router-dom';
  * - Exactly one <h1> per page
  * - One-line contextual subtitle
  * - At most ONE primary action button
- * - Optional secondary actions and breadcrumb hierarchy
+ * - Optional secondary actions and breadcrumb hierarchy (suppressed inside DashboardLayout since TopBar already renders breadcrumbs)
  */
 export function PageHeader({
   title,
@@ -22,10 +23,12 @@ export function PageHeader({
   align = 'left'
 }) {
   const isCentered = align === 'center';
+  const insideDashboardLayout = useContext(DashboardLayoutContext);
+  const showBreadcrumbs = !insideDashboardLayout && breadcrumbs.length > 0;
   return (
-    <header className={`w-full mb-6 pb-6 ${isCentered ? 'text-center' : 'border-b border-carbon-border/60 dark:border-border-subtle/60'} ${className}`}>
+    <header className={`w-full mb-4 pb-3 ${isCentered ? 'text-center' : 'border-b border-carbon-border/60 dark:border-border-subtle/60'} ${className}`}>
       {/* Breadcrumbs */}
-      {breadcrumbs.length > 0 && (
+      {showBreadcrumbs && (
         <nav aria-label="Breadcrumb" className={`flex items-center gap-1.5 text-xs text-mist mb-2 ${isCentered ? 'justify-center' : ''}`}>
           {breadcrumbs.map((crumb, idx) => {
             const isLast = idx === breadcrumbs.length - 1;

@@ -33,6 +33,7 @@ export const ROUTE_CHUNK_LOADERS = {
   '/company/careers': () => import('../pages/company/Careers'),
   '/company/privacy': () => import('../pages/company/Privacy'),
   '/company/terms': () => import('../pages/company/Terms'),
+  '/company/trust': () => import('../pages/company/Trust'),
   '/forbidden': () => import('../pages/Forbidden'),
   '/unauthorized': () => import('../pages/Forbidden'),
 
@@ -46,7 +47,8 @@ export const ROUTE_CHUNK_LOADERS = {
   '/platform/ai-detection': () => import('../pages/platform/AIDetection'),
   '/platform/saas-dashboard': () => import('../pages/platform/SaaSDashboard'),
   '/platform/saas': () => import('../pages/platform/SaaSDashboard'),
-  '/esg': () => import('../pages/platform/SaaSDashboard'),
+  '/demo-showcase': () => import('../pages/platform/SaaSDashboard'),
+  '/esg': () => import('../pages/platform/esg/EsgWorkspace'),
   '/platform/esg': () => import('../pages/platform/esg/EsgWorkspace'),
   '/platform/esg/callback': () => import('../pages/platform/esg/EsgWorkspace'),
   '/platform/impact': () => import('../pages/platform/Impact'),

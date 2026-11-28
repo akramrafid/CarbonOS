@@ -7,7 +7,7 @@ import {
   Phone, 
   ArrowRight, 
   Loader2, 
-  Sparkles, 
+  /* [COMMENTED OUT FOR PERSONAL REFERENCE — unused Sparkles import removed] */
   ShieldCheck 
 } from 'lucide-react';
 import { Modal } from './ui/Modal';

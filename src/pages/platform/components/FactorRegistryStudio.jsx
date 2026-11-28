@@ -1,13 +1,13 @@
 import React, { useState } from 'react';
-import { 
-  ShieldCheck, 
-  AlertCircle, 
-  CheckCircle2, 
-  GitBranch, 
-  Play, 
-  RefreshCw, 
-  FileText, 
-  Sliders, 
+import {
+  ShieldCheck,
+  AlertCircle,
+  CheckCircle2,
+  GitBranch,
+  Play,
+  RefreshCw,
+  FileText,
+  Sliders,
   ArrowRight,
   Info,
   Check
@@ -146,142 +146,162 @@ export const FactorRegistryStudio = ({ isLight, locale }) => {
   return (
     <div className="space-y-6">
       {/* Header Banner */}
-      <div className={`p-6 rounded-3xl border ${
-        isLight 
-          ? 'bg-gradient-to-r from-emerald-50 to-teal-50/50 border-emerald-200' 
+      <div className={`p-6 rounded-3xl border ${isLight
+          ? 'bg-gradient-to-r from-emerald-50 to-teal-50/50 border-emerald-200'
           : 'bg-gradient-to-r from-bg-surface to-bg-canvas border-border-subtle'
-      }`}>
+        }`}>
         <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
           <div className="space-y-1">
-            <div className="flex items-center space-x-2">
-              <div className="w-8 h-8 rounded-xl bg-emerald-500/10 border border-emerald-500/30 flex items-center justify-center text-emerald-500">
-                <ShieldCheck className="w-4 h-4" />
-              </div>
-              <h2 className={`text-xl font-bold font-sans ${isLight ? 'text-gray-900' : 'text-white'}`}>
-                {locale.factorTitle}
-              </h2>
-              <span className="px-2.5 py-0.5 rounded-full text-[10px] font-mono font-bold bg-emerald-500/15 text-emerald-600 dark:text-emerald-400 border border-emerald-500/30">
-                {locale.activeVersion}
-              </span>
-            </div>
-            <p className={`text-xs ${isLight ? 'text-gray-600' : 'text-fg-secondary'}`}>
-              {locale.factorSubtitle}
-            </p>
-          </div>
+                <div className="flex flex-wrap items-center gap-2">
+                  <div className="w-8 h-8 rounded-xl bg-emerald-500/10 border border-emerald-500/30 flex items-center justify-center text-emerald-700 dark:text-emerald-400">
+                    <ShieldCheck className="w-4 h-4" />
+                  </div>
+                    <h2 className="text-xl font-bold font-sans text-fg-primary">
+                      {locale.factorTitle}
+                    </h2>
+                      <span className="px-2.5 py-0.5 rounded-full text-[10px] font-mono font-bold bg-emerald-500/15 text-emerald-700 dark:text-emerald-400 border border-emerald-500/30">
+                        {locale.activeVersion}
+                      </span>
+                    </div>
+                      <p className="text-xs text-fg-secondary">
+                        {locale.factorSubtitle}
+                      </p>
+                    </div>
 
-          <div className="flex items-center space-x-3 text-xs font-mono">
-            <span className="px-3 py-1.5 rounded-2xl border bg-bg-canvas border-border-subtle text-gray-300">
-              {locale.toleranceThreshold}
-            </span>
-            <Button
-              variant="primary"
-              size="sm"
-              onClick={handleRunRegression}
-              disabled={isRunningRegression}
-              leftIcon={<Play className={`w-3.5 h-3.5 ${isRunningRegression ? 'animate-spin' : ''}`} />}
-            >
-              {locale.runRegression}
-            </Button>
-          </div>
-        </div>
-      </div>
-
-      {/* Regression Results Panel (if triggered) */}
-      {regressionReport && (
-        <div className={`p-5 rounded-3xl border animate-in fade-in duration-300 ${
-          isLight ? 'bg-emerald-50/60 border-emerald-300' : 'bg-bg-surface border-border-subtle'
-        }`}>
-          <div className="flex items-center justify-between mb-3">
-            <div className="flex items-center space-x-2">
-              <CheckCircle2 className="w-4 h-4 text-emerald-500" />
-              <h4 className="text-xs font-mono font-bold uppercase tracking-wider text-emerald-600 dark:text-emerald-400">
-                Factor Regression Test Passed: All Benchmark Portfolios Within Tolerance
-              </h4>
-            </div>
-            <span className="text-[10px] font-mono text-gray-500">Tested: {regressionReport.tested_at}</span>
-          </div>
-
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-3 text-xs font-sans">
-            {regressionReport.cases.map((c, idx) => (
-              <div 
-                key={idx} 
-                className={`p-3 rounded-2xl border ${isLight ? 'bg-white border-emerald-200' : 'bg-bg-canvas border-border-subtle'}`}
-              >
-                <span className="text-[10px] font-mono text-gray-500 block truncate">{c.customer}</span>
-                <div className="flex items-baseline justify-between mt-1">
-                  <span className="font-bold text-sm">{c.proposed_tco2e.toFixed(1)} t</span>
-                  <span className="text-xs font-mono font-semibold text-emerald-500">+{c.delta_pct}% (Pass)</span>
+                        <div className="flex flex-wrap items-center gap-3 text-xs font-mono">
+                          <span className="px-3 py-1.5 rounded-2xl border bg-bg-canvas border-border-subtle text-fg-secondary">
+                            {locale.toleranceThreshold}
+                          </span>
+                          <Button
+                            variant="primary"
+                            size="sm"
+                            onClick={handleRunRegression}
+                            disabled={isRunningRegression}
+                            leftIcon={<Play className={`w-3.5 h-3.5 ${isRunningRegression ? 'animate-spin' : ''}`} />}
+                          >
+                            {locale.runRegression}
+                          </Button>
+                        </div>
+                    </div>
                 </div>
-                <span className="text-[10px] text-gray-400 block mt-1">Delta: +{c.delta_tco2e} tCO₂e</span>
-              </div>
-            ))}
-          </div>
-        </div>
-      )}
 
-      {/* Factors Catalog Table */}
-      <div className={`p-6 rounded-3xl border overflow-x-auto ${isLight ? 'bg-white border-gray-200' : 'bg-bg-elevated border-border-subtle'}`}>
-        <h3 className={`text-sm font-bold font-sans mb-4 ${isLight ? 'text-gray-900' : 'text-white'}`}>
-          National Emission Factors Catalog (Department of Environment & SREDA Bangladesh)
-        </h3>
-        <table className="w-full text-xs font-sans">
-          <thead>
-            <tr className={`border-b text-left ${isLight ? 'border-gray-200 text-gray-500' : 'border-border-subtle text-gray-400'}`}>
-              <th className="pb-3 font-semibold">Factor ID</th>
-              <th className="pb-3 font-semibold">Fuel / Activity</th>
-              <th className="pb-3 font-semibold">Category</th>
-              <th className="pb-3 font-semibold">Factor Value</th>
-              <th className="pb-3 font-semibold">Uncertainty</th>
-              <th className="pb-3 font-semibold">Version & citation status</th>
-              <th className="pb-3 font-semibold text-right">Action</th>
-            </tr>
-          </thead>
-          <tbody className="divide-y divide-gray-100 dark:divide-gray-800">
-            {factors.map(f => (
-              <tr 
-                key={f.id} 
-                className="hover:bg-emerald-500/5 transition-colors cursor-pointer"
-                onClick={() => setSelectedFactor(f)}
-              >
-                <td className="py-3 font-mono font-bold text-emerald-500">{f.id}</td>
-                <td className="py-3 font-medium">
-                  <div>{f.name}</div>
-                  <div className="text-[10px] text-gray-500">{f.tier}</div>
-                </td>
-                <td className="py-3">
-                  <span className={`px-2 py-0.5 rounded-full text-[10px] font-mono font-semibold ${
-                    f.category.includes('1') ? 'bg-amber-500/15 text-amber-600 dark:text-amber-400' :
-                    f.category.includes('2') ? 'bg-cyan-500/15 text-cyan-600 dark:text-cyan-400' :
-                    'bg-emerald-500/15 text-emerald-600 dark:text-emerald-400'
-                  }`}>
-                    {f.category}
-                  </span>
-                </td>
-                <td className="py-3 font-mono font-bold text-sm">
-                  {f.factor_value} <span className="text-xs font-normal text-gray-500">{f.unit}</span>
-                </td>
-                <td className="py-3 font-mono text-gray-500">{f.uncertainty}</td>
-                <td className="py-3 max-w-xs">
-                  <div className="text-[11px] font-medium text-gray-700 dark:text-gray-300 truncate">{f.citation}</div>
-                  <div className="text-[10px] font-mono text-emerald-600 dark:text-emerald-400 truncate">{f.gazette}</div>
-                </td>
-                <td className="py-3 text-right">
-                  <Button 
-                    variant="secondary"
-                    size="sm"
-                    onClick={() => setSelectedFactor(f)}
-                    className="text-[10px] font-mono h-auto min-h-0 py-1 px-2.5"
+                {/* Regression Results Panel (if triggered) */}
+                {regressionReport && (
+                  <div className={`p-5 rounded-3xl border animate-in fade-in duration-300 ${isLight ? 'bg-emerald-50/60 border-emerald-300' : 'bg-bg-surface border-border-subtle'
+                    }`}>
+                    <div className="flex items-center justify-between mb-3">
+                      <div className="flex items-center space-x-2">
+                        <CheckCircle2 className="w-4 h-4 text-emerald-500" />
+                        <h4 className="text-xs font-mono font-bold uppercase tracking-wider text-emerald-600 dark:text-emerald-400">
+                          Factor Regression Test Passed: All Benchmark Portfolios Within Tolerance
+                        </h4>
+                      </div>
+                      <span className="text-[10px] font-mono text-gray-500">Tested: {regressionReport.tested_at}</span>
+                    </div>
+
+                    <div className="grid grid-cols-1 md:grid-cols-3 gap-3 text-xs font-sans">
+                      {regressionReport.cases.map((c, idx) => (
+                        <div
+                          key={idx}
+                          className={`p-3 rounded-2xl border ${isLight ? 'bg-white border-emerald-200' : 'bg-bg-canvas border-border-subtle'}`}
+                        >
+                          <span className="text-[10px] font-mono text-gray-500 block truncate">{c.customer}</span>
+                          <div className="flex items-baseline justify-between mt-1">
+                            <span className="font-bold text-sm">{c.proposed_tco2e.toFixed(1)} t</span>
+                            <span className="text-xs font-mono font-semibold text-emerald-500">+{c.delta_pct}% (Pass)</span>
+                          </div>
+                          <span className="text-[10px] text-gray-400 block mt-1">Delta: +{c.delta_tco2e} tCO₂e</span>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                )}
+
+                {/* Factors Catalog Table */}
+                <div className={`p-6 rounded-3xl border overflow-x-auto ${isLight ? 'bg-white border-gray-200' : 'bg-bg-elevated border-border-subtle'}`}>
+                  <h3 className={`text-sm font-bold font-sans mb-4 ${isLight ? 'text-gray-900' : 'text-white'}`}>
+                    National Emission Factors Catalog (Department of Environment & SREDA Bangladesh)
+                  </h3>
+                  <table className="w-full text-xs font-sans">
+                    <thead>
+                      <tr className={`border-b text-left ${isLight ? 'border-gray-200 text-gray-500' : 'border-border-subtle text-gray-400'}`}>
+                        <th className="pb-3 font-semibold">Factor ID</th>
+                        <th className="pb-3 font-semibold">Fuel / Activity</th>
+                        <th className="pb-3 font-semibold">Category</th>
+                        <th className="pb-3 font-semibold">Factor Value</th>
+                        <th className="pb-3 font-semibold">Uncertainty</th>
+                        <th className="pb-3 font-semibold">Version & citation status</th>
+                        <th className="pb-3 font-semibold text-right">Action</th>
+                      </tr>
+                    </thead>
+                    <tbody className="divide-y divide-gray-100 dark:divide-gray-800">
+                      {factors.map(f => (
+                        <tr
+                          key={f.id}
+                          className="hover:bg-emerald-500/5 transition-colors cursor-pointer"
+                          onClick={() => setSelectedFactor(f)}
+                        >
+                          <td className="py-3 font-mono font-bold text-emerald-500">{f.id}</td>
+                          <td className="py-3 font-medium">
+                            <div>{f.name}</div>
+                            <div className="text-[10px] text-gray-500">{f.tier}</div>
+                          </td>
+                          <td className="py-3">
+                            <span className={`px-2 py-0.5 rounded-full text-[10px] font-mono font-semibold ${f.category.includes('1') ? 'bg-amber-500/15 text-amber-600 dark:text-amber-400' :
+                                f.category.includes('2') ? 'bg-cyan-500/15 text-cyan-600 dark:text-cyan-400' :
+                                  'bg-emerald-500/15 text-emerald-600 dark:text-emerald-400'
+                              }`}>
+                              {f.category}
+                            </span>
+                          </td>
+                          <td className="py-3 font-mono font-bold text-sm">
+                            {f.factor_value} <span className="text-xs font-normal text-gray-500">{f.unit}</span>
+                          </td>
+                          <td className="py-3 font-mono text-gray-500">{f.uncertainty}</td>
+                          <td className="py-3 max-w-xs">
+                            <div className="text-[11px] font-medium text-gray-700 dark:text-gray-300 truncate">{f.citation}</div>
+                            <div className="text-[10px] font-mono text-emerald-600 dark:text-emerald-400 truncate">{f.gazette}</div>
+                          </td>
+                          <td className="py-3 text-right">
+                            <Button
+                              variant="secondary"
+                              size="sm"
+                              onClick={() => setSelectedFactor(f)}
+                              className="text-[10px] font-mono h-auto min-h-0 py-1 px-2.5"
+                            >
+                              Inspect
+                            </Button>
+                          </td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+
+                {selectedFactor && (
+                  <div
+                    className={`p-5 rounded-3xl border space-y-2 ${isLight ? 'bg-white border-emerald-200' : 'bg-bg-elevated border-border-subtle'
+                      }`}
                   >
-                    Inspect
-                  </Button>
-                </td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
-      </div>
-    </div>
-  );
+                    <div className="flex flex-wrap items-center justify-between gap-2">
+                      <div className="flex items-center gap-2">
+                        <span className="font-mono text-xs font-bold text-emerald">{selectedFactor.id}</span>
+                        <span className={`font-sans font-bold text-sm ${isLight ? 'text-gray-900' : 'text-white'}`}>
+                          {selectedFactor.name}
+                        </span>
+                      </div>
+                      <span className="font-mono text-xs text-fg-secondary">
+                        {selectedFactor.factor_value} {selectedFactor.unit} · {selectedFactor.uncertainty}
+                      </span>
+                    </div>
+                    <p className="text-xs text-fg-secondary">
+                      Citation: <span className="font-medium text-fg-primary">{selectedFactor.citation}</span> · Gazette:{' '}
+                      <span className="font-mono text-emerald">{selectedFactor.gazette}</span> ({selectedFactor.version})
+                    </p>
+                  </div>
+                )}
+              </div>
+              );
 };
 
-export default FactorRegistryStudio;
+              export default FactorRegistryStudio;

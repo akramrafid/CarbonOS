@@ -124,7 +124,7 @@ export function BoundarySelectionBox({
           return (
             <div
               className={`p-3.5 rounded-xl border space-y-2.5 ${
-                isLight ? 'bg-accent-muted/60 border-border-subtle' : 'bg-emerald/10 border-emerald/20'
+                isLight ? 'bg-bg-elevated border-border-strong' : 'bg-emerald/10 border-emerald/20'
               }`}
             >
               <div className="flex items-center justify-between">
@@ -204,53 +204,51 @@ export function BoundarySelectionBox({
                   Clear
                 </Button>
               </div>
-            </div>
+            </div >
           );
-        })() : drawPoints.length > 0 ? (
-          <div
-            className={`p-3 rounded-xl border text-xs ${
-              isLight ? 'bg-amber-50 border-amber-200 text-amber-700' : 'bg-amber/10 border-amber/20 text-amber'
-            }`}
-          >
-            <div className="flex items-center justify-between font-semibold">
-              <span>Vertices Plotted: {drawPoints.length}</span>
-              <Button
-                variant="link"
-                size="sm"
-                onClick={() => setDrawPoints([])}
-                className="!text-red-500 underline hover:!text-red-400 text-[11px]"
-              >
-                Reset
-              </Button>
-            </div>
-            <p className="text-[11px] mt-1 opacity-90">
-              Click {3 - drawPoints.length} more point{3 - drawPoints.length === 1 ? '' : 's'} on the map to enclose a complete boundary.
-            </p>
-          </div>
-        ) : null}
-
-        {/* Upload GeoJSON/KML */}
-        <div
-          className={`border-2 border-dashed transition-colors rounded-xl p-4 text-center cursor-pointer relative ${
-            isLight ? 'border-border-subtle hover:border-border-strong bg-bg-canvas' : 'border-white/10 hover:border-emerald/40'
-          }`}
-        >
-          <input
-            type="file"
-            onChange={handleBoundaryUpload}
-            accept=".geojson,.json,.kml"
-            className="absolute inset-0 opacity-0 cursor-pointer"
-          />
-          <Upload className="mx-auto text-emerald mb-2" size={24} />
-          <span className={`text-xs font-semibold block ${isLight ? 'text-fg-primary' : 'text-white'}`}>
-            Drag & Drop Boundary
-          </span>
-          <span className={`text-[10px] block mt-1 ${isLight ? 'text-fg-secondary' : 'text-mist'}`}>
-            GeoJSON / KML files supported
-          </span>
-        </div>
-      </div>
+}) (): drawPoints.length > 0 ? (
+  <div
+    className={`p-3 rounded-xl border text-xs ${isLight ? 'bg-amber-50 border-amber-200 text-amber-700' : 'bg-amber/10 border-amber/20 text-amber'
+      }`}
+  >
+    <div className="flex items-center justify-between font-semibold">
+      <span>Vertices Plotted: {drawPoints.length}</span>
+      <Button
+        variant="link"
+        size="sm"
+        onClick={() => setDrawPoints([])}
+        className="!text-red-500 underline hover:!text-red-400 text-[11px]"
+      >
+        Reset
+      </Button>
     </div>
+    <p className="text-[11px] mt-1 opacity-90">
+      Click {3 - drawPoints.length} more point{3 - drawPoints.length === 1 ? '' : 's'} on the map to enclose a complete boundary.
+    </p>
+  </div>
+) : null}
+
+{/* Upload GeoJSON/KML */ }
+<div
+  className={`border-2 border-dashed transition-colors rounded-xl p-4 text-center cursor-pointer relative ${isLight ? 'border-border-subtle hover:border-border-strong bg-bg-canvas' : 'border-white/10 hover:border-emerald/40'
+    }`}
+>
+  <input
+    type="file"
+    onChange={handleBoundaryUpload}
+    accept=".geojson,.json,.kml"
+    className="absolute inset-0 opacity-0 cursor-pointer"
+  />
+  <Upload className="mx-auto text-emerald mb-2" size={24} />
+  <span className={`text-xs font-semibold block ${isLight ? 'text-fg-primary' : 'text-white'}`}>
+    Drag & Drop Boundary
+  </span>
+  <span className={`text-[10px] block mt-1 ${isLight ? 'text-fg-secondary' : 'text-mist'}`}>
+    GeoJSON / KML files supported
+  </span>
+</div>
+      </div >
+    </div >
   );
 }
 

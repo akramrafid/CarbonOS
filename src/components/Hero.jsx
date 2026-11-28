@@ -11,8 +11,8 @@ import {
   Terminal,
   Lock,
   Globe,
-  Layers,
-  Sparkles
+  Layers
+  /* [COMMENTED OUT FOR PERSONAL REFERENCE — unused Sparkles import removed] */
 } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import { Link } from 'react-router-dom';

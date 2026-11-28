@@ -1,7 +1,7 @@
 import React, { useState, useMemo } from 'react';
-import { CheckCircle2 } from 'lucide-react';
 import PurchaseConfirmModal from '../payments/PurchaseConfirmModal';
 import { useTheme } from '../../context/ThemeContext';
+import { useToast } from '../../context/ToastContext';
 import { INITIAL_CREDITS } from './marketplaceData';
 import { MarketplaceHero } from './MarketplaceHero';
 import { MarketplaceFilterBar } from './MarketplaceFilterBar';
@@ -11,6 +11,7 @@ import { MrvDossierModal } from './MrvDossierModal';
 
 export const MarketplaceBrowse = () => {
   const { theme } = useTheme();
+  const { showToast } = useToast();
   const isLight = theme === 'light';
 
   // Selected state
@@ -25,7 +26,6 @@ export const MarketplaceBrowse = () => {
   const [sortBy, setSortBy] = useState('FEATURED');
   const [selectedBatchIds, setSelectedBatchIds] = useState([]);
   const [copiedId, setCopiedId] = useState(null);
-  const [toastMessage, setToastMessage] = useState(null);
 
   const [credits, setCredits] = useState(INITIAL_CREDITS);
 
@@ -34,10 +34,9 @@ export const MarketplaceBrowse = () => {
     e.stopPropagation();
     navigator.clipboard?.writeText(id);
     setCopiedId(id);
-    setToastMessage(`Copied serial ID: ${id}`);
+    showToast(`Copied serial ID: ${id}`, 'success');
     setTimeout(() => {
       setCopiedId(null);
-      setToastMessage(null);
     }, 2000);
   };
 
@@ -61,10 +60,10 @@ export const MarketplaceBrowse = () => {
           (selectedStandard === 'VERRA'
             ? credit.verification.includes('Verra')
             : selectedStandard === 'GOLD'
-            ? credit.verification.includes('Gold Standard')
-            : selectedStandard === 'DOE'
-            ? credit.verification.includes('DoE')
-            : true);
+              ? credit.verification.includes('Gold Standard')
+              : selectedStandard === 'DOE'
+                ? credit.verification.includes('DoE')
+                : true);
 
         const matchesRegion = selectedRegion === 'ALL' || credit.division === selectedRegion;
         const matchesVintage = selectedVintage === 'ALL' || credit.vintage === selectedVintage;
@@ -125,102 +124,88 @@ export const MarketplaceBrowse = () => {
   };
 
   return (
-    <div
-      className={`pt-16 pb-12 px-4 sm:px-6 lg:px-12 w-full min-h-screen transition-colors duration-300 ${
-        isLight ? 'bg-bg-canvas text-fg-primary' : 'bg-bg-canvas text-white'
-      }`}
-    >
-      {/* Toast Notification */}
-      {toastMessage && (
-        <div className="fixed bottom-6 right-6 z-50 bg-emerald text-carbon font-mono text-xs font-bold px-4 py-3 rounded-xl shadow-2xl flex items-center space-x-2 animate-slide-up">
-          <CheckCircle2 size={16} />
-          <span>{toastMessage}</span>
-        </div>
-      )}
+        <div className="w-full max-w-[1600px] mx-auto space-y-6 text-fg-primary transition-colors duration-300">
+          {/* 1. Hero & Real-time Spot Ticker */}
+          <MarketplaceHero isLight={isLight} />
 
-      <div className="max-w-[1440px] mx-auto space-y-8">
-        {/* 1. Hero & Real-time Spot Ticker */}
-        <MarketplaceHero isLight={isLight} />
-
-        {/* 2. Search, Filter Bar & View Toggle */}
-        <MarketplaceFilterBar
-          isLight={isLight}
-          selectedSector={selectedSector}
-          setSelectedSector={setSelectedSector}
-          searchQuery={searchQuery}
-          setSearchQuery={setSearchQuery}
-          selectedStandard={selectedStandard}
-          setSelectedStandard={setSelectedStandard}
-          selectedRegion={selectedRegion}
-          setSelectedRegion={setSelectedRegion}
-          sortBy={sortBy}
-          setSortBy={setSortBy}
-          viewMode={viewMode}
-          setViewMode={setViewMode}
-        />
-
-        {/* Results Counter & Active Filter summary */}
-        <div className="flex items-center justify-between text-xs text-slate-400 px-1 font-mono">
-          <div>
-            Showing <strong className="text-emerald">{filteredCredits.length}</strong> available carbon lots{' '}
-            {searchQuery && <span> matching "{searchQuery}"</span>}
-          </div>
-          <div className="flex items-center space-x-3">
-            <span>Minimum purchase: 0.1 tCO₂e</span>
-            <span>•</span>
-            <span className="text-emerald">Instant Retirement Available</span>
-          </div>
-        </div>
-
-        {/* 3. View Mode: Grid Cards */}
-        {viewMode === 'grid' && (
-          <MarketplaceGrid
+          {/* 2. Search, Filter Bar & View Toggle */}
+          <MarketplaceFilterBar
             isLight={isLight}
-            credits={filteredCredits}
-            copiedId={copiedId}
-            onCopyId={handleCopyId}
-            onInspectCredit={setInspectCredit}
-            onSelectCredit={setSelectedCredit}
+            selectedSector={selectedSector}
+            setSelectedSector={setSelectedSector}
+            searchQuery={searchQuery}
+            setSearchQuery={setSearchQuery}
+            selectedStandard={selectedStandard}
+            setSelectedStandard={setSelectedStandard}
+            selectedRegion={selectedRegion}
+            setSelectedRegion={setSelectedRegion}
+            sortBy={sortBy}
+            setSortBy={setSortBy}
+            viewMode={viewMode}
+            setViewMode={setViewMode}
           />
-        )}
 
-        {/* 4. View Mode: Order Book (Table View) */}
-        {viewMode === 'table' && (
-          <MarketplaceTable
+          {/* Results Counter & Active Filter summary */}
+            <div className="flex flex-wrap items-center justify-between gap-2 text-xs text-fg-muted px-1 font-mono">
+              <div>
+                Showing <strong className="text-emerald">{filteredCredits.length}</strong> available carbon lots{' '}
+                {searchQuery && <span> matching "{searchQuery}"</span>}
+              </div>
+              <div className="flex items-center space-x-3">
+                <span>Minimum purchase: 0.1 tCO₂e</span>
+                <span>•</span>
+                <span className="text-emerald">Instant Retirement Available</span>
+              </div>
+            </div>
+
+            {/* 3. View Mode: Grid Cards */}
+            {viewMode === 'grid' && (
+              <MarketplaceGrid
+                isLight={isLight}
+                credits={filteredCredits}
+                copiedId={copiedId}
+                onCopyId={handleCopyId}
+                onInspectCredit={setInspectCredit}
+                onSelectCredit={setSelectedCredit}
+              />
+            )}
+
+            {/* 4. View Mode: Order Book (Table View) */}
+            {viewMode === 'table' && (
+              <MarketplaceTable
+                isLight={isLight}
+                credits={filteredCredits}
+                selectedBatchIds={selectedBatchIds}
+                onToggleSelectBatch={handleToggleSelectBatch}
+                onSelectAll={handleSelectAll}
+                onInspectCredit={setInspectCredit}
+                onSelectCredit={setSelectedCredit}
+                bulkTotalTonnage={bulkTotalTonnage}
+                bulkTotalPrice={bulkTotalPrice}
+                onClearBulkSelection={() => setSelectedBatchIds([])}
+                onProceedBulkCheckout={handleProceedBulkCheckout}
+              />
+            )}
+
+          {/* 5. MRV Dossier Modal */}
+          <MrvDossierModal
+            inspectCredit={inspectCredit}
+            onClose={() => setInspectCredit(null)}
+            onPurchaseThisCredit={setSelectedCredit}
             isLight={isLight}
-            credits={filteredCredits}
-            selectedBatchIds={selectedBatchIds}
-            onToggleSelectBatch={handleToggleSelectBatch}
-            onSelectAll={handleSelectAll}
-            onInspectCredit={setInspectCredit}
-            onSelectCredit={setSelectedCredit}
-            bulkTotalTonnage={bulkTotalTonnage}
-            bulkTotalPrice={bulkTotalPrice}
-            onClearBulkSelection={() => setSelectedBatchIds([])}
-            onProceedBulkCheckout={handleProceedBulkCheckout}
           />
-        )}
-      </div>
 
-      {/* 5. MRV Dossier Modal */}
-      <MrvDossierModal
-        inspectCredit={inspectCredit}
-        onClose={() => setInspectCredit(null)}
-        onPurchaseThisCredit={setSelectedCredit}
-        isLight={isLight}
-      />
-
-      {/* 6. Purchase & Settlement Modal */}
-      {selectedCredit && (
-        <PurchaseConfirmModal
-          credit={selectedCredit}
-          creditId={selectedCredit.id}
-          onClose={() => setSelectedCredit(null)}
-          onPurchaseComplete={handlePurchaseSuccess}
-        />
-      )}
-    </div>
-  );
+          {/* 6. Purchase & Settlement Modal */}
+          {selectedCredit && (
+            <PurchaseConfirmModal
+              credit={selectedCredit}
+              creditId={selectedCredit.id}
+              onClose={() => setSelectedCredit(null)}
+              onPurchaseComplete={handlePurchaseSuccess}
+            />
+          )}
+        </div>
+        );
 };
 
-export default MarketplaceBrowse;
+        export default MarketplaceBrowse;

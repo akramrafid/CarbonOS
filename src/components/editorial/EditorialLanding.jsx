@@ -9,6 +9,8 @@ import { footerConfig } from '../../config/footer.config';
 import RequestDemoModal from '../RequestDemoModal';
 import EditorialHeroCanvas from './EditorialHeroCanvas';
 import EditorialHeroPipeline from './EditorialHeroPipeline';
+import EditorialModuleModal from './EditorialModuleModal';
+import EditorialFrameworkCarousel from './EditorialFrameworkCarousel';
 import {
   EditorialLiveTelemetry,
   EditorialClientShowcase,
@@ -85,60 +87,107 @@ const HERO_CONCEPT_SLIDES = [
 const WORK_ROWS = [
   {
     idx: '01',
-    title: 'Corporate ESG Accounting',
-    meta: 'GHG PROTOCOL · ISO 14064-1 · SCOPE 1–3 LEDGER',
+    pillarTag: 'FLAGSHIP 01 · CORPORATE ESG',
+    vizType: 'esg',
+    title: 'Corporate ESG & Utility Bill Accounting',
+    meta: 'GHG PROTOCOL · ISO 14064-1 · DESCO · TITAS GAS · DUAL-CONTROL',
     hoverTag: 'OPEN WORKSPACE →',
     to: '/platform/saas-dashboard',
+    what: 'Scope 1, 2 & 3 enterprise emissions workspace with native utility invoice OCR and RAG source provenance.',
+    how: 'Deterministic rules + LLM-assisted extraction bind raw DESCO/DPDC/Titas bills to immutable calculation snapshots where Preparer ≠ Approver.',
+    coreIdea: 'Audit-grade corporate carbon accounting grounded strictly in primary documents and cited IPCC 2006 / national factors — never synthetic defaults.',
   },
   {
     idx: '02',
-    title: 'ESG Utility Bill Intake & Dual-Control',
-    meta: 'DESCO · DPDC · BPDB · TITAS GAS · SHA-256',
-    hoverTag: 'LAUNCH BILL INTAKE →',
-    to: '/platform/esg',
+    pillarTag: 'FLAGSHIP 02 · SATELLITE & FIELD dMRV',
+    vizType: 'dmrv',
+    title: 'GIS Biomass & Orbital dMRV Studio',
+    meta: 'SENTINEL-1/2 · NASA GEDI LIDAR · VERRA VM0047 · IOT TELEMETRY',
+    hoverTag: 'OPEN dMRV MAP →',
+    to: '/carbon-monitoring',
+    what: 'Multi-sensor satellite biomass estimation, canopy change detection, and ground station IoT telemetry across Bangladesh.',
+    how: 'Fuses Sentinel-1 SAR backscatter, Sentinel-2 L2A NDVI/NDWI, GEDI LiDAR, and Khulna/Rangpur/Sundarbans ground sensors with conformal prediction intervals.',
+    coreIdea: 'Verifiable orbital and field ground truth that catches spatial overlap and leakage automatically before credits are issued.',
   },
   {
     idx: '03',
-    title: 'National MRV Telemetry Dashboard',
-    meta: 'IOT SENSORS · EDDY COVARIANCE · CEMS',
-    hoverTag: 'OPEN MRV TERMINAL →',
-    to: '/platform/mrv-dashboard',
+    pillarTag: 'FLAGSHIP 03 · CARBON REGISTRY',
+    vizType: 'registry',
+    title: 'Sovereign Carbon Registry & Serial Ledger',
+    meta: 'SHA-256 HASH CHAIN · ARTICLE 6.2 · CAD TRUST · RETIREMENT',
+    hoverTag: 'INSPECT REGISTRY →',
+    to: '/platform/carbon-registry',
+    what: 'Tamper-evident carbon credit serialization, LoA authorization tracking, BTR/AEF tables, and retirement registry.',
+    how: 'Links verified dMRV monitoring bundles to append-only hash-chained serials with AOI polygon overlap checks and UNFCCC Article 6.2 export adapters.',
+    coreIdea: 'Eliminating double counting across domestic corporate insetting and international ITMO transfers through cryptographic lineage.',
   },
   {
     idx: '04',
-    title: 'GIS Biomass & Satellite Heatmap',
-    meta: 'SENTINEL-1/2 · SUNDARBANS BLUE CARBON · VM0047',
-    hoverTag: 'OPEN dMRV MAP →',
-    to: '/carbon-monitoring',
+    pillarTag: 'MODULE 04 · BILL INTAKE ENGINE',
+    vizType: 'esg',
+    title: 'ESG Utility Bill Intake & RAG Assistant',
+    meta: '5-STEP WIZARD · BOUNDING BOX · SHA-256 EVIDENCE Q&A',
+    hoverTag: 'LAUNCH BILL INTAKE →',
+    to: '/platform/esg',
+    what: 'Guided multi-step utility bill ingestion paired with tenant-scoped RAG evidence inspection and document comparison.',
+    how: 'Isolates private PDFs/CSVs per tenant SQL boundary and lets auditors trace every Scope answer back to exact indexed passages and SHA-256 digests.',
+    coreIdea: 'Source-backed explainability: AI assists evidence discovery, while deterministic Python Decimal math calculates the ledger.',
   },
   {
     idx: '05',
-    title: 'Carbon Registry & Serial Ledger',
-    meta: 'HASH-CHAINED SERIALS · VINTAGE · RETIREMENT',
-    hoverTag: 'INSPECT REGISTRY →',
-    to: '/platform/carbon-registry',
+    pillarTag: 'MODULE 05 · MRV TELEMETRY',
+    vizType: 'dmrv',
+    title: 'National MRV Ground Telemetry',
+    meta: 'LORAWAN · EDDY COVARIANCE · CEMS STACK FEED',
+    hoverTag: 'OPEN MRV TERMINAL →',
+    to: '/platform/mrv-dashboard',
+    what: 'Real-time environmental ground truth spanning solar irrigation, AWD rice methane, mangrove flux towers, and kiln CEMS.',
+    how: 'Streams calibrated MQTT/HTTP sensor packets alongside regional baseline drift alerts and continuous station health checks.',
+    coreIdea: 'Continuous physical sensing backing digital registry claims rather than annual spreadsheet self-reporting.',
   },
   {
     idx: '06',
+    pillarTag: 'MODULE 06 · OFFTAKE EXCHANGE',
+    vizType: 'registry',
     title: 'Carbon Offtake Marketplace',
-    meta: 'WHOLESALE ORDER BOOK · ESCROW SETTLEMENT',
+    meta: 'WHOLESALE ORDER BOOK · ESCROW SETTLEMENT · 97% RAIL',
     hoverTag: 'EXPLORE LISTINGS →',
     to: '/platform/marketplace',
+    what: 'Direct primary & forward offtake marketplace connecting vetted Bangladesh project developers with corporate buyers.',
+    how: 'Matches serialized vintages with buyer ESG deficits while routing settlement proceeds via tracked MFS disbursement rails.',
+    coreIdea: 'Transparent price discovery and direct 97% community value retention instead of opaque broker markups.',
   },
   {
     idx: '07',
-    title: 'Verification Workflow & AI Detection',
-    meta: 'DUAL-CONTROL AUDIT · CANOPY CHANGE DETECTION',
+    pillarTag: 'MODULE 07 · VERIFICATION QUEUE',
+    vizType: 'esg',
+    title: 'Audit Verification & AI Change Detection',
+    meta: 'DUAL-CONTROL WORKFLOW · ANOMALY SCORING · VVB SIGN-OFF',
     hoverTag: 'OPEN VERIFICATION →',
     to: '/platform/verification-workflow',
+    what: 'Structured validation & verification body (VVB) sign-off console and canopy anomaly triage queue.',
+    how: 'Enforces separation of duties on every evidence item and flags statistical outliers across optical and field reports.',
+    coreIdea: 'Making independent VVB review fast, deterministic, and evidence-complete from day one.',
   },
   {
     idx: '08',
+    pillarTag: 'MODULE 08 · SMALLHOLDER ECOSYSTEM',
+    vizType: 'dmrv',
     title: 'Farmers AI & HarvestGuard Coop',
-    meta: 'ON-DEVICE ONNX VISION · SPOILAGE RISK · 97% MFS RAIL',
+    meta: 'ON-DEVICE ONNX VISION · FLOOD/CYCLONE RISK · bKASH/NAGAD',
     hoverTag: 'LAUNCH FIELD TOOL →',
     to: '/farmers-ai',
+    what: 'Edge ONNX crop disease diagnostics, parametric weather risk maps, and cooperative MFS payout tracking for rural growers.',
+    how: 'Runs quantized crop vision models offline in the field while syncing GPS-tagged resilience batches to cooperative risk dashboards.',
+    coreIdea: 'Rewarding 1M+ rural farmers directly for verified soil, rice methane, and clean-energy climate action.',
   },
+];
+
+const INSTITUTIONAL_FACTS = [
+  { key: 'JURISDICTION', val: 'Dhaka, Bangladesh (23.81°N)' },
+  { key: 'STANDARDS', val: 'GHG Protocol · ISO 14064-1 · VM0047' },
+  { key: 'PAYOUT RAIL MODEL', val: '97% Direct Participant Share' },
+  { key: 'BUILD STATUS', val: 'Demo / Pilot Platform Environment' },
 ];
 
 const QUICK_MODULE_LINKS = [
@@ -221,26 +270,9 @@ const ROADMAP_STEPS = [
   },
 ];
 
-const FRAMEWORK_PILLARS = [
-  {
-    idx: 'STAGE 01 // REGULATORY GROUNDING',
-    title: 'Built Around Published Rules',
-    desc: 'Designed around Bangladesh’s climate rules as they are published. A rule enters the product only with its primary document cited; nothing here is approved or endorsed by a regulator.',
-    tags: ['GHG Protocol', 'ISO 14064-1', 'IPCC 2006'],
-  },
-  {
-    idx: 'STAGE 02 // FIELD-HARDENED VERIFICATION',
-    title: 'MRV That Works in the Field',
-    desc: 'Google Earth Engine satellite integration. GPS field tagging. IoT sensor data ingestion. Mobile farmer reporting app and anomaly detection comparing satellite data against field reports in Khulna.',
-    tags: ['Google Earth Engine', 'PostGIS', 'TensorFlow'],
-  },
-  {
-    idx: 'STAGE 03 // GLOBAL FUNGIBILITY',
-    title: 'International Standards, Local Execution',
-    desc: 'Verra VCS, Gold Standard, Article 6 and CDM methodologies are referenced so Bangladesh projects speak the exact data structure expected by global institutional reviewers.',
-    tags: ['Verra VCS', 'Gold Standard', 'Article 6', 'CDM'],
-  },
-];
+/* [COMMENTED OUT FOR PERSONAL REFERENCE — extracted into EditorialFrameworkCarousel.jsx]
+const FRAMEWORK_PILLARS = [...];
+*/
 
 export function EditorialLanding() {
   const { theme, mode, setTheme, toggleTheme } = useTheme();
@@ -268,6 +300,11 @@ export function EditorialLanding() {
   const [isDemoModalOpen, setIsDemoModalOpen] = useState(false);
   const [openFooterCol, setOpenFooterCol] = useState('platform');
   const [heroSlideIdx, setHeroSlideIdx] = useState(0);
+  const [activePreviewModule, setActivePreviewModule] = useState(() => WORK_ROWS[0]);
+  const [factsSlideIdx, setFactsSlideIdx] = useState(0);
+  const [factsPaused, setFactsPaused] = useState(false);
+  const [bdKineticActive, setBdKineticActive] = useState(true);
+  const previewHoverTimerRef = useRef(null);
 
   const isBengali = i18n.language === 'bn';
   const activeHeroSlide = HERO_CONCEPT_SLIDES[heroSlideIdx] || HERO_CONCEPT_SLIDES[0];
@@ -291,6 +328,31 @@ export function EditorialLanding() {
     }, 4800);
     return () => window.clearInterval(timer);
   }, []);
+
+  // Auto-carousel for Institutional Footer Facts
+  useEffect(() => {
+    if (factsPaused || getPrefersReducedMotion()) return undefined;
+    const timer = window.setInterval(() => {
+      if (typeof document !== 'undefined' && document.visibilityState === 'hidden') return;
+      setFactsSlideIdx((prev) => (prev + 1) % INSTITUTIONAL_FACTS.length);
+    }, 4000);
+    return () => window.clearInterval(timer);
+  }, [factsPaused]);
+
+  const scheduleModulePreview = (item) => {
+    if (previewHoverTimerRef.current) window.clearTimeout(previewHoverTimerRef.current);
+    previewHoverTimerRef.current = window.setTimeout(() => {
+      setActivePreviewModule(item);
+    }, 120);
+  };
+
+  const scheduleModulePreviewClose = () => {
+    if (previewHoverTimerRef.current) window.clearTimeout(previewHoverTimerRef.current);
+  };
+
+  const keepModulePreviewOpen = () => {
+    if (previewHoverTimerRef.current) window.clearTimeout(previewHoverTimerRef.current);
+  };
 
   // Smoothly scroll to hash anchors (#sectors, #pricing, #platform, #process, etc.)
   useEffect(() => {
@@ -728,7 +790,7 @@ export function EditorialLanding() {
                       type="button"
                       role="radio"
                       aria-checked={mode === opt.id}
-                      onClick={() => setTheme(opt.id)}
+                      onClick={(e) => setTheme(opt.id, e)}
                       className={`ed-pill ed-pill--subtle ed-pill--compact ${
                         mode === opt.id ? 'is-filter-active' : ''
                       }`}
@@ -862,25 +924,25 @@ export function EditorialLanding() {
           <div id="hero-sentinel" className="ed-sentinel" aria-hidden="true" />
         </section>
 
-        {/* 3. Giant Outlined Marquee Bands (TrustBar & Policy Standards) */}
-        <section className="ed-marquee" aria-label="Methodological standards and guarantees">
+        {/* 3. Giant Outlined Marquee Bands (Authentic CarbonOS Identity) */}
+        <section className="ed-marquee" aria-label="CarbonOS infrastructure standards and guarantees">
           <div className="ed-marquee-band">
             <div className="ed-marquee-track">
               <span className="ed-marquee-text">
-                GHG PROTOCOL STANDARD · CITED FACTORS ONLY · AUTHOR ≠ APPROVER · NOT ASSURED UNTIL VERIFIER SIGNS ·
+                DESCO · DPDC · BPDB · TITAS GAS OCR · DUAL-CONTROL SCOPE 1–3 LEDGER · PREPARER ≠ APPROVER ·
               </span>
               <span className="ed-marquee-text" aria-hidden="true">
-                GHG PROTOCOL STANDARD · CITED FACTORS ONLY · AUTHOR ≠ APPROVER · NOT ASSURED UNTIL VERIFIER SIGNS ·
+                DESCO · DPDC · BPDB · TITAS GAS OCR · DUAL-CONTROL SCOPE 1–3 LEDGER · PREPARER ≠ APPROVER ·
               </span>
             </div>
           </div>
           <div className="ed-marquee-band">
             <div className="ed-marquee-track ed-marquee-track--reverse">
               <span className="ed-marquee-text ed-marquee-text--solid-accent">
-                97% INSTANT SETTLEMENT RAIL · IPCC 2006 TABLES · VERRA VM0047 · ISO 14064-1 · SENTINEL-2 DMRV ·
+                VERRA VM0047 SENTINEL-2 dMRV · SUNDARBANS BLUE CARBON · RANGPUR AWD · 97% MFS GROWER RAIL · SHA-256 REGISTRY ·
               </span>
               <span className="ed-marquee-text ed-marquee-text--solid-accent" aria-hidden="true">
-                97% INSTANT SETTLEMENT RAIL · IPCC 2006 TABLES · VERRA VM0047 · ISO 14064-1 · SENTINEL-2 DMRV ·
+                VERRA VM0047 SENTINEL-2 dMRV · SUNDARBANS BLUE CARBON · RANGPUR AWD · 97% MFS GROWER RAIL · SHA-256 REGISTRY ·
               </span>
             </div>
           </div>
@@ -898,8 +960,13 @@ export function EditorialLanding() {
               <div className="ed-container">
                 <div className="ed-compare-head">
                   <div>
-                    <span className="ed-mono">STATE 01 / BASELINE DRIFT</span>
+                    <span className="ed-mono">STATE 01 / FRAGMENTED REPORTING REALITY</span>
                     <h2 className="ed-compare-title">UNMEASURED</h2>
+                    <p className="ed-compare-sub">
+                      Across Bangladesh factories and field corridors, utility invoices arrive as
+                      unstructured PDFs, spreadsheets lack IPCC 2006 factor citations, and single-actor
+                      sign-offs leave audits fragile before international verifiers.
+                    </p>
                   </div>
                   <span className="ed-mono">BEFORE CALIBRATION</span>
                 </div>
@@ -921,10 +988,15 @@ export function EditorialLanding() {
               <div className="ed-container">
                 <div className="ed-compare-head">
                   <div>
-                    <span className="ed-mono ed-accent-text">STATE 02 / ZERO LINE LOCKED</span>
+                    <span className="ed-mono ed-accent-text">STATE 02 / CARBONOS ZERO LINE LOCKED</span>
                     <h2 className="ed-compare-title">
                       VERIFIED<span className="ed-accent-text">.</span>
                     </h2>
+                    <p className="ed-compare-sub">
+                      CarbonOS locks DESCO, DPDC, and Titas Gas activity data to SHA-256 evidence
+                      digests, dual-control Preparer ≠ Approver governance, and Sentinel-2 + Verra
+                      VM0047 conformal uncertainty bounds ready for external VVB inspection.
+                    </p>
                   </div>
                   <span ref={wipeProgressRef} className="ed-mono">
                     CALIBRATION 100%
@@ -943,39 +1015,92 @@ export function EditorialLanding() {
           </div>
         </section>
 
-        {/* 5. Work List / Platform Modules (Hairline Rows — ALL core routes preserved) */}
+        {/* 5. Work List / System Index (Sticky Header + Scroll-Stacking Cards + Hover/Tap Preview Modal) */}
         <section id="platform" className="ed-work">
           <div id="work" className="ed-container">
-            <div className="ed-section-header">
+            <div className="ed-section-header ed-sticky-header">
               <div>
                 <span className="ed-mono ed-accent-text">
-                  CARBON ZERO BD CORE · SECURING THE ENTIRE CARBON LIFECYCLE
+                  THREE FLAGSHIP PRODUCTS · ESG · dMRV · CARBON REGISTRY
                 </span>
                 <h2 className="ed-section-title">SYSTEM INDEX</h2>
-                <p className="ed-section-sub">
-                  Combining utility intake, satellite telemetry, AI anomaly detection, and dual-control
-                  registry workflows from source to serial retirement.
-                </p>
               </div>
               <span className="ed-mono">08 DEPLOYABLE WORKSPACES</span>
             </div>
+            <p className="ed-section-sub ed-section-sub--lead">
+              Flagship enterprise ESG, satellite dMRV, and carbon registry cores supported by
+              five specialized workflow modules — hover or inspect any layer to preview how it runs.
+            </p>
 
-            <div className="ed-work-list">
-              {WORK_ROWS.map((item) => (
-                <Link
-                  key={item.idx}
-                  to={item.to}
-                  data-hover-tag={item.hoverTag}
-                  className="ed-work-row"
-                >
-                  <span className="ed-work-idx ed-mono">{item.idx}</span>
-                  <span className="ed-work-name">{item.title}</span>
-                  <span className="ed-work-meta ed-mono">{item.meta}</span>
-                  <span className="ed-work-arrow" aria-hidden="true">
-                    →
-                  </span>
-                </Link>
-              ))}
+            <div className="ed-work-stack-layout">
+              <div className="ed-work-stack">
+                {WORK_ROWS.map((item, index) => (
+                  <article
+                    key={item.idx}
+                    onMouseEnter={() => scheduleModulePreview(item)}
+                    onMouseLeave={scheduleModulePreviewClose}
+                    className={`ed-work-stack-card ${index < 3 ? 'is-flagship' : ''} ${
+                      activePreviewModule?.idx === item.idx ? 'is-active-hover' : ''
+                    }`}
+                    style={{ '--stack-index': index }}
+                  >
+                    <div className="ed-work-card-head">
+                      <div className="ed-work-card-title-group">
+                        <span className="ed-work-idx ed-mono">{item.idx}</span>
+                        <div>
+                          <span className="ed-mono ed-accent-text">{item.pillarTag}</span>
+                          <h3 className="ed-work-name">{item.title}</h3>
+                        </div>
+                      </div>
+
+                      <div className="ed-work-card-actions">
+                        <button
+                          type="button"
+                          onClick={() =>
+                            setActivePreviewModule((curr) =>
+                              curr?.idx === item.idx ? null : item
+                            )
+                          }
+                          className="ed-pill ed-pill--subtle ed-pill--compact ed-mono"
+                        >
+                          {activePreviewModule?.idx === item.idx ? 'Hide Preview' : 'Preview Architecture'}
+                        </button>
+                        <Link
+                          to={item.to}
+                          data-hover-tag={item.hoverTag}
+                          className="ed-pill ed-pill--accent ed-pill--compact"
+                        >
+                          Open →
+                        </Link>
+                      </div>
+                    </div>
+
+                    <p className="ed-work-card-what">{item.what}</p>
+
+                    <div className="ed-work-card-details">
+                      <div>
+                        <span className="ed-mono ed-muted-text">HOW CARBONOS HANDLES IT</span>
+                        <p>{item.how}</p>
+                      </div>
+                      <div>
+                        <span className="ed-mono ed-muted-text">CORE IDEA</span>
+                        <p>{item.coreIdea}</p>
+                      </div>
+                    </div>
+
+                    <div className="ed-work-card-foot ed-mono ed-muted-text">
+                      <span>{item.meta}</span>
+                    </div>
+                  </article>
+                ))}
+              </div>
+
+              <EditorialModuleModal
+                moduleItem={activePreviewModule}
+                onClose={() => setActivePreviewModule(null)}
+                onMouseEnter={keepModulePreviewOpen}
+                onMouseLeave={scheduleModulePreviewClose}
+              />
             </div>
 
             <div className="ed-quick-links" aria-label="Additional platform routes">
@@ -1001,7 +1126,7 @@ export function EditorialLanding() {
         {/* 9. Inverted Process: Sovereign Philosophy + 5-Step Roadmap (Scroll-Drawn SVG Line) + Framework Pillars */}
         <section ref={processRef} id="process" className="ed-process ed-inverted">
           <div id="framework" className="ed-container">
-            {/* Sovereign Manifesto Band */}
+            {/* Sovereign Manifesto Band with Kinetic Scatter -> Organized Lock BANGLADESH. */}
             <div className="ed-philosophy-band">
               <span className="ed-mono ed-accent-text">
                 SOVEREIGN ARCHITECTURE · PRIMARY SOURCE CITATIONS
@@ -1009,8 +1134,34 @@ export function EditorialLanding() {
               <p className="ed-philosophy-kicker">
                 Most climate software is built for Geneva boardrooms. Carbon Zero BD is built for
               </p>
-              <h2 className="ed-philosophy-bangladesh">
-                BANGLADESH<span className="ed-accent-text">.</span>
+              <h2
+                className={`ed-philosophy-bangladesh ed-bd-kinetic ${
+                  bdKineticActive ? 'is-organized' : 'is-scattered'
+                }`}
+                onMouseEnter={() => setBdKineticActive(false)}
+                onMouseLeave={() => setBdKineticActive(true)}
+                onClick={() => setBdKineticActive((prev) => !prev)}
+                aria-label="BANGLADESH."
+              >
+                {'BANGLADESH.'.split('').map((ch, idx) => {
+                  const sx = ((idx % 4) - 1.5) * 18;
+                  const sy = (idx % 2 === 0 ? -1 : 1) * (10 + (idx % 3) * 6);
+                  const sr = (idx % 2 === 0 ? -1 : 1) * (6 + (idx % 4) * 3);
+                  return (
+                    <span
+                      key={`${ch}-${idx}`}
+                      className={`ed-bd-char ${ch === '.' ? 'ed-accent-text' : ''}`}
+                      style={{
+                        '--char-index': idx,
+                        '--scatter-x': sx,
+                        '--scatter-y': sy,
+                        '--scatter-rot': sr,
+                      }}
+                    >
+                      {ch}
+                    </span>
+                  );
+                })}
               </h2>
               <p className="ed-philosophy-statement">
                 You are not a carbon science company. You are climate infrastructure — software,
@@ -1018,77 +1169,77 @@ export function EditorialLanding() {
               </p>
             </div>
 
-            <div className="ed-section-header">
-              <div>
-                <span className="ed-mono ed-accent-text">PROCESS OVERVIEW · 5-STEP ROADMAP</span>
-                <h2 className="ed-section-title">HOW CARBON ZERO BD WORKS</h2>
-              </div>
-              <span className="ed-mono">DUAL-CONTROL LEDGER ENGINE</span>
-            </div>
-
-            <div className="ed-process-grid">
-              <div className="ed-process-rail" aria-hidden="true">
-                <svg className="ed-process-svg" viewBox="0 0 28 1000" preserveAspectRatio="none">
-                  <line x1="14" y1="0" x2="14" y2="1000" className="ed-process-track-bg" />
-                  <line
-                    ref={processLineRef}
-                    x1="14"
-                    y1="0"
-                    x2="14"
-                    y2="1000"
-                    className="ed-process-track-line"
-                  />
-                </svg>
+            <div className="ed-process-sticky-zone">
+              <div className="ed-section-header ed-sticky-header ed-sticky-header--inv">
+                <div>
+                  <span className="ed-mono ed-accent-text">PROCESS OVERVIEW · 5-STEP ROADMAP</span>
+                  <h2 className="ed-section-title">HOW CARBON ZERO BD WORKS</h2>
+                </div>
+                <span className="ed-mono">DUAL-CONTROL LEDGER ENGINE</span>
               </div>
 
-              <div className="ed-process-steps">
-                {ROADMAP_STEPS.map((step) => (
-                  <div key={step.num} className="ed-process-step">
-                    <div>
-                      <span className="ed-mono ed-accent-text">{step.num}</span>
-                      <h3 className="ed-process-step-title">{step.title}</h3>
-                    </div>
-                    <div className="ed-process-step-body">
-                      <p className="ed-process-step-desc">{step.desc}</p>
-                      <div className="ed-process-tags">
-                        {step.metrics.map((tag) => (
-                          <span key={tag} className="ed-process-tag ed-mono">
-                            {tag}
-                          </span>
-                        ))}
+              <div className="ed-process-grid">
+                <div className="ed-process-rail" aria-hidden="true">
+                  <svg className="ed-process-svg" viewBox="0 0 28 1000" preserveAspectRatio="none">
+                    <line x1="14" y1="0" x2="14" y2="1000" className="ed-process-track-bg" />
+                    <line
+                      ref={processLineRef}
+                      x1="14"
+                      y1="0"
+                      x2="14"
+                      y2="1000"
+                      className="ed-process-track-line"
+                    />
+                  </svg>
+                </div>
+
+                <div className="ed-process-steps ed-process-steps--stack">
+                  {ROADMAP_STEPS.map((step, idx) => (
+                    <div
+                      key={step.num}
+                      className="ed-process-step ed-process-step--card"
+                      style={{ '--step-stack': idx }}
+                    >
+                      <div>
+                        <span className="ed-mono ed-accent-text">{step.num}</span>
+                        <h3 className="ed-process-step-title">{step.title}</h3>
+                      </div>
+                      <div className="ed-process-step-body">
+                        <p className="ed-process-step-desc">{step.desc}</p>
+                        <div className="ed-process-tags">
+                          {step.metrics.map((tag) => (
+                            <span key={tag} className="ed-process-tag ed-mono">
+                              {tag}
+                            </span>
+                          ))}
+                        </div>
                       </div>
                     </div>
-                  </div>
-                ))}
+                  ))}
+                </div>
               </div>
             </div>
+          </div>
 
-            {/* 3 Framework Alignment Pillars */}
-            <div className="ed-framework-grid">
-              {FRAMEWORK_PILLARS.map((pillar) => (
-                <article key={pillar.idx} className="ed-framework-cell">
-                  <span className="ed-mono ed-accent-text">{pillar.idx}</span>
-                  <h3 className="ed-framework-title">{pillar.title}</h3>
-                  <p className="ed-framework-desc">{pillar.desc}</p>
-                  <div className="ed-process-tags">
-                    {pillar.tags.map((tag) => (
-                      <span key={tag} className="ed-process-tag ed-mono">
-                        [{tag}]
-                      </span>
-                    ))}
-                  </div>
-                </article>
-              ))}
-            </div>
+          <div className="ed-container ed-fw-wrap">
+            {/* 3 Framework Alignment Pillars Auto-Carousel */}
+            <EditorialFrameworkCarousel />
           </div>
         </section>
 
         {/* 10. Predictable Scaling Pricing */}
         <EditorialPricing />
 
-        {/* 11. Contact (Huge Email Link, Pill Buttons, Hairline Facts, Giant Cropped Wordmark) */}
+        {/* 11. Contact (Footer Background Image + Mailto Link + Auto-Carousel Facts + Centered CARBONZERO Wordmark) */}
         <section id="contact" className="ed-contact">
-          <div className="ed-container">
+          <div
+            className="ed-contact-bg-photo"
+            style={{ backgroundImage: 'url("/footer_landscape.png")' }}
+            aria-hidden="true"
+          />
+          <div className="ed-contact-bg-scrim" aria-hidden="true" />
+
+          <div className="ed-container ed-contact-inner">
             <div className="ed-contact-top">
               <span className="ed-mono">INITIATE AUDIT OR INSTITUTIONAL ONBOARDING</span>
               {/* Placeholder contact mailbox — see docs/copy-needed.md to confirm final production address */}
@@ -1117,28 +1268,63 @@ export function EditorialLanding() {
               </div>
             </div>
 
-            <div className="ed-facts-grid">
-              <div className="ed-fact-cell">
-                <span className="ed-mono">JURISDICTION</span>
-                <p className="ed-fact-val">Dhaka, Bangladesh (23.81°N)</p>
+            {/* Auto-Carousel Institutional Facts Strip */}
+            <div
+              className="ed-facts-carousel"
+              onMouseEnter={() => setFactsPaused(true)}
+              onMouseLeave={() => setFactsPaused(false)}
+            >
+              <div className="ed-facts-grid">
+                {INSTITUTIONAL_FACTS.map((fact, idx) => (
+                  <div
+                    key={fact.key}
+                    role="button"
+                    tabIndex={0}
+                    onClick={() => {
+                      setFactsPaused(true);
+                      setFactsSlideIdx(idx);
+                    }}
+                    onKeyDown={(e) => {
+                      if (e.key === 'Enter' || e.key === ' ') {
+                        e.preventDefault();
+                        setFactsPaused(true);
+                        setFactsSlideIdx(idx);
+                      }
+                    }}
+                    className={`ed-fact-cell ${factsSlideIdx === idx ? 'is-highlighted' : ''}`}
+                  >
+                    <span className="ed-mono">{fact.key}</span>
+                    <p className="ed-fact-val">{fact.val}</p>
+                  </div>
+                ))}
               </div>
-              <div className="ed-fact-cell">
-                <span className="ed-mono">STANDARDS</span>
-                <p className="ed-fact-val">GHG Protocol · ISO 14064-1 · VM0047</p>
-              </div>
-              <div className="ed-fact-cell">
-                <span className="ed-mono">PAYOUT RAIL MODEL</span>
-                <p className="ed-fact-val">97% Direct Participant Share</p>
-              </div>
-              <div className="ed-fact-cell">
-                <span className="ed-mono">BUILD STATUS</span>
-                <p className="ed-fact-val">Demo / Pilot Platform Environment</p>
+              <div className="ed-facts-carousel-bar">
+                <span className="ed-mono ed-accent-text">
+                  {INSTITUTIONAL_FACTS[factsSlideIdx]?.key}:{' '}
+                  {INSTITUTIONAL_FACTS[factsSlideIdx]?.val}
+                </span>
+                <div className="ed-facts-dots" role="tablist" aria-label="Footer metadata highlight">
+                  {INSTITUTIONAL_FACTS.map((fact, idx) => (
+                    <button
+                      key={fact.key}
+                      type="button"
+                      role="tab"
+                      aria-selected={factsSlideIdx === idx}
+                      aria-label={fact.key}
+                      onClick={() => {
+                        setFactsPaused(true);
+                        setFactsSlideIdx(idx);
+                      }}
+                      className={`ed-facts-dot ${factsSlideIdx === idx ? 'is-active' : ''}`}
+                    />
+                  ))}
+                </div>
               </div>
             </div>
           </div>
 
-          <div className="ed-container ed-wordmark-crop" aria-hidden="true">
-            <span className="ed-wordmark-text">CARBONZERO</span>
+          <div className="ed-container ed-wordmark-crop ed-wordmark-crop--centered" aria-hidden="true">
+            <span className="ed-wordmark-text ed-wordmark-text--centered">CARBONZERO</span>
           </div>
         </section>
       </main>
@@ -1178,7 +1364,7 @@ export function EditorialLanding() {
                     type="button"
                     role="radio"
                     aria-checked={mode === opt.id}
-                    onClick={() => setTheme(opt.id)}
+                    onClick={(e) => setTheme(opt.id, e)}
                     className={`ed-pill ed-pill--subtle ed-pill--compact ${
                       mode === opt.id ? 'is-filter-active' : ''
                     }`}

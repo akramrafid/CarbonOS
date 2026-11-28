@@ -21,7 +21,7 @@ const Technology = () => {
 
   return (
     <div className="bg-bg-canvas font-sans pt-12 pb-8 sm:pt-16 sm:pb-12">
-      
+
       <section className="pb-16 px-4 sm:px-6 lg:px-8 bg-bg-surface border-b border-border-subtle">
         <div className="max-w-7xl mx-auto text-center">
           <PageHeader
@@ -30,21 +30,21 @@ const Technology = () => {
             description="Carbon Zero BD combines ground-level LoRaWAN sensors with Sentinel-1/2 remote sensing and deterministic allometric pipelines across Bangladesh agro-ecological zones."
             align="center"
             className="border-none mb-12 pb-0"
-            titleClassName="!text-[48px] !leading-tight !font-bold !text-fg-primary !tracking-[-0.02em] max-w-4xl mx-auto"
+            titleClassName="!text-3xl sm:!text-4xl lg:!text-[48px] !leading-tight !font-bold !text-fg-primary !tracking-[-0.02em] max-w-4xl mx-auto"
           />
-          
-          <div className="w-full max-w-5xl mx-auto bg-slate-900 rounded-2xl p-8 flex flex-col md:flex-row items-center justify-between space-y-4 md:space-y-0 text-white font-mono text-sm shadow-xl">
-            <div className="flex flex-col items-center"><div className="w-12 h-12 bg-accent/20 rounded-lg border border-border-strong mb-2 flex items-center justify-center text-accent"><Radio className="w-5 h-5" /></div><span>Field Sensors</span></div>
-            <div className="text-accent">→</div>
-            <div className="flex flex-col items-center"><div className="w-12 h-12 bg-white/10 rounded-lg border border-white/20 mb-2 flex items-center justify-center text-white"><Cpu className="w-5 h-5" /></div><span>Edge Gateway</span></div>
-            <div className="text-accent">→</div>
-            <div className="flex flex-col items-center"><div className="w-12 h-12 bg-white/10 rounded-lg border border-white/20 mb-2 flex items-center justify-center text-white"><Cloud className="w-5 h-5" /></div><span>Cloud Backend</span></div>
-            <div className="text-accent">↔</div>
-            <div className="flex flex-col items-center"><div className="w-12 h-12 bg-blue-500/20 rounded-lg border border-blue-500/50 mb-2 flex items-center justify-center text-blue-400"><Satellite className="w-5 h-5" /></div><span>Satellites</span></div>
-            <div className="text-accent">→</div>
-            <div className="flex flex-col items-center"><div className="w-12 h-12 bg-amber-500/20 rounded-lg border border-amber-500/50 mb-2 flex items-center justify-center text-amber-400"><FileCheck className="w-5 h-5" /></div><span>Registry</span></div>
+
+            <div className="w-full max-w-5xl mx-auto bg-slate-900 keep-white rounded-2xl p-6 sm:p-8 flex flex-col md:flex-row flex-wrap items-center justify-between gap-4 md:gap-0 text-white font-mono text-sm shadow-xl">
+              <div className="flex flex-col items-center"><div className="w-12 h-12 bg-accent/20 rounded-lg border border-border-strong mb-2 flex items-center justify-center text-accent"><Radio className="w-5 h-5" /></div><span>Field Sensors</span></div>
+              <div className="text-accent">→</div>
+              <div className="flex flex-col items-center"><div className="w-12 h-12 bg-white/10 rounded-lg border border-white/20 mb-2 flex items-center justify-center text-white"><Cpu className="w-5 h-5" /></div><span>Edge Gateway</span></div>
+              <div className="text-accent">→</div>
+              <div className="flex flex-col items-center"><div className="w-12 h-12 bg-white/10 rounded-lg border border-white/20 mb-2 flex items-center justify-center text-white"><Cloud className="w-5 h-5" /></div><span>Cloud Backend</span></div>
+              <div className="text-accent">↔</div>
+              <div className="flex flex-col items-center"><div className="w-12 h-12 bg-blue-500/20 rounded-lg border border-blue-500/50 mb-2 flex items-center justify-center text-blue-400"><Satellite className="w-5 h-5" /></div><span>Satellites</span></div>
+              <div className="text-accent">→</div>
+              <div className="flex flex-col items-center"><div className="w-12 h-12 bg-amber-500/20 rounded-lg border border-amber-500/50 mb-2 flex items-center justify-center text-amber-400"><FileCheck className="w-5 h-5" /></div><span>Registry</span></div>
+            </div>
           </div>
-        </div>
       </section>
 
       {/* SECTION 2: GROUND-LEVEL IoT DEVICES */}
@@ -54,7 +54,7 @@ const Technology = () => {
             <h2 className="text-[32px] font-bold text-fg-primary mb-4">Ground-Level IoT Sensors</h2>
             <p className="text-fg-secondary max-w-2xl mx-auto">Continuous, tamper-proof environmental data collection across 5 agro-ecological zones.</p>
           </div>
-          
+
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
             {devices.map((device, i) => (
               <DeviceCard key={i} {...device} />
@@ -64,51 +64,51 @@ const Technology = () => {
       </section>
 
       {/* SECTION 3: SATELLITE LAYER */}
-      <section className="py-10 md:py-16 px-4 sm:px-6 lg:px-8 bg-white border-y border-border-subtle overflow-hidden">
-        <div className="max-w-7xl mx-auto">
-          <div className="mb-12">
-            <h2 className="text-[32px] font-bold text-fg-primary mb-4">Satellite & Remote Sensing Layer</h2>
-            <p className="text-fg-secondary max-w-2xl">Cross-referencing ground truth data with orbital imagery for landscape-scale verification.</p>
+        <section className="py-10 md:py-16 px-4 sm:px-6 lg:px-8 bg-bg-surface border-y border-border-subtle overflow-hidden">
+          <div className="max-w-7xl mx-auto">
+            <div className="mb-12">
+              <h2 className="text-[32px] font-bold text-fg-primary mb-4">Satellite & Remote Sensing Layer</h2>
+              <p className="text-fg-secondary max-w-2xl">Cross-referencing ground truth data with orbital imagery for landscape-scale verification.</p>
+            </div>
+            <SatelliteLayer />
           </div>
-          <SatelliteLayer />
-        </div>
-      </section>
+        </section>
 
-      {/* SECTION 4: SOFTWARE STACK */}
-      <section className="py-10 md:py-16 px-4 sm:px-6 lg:px-8">
-        <div className="max-w-7xl mx-auto">
-          <div className="mb-12 text-center">
-            <h2 className="text-[32px] font-bold text-fg-primary mb-4">Software & AI Stack</h2>
-            <p className="text-fg-secondary max-w-2xl mx-auto">An enterprise-grade, scalable architecture processing massive geospatial datasets.</p>
+        {/* SECTION 4: SOFTWARE STACK */}
+        <section className="py-10 md:py-16 px-4 sm:px-6 lg:px-8">
+          <div className="max-w-7xl mx-auto">
+            <div className="mb-12 text-center">
+              <h2 className="text-[32px] font-bold text-fg-primary mb-4">Software & AI Stack</h2>
+              <p className="text-fg-secondary max-w-2xl mx-auto">An enterprise-grade, scalable architecture processing massive geospatial datasets.</p>
+            </div>
+            <TechStackDiagram />
           </div>
-          <TechStackDiagram />
-        </div>
-      </section>
+        </section>
 
-      {/* SECTION 5: ROADMAP */}
-      <section className="py-10 md:py-16 px-4 sm:px-6 lg:px-8 bg-white border-t border-border-subtle">
-        <div className="max-w-7xl mx-auto">
-          <div className="mb-16 text-center">
-            <h2 className="text-[32px] font-bold text-fg-primary mb-4">Deployment Roadmap</h2>
-            <p className="text-fg-secondary max-w-2xl mx-auto">Our path from regional pilot to national carbon registry.</p>
-          </div>
-          <DeploymentTimeline />
-        </div>
-      </section>
+        {/* SECTION 5: ROADMAP */}
+          <section className="py-10 md:py-16 px-4 sm:px-6 lg:px-8 bg-bg-surface border-t border-border-subtle">
+            <div className="max-w-7xl mx-auto">
+              <div className="mb-16 text-center">
+                <h2 className="text-[32px] font-bold text-fg-primary mb-4">Deployment Roadmap</h2>
+                <p className="text-fg-secondary max-w-2xl mx-auto">Our path from regional pilot to national carbon registry.</p>
+              </div>
+              <DeploymentTimeline />
+            </div>
+          </section>
 
-      {/* SECTION 6: CTA */}
-      <section className="py-10 md:py-16 px-4 sm:px-6 lg:px-8 bg-accent text-center">
-        <div className="max-w-4xl mx-auto">
-          <h2 className="text-4xl font-bold text-white mb-8">Ready to integrate your project into Carbon Zero BD?</h2>
-          <div className="flex flex-col sm:flex-row justify-center items-center space-y-4 sm:space-y-0 sm:space-x-6">
-            <Button variant="primary" size="lg" className="w-full sm:w-auto text-lg">
-              Register a Carbon Project →
-            </Button>
-          </div>
+          {/* SECTION 6: CTA */}
+          <section className="py-10 md:py-16 px-4 sm:px-6 lg:px-8 bg-accent text-center">
+            <div className="max-w-4xl mx-auto">
+              <h2 className="text-3xl sm:text-4xl font-bold text-fg-inverse mb-8">Ready to integrate your project into Carbon Zero BD?</h2>
+              <div className="flex flex-col sm:flex-row justify-center items-center space-y-4 sm:space-y-0 sm:space-x-6">
+                  <Button variant="secondary" size="lg" className="w-full sm:w-auto text-lg">
+                    Register a Carbon Project →
+                  </Button>
+              </div>
+            </div>
+          </section>
         </div>
-      </section>
-    </div>
-  );
+        );
 };
 
-export default Technology;
+        export default Technology;

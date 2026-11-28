@@ -16,6 +16,10 @@ const OFFLINE_DEMO_ALLOWED =
 
 export const authConfigured = Boolean(issuer && clientId);
 export const DEMO_SESSION_KEY = 'carbonos.esg.demo_session';
+const DEMO_SIGNED_OUT_KEY = 'carbonos.esg.demo_signed_out';
+
+export const isDemoSignedOut = () => safeGetItem(DEMO_SIGNED_OUT_KEY, null, 'session') === 'true';
+export const resumeDemo = () => safeRemoveItem(DEMO_SIGNED_OUT_KEY, 'session');
 
 export function getStoredDemoSession() {
   const raw = safeGetItem(DEMO_SESSION_KEY, null, 'session');
@@ -228,6 +232,7 @@ export async function loadSession() {
   }
 
   // 2. Demo session in sessionStorage
+  if (isDemoSignedOut()) return null;
   let demo = getStoredDemoSession();
   if (!demo) {
     try {
@@ -285,6 +290,7 @@ export async function signOut() {
       /* ignore */
     }
   }
+  safeSetItem(DEMO_SIGNED_OUT_KEY, 'true', 'session');
   if (typeof window !== 'undefined') {
     window.location.href = '/platform/esg';
   }

@@ -7,14 +7,14 @@ import { IconButton } from '../../components/ui/IconButton';
 import { PageHeader } from '../../components/ui/PageHeader';
 
 const districts = [
-  "Bagerhat", "Bandarban", "Barguna", "Barisal", "Bhola", "Bogra", "Brahmanbaria", "Chandpur", 
-  "Chapainawabganj", "Chittagong", "Chuadanga", "Comilla", "Cox's Bazar", "Dhaka", "Dinajpur", 
-  "Faridpur", "Feni", "Gaibandha", "Gazipur", "Gopalganj", "Habiganj", "Jamalpur", "Jessore", 
-  "Jhalokati", "Jhenaidah", "Joypurhat", "Khagrachhari", "Khulna", "Kishoreganj", "Kurigram", 
-  "Kushtia", "Lalmonirhat", "Lakshmipur", "Madaripur", "Magura", "Manikganj", "Meherpur", 
-  "Moulvibazar", "Munshiganj", "Mymensingh", "Naogaon", "Narail", "Narayanganj", "Narsingdi", 
-  "Natore", "Netrokona", "Nilphamari", "Noakhali", "Pabna", "Panchagarh", "Patuakhali", 
-  "Pirojpur", "Rajbari", "Rajshahi", "Rangamati", "Rangpur", "Satkhira", "Shariatpur", "Sherpur", 
+  "Bagerhat", "Bandarban", "Barguna", "Barisal", "Bhola", "Bogra", "Brahmanbaria", "Chandpur",
+  "Chapainawabganj", "Chittagong", "Chuadanga", "Comilla", "Cox's Bazar", "Dhaka", "Dinajpur",
+  "Faridpur", "Feni", "Gaibandha", "Gazipur", "Gopalganj", "Habiganj", "Jamalpur", "Jessore",
+  "Jhalokati", "Jhenaidah", "Joypurhat", "Khagrachhari", "Khulna", "Kishoreganj", "Kurigram",
+  "Kushtia", "Lalmonirhat", "Lakshmipur", "Madaripur", "Magura", "Manikganj", "Meherpur",
+  "Moulvibazar", "Munshiganj", "Mymensingh", "Naogaon", "Narail", "Narayanganj", "Narsingdi",
+  "Natore", "Netrokona", "Nilphamari", "Noakhali", "Pabna", "Panchagarh", "Patuakhali",
+  "Pirojpur", "Rajbari", "Rajshahi", "Rangamati", "Rangpur", "Satkhira", "Shariatpur", "Sherpur",
   "Sirajganj", "Sunamganj", "Sylhet", "Tangail", "Thakurgaon"
 ].sort();
 
@@ -49,13 +49,13 @@ const BatchRegistration = ({ isInline = false, onBack = null, onSaveBatch = null
           if (response.ok) {
             const data = await response.json();
             const address = data.address || {};
-            
-            const detectedValue = 
-              address.state_district || 
-              address.county || 
-              address.district || 
-              address.city || 
-              address.suburb || 
+
+            const detectedValue =
+              address.state_district ||
+              address.county ||
+              address.district ||
+              address.city ||
+              address.suburb ||
               "";
 
             const matchedDistrict = districts.find(d => {
@@ -123,75 +123,82 @@ const BatchRegistration = ({ isInline = false, onBack = null, onSaveBatch = null
           Back
         </Button>
       )}
-      
-      <PageHeader
-        title="Log New Harvest"
-        description="Offline mode supported"
-        align="center"
-        className="border-none mb-10 pb-0 mt-4"
-        titleClassName="!text-3xl !font-extrabold !text-white !tracking-tight"
-      />
+
+      {!isInline ? (
+        <PageHeader
+          title="Log New Harvest"
+          description="Offline mode supported"
+          align="center"
+          className="border-none mb-6 pb-0"
+          titleClassName="!text-3xl !font-extrabold !text-fg-primary !tracking-tight"
+        />
+      ) : (
+        <div className="text-center mb-6">
+          <h2 className="text-2xl sm:text-3xl font-extrabold text-fg-primary tracking-tight">Log New Harvest</h2>
+          <p className="text-xs text-fg-muted mt-1">Offline mode supported</p>
+        </div>
+      )}
 
       <form onSubmit={handleSubmit} className="space-y-5">
         <div>
-          <label className="block text-white/80 text-sm font-bold mb-1.5">Crop Type / ফসল</label>
-          <select value={cropType} onChange={e => setCropType(e.target.value)} className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-white focus:outline-none focus:border-lime-400 focus:ring-1 focus:ring-lime-400/50 transition-all">
-            <option value="rice" className="bg-carbon text-white">Paddy/Rice (ধান)</option>
-            <option value="potato" className="bg-carbon text-white">Potato (আলু)</option>
-            <option value="tomato" className="bg-carbon text-white">Tomato (টমেটো)</option>
-            <option value="maize" className="bg-carbon text-white">Maize (ভুট্টা)</option>
-            <option value="mango" className="bg-carbon text-white">Mango (আম)</option>
-            <option value="jackfruit" className="bg-carbon text-white">Jackfruit (কাঁঠাল)</option>
-            <option value="guava" className="bg-carbon text-white">Guava (পেয়ারা)</option>
-            <option value="citrus" className="bg-carbon text-white">Citrus (লেবু/কমলা)</option>
-          </select>
+            <label className="block text-fg-secondary text-sm font-bold mb-1.5">Crop Type / ফসল</label>
+            <select value={cropType} onChange={e => setCropType(e.target.value)} className="w-full bg-bg-surface border border-border-subtle rounded-xl px-4 py-3 text-fg-primary focus:outline-none focus:border-accent focus:ring-1 focus:ring-accent/50 transition-all">
+              <option value="rice">Paddy/Rice (ধান)</option>
+              <option value="potato">Potato (আলু)</option>
+              <option value="tomato">Tomato (টমেটো)</option>
+              <option value="maize">Maize (ভুট্টা)</option>
+              <option value="mango">Mango (আম)</option>
+              <option value="jackfruit">Jackfruit (কাঁঠাল)</option>
+              <option value="guava">Guava (পেয়ারা)</option>
+              <option value="citrus">Citrus (লেবু/কমলা)</option>
+            </select>
         </div>
 
         <div>
-          <label className="block text-white/80 text-sm font-bold mb-1.5">Weight / ওজন (kg)</label>
-          <input type="number" min="1" value={weight} onChange={e => setWeight(e.target.value)} required className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-white focus:outline-none focus:border-lime-400 focus:ring-1 focus:ring-lime-400/50 transition-all" placeholder="e.g., 500" />
+          <label className="block text-fg-secondary text-sm font-bold mb-1.5">Weight / ওজন (kg)</label>
+          <input type="number" min="1" value={weight} onChange={e => setWeight(e.target.value)} required className="w-full bg-bg-surface border border-border-subtle rounded-xl px-4 py-3 text-fg-primary focus:outline-none focus:border-accent focus:ring-1 focus:ring-accent/50 transition-all" placeholder="e.g., 500" />
         </div>
 
         <div>
-          <label className="block text-white/80 text-sm font-bold mb-1.5">Harvest Date / কাটার তারিখ</label>
-          <input type="date" value={date} onChange={e => setDate(e.target.value)} required className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-white focus:outline-none focus:border-lime-400 focus:ring-1 focus:ring-lime-400/50 transition-all" style={{ colorScheme: 'dark' }} />
+          <label className="block text-fg-secondary text-sm font-bold mb-1.5">Harvest Date / কাটার তারিখ</label>
+          <input type="date" value={date} onChange={e => setDate(e.target.value)} required className="w-full bg-bg-surface border border-border-subtle rounded-xl px-4 py-3 text-fg-primary focus:outline-none focus:border-accent focus:ring-1 focus:ring-accent/50 transition-all" />
         </div>
 
         <div>
           <div className="flex justify-between items-center mb-1.5">
-            <label className="block text-white/80 text-sm font-bold">District / জেলা</label>
-            <Button 
-              type="button" 
+            <label className="block text-fg-secondary text-sm font-bold">District / জেলা</label>
+            <Button
+              type="button"
               variant="link"
               size="sm"
-              onClick={detectLocation} 
+              onClick={detectLocation}
               disabled={detectingLocation}
-              className="text-xs text-lime-400 hover:text-lime-500 hover:underline flex items-center space-x-1 p-0 h-auto"
+              className="text-xs text-accent hover:underline flex items-center space-x-1 p-0 h-auto"
             >
               {detectingLocation ? (
                 <>
-                  <div className="w-2.5 h-2.5 border-2 border-lime-400 border-t-transparent rounded-full animate-spin mr-1"></div>
+                  <div className="w-2.5 h-2.5 border-2 border-accent border-t-transparent rounded-full animate-spin mr-1"></div>
                   <span>Detecting...</span>
                 </>
               ) : locationError ? (
-                <span className="text-white/40 inline-flex items-center gap-1">Retry (Auto-detect) <MapPin size={12} /></span>
+                <span className="text-fg-muted inline-flex items-center gap-1">Retry (Auto-detect) <MapPin size={12} /></span>
               ) : (
                 <span className="inline-flex items-center gap-1">Auto-detect <MapPin size={12} /></span>
               )}
             </Button>
           </div>
-          <select value={district} onChange={e => setDistrict(e.target.value)} className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-white focus:outline-none focus:border-lime-400 focus:ring-1 focus:ring-lime-400/50 transition-all">
-            {districts.map(d => <option key={d} value={d} className="bg-carbon text-white">{d}</option>)}
-          </select>
+            <select value={district} onChange={e => setDistrict(e.target.value)} className="w-full bg-bg-surface border border-border-subtle rounded-xl px-4 py-3 text-fg-primary focus:outline-none focus:border-accent focus:ring-1 focus:ring-accent/50 transition-all">
+              {districts.map(d => <option key={d} value={d}>{d}</option>)}
+            </select>
         </div>
 
         <div>
-          <label className="block text-white/80 text-sm font-bold mb-1.5">Storage Type / সংরক্ষণের ধরন</label>
-          <select value={storageType} onChange={e => setStorageType(e.target.value)} className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-white focus:outline-none focus:border-lime-400 focus:ring-1 focus:ring-lime-400/50 transition-all">
-            <option value="jute_bag" className="bg-carbon text-white">Jute Bag Stack (চটের বস্তা)</option>
-            <option value="silo" className="bg-carbon text-white">Silo / Sealed (সাইলো)</option>
-            <option value="open_area" className="bg-carbon text-white">Open Area Drying (উন্মুক্ত স্থানে)</option>
-          </select>
+            <label className="block text-fg-secondary text-sm font-bold mb-1.5">Storage Type / সংরক্ষণের ধরন</label>
+            <select value={storageType} onChange={e => setStorageType(e.target.value)} className="w-full bg-bg-surface border border-border-subtle rounded-xl px-4 py-3 text-fg-primary focus:outline-none focus:border-accent focus:ring-1 focus:ring-accent/50 transition-all">
+              <option value="jute_bag">Jute Bag Stack (চটের বস্তা)</option>
+              <option value="silo">Silo / Sealed (সাইলো)</option>
+              <option value="open_area">Open Area Drying (উন্মুক্ত স্থানে)</option>
+            </select>
         </div>
 
         <Button
@@ -212,10 +219,10 @@ const BatchRegistration = ({ isInline = false, onBack = null, onSaveBatch = null
   }
 
   return (
-    <div className="min-h-screen bg-carbon pt-12 pb-8 sm:pt-16 sm:pb-12 px-4 flex items-center justify-center">
-      {formContent}
-    </div>
-  );
+      <div className="w-full flex items-center justify-center py-4">
+        {formContent}
+      </div>
+      );
 };
 
-export default BatchRegistration;
+      export default BatchRegistration;

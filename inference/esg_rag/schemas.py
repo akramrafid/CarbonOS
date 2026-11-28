@@ -1,5 +1,5 @@
-from pydantic import BaseModel, Field
-from typing import List, Optional, Dict, Any
+from pydantic import BaseModel, Field, field_validator
+from typing import Annotated, List, Optional, Dict, Any, Literal
 
 class Citation(BaseModel):
     source: str
@@ -7,6 +7,10 @@ class Citation(BaseModel):
     section: Optional[str] = None
     snippet: str
     relevance_score: float
+    document_id: str = ""
+    chunk_id: str = ""
+    content_sha256: str = ""
+    source_status: str = "UNREVIEWED"
 
 class OrganizationCreate(BaseModel):
     name: str = Field(..., min_length=1, max_length=200)
@@ -15,11 +19,22 @@ class OrganizationCreate(BaseModel):
 class QueryRequest(BaseModel):
     # No tenant field: the tenant is derived from the authenticated membership.
     query: str = Field(..., min_length=1, max_length=2000)
-    corpus: Optional[str] = "all" # regulatory, emission_factors, tenant_docs, or all
+    # corpus: Optional[str] = "all"  # [COMMENTED OUT FOR PERSONAL REFERENCE — tightened to valid Literal corpora]
+    corpus: Optional[Literal['all', 'regulatory', 'emission_factors', 'tenant_docs']] = "all"
     top_k: Optional[int] = Field(5, ge=1, le=20)
     temperature: Optional[float] = 0.2
+    document_ids: Optional[List[Annotated[str, Field(min_length=1, max_length=36)]]] = Field(None, min_length=1, max_length=2)
+
+    @field_validator("document_ids")
+    @classmethod
+    def distinct_document_ids(cls, value):
+        if value is not None and (len(value) != len(set(value)) or any(item != item.strip() for item in value)):
+            raise ValueError("Choose distinct document identifiers without whitespace")
+        return value
 
 class QueryResponse(BaseModel):
+    query_id: str = ""
+    document_ids: Optional[List[str]] = None
     query: str
     answer: str
     confidence: float
@@ -28,6 +43,12 @@ class QueryResponse(BaseModel):
     model_used: str
     insufficient_data: bool = False
     latency_ms: float
+    answer_mode: str = "retrieval_only"
+    retrieval_method: str = "bm25_vector_rrf"
+    candidate_count: int = 0
+    candidate_limit_reached: bool = False
+    score_kind: str = "ranking_score_not_probability"
+    review_required: bool = True
 
 class IngestResponse(BaseModel):
     document_id: str

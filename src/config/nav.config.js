@@ -53,6 +53,7 @@ export const navConfig = {
           labelKey: 'nav.carbonLedger',
           route: '/platform/carbon-registry',
           icon: Database,
+          badge: 'Core',
           keywords: ['registry', 'ledger', 'blockchain', 'credits', 'issuance', 'retirement']
         },
         {
@@ -92,6 +93,7 @@ export const navConfig = {
           labelKey: 'nav.saasAccounting',
           route: '/platform/saas-dashboard',
           icon: BarChart3,
+          badge: 'Core',
           keywords: ['saas', 'accounting', 'scope 1', 'scope 2', 'scope 3', 'ghg']
         },
         {
@@ -100,6 +102,7 @@ export const navConfig = {
           labelKey: 'nav.esgIntake',
           route: '/platform/esg',
           icon: FileText,
+          badge: 'Core',
           keywords: ['esg', 'utility', 'bills', 'titas', 'reb', 'desco', 'extraction', 'rag']
         },
         {
@@ -185,6 +188,7 @@ export const navConfig = {
     { id: 'about', label: 'About Carbon Zero BD', route: '/company/about', icon: Users, category: 'Company' },
     { id: 'framework-docs', label: 'Article 6 Framework Docs', route: '/company/framework-docs', icon: FileCode, category: 'Documentation' },
     { id: 'api-docs', label: 'Developer API Reference', route: '/company/api-docs', icon: Code2, category: 'Documentation' },
+    { id: 'trust', label: 'Trust & Data Architecture', route: '/company/trust', icon: Shield, category: 'Documentation' },
     { id: 'privacy', label: 'Privacy Policy', route: '/company/privacy', icon: Shield, category: 'Legal' },
     { id: 'terms', label: 'Terms of Service', route: '/company/terms', icon: Shield, category: 'Legal' }
   ]

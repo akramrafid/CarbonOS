@@ -5,7 +5,7 @@ import {
   Leaf, 
   Building2, 
   ArrowUpRight, 
-  Sparkles, 
+  /* [COMMENTED OUT FOR PERSONAL REFERENCE — removed Sparkles] */
   Zap,
   Award,
   Layers,
@@ -30,7 +30,7 @@ const ClientShowcase = () => {
       case 'circular': return Recycle;
       case 'education': return GraduationCap;
       case 'fashion': return ShoppingBag;
-      default: return Sparkles;
+      default: return ShieldCheck;
     }
   };
 
@@ -277,7 +277,7 @@ const ClientShowcase = () => {
             <div className={`w-14 h-14 rounded-2xl flex items-center justify-center shrink-0 ${
               isLight ? 'bg-accent-muted border border-border-strong/30' : 'bg-accent/20 border border-border-strong/40'
             }`}>
-              <Sparkles className={`w-7 h-7 ${isLight ? 'text-accent' : 'text-accent'}`} />
+              <Leaf className="w-7 h-7 text-accent" />
             </div>
             <div>
               <h4 className={`font-sans font-bold text-lg ${isLight ? 'text-fg-primary' : 'text-white'}`}>

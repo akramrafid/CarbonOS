@@ -26,7 +26,8 @@ from .ledger_models import (
     ContractualInstrument, GasCertificate, LegalEntity,
     MetricObservation, ReportingPeriod, ReportSnapshot, _now,
 )
-from .models import ESGOrganization
+from .models import ESGOrganization, ESGDocument
+from .evidence import visible_document_filter
 
 REPORT_SCHEMA = "carbonos.esg.report/2"
 DISCLAIMERS = [
@@ -709,6 +710,17 @@ def _captive_meter_clash(db, principal, data):
         ActivityRecord.activity_start <= data["activity_end"], ActivityRecord.activity_end >= data["activity_start"]).first()
 
 
+def _check_source_document(db, principal, document_id):
+    if document_id is None:
+        return
+    source = db.query(ESGDocument.id).filter(
+        ESGDocument.id == document_id,
+        visible_document_filter(principal.organization_id),
+    ).first()
+    if source is None:
+        raise DomainError(404, "Source document not found")
+
+
 def create_activity(db, principal, data):
     """Create a DRAFT activity record. Overlapping records for the same facility, activity and meter
     are rejected (prevents double counting); identical idempotency keys return the original."""
@@ -720,6 +732,7 @@ def create_activity(db, principal, data):
             return existing, False
     period = _open_period(db, principal, data["period_id"])
     _get(db, Facility, principal, data["facility_id"])
+    _check_source_document(db, principal, data.get("source_document_id"))
     if data["activity_type"] not in accounting.ACTIVITY_TYPES and data["activity_type"] not in accounting.MEMO_ACTIVITY_TYPES:
         raise DomainError(422, "Unknown activity type")
     data = _refrigerant_fields(db, principal, _scope1_fields(dict(data)))

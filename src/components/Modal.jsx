@@ -98,7 +98,7 @@ export const Modal = ({
 
   const modalContent = (
     <div
-      className="fixed inset-0 z-[90] flex items-center justify-center p-4 sm:p-6 bg-black/75 backdrop-blur-md animate-in fade-in duration-200"
+      className="fixed inset-0 z-[110] flex items-center justify-center p-4 sm:p-6 bg-black/75 backdrop-blur-md animate-in fade-in duration-200"
       role="dialog"
       aria-modal="true"
       aria-labelledby={titleId}

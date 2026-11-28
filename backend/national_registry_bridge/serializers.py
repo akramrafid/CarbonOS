@@ -32,6 +32,8 @@ class RegistryProjectSerializer(serializers.ModelSerializer):
         # fields = "__all__"  # [COMMENTED OUT FOR PERSONAL REFERENCE — eligibility_status must not be caller-writable on create/patch]
         fields = [
             "id",
+            "organization_id",
+            "owner",
             "external_project_id",
             "project_name",
             "sector",
@@ -41,10 +43,28 @@ class RegistryProjectSerializer(serializers.ModelSerializer):
             "ndc_commitment_type",
             "eligibility_status",
             "carbon_standard",
+            "polygon_geojson",
+            "article62_loa_reference",
+            "article62_loa_sha256",
+            "article62_loa_issued_at",
+            "article62_loa_status",
+            "article62_loa_revoked_at",
+            "cad_trust_warehouse_id",
             "created_at",
             "updated_at",
         ]
-        read_only_fields = ["id", "eligibility_status", "created_at", "updated_at"]
+        read_only_fields = [
+            "id",
+            "organization_id",
+            "owner",
+            "eligibility_status",
+            "article62_loa_issued_at",
+            "article62_loa_revoked_at",
+            "article62_loa_status",
+            "cad_trust_warehouse_id",
+            "created_at",
+            "updated_at",
+        ]
 
 
 class MonitoringReportSubmissionSerializer(serializers.ModelSerializer):

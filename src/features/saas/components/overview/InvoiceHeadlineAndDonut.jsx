@@ -23,9 +23,8 @@ export const InvoiceHeadlineAndDonut = ({
           {/* Left: Total Footprint Readout */}
           <div className="space-y-1">
             <div className="flex items-center space-x-2">
-              <span className={`font-mono text-[10px] uppercase tracking-wider font-bold ${
-                isLight ? 'text-fg-muted' : 'text-mist'
-              }`}>
+              <span className={`font-mono text-[10px] uppercase tracking-wider font-bold ${isLight ? 'text-fg-muted' : 'text-mist'
+                }`}>
                 Total Invoiced Carbon Footprint
               </span>
               <Badge variant="emerald" size="sm">
@@ -34,11 +33,10 @@ export const InvoiceHeadlineAndDonut = ({
               </Badge>
             </div>
             <div className="flex items-baseline space-x-3">
-              <div className={`font-sans font-extrabold text-3xl sm:text-4xl tracking-tight tabular-nums ${
-                isLight ? 'text-fg-primary' : 'text-white'
-              }`}>
-                {unitMode === 'tonnes' 
-                  ? `${activeMatrix.totalFootprintTonnes?.toLocaleString() || 0}` 
+              <div className={`font-sans font-extrabold text-3xl sm:text-4xl tracking-tight tabular-nums ${isLight ? 'text-fg-primary' : 'text-white'
+                }`}>
+                {unitMode === 'tonnes'
+                  ? `${activeMatrix.totalFootprintTonnes?.toLocaleString() || 0}`
                   : `${activeMatrix.totalFootprintKg?.toLocaleString() || 0}`
                 }
               </div>
@@ -53,9 +51,8 @@ export const InvoiceHeadlineAndDonut = ({
 
           {/* Right: Quick Stats & Unit Mode Toggle */}
           <div className="flex flex-wrap items-center gap-4">
-            <div className={`px-4 py-2.5 rounded-xl border text-left ${
-              isLight ? 'bg-white border-carbon-border' : 'bg-bg-elevated border-border-subtle'
-            }`}>
+            <div className={`px-4 py-2.5 rounded-xl border text-left ${isLight ? 'bg-white border-carbon-border' : 'bg-bg-elevated border-border-subtle'
+              }`}>
               <div className="text-[10px] uppercase font-mono font-bold text-mist">
                 Invoiced Spend
               </div>
@@ -64,15 +61,14 @@ export const InvoiceHeadlineAndDonut = ({
               </div>
             </div>
 
-            <div className={`px-4 py-2.5 rounded-xl border text-left ${
-              isLight ? 'bg-white border-carbon-border' : 'bg-bg-elevated border-border-subtle'
-            }`}>
+            <div className={`px-4 py-2.5 rounded-xl border text-left ${isLight ? 'bg-white border-carbon-border' : 'bg-bg-elevated border-border-subtle'
+              }`}>
               <div className="text-[10px] uppercase font-mono font-bold text-mist">
                 Carbon Intensity
               </div>
               <div className="text-sm font-bold font-mono text-emerald">
-                {activeMatrix.totalSpendBdt > 0 
-                  ? ((activeMatrix.totalFootprintKg / activeMatrix.totalSpendBdt) * 1000).toFixed(2) 
+                {activeMatrix.totalSpendBdt > 0
+                  ? ((activeMatrix.totalFootprintKg / activeMatrix.totalSpendBdt) * 1000).toFixed(2)
                   : "0.00"
                 } <span className="text-[10px] font-normal text-mist">kg/৳1k</span>
               </div>
@@ -93,7 +89,7 @@ export const InvoiceHeadlineAndDonut = ({
               variant="secondary"
               size="sm"
               onClick={() => setIsAddCustomModalOpen(true)}
-              icon={<Plus className="w-3.5 h-3.5" />}
+              leftIcon={<Plus className="w-3.5 h-3.5" />}
             >
               Add Custom Item
             </Button>
@@ -108,9 +104,8 @@ export const InvoiceHeadlineAndDonut = ({
           <div className="w-full flex justify-between items-center border-b pb-3 mb-2 border-inherit">
             <div className="flex items-center space-x-2">
               <PieChart className="w-4 h-4 text-emerald" />
-              <h4 className={`text-xs font-bold uppercase font-mono tracking-wider ${
-                isLight ? 'text-fg-primary' : 'text-white'
-              }`}>
+              <h4 className={`text-xs font-bold uppercase font-mono tracking-wider ${isLight ? 'text-fg-primary' : 'text-white'
+                }`}>
                 Emission Distribution by Category
               </h4>
             </div>
@@ -119,7 +114,7 @@ export const InvoiceHeadlineAndDonut = ({
             </span>
           </div>
 
-          <CarbonDistributionDonut 
+          <CarbonDistributionDonut
             categories={activeMatrix.categories}
             totalKg={activeMatrix.totalFootprintKg}
             totalTonnes={activeMatrix.totalFootprintTonnes}
@@ -136,9 +131,8 @@ export const InvoiceHeadlineAndDonut = ({
             <div className="flex justify-between items-center pb-2 border-b border-inherit">
               <div className="flex items-center space-x-2">
                 <Activity className="w-4 h-4 text-emerald" />
-                <h4 className={`text-xs font-bold uppercase font-mono tracking-wider ${
-                  isLight ? 'text-fg-primary' : 'text-white'
-                }`}>
+                <h4 className={`text-xs font-bold uppercase font-mono tracking-wider ${isLight ? 'text-fg-primary' : 'text-white'
+                  }`}>
                   Top Impact Drivers
                 </h4>
               </div>
@@ -149,17 +143,16 @@ export const InvoiceHeadlineAndDonut = ({
 
             <div className="space-y-2.5">
               {(activeMatrix.topImpactCategories || []).map(top => (
-                <div 
+                <div
                   key={top.id}
-                  className={`p-3 rounded-xl border transition-all ${
-                    isLight 
-                      ? 'bg-bg-muted border-carbon-border hover:border-emerald' 
+                  className={`p-3 rounded-xl border transition-all ${isLight
+                      ? 'bg-bg-muted border-carbon-border hover:border-emerald'
                       : 'bg-bg-elevated border-border-subtle hover:border-emerald/40'
-                  }`}
+                    }`}
                 >
                   <div className="flex justify-between items-center mb-1.5">
                     <div className="flex items-center space-x-2">
-                      <span 
+                      <span
                         className="w-5 h-5 rounded-full flex items-center justify-center text-[10px] font-black text-white shadow-sm"
                         style={{ backgroundColor: top.color }}
                       >
@@ -178,13 +171,13 @@ export const InvoiceHeadlineAndDonut = ({
                       </span>
                     </div>
                   </div>
-                  
+
                   <div className="w-full h-2 rounded-full bg-slate-200/40 overflow-hidden">
-                    <div 
+                    <div
                       className="h-full rounded-full transition-all duration-700"
-                      style={{ 
+                      style={{
                         width: `${top.percentage}%`,
-                        backgroundColor: top.color 
+                        backgroundColor: top.color
                       }}
                     />
                   </div>
@@ -194,9 +187,8 @@ export const InvoiceHeadlineAndDonut = ({
           </Card>
 
           {/* AI Decarbonization Recommendation Card */}
-          <div className={`p-4 rounded-2xl border flex items-start space-x-3 ${
-            isLight ? 'bg-emerald-50/60 border-emerald/30' : 'bg-bg-surface border-border-subtle'
-          }`}>
+          <div className={`p-4 rounded-2xl border flex items-start space-x-3 ${isLight ? 'bg-emerald-50/60 border-emerald/30' : 'bg-bg-surface border-border-subtle'
+            }`}>
             <div className="p-2 rounded-xl shrink-0 bg-emerald/15 text-emerald">
               <Lightbulb className="w-4 h-4 text-emerald" />
             </div>

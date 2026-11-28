@@ -25,7 +25,7 @@ const HarvestGuardDashboard = ({ isInline = false, onBack = null, onAddBatchClic
   useEffect(() => {
     let isMounted = true;
     setWeatherLoading(true);
-    
+
     const fetchWeather = async () => {
       const djangoApiUrl = import.meta.env.VITE_DJANGO_API_URL || '';
       if (djangoApiUrl) {
@@ -71,7 +71,7 @@ const HarvestGuardDashboard = ({ isInline = false, onBack = null, onAddBatchClic
         setWeatherLoading(false);
       }
     };
-    
+
     fetchWeather();
     return () => { isMounted = false; };
   }, [userLocation]);
@@ -113,7 +113,7 @@ const HarvestGuardDashboard = ({ isInline = false, onBack = null, onAddBatchClic
           size="sm"
           onClick={() => navigate('/farmers-ai')}
           leftIcon={<ArrowLeft size={20} />}
-          className="text-white/50 hover:text-white mb-8"
+          className="text-fg-secondary hover:text-fg-primary mb-8"
         >
           Back to Landing
         </Button>
@@ -124,7 +124,7 @@ const HarvestGuardDashboard = ({ isInline = false, onBack = null, onAddBatchClic
           size="sm"
           onClick={onBack}
           leftIcon={<ArrowLeft size={20} />}
-          className="text-white/50 hover:text-white mb-8 font-semibold"
+          className="text-fg-secondary hover:text-fg-primary mb-8 font-semibold"
         >
           Back to Landing
         </Button>
@@ -140,160 +140,160 @@ const HarvestGuardDashboard = ({ isInline = false, onBack = null, onAddBatchClic
         ) : (
           <div>
             <Badge variant="emerald" className="mb-2">FARMER PORTAL</Badge>
-            <h2 className="text-2xl md:text-3xl font-bold text-white tracking-tight">A Farmer's Inventory</h2>
-            <p className="text-sm text-white/60 mt-1">Track harvest batches, local climate risk, and verified eco-credentials.</p>
+            <h2 className="text-2xl md:text-3xl font-bold text-fg-primary tracking-tight">A Farmer's Inventory</h2>
+            <p className="text-sm text-fg-secondary mt-1">Track harvest batches, local climate risk, and verified eco-credentials.</p>
           </div>
         )}
       </div>
 
-      <div className="bg-white/5 backdrop-blur-md border border-white/10 p-6 md:p-8 rounded-[28px] mb-8 flex flex-col md:flex-row items-center justify-between shadow-lg relative overflow-hidden group">
-        <div className="flex flex-col md:flex-row items-center space-y-4 md:space-y-0 md:space-x-6 relative z-10 w-full md:w-auto text-center md:text-left">
-          <div className="w-20 h-20 bg-white/5 rounded-full flex items-center justify-center border-2 border-lime-400 shrink-0">
-            <Sprout size={40} className="text-lime-400 animate-pulse" />
-          </div>
-          <div>
-            <h2 className="text-xl font-bold text-white tracking-tight">Registered Farm Profile</h2>
-            
-            {/* Location Select and Weather details */}
-            <div className="mt-3 flex flex-wrap items-center justify-center md:justify-start gap-4">
-              <div className="flex items-center space-x-2">
-                <span className="text-white/40 text-xs font-semibold uppercase">Location:</span>
-                <select 
-                  value={userLocation} 
-                  onChange={(e) => handleLocationChange(e.target.value)}
-                  className="bg-white/5 border border-white/10 hover:border-lime-400/40 rounded-full px-3 py-1 text-xs text-white focus:outline-none focus:border-lime-400 transition-colors font-semibold font-sans"
-                >
-                  <option value="Dhaka" className="bg-carbon text-white">Dhaka</option>
-                  <option value="Rajshahi" className="bg-carbon text-white">Rajshahi</option>
-                  <option value="Sylhet" className="bg-carbon text-white">Sylhet</option>
-                  <option value="Chittagong" className="bg-carbon text-white">Chittagong</option>
-                  <option value="Khulna" className="bg-carbon text-white">Khulna</option>
-                  <option value="Barisal" className="bg-carbon text-white">Barisal</option>
-                  <option value="Rangpur" className="bg-carbon text-white">Rangpur</option>
-                </select>
+        <div className="bg-bg-surface backdrop-blur-md border border-border-subtle p-6 md:p-8 rounded-[28px] mb-8 flex flex-col md:flex-row items-center justify-between shadow-lg relative overflow-hidden group">
+          <div className="flex flex-col md:flex-row items-center space-y-4 md:space-y-0 md:space-x-6 relative z-10 w-full md:w-auto text-center md:text-left">
+              <div className="w-20 h-20 bg-bg-elevated rounded-full flex items-center justify-center border-2 border-accent shrink-0">
+                <Sprout size={40} className="text-emerald-700 dark:text-lime-400 animate-pulse" />
               </div>
+              <div>
+                <h2 className="text-xl font-bold text-fg-primary tracking-tight">Registered Farm Profile</h2>
 
-              {weatherLoading ? (
-                <div className="flex items-center space-x-1.5 text-white/50 text-xs animate-pulse">
-                  <span className="w-1.5 h-1.5 rounded-full bg-lime-400"></span>
-                  <span>Fetching live weather...</span>
-                </div>
-              ) : weatherData ? (
-                <div className="flex items-center space-x-2.5 bg-white/5 border border-white/5 px-3 py-1 rounded-full text-xs text-white/90">
-                  {weatherData.icon && (
-                    <img 
-                      src={`https://openweathermap.org/img/wn/${weatherData.icon}.png`} 
-                      alt={weatherData.description}
-                      className="w-5 h-5 object-contain"
-                    />
-                  )}
-                  <span className="font-extrabold text-lime-400">{weatherData.temp}°C</span>
-                  <span className="text-white/40">|</span>
-                  <span className="capitalize">{weatherData.description}</span>
-                  <span className="text-white/40">|</span>
-                  <span className="text-[10px] text-lime-400/80 font-bold bg-lime-400/5 px-2 py-0.5 rounded-full">
-                    {weatherData.source}
-                  </span>
-                </div>
+                {/* Location Select and Weather details */}
+                <div className="mt-3 flex flex-wrap items-center justify-center md:justify-start gap-4">
+                  <div className="flex items-center space-x-2">
+                    <span className="text-fg-muted text-xs font-semibold uppercase">Location:</span>
+                    <select
+                      value={userLocation}
+                      onChange={(e) => handleLocationChange(e.target.value)}
+                      className="bg-bg-elevated border border-border-subtle hover:border-accent rounded-full px-3 py-1 text-xs text-fg-primary focus:outline-none focus:border-accent transition-colors font-semibold font-sans"
+                    >
+                      <option value="Dhaka">Dhaka</option>
+                      <option value="Rajshahi">Rajshahi</option>
+                      <option value="Sylhet">Sylhet</option>
+                      <option value="Chittagong">Chittagong</option>
+                      <option value="Khulna">Khulna</option>
+                      <option value="Barisal">Barisal</option>
+                      <option value="Rangpur">Rangpur</option>
+                    </select>
+                  </div>
+
+                  {weatherLoading ? (
+                      <div className="flex items-center space-x-1.5 text-fg-secondary text-xs animate-pulse">
+                        <span className="w-1.5 h-1.5 rounded-full bg-accent"></span>
+                        <span>Fetching live weather...</span>
+                      </div>
+                      ) : weatherData ? (
+                        <div className="flex items-center space-x-2.5 bg-bg-elevated border border-border-subtle px-3 py-1 rounded-full text-xs text-fg-primary">
+                          {weatherData.icon && (
+                            <img
+                              src={`https://openweathermap.org/img/wn/${weatherData.icon}.png`}
+                              alt={weatherData.description}
+                              className="w-5 h-5 object-contain"
+                            />
+                          )}
+                          <span className="font-extrabold text-emerald-700 dark:text-lime-400">{weatherData.temp}°C</span>
+                          <span className="text-fg-muted">|</span>
+                          <span className="capitalize">{weatherData.description}</span>
+                            <span className="text-fg-muted">|</span>
+                            <span className="text-[10px] text-emerald-700 dark:text-lime-400 font-bold bg-accent/10 px-2 py-0.5 rounded-full">
+                              {weatherData.source}
+                            </span>
+                        </div>
               ) : null}
-            </div>
-          </div>
+                      </div>
+                    </div>
         </div>
-        <div className="flex space-x-4 relative z-10 mt-4 md:mt-0">
-          <Button
-            variant="secondary"
-            size="sm"
-            onClick={exportCSV}
-            leftIcon={<Download size={16} className="text-lime-400" />}
-          >
-            Export CSV
-          </Button>
-          <Button
-            variant="secondary"
-            size="sm"
-            onClick={exportData}
-            leftIcon={<Download size={16} className="text-lime-400" />}
-          >
-            Backup JSON
-          </Button>
-        </div>
-      </div>
-
-      {/* Gamification / Badges */}
-      <div className="mb-12">
-        <h2 className="text-xl font-extrabold text-white mb-4 flex items-center tracking-tight"><Award className="mr-2 text-lime-400" /> Achievements</h2>
-        {badges.length === 0 ? (
-          <p className="text-white/50 bg-white/5 border border-white/5 p-4 rounded-2xl text-sm">No badges earned yet. Register your first crop batch!</p>
-        ) : (
-          <div className="flex flex-wrap gap-4">
-            {badges.map((badge, idx) => (
-              <div key={idx} className="bg-amber-500/15 border border-amber-500/30 text-amber-400 px-5 py-2.5 rounded-full flex items-center text-sm font-extrabold shadow-sm">
-                <Award size={16} className="mr-2" />
-                {badge}
-              </div>
-            ))}
-          </div>
-        )}
-      </div>
-
-      {/* Crop Batches Inventory */}
-      <div>
-        <div className="flex items-center justify-between mb-6">
-          <h2 className="text-2xl font-extrabold text-white flex items-center tracking-tight"><List className="mr-2 text-lime-400" /> Crop Inventory</h2>
-          <Button 
-            variant="primary"
-            size="md"
-            onClick={isInline && onAddBatchClick ? onAddBatchClick : () => navigate('/harvestguard/register-batch')} 
-            leftIcon={<Plus size={18} />}
-          >
-            Add Batch
-          </Button>
-        </div>
-
-        {batches.length === 0 ? (
-          <div className="bg-white/5 border border-white/10 rounded-3xl p-16 text-center">
-            <Sprout size={48} className="mx-auto text-white/20 mb-4 animate-pulse" />
-            <p className="text-white/60 text-lg max-w-md mx-auto">Your inventory is empty. Log your first harvest to start protecting your yield.</p>
-          </div>
-        ) : (
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            {batches.map(batch => (
-              <div key={batch.id} className="bg-white/5 border border-white/10 p-6 rounded-[24px] relative overflow-hidden group hover:border-lime-400/40 hover:bg-white/10 transition-all duration-300 shadow-md">
-                <div className={`absolute top-0 right-0 w-2.5 h-full ${batch.status === 'active' ? 'bg-lime-400' : 'bg-white/20'} transition-colors`} />
-                <h3 className="text-xl font-extrabold text-white capitalize mb-1 tracking-tight">{batch.cropType}</h3>
-                <p className="text-lime-400 font-extrabold text-lg mb-4">{batch.weight} kg</p>
-                
-                <div className="space-y-2.5 text-sm text-white/70">
-                  <p><span className="text-white/40 font-medium">Location:</span> {batch.district}</p>
-                  <p><span className="text-white/40 font-medium">Harvest Date:</span> {batch.date}</p>
-                  <p><span className="text-white/40 font-medium">Storage:</span> <span className="capitalize">{batch.storageType.replace('_', ' ')}</span></p>
+                <div className="flex space-x-4 relative z-10 mt-4 md:mt-0">
+                  <Button
+                    variant="secondary"
+                    size="sm"
+                    onClick={exportCSV}
+                    leftIcon={<Download size={16} className="text-lime-400" />}
+                  >
+                    Export CSV
+                  </Button>
+                  <Button
+                    variant="secondary"
+                    size="sm"
+                    onClick={exportData}
+                    leftIcon={<Download size={16} className="text-lime-400" />}
+                  >
+                    Backup JSON
+                  </Button>
                 </div>
-                
-                <Button 
-                  variant="secondary"
-                  size="md"
-                  onClick={isInline && onViewRiskClick ? () => onViewRiskClick(batch.id) : () => navigate(`/harvestguard/risk-analysis/${batch.id}`)} 
-                  className="mt-6 w-full"
-                >
-                  View Weather Risk
-                </Button>
               </div>
-            ))}
-          </div>
-        )}
-      </div>
-    </div>
-  );
 
-  if (isInline) {
+              {/* Gamification / Badges */}
+              <div className="mb-12">
+                <h2 className="text-xl font-extrabold text-white mb-4 flex items-center tracking-tight"><Award className="mr-2 text-lime-400" /> Achievements</h2>
+                {badges.length === 0 ? (
+                  <p className="text-white/50 bg-white/5 border border-white/5 p-4 rounded-2xl text-sm">No badges earned yet. Register your first crop batch!</p>
+                ) : (
+                  <div className="flex flex-wrap gap-4">
+                    {badges.map((badge, idx) => (
+                      <div key={idx} className="bg-amber-500/15 border border-amber-500/30 text-amber-400 px-5 py-2.5 rounded-full flex items-center text-sm font-extrabold shadow-sm">
+                        <Award size={16} className="mr-2" />
+                        {badge}
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </div>
+
+              {/* Crop Batches Inventory */}
+              <div>
+                <div className="flex items-center justify-between mb-6">
+                  <h2 className="text-2xl font-extrabold text-white flex items-center tracking-tight"><List className="mr-2 text-lime-400" /> Crop Inventory</h2>
+                  <Button
+                    variant="primary"
+                    size="md"
+                    onClick={isInline && onAddBatchClick ? onAddBatchClick : () => navigate('/harvestguard/register-batch')}
+                    leftIcon={<Plus size={18} />}
+                  >
+                    Add Batch
+                  </Button>
+                </div>
+
+                {batches.length === 0 ? (
+                  <div className="bg-white/5 border border-white/10 rounded-3xl p-16 text-center">
+                    <Sprout size={48} className="mx-auto text-white/20 mb-4 animate-pulse" />
+                    <p className="text-white/60 text-lg max-w-md mx-auto">Your inventory is empty. Log your first harvest to start protecting your yield.</p>
+                  </div>
+                ) : (
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    {batches.map(batch => (
+                      <div key={batch.id} className="bg-white/5 border border-white/10 p-6 rounded-[24px] relative overflow-hidden group hover:border-lime-400/40 hover:bg-white/10 transition-all duration-300 shadow-md">
+                        <div className={`absolute top-0 right-0 w-2.5 h-full ${batch.status === 'active' ? 'bg-lime-400' : 'bg-white/20'} transition-colors`} />
+                        <h3 className="text-xl font-extrabold text-white capitalize mb-1 tracking-tight">{batch.cropType}</h3>
+                        <p className="text-lime-400 font-extrabold text-lg mb-4">{batch.weight} kg</p>
+
+                        <div className="space-y-2.5 text-sm text-white/70">
+                          <p><span className="text-white/40 font-medium">Location:</span> {batch.district}</p>
+                          <p><span className="text-white/40 font-medium">Harvest Date:</span> {batch.date}</p>
+                          <p><span className="text-white/40 font-medium">Storage:</span> <span className="capitalize">{batch.storageType.replace('_', ' ')}</span></p>
+                        </div>
+
+                        <Button
+                          variant="secondary"
+                          size="md"
+                          onClick={isInline && onViewRiskClick ? () => onViewRiskClick(batch.id) : () => navigate(`/harvestguard/risk-analysis/${batch.id}`)}
+                          className="mt-6 w-full"
+                        >
+                          View Weather Risk
+                        </Button>
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </div>
+            </div>
+            );
+
+            if (isInline) {
     return <div className="w-full">{dashboardContent}</div>;
   }
 
-  return (
-    <div className="min-h-screen bg-carbon pt-12 pb-8 sm:pt-16 sm:pb-12 px-4 lg:px-12">
-      {dashboardContent}
-    </div>
-  );
+            return (
+              <div className="w-full max-w-[1600px] mx-auto">
+                {dashboardContent}
+              </div>
+              );
 };
 
-export default HarvestGuardDashboard;
+              export default HarvestGuardDashboard;

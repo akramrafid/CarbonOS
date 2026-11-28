@@ -26,7 +26,7 @@ export const IconButton = React.forwardRef(function IconButton(
 
   const variantClasses = {
     primary:
-      'bg-emerald text-carbon hover:bg-emerald-glow active:scale-95 border border-emerald/20 focus-visible:ring-emerald dark:bg-emerald dark:text-carbon',
+      'bg-emerald text-carbon hover:bg-accent-hover active:scale-95 border border-emerald/20 focus-visible:ring-emerald dark:bg-emerald dark:text-carbon',
     secondary:
       'bg-carbon-surface text-registry border border-carbon-border hover:bg-carbon-surface-raised active:scale-95 focus-visible:ring-emerald dark:bg-bg-surface dark:text-fg-primary dark:border-border-subtle',
     ghost:

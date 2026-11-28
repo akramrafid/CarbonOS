@@ -212,13 +212,12 @@ export default function BillIntakeWizard({ facilities = [], periods = [] }) {
             return (
               <div
                 key={stageLabel}
-                className={`px-2.5 py-1.5 rounded-lg border flex items-center justify-between transition-colors ${
-                  isCurrent
+                className={`px-2.5 py-1.5 rounded-lg border flex items-center justify-between transition-colors ${isCurrent
                     ? 'bg-emerald/15 border-emerald/50 text-emerald-300 font-semibold'
                     : isDone
                       ? 'bg-forest/50 border-emerald/20 text-registry'
                       : 'bg-carbon/40 border-mist/10 text-mist/60'
-                }`}
+                  }`}
               >
                 <span className="truncate">{stageLabel}</span>
                 <span className="ml-1 text-[10px]">
@@ -242,97 +241,97 @@ export default function BillIntakeWizard({ facilities = [], periods = [] }) {
       </div>
 
       {/* Step Navigation Bar */}
-      <nav className="flex items-center justify-between border-b border-emerald/10 pb-4 overflow-x-auto text-xs font-mono">
-        {[
-          [1, t.step1],
-          [2, t.step2],
-          [3, t.step3],
-          [4, t.step4],
-          [5, t.step5],
-        ].map(([s, label]) => (
-          <Button
-            key={s}
-            type="button"
-            variant={step === s ? 'secondary' : 'ghost'}
-            size="sm"
-            disabled={s > step && (!billId || (s === 4 && gaps?.missing_required?.length > 0))}
-            onClick={() => setStep(s)}
-            className={`text-xs font-mono ${step === s ? 'border-emerald/50 text-emerald-300' : ''}`}
-          >
-            {label}
-          </Button>
-        ))}
-      </nav>
+        <nav data-internal-nav="true" className="flex items-center justify-between gap-2 border-b border-border-subtle pb-4 overflow-x-auto text-xs font-mono">
+          {[
+            [1, t.step1],
+            [2, t.step2],
+            [3, t.step3],
+            [4, t.step4],
+            [5, t.step5],
+          ].map(([s, label]) => (
+            <Button
+              key={s}
+              type="button"
+              variant={step === s ? 'secondary' : 'ghost'}
+              size="sm"
+              disabled={s > step && (!billId || (s === 4 && gaps?.missing_required?.length > 0))}
+              onClick={() => setStep(s)}
+              className={`text-xs font-mono ${step === s ? 'border-emerald-500/50 text-emerald-700 dark:text-emerald-300' : ''}`}
+            >
+              {label}
+            </Button>
+          ))}
+        </nav>
 
-      {/* Step Components */}
-      {step === 1 && (
-        <Step1Upload
-          t={t}
-          facilities={facilities}
-          uploadAction={uploadAction}
-          onUpload={handleUpload}
-        />
-      )}
+        {/* Step Components */}
+        {step === 1 && (
+          <Step1Upload
+            t={t}
+            facilities={facilities}
+            uploadAction={uploadAction}
+            onUpload={handleUpload}
+          />
+        )}
 
-      {step === 2 && (
-        <Step2Found
-          t={t}
-          gaps={gaps}
-          gapsLoading={gapsLoading}
-          docNotice={docNotice}
-          billId={billId}
-          activeField={activeField}
-          setActiveField={setActiveField}
-          onDeleteDocument={handleDeleteDocument}
-          onNext={() => setStep(3)}
-          onSkipToConfirm={() => setStep(4)}
-        />
-      )}
+        {step === 2 && (
+          <Step2Found
+            t={t}
+            gaps={gaps}
+            gapsLoading={gapsLoading}
+            docNotice={docNotice}
+            billId={billId}
+            activeField={activeField}
+            setActiveField={setActiveField}
+            onDeleteDocument={handleDeleteDocument}
+            onNext={() => setStep(3)}
+            onSkipToConfirm={() => setStep(4)}
+          />
+        )}
 
-      {step === 3 && (
-        <Step3FillGaps
-          t={t}
-          lang={lang}
-          gaps={gaps}
-          enterAction={enterAction}
-          reviewAction={reviewAction}
-          onEnterValue={handleEnterValue}
-          onReviewValue={handleReviewValue}
-          onBack={() => setStep(2)}
-          onNext={() => setStep(4)}
-        />
-      )}
+        {step === 3 && (
+          <Step3FillGaps
+            t={t}
+            lang={lang}
+            gaps={gaps}
+            enterAction={enterAction}
+            reviewAction={reviewAction}
+            onEnterValue={handleEnterValue}
+            onReviewValue={handleReviewValue}
+            onBack={() => setStep(2)}
+            onNext={() => setStep(4)}
+          />
+        )}
 
-      {step === 4 && (
-        <Step4Confirm
-          t={t}
-          gaps={gaps}
-          selectedPeriod={selectedPeriod}
-          setSelectedPeriod={setSelectedPeriod}
-          periods={periods}
-          postAction={postAction}
-          estimateAction={estimateAction}
-          inviteAction={inviteAction}
-          estimateData={estimateData}
-          allowProvisional={allowProvisional}
-          setAllowProvisional={setAllowProvisional}
-          showInviteModal={showInviteModal}
-          setShowInviteModal={setShowInviteModal}
-          inviteResult={inviteResult}
-          onRunEstimate={handleRunEstimate}
-          onSendInvite={handleSendInvite}
-          onPost={handlePost}
-          onBack={() => setStep(3)}
-        />
-      )}
+        {step === 4 && (
+          <Step4Confirm
+            t={t}
+            gaps={gaps}
+            selectedPeriod={selectedPeriod}
+            setSelectedPeriod={setSelectedPeriod}
+            periods={periods}
+            postAction={postAction}
+            estimateAction={estimateAction}
+            inviteAction={inviteAction}
+            estimateData={estimateData}
+            allowProvisional={allowProvisional}
+            setAllowProvisional={setAllowProvisional}
+            showInviteModal={showInviteModal}
+            setShowInviteModal={setShowInviteModal}
+            inviteResult={inviteResult}
+            onRunEstimate={handleRunEstimate}
+            onSendInvite={handleSendInvite}
+            onPost={handlePost}
+            onBack={() => setStep(3)}
+          />
+        )}
 
-      {step === 5 && (
-        <Step5Result
-          t={t}
-          postResult={postResult}
-          onReset={handleReset}
-        />
-      )}
+        {step === 5 && (
+          <Step5Result
+            t={t}
+            postResult={postResult}
+            onReset={handleReset}
+          />
+        )}
     </Panel>
   );
 }

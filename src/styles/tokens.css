@@ -19,6 +19,31 @@
   --color-bg-elevated: #13241B;      /* Raised interactive card surface */
   --color-bg-glass: rgba(13, 24, 18, 0.75);
 
+  /* RGB Channels for Tailwind v3 <alpha-value> modifiers */
+  --color-bg-canvas-rgb: 8 15 11;
+  --color-bg-surface-rgb: 13 24 18;
+  --color-bg-muted-rgb: 10 19 14;
+  --color-bg-elevated-rgb: 19 36 27;
+  --color-fg-primary-rgb: 240 244 241;
+  --color-fg-secondary-rgb: 194 202 197;
+  --color-fg-muted-rgb: 158 168 162;
+  --color-fg-accent-rgb: 0 200 83;
+  --color-fg-inverse-rgb: 8 15 11;
+  --color-border-subtle-rgb: 46 61 52;
+  --color-border-strong-rgb: 14 116 58;
+  --color-accent-default-rgb: 0 200 83;
+  --color-accent-hover-rgb: 0 230 118;
+  --color-accent-active-rgb: 0 178 72;
+  --color-forest-rgb: 13 24 18;
+  --color-carbon-rgb: 8 15 11;
+  --color-emerald-rgb: 0 200 83;
+  --color-amber-rgb: 245 158 11;
+  --color-registry-rgb: 240 244 241;
+  --color-mist-rgb: 194 202 197;
+  --color-brand-bkash-rgb: 226 19 110;
+  --color-brand-nagad-rgb: 247 148 29;
+  --color-brand-rocket-rgb: 140 52 148;
+
   /* Typography & Foreground */
   --color-fg-primary: #F0F4F1;       /* Crisp chalk white (WCAG AAA 16.2:1) */
   --color-fg-secondary: rgba(240, 244, 241, 0.78); /* High-readability secondary (WCAG AA 12.6:1) */
@@ -89,6 +114,31 @@
   --color-bg-muted: #E8ECE6;         /* Soft warm paper container */
   --color-bg-elevated: #FFFFFF;      /* Clean elevated surface */
   --color-bg-glass: rgba(255, 255, 255, 0.85);
+
+  /* RGB Channels for Tailwind v3 <alpha-value> modifiers */
+  --color-bg-canvas-rgb: 242 243 238;
+  --color-bg-surface-rgb: 255 255 255;
+  --color-bg-muted-rgb: 232 236 230;
+  --color-bg-elevated-rgb: 255 255 255;
+  --color-fg-primary-rgb: 24 20 20;
+  --color-fg-secondary-rgb: 65 63 63;
+  --color-fg-muted-rgb: 100 98 98;
+  --color-fg-accent-rgb: 22 101 52;
+  --color-fg-inverse-rgb: 255 255 255;
+  --color-border-subtle-rgb: 209 213 211;
+  --color-border-strong-rgb: 219 240 234;
+  --color-accent-default-rgb: 22 101 52;
+  --color-accent-hover-rgb: 21 128 61;
+  --color-accent-active-rgb: 20 83 45;
+  --color-forest-rgb: 219 240 234;
+  --color-carbon-rgb: 242 243 238;
+  --color-emerald-rgb: 22 101 52;
+  --color-amber-rgb: 146 64 14;
+  --color-registry-rgb: 65 63 63;
+  --color-mist-rgb: 100 98 98;
+  --color-brand-bkash-rgb: 226 19 110;
+  --color-brand-nagad-rgb: 247 148 29;
+  --color-brand-rocket-rgb: 140 52 148;
 
   /* Typography & Foreground */
   --color-fg-primary: #181414;       /* Deep charcoal black (WCAG AAA 15.3:1) */

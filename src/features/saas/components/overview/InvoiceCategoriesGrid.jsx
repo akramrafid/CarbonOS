@@ -29,7 +29,7 @@ export const InvoiceCategoriesGrid = ({
           variant="secondary"
           size="sm"
           onClick={() => setIsAddCustomModalOpen(true)}
-          icon={<Plus className="w-3.5 h-3.5 text-emerald" />}
+          leftIcon={<Plus className="w-3.5 h-3.5 text-emerald" />}
         >
           Add Custom Line Item
         </Button>
@@ -46,7 +46,7 @@ export const InvoiceCategoriesGrid = ({
               <div className="space-y-3">
                 <div className="flex justify-between items-start">
                   <div className="flex items-center space-x-2.5">
-                    <div 
+                    <div
                       className="w-8 h-8 rounded-xl flex items-center justify-center text-white shadow-sm shrink-0"
                       style={{ backgroundColor: cat.color }}
                     >
@@ -95,11 +95,11 @@ export const InvoiceCategoriesGrid = ({
                     <span className="font-bold text-emerald">{cat.percentage}%</span>
                   </div>
                   <div className="w-full h-1.5 rounded-full bg-slate-200/30 overflow-hidden">
-                    <div 
+                    <div
                       className="h-full rounded-full transition-all duration-500"
-                      style={{ 
+                      style={{
                         width: `${cat.percentage}%`,
-                        backgroundColor: cat.color 
+                        backgroundColor: cat.color
                       }}
                     />
                   </div>
@@ -121,9 +121,8 @@ export const InvoiceCategoriesGrid = ({
           <div className="flex justify-between items-center">
             <div className="flex items-center space-x-2">
               <Package className="w-4 h-4 text-emerald" />
-              <h4 className={`text-xs font-bold uppercase font-mono tracking-wider ${
-                isLight ? 'text-fg-primary' : 'text-white'
-              }`}>
+              <h4 className={`text-xs font-bold uppercase font-mono tracking-wider ${isLight ? 'text-fg-primary' : 'text-white'
+                }`}>
                 Custom Invoiced Additions ({customItems.length})
               </h4>
             </div>

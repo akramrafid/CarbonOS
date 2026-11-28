@@ -19,7 +19,8 @@ from django.utils import timezone
 def generate_btr_structured_summary(
     registry_project=None,
     reporting_year: Optional[int] = None,
-    include_all_projects: bool = False
+    include_all_projects: bool = False,
+    organization_id: Optional[str] = None,
 ) -> Dict[str, Any]:
     """
     Generates a structured summary report for Bangladesh's Biennial Transparency Report (BTR).
@@ -47,6 +48,10 @@ def generate_btr_structured_summary(
         ca_query = ca_query.filter(
             monitoring_report_submission__registry_project=registry_project
         )
+    elif organization_id is not None:
+        ca_query = ca_query.filter(
+            monitoring_report_submission__registry_project__organization_id=organization_id
+        )
 
     # Filter adjustments by vintage if specified
     adjustments = list(ca_query.order_by("vintage_year", "created_at"))
@@ -55,6 +60,8 @@ def generate_btr_structured_summary(
     sub_query = MonitoringReportSubmission.objects.select_related("registry_project")
     if registry_project and not include_all_projects:
         sub_query = sub_query.filter(registry_project=registry_project)
+    elif organization_id is not None:
+        sub_query = sub_query.filter(registry_project__organization_id=organization_id)
     submissions = list(sub_query.order_by("-submitted_at"))
 
     # Aggregate national inventory sector balance
@@ -110,6 +117,39 @@ def generate_btr_structured_summary(
             }
         })
 
+    has_submissions = len(submissions) > 0
+    all_live_non_sim = True
+    all_quorum_verified = True
+    for s in submissions:
+        payload_sent = s.payload_sent or {}
+        resp_body = s.response_body or {}
+        header = payload_sent.get("mrvSubmissionHeader", {})
+        prov_trail = payload_sent.get("provenanceAuditTrail", {})
+        data_origin = str(
+            resp_body.get("data_origin")
+            or header.get("dataOrigin")
+            or prov_trail.get("dataOrigin")
+            or ""
+        ).lower()
+        if data_origin in ("simulation", "simulated", "sandbox", "synthetic") or "sandbox" in str(resp_body.get("status", "")).lower():
+            all_live_non_sim = False
+        if not bool(prov_trail.get("quorumReached", False)):
+            all_quorum_verified = False
+
+    if has_submissions and all_live_non_sim and all_quorum_verified:
+        verification_gate_status = "VERIFIED_NON_SIMULATION_QUORUM"
+        consistency_statement = (
+            "Reported ITMO quantities are substantiated by recorded non-simulation dMRV monitoring "
+            "submissions with accredited VVB co-signature quorum and cryptographic provenance hash chains."
+        )
+    else:
+        verification_gate_status = "UNVERIFIED_OR_SANDBOX_ONLY"
+        consistency_statement = (
+            "UNVERIFIED / SANDBOX NOTICE: Underlying submissions include simulated/sandbox data, "
+            "uncalibrated estimates, or lack accredited VVB co-signature quorum. Not eligible for "
+            "official UNFCCC Article 6.2 ITMO issuance or corresponding adjustment claims without external VVB verification."
+        )
+
     # Assemble structured summary compliant with Decision 2/CMA.3 Chapter IV
     structured_summary = {
         "btr_metadata": {
@@ -120,7 +160,8 @@ def generate_btr_structured_summary(
             "decisions_referenced": ["18/CMA.1", "2/CMA.3", "5/CMA.3"],
             "reporting_year": year,
             "generated_at": now_iso,
-            "mrv_provider_client": "CarbonOS Bangladesh (Carbon Zero BD)"
+            "mrv_provider_client": "CarbonOS Bangladesh (Carbon Zero BD)",
+            "verification_gate_status": verification_gate_status,
         },
         "ndc_accounting_context": {
             "ndc_target_description": "Bangladesh Updated NDC 2021 / NDC 3.0",
@@ -138,12 +179,11 @@ def generate_btr_structured_summary(
             }
         },
         "table_structured_summary_itmos": itmo_table_rows,
-        "methodological_consistency_statement": (
-            "All reported ITMO quantities originate from verified dMRV pipelines "
-            "incorporating Sentinel-2 optical imagery, Sentinel-1 SAR, NASA GEDI LiDAR, "
-            "and ground-truth calibration plots with conformal prediction intervals "
-            "and cryptographic hash-chain provenance records."
-        )
+        # [COMMENTED OUT FOR PERSONAL REFERENCE — unconditional verification statement replaced by verification gate]
+        # "methodological_consistency_statement": (
+        #     "All reported ITMO quantities originate from verified dMRV pipelines ..."
+        # )
+        "methodological_consistency_statement": consistency_statement,
     }
 
     return structured_summary

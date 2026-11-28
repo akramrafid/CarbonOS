@@ -20,6 +20,7 @@ export function AlertsPanel(props) {
     setActiveTab,
     setMapCenter,
     setMapZoom,
+    setMapBounds,
     loadingAlerts = false
   } = props;
 

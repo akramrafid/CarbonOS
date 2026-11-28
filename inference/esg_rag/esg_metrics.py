@@ -14,7 +14,7 @@ from typing import Optional
 from sqlalchemy.exc import IntegrityError
 
 from . import disclosures_catalog as dc
-from .ledger import DomainError, _get, _need, _now, _open_period, _transition, audit, SafeCsvWriter
+from .ledger import DomainError, _get, _need, _now, _open_period, _transition, _check_source_document, audit, SafeCsvWriter
 from .ledger_models import DisclosureResponse, Facility, MetricObservation, ReportingPeriod, ReportSnapshot
 from .metrics_catalog import METRICS, MetricError, validate
 
@@ -31,6 +31,7 @@ def create_observation(db, principal, data):
     _open_period(db, principal, data["period_id"])
     if data.get("facility_id"):
         _get(db, Facility, principal, data["facility_id"])
+    _check_source_document(db, principal, data.get("source_document_id"))
     value = Decimal(str(data["value"]))
     try:
         dim_key = validate(data["metric_key"], value, data.get("dimensions") or {})

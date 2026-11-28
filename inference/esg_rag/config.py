@@ -32,6 +32,7 @@ CHUNK_OVERLAP = int(os.getenv("ESG_CHUNK_OVERLAP", "64"))   # characters
 # ---------------------------------------------------------------------------
 TOP_K = int(os.getenv("ESG_TOP_K", "5"))
 MIN_CONFIDENCE = float(os.getenv("ESG_MIN_CONFIDENCE", "0.30"))
+RAG_CANDIDATE_LIMIT = int(os.getenv("ESG_RAG_CANDIDATE_LIMIT", "1000"))
 
 # ---------------------------------------------------------------------------
 # Generation — Gemini free-tier (reuses existing GEMINI_API_KEY)
@@ -47,3 +48,4 @@ CORPUS_EMISSION_FACTORS = "emission_factors"
 CORPUS_TENANT_DOCS = "tenant_docs"
 
 VALID_CORPORA = {CORPUS_REGULATORY, CORPUS_EMISSION_FACTORS, CORPUS_TENANT_DOCS}
+GLOBAL_CORPUS_OWNER = {CORPUS_REGULATORY: "global_regulatory", CORPUS_EMISSION_FACTORS: "global_ef"}

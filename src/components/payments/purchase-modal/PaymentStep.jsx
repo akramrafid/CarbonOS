@@ -34,15 +34,14 @@ export function PaymentStep({
       <div className="grid grid-cols-3 gap-2">
         <button
           onClick={() => setPaymentMethod('mfs')}
-          className={`p-3 rounded-xl border flex flex-col items-center justify-center space-y-1.5 transition-all cursor-pointer ${
-            paymentMethod === 'mfs'
+          className={`p-3 rounded-xl border flex flex-col items-center justify-center space-y-1.5 transition-all cursor-pointer ${paymentMethod === 'mfs'
               ? isLight
                 ? 'bg-accent-muted border-border-strong text-accent'
                 : 'bg-emerald/10 border-emerald text-emerald'
               : isLight
-              ? 'bg-white border-slate-200 text-slate-600 hover:bg-slate-50'
-              : 'bg-white/5 border-white/5 text-slate-400 hover:text-white'
-          }`}
+                ? 'bg-white border-slate-200 text-slate-600 hover:bg-slate-50'
+                : 'bg-white/5 border-white/5 text-slate-400 hover:text-white'
+            }`}
         >
           <Smartphone size={18} />
           <span className="text-[11px] font-bold">MFS Wallet</span>
@@ -50,15 +49,14 @@ export function PaymentStep({
 
         <button
           onClick={() => setPaymentMethod('card')}
-          className={`p-3 rounded-xl border flex flex-col items-center justify-center space-y-1.5 transition-all cursor-pointer ${
-            paymentMethod === 'card'
+          className={`p-3 rounded-xl border flex flex-col items-center justify-center space-y-1.5 transition-all cursor-pointer ${paymentMethod === 'card'
               ? isLight
                 ? 'bg-accent-muted border-border-strong text-accent'
                 : 'bg-emerald/10 border-emerald text-emerald'
               : isLight
-              ? 'bg-white border-slate-200 text-slate-600 hover:bg-slate-50'
-              : 'bg-white/5 border-white/5 text-slate-400 hover:text-white'
-          }`}
+                ? 'bg-white border-slate-200 text-slate-600 hover:bg-slate-50'
+                : 'bg-white/5 border-white/5 text-slate-400 hover:text-white'
+            }`}
         >
           <CreditCard size={18} />
           <span className="text-[11px] font-bold">Corporate Card</span>
@@ -66,15 +64,14 @@ export function PaymentStep({
 
         <button
           onClick={() => setPaymentMethod('wire')}
-          className={`p-3 rounded-xl border flex flex-col items-center justify-center space-y-1.5 transition-all cursor-pointer ${
-            paymentMethod === 'wire'
+          className={`p-3 rounded-xl border flex flex-col items-center justify-center space-y-1.5 transition-all cursor-pointer ${paymentMethod === 'wire'
               ? isLight
                 ? 'bg-accent-muted border-border-strong text-accent'
                 : 'bg-emerald/10 border-emerald text-emerald'
               : isLight
-              ? 'bg-white border-slate-200 text-slate-600 hover:bg-slate-50'
-              : 'bg-white/5 border-white/5 text-slate-400 hover:text-white'
-          }`}
+                ? 'bg-white border-slate-200 text-slate-600 hover:bg-slate-50'
+                : 'bg-white/5 border-white/5 text-slate-400 hover:text-white'
+            }`}
         >
           <Building2 size={18} />
           <span className="text-[11px] font-bold">BFTN / RTGS Wire</span>
@@ -84,26 +81,24 @@ export function PaymentStep({
       {/* MFS Form */}
       {paymentMethod === 'mfs' && (
         <div
-          className={`p-4 rounded-xl border space-y-3.5 ${
-            isLight ? 'bg-slate-50 border-slate-200' : 'bg-bg-canvas border-emerald/20'
-          }`}
+          className={`p-4 rounded-xl border space-y-3.5 ${isLight ? 'bg-slate-50 border-slate-200' : 'bg-bg-canvas border-emerald/20'
+            }`}
         >
           <div className="flex space-x-2">
             {['bKash', 'Nagad', 'Rocket'].map((provider) => (
               <button
                 key={provider}
                 onClick={() => setMfsProvider(provider)}
-                className={`flex-1 py-1.5 text-xs font-bold rounded-lg border transition-all cursor-pointer ${
-                  mfsProvider === provider
+                className={`flex-1 py-1.5 text-xs font-bold rounded-lg border transition-all cursor-pointer ${mfsProvider === provider
                     ? provider === 'bKash'
                       ? 'bg-bkash text-white border-bkash'
                       : provider === 'Nagad'
-                      ? 'bg-nagad text-white border-nagad'
-                      : 'bg-rocket text-white border-rocket'
+                        ? 'bg-nagad text-white border-nagad'
+                        : 'bg-rocket text-white border-rocket'
                     : isLight
-                    ? 'bg-white border-slate-200 text-slate-600'
-                    : 'bg-white/5 border-white/10 text-slate-400'
-                }`}
+                      ? 'bg-white border-slate-200 text-slate-600'
+                      : 'bg-white/5 border-white/10 text-slate-400'
+                  }`}
               >
                 {provider}
               </button>
@@ -112,34 +107,30 @@ export function PaymentStep({
 
           {mfsStep === 'number' ? (
             <div>
-              <label className="block text-[11px] font-medium text-slate-400 mb-1">
-                {mfsProvider} Corporate Wallet Number
-              </label>
-              <input
-                type="text"
-                value={mfsNumber}
-                onChange={(e) => setMfsNumber(e.target.value)}
-                placeholder="017XXXXXXXX"
-                className={`w-full p-2.5 text-xs font-mono rounded-lg border focus:outline-none focus:border-emerald ${
-                  isLight ? 'bg-white border-slate-300 text-fg-primary' : 'bg-bg-canvas border-white/10 text-white'
-                }`}
-              />
+                <label className="block text-[11px] font-medium text-fg-secondary mb-1">
+                  {mfsProvider} Corporate Wallet Number
+                </label>
+                <input
+                  type="text"
+                  value={mfsNumber}
+                  onChange={(e) => setMfsNumber(e.target.value)}
+                  placeholder="017XXXXXXXX"
+                  className="w-full p-2.5 text-xs font-mono rounded-lg border focus:outline-none focus:border-accent bg-bg-surface border-border-subtle text-fg-primary"
+                />
             </div>
           ) : (
             <div>
-              <label className="block text-[11px] font-medium text-slate-400 mb-1">
-                Enter OTP Code sent to {mfsNumber}
-              </label>
-              <input
-                type="text"
-                value={mfsOTP}
-                onChange={(e) => setMfsOTP(e.target.value)}
-                placeholder="6-digit OTP code"
-                maxLength={6}
-                className={`w-full p-2.5 text-xs font-mono rounded-lg border text-center tracking-widest text-lg font-bold focus:outline-none focus:border-emerald ${
-                  isLight ? 'bg-white border-slate-300 text-fg-primary' : 'bg-bg-canvas border-white/10 text-white'
-                }`}
-              />
+                <label className="block text-[11px] font-medium text-fg-secondary mb-1">
+                  Enter OTP Code sent to {mfsNumber}
+                </label>
+                <input
+                  type="text"
+                  value={mfsOTP}
+                  onChange={(e) => setMfsOTP(e.target.value)}
+                  placeholder="6-digit OTP code"
+                  maxLength={6}
+                  className="w-full p-2.5 font-mono rounded-lg border text-center tracking-widest text-lg font-bold focus:outline-none focus:border-accent bg-bg-surface border-border-subtle text-fg-primary"
+                />
             </div>
           )}
         </div>
@@ -148,42 +139,35 @@ export function PaymentStep({
       {/* Corporate Card Form */}
       {paymentMethod === 'card' && (
         <div
-          className={`p-4 rounded-xl border space-y-3 ${
-            isLight ? 'bg-slate-50 border-slate-200' : 'bg-bg-canvas border-emerald/20'
-          }`}
+          className="p-4 rounded-xl border space-y-3 bg-bg-elevated/60 border-border-subtle"
         >
           <div>
-            <label className="block text-[11px] font-medium text-slate-400 mb-1">Cardholder Name</label>
+            <label className="block text-[11px] font-medium text-fg-secondary mb-1">Cardholder Name</label>
             <input
               type="text"
               value={cardName}
               onChange={(e) => setCardName(e.target.value)}
-              className={`w-full p-2 text-xs rounded border ${
-                isLight ? 'bg-white border-slate-300 text-fg-primary' : 'bg-bg-canvas border-white/10 text-white'
-              }`}
+              className="w-full p-2 text-xs rounded border bg-bg-surface border-border-subtle text-fg-primary"
             />
           </div>
           <div>
-            <label className="block text-[11px] font-medium text-slate-400 mb-1">Card Number</label>
+            <label className="block text-[11px] font-medium text-fg-secondary mb-1">Card Number</label>
             <input
               type="text"
               value={cardNumber}
               onChange={(e) => setCardNumber(e.target.value)}
-              className={`w-full p-2 text-xs font-mono rounded border ${
-                isLight ? 'bg-white border-slate-300 text-fg-primary' : 'bg-bg-canvas border-white/10 text-white'
-              }`}
+              className="w-full p-2 text-xs font-mono rounded border bg-bg-surface border-border-subtle text-fg-primary"
             />
           </div>
           <div className="grid grid-cols-2 gap-2">
             <div>
-              <label className="block text-[11px] font-medium text-slate-400 mb-1">Expiry</label>
+              <label className="block text-[11px] font-medium text-fg-secondary mb-1">Expiry</label>
               <input
                 type="text"
                 value={cardExpiry}
                 onChange={(e) => setCardExpiry(e.target.value)}
-                className={`w-full p-2 text-xs font-mono rounded border ${
-                  isLight ? 'bg-white border-slate-300 text-fg-primary' : 'bg-bg-canvas border-white/10 text-white'
-                }`}
+                className={`w-full p-2 text-xs font-mono rounded border ${isLight ? 'bg-white border-slate-300 text-fg-primary' : 'bg-bg-canvas border-white/10 text-white'
+                  }`}
               />
             </div>
             <div>
@@ -192,9 +176,8 @@ export function PaymentStep({
                 type="text"
                 value={cardCvc}
                 onChange={(e) => setCardCvc(e.target.value)}
-                className={`w-full p-2 text-xs font-mono rounded border ${
-                  isLight ? 'bg-white border-slate-300 text-fg-primary' : 'bg-bg-canvas border-white/10 text-white'
-                }`}
+                className={`w-full p-2 text-xs font-mono rounded border ${isLight ? 'bg-white border-slate-300 text-fg-primary' : 'bg-bg-canvas border-white/10 text-white'
+                  }`}
               />
             </div>
           </div>
@@ -204,9 +187,8 @@ export function PaymentStep({
       {/* Wire Tab Content */}
       {paymentMethod === 'wire' && (
         <div
-          className={`p-4 rounded-xl border space-y-2 text-xs ${
-            isLight ? 'bg-bg-canvas/80 border-border-strong' : 'bg-bg-canvas border-emerald/20'
-          }`}
+          className={`p-4 rounded-xl border space-y-2 text-xs ${isLight ? 'bg-bg-canvas/80 border-border-strong' : 'bg-bg-canvas border-emerald/20'
+            }`}
         >
           <div className="flex items-center justify-between pb-2 border-b border-white/5">
             <span className="font-mono font-bold text-emerald">RTGS Escrow Account (demo)</span>
@@ -235,9 +217,8 @@ export function PaymentStep({
 
       {/* Breakdown */}
       <div
-        className={`p-3 rounded-xl border text-xs space-y-1.5 ${
-          isLight ? 'bg-slate-50 border-slate-200' : 'bg-white/5 border-white/5'
-        }`}
+        className={`p-3 rounded-xl border text-xs space-y-1.5 ${isLight ? 'bg-slate-50 border-slate-200' : 'bg-white/5 border-white/5'
+          }`}
       >
         <div className="flex justify-between">
           <span className="text-slate-400">Carbon Offset Subtotal ({activeCredit.tonnage} tCO₂e):</span>
@@ -252,9 +233,8 @@ export function PaymentStep({
           <span className="font-mono">৳{registryFee.toLocaleString()}</span>
         </div>
         <div
-          className={`flex justify-between pt-1.5 border-t font-bold text-sm ${
-            isLight ? 'border-slate-200 text-fg-primary' : 'border-white/10 text-white'
-          }`}
+          className={`flex justify-between pt-1.5 border-t font-bold text-sm ${isLight ? 'border-slate-200 text-fg-primary' : 'border-white/10 text-white'
+            }`}
         >
           <span>Total Authorized Settlement:</span>
           <span className="text-emerald font-mono">৳{activeCredit.price.toLocaleString()}</span>

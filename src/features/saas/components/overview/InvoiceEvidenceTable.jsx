@@ -23,7 +23,7 @@ export const InvoiceEvidenceTable = ({
           variant="secondary"
           size="sm"
           onClick={() => executeAIExtraction("Dexterity_Textiles_ESG_Statement_Q2_2026.txt")}
-          icon={<Sparkles className="w-3.5 h-3.5 text-emerald" />}
+          leftIcon={<Sparkles className="w-3.5 h-3.5 text-emerald" />}
         >
           Load Sample Document Now
         </Button>

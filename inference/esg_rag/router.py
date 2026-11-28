@@ -1,12 +1,14 @@
 import os
 import time
 import datetime
+import hashlib
 from fastapi import APIRouter, Depends, HTTPException, UploadFile, File, Form, Body
+from sqlalchemy import and_, or_
 from sqlalchemy.orm import Session
 from typing import List, Optional, Dict, Any
 
 from .database import get_db
-from .models import ESGDocument, ESGQueryLog, EmissionFactorRecord, ESGOrganization, ESGMembership
+from .models import ESGDocument, ESGChunk, ESGQueryLog, EmissionFactorRecord, ESGOrganization, ESGMembership
 from .schemas import (
     QueryRequest,
     QueryResponse,
@@ -18,7 +20,8 @@ from .schemas import (
 )
 from .auth import Identity, Principal, get_identity, require
 from .ratelimit import limited
-from .config import CORPUS_TENANT_DOCS, CORPUS_REGULATORY, CORPUS_EMISSION_FACTORS
+from .ledger import audit
+from .config import CORPUS_TENANT_DOCS, CORPUS_REGULATORY, CORPUS_EMISSION_FACTORS, GLOBAL_CORPUS_OWNER
 from .ingest import ingest_document, IngestRejected, MAX_UPLOAD_BYTES
 from .retriever import retrieve
 from .generator import generate_answer
@@ -27,8 +30,16 @@ from .extractor import extract_footprint_from_text, detect_all_utility_segments
 
 router = APIRouter(prefix="/api/esg", tags=["ESG RAG Intelligence"])
 
-# Global corpora are shared by every tenant, so only platform operators may write them.
-GLOBAL_CORPUS_OWNER = {CORPUS_REGULATORY: "global_regulatory", CORPUS_EMISSION_FACTORS: "global_ef"}
+# [COMMENTED OUT FOR PERSONAL REFERENCE — moved to config.py]
+# GLOBAL_CORPUS_OWNER = {CORPUS_REGULATORY: "global_regulatory", CORPUS_EMISSION_FACTORS: "global_ef"}
+
+
+def _visible_documents(principal: Principal):
+    return or_(
+        and_(ESGDocument.tenant_id == principal.organization_id, ESGDocument.corpus == CORPUS_TENANT_DOCS),
+        *(and_(ESGDocument.tenant_id == owner, ESGDocument.corpus == corpus)
+          for corpus, owner in GLOBAL_CORPUS_OWNER.items()),
+    )
 
 
 async def _read_upload(file: UploadFile) -> bytes:
@@ -112,6 +123,59 @@ def esg_query(
     start_time = time.time()
     tenant_id = principal.organization_id
 
+    if request.document_ids is not None:
+        visible = db.query(ESGDocument.id).filter(
+            _visible_documents(principal),
+            ESGDocument.id.in_(request.document_ids),
+        ).all()
+        if {row[0] for row in visible} != set(request.document_ids):
+            raise HTTPException(404, "Selected source documents not found")
+
+        retrieval_res = retrieve(
+            query=request.query,
+            corpus=request.corpus or "all",
+            tenant_id=tenant_id,
+            top_k=request.top_k or 5,
+            db=db,
+            document_ids=request.document_ids,
+        )
+        gen_res = generate_answer(request.query, retrieval_res)
+        latency = round((time.time() - start_time) * 1000, 2)
+        citations_data = retrieval_res.get("citations", [])
+        log = ESGQueryLog(
+            tenant_id=tenant_id,
+            corpus=request.corpus or "all",
+            query_text=request.query,
+            answer_text=gen_res["answer"],
+            confidence=retrieval_res.get("best_score", 0.0),
+            citations=citations_data,
+            retrieved_chunk_ids=[c.chunk_id for c in retrieval_res.get("chunks", []) if getattr(c, "chunk_id", "")],
+            latency_ms=latency,
+            llm_model=gen_res.get("model_used", "unknown"),
+            verified_by_audit=False,
+        )
+        db.add(log)
+        db.flush()
+        audit(db, principal, "evidence.query_scoped", "query", log.id, {"document_ids": request.document_ids})
+        db.commit()
+        model_used = gen_res.get("model_used", "retrieval-only")
+        return QueryResponse(
+            query_id=log.id,
+            document_ids=request.document_ids,
+            query=request.query,
+            answer=gen_res["answer"],
+            confidence=round(retrieval_res.get("best_score", 0.0), 3),
+            citations=[Citation(**c) for c in citations_data],
+            corpus=request.corpus or "all",
+            model_used=model_used,
+            insufficient_data=gen_res.get("insufficient_data", False),
+            latency_ms=latency,
+            answer_mode="retrieval_only" if model_used in ("retrieval-only", "carbonos-policy-guard") else "supported_synthesis",
+            retrieval_method=retrieval_res.get("retrieval_method", "bm25_vector_rrf"),
+            candidate_count=retrieval_res.get("candidate_count", 0),
+            candidate_limit_reached=retrieval_res.get("candidate_limit_reached", False),
+        )
+
     # 1. Check if user query is asking about an emission factor
     factor_intent = detect_factor_intent(request.query)
     if factor_intent:
@@ -149,6 +213,7 @@ def esg_query(
         db.commit()
 
         return QueryResponse(
+            query_id=log.id,
             query=request.query,
             answer=factor_ans["answer"],
             confidence=1.0 if status_cat == "APPROVED" else (0.85 if status_cat == "PROVISIONAL" else 0.4),
@@ -187,6 +252,7 @@ def esg_query(
         db.add(log)
         db.commit()
         return QueryResponse(
+            query_id=log.id,
             query=request.query,
             answer=honest_answer,
             confidence=round(retrieval_res.get("best_score", 0.0), 3),
@@ -209,6 +275,7 @@ def esg_query(
         answer_text=gen_res["answer"],
         confidence=retrieval_res.get("best_score", 0.0),
         citations=citations_data,
+        retrieved_chunk_ids=[c.chunk_id for c in retrieval_res.get("chunks", []) if getattr(c, "chunk_id", "")],
         latency_ms=latency,
         llm_model=gen_res.get("model_used", "unknown"),
         verified_by_audit=False
@@ -216,15 +283,18 @@ def esg_query(
     db.add(log)
     db.commit()
 
+    model_used = gen_res.get("model_used", "gemini")
     return QueryResponse(
+        query_id=log.id,
         query=request.query,
         answer=gen_res["answer"],
         confidence=round(retrieval_res.get("best_score", 0.0), 3),
         citations=[Citation(**c) for c in citations_data],
         corpus=request.corpus or "all",
-        model_used=gen_res.get("model_used", "gemini"),
+        model_used=model_used,
         insufficient_data=gen_res.get("insufficient_data", False),
-        latency_ms=latency
+        latency_ms=latency,
+        answer_mode="retrieval_only" if model_used in ("retrieval-only", "carbonos-policy-guard") else "supported_synthesis",
     )
 
 @router.post("/extract-footprint", response_model=ExtractionResponse)
@@ -372,6 +442,37 @@ def get_emission_factors(
         for f in factors
     ]
 
+@router.get("/documents/{document_id}/chunks/{chunk_id}")
+def read_source_passage(
+    document_id: str,
+    chunk_id: str,
+    principal: Principal = Depends(require("read")),
+    db: Session = Depends(get_db),
+):
+    """Read one SQL-authorized indexed passage; source text is data, never executable HTML."""
+    row = (
+        db.query(ESGChunk, ESGDocument)
+        .join(ESGDocument, ESGChunk.document_id == ESGDocument.id)
+        .filter(ESGDocument.id == document_id, ESGChunk.id == chunk_id, _visible_documents(principal))
+        .first()
+    )
+    if row is None:
+        raise HTTPException(404, "Source passage not found")
+    chunk, document = row
+    return {
+        "document_id": document.id,
+        "chunk_id": chunk.id,
+        "source": document.filename,
+        "corpus": document.corpus,
+        "page": chunk.page_number,
+        "section": chunk.section_title,
+        "source_status": (document.meta_info or {}).get("source_status", "UNREVIEWED"),
+        "content": chunk.content,
+        "content_sha256": hashlib.sha256(chunk.content.encode()).hexdigest(),
+        "document_sha256": document.checksum,
+    }
+
+
 @router.get("/documents")
 def list_documents(
     corpus: Optional[str] = None,
@@ -379,10 +480,7 @@ def list_documents(
     db: Session = Depends(get_db)
 ):
     """List the caller's tenant documents plus global corpora, with provenance."""
-    q = db.query(ESGDocument).filter(
-        (ESGDocument.tenant_id == principal.organization_id)
-        | (ESGDocument.tenant_id.in_(list(GLOBAL_CORPUS_OWNER.values())))
-    )
+    q = db.query(ESGDocument).filter(_visible_documents(principal))
     if corpus:
         q = q.filter(ESGDocument.corpus == corpus)
 

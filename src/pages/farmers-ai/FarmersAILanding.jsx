@@ -26,98 +26,98 @@ const FarmersAILanding = () => {
   const itemVariants = createItemVariants(16);
 
   return (
-    <div className="min-h-screen bg-carbon pt-16 pb-12 px-4 lg:px-12 font-sans selection:bg-emerald selection:text-carbon overflow-hidden">
-      {/* Language Toggle */}
-      <div className="max-w-7xl mx-auto flex justify-end mb-8 relative z-20">
-        <Tabs
-          tabs={[
-            { id: 'en', label: 'English' },
-            { id: 'bn', label: 'বাংলা' }
-          ]}
-          activeTab={lang}
-          onChange={setLang}
-          size="sm"
-        />
-      </div>
-
-      <div className="max-w-7xl mx-auto">
-        <FarmersHero lang={lang} text={text} />
-
-        <WorkflowCards
-          lang={lang}
-          text={text}
-          containerVariants={containerVariants}
-          itemVariants={itemVariants}
-        />
-
-        {/* AI Scanner Section */}
-        <div id="ai-scanner" className="mb-32 relative z-10 scroll-mt-28">
-          <div className="bg-gradient-to-b from-white/5 to-transparent border border-white/10 p-6 md:p-8 rounded-3xl shadow-xl hover:border-lime-400/20 transition-all duration-300">
-            {scanResult === null ? (
-              <CameraCapture 
-                isInline={true} 
-                onScanComplete={(result, imgBlob) => {
-                  setScanResult(result);
-                  setScanImage(imgBlob);
-                }}
-              />
-            ) : (
-              <DiagnosisResult 
-                isInline={true}
-                onBack={() => {
-                  setScanResult(null);
-                  setScanImage(null);
-                }}
-                inlineResult={scanResult}
-                inlineImageBlob={scanImage}
-              />
-            )}
+      <div className="w-full max-w-[1600px] mx-auto font-sans selection:bg-emerald selection:text-carbon space-y-8">
+        {/* Language Toggle */}
+          <div className="flex justify-end relative z-20">
+            <Tabs
+              tabs={[
+                { id: 'en', label: 'English' },
+                { id: 'bn', label: 'বাংলা' }
+              ]}
+              activeTab={lang}
+              onChange={setLang}
+              size="sm"
+            />
           </div>
-        </div>
 
-        <SupportedCropsSection
-          lang={lang}
-          text={text}
-          selectedCrop={selectedCrop}
-          onSelectCrop={setSelectedCrop}
-          containerVariants={containerVariants}
-          itemVariants={itemVariants}
-        />
+            <div>
+              <FarmersHero lang={lang} text={text} />
 
-        {/* HarvestGuard Dashboard Section */}
-        <div id="harvestguard-dashboard" className="mb-32 relative z-10 scroll-mt-28">
-          <div className="bg-bg-elevated/90 border border-lime-400/20 p-6 md:p-8 rounded-3xl shadow-xl">
-            {dashboardSection === 'inventory' && (
-              <HarvestGuardDashboard 
-                isInline={true}
-                onAddBatchClick={() => setDashboardSection('add-batch')}
-                onViewRiskClick={(batchId) => {
-                  setDashboardBatchId(batchId);
-                  setDashboardSection('risk-details');
-                }}
+              <WorkflowCards
+                lang={lang}
+                text={text}
+                containerVariants={containerVariants}
+                itemVariants={itemVariants}
               />
-            )}
-            {dashboardSection === 'add-batch' && (
-              <BatchRegistration 
-                isInline={true}
-                onBack={() => setDashboardSection('inventory')}
-                onSaveBatch={() => setDashboardSection('inventory')}
-              />
-            )}
-            {dashboardSection === 'risk-details' && (
-              <WeatherRiskWidget 
-                isInline={true}
-                onBack={() => setDashboardSection('inventory')}
-                inlineBatchId={dashboardBatchId}
-              />
-            )}
-          </div>
-        </div>
 
-        <FeaturesGridAndCta text={text} />
-      </div>
-    </div>
-  );
+              {/* AI Scanner Section */}
+                <div id="ai-scanner" className="mb-10 relative z-10 scroll-mt-24">
+                  <div className="bg-gradient-to-b from-white/5 to-transparent border border-white/10 p-6 md:p-8 rounded-3xl shadow-xl hover:border-lime-400/20 transition-all duration-300">
+                    {scanResult === null ? (
+                      <CameraCapture
+                        isInline={true}
+                        onScanComplete={(result, imgBlob) => {
+                          setScanResult(result);
+                          setScanImage(imgBlob);
+                        }}
+                      />
+                    ) : (
+                      <DiagnosisResult
+                        isInline={true}
+                        onBack={() => {
+                          setScanResult(null);
+                          setScanImage(null);
+                        }}
+                        inlineResult={scanResult}
+                        inlineImageBlob={scanImage}
+                      />
+                    )}
+                  </div>
+                </div>
+
+                <SupportedCropsSection
+                  lang={lang}
+                  text={text}
+                  selectedCrop={selectedCrop}
+                  onSelectCrop={setSelectedCrop}
+                  containerVariants={containerVariants}
+                  itemVariants={itemVariants}
+                />
+
+                {/* HarvestGuard Dashboard Section */}
+                  <div id="harvestguard-dashboard" className="mb-10 relative z-10 scroll-mt-24">
+                    <div className="bg-bg-elevated/90 border border-lime-400/20 p-6 md:p-8 rounded-3xl shadow-xl">
+                      {dashboardSection === 'inventory' && (
+                        <HarvestGuardDashboard
+                          isInline={true}
+                          onAddBatchClick={() => setDashboardSection('add-batch')}
+                          onViewRiskClick={(batchId) => {
+                            setDashboardBatchId(batchId);
+                            setDashboardSection('risk-details');
+                          }}
+                        />
+                      )}
+                      {dashboardSection === 'add-batch' && (
+                        <BatchRegistration
+                          isInline={true}
+                          onBack={() => setDashboardSection('inventory')}
+                          onSaveBatch={() => setDashboardSection('inventory')}
+                        />
+                      )}
+                      {dashboardSection === 'risk-details' && (
+                        <WeatherRiskWidget
+                          isInline={true}
+                          onBack={() => setDashboardSection('inventory')}
+                          inlineBatchId={dashboardBatchId}
+                        />
+                      )}
+                    </div>
+                  </div>
+
+                  <FeaturesGridAndCta text={text} />
+                </div>
+              </div>
+              );
 };
 
-export default FarmersAILanding;
+              export default FarmersAILanding;

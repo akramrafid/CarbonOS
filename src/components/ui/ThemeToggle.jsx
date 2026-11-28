@@ -35,7 +35,7 @@ export function ThemeToggle({ variant = 'icon', className = '', id }) {
               role="radio"
               aria-checked={isSelected}
               aria-label={`${opt.label} theme`}
-              onClick={() => setTheme(opt.id)}
+              onClick={(e) => setTheme(opt.id, e)}
               className={`inline-flex items-center justify-center gap-1.5 px-3 py-2 rounded-full text-xs font-mono transition-colors min-h-[44px] min-w-[44px] cursor-pointer focus-ring-standard ${
                 isSelected
                   ? 'bg-accent text-fg-inverse font-semibold shadow-sm'

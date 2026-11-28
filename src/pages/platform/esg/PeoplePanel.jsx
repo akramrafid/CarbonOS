@@ -36,11 +36,13 @@ export function MembersPanel() {
         <Loading state={members} empty="No members.">
           <Table caption="Members" rows={members.data || []} columns={[
             { key: 'user_sub', label: 'User' },
-            { key: 'role', label: 'Role', render: (m) => (
-              <select aria-label={`Role for ${m.user_sub}`} defaultValue={m.role} className="rounded border border-mist/30 bg-carbon px-2 py-1 text-sm"
+            {
+              key: 'role', label: 'Role', render: (m) => (
+              <select aria-label={`Role for ${m.user_sub}`} defaultValue={m.role} className="rounded border border-border-subtle bg-bg-canvas px-2 py-1 text-sm text-fg-primary"
                 onChange={(e) => change(`/api/esg/members/${m.id}`, 'PATCH', { role: e.target.value }, 'Role updated.')()}>
                 {ROLES.map(([v, t]) => <option key={v} value={v}>{t}</option>)}
-              </select>) },
+              </select>)
+            },
             { key: 'remove', label: '', render: (m) => <Button variant="secondary" onClick={change(`/api/esg/members/${m.id}`, 'DELETE', undefined, 'Member removed.')}>Remove</Button> },
           ]} />
         </Loading>
@@ -51,13 +53,15 @@ export function MembersPanel() {
           <Select label="Role" name="role" options={ROLES} />
           <Button type="submit" disabled={action.busy}>Create invitation</Button>
         </form>
-        {link && <p role="status" className="break-all rounded-lg border border-amber/40 bg-amber/10 p-3 font-mono text-xs text-amber-200">One-time link (shown once): {link}</p>}
+        {link && <p role="status" className="break-all rounded-lg border border-amber-500/40 bg-amber-500/10 p-3 font-mono text-xs text-amber-800 dark:text-amber-200">One-time link (shown once): {link}</p>}
         <Loading state={invitations} empty="No invitations.">
           <Table caption="Invitations" rows={invitations.data || []} columns={[
             { key: 'email', label: 'Email' }, { key: 'role', label: 'Role' }, { key: 'expires_at', label: 'Expires' },
             { key: 'state', label: 'State', render: (i) => (i.accepted_at ? 'Accepted' : i.revoked_at ? 'Revoked' : 'Pending') },
-            { key: 'revoke', label: '', render: (i) => (!i.accepted_at && !i.revoked_at
-              ? <Button variant="secondary" onClick={change(`/api/esg/invitations/${i.id}`, 'DELETE', undefined, 'Invitation revoked.')}>Revoke</Button> : null) },
+            {
+              key: 'revoke', label: '', render: (i) => (!i.accepted_at && !i.revoked_at
+                ? <Button variant="secondary" onClick={change(`/api/esg/invitations/${i.id}`, 'DELETE', undefined, 'Invitation revoked.')}>Revoke</Button> : null)
+            },
           ]} />
         </Loading>
       </Panel>

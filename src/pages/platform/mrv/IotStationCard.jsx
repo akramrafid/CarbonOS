@@ -102,9 +102,8 @@ export function IotStationCard({
 
         {/* Air Quality */}
         <div
-          className={`p-5 bg-bg-canvas border rounded-xl relative group overflow-hidden transition-all duration-500 ${
-            metrics.air !== null && deviceConnected ? 'border-emerald/15' : 'border-emerald/10'
-          }`}
+          className={`p-5 bg-bg-canvas border rounded-xl relative group overflow-hidden transition-all duration-500 ${metrics.air !== null && deviceConnected ? 'border-emerald/15' : 'border-emerald/10'
+            }`}
         >
           <div className="flex justify-between items-center mb-2">
             <span className="font-mono text-[9px] text-mist/50 uppercase tracking-wider">Air Quality</span>
@@ -125,9 +124,8 @@ export function IotStationCard({
 
         {/* CO2 */}
         <div
-          className={`p-5 bg-bg-canvas border rounded-xl relative group overflow-hidden transition-all duration-500 ${
-            metrics.co2 !== null && deviceConnected ? 'border-emerald/15' : 'border-emerald/10'
-          }`}
+          className={`p-5 bg-bg-canvas border rounded-xl relative group overflow-hidden transition-all duration-500 ${metrics.co2 !== null && deviceConnected ? 'border-emerald/15' : 'border-emerald/10'
+            }`}
         >
           <div className="flex justify-between items-center mb-2">
             <span className="font-mono text-[9px] text-mist/50 uppercase tracking-wider">CO2 Level</span>
@@ -150,84 +148,84 @@ export function IotStationCard({
       {/* Historical Trends Visualized */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         {/* Chart Area */}
-        <div className="lg:col-span-2 p-6 bg-bg-canvas border border-emerald/10 rounded-2xl flex flex-col justify-between h-[420px]">
-          <div className="flex flex-col sm:flex-row justify-between sm:items-center gap-3 mb-4">
-            <span className="text-xs font-mono font-bold text-white tracking-wider flex items-center">
-              <Activity className="w-4 h-4 text-emerald mr-1.5 animate-pulse" />
-              HISTORICAL TREND ANALYSES
-            </span>
-            <Tabs
-              tabs={[
-                { id: 'co2', label: 'CO2' },
-                { id: 'air', label: 'AQI' },
-                { id: 'temp', label: 'TEMP' },
-                { id: 'hum', label: 'HUM' }
-              ]}
-              activeTab={chartMetric}
-              onChange={setChartMetric}
-              size="sm"
-            />
+          <div className="lg:col-span-2 p-6 bg-bg-surface border border-border-subtle rounded-2xl flex flex-col justify-between h-[420px]">
+            <div className="flex flex-col sm:flex-row justify-between sm:items-center gap-3 mb-4">
+                <span className="text-xs font-mono font-bold text-fg-primary tracking-wider flex items-center">
+                  <Activity className="w-4 h-4 text-accent mr-1.5 animate-pulse" />
+                  HISTORICAL TREND ANALYSES
+                </span>
+                <Tabs
+                  tabs={[
+                    { id: 'co2', label: 'CO2' },
+                    { id: 'air', label: 'AQI' },
+                    { id: 'temp', label: 'TEMP' },
+                    { id: 'hum', label: 'HUM' }
+                  ]}
+                  activeTab={chartMetric}
+                  onChange={setChartMetric}
+                  size="sm"
+                />
+            </div>
+
+            <div className="flex-1 flex items-center justify-center">
+              {telemetryLoading ? (
+                <Loader2 className="w-6 h-6 animate-spin text-emerald" />
+              ) : (
+                <TelemetryChart history={telemetryHistory} metricType={chartMetric} />
+              )}
+            </div>
           </div>
 
-          <div className="flex-1 flex items-center justify-center">
-            {telemetryLoading ? (
-              <Loader2 className="w-6 h-6 animate-spin text-emerald" />
+          {/* Log stream / Mock Stream Panel */}
+          <div className="p-6 bg-bg-canvas border border-emerald/10 rounded-2xl flex flex-col justify-between h-[420px]">
+            <div className="flex justify-between items-center border-b border-emerald/10 pb-3 mb-3">
+              <span className="text-xs font-mono font-bold text-amber tracking-wider">&gt;&gt; LOG STREAM</span>
+              <Tabs
+                tabs={[
+                  { id: 'sensor_logs', label: 'SENSOR' },
+                  { id: 'mock_stream', label: 'SIM' }
+                ]}
+                activeTab={leftTab}
+                onChange={setLeftTab}
+                size="sm"
+              />
+            </div>
+
+            {leftTab === 'sensor_logs' ? (
+              <div className="flex-1 overflow-y-auto space-y-2 pr-1 font-mono text-[9px] text-mist/70 select-none scrollbar-thin max-h-[320px]">
+                {telemetryLoading ? (
+                  <div className="flex items-center justify-center h-full">
+                    <Loader2 className="w-4 h-4 animate-spin text-amber" />
+                  </div>
+                ) : telemetryHistory.length === 0 ? (
+                  <div className="text-center text-mist/30 mt-8">NO TELEMETRY RECORDED YET</div>
+                ) : (
+                  telemetryHistory.map((item, idx) => {
+                    const time = new Date(item.timestamp).toLocaleTimeString();
+                    return (
+                      <div
+                        key={item.id || idx}
+                        className="hover:text-white transition-colors border-b border-white/5 pb-1"
+                      >
+                        <span className="text-emerald/70">[{time}]</span> ESP: CO2={item.co2} AQI=
+                        {item.air_quality} T={item.temperature}°C H={item.humidity}%
+                      </div>
+                    );
+                  })
+                )}
+              </div>
             ) : (
-              <TelemetryChart history={telemetryHistory} metricType={chartMetric} />
+              <div className="flex-1 overflow-y-auto space-y-3 font-mono text-[10px] text-mist/70 scrollbar-thin max-h-[320px]">
+                <div>[NODE-84A] Solar output matched expected baseline. (+2.1 tCO2e)</div>
+                <div>[NODE-92C] Cookstove usage confirmed via thermal sensor. (+0.4 tCO2e)</div>
+                <div>[SAT-GEO] Mangrove boundary scan complete. Zero deforestation detected.</div>
+                <div className="text-emerald">[FARMER-AI] Diagnosis logged. field_id: 1102 (healthy)</div>
+              </div>
             )}
           </div>
         </div>
-
-        {/* Log stream / Mock Stream Panel */}
-        <div className="p-6 bg-bg-canvas border border-emerald/10 rounded-2xl flex flex-col justify-between h-[420px]">
-          <div className="flex justify-between items-center border-b border-emerald/10 pb-3 mb-3">
-            <span className="text-xs font-mono font-bold text-amber tracking-wider">&gt;&gt; LOG STREAM</span>
-            <Tabs
-              tabs={[
-                { id: 'sensor_logs', label: 'SENSOR' },
-                { id: 'mock_stream', label: 'SIM' }
-              ]}
-              activeTab={leftTab}
-              onChange={setLeftTab}
-              size="sm"
-            />
-          </div>
-
-          {leftTab === 'sensor_logs' ? (
-            <div className="flex-1 overflow-y-auto space-y-2 pr-1 font-mono text-[9px] text-mist/70 select-none scrollbar-thin max-h-[320px]">
-              {telemetryLoading ? (
-                <div className="flex items-center justify-center h-full">
-                  <Loader2 className="w-4 h-4 animate-spin text-amber" />
-                </div>
-              ) : telemetryHistory.length === 0 ? (
-                <div className="text-center text-mist/30 mt-8">NO TELEMETRY RECORDED YET</div>
-              ) : (
-                telemetryHistory.map((item, idx) => {
-                  const time = new Date(item.timestamp).toLocaleTimeString();
-                  return (
-                    <div
-                      key={item.id || idx}
-                      className="hover:text-white transition-colors border-b border-white/5 pb-1"
-                    >
-                      <span className="text-emerald/70">[{time}]</span> ESP: CO2={item.co2} AQI=
-                      {item.air_quality} T={item.temperature}°C H={item.humidity}%
-                    </div>
-                  );
-                })
-              )}
-            </div>
-          ) : (
-            <div className="flex-1 overflow-y-auto space-y-3 font-mono text-[10px] text-mist/70 scrollbar-thin max-h-[320px]">
-              <div>[NODE-84A] Solar output matched expected baseline. (+2.1 tCO2e)</div>
-              <div>[NODE-92C] Cookstove usage confirmed via thermal sensor. (+0.4 tCO2e)</div>
-              <div>[SAT-GEO] Mangrove boundary scan complete. Zero deforestation detected.</div>
-              <div className="text-emerald">[FARMER-AI] Diagnosis logged. field_id: 1102 (healthy)</div>
-            </div>
-          )}
-        </div>
       </div>
-    </div>
-  );
+      );
 }
 
-export default IotStationCard;
+      export default IotStationCard;

@@ -139,18 +139,18 @@ export const AtlasBenchmarkStudio = ({ isLight, locale }) => {
       }`}>
         <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
           <div className="space-y-1">
-            <div className="flex items-center space-x-2">
-              <div className="w-8 h-8 rounded-xl bg-cyan-500/10 border border-cyan-500/30 flex items-center justify-center text-cyan-500">
+            <div className="flex flex-wrap items-center gap-2">
+              <div className="w-8 h-8 rounded-xl bg-cyan-500/10 border border-cyan-500/30 flex items-center justify-center text-cyan-700 dark:text-cyan-400">
                 <Activity className="w-4 h-4" />
               </div>
-              <h2 className={`text-xl font-bold font-sans ${isLight ? 'text-gray-900' : 'text-white'}`}>
+              <h2 className="text-xl font-bold font-sans text-fg-primary">
                 {locale.atlasTitle}
               </h2>
-              <span className="px-2.5 py-0.5 rounded-full text-[10px] font-mono font-bold bg-cyan-500/15 text-cyan-600 dark:text-cyan-400 border border-cyan-500/30">
+              <span className="px-2.5 py-0.5 rounded-full text-[10px] font-mono font-bold bg-cyan-500/15 text-cyan-800 dark:text-cyan-400 border border-cyan-500/30">
                 Watershed ATLAS Pattern
               </span>
             </div>
-            <p className={`text-xs ${isLight ? 'text-gray-600' : 'text-fg-secondary'}`}>
+            <p className="text-xs text-fg-secondary">
               {locale.atlasSubtitle}
             </p>
           </div>
@@ -219,19 +219,19 @@ export const AtlasBenchmarkStudio = ({ isLight, locale }) => {
           <tbody className="divide-y divide-gray-100 dark:divide-gray-800">
             {testCases.map(tc => (
               <tr key={tc.id} className="hover:bg-emerald-500/5 transition-colors">
-                <td className="py-3 font-mono font-bold text-cyan-500">{tc.id}</td>
+                <td className="py-3 font-mono font-bold text-cyan-700 dark:text-cyan-400">{tc.id}</td>
                 <td className="py-3 font-medium max-w-xs">
-                  <div className="truncate font-semibold text-gray-800 dark:text-gray-200">{tc.document}</div>
-                  <div className="text-[10px] text-gray-500 italic truncate font-mono">"{tc.snippet}"</div>
+                  <div className="truncate font-semibold text-fg-primary">{tc.document}</div>
+                  <div className="text-[10px] text-fg-secondary italic truncate font-mono">"{tc.snippet}"</div>
                 </td>
-                <td className="py-3 font-mono text-gray-600 dark:text-gray-300">{tc.groundTruth}</td>
-                <td className="py-3 font-mono font-bold text-emerald-500">{tc.extracted}</td>
+                <td className="py-3 font-mono text-fg-secondary">{tc.groundTruth}</td>
+                <td className="py-3 font-mono font-bold text-emerald-700 dark:text-emerald-400">{tc.extracted}</td>
                 <td className="py-3">
-                  <span className="px-2 py-0.5 rounded-full text-[10px] font-mono font-semibold bg-emerald-500/15 text-emerald-600 dark:text-emerald-400">
+                  <span className="px-2 py-0.5 rounded-full text-[10px] font-mono font-semibold bg-emerald-500/15 text-emerald-700 dark:text-emerald-400">
                     {tc.scope}
                   </span>
                 </td>
-                <td className="py-3 font-mono text-gray-400">{(tc.confidence * 100).toFixed(0)}%</td>
+                <td className="py-3 font-mono text-fg-secondary">{(tc.confidence * 100).toFixed(0)}%</td>
                 <td className="py-3 text-right">
                   <span className="px-2.5 py-0.5 rounded-full text-[10px] font-mono font-bold bg-emerald-500/20 text-emerald-600 dark:text-emerald-400 border border-emerald-500/30">
                     Pass

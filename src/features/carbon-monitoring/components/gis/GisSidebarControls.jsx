@@ -35,14 +35,12 @@ export function GisSidebarControls(props) {
     <div className="lg:col-span-1 flex flex-col space-y-6">
       {/* Coordinate Search box */}
       <div
-        className={`border rounded-2xl p-5 transition-all ${
-          isLight ? 'bg-white border-border-subtle shadow-xs' : 'bg-bg-elevated border-border-subtle'
-        }`}
+        className={`border rounded-2xl p-5 transition-all ${isLight ? 'bg-white border-border-subtle shadow-xs' : 'bg-bg-elevated border-border-subtle'
+          }`}
       >
         <h3
-          className={`font-bold text-sm mb-3 uppercase tracking-wider flex items-center space-x-2 ${
-            isLight ? 'text-fg-primary' : 'text-mist'
-          }`}
+          className={`font-bold text-sm mb-3 uppercase tracking-wider flex items-center space-x-2 ${isLight ? 'text-fg-primary' : 'text-mist'
+            }`}
         >
           <MapPin size={16} className="text-emerald" />
           <span>Search Coordinates</span>
@@ -53,11 +51,10 @@ export function GisSidebarControls(props) {
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
             placeholder="Lat, Lng (e.g. 22.3, 89.6)"
-            className={`flex-1 border rounded-xl px-3 py-2 text-sm focus:outline-none focus:border-emerald/50 transition-colors ${
-              isLight
+            className={`flex-1 border rounded-xl px-3 py-2 text-sm focus:outline-none focus:border-emerald/50 transition-colors ${isLight
                 ? 'bg-bg-canvas border-border-subtle text-fg-primary placeholder-fg-muted'
                 : 'bg-white/5 border-white/10 text-white placeholder-mist/60'
-            }`}
+              }`}
           />
           <IconButton
             icon={<Search size={16} />}
@@ -86,17 +83,15 @@ export function GisSidebarControls(props) {
 
       {/* Layers toggle */}
       <div
-        className={`border rounded-2xl p-5 transition-all ${
-          isLight ? 'bg-white border-border-subtle shadow-xs' : 'bg-bg-elevated border-border-subtle'
-        }`}
+        className={`border rounded-2xl p-5 transition-all ${isLight ? 'bg-white border-border-subtle shadow-xs' : 'bg-bg-elevated border-border-subtle'
+          }`}
       >
         <h3
-          className={`font-bold text-sm mb-4 uppercase tracking-wider flex items-center space-x-2 ${
-            isLight ? 'text-fg-primary' : 'text-mist'
-          }`}
+          className={`font-bold text-sm mb-4 uppercase tracking-wider flex items-center space-x-2 ${isLight ? 'text-fg-primary' : 'text-mist'
+            }`}
         >
           <Layers size={16} className="text-emerald" />
-          <span>GIS Layer Layers</span>
+          <span>GIS Layers</span>
         </h3>
 
         <div className="space-y-2">
@@ -112,13 +107,12 @@ export function GisSidebarControls(props) {
               variant="secondary"
               size="sm"
               onClick={() => setActiveLayer(layer.id)}
-              className={`w-full !flex !items-center !justify-between text-xs !p-3 ${
-                activeLayer === layer.id
+              className={`w-full !flex !items-center !justify-between text-xs !p-3 ${activeLayer === layer.id
                   ? isLight
                     ? '!border-border-strong !bg-accent-muted !text-accent font-bold shadow-xs'
                     : '!border-emerald/45 !bg-emerald/10 !text-white font-bold'
                   : ''
-              }`}
+                }`}
             >
               <span className="flex-1 text-left">{layer.label}</span>
               <span className={`w-2.5 h-2.5 rounded-full ${layer.color}`}></span>
@@ -129,15 +123,13 @@ export function GisSidebarControls(props) {
 
       {/* Basemap Selection */}
       <div
-        className={`border rounded-2xl p-5 transition-all ${
-          isLight ? 'bg-white border-border-subtle shadow-xs' : 'bg-bg-elevated border-border-subtle'
-        }`}
+        className={`border rounded-2xl p-5 transition-all ${isLight ? 'bg-white border-border-subtle shadow-xs' : 'bg-bg-elevated border-border-subtle'
+          }`}
       >
         <div className="flex items-center justify-between mb-3">
           <h3
-            className={`font-bold text-sm uppercase tracking-wider flex items-center space-x-2 ${
-              isLight ? 'text-fg-primary' : 'text-mist'
-            }`}
+            className={`font-bold text-sm uppercase tracking-wider flex items-center space-x-2 ${isLight ? 'text-fg-primary' : 'text-mist'
+              }`}
           >
             <MapIcon size={16} className="text-emerald" />
             <span>Basemap Style</span>

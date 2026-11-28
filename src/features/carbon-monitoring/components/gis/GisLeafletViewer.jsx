@@ -84,7 +84,7 @@ export function GisLeafletViewer(props) {
       <MapContainer
         center={mapCenter}
         zoom={mapZoom}
-        className="w-full h-full"
+        className="w-full h-full z-0"
         scrollWheelZoom={true}
       >
         <MapResizeHandler />
@@ -138,20 +138,20 @@ export function GisLeafletViewer(props) {
           !isNaN(parseFloat(inspectedPixel.lng)) && (
             <Marker position={[parseFloat(inspectedPixel.lat), parseFloat(inspectedPixel.lng)]}>
               <Popup>
-                <div className="text-xs p-1 max-w-xs leading-tight">
+                <div className="text-xs p-1 max-w-xs leading-tight text-fg-primary">
                   <div className="font-bold text-accent">
                     {inspectedPixel.forestType || 'Inspected Pixel'}
                   </div>
-                  <div className="text-gray-500 font-mono text-[10px] mt-0.5">
+                  <div className="text-fg-muted font-mono text-[10px] mt-0.5">
                     {inspectedPixel.lat}, {inspectedPixel.lng}
                   </div>
-                  <div className="mt-1.5 font-medium text-gray-700">
-                    Biomass: <span className="font-bold">{inspectedPixel.biomass} Mg/ha</span>
+                  <div className="mt-1.5 font-medium text-fg-secondary">
+                    Biomass: <span className="font-bold text-fg-primary">{inspectedPixel.biomass} Mg/ha</span>
                   </div>
-                  <div className="mt-1.5 font-medium text-gray-700">
-                    Carbon: <span className="font-bold">{inspectedPixel.carbon} tC/ha</span>
+                  <div className="mt-1.5 font-medium text-fg-secondary">
+                    Carbon: <span className="font-bold text-fg-primary">{inspectedPixel.carbon} tC/ha</span>
                   </div>
-                  <div className="text-[10px] text-gray-500 mt-1">
+                  <div className="text-[10px] text-fg-muted mt-1">
                     NDVI: {inspectedPixel.ndvi} • {inspectedPixel.confidence}
                   </div>
                 </div>
@@ -201,14 +201,14 @@ export function GisLeafletViewer(props) {
         </div>
       )}
 
-      <div className="absolute top-4 right-4 bg-carbon/90 backdrop-blur-md border border-white/15 p-3.5 rounded-2xl max-w-[210px] z-20 space-y-2.5 shadow-xl">
+      <div className="absolute top-4 right-4 bg-bg-surface/95 backdrop-blur-md border border-border-subtle p-3.5 rounded-2xl max-w-[210px] z-20 space-y-2.5 shadow-xl">
         <div className="flex items-center justify-between gap-2">
-          <h4 className="text-[10px] font-bold uppercase tracking-wider text-mist truncate">
+          <h4 className="text-[10px] font-bold uppercase tracking-wider text-fg-secondary truncate">
             {LAYER_CONFIG[activeLayer]?.title || 'INDEX RANGE'}
           </h4>
           <span
             className={`text-[9px] px-1.5 py-0.5 rounded font-bold shrink-0 ${
-              LAYER_CONFIG[activeLayer]?.badgeClass || 'bg-emerald text-carbon'
+              LAYER_CONFIG[activeLayer]?.badgeClass || 'bg-accent text-fg-inverse'
             }`}
           >
             {LAYER_CONFIG[activeLayer]?.id?.toUpperCase()}
@@ -224,9 +224,9 @@ export function GisLeafletViewer(props) {
                 'linear-gradient(to top, #78350F, #F59E0B, #84CC16, #00C853)'
             }}
           ></div>
-          <div className="flex flex-col justify-between h-20 text-[10px] text-mist font-mono">
+          <div className="flex flex-col justify-between h-20 text-[10px] text-fg-secondary font-mono">
             {LAYER_CONFIG[activeLayer]?.ticks?.map((tick, i) => (
-              <span key={i} className={i === 0 ? 'text-white font-semibold' : ''}>
+              <span key={i} className={i === 0 ? 'text-fg-primary font-semibold' : ''}>
                 {tick}
               </span>
             )) || (
@@ -239,7 +239,7 @@ export function GisLeafletViewer(props) {
           </div>
         </div>
 
-        <p className="text-[9px] text-mist/80 border-t border-white/10 pt-1.5 leading-tight">
+        <p className="text-[9px] text-fg-muted border-t border-border-subtle pt-1.5 leading-tight">
           {LAYER_CONFIG[activeLayer]?.description}
         </p>
       </div>

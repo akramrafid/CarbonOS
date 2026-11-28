@@ -57,9 +57,8 @@ export const TelemetryChart = ({ history, metricType }) => {
   });
 
   const linePath = points.map((p, idx) => `${idx === 0 ? 'M' : 'L'} ${p.x} ${p.y}`).join(' ');
-  const areaPath = `${linePath} L ${points[points.length - 1].x} ${paddingTop + chartHeight} L ${
-    points[0].x
-  } ${paddingTop + chartHeight} Z`;
+  const areaPath = `${linePath} L ${points[points.length - 1].x} ${paddingTop + chartHeight} L ${points[0].x
+    } ${paddingTop + chartHeight} Z`;
 
   let strokeColor = '#10b981';
   let fillGradientId = 'grad-emerald-mrv';
@@ -114,7 +113,8 @@ export const TelemetryChart = ({ history, metricType }) => {
           y1={paddingTop}
           x2={width - paddingRight}
           y2={paddingTop}
-          stroke="rgba(255,255,255,0.03)"
+          stroke="var(--color-border-subtle)"
+          strokeOpacity="0.6"
           strokeDasharray="3"
         />
         <line
@@ -122,7 +122,8 @@ export const TelemetryChart = ({ history, metricType }) => {
           y1={paddingTop + chartHeight / 2}
           x2={width - paddingRight}
           y2={paddingTop + chartHeight / 2}
-          stroke="rgba(255,255,255,0.03)"
+          stroke="var(--color-border-subtle)"
+          strokeOpacity="0.6"
           strokeDasharray="3"
         />
         <line
@@ -130,13 +131,13 @@ export const TelemetryChart = ({ history, metricType }) => {
           y1={paddingTop + chartHeight}
           x2={width - paddingRight}
           y2={paddingTop + chartHeight}
-          stroke="rgba(255,255,255,0.06)"
+          stroke="var(--color-border-subtle)"
         />
 
         <text
           x={paddingLeft - 8}
           y={paddingTop + 3}
-          fill="rgba(255,255,255,0.4)"
+          fill="var(--color-fg-muted)"
           fontSize="7"
           fontFamily="monospace"
           textAnchor="end"
@@ -146,7 +147,7 @@ export const TelemetryChart = ({ history, metricType }) => {
         <text
           x={paddingLeft - 8}
           y={paddingTop + chartHeight / 2 + 3}
-          fill="rgba(255,255,255,0.25)"
+          fill="var(--color-fg-muted)"
           fontSize="7"
           fontFamily="monospace"
           textAnchor="end"
@@ -156,7 +157,7 @@ export const TelemetryChart = ({ history, metricType }) => {
         <text
           x={paddingLeft - 8}
           y={paddingTop + chartHeight + 3}
-          fill="rgba(255,255,255,0.4)"
+          fill="var(--color-fg-muted)"
           fontSize="7"
           fontFamily="monospace"
           textAnchor="end"
@@ -167,7 +168,7 @@ export const TelemetryChart = ({ history, metricType }) => {
         <text
           x={paddingLeft}
           y={height - 8}
-          fill="rgba(255,255,255,0.3)"
+          fill="var(--color-fg-muted)"
           fontSize="7"
           fontFamily="monospace"
           textAnchor="start"
@@ -177,7 +178,7 @@ export const TelemetryChart = ({ history, metricType }) => {
         <text
           x={width - paddingRight}
           y={height - 8}
-          fill="rgba(255,255,255,0.3)"
+          fill="var(--color-fg-muted)"
           fontSize="7"
           fontFamily="monospace"
           textAnchor="end"
@@ -185,8 +186,8 @@ export const TelemetryChart = ({ history, metricType }) => {
           {points[points.length - 1].time}
         </text>
 
-        <path d={areaPath} fill={`url(#${fillGradientId})`} />
-        <path d={linePath} fill="none" stroke={strokeColor} strokeWidth="1.5" filter="url(#glow-mrv)" />
+        <path d={areaPath} fill={`url(#${fillGradientId})`} className="chart-animate-area" />
+        <path d={linePath} fill="none" stroke={strokeColor} strokeWidth="1.5" filter="url(#glow-mrv)" className="chart-animate-line" />
 
         {points.map((p, idx) => {
           const isKeyPoint =
@@ -198,7 +199,7 @@ export const TelemetryChart = ({ history, metricType }) => {
               cx={p.x}
               cy={p.y}
               r="3"
-              fill="#080F0B"
+              fill="var(--color-bg-surface)"
               stroke={strokeColor}
               strokeWidth="1.5"
             />

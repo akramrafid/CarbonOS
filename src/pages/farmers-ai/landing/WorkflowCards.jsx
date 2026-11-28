@@ -17,66 +17,66 @@ export function WorkflowCards({
   ];
 
   return (
-    <m.div 
+    <m.div
       initial="hidden"
       whileInView="visible"
       viewport={{ once: true }}
       variants={containerVariants}
-      className="mb-32 relative"
+      className="mb-14 relative"
     >
       {/* [COMMENTED OUT FOR PERSONAL REFERENCE — removed full-section ambient blur blob] */}
-      
-      <m.h2 variants={itemVariants} className="text-3xl md:text-5xl font-extrabold text-center text-white mb-4 tracking-tight">
-        {text.solutionTitle}
-      </m.h2>
-      <m.p variants={itemVariants} className="text-lg text-white/60 text-center max-w-2xl mx-auto mb-16 leading-relaxed">
-        {text.solutionDesc}
-      </m.p>
 
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 relative z-10">
-        {workflowSteps.map((step, idx) => {
-          const isSolidCard = idx === 2;
-          return (
-            <m.div 
-              key={idx}
-              variants={itemVariants}
-              className={`p-8 rounded-[28px] text-left transition-[background-color,border-color,box-shadow,transform] duration-300 relative flex flex-col justify-between min-h-[280px] group border
-                ${isSolidCard 
-                  ? 'bg-lime-400 text-black border-transparent shadow-[0_15px_30px_rgba(204,255,0,0.15)] hover:scale-[1.02] hover:shadow-[0_20px_40px_rgba(204,255,0,0.25)]' 
-                  : 'bg-white/5 border-white/10 hover:border-lime-400/40 hover:scale-[1.02] hover:bg-white/10 text-white'
-                }`}
-            >
-              <div>
-                <div className="flex justify-between items-center mb-6">
-                  <div className={`text-sm font-black tracking-widest uppercase ${isSolidCard ? 'text-black/50' : 'text-white/40'}`}>
-                    {idx + 1 === 1 ? '01' : idx + 1 === 2 ? '02' : idx + 1 === 3 ? '03' : '04'}
-                  </div>
-                  <div className={`p-2.5 rounded-full ${isSolidCard ? 'bg-black text-lime-400' : 'bg-white/5 text-lime-400 border border-white/10 group-hover:bg-lime-400 group-hover:text-black group-hover:border-transparent'} transition-colors duration-300`}>
-                    {isSolidCard ? <ArrowUpRight size={18} /> : step.icon}
-                  </div>
-                </div>
+        <m.h2 variants={itemVariants} className="text-3xl md:text-5xl font-extrabold text-center text-fg-primary mb-4 tracking-tight">
+          {text.solutionTitle}
+        </m.h2>
+          <m.p variants={itemVariants} className="text-lg text-fg-secondary text-center max-w-2xl mx-auto mb-12 leading-relaxed">
+            {text.solutionDesc}
+          </m.p>
 
-                <h3 className={`text-xl font-bold tracking-tight mb-2 ${isSolidCard ? 'text-black' : 'text-white'}`}>
-                  {step.label}
-                </h3>
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 relative z-10">
+            {workflowSteps.map((step, idx) => {
+              const isSolidCard = idx === 2;
+              return (
+                <m.div
+                  key={idx}
+                  variants={itemVariants}
+                  className={`p-8 rounded-[28px] text-left transition-[background-color,border-color,box-shadow,transform] duration-300 relative flex flex-col justify-between min-h-[280px] group border
+                ${isSolidCard
+                        ? 'bg-accent text-fg-inverse border-accent shadow-lg hover:scale-[1.02]'
+                        : 'bg-bg-surface border-border-subtle hover:border-accent/50 hover:scale-[1.02] hover:bg-bg-elevated text-fg-primary'
+                    }`}
+                >
+                  <div>
+                    <div className="flex justify-between items-center mb-6">
+                        <div className={`text-sm font-black tracking-widest uppercase ${isSolidCard ? 'text-fg-inverse/75' : 'text-fg-muted'}`}>
+                          {idx + 1 === 1 ? '01' : idx + 1 === 2 ? '02' : idx + 1 === 3 ? '03' : '04'}
+                        </div>
+                          <div className={`p-2.5 rounded-full ${isSolidCard ? 'bg-fg-inverse/15 text-fg-inverse' : 'bg-accent/10 text-emerald-700 dark:text-lime-400 border border-accent/25 group-hover:bg-accent group-hover:text-fg-inverse group-hover:border-transparent'} transition-colors duration-300`}>
+                            {isSolidCard ? <ArrowUpRight size={18} /> : step.icon}
+                          </div>
+                        </div>
 
-                <p className={`text-sm leading-relaxed ${isSolidCard ? 'text-black/80 font-medium' : 'text-white/60'}`}>
-                  {step.details}
-                </p>
-              </div>
+                          <h3 className={`text-xl font-bold tracking-tight mb-2 ${isSolidCard ? 'text-fg-inverse' : 'text-fg-primary'}`}>
+                            {step.label}
+                          </h3>
 
-              <div className={`pt-6 mt-6 border-t ${isSolidCard ? 'border-black/10' : 'border-white/10'} flex items-center justify-between`}>
-                <span className="text-xs font-bold uppercase tracking-wider">
-                  {isSolidCard ? (lang === 'en' ? 'Get Advice' : 'পরামর্শ নিন') : (lang === 'en' ? 'Active' : 'চলমান')}
-                </span>
-                <ArrowRight size={14} className="transform group-hover:translate-x-1 transition-transform" />
-              </div>
-            </m.div>
-          );
+                            <p className={`text-sm leading-relaxed ${isSolidCard ? 'text-fg-inverse/90 font-medium' : 'text-fg-secondary'}`}>
+                              {step.details}
+                            </p>
+                          </div>
+
+                            <div className={`pt-6 mt-6 border-t ${isSolidCard ? 'border-fg-inverse/20 text-fg-inverse' : 'border-border-subtle text-fg-primary'} flex items-center justify-between`}>
+                              <span className="text-xs font-bold uppercase tracking-wider">
+                                {isSolidCard ? (lang === 'en' ? 'Get Advice' : 'পরামর্শ নিন') : (lang === 'en' ? 'Active' : 'চলমান')}
+                              </span>
+                              <ArrowRight size={14} className="transform group-hover:translate-x-1 transition-transform" />
+                            </div>
+                          </m.div>
+                          );
         })}
-      </div>
-    </m.div>
-  );
+                      </div>
+                    </m.div>
+                    );
 }
 
-export default WorkflowCards;
+                    export default WorkflowCards;

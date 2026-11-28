@@ -1,5 +1,5 @@
 import React from 'react';
-import { Info, MoreHorizontal, Sparkles, CheckCircle2 } from 'lucide-react';
+import { Activity, Info, MoreHorizontal, CheckCircle2 } from 'lucide-react';
 import { Card } from '../../../../components/ui/Card';
 import { IconButton } from '../../../../components/ui/IconButton';
 import { Button } from '../../../../components/ui/Button';
@@ -37,7 +37,7 @@ export const DeepTelemetryRow = ({
           <SemiCircularGauge 
             score={Math.min(100, Math.max(30, Math.round(((activeClient.activeInsets || 0) / (results.total || 1)) * 100 + 48)))} 
             max={100} 
-            label={`${Math.min(100, Math.max(30, Math.round(((activeClient.activeInsets || 0) / (results.total || 1)) * 100 + 48)))}%`} 
+            label=""
             sublabel="target progress" 
             isLight={isLight} 
           />
@@ -45,7 +45,7 @@ export const DeepTelemetryRow = ({
           <div className="mt-3 text-center">
             <div className={`font-sans font-extrabold text-2xl tracking-tight ${isLight ? 'text-fg-primary' : 'text-white'}`}>
               {results.total} <span className="text-xs font-mono font-normal text-emerald">tCO2e</span>
-              {results.scope2Missing && <span className="block text-[10px] font-mono font-normal text-amber-500">excl. Scope 2 (grid-average factor needed)</span>}
+              {results.scope2Missing && <span className="block text-[10px] font-mono font-normal text-amber-800 dark:text-amber-400">excl. Scope 2 (grid-average factor needed)</span>}
             </div>
             <div className="flex items-center justify-center space-x-4 text-[10px] font-mono text-mist mt-1">
               <span>S1: {results.scope1} t</span>
@@ -75,6 +75,7 @@ export const DeepTelemetryRow = ({
             icon={<MoreHorizontal className="w-4 h-4" />}
             aria-label="More telemetry options"
             title="More telemetry options"
+            onClick={() => setIsEsgAuditModalOpen(true)}
             variant="ghost"
             size="sm"
           />
@@ -113,7 +114,7 @@ export const DeepTelemetryRow = ({
             variant="secondary"
             size="sm"
             onClick={() => executeRagQuery("Summarize our ESG score readiness against CSRD and Bangladesh ECR standards.")}
-            icon={<Sparkles className="w-3 h-3 text-emerald" />}
+            leftIcon={<Activity className="w-3 h-3 text-emerald" />}
           >
             Run AI
           </Button>

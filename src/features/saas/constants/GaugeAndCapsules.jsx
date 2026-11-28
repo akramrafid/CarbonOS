@@ -70,9 +70,8 @@ export const SemiCircularGauge = ({
       </div>
 
       {badgeText && (
-        <div className={`mt-2 px-3 py-1 rounded-full text-[10px] font-sans font-semibold border ${
-          isLight ? 'bg-bg-muted text-fg-primary border-border-subtle' : 'bg-bg-canvas text-emerald-200 border-border-subtle'
-        }`}>
+        <div className={`mt-2 px-3 py-1 rounded-full text-[10px] font-sans font-semibold border ${isLight ? 'bg-bg-muted text-fg-primary border-border-subtle' : 'bg-bg-canvas text-emerald-200 border-border-subtle'
+          }`}>
           {badgeText}
         </div>
       )}
@@ -89,13 +88,12 @@ export const SegmentedProgressBar = ({ totalBars = 24, activeBars = 19, isLight 
         return (
           <div
             key={index}
-            className={`flex-1 h-6 sm:h-7 rounded-full transition-all duration-300 ${
-              isActive
+            className={`flex-1 h-6 sm:h-7 rounded-full transition-all duration-300 ${isActive
                 ? 'bg-accent shadow-[0_0_6px_rgba(0,200,83,0.3)]'
                 : isLight
                   ? 'bg-bg-muted'
                   : 'bg-bg-surface'
-            }`}
+              }`}
             title={`Segment ${index + 1} of ${totalBars} (${isActive ? 'Verified' : 'Pending'})`}
           />
         );
@@ -114,36 +112,35 @@ export const MicroBarChart = ({ isLight = false }) => {
   ];
 
   return (
-    <div className="flex items-end justify-end space-x-2.5 h-16 sm:h-18">
-      {bars.map((bar, i) => (
-        <div key={i} className="flex flex-col items-center space-y-1.5 h-full justify-end">
-          <div
-            className={`w-3.5 sm:w-4 rounded-t-md transition-all duration-500 ${
-              bar.active
-                ? 'bg-accent shadow-[0_0_8px_rgba(0,200,83,0.35)]'
-                : isLight
-                  ? 'bg-accent-muted'
-                  : 'bg-bg-surface'
-            }`}
-            style={{ height: bar.height }}
-          />
-          <span className={`text-[8.5px] font-mono ${isLight ? 'text-fg-secondary' : 'text-fg-muted'}`}>
-            {bar.label}
-          </span>
-        </div>
-      ))}
-    </div>
-  );
+      <div className="flex items-end justify-end space-x-2.5 h-16 sm:h-20">
+        {bars.map((bar, i) => (
+          <div key={i} className="flex flex-col items-center space-y-1.5 h-full justify-end">
+            <div
+              className={`w-3.5 sm:w-4 rounded-t-md transition-all duration-500 ${bar.active
+                  ? 'bg-accent shadow-[0_0_8px_rgba(0,200,83,0.35)]'
+                  : isLight
+                    ? 'bg-accent-muted'
+                    : 'bg-bg-surface'
+                }`}
+              style={{ height: bar.height }}
+            />
+            <span className={`text-[8.5px] font-mono ${isLight ? 'text-fg-secondary' : 'text-fg-muted'}`}>
+              {bar.label}
+            </span>
+          </div>
+        ))}
+      </div>
+      );
 };
 
-// 4. Carousel Slider Indicator
-export const CarouselIndicator = ({ isLight = false }) => {
+      // 4. Carousel Slider Indicator
+      export const CarouselIndicator = ({isLight = false}) => {
   return (
-    <div className="flex items-center space-x-1.5 pt-1">
-      <div className="w-8 h-1 rounded-full bg-accent" />
-      <div className={`w-2.5 h-1 rounded-full ${isLight ? 'bg-accent-muted' : 'bg-bg-surface'}`} />
-      <div className={`w-2.5 h-1 rounded-full ${isLight ? 'bg-accent-muted' : 'bg-bg-surface'}`} />
-      <div className={`w-2.5 h-1 rounded-full ${isLight ? 'bg-accent-muted' : 'bg-bg-surface'}`} />
-    </div>
-  );
+      <div className="flex items-center space-x-1.5 pt-1">
+        <div className="w-8 h-1 rounded-full bg-accent" />
+        <div className={`w-2.5 h-1 rounded-full ${isLight ? 'bg-accent-muted' : 'bg-bg-surface'}`} />
+        <div className={`w-2.5 h-1 rounded-full ${isLight ? 'bg-accent-muted' : 'bg-bg-surface'}`} />
+        <div className={`w-2.5 h-1 rounded-full ${isLight ? 'bg-accent-muted' : 'bg-bg-surface'}`} />
+      </div>
+      );
 };

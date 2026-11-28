@@ -320,66 +320,64 @@ const MRVDashboard = () => {
   const airStatus = deviceConnected
     ? getAirStatus(metrics.air)
     : {
-        text: 'OFFLINE',
-        style: 'text-rose-400 bg-rose-500/10 border-rose-500/20',
-        color: 'text-rose-400'
-      };
+      text: 'OFFLINE',
+      style: 'text-rose-400 bg-rose-500/10 border-rose-500/20',
+      color: 'text-rose-400'
+    };
   const co2Status = deviceConnected
     ? getCO2Status(metrics.co2)
     : {
-        text: 'OFFLINE',
-        style: 'text-rose-400 bg-rose-500/10 border-rose-500/20',
-        color: 'text-rose-400'
-      };
+      text: 'OFFLINE',
+      style: 'text-rose-400 bg-rose-500/10 border-rose-500/20',
+      color: 'text-rose-400'
+    };
 
   const blynkAlerts = getBlynkAlerts();
   const allAlerts = [...blynkAlerts, ...trends];
   const hasAlerts = allAlerts.length > 0;
 
   return (
-    <div className="pt-12 pb-8 sm:pt-16 sm:pb-12 min-h-[80dvh] flex flex-col items-center noise-overlay">
-      <div className="max-w-5xl w-full mx-auto px-6 lg:px-12 relative z-10 space-y-8">
-        <PageHeader
-          title="MRV Dashboard"
-          description="Real-time Measurement, Reporting, and Verification data feeds from IoT sensor stations and satellite telemetry."
-          badge={<Badge variant="emerald">Live STAC & IoT</Badge>}
-          breadcrumbs={[
-            { label: 'Platform', path: '/platform/mrv-dashboard' },
-            { label: 'MRV Telemetry', path: '/platform/mrv-dashboard' }
-          ]}
-        />
+        <div className="w-full max-w-[1600px] mx-auto flex flex-col space-y-6">
+          <PageHeader
+            title="MRV Dashboard"
+            description="Real-time Measurement, Reporting, and Verification data feeds from IoT sensor stations and satellite telemetry."
+            badge={<Badge variant="emerald">Live STAC & IoT</Badge>}
+            breadcrumbs={[
+              { label: 'Platform', path: '/platform/mrv-dashboard' },
+              { label: 'MRV Telemetry', path: '/platform/mrv-dashboard' }
+            ]}
+          />
 
-        {/* Core System Telemetry Card */}
-        <SystemTelemetryCard
-          deviceConnected={deviceConnected}
-          mitigatedToday={mitigatedToday}
-        />
+          {/* Core System Telemetry Card */}
+          <SystemTelemetryCard
+            deviceConnected={deviceConnected}
+            mitigatedToday={mitigatedToday}
+          />
 
-        {/* ESP8266 Carbon Monitor live feeds */}
-        <IotStationCard
-          deviceConnected={deviceConnected}
-          lastSyncTime={lastSyncTime}
-          downloadExcel={downloadExcel}
-          telemetryHistory={telemetryHistory}
-          metrics={metrics}
-          airStatus={airStatus}
-          co2Status={co2Status}
-          chartMetric={chartMetric}
-          setChartMetric={setChartMetric}
-          telemetryLoading={telemetryLoading}
-          leftTab={leftTab}
-          setLeftTab={setLeftTab}
-        />
+          {/* ESP8266 Carbon Monitor live feeds */}
+          <IotStationCard
+            deviceConnected={deviceConnected}
+            lastSyncTime={lastSyncTime}
+            downloadExcel={downloadExcel}
+            telemetryHistory={telemetryHistory}
+            metrics={metrics}
+            airStatus={airStatus}
+            co2Status={co2Status}
+            chartMetric={chartMetric}
+            setChartMetric={setChartMetric}
+            telemetryLoading={telemetryLoading}
+            leftTab={leftTab}
+            setLeftTab={setLeftTab}
+          />
 
-        {/* Farmer's AI Carbon Asset Alerts */}
-        <AssetHealthAlertsCard
-          trendsLoading={trendsLoading}
-          hasAlerts={hasAlerts}
-          allAlerts={allAlerts}
-        />
+          {/* Farmer's AI Carbon Asset Alerts */}
+          <AssetHealthAlertsCard
+            trendsLoading={trendsLoading}
+            hasAlerts={hasAlerts}
+            allAlerts={allAlerts}
+          />
       </div>
-    </div>
-  );
+      );
 };
 
-export default MRVDashboard;
+      export default MRVDashboard;

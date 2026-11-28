@@ -21,11 +21,10 @@ export function CertificateStep({
     <div className="space-y-5 animate-fade-in">
       {/* Certificate Border Box */}
       <div
-        className={`p-6 rounded-2xl border-2 relative overflow-hidden ${
-          isLight
+        className={`p-6 rounded-2xl border-2 relative overflow-hidden ${isLight
             ? 'bg-gradient-to-b from-white to-bg-canvas border-emerald/40 shadow-xl'
             : 'bg-gradient-to-b from-bg-canvas to-bg-canvas border-emerald/50 shadow-[0_0_40px_rgba(0,200,83,0.2)]'
-        }`}
+          }`}
       >
         <div className="absolute top-0 right-0 w-32 h-32 bg-emerald/5 rounded-full blur-2xl pointer-events-none"></div>
 
@@ -36,113 +35,111 @@ export function CertificateStep({
               <ShieldCheck size={22} />
             </div>
             <div>
-              <span className="font-mono text-[9px] uppercase tracking-widest text-emerald font-bold block">
-                CARBONOS DEMO
-              </span>
-              <h3 className="serif-drama text-lg font-bold text-white tracking-wide">
-                Demo Retirement Receipt
-              </h3>
+                <span className="font-mono text-[9px] uppercase tracking-widest text-emerald-700 dark:text-emerald font-bold block">
+                  CARBONOS DEMO
+                </span>
+                  <h3 className="serif-drama text-lg font-bold text-fg-primary tracking-wide">
+                    Demo Retirement Receipt
+                  </h3>
+                </div>
             </div>
-          </div>
-          <div className="text-right">
-            <span className="font-mono text-[9px] text-slate-400 block">SERIAL NUMBER</span>
-            <span className="font-mono text-xs font-bold text-emerald">{certificateSerial}</span>
-          </div>
-        </div>
-
-        {/* Certificate Statement */}
-        <div className="space-y-3 text-xs leading-relaxed my-4">
-          <p className="text-slate-300">
-            This demo receipt records a simulated retirement for{' '}
-            <strong className="text-white underline">{companyName}</strong> (BIN: {taxBin}). Nothing was
-            retired or neutralized:
-          </p>
-
-          <div
-            className={`p-3.5 rounded-xl border text-center my-3 ${
-              isLight ? 'bg-emerald/5 border-emerald/20' : 'bg-bg-surface/40 border-emerald/30'
-            }`}
-          >
-            <span className="font-mono text-3xl font-bold text-emerald block">
-              {activeCredit.tonnage} <span className="text-lg">tCO₂e</span>
-            </span>
-            <span className="text-[11px] font-sans text-slate-300">Metric tonnes CO₂e (simulated)</span>
-          </div>
-
-          <div className="grid grid-cols-2 gap-3 pt-2 text-[11px] font-mono">
-            <div>
-              <span className="text-slate-400 block text-[9px]">ORIGIN PROJECT</span>
-              <span className="text-white font-sans font-semibold">{activeCredit.type}</span>
-            </div>
-            <div>
-              <span className="text-slate-400 block text-[9px]">RURAL PRODUCER</span>
-              <span className="text-white font-sans font-semibold">
-                {activeCredit.farmer} ({activeCredit.region})
-              </span>
-            </div>
-            <div>
-              <span className="text-slate-400 block text-[9px]">STANDARD & METHODOLOGY</span>
-              <span className="text-emerald">{activeCredit.verification}</span>
-            </div>
-            <div>
-              <span className="text-slate-400 block text-[9px]">SETTLEMENT DATE</span>
-              <span className="text-white">{settlementDate}</span>
-            </div>
-            <div>
-              <span className="text-slate-400 block text-[9px]">GHG PROTOCOL ALLOCATION</span>
-              <span className="text-slate-300 truncate block">{scopeType}</span>
-            </div>
-            <div>
-              <span className="text-slate-400 block text-[9px]">MOBILE BANKING REMITTANCE</span>
-              <span className="text-emerald">৳{farmerRemittance.toLocaleString()} (97% Disbursed)</span>
+            <div className="text-right">
+              <span className="font-mono text-[9px] text-fg-secondary block">SERIAL NUMBER</span>
+              <span className="font-mono text-xs font-bold text-emerald-700 dark:text-emerald">{certificateSerial}</span>
             </div>
           </div>
 
-          <div className="mt-4 pt-3 border-t border-white/10 flex items-center justify-between text-[10px] font-mono">
-            <div className="truncate mr-2">
-              <span className="text-slate-500 block">ON-CHAIN VERIFICATION HASH</span>
-              <span className="text-slate-400 truncate block">{verificationHash}</span>
-            </div>
-            <button
-              onClick={handleCopyHash}
-              className="p-1.5 rounded bg-white/5 hover:bg-white/10 text-slate-300 shrink-0 cursor-pointer"
-              title="Copy Proof Hash"
+          {/* Certificate Statement */}
+          <div className="space-y-3 text-xs leading-relaxed my-4">
+              <p className="text-fg-secondary">
+                This demo receipt records a simulated retirement for{' '}
+                <strong className="text-fg-primary underline">{companyName}</strong> (BIN: {taxBin}). Nothing was
+                retired or neutralized:
+              </p>
+
+              <div
+                className="p-3.5 rounded-xl border text-center my-3 bg-emerald-500/10 border-emerald-500/30"
+              >
+                  <span className="font-mono text-3xl font-bold text-emerald-700 dark:text-emerald block">
+                    {activeCredit.tonnage} <span className="text-lg">tCO₂e</span>
+                  </span>
+                  <span className="text-[11px] font-sans text-fg-secondary">Metric tonnes CO₂e (simulated)</span>
+              </div>
+
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 pt-2 text-[11px] font-mono">
+                  <div>
+                    <span className="text-fg-muted block text-[9px]">ORIGIN PROJECT</span>
+                    <span className="text-fg-primary font-sans font-semibold">{activeCredit.type}</span>
+                  </div>
+                  <div>
+                      <span className="text-fg-muted block text-[9px]">RURAL PRODUCER</span>
+                      <span className="text-fg-primary font-sans font-semibold">
+                        {activeCredit.farmer} ({activeCredit.region})
+                      </span>
+                  </div>
+                  <div>
+                    <span className="text-fg-muted block text-[9px]">STANDARD & METHODOLOGY</span>
+                    <span className="text-emerald-700 dark:text-emerald">{activeCredit.verification}</span>
+                  </div>
+                  <div>
+                    <span className="text-fg-muted block text-[9px]">SETTLEMENT DATE</span>
+                    <span className="text-fg-primary">{settlementDate}</span>
+                  </div>
+                  <div>
+                    <span className="text-fg-muted block text-[9px]">GHG PROTOCOL ALLOCATION</span>
+                    <span className="text-fg-secondary truncate block">{scopeType}</span>
+                  </div>
+                  <div>
+                    <span className="text-fg-muted block text-[9px]">MOBILE BANKING REMITTANCE</span>
+                    <span className="text-emerald-700 dark:text-emerald">৳{farmerRemittance.toLocaleString()} (97% Disbursed)</span>
+                  </div>
+                </div>
+
+                <div className="mt-4 pt-3 border-t border-white/10 flex items-center justify-between text-[10px] font-mono">
+                  <div className="truncate mr-2">
+                    <span className="text-slate-500 block">ON-CHAIN VERIFICATION HASH</span>
+                    <span className="text-slate-400 truncate block">{verificationHash}</span>
+                  </div>
+                  <button
+                    onClick={handleCopyHash}
+                    className="p-1.5 rounded bg-white/5 hover:bg-white/10 text-slate-300 shrink-0 cursor-pointer"
+                    title="Copy Proof Hash"
+                  >
+                    {copiedSerial ? <Check size={14} className="text-emerald" /> : <Copy size={14} />}
+                  </button>
+                </div>
+              </div>
+
+              <div className="flex items-center justify-between pt-3 border-t border-emerald/20 text-[10px] text-slate-400">
+                <span>Not a regulatory document. No registry, ministry or verifier issued it.</span>
+                <span className="font-bold text-emerald">Demo · Carbon Zero BD</span>
+              </div>
+          </div>
+
+          {/* Action Buttons */}
+          <div className="flex items-center space-x-3">
+            <Button
+              variant="secondary"
+              size="md"
+              onClick={handlePrint}
+              className="flex-1"
             >
-              {copiedSerial ? <Check size={14} className="text-emerald" /> : <Copy size={14} />}
-            </button>
+              <Printer size={14} className="mr-1.5" />
+              <span>Print Demo Receipt</span>
+            </Button>
+
+            <Button
+              variant="secondary"
+              size="md"
+              onClick={onClose}
+              className="flex-1"
+            >
+              <CheckCircle2 size={14} className="mr-1.5" />
+              <span>Return to Marketplace</span>
+            </Button>
           </div>
         </div>
-
-        <div className="flex items-center justify-between pt-3 border-t border-emerald/20 text-[10px] text-slate-400">
-          <span>Not a regulatory document. No registry, ministry or verifier issued it.</span>
-          <span className="font-bold text-emerald">Demo · Carbon Zero BD</span>
-        </div>
-      </div>
-
-      {/* Action Buttons */}
-      <div className="flex items-center space-x-3">
-        <Button
-          variant="secondary"
-          size="md"
-          onClick={handlePrint}
-          className="flex-1"
-        >
-          <Printer size={14} className="mr-1.5" />
-          <span>Print Demo Receipt</span>
-        </Button>
-
-        <Button
-          variant="secondary"
-          size="md"
-          onClick={onClose}
-          className="flex-1"
-        >
-          <CheckCircle2 size={14} className="mr-1.5" />
-          <span>Return to Marketplace</span>
-        </Button>
-      </div>
-    </div>
-  );
+        );
 }
 
-export default CertificateStep;
+        export default CertificateStep;

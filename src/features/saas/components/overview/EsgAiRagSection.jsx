@@ -28,7 +28,7 @@ export const EsgAiRagSection = ({
             Carbon Zero BD ESG Regulatory & Auditor Copilot
           </h4>
         </div>
-        
+
         {/* Corpus Filter Tabs */}
         <Tabs
           tabs={[
@@ -82,7 +82,7 @@ export const EsgAiRagSection = ({
           onClick={() => executeRagQuery()}
           disabled={isRagLoading || !ragQuery.trim()}
           loading={isRagLoading}
-          icon={<Send className="w-3.5 h-3.5" />}
+          leftIcon={<Send className="w-3.5 h-3.5" />}
         >
           Ask Copilot
         </Button>
@@ -90,12 +90,10 @@ export const EsgAiRagSection = ({
 
       {/* RAG Grounded Answer Output */}
       {ragResponse && (
-        <div className={`rounded-2xl p-5 space-y-4 border ${
-          isLight ? 'bg-bg-muted border-emerald/30' : 'bg-bg-canvas border-border-subtle'
-        }`}>
-          <div className={`flex justify-between items-center pb-2 border-b ${
-            isLight ? 'border-emerald/20' : 'border-border-subtle'
+        <div className={`rounded-2xl p-5 space-y-4 border ${isLight ? 'bg-bg-muted border-emerald/30' : 'bg-bg-canvas border-border-subtle'
           }`}>
+          <div className={`flex justify-between items-center pb-2 border-b ${isLight ? 'border-emerald/20' : 'border-border-subtle'
+            }`}>
             <div className="flex items-center space-x-2">
               <Badge variant="emerald" size="sm">
                 {ragResponse.model_used || "unknown"}

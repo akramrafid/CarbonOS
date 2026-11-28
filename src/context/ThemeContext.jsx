@@ -1,10 +1,34 @@
 import React, { createContext, useContext, useState, useEffect, useCallback, useRef } from 'react';
+import { flushSync } from 'react-dom';
+import { getPrefersReducedMotion } from '../lib/motion';
 
 const ThemeContext = createContext();
 
 export const THEME_STORAGE_KEY = 'carbonos-theme';
 export const VALID_THEME_MODES = ['light', 'dark', 'system'];
 export const THEME_TRANSITION_MS = 200;
+
+function getSpreadOrigin(event) {
+  if (typeof window === 'undefined') return { x: 0, y: 0, radius: 0 };
+  const vw = window.innerWidth;
+  const vh = window.innerHeight;
+  let x = vw - 36;
+  let y = 32;
+
+  if (event?.currentTarget?.getBoundingClientRect) {
+    const rect = event.currentTarget.getBoundingClientRect();
+    if (rect.width > 0 && rect.height > 0) {
+      x = rect.left + rect.width / 2;
+      y = rect.top + rect.height / 2;
+    }
+  } else if (typeof event?.clientX === 'number' && typeof event?.clientY === 'number' && (event.clientX || event.clientY)) {
+    x = event.clientX;
+    y = event.clientY;
+  }
+
+  const radius = Math.hypot(Math.max(x, vw - x), Math.max(y, vh - y));
+  return { x, y, radius };
+}
 
 export function getSystemTheme() {
   // [COMMENTED OUT FOR PERSONAL REFERENCE — defaulted OS-query fallback to dark; light-first follows prefers-color-scheme: dark]
@@ -125,36 +149,92 @@ export const ThemeProvider = ({ children }) => {
     };
   }, []);
 
+  const runWithVenomSpread = useCallback((applyUpdate, event) => {
+    if (typeof document === 'undefined' || getPrefersReducedMotion()) {
+      applyUpdate();
+      return;
+    }
+
+    const { x, y, radius } = getSpreadOrigin(event);
+
+    if (typeof document.startViewTransition === 'function') {
+      try {
+        const transition = document.startViewTransition(() => {
+          flushSync(() => {
+            applyUpdate();
+          });
+        });
+
+        transition.ready.then(() => {
+          document.documentElement.animate(
+            {
+              clipPath: [
+                `circle(0px at ${x}px ${y}px)`,
+                `circle(${radius}px at ${x}px ${y}px)`,
+              ],
+            },
+            {
+              duration: 620,
+              easing: 'cubic-bezier(0.22, 1, 0.36, 1)',
+              pseudoElement: '::view-transition-new(root)',
+            }
+          );
+        }).catch(() => {});
+        return;
+      } catch {
+        // Fall through to CSS radial pulse fallback
+      }
+    }
+
+    triggerThemeCrossfade();
+    applyUpdate();
+    const wave = document.createElement('div');
+    wave.className = 'venom-theme-overlay';
+    wave.style.setProperty('--venom-x', `${x}px`);
+    wave.style.setProperty('--venom-y', `${y}px`);
+    document.body.appendChild(wave);
+    window.setTimeout(() => wave.remove(), 540);
+  }, [triggerThemeCrossfade]);
+
   const setTheme = useCallback(
-    (nextMode) => {
+    (nextMode, event) => {
       const normalized = VALID_THEME_MODES.includes(nextMode) ? nextMode : 'dark';
       const nextResolved = resolveThemeMode(normalized, getSystemTheme());
-      triggerThemeCrossfade();
-      applyThemeToDom(normalized, nextResolved);
-      setModeState(normalized);
+      runWithVenomSpread(() => {
+        applyThemeToDom(normalized, nextResolved);
+        setModeState(normalized);
+      }, event);
     },
-    [triggerThemeCrossfade]
+    [runWithVenomSpread]
   );
 
-  const toggleTheme = useCallback(() => {
-    triggerThemeCrossfade();
-    setModeState((prev) => {
-      const currentResolved = resolveThemeMode(prev, getSystemTheme());
-      const nextMode = currentResolved === 'dark' ? 'light' : 'dark';
-      applyThemeToDom(nextMode, nextMode);
-      return nextMode;
-    });
-  }, [triggerThemeCrossfade]);
+  const toggleTheme = useCallback(
+    (event) => {
+      runWithVenomSpread(() => {
+        setModeState((prev) => {
+          const currentResolved = resolveThemeMode(prev, getSystemTheme());
+          const nextMode = currentResolved === 'dark' ? 'light' : 'dark';
+          applyThemeToDom(nextMode, nextMode);
+          return nextMode;
+        });
+      }, event);
+    },
+    [runWithVenomSpread]
+  );
 
-  const cycleTheme = useCallback(() => {
-    triggerThemeCrossfade();
-    setModeState((prev) => {
-      const nextMode = prev === 'dark' ? 'light' : prev === 'light' ? 'system' : 'dark';
-      const nextResolved = resolveThemeMode(nextMode, getSystemTheme());
-      applyThemeToDom(nextMode, nextResolved);
-      return nextMode;
-    });
-  }, [triggerThemeCrossfade]);
+  const cycleTheme = useCallback(
+    (event) => {
+      runWithVenomSpread(() => {
+        setModeState((prev) => {
+          const nextMode = prev === 'dark' ? 'light' : prev === 'light' ? 'system' : 'dark';
+          const nextResolved = resolveThemeMode(nextMode, getSystemTheme());
+          applyThemeToDom(nextMode, nextResolved);
+          return nextMode;
+        });
+      }, event);
+    },
+    [runWithVenomSpread]
+  );
 
   return (
     <ThemeContext.Provider

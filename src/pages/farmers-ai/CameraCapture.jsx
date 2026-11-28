@@ -16,7 +16,7 @@ const CameraCapture = ({ isInline = false, onBack = null, onScanComplete = null 
   const canvasRef = useRef(null);
   const fileInputRef = useRef(null);
   const navigate = useNavigate();
-  
+
   const [species, setSpecies] = useState('rice');
   const [isCameraActive, setIsCameraActive] = useState(false);
   const [error, setError] = useState('');
@@ -43,7 +43,7 @@ const CameraCapture = ({ isInline = false, onBack = null, onScanComplete = null 
           // Ignore malformed WS message
         }
       };
-      ws.onerror = () => {};
+      ws.onerror = () => { };
     } catch {
       // WebSocket unavailable
     }
@@ -54,8 +54,8 @@ const CameraCapture = ({ isInline = false, onBack = null, onScanComplete = null 
 
   const startCamera = async () => {
     try {
-      const stream = await navigator.mediaDevices.getUserMedia({ 
-        video: { facingMode: 'environment' } 
+      const stream = await navigator.mediaDevices.getUserMedia({
+        video: { facingMode: 'environment' }
       });
       if (videoRef.current) {
         videoRef.current.srcObject = stream;
@@ -252,26 +252,26 @@ const CameraCapture = ({ isInline = false, onBack = null, onScanComplete = null 
 
   const captureAndAnalyze = useCallback(async () => {
     if (!videoRef.current || !canvasRef.current) return;
-    
+
     setIsProcessing(true);
     setError('');
 
     const video = videoRef.current;
     const canvas = canvasRef.current;
-    
+
     canvas.width = video.videoWidth;
     canvas.height = video.videoHeight;
-    
+
     const ctx = canvas.getContext('2d');
     ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
-    
+
     const isSharp = checkImageBlur(canvas);
     if (!isSharp) {
       setError("Image is too blurry! Please hold the camera steady and ensure the leaf is in focus.");
       setIsProcessing(false);
       return;
     }
-    
+
     canvas.toBlob(async (blob) => {
       if (!blob) { setError('Failed to capture image.'); setIsProcessing(false); return; }
       await processCanvas(canvas, blob);
@@ -279,91 +279,91 @@ const CameraCapture = ({ isInline = false, onBack = null, onScanComplete = null 
   }, [processCanvas]);
 
   return (
-    <div className={`pb-16 px-4 max-w-xl mx-auto flex flex-col ${isInline ? 'pt-4' : 'pt-16 min-h-screen'}`}>
-      {isInline && onBack && (
-        <Button
-          variant="ghost"
-          size="sm"
-          onClick={onBack}
-          className="self-start text-white/50 hover:text-lime-400 mb-6 font-semibold"
-        >
-          &larr; Back to Landing
-        </Button>
-      )}
+      <div className={`w-full max-w-xl mx-auto flex flex-col ${isInline ? 'py-2' : 'pb-6'}`}>
+        {isInline && onBack && (
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={onBack}
+            className="self-start text-white/50 hover:text-lime-400 mb-6 font-semibold"
+          >
+            &larr; Back to Landing
+          </Button>
+        )}
 
-      {!isInline ? (
-        <div className="mb-8">
-          <PageHeader
-            title="Farmer's AI Scanner"
-            description="Select crop and scan leaf or upload a photo."
-            badge={<Badge variant="emerald">AI Scanner / এআই স্ক্যানার</Badge>}
-            align="center"
-          />
-        </div>
-      ) : (
-        <div className="mb-6 text-center">
-          <Badge variant="emerald" className="mb-2">AI Scanner / এআই স্ক্যানার</Badge>
-          <h2 className="text-2xl md:text-3xl font-bold text-white tracking-tight">Farmer's AI Scanner</h2>
-          <p className="text-sm text-white/60 mt-1">Select crop and scan leaf or upload a photo.</p>
-        </div>
-      )}
-
-      {cropMismatch && (
-        <div className="mismatch-banner mb-5 flex items-start gap-3 bg-amber-500/10 border border-amber-400/30 px-4 py-3.5 rounded-2xl backdrop-blur-sm shadow-lg">
-          <AlertCircle size={18} className="shrink-0 text-amber-400 mt-0.5" />
-          <div className="flex-1">
-            <p className="text-amber-300 text-sm font-bold leading-tight">
-              Crop Auto-Corrected by AI
-            </p>
-            <p className="text-amber-200/80 text-xs mt-1 leading-relaxed">
-              You selected{' '}
-              <span className="font-bold capitalize text-white">{cropMismatch.selected}</span>, but our AI detected this image as{' '}
-              <span className="font-bold capitalize text-lime-400">{cropMismatch.detected}</span>.
-              {' '}Analyzing as <span className="font-bold capitalize text-lime-400">{cropMismatch.detected}</span> for accurate results.
-            </p>
+        {!isInline ? (
+          <div className="mb-8">
+            <PageHeader
+              title="Farmer's AI Scanner"
+              description="Select crop and scan leaf or upload a photo."
+              badge={<Badge variant="emerald">AI Scanner / এআই স্ক্যানার</Badge>}
+              align="center"
+            />
           </div>
-          <IconButton
-            icon={<span className="text-xl leading-none">&times;</span>}
-            aria-label="Dismiss crop mismatch notification"
-            onClick={() => setCropMismatch(null)}
-            className="shrink-0 text-white/30 hover:text-white/70 min-h-[32px] min-w-[32px] p-1 ml-1"
-          />
-        </div>
-      )}
+        ) : (
+          <div className="mb-6 text-center">
+            <Badge variant="emerald" className="mb-2">AI Scanner / এআই স্ক্যানার</Badge>
+            <h2 className="text-2xl md:text-3xl font-bold text-white tracking-tight">Farmer's AI Scanner</h2>
+            <p className="text-sm text-white/60 mt-1">Select crop and scan leaf or upload a photo.</p>
+          </div>
+        )}
 
-      <CropSelector species={species} onSelectSpecies={setSpecies} />
+        {cropMismatch && (
+          <div className="mismatch-banner mb-5 flex items-start gap-3 bg-amber-500/10 border border-amber-400/30 px-4 py-3.5 rounded-2xl backdrop-blur-sm shadow-lg">
+            <AlertCircle size={18} className="shrink-0 text-amber-400 mt-0.5" />
+            <div className="flex-1">
+              <p className="text-amber-300 text-sm font-bold leading-tight">
+                Crop Auto-Corrected by AI
+              </p>
+              <p className="text-amber-200/80 text-xs mt-1 leading-relaxed">
+                You selected{' '}
+                <span className="font-bold capitalize text-white">{cropMismatch.selected}</span>, but our AI detected this image as{' '}
+                <span className="font-bold capitalize text-lime-400">{cropMismatch.detected}</span>.
+                {' '}Analyzing as <span className="font-bold capitalize text-lime-400">{cropMismatch.detected}</span> for accurate results.
+              </p>
+            </div>
+            <IconButton
+              icon={<span className="text-xl leading-none">&times;</span>}
+              aria-label="Dismiss crop mismatch notification"
+              onClick={() => setCropMismatch(null)}
+              className="shrink-0 text-white/30 hover:text-white/70 min-h-[32px] min-w-[32px] p-1 ml-1"
+            />
+          </div>
+        )}
 
-      <input 
-        type="file" 
-        ref={fileInputRef} 
-        onChange={handleFileUpload} 
-        accept="image/*" 
-        className="hidden" 
-      />
+        <CropSelector species={species} onSelectSpecies={setSpecies} />
 
-      <CameraViewport
-        videoRef={videoRef}
-        canvasRef={canvasRef}
-        isCameraActive={isCameraActive}
-        error={error}
-        isDragging={isDragging}
-        isProcessing={isProcessing}
-        onFileSelectClick={() => fileInputRef.current?.click()}
-        onDragOver={handleDragOver}
-        onDragLeave={handleDragLeave}
-        onDrop={handleDrop}
-      />
+        <input
+          type="file"
+          ref={fileInputRef}
+          onChange={handleFileUpload}
+          accept="image/*"
+          className="hidden"
+        />
 
-      <CameraControls
-        isCameraActive={isCameraActive}
-        error={error}
-        isProcessing={isProcessing}
-        onCapture={captureAndAnalyze}
-        onFileSelectClick={() => fileInputRef.current?.click()}
-        onRetryCamera={startCamera}
-      />
-    </div>
-  );
+        <CameraViewport
+          videoRef={videoRef}
+          canvasRef={canvasRef}
+          isCameraActive={isCameraActive}
+          error={error}
+          isDragging={isDragging}
+          isProcessing={isProcessing}
+          onFileSelectClick={() => fileInputRef.current?.click()}
+          onDragOver={handleDragOver}
+          onDragLeave={handleDragLeave}
+          onDrop={handleDrop}
+        />
+
+        <CameraControls
+          isCameraActive={isCameraActive}
+          error={error}
+          isProcessing={isProcessing}
+          onCapture={captureAndAnalyze}
+          onFileSelectClick={() => fileInputRef.current?.click()}
+          onRetryCamera={startCamera}
+        />
+      </div>
+      );
 };
 
-export default CameraCapture;
+      export default CameraCapture;
